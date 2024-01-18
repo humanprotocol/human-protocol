@@ -8,6 +8,7 @@ from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.escrow import EscrowClient, EscrowClientError, EscrowConfig
 from human_protocol_sdk.filter import EscrowFilter, FilterError
 from web3 import Web3
+from web3.constants import ADDRESS_ZERO
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
@@ -1478,12 +1479,49 @@ class TestEscrowClient(unittest.TestCase):
         mock_contract = MagicMock()
         mock_contract.functions.cancel = MagicMock()
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        escrow_address = "0x1234567890123456789012345678901234567890"
+        escrow_address = "0xa76507AbFE3B67cB25F16DbC75a883D4190B7e46"
+        token_address = "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+
+        self.escrow.get_token_address = MagicMock(return_value=token_address)
 
         with patch(
             "human_protocol_sdk.escrow.escrow_client.handle_transaction"
         ) as mock_function:
-            self.escrow.cancel(escrow_address)
+            tx_hash = bytes.fromhex(
+                "01682095d5abb0270d11a31139b9a1f410b363c84add467004e728ec831bd529"
+            )
+            amount_refunded = 187744067287473730
+            mock_function.return_value = {
+                "transactionHash": tx_hash,
+                "logs": [
+                    {
+                        "logIndex": 0,
+                        "transactionIndex": 0,
+                        "transactionHash": tx_hash,
+                        "blockHash": bytes.fromhex(
+                            "92abf9325a3959a911a2581e9ea36cba3060d8b293b50e5738ff959feb95258a"
+                        ),
+                        "blockNumber": 5,
+                        "address": token_address,
+                        "data": bytes.fromhex(
+                            "000000000000000000000000000000000000000000000000029b003c075b5e42"
+                        ),
+                        "topics": [
+                            bytes.fromhex(
+                                "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+                            ),
+                            bytes.fromhex(
+                                "000000000000000000000000a76507abfe3b67cb25f16dbc75a883d4190b7e46"
+                            ),
+                            bytes.fromhex(
+                                "0000000000000000000000005607acf0828e238099aa1784541a5abd7f975c76"
+                            ),
+                        ],
+                    }
+                ],
+            }
+
+            escrow_cancel_data = self.escrow.cancel(escrow_address)
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.cancel.assert_called_once_with()
@@ -1494,6 +1532,9 @@ class TestEscrowClient(unittest.TestCase):
                 EscrowClientError,
                 None,
             )
+
+            self.assertEqual(escrow_cancel_data.txHash, tx_hash.hex())
+            self.assertEqual(escrow_cancel_data.amountRefunded, amount_refunded)
 
     def test_cancel_invalid_address(self):
         escrow_address = "invalid_address"
@@ -1560,13 +1601,51 @@ class TestEscrowClient(unittest.TestCase):
         mock_contract = MagicMock()
         mock_contract.functions.cancel = MagicMock()
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        escrow_address = "0x1234567890123456789012345678901234567890"
         tx_options = {"gas": 50000}
+
+        escrow_address = "0xa76507AbFE3B67cB25F16DbC75a883D4190B7e46"
+        token_address = "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+
+        self.escrow.get_token_address = MagicMock(return_value=token_address)
 
         with patch(
             "human_protocol_sdk.escrow.escrow_client.handle_transaction"
         ) as mock_function:
-            self.escrow.cancel(escrow_address, tx_options)
+            tx_hash = bytes.fromhex(
+                "01682095d5abb0270d11a31139b9a1f410b363c84add467004e728ec831bd529"
+            )
+            amount_refunded = 187744067287473730
+            mock_function.return_value = {
+                "transactionHash": tx_hash,
+                "logs": [
+                    {
+                        "logIndex": 0,
+                        "transactionIndex": 0,
+                        "transactionHash": tx_hash,
+                        "blockHash": bytes.fromhex(
+                            "92abf9325a3959a911a2581e9ea36cba3060d8b293b50e5738ff959feb95258a"
+                        ),
+                        "blockNumber": 5,
+                        "address": token_address,
+                        "data": bytes.fromhex(
+                            "000000000000000000000000000000000000000000000000029b003c075b5e42"
+                        ),
+                        "topics": [
+                            bytes.fromhex(
+                                "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+                            ),
+                            bytes.fromhex(
+                                "000000000000000000000000a76507abfe3b67cb25f16dbc75a883d4190b7e46"
+                            ),
+                            bytes.fromhex(
+                                "0000000000000000000000005607acf0828e238099aa1784541a5abd7f975c76"
+                            ),
+                        ],
+                    }
+                ],
+            }
+
+            escrow_cancel_data = self.escrow.cancel(escrow_address, tx_options)
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.cancel.assert_called_once_with()
@@ -1577,6 +1656,9 @@ class TestEscrowClient(unittest.TestCase):
                 EscrowClientError,
                 tx_options,
             )
+
+            self.assertEqual(escrow_cancel_data.txHash, tx_hash.hex())
+            self.assertEqual(escrow_cancel_data.amountRefunded, amount_refunded)
 
     def test_abort(self):
         mock_contract = MagicMock()

@@ -165,20 +165,26 @@ class EscrowUtils:
                 query=get_escrows_query(filter),
                 params={
                     "launcher": filter.launcher.lower() if filter.launcher else None,
-                    "reputationOracle": filter.reputation_oracle.lower()
-                    if filter.reputation_oracle
-                    else None,
-                    "recordingOracle": filter.recording_oracle.lower()
-                    if filter.recording_oracle
-                    else None,
-                    "exchangeOracle": filter.exchange_oracle.lower()
-                    if filter.exchange_oracle
-                    else None,
+                    "reputationOracle": (
+                        filter.reputation_oracle.lower()
+                        if filter.reputation_oracle
+                        else None
+                    ),
+                    "recordingOracle": (
+                        filter.recording_oracle.lower()
+                        if filter.recording_oracle
+                        else None
+                    ),
+                    "exchangeOracle": (
+                        filter.exchange_oracle.lower()
+                        if filter.exchange_oracle
+                        else None
+                    ),
                     "jobRequesterId": filter.job_requester_id,
                     "status": filter.status.name if filter.status else None,
-                    "from": int(filter.date_from.timestamp())
-                    if filter.date_from
-                    else None,
+                    "from": (
+                        int(filter.date_from.timestamp()) if filter.date_from else None
+                    ),
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
@@ -208,17 +214,23 @@ class EscrowUtils:
                         manifest_hash=escrow.get("manifestHash", None),
                         manifest_url=escrow.get("manifestUrl", None),
                         recording_oracle=escrow.get("recordingOracle", None),
-                        recording_oracle_fee=int(escrow.get("recordingOracleFee"))
-                        if escrow.get("recordingOracleFee", None)
-                        else None,
+                        recording_oracle_fee=(
+                            int(escrow.get("recordingOracleFee"))
+                            if escrow.get("recordingOracleFee", None)
+                            else None
+                        ),
                         reputation_oracle=escrow.get("reputationOracle", None),
-                        reputation_oracle_fee=int(escrow.get("reputationOracleFee"))
-                        if escrow.get("reputationOracleFee", None)
-                        else None,
+                        reputation_oracle_fee=(
+                            int(escrow.get("reputationOracleFee"))
+                            if escrow.get("reputationOracleFee", None)
+                            else None
+                        ),
                         exchange_oracle=escrow.get("exchangeOracle", None),
-                        exchange_oracle_fee=int(escrow.get("exchangeOracleFee"))
-                        if escrow.get("exchangeOracleFee", None)
-                        else None,
+                        exchange_oracle_fee=(
+                            int(escrow.get("exchangeOracleFee"))
+                            if escrow.get("exchangeOracleFee", None)
+                            else None
+                        ),
                     )
                     for escrow in escrows_raw
                 ]
@@ -294,15 +306,21 @@ class EscrowUtils:
             manifest_hash=escrow.get("manifestHash", None),
             manifest_url=escrow.get("manifestUrl", None),
             recording_oracle=escrow.get("recordingOracle", None),
-            recording_oracle_fee=int(escrow.get("recordingOracleFee"))
-            if escrow.get("recordingOracleFee", None)
-            else None,
+            recording_oracle_fee=(
+                int(escrow.get("recordingOracleFee"))
+                if escrow.get("recordingOracleFee", None)
+                else None
+            ),
             reputation_oracle=escrow.get("reputationOracle", None),
-            reputation_oracle_fee=int(escrow.get("reputationOracleFee"))
-            if escrow.get("reputationOracleFee", None)
-            else None,
+            reputation_oracle_fee=(
+                int(escrow.get("reputationOracleFee"))
+                if escrow.get("reputationOracleFee", None)
+                else None
+            ),
             exchange_oracle=escrow.get("exchangeOracle", None),
-            exchange_oracle_fee=int(escrow.get("exchangeOracleFee"))
-            if escrow.get("exchangeOracleFee", None)
-            else None,
+            exchange_oracle_fee=(
+                int(escrow.get("exchangeOracleFee"))
+                if escrow.get("exchangeOracleFee", None)
+                else None
+            ),
         )

@@ -24,6 +24,7 @@ import {
 } from '../../common/enums';
 import {
   MOCK_ADDRESS,
+  MOCK_ENCRYPTION_PUBLIC_KEY,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
@@ -54,6 +55,14 @@ jest.mock('@human-protocol/sdk', () => ({
       getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       bulkPayOut: jest.fn().mockResolvedValue(true),
       getBalance: jest.fn().mockResolvedValue(10n),
+      getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+    })),
+  },
+  StakingClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getLeader: jest
+        .fn()
+        .mockResolvedValue({ publicKey: MOCK_ENCRYPTION_PUBLIC_KEY }),
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
@@ -89,7 +98,7 @@ describe('WebhookService', () => {
 
   const signerMock = {
     address: MOCK_ADDRESS,
-    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+    getNetwork: jest.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
   };
 
   beforeEach(async () => {
@@ -306,7 +315,7 @@ describe('WebhookService', () => {
         .spyOn(webhookService, 'processFortune')
         .mockResolvedValue(results as any);
 
-      (EscrowClient.build as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementationOnce(() => ({
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
         getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
