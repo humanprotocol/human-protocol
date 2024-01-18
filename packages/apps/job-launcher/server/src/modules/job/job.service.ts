@@ -56,7 +56,6 @@ import { Web3Service } from '../web3/web3.service';
 import {
   CvatManifestDto,
   EscrowCancelDto,
-  EscrowFailedWebhookDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   JobCvatDto,
@@ -107,6 +106,7 @@ import {
   generateBucketUrl,
   listObjectsInBucket,
 } from '../../common/utils/storage';
+import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -1252,7 +1252,7 @@ export class JobService {
     });
   }
 
-  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {
+  public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
     if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -1274,7 +1274,7 @@ export class JobService {
     }
 
     jobEntity.status = JobStatus.FAILED;
-    jobEntity.failedReason = dto.reason;
+    jobEntity.failedReason = dto.reason!;
     await jobEntity.save();
   }
 
