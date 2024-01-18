@@ -5,20 +5,36 @@ import {Script, console} from "forge-std/Script.sol";
 import "../src/Staking.sol";
 
 contract UpgradeProxiesScript is Script {
+    address escrowFactoryProxy = vm.envAddress("ESCROW_FACTORY_PROXY");
     address stakingProxy = vm.envAddress("STAKING_PROXY");
+    address rewardPoolProxy = vm.envAddress("REWARD_POOL");
     address hmtAddress = vm.envAddress("HMT_ADDRESS");
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-
         console.log("trying with address", vm.addr(deployerPrivateKey));
 
+        // Upgrade EscrowFactory 
+        EscrowFactory proxyEscrowFactory = EscrowFactory(payable(escrowFactoryProxy));
+        address newEscrowFactory = address(new EscrowFactory());
+        proxyEscrowFactory.upgradeTo(newEscrowFactory);
+        console.log("Upgraded successfully to", newEscrowFactory); 
+
+        // Upgrade Staking 
         Staking proxyStaking = Staking(payable(stakingProxy));
-        address newAddress = address(new Staking());
-        proxyStaking.upgradeTo(newAddress);
-        
-        console.log("Upgraded successfully to", newAddress);
+        address newStaking = address(new Staking());
+        proxyStaking.upgradeTo(newStaking);
+        console.log("Upgraded successfully to", newStaking);
+
+        // Upgrade RewardPool
+        RewardPool proxyRewardPool = RewardPool(payable(rewardPoolProxy));
+        address newRewardPool = address(new RewardPool());
+        proxyRewardPool.upgradeTo(newRewardPool);
+        console.log("Upgraded successfully to", newRewardPool);
+
+
+
 
         vm.stopBroadcast();
     }

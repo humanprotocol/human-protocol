@@ -22,9 +22,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMath for uint256;
     using Stakes for Stakes.Staker;
 
-    // Change made
-    address public newChange;
-
     // Token address
     address public token;
 
