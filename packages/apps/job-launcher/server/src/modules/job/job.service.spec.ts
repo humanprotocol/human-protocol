@@ -196,10 +196,6 @@ describe('JobService', () => {
             return MOCK_RECORDING_ORACLE_ADDRESS;
           case 'REPUTATION_ORACLE_ADDRESS':
             return MOCK_REPUTATION_ORACLE_ADDRESS;
-          case 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL':
-            return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
-          case 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL':
-            return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
           case 'HOST':
             return '127.0.0.1';
           case 'PORT':
