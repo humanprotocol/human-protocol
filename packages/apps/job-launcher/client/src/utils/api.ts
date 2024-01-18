@@ -30,7 +30,6 @@ axiosInstance.interceptors.response.use(
     if (response.data) {
       response.data = CaseConverter.transformToCamelCase(response.data);
     }
-    console.log(response.data);
     return response;
   },
   (error) => {
