@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BigNumber, ethers } from 'ethers';
+import { Overrides, ethers } from 'ethers';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
@@ -31,17 +31,14 @@ describe('KVStoreClient', () => {
     mockKVStoreContract: any;
 
   beforeAll(async () => {
-    const provider = new ethers.providers.JsonRpcProvider();
     mockProvider = {
-      ...provider,
-      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+      provider: {
+        getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+      },
     };
     mockSigner = {
-      ...provider.getSigner(),
-      provider: {
-        ...mockProvider,
-      },
-      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+      provider: mockProvider.provider,
+      getAddress: vi.fn().mockReturnValue(ethers.ZeroAddress),
     };
     network = NETWORKS[ChainId.LOCALHOST];
   });
@@ -66,9 +63,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should create a new instance of KVStoreClient with a Provider', async () => {
-      const provider = ethers.getDefaultProvider();
-
-      const kvStoreClient = await KVStoreClient.build(provider);
+      const kvStoreClient = await KVStoreClient.build(mockProvider);
 
       expect(kvStoreClient).toBeInstanceOf(KVStoreClient);
     });
@@ -82,7 +77,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error if the chain ID is unsupported', async () => {
-      const provider = ethers.getDefaultProvider();
+      const provider = new ethers.JsonRpcProvider();
 
       vi.spyOn(provider, 'getNetwork').mockResolvedValue({
         chainId: 1337,
@@ -105,12 +100,13 @@ describe('KVStoreClient', () => {
 
     test('should set the key-value pair if both key and value are provided', async () => {
       mockKVStoreContract.set.mockResolvedValue(null);
+      const setSpy = vi
+        .spyOn(mockKVStoreContract, 'set')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
       expect(await kvStoreClient.set('key1', 'value1')).toBeUndefined();
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith(
-        'key1',
-        'value1',
-        {}
-      );
+      expect(setSpy).toHaveBeenCalledWith('key1', 'value1', {});
     });
 
     test('should throw an error when attempting to set a value without signer', async () => {
@@ -136,19 +132,38 @@ describe('KVStoreClient', () => {
         {}
       );
     });
+
+    test('should set the key-value pair if both key and value are provided with transaction options', async () => {
+      mockKVStoreContract.set.mockResolvedValue(null);
+      const setSpy = vi
+        .spyOn(mockKVStoreContract, 'set')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+      const txOptions: Overrides = { gasLimit: 45000 };
+      expect(
+        await kvStoreClient.set('key1', 'value1', txOptions)
+      ).toBeUndefined();
+      expect(setSpy).toHaveBeenCalledWith('key1', 'value1', txOptions);
+    });
   });
 
   describe('setURL', () => {
     test('should set the URL and hash', async () => {
       mockKVStoreContract.set.mockResolvedValue(null);
+      const setBulkSpy = vi
+        .spyOn(mockKVStoreContract, 'setBulk')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
       expect(await kvStoreClient.setURL('https://example.com')).toBeUndefined();
 
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
+      expect(setBulkSpy).toHaveBeenCalledWith(
         ['url', 'urlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         {}
       );
@@ -156,16 +171,21 @@ describe('KVStoreClient', () => {
 
     test('should set the URL and hash for the given URL key', async () => {
       mockKVStoreContract.set.mockResolvedValue(null);
+      const setBulkSpy = vi
+        .spyOn(mockKVStoreContract, 'setBulk')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
       expect(
         await kvStoreClient.setURL('https://example.com', 'linkedinUrl')
       ).toBeUndefined();
 
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
+      expect(setBulkSpy).toHaveBeenCalledWith(
         ['linkedinUrl', 'linkedinUrlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         {}
       );
@@ -198,9 +218,37 @@ describe('KVStoreClient', () => {
         ['url', 'urlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         {}
+      );
+    });
+
+    test('should set the URL and hash for the given URL key with transaction options', async () => {
+      mockKVStoreContract.set.mockResolvedValue(null);
+      const setBulkSpy = vi
+        .spyOn(mockKVStoreContract, 'setBulk')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      expect(
+        await kvStoreClient.setURL(
+          'https://example.com',
+          'linkedinUrl',
+          txOptions
+        )
+      ).toBeUndefined();
+
+      expect(setBulkSpy).toHaveBeenCalledWith(
+        ['linkedinUrl', 'linkedinUrlHash'],
+        [
+          'https://example.com',
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
+        ],
+        txOptions
       );
     });
   });
@@ -227,10 +275,15 @@ describe('KVStoreClient', () => {
 
     test('should set the key-value pairs if both keys and values arrays are provided correctly', async () => {
       mockKVStoreContract.setBulk.mockResolvedValue(null);
+      const setBulkSpy = vi
+        .spyOn(mockKVStoreContract, 'setBulk')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
       expect(
         await kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
       ).toBeUndefined();
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
+      expect(setBulkSpy).toHaveBeenCalledWith(
         ['key1', 'key2'],
         ['value1', 'value2'],
         {}
@@ -258,6 +311,28 @@ describe('KVStoreClient', () => {
         ['key1', 'key2'],
         ['value1', 'value2'],
         {}
+      );
+    });
+
+    test('should set the key-value pairs with transaction options', async () => {
+      mockKVStoreContract.setBulk.mockResolvedValue(null);
+      const setBulkSpy = vi
+        .spyOn(mockKVStoreContract, 'setBulk')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+      const txOptions: Overrides = { gasLimit: 45000 };
+      expect(
+        await kvStoreClient.setBulk(
+          ['key1', 'key2'],
+          ['value1', 'value2'],
+          txOptions
+        )
+      ).toBeUndefined();
+      expect(setBulkSpy).toHaveBeenCalledWith(
+        ['key1', 'key2'],
+        ['value1', 'value2'],
+        txOptions
       );
     });
   });
@@ -344,9 +419,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should return URL if the content is valid', async () => {
-      const validHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes('example')
-      );
+      const validHash = ethers.keccak256(ethers.toUtf8Bytes('example'));
 
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
@@ -367,9 +440,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should return URL for the given URL key if the content is valid', async () => {
-      const validHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes('example')
-      );
+      const validHash = ethers.keccak256(ethers.toUtf8Bytes('example'));
 
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
@@ -391,8 +462,8 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error if the content is not valid', async () => {
-      const invalidHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes('invalid-example')
+      const invalidHash = ethers.keccak256(
+        ethers.toUtf8Bytes('invalid-example')
       );
 
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
@@ -425,280 +496,6 @@ describe('KVStoreClient', () => {
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url'
       );
-    });
-  });
-});
-
-describe('KVStoreClient with lower gas price', () => {
-  const gasPriceMultiplier = 0.5;
-  const defaultGasPrice = BigNumber.from(10);
-  const expectedGasPrice = BigNumber.from(5);
-
-  let mockProvider: any,
-    mockSigner: any,
-    network: NetworkData | undefined,
-    kvStoreClient: any,
-    mockKVStoreContract: any;
-
-  beforeAll(async () => {
-    const provider = new ethers.providers.JsonRpcProvider();
-    mockProvider = {
-      ...provider,
-      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
-      getFeeData: vi.fn().mockResolvedValue({ gasPrice: defaultGasPrice }),
-    };
-    mockSigner = {
-      ...provider.getSigner(),
-      provider: {
-        ...mockProvider,
-      },
-      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
-    };
-    network = NETWORKS[ChainId.LOCALHOST];
-  });
-
-  beforeEach(async () => {
-    kvStoreClient = await KVStoreClient.build(mockSigner, gasPriceMultiplier);
-    mockKVStoreContract = {
-      ...kvStoreClient.contract,
-      set: vi.fn(),
-      setBulk: vi.fn(),
-      get: vi.fn(),
-      address: network?.kvstoreAddress,
-    };
-    kvStoreClient.contract = mockKVStoreContract;
-  });
-
-  describe('build', () => {
-    test('should create a new instance of KVStoreClient with a Signer', async () => {
-      const kvStoreClient = await KVStoreClient.build(
-        mockSigner,
-        gasPriceMultiplier
-      );
-
-      expect(kvStoreClient).toBeInstanceOf(KVStoreClient);
-    });
-
-    test('should create a new instance of KVStoreClient with a Provider', async () => {
-      const provider = ethers.getDefaultProvider();
-
-      const kvStoreClient = await KVStoreClient.build(
-        provider,
-        gasPriceMultiplier
-      );
-
-      expect(kvStoreClient).toBeInstanceOf(KVStoreClient);
-    });
-
-    test('should throw an error if Signer provider does not exist', async () => {
-      const signer = new ethers.Wallet(DEFAULT_GAS_PAYER_PRIVKEY);
-
-      await expect(
-        KVStoreClient.build(signer, gasPriceMultiplier)
-      ).rejects.toThrow(ErrorProviderDoesNotExist);
-    });
-
-    test('should throw an error if the chain ID is unsupported', async () => {
-      const provider = ethers.getDefaultProvider();
-
-      vi.spyOn(provider, 'getNetwork').mockResolvedValue({
-        chainId: 1337,
-      } as any);
-
-      await expect(
-        KVStoreClient.build(provider, gasPriceMultiplier)
-      ).rejects.toThrow(ErrorUnsupportedChainID);
-    });
-  });
-
-  describe('set', () => {
-    test('should throw an error if key is empty', async () => {
-      const setSpy = vi.spyOn(kvStoreClient, 'set');
-      await expect(kvStoreClient.set('', 'test')).rejects.toThrow(
-        ErrorKVStoreEmptyKey
-      );
-      expect(setSpy).toHaveBeenCalledWith('', 'test');
-    });
-
-    test('should set the key-value pair if both key and value are provided', async () => {
-      mockKVStoreContract.set.mockResolvedValue(null);
-      expect(await kvStoreClient.set('key1', 'value1')).toBeUndefined();
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith('key1', 'value1', {
-        gasPrice: expectedGasPrice,
-      });
-    });
-
-    test('should throw an error when attempting to set a value without signer', async () => {
-      kvStoreClient = await KVStoreClient.build(mockProvider);
-
-      await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
-    test('should throw an error when a network error occurs', async () => {
-      mockKVStoreContract.set.mockRejectedValue(
-        new Error('could not detect network')
-      );
-
-      await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
-        Error('Failed to set value: could not detect network')
-      );
-
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith('key1', 'value1', {
-        gasPrice: expectedGasPrice,
-      });
-    });
-
-    test('should throw an error if gas price data is missing from provider/signer', async () => {
-      mockKVStoreContract.set.mockResolvedValue(null);
-      mockProvider.getFeeData.mockResolvedValueOnce({ gasPrice: null });
-
-      await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
-        Error('Failed to set value: Missing gas price')
-      );
-    });
-  });
-
-  describe('setURL', () => {
-    test('should set the URL and hash', async () => {
-      mockKVStoreContract.set.mockResolvedValue(null);
-
-      expect(await kvStoreClient.setURL('https://example.com')).toBeUndefined();
-
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['url', 'urlHash'],
-        [
-          'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
-        ],
-        { gasPrice: expectedGasPrice }
-      );
-    });
-
-    test('should set the URL and hash for the given URL key', async () => {
-      mockKVStoreContract.set.mockResolvedValue(null);
-
-      expect(
-        await kvStoreClient.setURL('https://example.com', 'linkedinUrl')
-      ).toBeUndefined();
-
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['linkedinUrl', 'linkedinUrlHash'],
-        [
-          'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
-        ],
-        { gasPrice: expectedGasPrice }
-      );
-    });
-
-    test('should throw an error when attempting to set the URL without signer', async () => {
-      kvStoreClient = await KVStoreClient.build(mockProvider);
-
-      await expect(kvStoreClient.setURL('example.com')).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
-    test('should throw an error when attempting to set invalid URL', async () => {
-      await expect(kvStoreClient.setURL('invalid_url')).rejects.toThrow(
-        ErrorInvalidUrl
-      );
-    });
-
-    test('should throw an error when a network error occurs', async () => {
-      mockKVStoreContract.setBulk.mockRejectedValue(
-        new Error('could not detect network')
-      );
-
-      await expect(kvStoreClient.setURL('https://example.com')).rejects.toThrow(
-        Error('Failed to set URL and hash: could not detect network')
-      );
-
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['url', 'urlHash'],
-        [
-          'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
-        ],
-        { gasPrice: expectedGasPrice }
-      );
-    });
-
-    test('should throw an error if gas price data is missing from provider/signer', async () => {
-      mockKVStoreContract.setBulk.mockResolvedValue(null);
-      mockProvider.getFeeData.mockResolvedValueOnce({ gasPrice: null });
-
-      await expect(kvStoreClient.setURL('https://example.com')).rejects.toThrow(
-        Error('Failed to set URL and hash: Missing gas price')
-      );
-    });
-  });
-
-  describe('setBulk', () => {
-    test('should throw an error if keys and values arrays are not of the same length', async () => {
-      const setBulkSpy = vi.spyOn(kvStoreClient, 'setBulk');
-      await expect(
-        kvStoreClient.setBulk(['key1', 'key2'], ['value1'])
-      ).rejects.toThrow(ErrorKVStoreArrayLength);
-      expect(setBulkSpy).toHaveBeenCalledWith(['key1', 'key2'], ['value1']);
-    });
-
-    test('should throw an error if any of the keys is empty', async () => {
-      const setBulkSpy = vi.spyOn(kvStoreClient, 'setBulk');
-      await expect(
-        kvStoreClient.setBulk(['key1', ''], ['value1', 'value2'])
-      ).rejects.toThrow(ErrorKVStoreEmptyKey);
-      expect(setBulkSpy).toHaveBeenCalledWith(
-        ['key1', ''],
-        ['value1', 'value2']
-      );
-    });
-
-    test('should set the key-value pairs if both keys and values arrays are provided correctly', async () => {
-      mockKVStoreContract.setBulk.mockResolvedValue(null);
-      expect(
-        await kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
-      ).toBeUndefined();
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['key1', 'key2'],
-        ['value1', 'value2'],
-        { gasPrice: expectedGasPrice }
-      );
-    });
-
-    test('should throw an error when attempting to set values without signer', async () => {
-      kvStoreClient = await KVStoreClient.build(mockProvider);
-
-      await expect(
-        kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
-      ).rejects.toThrow(ErrorSigner);
-    });
-
-    test('should throw an error if a network error occurs', async () => {
-      mockKVStoreContract.setBulk.mockRejectedValue(
-        new Error('could not detect network')
-      );
-      await expect(
-        kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
-      ).rejects.toThrow(
-        new Error('Failed to set bulk values: could not detect network')
-      );
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['key1', 'key2'],
-        ['value1', 'value2'],
-        { gasPrice: expectedGasPrice }
-      );
-    });
-
-    test('should throw an error if gas price data is missing from provider/signer', async () => {
-      mockKVStoreContract.setBulk.mockResolvedValue(null);
-      mockProvider.getFeeData.mockResolvedValueOnce({ gasPrice: null });
-
-      await expect(
-        kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
-      ).rejects.toThrow(Error('Failed to set bulk values: Missing gas price'));
     });
   });
 });

@@ -48,27 +48,39 @@ escrow_client = EscrowClient(w3)
 
 ## Module
 
-### *class* human_protocol_sdk.escrow.escrow_client.EscrowClient(web3, gas_limit=None)
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowCancel(tx_hash, amount_refunded)
+
+Bases: `object`
+
+#### \_\_init_\_(tx_hash, amount_refunded)
+
+Represents the result of an escrow cancellation transaction.
+Args:
+
+> tx_hash (str): The hash of the transaction that cancelled the escrow.
+> amount_refunded (Any): The amount refunded during the escrow cancellation.
+
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowClient(web3)
 
 Bases: `object`
 
 A class used to manage escrow on the HUMAN network.
 
-#### \_\_init_\_(web3, gas_limit=None)
+#### \_\_init_\_(web3)
 
 Initializes a Escrow instance.
 
 * **Parameters:**
-  * **web3** (`Web3`) – The Web3 object
-  * **gas_limit** (`Optional`[`int`]) – Gas limit to be provided to transaction
+  **web3** (`Web3`) – The Web3 object
 
-#### abort(escrow_address)
+#### abort(escrow_address, tx_options=None)
 
 Cancels the specified escrow,
 sends the balance to the canceler and selfdestructs the escrow contract.
 
 * **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow to abort
+  * **escrow_address** (`str`) – Address of the escrow to abort
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -100,13 +112,14 @@ sends the balance to the canceler and selfdestructs the escrow contract.
   escrow_client.abort("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
   ```
 
-#### add_trusted_handlers(escrow_address, handlers)
+#### add_trusted_handlers(escrow_address, handlers, tx_options=None)
 
 Adds an array of addresses to the trusted handlers list.
 
 * **Parameters:**
   * **escrow_address** (`str`) – Address of the escrow
   * **handlers** (`List`[`str`]) – Array of trusted handler addresses
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -145,7 +158,7 @@ Adds an array of addresses to the trusted handlers list.
   )
   ```
 
-#### bulk_payout(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId)
+#### bulk_payout(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, tx_options=None)
 
 Pays out the amounts specified to the workers and sets the URL of the final results file.
 
@@ -156,6 +169,7 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
   * **final_results_url** (`str`) – Final results file url
   * **final_results_hash** (`str`) – Final results file hash
   * **txId** (`Decimal`) – Serial number of the bulks
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -205,18 +219,23 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
   )
   ```
 
-#### cancel(escrow_address)
+#### cancel(escrow_address, tx_options=None)
 
 Cancels the specified escrow and sends the balance to the canceler.
 
 * **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow to cancel
+  * **escrow_address** (`str`) – Address of the escrow to cancel
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
-  `None`
+  [`EscrowCancel`](#human_protocol_sdk.escrow.escrow_client.EscrowCancel)
 * **Returns:**
-  None
+  EscrowCancel:
+  An instance of the EscrowCancel class containing details of the cancellation transaction,
+  including the transaction hash and the amount refunded.
 * **Raises:**
-  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+  * [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+  * [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If the transfer event associated with the cancellation
+    is not found in the transaction logs
 * **Example:**
   ```python
   from eth_typing import URI
@@ -239,17 +258,18 @@ Cancels the specified escrow and sends the balance to the canceler.
   (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
   escrow_client = EscrowClient(w3)
 
-  transaction_hash = escrow_client.cancel(
+  escrow_cancel_data = escrow_client.cancel(
       "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
   )
   ```
 
-#### complete(escrow_address)
+#### complete(escrow_address, tx_options=None)
 
 Sets the status of an escrow to completed.
 
 * **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow to complete
+  * **escrow_address** (`str`) – Address of the escrow to complete
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -342,7 +362,7 @@ Creates and sets up an escrow.
   )
   ```
 
-#### create_escrow(token_address, trusted_handlers, job_requester_id)
+#### create_escrow(token_address, trusted_handlers, job_requester_id, tx_options=None)
 
 Creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
 
@@ -350,6 +370,7 @@ Creates an escrow contract that uses the token passed to pay oracle fees and rew
   * **tokenAddress** – The address of the token to use for payouts
   * **trusted_handlers** (`List`[`str`]) – Array of addresses that can perform actions on the contract
   * **job_requester_id** (`str`) – The id of the job requester
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `str`
 * **Returns:**
@@ -391,13 +412,14 @@ Creates an escrow contract that uses the token passed to pay oracle fees and rew
   )
   ```
 
-#### fund(escrow_address, amount)
+#### fund(escrow_address, amount, tx_options=None)
 
 Adds funds to the escrow.
 
 * **Parameters:**
   * **escrow_address** (`str`) – Address of the escrow to setup
   * **amount** (`Decimal`) – Amount to be added as funds
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -766,13 +788,14 @@ Gets the address of the token used to fund the escrow.
   )
   ```
 
-#### setup(escrow_address, escrow_config)
+#### setup(escrow_address, escrow_config, tx_options=None)
 
 Sets up the parameters of the escrow.
 
 * **Parameters:**
   * **escrow_address** (`str`) – Address of the escrow to setup
   * **escrow_config** ([`EscrowConfig`](#human_protocol_sdk.escrow.escrow_client.EscrowConfig)) – Object containing all the necessary information to setup an escrow
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -815,7 +838,7 @@ Sets up the parameters of the escrow.
   escrow_client.setup(escrow_address, escrow_config)
   ```
 
-#### store_results(escrow_address, url, hash)
+#### store_results(escrow_address, url, hash, tx_options=None)
 
 Stores the results url.
 
@@ -823,6 +846,7 @@ Stores the results url.
   * **escrow_address** (`str`) – Address of the escrow
   * **url** (`str`) – Results file url
   * **hash** (`str`) – Results file hash
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**

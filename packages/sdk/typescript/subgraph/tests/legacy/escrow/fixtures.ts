@@ -38,9 +38,8 @@ export function createISEvent(
   url: string,
   hash: string
 ): IntermediateStorage {
-  const newIntermediateStorageEvent = changetype<IntermediateStorage>(
-    newMockEvent()
-  );
+  const newIntermediateStorageEvent =
+    changetype<IntermediateStorage>(newMockEvent());
 
   newIntermediateStorageEvent.transaction.from = sender;
 

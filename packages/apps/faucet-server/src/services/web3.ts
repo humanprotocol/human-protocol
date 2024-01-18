@@ -1,6 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * TODO: Remove eslint rule for explict any after the PR is merged
+ * Known issue for web3 v4 unknown ABI
+ * https://github.com/web3/web3.js/pull/6636
+ */
+
 import hmtAbi from '@human-protocol/core/abis/HMToken.json';
 import Web3 from 'web3';
-import { ChainId } from '../constants/networks';
+
+import { ChainId, FAUCET_NETWORKS } from '../constants/networks';
 import {
   AnonymousParams,
   AnonymousPoW,
@@ -27,9 +36,9 @@ export const getFaucetBalance = async (
     faucetAddress
   )
     return await web3.eth.getBalance(faucetAddress);
-  const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
+  const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
   const balance = web3.utils.fromWei(
-    await HMT.methods.balanceOf(web3.eth.defaultAccount).call(),
+    await (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call(),
     'ether'
   );
   return balance;
@@ -41,16 +50,15 @@ export const sendFunds = async (
   toAddress: string,
   faucetAddress?: string
 ): Promise<string | undefined> => {
-  const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
+  const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
   let txHash = '';
   try {
     if (
       (await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() &&
       faucetAddress
     ) {
-      const currentProvider = web3.currentProvider as any;
       const skalePOW = new AnonymousPoW({
-        rpcUrl: currentProvider.host,
+        rpcUrl: FAUCET_NETWORKS[ChainId.SKALE].rpcUrl,
       } as AnonymousParams);
       const txParams = {
         to: faucetAddress,
@@ -59,19 +67,19 @@ export const sendFunds = async (
       const receipt = await (await skalePOW.send(txParams)).wait();
       txHash = receipt.transactionHash;
     } else {
-      const gasNeeded = await HMT.methods
-        .transfer(
-          toAddress,
-          Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
-        )
-        .estimateGas({ from: web3.eth.defaultAccount });
+      const gasNeeded = await (HMT.methods.transfer as any)(
+        toAddress,
+        Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
+      ).estimateGas({ from: web3.eth.defaultAccount });
       const gasPrice = await web3.eth.getGasPrice();
-      const receipt = await HMT.methods
-        .transfer(
-          toAddress,
-          Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
-        )
-        .send({ from: web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
+      const receipt = await (HMT.methods.transfer as any)(
+        toAddress,
+        Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
+      ).send({
+        from: web3.eth.defaultAccount,
+        gas: gasNeeded.toString(),
+        gasPrice: gasPrice.toString(),
+      });
       txHash = receipt.transactionHash;
     }
   } catch (err) {
@@ -100,22 +108,15 @@ export const checkFaucetBalance = async (
   )
     return true;
 
-  const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
-  const gasNeeded = await HMT.methods
-    .transfer(
-      web3.eth.defaultAccount,
-      Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
-    )
-    .estimateGas({ from: web3.eth.defaultAccount });
+  const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
+  const gasNeeded = await (HMT.methods.transfer as any)(
+    web3.eth.defaultAccount,
+    Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
+  ).estimateGas({ from: web3.eth.defaultAccount });
   const gasPrice = await web3.eth.getGasPrice();
   const balance = await web3.eth.getBalance(web3.eth.defaultAccount);
 
-  if (
-    web3.utils
-      .toBN(balance)
-      .cmp(web3.utils.toBN(gasNeeded).mul(web3.utils.toBN(gasPrice))) === -1
-  )
-    return false;
+  if (balance < web3.utils.toBigInt(gasNeeded) * gasPrice) return false;
 
   return true;
 };

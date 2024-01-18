@@ -8,11 +8,11 @@
 
 This client enables to perform actions on KVStore contract and obtain information from both the contracts and subgraph.
 
-Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+Internally, the SDK will use one network or another according to the network ID of the `runner`.
 To use this client, it is recommended to initialize it using the static `build` method.
 
 ```ts
-static async build(signerOrProvider: Signer | Provider);
+static async build(runner: ContractRunner);
 ```
 
 A `Signer` or a `Provider` should be passed depending on the use case of this module:
@@ -87,13 +87,11 @@ const kvstoreClient = await KVStoreClient.build(signer);
 ### Properties
 
 - [contract](kvstore.KVStoreClient.md#contract)
-- [gasPriceMultiplier](kvstore.KVStoreClient.md#gaspricemultiplier)
 - [networkData](kvstore.KVStoreClient.md#networkdata)
-- [signerOrProvider](kvstore.KVStoreClient.md#signerorprovider)
+- [runner](kvstore.KVStoreClient.md#runner)
 
 ### Methods
 
-- [gasPriceOptions](kvstore.KVStoreClient.md#gaspriceoptions)
 - [get](kvstore.KVStoreClient.md#get)
 - [getURL](kvstore.KVStoreClient.md#geturl)
 - [set](kvstore.KVStoreClient.md#set)
@@ -105,7 +103,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 ### constructor
 
-• **new KVStoreClient**(`signerOrProvider`, `networkData`, `gasPriceMultiplier?`)
+• **new KVStoreClient**(`runner`, `networkData`): [`KVStoreClient`](kvstore.KVStoreClient.md)
 
 **KVStoreClient constructor**
 
@@ -113,9 +111,12 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 | `networkData` | `NetworkData` | - |
-| `gasPriceMultiplier?` | `number` | The multiplier to apply to the gas price |
+
+#### Returns
+
+[`KVStoreClient`](kvstore.KVStoreClient.md)
 
 #### Overrides
 
@@ -123,7 +124,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
+[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
 
 ## Properties
 
@@ -133,21 +134,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:95](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L95)
-
-___
-
-### gasPriceMultiplier
-
-• `Protected` `Optional` **gasPriceMultiplier**: `number`
-
-#### Inherited from
-
-[BaseEthersClient](base.BaseEthersClient.md).[gasPriceMultiplier](base.BaseEthersClient.md#gaspricemultiplier)
-
-#### Defined in
-
-[base.ts:14](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
+[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
 
 ___
 
@@ -161,49 +148,27 @@ ___
 
 #### Defined in
 
-[base.ts:15](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L15)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
-### signerOrProvider
+### runner
 
-• `Protected` **signerOrProvider**: `Signer` \| `Provider`
+• `Protected` **runner**: `ContractRunner`
 
 #### Inherited from
 
-[BaseEthersClient](base.BaseEthersClient.md).[signerOrProvider](base.BaseEthersClient.md#signerorprovider)
+[BaseEthersClient](base.BaseEthersClient.md).[runner](base.BaseEthersClient.md#runner)
 
 #### Defined in
 
-[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
-### gasPriceOptions
-
-▸ `Protected` **gasPriceOptions**(): `Promise`<`Partial`<`Overrides`\>\>
-
-Adjust the gas price, and return as an option to be passed to a transaction
-
-#### Returns
-
-`Promise`<`Partial`<`Overrides`\>\>
-
-Returns the gas price options
-
-#### Inherited from
-
-[BaseEthersClient](base.BaseEthersClient.md).[gasPriceOptions](base.BaseEthersClient.md#gaspriceoptions)
-
-#### Defined in
-
-[base.ts:39](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L39)
-
-___
-
 ### get
 
-▸ **get**(`address`, `key`): `Promise`<`string`\>
+▸ **get**(`address`, `key`): `Promise`\<`string`\>
 
 This function returns the value for a specified key and address.
 
@@ -216,7 +181,7 @@ This function returns the value for a specified key and address.
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`\<`string`\>
 
 Value of the key.
 
@@ -238,13 +203,13 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:311](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L311)
+[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
 
 ___
 
 ### getURL
 
-▸ **getURL**(`address`, `urlKey?`): `Promise`<`string`\>
+▸ **getURL**(`address`, `urlKey?`): `Promise`\<`string`\>
 
 This function returns the URL value for the given entity.
 
@@ -257,7 +222,7 @@ This function returns the URL value for the given entity.
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`\<`string`\>
 
 URL value for the given address if exists, and the content is valid
 
@@ -281,13 +246,13 @@ const linkedinUrl = await kvstoreClient.getURL(
 
 #### Defined in
 
-[kvstore.ts:350](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L350)
+[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
 
 ___
 
 ### set
 
-▸ **set**(`key`, `value`): `Promise`<`void`\>
+▸ **set**(`key`, `value`, `txOptions?`): `Promise`\<`void`\>
 
 This function sets a key-value pair associated with the address that submits the transaction.
 
@@ -297,10 +262,11 @@ This function sets a key-value pair associated with the address that submits the
 | :------ | :------ | :------ |
 | `key` | `string` | Key of the key-value pair |
 | `value` | `string` | Value of the key-value pair |
+| `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 Returns void if successful. Throws error if any.
 
@@ -324,13 +290,13 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:179](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L179)
+[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
 
 ___
 
 ### setBulk
 
-▸ **setBulk**(`keys`, `values`): `Promise`<`void`\>
+▸ **setBulk**(`keys`, `values`, `txOptions?`): `Promise`\<`void`\>
 
 This function sets key-value pairs in bulk associated with the address that submits the transaction.
 
@@ -340,10 +306,11 @@ This function sets key-value pairs in bulk associated with the address that subm
 | :------ | :------ | :------ |
 | `keys` | `string`[] | Array of keys (keys and value must have the same order) |
 | `values` | `string`[] | Array of values |
+| `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 Returns void if successful. Throws error if any.
 
@@ -369,13 +336,13 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:220](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L220)
+[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
 
 ___
 
 ### setURL
 
-▸ **setURL**(`url`, `urlKey?`): `Promise`<`void`\>
+▸ **setURL**(`url`, `urlKey?`, `txOptions?`): `Promise`\<`void`\>
 
 This function sets a URL value for the address that submits the transaction.
 
@@ -385,10 +352,11 @@ This function sets a URL value for the address that submits the transaction.
 | :------ | :------ | :------ | :------ |
 | `url` | `string` | `undefined` | URL to set |
 | `urlKey` | `string` | `'url'` | Configurable URL key. `url` by default. |
+| `txOptions?` | `Overrides` | `{}` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 Returns void if successful. Throws error if any.
 
@@ -411,26 +379,25 @@ await kvstoreClient.setURL('linkedin.com/example', 'linkedinUrl);
 
 #### Defined in
 
-[kvstore.ts:261](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L261)
+[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
 
 ___
 
 ### build
 
-▸ `Static` **build**(`signerOrProvider`, `gasPriceMultiplier?`): `Promise`<[`KVStoreClient`](kvstore.KVStoreClient.md)\>
+▸ **build**(`runner`): `Promise`\<[`KVStoreClient`](kvstore.KVStoreClient.md)\>
 
-Creates an instance of KVStoreClient from a Signer or Provider.
+Creates an instance of KVStoreClient from a runner.
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
-| `gasPriceMultiplier?` | `number` | The multiplier to apply to the gas price |
+| `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 
 #### Returns
 
-`Promise`<[`KVStoreClient`](kvstore.KVStoreClient.md)\>
+`Promise`\<[`KVStoreClient`](kvstore.KVStoreClient.md)\>
 
 - An instance of KVStoreClient
 
@@ -444,4 +411,4 @@ Creates an instance of KVStoreClient from a Signer or Provider.
 
 #### Defined in
 
-[kvstore.ts:127](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L127)
+[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)

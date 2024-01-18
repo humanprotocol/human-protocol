@@ -105,6 +105,27 @@ class TestKVStoreClient(unittest.TestCase):
             kvstore.set(key, value)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
+    def test_set_with_tx_options(self):
+        mock_function = MagicMock()
+        self.kvstore.kvstore_contract.functions.set = mock_function
+        key = "key"
+        value = "value"
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.kvstore.set(key, value, tx_options)
+
+            mock_function.assert_called_once_with(key, value)
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Set",
+                mock_function.return_value,
+                KVStoreClientError,
+                tx_options,
+            )
+
     def test_set_bulk(self):
         mock_function = MagicMock()
         self.kvstore.kvstore_contract.functions.setBulk = mock_function
@@ -160,6 +181,27 @@ class TestKVStoreClient(unittest.TestCase):
             kvstore.set_bulk(keys, values)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
+    def test_set_bulk_with_tx_options(self):
+        mock_function = MagicMock()
+        self.kvstore.kvstore_contract.functions.setBulk = mock_function
+        keys = ["key1", "key2", "key3"]
+        values = ["value1", "value2", "value3"]
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.kvstore.set_bulk(keys, values, tx_options)
+
+            mock_function.assert_called_once_with(keys, values)
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Set Bulk",
+                mock_function.return_value,
+                KVStoreClientError,
+                tx_options,
+            )
+
     def test_set_url(self):
         mock_function = MagicMock()
         self.kvstore.kvstore_contract.functions.setBulk = mock_function
@@ -199,9 +241,12 @@ class TestKVStoreClient(unittest.TestCase):
         content = "example"
         content_hash = self.w3.keccak(text=content).hex()
 
-        with patch(
-            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-        ) as mock_handle_transaction, patch("requests.get") as mock_get:
+        with (
+            patch(
+                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
+            ) as mock_handle_transaction,
+            patch("requests.get") as mock_get,
+        ):
             mock_response = mock_get.return_value
             mock_response.text = content
 
@@ -237,6 +282,38 @@ class TestKVStoreClient(unittest.TestCase):
         with self.assertRaises(KVStoreClientError) as cm:
             kvstore.set_url(url)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
+
+    def test_set_url_with_tx_options(self):
+        mock_function = MagicMock()
+        self.kvstore.kvstore_contract.functions.setBulk = mock_function
+
+        url = "https://example.com"
+        content = "example"
+        content_hash = self.w3.keccak(text=content).hex()
+        tx_options = {"gas": 50000}
+
+        with (
+            patch(
+                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
+            ) as mock_handle_transaction,
+            patch("requests.get") as mock_get,
+        ):
+            mock_response = mock_get.return_value
+            mock_response.text = content
+
+            self.kvstore.set_url(url, tx_options=tx_options)
+
+            mock_function.assert_called_once_with(
+                ["url", "urlHash"], [url, content_hash]
+            )
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Set Bulk",
+                mock_function.return_value,
+                KVStoreClientError,
+                tx_options,
+            )
 
     def test_get(self):
         mock_function = MagicMock()

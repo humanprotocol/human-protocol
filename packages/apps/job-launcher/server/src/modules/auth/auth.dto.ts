@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, Matches } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 import { IsConfirm, IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
@@ -24,10 +24,6 @@ export class SignInDto {
 }
 
 export class ValidatePasswordDto {
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*+])(?=.{8,})/, {
-    message:
-      'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character.',
-  })
   @ApiProperty()
   @IsPassword()
   public password: string;
@@ -75,4 +71,10 @@ export class AuthUpdateDto {
 export class TokenCreateDto {
   public tokenType: TokenType;
   public user: UserEntity;
+}
+
+export class ApiKeyDto {
+  @ApiProperty({ name: 'api_key' })
+  @IsString()
+  public apiKey: string;
 }

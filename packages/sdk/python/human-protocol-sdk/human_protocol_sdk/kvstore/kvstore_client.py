@@ -64,8 +64,7 @@ from human_protocol_sdk.utils import (
 )
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
+from web3.types import TxParams
 
 LOG = logging.getLogger("human_protocol_sdk.kvstore")
 
@@ -113,12 +112,13 @@ class KVStoreClient:
         )
         self.gas_limit = gas_limit
 
-    def set(self, key: str, value: str) -> None:
+    def set(self, key: str, value: str, tx_options: Optional[TxParams] = None) -> None:
         """
         Sets the value of a key-value pair in the contract.
 
         :param key: The key of the key-value pair to set
         :param value: The value of the key-value pair to set
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -155,15 +155,18 @@ class KVStoreClient:
             "Set",
             self.kvstore_contract.functions.set(key, value),
             KVStoreClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def set_bulk(self, keys: List[str], values: List[str]) -> None:
+    def set_bulk(
+        self, keys: List[str], values: List[str], tx_options: Optional[TxParams] = None
+    ) -> None:
         """
         Sets multiple key-value pairs in the contract.
 
         :param keys: A list of keys to set
         :param values: A list of values to set
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -207,15 +210,21 @@ class KVStoreClient:
             "Set Bulk",
             self.kvstore_contract.functions.setBulk(keys, values),
             KVStoreClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def set_url(self, url: str, key: Optional[str] = "url") -> None:
+    def set_url(
+        self,
+        url: str,
+        key: Optional[str] = "url",
+        tx_options: Optional[TxParams] = None,
+    ) -> None:
         """
         Sets a URL value for the address that submits the transaction.
 
         :param url: URL to set
-        :key: Configurable URL key. `url` by default.
+        :param key: Configurable URL key. `url` by default.
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -260,7 +269,7 @@ class KVStoreClient:
                 [key, key + "Hash"], [url, content_hash]
             ),
             KVStoreClientError,
-            self.gas_limit,
+            tx_options,
         )
 
     def get(self, address: str, key: str) -> str:

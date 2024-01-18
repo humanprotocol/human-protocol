@@ -5,7 +5,7 @@ import api from '../utils/api';
 
 export const createCryptoPayment = async (
   signer: Signer,
-  body: CryptoPaymentRequest
+  body: CryptoPaymentRequest,
 ) => {
   const signature = await signer.signMessage(JSON.stringify(body));
   await api.post('/payment/crypto', body, {

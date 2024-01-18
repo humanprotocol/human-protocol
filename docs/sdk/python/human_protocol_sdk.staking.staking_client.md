@@ -76,13 +76,14 @@ Initializes a Staking instance
 * **Parameters:**
   **w3** (`Web3`) – Web3 instance
 
-#### allocate(escrow_address, amount)
+#### allocate(escrow_address, amount, tx_options=None)
 
 Allocates HMT token to the escrow.
 
 * **Parameters:**
   * **escrow_address** (`str`) – Address of the escrow
   * **amount** (`Decimal`) – Amount to allocate
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -117,12 +118,13 @@ Allocates HMT token to the escrow.
   staking_client.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount)
   ```
 
-#### approve_stake(amount)
+#### approve_stake(amount, tx_options=None)
 
 Approves HMT token for Staking.
 
 * **Parameters:**
-  **amount** (`Decimal`) – Amount to approve
+  * **amount** (`Decimal`) – Amount to approve
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -155,12 +157,13 @@ Approves HMT token for Staking.
   staking_client.approve_stake(amount)
   ```
 
-#### close_allocation(escrow_address)
+#### close_allocation(escrow_address, tx_options=None)
 
 Closes allocated HMT token from the escrow.
 
 * **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow
+  * **escrow_address** (`str`) – Address of the escrow
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -193,12 +196,13 @@ Closes allocated HMT token from the escrow.
   staking_client.close_allocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f')
   ```
 
-#### distribute_reward(escrow_address)
+#### distribute_reward(escrow_address, tx_options=None)
 
 Pays out rewards to the slashers for the specified escrow address.
 
 * **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow
+  * **escrow_address** (`str`) – Address of the escrow
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -256,7 +260,7 @@ Gets the allocation info for the specified escrow.
   )
   ```
 
-#### slash(slasher, staker, escrow_address, amount)
+#### slash(slasher, staker, escrow_address, amount, tx_options=None)
 
 Slashes HMT token.
 
@@ -265,6 +269,7 @@ Slashes HMT token.
   * **staker** (`str`) – Address of the staker
   * **escrow_address** (`str`) – Address of the escrow
   * **amount** (`Decimal`) – Amount to slash
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -304,12 +309,13 @@ Slashes HMT token.
   )
   ```
 
-#### stake(amount)
+#### stake(amount, tx_options=None)
 
 Stakes HMT token.
 
 * **Parameters:**
-  **amount** (`Decimal`) – Amount to stake
+  * **amount** (`Decimal`) – Amount to stake
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -347,12 +353,13 @@ Stakes HMT token.
   staking_client.stake(amount)
   ```
 
-#### unstake(amount)
+#### unstake(amount, tx_options=None)
 
 Unstakes HMT token.
 
 * **Parameters:**
-  **amount** (`Decimal`) – Amount to unstake
+  * **amount** (`Decimal`) – Amount to unstake
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -386,10 +393,12 @@ Unstakes HMT token.
   staking_client.unstake(amount)
   ```
 
-#### withdraw()
+#### withdraw(tx_options=None)
 
 Withdraws HMT token.
 
+* **Parameters:**
+  **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**

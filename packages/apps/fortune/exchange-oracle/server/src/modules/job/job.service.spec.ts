@@ -154,8 +154,9 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce('encrypted string')
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce('encrypted string');
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([]);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
@@ -180,8 +181,9 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(JSON.stringify(manifest))
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce(JSON.stringify(manifest));
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([]);
 
       const result = await jobService.getDetails(chainId, escrowAddress);
 
@@ -243,14 +245,15 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(manifest)
-        .mockResolvedValueOnce([
-          {
-            exchangeAddress: '0x1234567890123456789012345678901234567892',
-            workerAddress: '0x1234567890123456789012345678901234567892',
-            solution: 'test',
-          },
-        ]);
+        .mockResolvedValueOnce(manifest);
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
+        },
+      ]);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
@@ -351,9 +354,10 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
+
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce([])
         .mockResolvedValueOnce(manifest);
 
       (Encryption.build as any).mockImplementation(() => ({
@@ -370,6 +374,9 @@ describe('JobService', () => {
           webhookUrl: recordingOracleURLMock,
         }),
       }));
+      storageService.uploadJobSolutions = jest
+        .fn()
+        .mockResolvedValue(solutionsUrl);
 
       await jobService.solveJob(
         chainId,
@@ -405,15 +412,16 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
+        },
+      ]);
+
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce([
-          {
-            exchangeAddress: '0x1234567890123456789012345678901234567892',
-            workerAddress: '0x1234567890123456789012345678901234567892',
-            solution: 'test',
-          },
-        ])
         .mockResolvedValueOnce(manifest);
 
       (Encryption.build as any).mockImplementation(() => ({
@@ -483,7 +491,7 @@ describe('JobService', () => {
         }),
       }));
 
-      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([
         {
           exchangeAddress: '0x1234567890123456789012345678901234567892',
           workerAddress: '0x1234567890123456789012345678901234567891',
@@ -510,30 +518,27 @@ describe('JobService', () => {
         solution,
       };
       const existingJobSolutions = [jobSolution];
-      StorageClient.downloadFileFromUrl = jest
+      storageService.downloadJobSolutions = jest
         .fn()
         .mockResolvedValue(existingJobSolutions);
+      storageService.uploadJobSolutions = jest.fn();
+
       await jobService.processInvalidJobSolution({
         chainId,
         escrowAddress,
         workerAddress,
       });
 
-      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
-        MOCK_S3_BUCKET,
-        `${escrowAddress}-${chainId}.json`,
-        JSON.stringify([
+      expect(storageService.uploadJobSolutions).toHaveBeenCalledWith(
+        escrowAddress,
+        chainId,
+        [
           {
             workerAddress,
             solution,
             error: true,
           },
-        ]),
-
-        {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store',
-        },
+        ],
       );
     });
 
@@ -548,7 +553,7 @@ describe('JobService', () => {
           solution: 'test',
         },
       ];
-      StorageClient.downloadFileFromUrl = jest
+      storageService.downloadJobSolutions = jest
         .fn()
         .mockResolvedValue(existingJobSolutions);
 

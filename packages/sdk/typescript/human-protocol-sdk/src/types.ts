@@ -1,5 +1,3 @@
-import { BigNumber } from 'ethers';
-
 /**
  * Enum for escrow statuses.
  * @readonly
@@ -150,5 +148,5 @@ export type EscrowCancel = {
   /**
    * The amount refunded in the escrow cancellation.
    */
-  amountRefunded: BigNumber;
+  amountRefunded: bigint;
 };

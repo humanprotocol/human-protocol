@@ -9,7 +9,7 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 
 export class PaymentFiatConfirmDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'payment_id' })
   @IsString()
   public paymentId: string;
 }
@@ -30,11 +30,12 @@ export class PaymentFiatCreateDto {
 export class PaymentCryptoCreateDto {
   @ApiProperty({
     enum: ChainId,
+    name: 'chain_id',
   })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'transaction_hash' })
   @IsString()
   public transactionHash: string;
 }
@@ -64,7 +65,7 @@ export class GetRateDto {
 
 export class PaymentRefundCreateDto {
   @IsNumber()
-  public refundAmount: number
+  public refundAmount: number;
 
   @IsNumber()
   public userId: number;

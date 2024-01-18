@@ -13,18 +13,17 @@ import {
 import { EventType, SolutionError, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
-import { BigNumber } from 'ethers';
 
 export class WebhookIncomingDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'chain_id' })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'event_type' })
   @IsEnum(EventType)
   public eventType: EventType;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'escrow_address' })
   @IsString()
   public escrowAddress: string;
 }
@@ -162,7 +161,7 @@ export class ProcessingResultDto {
   /**
    * Corresponding amounts to be paid out to recipients.
    */
-  amounts: BigNumber[];
+  amounts: bigint[];
 
   /**
    * URL to the stored results.

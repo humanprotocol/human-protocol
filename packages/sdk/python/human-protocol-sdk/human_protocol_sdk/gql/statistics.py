@@ -56,9 +56,7 @@ query GetHMTokenStatistics {{
     }}
 }}
 {hmtoken_statistics_fragment}
-""".format(
-    hmtoken_statistics_fragment=hmtoken_statistics_fragment
-)
+""".format(hmtoken_statistics_fragment=hmtoken_statistics_fragment)
 
 get_escrow_statistics_query = """
 query GetEscrowStatistics {{
@@ -67,9 +65,7 @@ query GetEscrowStatistics {{
     }}
 }}
 {escrow_statistics_fragment}
-""".format(
-    escrow_statistics_fragment=escrow_statistics_fragment
-)
+""".format(escrow_statistics_fragment=escrow_statistics_fragment)
 
 
 def get_event_day_data_query(param: StatisticsParam):

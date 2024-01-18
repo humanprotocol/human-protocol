@@ -7,4 +7,11 @@ export enum EventType {
 export enum OracleType {
   FORTUNE = 'fortune',
   CVAT = 'cvat',
+  HCAPTCHA = 'hcaptcha',
+}
+
+export enum WebhookStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
 }

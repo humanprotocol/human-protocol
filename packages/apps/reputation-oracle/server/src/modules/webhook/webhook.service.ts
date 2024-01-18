@@ -30,7 +30,7 @@ import {
   RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
 import { ReputationService } from '../reputation/reputation.service';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import {
   EventType,
@@ -44,7 +44,6 @@ import { LessThanOrEqual } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class WebhookService {
@@ -118,10 +117,7 @@ export class WebhookService {
     try {
       const { chainId, escrowAddress } = webhookEntity;
       const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(
-        signer,
-        this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-      );
+      const escrowClient = await EscrowClient.build(signer);
 
       const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
       if (!manifestUrl) {
@@ -137,7 +133,7 @@ export class WebhookService {
 
       let results: {
         recipients: string[];
-        amounts: BigNumber[];
+        amounts: bigint[];
         url: string;
         hash: string;
         checkPassed: boolean;
@@ -173,6 +169,9 @@ export class WebhookService {
         results.amounts,
         results.url,
         results.hash,
+        {
+          gasPrice: await this.web3Service.calculateGasPrice(chainId),
+        },
       );
 
       await this.webhookRepository.updateOne(
@@ -229,9 +228,9 @@ export class WebhookService {
     const recipients = intermediateResults
       .filter((result) => !result.error)
       .map((item) => item.workerAddress);
-    const payoutAmount = BigNumber.from(
-      ethers.utils.parseUnits(manifest.fundAmount.toString(), 'ether'),
-    ).div(recipients.length);
+    const payoutAmount =
+      BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
+      BigInt(recipients.length);
     const amounts = new Array(recipients.length).fill(payoutAmount);
 
     return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
@@ -254,21 +253,19 @@ export class WebhookService {
       escrowAddress,
     );
     const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+      escrowAddress,
+      chainId,
       `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
     );
     const annotations: CvatAnnotationMeta = await this.storageService.download(
       `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
     );
 
-    const bountyValue = ethers.utils.parseUnits(manifest.job_bounty, 18);
+    const bountyValue = ethers.parseUnits(manifest.job_bounty, 18);
     const accumulatedBounties = annotations.results.reduce((accMap, curr) => {
       if (curr.annotation_quality >= manifest.validation.min_quality) {
-        const existingValue =
-          accMap.get(curr.annotator_wallet_address) || BigNumber.from(0);
-        accMap.set(
-          curr.annotator_wallet_address,
-          existingValue.add(bountyValue),
-        );
+        const existingValue = accMap.get(curr.annotator_wallet_address) || 0n;
+        accMap.set(curr.annotator_wallet_address, existingValue + bountyValue);
       }
       return accMap;
     }, new Map<string, typeof bountyValue>());
@@ -325,10 +322,7 @@ export class WebhookService {
   ): Promise<string> {
     const signer = this.web3Service.getSigner(chainId);
 
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const url = await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
@@ -392,10 +386,7 @@ export class WebhookService {
 
     try {
       const signer = this.web3Service.getSigner(webhookEntity.chainId);
-      const escrowClient = await EscrowClient.build(
-        signer,
-        this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-      );
+      const escrowClient = await EscrowClient.build(signer);
 
       const manifestUrl = await escrowClient.getManifestUrl(
         webhookEntity.escrowAddress,
@@ -420,9 +411,8 @@ export class WebhookService {
           webhookEntity.escrowAddress,
         );
 
-        const finalResults = await this.storageService.download(
-          finalResultsUrl,
-        );
+        const finalResults =
+          await this.storageService.download(finalResultsUrl);
 
         if (finalResults.length === 0) {
           this.logger.log(
@@ -497,7 +487,11 @@ export class WebhookService {
         );
       }
 
-      await escrowClient.complete(webhookEntity.escrowAddress);
+      await escrowClient.complete(webhookEntity.escrowAddress, {
+        gasPrice: await this.web3Service.calculateGasPrice(
+          webhookEntity.chainId,
+        ),
+      });
 
       await this.webhookRepository.updateOne(
         {

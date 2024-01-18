@@ -28,6 +28,7 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
+    passWithNoTests: true,
   },
   optimizeDeps: {
     include: ['@human-protocol/sdk'],

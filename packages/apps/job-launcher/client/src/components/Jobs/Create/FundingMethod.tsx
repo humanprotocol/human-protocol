@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import fundCryptoImg from '../../../assets/fund-crypto.png';
 import fundFiatImg from '../../../assets/fund-fiat.png';
+import { IS_MAINNET, IS_TESTNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { PayMethod } from '../../../types';
 import WalletModal from '../../WalletModal';
@@ -43,7 +44,7 @@ export const FundingMethod = () => {
         }}
       >
         <Grid container spacing={4}>
-          <Grid item xs={12} md={import.meta.env.VITE_APP_NETWORK === 'mainnet' ? 12 : 6}>
+          <Grid item xs={12} md={IS_MAINNET ? 12 : 6}>
             <Box
               sx={{
                 width: '100%',
@@ -59,16 +60,24 @@ export const FundingMethod = () => {
                 py: 8,
               }}
             >
-              <img src={fundCryptoImg} alt="crypto" style={{ width: 135, height: 'auto' }} />
+              <img
+                src={fundCryptoImg}
+                alt="crypto"
+                style={{ width: 135, height: 'auto' }}
+              />
               <Typography variant="body2" color="primary" mt={8}>
                 Click to connect your wallet
               </Typography>
-              <Button variant="outlined" sx={{ mt: 2.5, minWidth: '200px' }} onClick={handleClickCrypto}>
+              <Button
+                variant="outlined"
+                sx={{ mt: 2.5, minWidth: '200px' }}
+                onClick={handleClickCrypto}
+              >
                 Crypto
               </Button>
             </Box>
           </Grid>
-          {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
+          {IS_TESTNET && (
             <Grid item xs={12} md={6}>
               <Box
                 sx={{
@@ -84,7 +93,11 @@ export const FundingMethod = () => {
                   py: 8,
                 }}
               >
-                <img src={fundFiatImg} alt="fiat" style={{ width: 143, height: 'auto' }} />
+                <img
+                  src={fundFiatImg}
+                  alt="fiat"
+                  style={{ width: 143, height: 'auto' }}
+                />
                 <Typography variant="body2" color="primary" mt={8}>
                   Click to pay with credit card
                 </Typography>
@@ -107,7 +120,11 @@ export const FundingMethod = () => {
                   >
                     Pay with Credit Card
                   </Button>
-                  <Button variant="outlined" sx={{ minWidth: '200px' }} onClick={() => navigate('/profile/top-up')}>
+                  <Button
+                    variant="outlined"
+                    sx={{ minWidth: '200px' }}
+                    onClick={() => navigate('/profile/top-up')}
+                  >
                     Top up your account
                   </Button>
                 </Box>
@@ -116,7 +133,10 @@ export const FundingMethod = () => {
           )}
         </Grid>
       </Box>
-      <WalletModal open={walletModalOpen} onClose={() => setWalletModalOpen(false)} />
+      <WalletModal
+        open={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+      />
     </>
   );
 };

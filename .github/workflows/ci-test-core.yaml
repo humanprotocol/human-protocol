@@ -7,7 +7,6 @@ on:
   pull_request:
     paths:
       - 'packages/core/**'
-      - '!packages/core/mx/**'
   workflow_dispatch:
 
 jobs:

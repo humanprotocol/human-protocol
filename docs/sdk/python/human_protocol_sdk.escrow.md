@@ -8,6 +8,8 @@ obtain information from both the contracts and subgraph.
 * [human_protocol_sdk.escrow.escrow_client module](human_protocol_sdk.escrow.escrow_client.md)
   * [Code Example](human_protocol_sdk.escrow.escrow_client.md#code-example)
   * [Module](human_protocol_sdk.escrow.escrow_client.md#module)
+  * [`EscrowCancel`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowCancel)
+    * [`EscrowCancel.__init__()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowCancel.__init__)
   * [`EscrowClient`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient)
     * [`EscrowClient.__init__()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.__init__)
     * [`EscrowClient.abort()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.abort)

@@ -1,10 +1,22 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  Encryption,
+  EncryptionUtils,
+  StakingClient,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import { S3ConfigType, s3ConfigKey } from '../../common/config';
+import {
+  S3ConfigType,
+  ServerConfigType,
+  s3ConfigKey,
+  serverConfigKey,
+} from '../../common/config';
 import { ISolution } from '../../common/interfaces/job';
 import crypto from 'crypto';
 import { SaveSolutionsDto } from '../job/job.dto';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class StorageService {
@@ -13,6 +25,10 @@ export class StorageService {
   constructor(
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
+    @Inject(serverConfigKey)
+    private serverConfig: ServerConfigType,
+    @Inject(Web3Service)
+    private readonly web3Service: Web3Service,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -32,7 +48,17 @@ export class StorageService {
 
   public async download(url: string): Promise<any> {
     try {
-      return await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      try {
+        return JSON.parse(fileContent);
+      } catch {
+        const encryption = await Encryption.build(
+          this.serverConfig.encryptionPrivateKey,
+          this.serverConfig.encryptionPassphrase,
+        );
+
+        return JSON.parse(await encryption.decrypt(fileContent));
+      }
     } catch {
       return [];
     }
@@ -47,13 +73,27 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const content = JSON.stringify(solutions);
+    const signer = this.web3Service.getSigner(chainId);
+    const stakingClient = await StakingClient.build(signer);
+    const recordingOracle = await stakingClient.getLeader(signer.address);
+    const reputationOracle = await stakingClient.getLeader(
+      this.serverConfig.reputationOracleAddress,
+    );
+    if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
+      throw new BadRequestException('Missing public key');
+    }
+
     try {
+      const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
+        recordingOracle.publicKey,
+        reputationOracle.publicKey,
+      ]);
+
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       await this.minioClient.putObject(
         this.s3Config.bucket,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify(content),
+        content,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

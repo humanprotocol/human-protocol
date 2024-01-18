@@ -7,7 +7,6 @@ export enum ErrorJob {
   NotEnoughFunds = 'Not enough funds',
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
-  WebhookWasNotSent = 'Webhook was not sent',
   ResultNotFound = 'Result not found',
   ResultValidationFailed = 'Result validation failed',
   InvalidRequestType = 'Invalid job type',
@@ -15,6 +14,19 @@ export enum ErrorJob {
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
+  TaskDataNotFound = 'Task data not found',
+  HCaptchaInvalidJobType = 'hCaptcha invalid job type',
+  GroundThuthValidationFailed = 'Ground thuth validation failed',
+}
+
+/**
+ * Represents error messages associated to webhook.
+ */
+export enum ErrorWebhook {
+  NotSent = 'Webhook was not sent',
+  NotFound = 'Webhook not found',
+  UrlNotFound = 'Webhook URL not found',
+  NotCreated = 'Webhook has not been created',
 }
 
 /**
@@ -34,7 +46,7 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
 }
 
@@ -47,7 +59,8 @@ export enum ErrorAuth {
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
-  ApiKeyNotFound = 'API key not found'
+  ApiKeyNotFound = 'API key not found',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
 }
 
 /**
@@ -91,6 +104,11 @@ export enum ErrorBucket {
   NotExist = 'Bucket does not exist',
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
+  InvalidProvider = 'Invalid storage provider',
+  EmptyRegion = 'Region cannot be empty for this storage provider',
+  InvalidRegion = 'Invalid region for the storage provider',
+  EmptyBucket = 'bucketName cannot be empty',
+  FailedToFetchBucketContents = 'Failed to fetch bucket contents',
 }
 
 /**
@@ -122,4 +140,13 @@ export enum ErrorSignature {
  */
 export enum ErrorPostgres {
   NumericFieldOverflow = 'Numeric field overflow',
+}
+
+/**
+ * Represents error messages associated with a cron job.
+ */
+export enum ErrorCronJob {
+  NotCreated = 'Cron job has not been created',
+  NotCompleted = 'Cron job is not completed',
+  Completed = 'Cron job is completed',
 }

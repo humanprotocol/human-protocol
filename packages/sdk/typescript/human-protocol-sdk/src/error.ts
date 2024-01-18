@@ -283,18 +283,6 @@ export class InvalidArgumentError extends EthereumError {
   }
 }
 
-export class OutOfGasError extends EthereumError {
-  constructor(message: string) {
-    super(`Out of gas: ${message}`);
-  }
-}
-
-export class UnpredictableGasLimit extends EthereumError {
-  constructor(message: string) {
-    super(`Unpredictable gas limit: ${message}`);
-  }
-}
-
 export class ReplacementUnderpriced extends EthereumError {
   constructor(message: string) {
     super(`Replacement underpriced: ${message}`);
@@ -334,8 +322,3 @@ export class InvalidEthereumAddressError extends Error {
  * @constant {Error} - The Hash does not match
  */
 export const ErrorInvalidHash = new Error('Invalid hash');
-
-/**
- * @constant {Error} - The Hash does not match
- */
-export const ErrorMissingGasPrice = new Error('Missing gas price');

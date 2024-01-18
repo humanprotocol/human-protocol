@@ -31,8 +31,8 @@ describe('ApiKeyGuard', () => {
 
   describe('canActivate', () => {
     const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email: 'user@example.com',
+      id: 1,
+      email: 'user@example.com',
     };
     it('should return true if API key is valid', async () => {
       const context = {
@@ -46,7 +46,9 @@ describe('ApiKeyGuard', () => {
         }),
       } as ExecutionContext;
 
-      jest.spyOn(authService, 'validateAPIKeyAndGetUser').mockResolvedValue(userEntity as UserEntity);
+      jest
+        .spyOn(authService, 'validateAPIKeyAndGetUser')
+        .mockResolvedValue(userEntity as UserEntity);
 
       expect(await guard.canActivate(context)).toBe(true);
     });
@@ -63,9 +65,13 @@ describe('ApiKeyGuard', () => {
         }),
       } as ExecutionContext;
 
-      jest.spyOn(authService, 'validateAPIKeyAndGetUser').mockRejectedValue(new Error());
+      jest
+        .spyOn(authService, 'validateAPIKeyAndGetUser')
+        .mockRejectedValue(new Error());
 
-      await expect(guard.canActivate(context)).rejects.toThrow('Invalid API Key');
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        'Invalid API Key',
+      );
     });
 
     it('should throw UnauthorizedException for invalid API key format', async () => {
@@ -80,8 +86,9 @@ describe('ApiKeyGuard', () => {
         }),
       } as ExecutionContext;
 
-      await expect(guard.canActivate(context)).rejects.toThrow('Invalid API Key format');
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        'Invalid API Key format',
+      );
     });
-
   });
 });
