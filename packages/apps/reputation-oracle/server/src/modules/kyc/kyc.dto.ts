@@ -12,11 +12,15 @@ export class KYCStatusDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  reason?: string;
+  public reason?: string;
+
+  @ApiProperty({ name: 'step_id' })
+  @IsString()
+  public stepId: string;
 
   @ApiProperty()
   @IsString()
-  service: string;
+  public service: string;
 
   @ApiProperty({ name: 'session_id' })
   @IsString()
@@ -26,5 +30,11 @@ export class KYCStatusDto {
     enum: KYCStatus,
   })
   @IsEnum(KYCStatus)
-  public status: KYCStatus;
+  public state: KYCStatus;
+}
+
+export class KYCUpdateWebhookQueryDto {
+  @ApiProperty()
+  @IsString()
+  public secret: string;
 }

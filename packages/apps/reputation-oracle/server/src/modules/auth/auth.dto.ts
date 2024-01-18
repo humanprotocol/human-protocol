@@ -108,3 +108,15 @@ export class Web3SignInDto {
   @IsString()
   public signature: string;
 }
+
+export class RegisterAddressRequestDto {
+  @ApiProperty()
+  @IsString()
+  public address: string;
+}
+
+export class RegisterAddressResponseDto {
+  @ApiProperty({ name: 'signed_address' })
+  @IsString()
+  public signedAddress: string;
+}

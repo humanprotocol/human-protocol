@@ -49,6 +49,8 @@ export enum ErrorUser {
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
+  IncorrectAddress = 'Incorrect address',
+  KYCNotApproved = 'KYC not approved',
 }
 
 /**

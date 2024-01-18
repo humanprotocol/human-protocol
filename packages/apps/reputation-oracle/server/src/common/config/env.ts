@@ -34,6 +34,7 @@ export const ConfigNames = {
   ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   SYNAPS_API_KEY: 'SYNAPS_API_KEY',
+  SYNAPS_WEBHOOK_SECRET: 'SYNAPS_WEBHOOK_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -80,4 +81,5 @@ export const envValidator = Joi.object({
   PGP_ENCRYPT: Joi.string().default(false),
   // Synaps KYC
   SYNAPS_API_KEY: Joi.string().required(),
+  SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
 });

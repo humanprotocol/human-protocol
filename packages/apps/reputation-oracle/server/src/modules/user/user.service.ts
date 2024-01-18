@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -108,6 +109,22 @@ export class UserService {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
       throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
     }
+  }
+
+  public async updateEvmAddress(
+    userEntity: UserEntity,
+    address: string,
+  ): Promise<UserEntity> {
+    if (userEntity.evmAddress && userEntity.evmAddress !== address) {
+      throw new BadRequestException(ErrorUser.IncorrectAddress);
+    }
+
+    if (userEntity.kycStatus !== KYCStatus.APPROVED) {
+      throw new BadRequestException(ErrorUser.KYCNotApproved);
+    }
+
+    userEntity.evmAddress = address;
+    return userEntity.save();
   }
 
   public async getByAddress(address: string): Promise<UserEntity> {

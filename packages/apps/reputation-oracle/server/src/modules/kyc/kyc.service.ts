@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../user/user.entity';
@@ -13,6 +18,7 @@ export class KYCService {
   private readonly logger = new Logger(KYCService.name);
   private readonly synapsBaseURL: string;
   private readonly synapsApiKey: string;
+  private readonly synapsWebhookSecret: string;
 
   constructor(
     private readonly httpService: HttpService,
@@ -23,6 +29,11 @@ export class KYCService {
 
     this.synapsApiKey = this.configService.get<string>(
       ConfigNames.SYNAPS_API_KEY,
+      '',
+    );
+
+    this.synapsWebhookSecret = this.configService.get<string>(
+      ConfigNames.SYNAPS_WEBHOOK_SECRET,
       '',
     );
   }
@@ -49,6 +60,10 @@ export class KYCService {
   }
 
   public async initSession(userEntity: UserEntity): Promise<KYCSessionDto> {
+    if (userEntity.kycSessionId) {
+      throw new BadRequestException('User already has an active KYC session');
+    }
+
     const { data } = await this.synapsAPIRequest<{ session_id: string }>(
       'POST',
       'session/init',
@@ -64,7 +79,13 @@ export class KYCService {
     };
   }
 
-  public async updateKYCStatus(data: KYCStatusDto): Promise<void> {
-    await this.userService.updateKYCStatus(data.sessionId, data.status);
+  public async updateKYCStatus(
+    secret: string,
+    data: KYCStatusDto,
+  ): Promise<void> {
+    if (secret !== this.synapsWebhookSecret) {
+      throw new UnauthorizedException('Invalid secret');
+    }
+    await this.userService.updateKYCStatus(data.sessionId, data.state);
   }
 }

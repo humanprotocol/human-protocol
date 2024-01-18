@@ -2,6 +2,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -10,12 +11,17 @@ import {
   Controller,
   HttpCode,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import { KYCSessionDto, KYCStatusDto } from './kyc.dto';
+import {
+  KYCSessionDto,
+  KYCStatusDto,
+  KYCUpdateWebhookQueryDto,
+} from './kyc.dto';
 import { KYCService } from './kyc.service';
 
 @ApiTags('KYC')
@@ -46,12 +52,21 @@ export class KYCController {
     summary: 'Update KYC status',
     description: 'Endpoint to update KYC process for the user.',
   })
+  @ApiQuery({
+    name: 'secret',
+    description: 'Secret for the webhook authentication.',
+    type: String,
+    required: true,
+  })
   @ApiBody({ type: KYCStatusDto })
   @ApiResponse({
     status: 200,
     description: 'KYC status updated successfully',
   })
-  public updateKYCStatus(@Body() data: KYCStatusDto): Promise<void> {
-    return this.kycService.updateKYCStatus(data);
+  public updateKYCStatus(
+    @Query() query: KYCUpdateWebhookQueryDto,
+    @Body() data: KYCStatusDto,
+  ): Promise<void> {
+    return this.kycService.updateKYCStatus(query.secret, data);
   }
 }
