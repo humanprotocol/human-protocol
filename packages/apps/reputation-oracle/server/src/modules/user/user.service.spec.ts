@@ -1,12 +1,16 @@
 import { Test } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
 import { ErrorUser } from '../../common/constants/errors';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserEntity } from './user.entity';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { KYCStatus, UserStatus, UserType } from '../../common/enums/user';
 import { getNonce } from '../../common/utils/signature';
 import { MOCK_ADDRESS } from '../../../test/constants';
 
@@ -224,6 +228,120 @@ describe('UserService', () => {
       expect(userRepository.findOne).toHaveBeenCalledWith({
         evmAddress: address,
       });
+    });
+  });
+
+  describe('updateEvmAddress', () => {
+    it("should fail if the user's evm address is different from the input", async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: MOCK_ADDRESS,
+        kycStatus: KYCStatus.APPROVED,
+      };
+
+      await expect(
+        userService.updateEvmAddress(userEntity as UserEntity, '0x123'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("should fail if the user's kyc status is not approved", async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: MOCK_ADDRESS,
+        kycStatus: KYCStatus.NONE,
+      };
+
+      await expect(
+        userService.updateEvmAddress(userEntity as UserEntity, MOCK_ADDRESS),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("should update the user's evm address", async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: MOCK_ADDRESS,
+        kycStatus: KYCStatus.APPROVED,
+      };
+
+      const newAddress = '0x123';
+
+      const newUserEntity = {
+        ...userEntity,
+        evmAddress: newAddress,
+      };
+
+      userEntity.save = jest
+        .fn()
+        .mockResolvedValue(newUserEntity as UserEntity);
+
+      const result = await userService.updateEvmAddress(
+        userEntity as UserEntity,
+        MOCK_ADDRESS,
+      );
+
+      expect(userEntity.save).toHaveBeenCalled();
+      expect(result).toBe(newUserEntity);
+    });
+  });
+
+  describe('startKYC', () => {
+    it('should save the KYC session id to the user entity', async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: MOCK_ADDRESS,
+        kycStatus: KYCStatus.NONE,
+      };
+
+      const newUserEntity = {
+        ...userEntity,
+        kycSessionId: '123',
+      };
+
+      userEntity.save = jest.fn().mockResolvedValue(newUserEntity);
+
+      const result = await userService.startKYC(
+        userEntity as UserEntity,
+        '123',
+      );
+
+      expect(userEntity.save).toHaveBeenCalled();
+      expect(result).toBe(newUserEntity);
+    });
+  });
+
+  describe('updateKYCStatus', () => {
+    it('should throw NotFoundException if the user does not exist', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(
+        userService.updateKYCStatus('123', KYCStatus.APPROVED),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("should update the user's kyc status", async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: MOCK_ADDRESS,
+        kycStatus: KYCStatus.NONE,
+      };
+
+      const newUserEntity = {
+        ...userEntity,
+        kycStatus: KYCStatus.APPROVED,
+      };
+
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValueOnce(userEntity as UserEntity);
+      userEntity.save = jest.fn().mockResolvedValue(newUserEntity);
+
+      const result = await userService.updateKYCStatus(
+        '123',
+        KYCStatus.APPROVED,
+      );
+
+      expect(userEntity.save).toHaveBeenCalled();
+      expect(result).toBe(newUserEntity);
     });
   });
 });
