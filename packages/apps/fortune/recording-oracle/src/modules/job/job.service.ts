@@ -204,9 +204,9 @@ export class JobService {
         this.logger,
         this.serverConfig.reputationOracleWebhookUrl,
         {
-          chain_id: jobSolution.chainId,
-          escrow_address: jobSolution.escrowAddress,
-          event_type: EventType.escrow_recorded,
+          chainId: jobSolution.chainId,
+          escrowAddress: jobSolution.escrowAddress,
+          eventType: EventType.escrow_recorded,
         },
         this.web3Config.web3PrivateKey,
       );
@@ -219,15 +219,15 @@ export class JobService {
         KVStoreKeys.webhookUrl,
       )) as string;
       const eventData: EventData[] = errorSolutions.map((solution) => ({
-        assignee_id: solution.workerAddress,
+        assigneeId: solution.workerAddress,
         reason: solution.error as SolutionError,
       }));
 
       const webhookBody: WebhookBody = {
-        escrow_address: jobSolution.escrowAddress,
-        chain_id: jobSolution.chainId,
-        event_type: EventType.submission_rejected,
-        event_data: eventData,
+        escrowAddress: jobSolution.escrowAddress,
+        chainId: jobSolution.chainId,
+        eventType: EventType.submission_rejected,
+        eventData: eventData,
       };
 
       // Enviar la llamada al webhook una vez con todos los errores

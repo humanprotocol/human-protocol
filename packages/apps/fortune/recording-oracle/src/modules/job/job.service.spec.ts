@@ -32,7 +32,7 @@ import {
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { IManifest, ISolution } from '../../common/interfaces/job';
 import { of } from 'rxjs';
-import { JobSolutionsRequestDto, WebhookBody } from './job.dto';
+import { JobSolutionsRequestDto } from './job.dto';
 import { StorageService } from '../storage/storage.service';
 import {
   EXCHANGE_INVALID_ENDPOINT,
@@ -478,7 +478,7 @@ describe('JobService', () => {
 
       const result = await jobService.processJobSolution(jobSolution);
 
-      const expectedBody: WebhookBody = {
+      const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
         event_type: EventType.escrow_recorded,
@@ -566,7 +566,7 @@ describe('JobService', () => {
 
     const result = await jobService.processJobSolution(jobSolution);
 
-    const expectedBody: WebhookBody = {
+    const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
       event_type: EventType.escrow_recorded,
@@ -640,7 +640,7 @@ describe('JobService', () => {
 
     const result = await jobService.processJobSolution(jobSolution);
 
-    const expectedBody: WebhookBody = {
+    const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
       event_type: EventType.submission_rejected,
@@ -715,7 +715,7 @@ describe('JobService', () => {
       solutionsUrl: MOCK_FILE_URL,
     };
 
-    const expectedBody: WebhookBody = {
+    const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
       event_type: EventType.submission_rejected,

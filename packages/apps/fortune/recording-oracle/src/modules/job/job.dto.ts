@@ -7,18 +7,19 @@ import { SolutionError } from '@/common/enums/job';
 import { EventType } from '@/common/enums/webhook';
 
 export class JobSolutionsRequestDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'escrow_address' })
   @IsString()
   @IsValidEthereumAddress()
   public escrowAddress: string;
 
   @ApiProperty({
     enum: ChainId,
+    name: 'chain_id',
   })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'solutions_url' })
   @IsString()
   @IsUrl()
   public solutionsUrl: string;
@@ -30,13 +31,13 @@ export class SaveSolutionsDto {
 }
 
 export class WebhookBody {
-  escrow_address: string;
-  chain_id: ChainId;
-  event_type: EventType;
-  event_data?: EventData[];
+  escrowAddress: string;
+  chainId: ChainId;
+  eventType: EventType;
+  eventData?: EventData[];
 }
 
 export class EventData {
-  assignee_id: string;
+  assigneeId: string;
   reason?: SolutionError;
 }

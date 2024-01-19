@@ -26,12 +26,8 @@ import { EventType } from '../../common/enums/webhook';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import {
-  EscrowFailedWebhookDto,
-  InvalidJobDto,
-  JobDetailsDto,
-  ManifestDto,
-} from './job.dto';
+import { WebhookDto, JobDetailsDto, ManifestDto } from './job.dto';
+import { CaseConverter } from '../../common/utils/case-converter';
 
 @Injectable()
 export class JobService {
@@ -99,9 +95,8 @@ export class JobService {
   ): Promise<void> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
-      escrowAddress,
-    );
+    const recordingOracleAddress =
+      await escrowClient.getRecordingOracleAddress(escrowAddress);
 
     const stakingClient = await StakingClient.build(signer);
     const leader = await stakingClient.getLeader(recordingOracleAddress);
@@ -125,30 +120,34 @@ export class JobService {
   }
 
   public async processInvalidJobSolution(
-    invalidJobSolution: InvalidJobDto,
+    invalidJobSolution: WebhookDto,
   ): Promise<void> {
-    const existingJobSolutions = await this.storageService.downloadJobSolutions(
-      invalidJobSolution.escrowAddress,
-      invalidJobSolution.chainId,
-    );
+    if (invalidJobSolution.eventData) {
+      const existingJobSolutions =
+        await this.storageService.downloadJobSolutions(
+          invalidJobSolution.escrowAddress,
+          invalidJobSolution.chainId,
+        );
+      for (const invalidSolution of invalidJobSolution.eventData) {
+        const foundSolution = existingJobSolutions.find(
+          (sol) => sol.workerAddress === invalidSolution.assigneeId,
+        );
 
-    const foundSolution = existingJobSolutions.find(
-      (sol) => sol.workerAddress === invalidJobSolution.workerAddress,
-    );
+        if (foundSolution) {
+          foundSolution.error = true;
+        } else {
+          throw new BadRequestException(
+            `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
+          );
+        }
+      }
 
-    if (foundSolution) {
-      foundSolution.error = true;
-    } else {
-      throw new BadRequestException(
-        `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
+      await this.storageService.uploadJobSolutions(
+        invalidJobSolution.escrowAddress,
+        invalidJobSolution.chainId,
+        existingJobSolutions,
       );
     }
-
-    await this.storageService.uploadJobSolutions(
-      invalidJobSolution.escrowAddress,
-      invalidJobSolution.chainId,
-      existingJobSolutions,
-    );
   }
 
   private async addSolution(
@@ -196,11 +195,12 @@ export class JobService {
   }
 
   private async sendWebhook(url: string, body: any): Promise<void> {
+    const snake_case_body = CaseConverter.transformToSnakeCase(body);
     const signedBody = await signMessage(
-      body,
+      snake_case_body,
       this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
     );
-    await this.httpService.post(url, body, {
+    await this.httpService.post(url, snake_case_body, {
       headers: { [HEADER_SIGNATURE_KEY]: signedBody },
     });
   }
@@ -212,9 +212,8 @@ export class JobService {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-    const manifestEncrypted = await StorageClient.downloadFileFromUrl(
-      manifestUrl,
-    );
+    const manifestEncrypted =
+      await StorageClient.downloadFileFromUrl(manifestUrl);
 
     let manifest: ManifestDto | null;
 
@@ -240,9 +239,8 @@ export class JobService {
     if (!manifest) {
       const signer = this.web3Service.getSigner(chainId);
       const escrowClient = await EscrowClient.build(signer);
-      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
-        escrowAddress,
-      );
+      const jobLauncherAddress =
+        await escrowClient.getJobLauncherAddress(escrowAddress);
       const stakingClient = await StakingClient.build(signer);
       const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
       const jobLauncherWebhookUrl = jobLauncher?.webhookUrl;
@@ -251,11 +249,11 @@ export class JobService {
         throw new NotFoundException('Unable to get Job Launcher webhook URL');
       }
 
-      const body: EscrowFailedWebhookDto = {
-        escrow_address: escrowAddress,
-        chain_id: chainId,
-        event_type: EventType.TASK_CREATION_FAILED,
-        reason: 'Unable to get manifest',
+      const body: WebhookDto = {
+        escrowAddress: escrowAddress,
+        chainId: chainId,
+        eventType: EventType.TASK_CREATION_FAILED,
+        eventData: [{ reason: 'Unable to get manifest' }],
       };
       await this.sendWebhook(
         jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,

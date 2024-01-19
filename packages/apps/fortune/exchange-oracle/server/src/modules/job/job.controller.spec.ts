@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
-import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
+import { JobDetailsDto, SolveJobDto, WebhookDto } from './job.dto';
 import { Web3Service } from '../web3/web3.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
@@ -19,6 +19,7 @@ import {
 } from '../../../test/constants';
 import { StorageService } from '../storage/storage.service';
 import { verifySignature } from '../../common/utils/signature';
+import { EventType } from '../../common/enums/webhook';
 
 jest.mock('../../common/utils/signature');
 
@@ -153,10 +154,11 @@ describe('JobController', () => {
 
   describe('invalidJobSolution-solution', () => {
     it('should mark a job solution as invalid', async () => {
-      const solveJobDto: InvalidJobDto = {
+      const solveJobDto: WebhookDto = {
         chainId,
         escrowAddress,
-        workerAddress,
+        eventType: EventType.SUBMISSION_REJECTED,
+        eventData: [{ assigneeId: workerAddress }],
       };
 
       jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();

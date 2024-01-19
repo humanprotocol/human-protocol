@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JobService } from './job.service';
-import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
+import { JobDetailsDto, SolveJobDto, WebhookDto } from './job.dto';
 import { SignatureAuthGuard } from '../../common/guards';
 import { Role } from '../../common/enums/role';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
@@ -20,18 +20,18 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
-  @Get('details/:chainId/:escrowAddress')
+  @Get('details/:chain_id/:escrow_address')
   getDetails(
-    @Param('chainId') chainId: number,
-    @Param('escrowAddress') escrowAddress: string,
+    @Param('chain_id') chainId: number,
+    @Param('escrow_address') escrowAddress: string,
   ): Promise<JobDetailsDto> {
     return this.jobService.getDetails(chainId, escrowAddress);
   }
 
-  @Get('pending/:chainId/:workerAddress')
+  @Get('pending/:chain_id/:worker_address')
   getPendingJobs(
-    @Param('chainId') chainId: number,
-    @Param('workerAddress') workerAddress: string,
+    @Param('chain_id') chainId: number,
+    @Param('worker_address') workerAddress: string,
   ): Promise<any> {
     return this.jobService.getPendingJobs(chainId, workerAddress);
   }
@@ -50,7 +50,7 @@ export class JobController {
   @Patch('invalid-solution')
   invalidJobSolution(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() body: InvalidJobDto,
+    @Body() body: WebhookDto,
   ): Promise<any> {
     return this.jobService.processInvalidJobSolution(body);
   }
