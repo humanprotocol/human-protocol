@@ -25,7 +25,7 @@ contract EscrowTest is CoreUtils {
 
     function setUp() public {
         vm.startPrank(owner);
-        hmToken = new HMToken(1, 'Human Token', 10, 'HMT');
+        hmToken = new HMToken(1000000000, 'Human Token', 18, 'HMT');
         escrow = new Escrow(address(hmToken), launcher, payable(owner), 100, trustedHandlers);
         vm.stopPrank();
     }
@@ -58,7 +58,7 @@ contract EscrowTest is CoreUtils {
         assertEq(address(escrow.token()), address(hmToken), "Escrow token address is not the same as HMToken");
     }
 
-    function testRightLauncherStatus() public {
+    function testRightStatus() public {
         vm.prank(launcher); // should be a trustedHandler (owner also works)
         uint256 status = uint256(escrow.status());
         assertEq(status, uint256(Status.Launched), "Escrow status is not Launched");
@@ -77,23 +77,82 @@ contract EscrowTest is CoreUtils {
         assertEq(escrow.escrowFactory(), owner, "Escrow factory is not the same as owner");
     }
 
-    // FAILURES CASES 
     function testFail_NoTrustedAddress() public {
+        vm.prank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         vm.prank(externalAddress);
         vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
-        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        escrow.abort();
     }
 
     function testFail_AbortingFromReputationOracle() public {
+        vm.prank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         vm.prank(reputationOracle);
         vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
-        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        escrow.abort();
     }
 
     function testFail_AbortingFromRecordingOracle() public {
+        vm.prank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         vm.prank(recordingOracle);
         vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
-        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        escrow.abort();
     }
 
+    function testTransferToOwnerIfAbortedByOwner() public {
+        vm.startPrank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        uint256 ownerInitialBalance = hmToken.balanceOf(owner);
+        hmToken.approve(address(escrow), 100);
+        hmToken.transfer(address(escrow), 100);
+        escrow.abort();
+        uint256 balanceEscrow = hmToken.balanceOf(address(escrow));
+        uint256 balanceOwner = hmToken.balanceOf(owner);
+        assertEq(balanceEscrow, 0);
+        assertEq(balanceOwner, ownerInitialBalance);
+        vm.stopPrank();
+    }
+
+    function testTransferToOwnerIfAbortedTrustedHandler() public {
+        vm.startPrank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        uint256 ownerInitialBalance = hmToken.balanceOf(owner);
+        hmToken.approve(address(escrow), 100);
+        hmToken.transfer(address(escrow), 100);
+        vm.stopPrank();
+        vm.prank(trustedHandlers[0]);
+        escrow.abort();
+        uint256 balanceEscrow = hmToken.balanceOf(address(escrow));
+        uint256 balanceOwner = hmToken.balanceOf(owner);
+        assertEq(balanceEscrow, 0);
+        assertEq(balanceOwner, ownerInitialBalance);
+    }
+
+    function testFail_callerCannotAddTrustedHandler() public {
+        vm.prank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.prank(externalAddress);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        address[] memory newTrustedHandlers = new address[](1);
+        escrow.addTrustedHandlers(newTrustedHandlers);
+        vm.prank(reputationOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.addTrustedHandlers(newTrustedHandlers);
+        vm.prank(recordingOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.addTrustedHandlers(newTrustedHandlers);
+    }
+
+    function testAddTrustedHandler() public {
+        vm.startPrank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        restAccounts[0] = vm.addr(7);
+        restAccounts[1] = vm.addr(8);
+        escrow.addTrustedHandlers(restAccounts);
+        vm.stopPrank();
+        vm.prank(restAccounts[1]);
+        escrow.storeResults(MOCK_URL, MOCK_HASH);
+    }
 }
