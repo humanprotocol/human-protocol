@@ -102,7 +102,7 @@ export const TokenView: FC = () => {
 
   const transferCount = useMemo(() => {
     if (data) {
-      return data.data[0].attributes.dailyHMTData
+      return data[0].data[0].attributes.dailyHMTData
         .slice(0, days)
         .reverse()
         .reduce(
