@@ -37,7 +37,7 @@ contract DeployProxies is Script {
 
         // Deploy Reward Pool
         address rewardPoolImpl = address(new RewardPool());
-        bytes memory rewardPoolData =
+        bytes memory rewardPoolData = 
             abi.encodeWithSelector(RewardPool.initialize.selector, address(hmToken), address(staking), 1);
         address rewardPoolProxy = address(new ERC1967Proxy(rewardPoolImpl, rewardPoolData));
         RewardPool rewardPool = RewardPool(rewardPoolProxy);

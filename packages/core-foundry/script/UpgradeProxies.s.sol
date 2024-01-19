@@ -10,7 +10,7 @@ import "../src/RewardPool.sol";
 contract UpgradeProxiesScript is Script {
     address escrowFactoryProxy = vm.envAddress("ESCROW_FACTORY_PROXY");
     address stakingProxy = vm.envAddress("STAKING_PROXY");
-    address rewardPoolProxy = vm.envAddress("REWARD_POOL");
+    address rewardPoolProxy = vm.envAddress("REWARD_POOL_PROXY");
     address hmtAddress = vm.envAddress("HMT_ADDRESS");
 
     function run() external {
