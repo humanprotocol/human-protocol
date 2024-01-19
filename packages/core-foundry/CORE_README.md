@@ -4,4 +4,8 @@
 ## Overview 
 
 This document contains information about scripts that helps with the deployment, initialization and interaction with
-MetaHuman Governance smart contracts.
+Core Contracts for Human Protocol. 
+
+## Preparation 
+
+Create an .env file based on .env.example. 

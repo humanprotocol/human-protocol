@@ -4,9 +4,10 @@ import "forge-std/test.sol";
 import "../src/Staking.sol";
 import "../src/HMToken.sol";
 import "../src/Escrow.sol";
+import "./CoreUtils.t.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract EscrowTest is Test {
+contract EscrowTest is CoreUtils {
     Escrow public escrow;
     HMToken public hmToken;
 
@@ -21,15 +22,6 @@ contract EscrowTest is Test {
 
     string constant MOCK_URL = "http://google.com/fake";
     string constant MOCK_HASH = "kGKmnj9BRf";
-
-    address owner = vm.addr(0x1);
-    address launcher = vm.addr(0x2);
-    address reputationOracle = vm.addr(0x3);
-    address recordingOracle = vm.addr(0x4);
-    address exchangeOracle = vm.addr(0x5);
-    address externalAddress = vm.addr(0x6);
-    address[] restAccounts = [vm.addr(0x7)];
-    address[] trustedHandlers = [vm.addr(0x12)];
 
     function setUp() public {
         vm.startPrank(owner);
@@ -103,4 +95,5 @@ contract EscrowTest is Test {
         vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
         escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
     }
+
 }
