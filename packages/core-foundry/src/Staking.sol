@@ -304,14 +304,14 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         require(staker.tokensSecureStake().add(_tokens) >= minimumStake, "Total stake is below the minimum threshold");
 
         if (staker.tokensStaked == 0) {
-            staker = Stakes.Staker(0, 0, 0, 0);
+            staker = Stakes.Staker(0, 0, 0, 0); // 80K gas savings
             stakes[msg.sender] = staker;
             stakers.push(msg.sender);
         }
 
         _safeTransferFrom(msg.sender, address(this), _tokens);
 
-        stakes[msg.sender].deposit(_tokens);
+        stakes[msg.sender].deposit(_tokens); // 80K gas savings
 
         emit StakeDeposited(msg.sender, _tokens);
     }

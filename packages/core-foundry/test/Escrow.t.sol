@@ -7,7 +7,16 @@ import "../src/Escrow.sol";
 import "./CoreUtils.t.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract EscrowTest is CoreUtils {
+interface EscrowEvents {
+    event TrustedHandlerAdded(address _handler);
+    event IntermediateStorage(string _url, string _hash);
+    event Pending(string manifest, string hash);
+    event BulkTransfer(uint256 indexed _txId, address[] _recipients, uint256[] _amounts, bool _isPartial);
+    event Cancelled();
+    event Completed();
+}
+
+contract EscrowTest is CoreUtils, EscrowEvents {
     Escrow public escrow;
     HMToken public hmToken;
 
@@ -26,6 +35,7 @@ contract EscrowTest is CoreUtils {
     function setUp() public {
         vm.startPrank(owner);
         hmToken = new HMToken(1000000000, 'Human Token', 18, 'HMT');
+        _initTrustedHandlers();
         escrow = new Escrow(address(hmToken), launcher, payable(owner), 100, trustedHandlers);
         vm.stopPrank();
     }
@@ -145,7 +155,7 @@ contract EscrowTest is CoreUtils {
         escrow.addTrustedHandlers(newTrustedHandlers);
     }
 
-    function testAddTrustedHandler() public {
+    function testAddTrustedHandlersByOwner() public {
         vm.startPrank(owner);
         escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         restAccounts[0] = vm.addr(7);
@@ -155,4 +165,53 @@ contract EscrowTest is CoreUtils {
         vm.prank(restAccounts[1]);
         escrow.storeResults(MOCK_URL, MOCK_HASH);
     }
+
+    function testAddTrustedHandlers() public {
+        vm.startPrank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        _initTrustedHandlers();
+        vm.startPrank(trustedHandlers[0]);
+        escrow.addTrustedHandlers(trustedHandlers);
+    }
+
+    // Store results
+    function testFail_StoreResultWrongCaller() public {
+        // Caller is externalAddress
+        vm.startPrank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.prank(externalAddress);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.storeResults(MOCK_URL, MOCK_HASH);
+
+        // Caller is reputationOracle
+        vm.prank(reputationOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.storeResults(MOCK_URL, MOCK_HASH);
+    }
+
+    // TO DO :
+
+    // function testFail_EscrowStatusPendingOrPartial() public {
+    //     vm.startPrank(owner);
+    //     escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+    //     _initTrustedHandlers();
+    //     escrow.addTrustedHandlers(reputationOracle);
+    //     vm.stopPrank();
+    //     vm.prank(reputationOracle);
+    //     vm.expectRevert(bytes("ESCROW_STATUS_NOT_PENDING_OR_PARTIAL"));
+    //     escrow.storeResults(MOCK_URL, MOCK_HASH);
+    // }
+
+    // Events
+    function testEmitEventIntermediateStorage() public {
+        vm.startPrank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.expectEmit();
+        emit IntermediateStorage(MOCK_URL, MOCK_HASH);
+        //Perform the call 
+        escrow.storeResults(MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+    }
+
+    function 
 }

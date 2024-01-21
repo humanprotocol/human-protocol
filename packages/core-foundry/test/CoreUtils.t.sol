@@ -4,10 +4,7 @@ import "forge-std/test.sol";
 import "../src/Escrow.sol";
 import "../src/HMToken.sol";
 
-
-contract CoreUtils is Test {    
-
-
+contract CoreUtils is Test {
     address owner = vm.addr(1);
     address launcher = vm.addr(2);
     address reputationOracle = vm.addr(3);
@@ -34,8 +31,7 @@ contract CoreUtils is Test {
     function _initTrustedHandlers() internal {
         trustedHandlers[0] = vm.addr(12);
         trustedHandlers[1] = vm.addr(13);
-        // vm.prank(owner);
-        // escrow = new Escrow(address(0), launcher, payable(owner), 100, trustedHandlers);
-        // escrow.addTrustedHandlers(trustedHandlers);
+        restAccounts[0] = vm.addr(14);
+        restAccounts[1] = vm.addr(15);
     }
 }
