@@ -8,7 +8,6 @@ import "./CoreUtils.t.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "../src/utils/SafeMath.sol";
 
-
 interface EscrowEvents {
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(string _url, string _hash);
@@ -19,12 +18,10 @@ interface EscrowEvents {
 }
 
 contract EscrowTest is CoreUtils, EscrowEvents {
-
     using SafeMath for uint256;
 
     Escrow public escrow;
     HMToken public hmToken;
-
 
     enum Status {
         Launched,
@@ -403,14 +400,192 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 7;
         amounts[1] = 200; // 30% (FeePercentages) fee on 200 = 60 (200-60 = 140)
-        uint256 feeReduction = (200*(100-30));
-        uint256 amountToTransfer = feeReduction.div(100); 
+        uint256 feeReduction = (amounts[1].mul(100 - 30));
+        uint256 amountToTransfer = feeReduction.div(100);
         uint256[] memory expectedAmountTransfered = new uint256[](2);
         expectedAmountTransfered[0] = 7;
         expectedAmountTransfered[1] = amountToTransfer;
         vm.expectEmit();
         emit BulkTransfer(0, restAccounts, expectedAmountTransfered, true);
         escrow.bulkPayOut(restAccounts, amounts, MOCK_URL, MOCK_HASH, 0);
+        vm.stopPrank();
+    }
+
+    function testBulkPayoutForRecipients() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 1000);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+
+        address[] memory recipients = new address[](3);
+        recipients[0] = vm.addr(19);
+        recipients[1] = vm.addr(20);
+        recipients[2] = vm.addr(21);
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 10;
+        amounts[1] = 20;
+        amounts[2] = 30;
+
+        uint256 initialBalanceRecipient1 = hmToken.balanceOf(recipients[0]);
+        uint256 initialBalanceRecipient2 = hmToken.balanceOf(recipients[1]);
+        uint256 initialBalanceRecipient3 = hmToken.balanceOf(recipients[2]);
+        uint256 initialBalanceRecordingOracle = hmToken.balanceOf(recordingOracle);
+        uint256 initialBalanceReputationOracle = hmToken.balanceOf(reputationOracle);
+        uint256 initialBalanceExchangeOracle = hmToken.balanceOf(exchangeOracle);
+        vm.stopPrank();
+
+        vm.prank(reputationOracle);
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+        uint256[] memory amountsWithFees = new uint256[](3);
+        amountsWithFees[0] = amounts[0].mul(100 - 30).div(100);
+        amountsWithFees[1] = amounts[1].mul(100 - 30).div(100);
+        amountsWithFees[2] = amounts[2].mul(100 - 30).div(100);
+        uint256 oracleReceivedAmount = (amounts[0] + amounts[1] + amounts[2]).mul(10).div(100); // 10% for each oracle
+
+        uint256 finalBalanceRecipient1 = hmToken.balanceOf(recipients[0]);
+        uint256 finalBalanceRecipient2 = hmToken.balanceOf(recipients[1]);
+        uint256 finalBalanceRecipient3 = hmToken.balanceOf(recipients[2]);
+        uint256 finalBalanceRecordingOracle = hmToken.balanceOf(recordingOracle);
+        uint256 finalBalanceReputationOracle = hmToken.balanceOf(reputationOracle);
+        uint256 finalBalanceExchangeOracle = hmToken.balanceOf(exchangeOracle);
+
+        assertEq(
+            finalBalanceRecipient1 - initialBalanceRecipient1,
+            amountsWithFees[0],
+            "Recipient 1 didn't receive the correct amount"
+        );
+        assertEq(
+            finalBalanceRecipient2 - initialBalanceRecipient2,
+            amountsWithFees[1],
+            "Recipient 2 didn't receive the correct amount"
+        );
+        assertEq(
+            finalBalanceRecipient3 - initialBalanceRecipient3,
+            amountsWithFees[2],
+            "Recipient 3 didn't receive the correct amount"
+        );
+        assertEq(
+            finalBalanceRecordingOracle - initialBalanceRecordingOracle,
+            oracleReceivedAmount,
+            "Recording Oracle didn't receive the correct amount"
+        );
+        assertEq(
+            finalBalanceReputationOracle - initialBalanceReputationOracle,
+            oracleReceivedAmount,
+            "Reputation Oracle didn't receive the correct amount"
+        );
+        assertEq(
+            finalBalanceExchangeOracle - initialBalanceExchangeOracle,
+            oracleReceivedAmount,
+            "Exchange Oracle didn't receive the correct amount"
+        );
+    }
+
+    function testFromSetupToBulkPay() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        address[] memory recipients = new address[](1);
+        recipients[0] = vm.addr(44);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100;
+
+        // Check status of Escrow
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Pending), "Escrow status is not Pending");
+        vm.stopPrank();
+
+        vm.startPrank(reputationOracle);
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+        uint256 statusAfterPayout = uint256(escrow.status());
+        assertEq(statusAfterPayout, uint256(Status.Paid), "Escrow status is not Paid");
+        escrow.complete();
+        uint256 statusAfterComplete = uint256(escrow.status());
+        assertEq(statusAfterComplete, uint256(Status.Complete), "Escrow status is not Complete");
+    }
+
+    function testFromSetupToBulkPayOutMultipleAddresses() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 1000);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        address[] memory recipients = new address[](3);
+        recipients[0] = vm.addr(44);
+        recipients[1] = vm.addr(45);
+        recipients[2] = vm.addr(46);
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 200;
+        amounts[1] = 400; 
+        amounts[2] = 400;
+
+        // Check status of Escrow
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Pending), "Escrow status is not Pending");
+        vm.stopPrank();
+
+        vm.startPrank(reputationOracle);
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+        uint256 statusAfterPayout = uint256(escrow.status());
+        assertEq(statusAfterPayout, uint256(Status.Paid), "Escrow status is not Paid");
+        escrow.complete();
+        uint256 statusAfterComplete = uint256(escrow.status());
+        assertEq(statusAfterComplete, uint256(Status.Complete), "Escrow status is not Complete");
+    }
+
+    function testFail_CompleteValidations() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 1000);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+
+        // External Address 
+        vm.prank(externalAddress);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.complete();
+
+        // Recording Oracle
+        vm.prank(recordingOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.complete();
+
+        // Not right status 
+        vm.prank(owner);
+        vm.expectRevert(bytes("ESCROW_STATUS_NOT_PAID"));
+        escrow.complete();
+    }
+
+    function testCompleteEscrowByLauncher() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        address[] memory recipients = new address[](1);
+        recipients[0] = vm.addr(44);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100;
+
+        // Completed by Launcher 
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+        escrow.complete(); 
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Complete), "Escrow status is Complete");
+        vm.stopPrank();
+    }
+
+    function testCompleteEscrowByTrustedHandler() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        address[] memory recipients = new address[](1);
+        recipients[0] = vm.addr(44);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100;
+
+        // Completed by Trusted Handler
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+        vm.stopPrank();
+        vm.startPrank(trustedHandlers[0]);
+        escrow.complete(); 
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Complete), "Escrow status is Complete");
         vm.stopPrank();
     }
 }
