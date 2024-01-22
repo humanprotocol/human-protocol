@@ -11,6 +11,10 @@ contract CoreUtils is Test {
     address recordingOracle = vm.addr(4);
     address exchangeOracle = vm.addr(5);
     address externalAddress = vm.addr(6);
+    address validator = vm.addr(7);
+    address operator = vm.addr(8);
+    address operator2 = vm.addr(9);
+    address operator3 = vm.addr(10);
     address[] restAccounts = new address[](2);
     address[] trustedHandlers = new address[](2);
 

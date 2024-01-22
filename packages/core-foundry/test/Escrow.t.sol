@@ -514,7 +514,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         recipients[2] = vm.addr(46);
         uint256[] memory amounts = new uint256[](3);
         amounts[0] = 200;
-        amounts[1] = 400; 
+        amounts[1] = 400;
         amounts[2] = 400;
 
         // Check status of Escrow
@@ -537,7 +537,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         vm.stopPrank();
 
-        // External Address 
+        // External Address
         vm.prank(externalAddress);
         vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
         escrow.complete();
@@ -547,7 +547,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
         escrow.complete();
 
-        // Not right status 
+        // Not right status
         vm.prank(owner);
         vm.expectRevert(bytes("ESCROW_STATUS_NOT_PAID"));
         escrow.complete();
@@ -562,9 +562,9 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100;
 
-        // Completed by Launcher 
+        // Completed by Launcher
         escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
-        escrow.complete(); 
+        escrow.complete();
         uint256 status = uint256(escrow.status());
         assertEq(status, uint256(Status.Complete), "Escrow status is Complete");
         vm.stopPrank();
@@ -583,7 +583,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
         vm.stopPrank();
         vm.startPrank(trustedHandlers[0]);
-        escrow.complete(); 
+        escrow.complete();
         uint256 status = uint256(escrow.status());
         assertEq(status, uint256(Status.Complete), "Escrow status is Complete");
         vm.stopPrank();

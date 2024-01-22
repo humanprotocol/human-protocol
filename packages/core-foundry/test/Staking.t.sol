@@ -3,53 +3,64 @@ pragma solidity 0.8.20;
 import "forge-std/test.sol";
 import "../src/Staking.sol";
 import "../src/HMToken.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "../src/RewardPool.sol";
+import "../src/EscrowFactory.sol";
+import "./StakingUtils.t.sol";
 
-contract StakingTest is Test {
+contract StakingTest is StakingUtils {
     Staking public staking;
     HMToken public hmToken;
-
-    address owner = address(0x1);
-    address acc1 = address(0x2);
-
-    // address stakingProxy = vm.envAddress("STAKING_PROXY");
+    RewardPool public rewardPool;
+    EscrowFactory public escrowFactory;
 
     function setUp() public {
-        // vm.deal(owner, 1);
-        vm.startPrank(acc1);
+        vm.startPrank(owner);
         hmToken = new HMToken(1, 'Human Token', 10, 'HMT');
+        // Loop through accounts and approve HMToken for each account
+        for (uint256 i = 0; i < accounts.length; i++) {
+            hmToken.approve(accounts[i], 1000);
+        }
+
+        // Deploy Staking Proxy
+        address stakingImpl = address(new Staking());
+        bytes memory stakingData = abi.encodeWithSelector(Staking.initialize.selector, address(hmToken), 1, 1);
+        address stakingProxy = address(new ERC1967Proxy(stakingImpl, stakingData));
+        staking = Staking(stakingProxy);
+
+        //Deploy Escrow Factory proxy
+        address escrowFactoryImpl = address(new EscrowFactory());
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, stakingImpl);
+        address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
+        escrowFactory = EscrowFactory(escrowFactoryProxy);
+
+        // Deploy Reward Pool
+        address rewardPoolImpl = address(new RewardPool());
+        bytes memory rewardPoolData =
+            abi.encodeWithSelector(RewardPool.initialize.selector, address(hmToken), address(staking), 1);
+        address rewardPoolProxy = address(new ERC1967Proxy(rewardPoolImpl, rewardPoolData));
+        RewardPool rewardPool = RewardPool(rewardPoolProxy);
+
+        // Topup staking address
+        hmToken.transfer(address(staking), 1000);
+
+        // Approve spend HMT tokens staking contract
+        hmToken.approve(address(staking), 1000);
+
         vm.stopPrank();
     }
 
-    // function testTransferHMT() public {
-    //     vm.prank(owner);
-    //     assertEq(hmToken.balanceOf(owner), 1000000000000000000);
-    //     vm.prank(owner);
-    //     hmToken.transfer(acc1, 600);
-    //     uint256 balanceAfterOwner = hmToken.balanceOf(owner);
-    //     assertEq(hmToken.balanceOf(acc1), 600);
-    //     assertEq(hmToken.balanceOf(owner), balanceAfterOwner);
-    // }
+    function testInitValidations() public {
+        assertEq(staking.token(), address(hmToken), "Should set the right token address");
+        assertEq(staking.minimumStake(), 1, "Should set the right minimum stake");
+        assertEq(staking.lockPeriod(), 1, "Should set the right staking period");
+    }
 
-    // function testFunctionSelector() external view returns (bytes4) {
-    //     return bytes4(keccak256("setMinimumStake(uint256)"));
-    // }
-
-    function testStake() public {
-        vm.startPrank(owner);
-        address implementation = address(new Staking());
-        address proxy = address(new ERC1967Proxy(implementation, ""));
-        Staking staking = Staking(proxy);
-        // Data for the delegatecall
-        bytes memory data = abi.encodeWithSelector(Staking.stake.selector, 20000);
-        // Execute delegatecall
-        (bool success, bytes memory returnData) = proxy.delegatecall(data);
-        require(success, "delegatecall to stake failed");
-
-        // Check the stakes mapping
-        bytes memory stakesData = abi.encodeWithSelector(Staking.getStaker.selector, owner);
-        (bool successData, bytes memory returnStakesData) = proxy.delegatecall(stakesData);
-
+    function testFail_StakeValidations() public {
+        vm.startPrank(operator);
+        vm.expectRevert("MUST_BE_POSITIVE_NUMBER");
+        staking.stake(0); 
+        vm.expectRevert("TOTAL_STAKE_BELOW_MINIMUM_THRESHOLD");
+        staking.stake(1);
         vm.stopPrank();
     }
 }
