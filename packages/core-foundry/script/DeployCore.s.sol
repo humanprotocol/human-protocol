@@ -30,7 +30,7 @@ contract DeployCoreScript is Script {
 
         //Deploy Escrow Factory proxy
         address escrowFactoryImpl = address(new EscrowFactory());
-        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, stakingImpl);
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
         address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
         escrowFactory = EscrowFactory(escrowFactoryProxy);
 

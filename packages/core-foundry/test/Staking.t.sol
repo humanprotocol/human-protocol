@@ -42,7 +42,7 @@ contract StakingTest is StakingUtils, StakingEvents {
 
         //Deploy Escrow Factory proxy
         address escrowFactoryImpl = address(new EscrowFactory());
-        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, stakingImpl);
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
         address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
         escrowFactory = EscrowFactory(escrowFactoryProxy);
 
@@ -151,12 +151,13 @@ contract StakingTest is StakingUtils, StakingEvents {
         assertEq(staker.tokensLockedUntil, untilLocked);
     }
 
-    // function testAllocation() public {
-    //     vm.startPrank(operator);
-    //     uint256 amount = 10;
-    //     staking.stake(amount);
-    //     address[] memory trustedHandlers = _initTrustedHandlers();
-    //     escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
-    //     vm.stopPrank();
-    // }
+    function testAllocation() public {
+        vm.startPrank(operator);
+        uint256 amount = 10;
+        staking.stake(amount);
+        Stakes.Staker memory staker = staking.getStaker(operator);
+        address[] memory trustedHandlers = _initTrustedHandlers();
+        escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        vm.stopPrank();
+    }
 }
