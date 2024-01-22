@@ -123,10 +123,10 @@ export class JobService {
     private readonly paymentService: PaymentService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
-    private readonly encryption: Encryption,
     private readonly storageService: StorageService,
     private readonly webhookService: WebhookService,
     private readonly cronJobService: CronJobService,
+    @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
 
   public async createCvatManifest(
@@ -574,10 +574,7 @@ export class JobService {
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      const encription = await Encryption.build(
-        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
-      );
-      manifest = await encription.decrypt(manifest as any);
+      manifest = await this.encryption.decrypt(manifest as any);
     }
 
     if (isValidJSON(manifest)) {
@@ -1310,10 +1307,7 @@ export class JobService {
 
     let manifest;
     if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
-      const encription = await Encryption.build(
-        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
-      );
-      manifestData = await encription.decrypt(manifestData as any);
+      manifestData = await this.encryption.decrypt(manifestData as any);
     }
 
     if (isValidJSON(manifestData)) {
