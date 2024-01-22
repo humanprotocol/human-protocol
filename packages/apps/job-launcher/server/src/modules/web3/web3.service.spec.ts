@@ -5,19 +5,18 @@ import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/constants';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Env } from '../../common/enums/web3';
 import { Web3Service } from './web3.service';
+import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from './../../../test/constants';
 
 describe('Web3Service', () => {
   let mockConfigService: Partial<ConfigService>;
   let web3Service: Web3Service;
-  const privateKey =
-    '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 
   beforeAll(async () => {
     mockConfigService = {
       get: jest.fn((key: string, defaultValue?: any) => {
         switch (key) {
           case 'WEB3_PRIVATE_KEY':
-            return privateKey;
+            return MOCK_PRIVATE_KEY;
           case 'WEB3_ENV':
             return 'testnet';
           default:
@@ -67,6 +66,13 @@ describe('Web3Service', () => {
       mockConfigService.get = jest.fn().mockReturnValue(Web3Env.TESTNET);
       const validChainIds = web3Service.getValidChains();
       expect(validChainIds).toBe(TESTNET_CHAIN_IDS);
+    });
+  });
+
+  describe('getOperatorAddress', () => {
+    it('should get the operator address', () => {
+      const operatorAddress = web3Service.getOperatorAddress();
+      expect(operatorAddress).toBe(MOCK_ADDRESS);
     });
   });
 });
