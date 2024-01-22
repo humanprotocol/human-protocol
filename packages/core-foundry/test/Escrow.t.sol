@@ -6,6 +6,8 @@ import "../src/HMToken.sol";
 import "../src/Escrow.sol";
 import "./CoreUtils.t.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "../src/utils/SafeMath.sol";
+
 
 interface EscrowEvents {
     event TrustedHandlerAdded(address _handler);
@@ -17,8 +19,12 @@ interface EscrowEvents {
 }
 
 contract EscrowTest is CoreUtils, EscrowEvents {
+
+    using SafeMath for uint256;
+
     Escrow public escrow;
     HMToken public hmToken;
+
 
     enum Status {
         Launched,
@@ -388,7 +394,23 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
     }
 
-    // function testEmitOnBulkTransfer() public {
-
-    // }
+    function testEmitOnBulkTransfer() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 1000);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        restAccounts[0] = vm.addr(44);
+        restAccounts[1] = vm.addr(45);
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 7;
+        amounts[1] = 200; // 30% (FeePercentages) fee on 200 = 60 (200-60 = 140)
+        uint256 feeReduction = (200*(100-30));
+        uint256 amountToTransfer = feeReduction.div(100); 
+        uint256[] memory expectedAmountTransfered = new uint256[](2);
+        expectedAmountTransfered[0] = 7;
+        expectedAmountTransfered[1] = amountToTransfer;
+        vm.expectEmit();
+        emit BulkTransfer(0, restAccounts, expectedAmountTransfered, true);
+        escrow.bulkPayOut(restAccounts, amounts, MOCK_URL, MOCK_HASH, 0);
+        vm.stopPrank();
+    }
 }
