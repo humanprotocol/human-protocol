@@ -51,6 +51,8 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         assertEq(escrow.exchangeOracleFeePercentage(), 10, "Exchange oracle fee is not the same");
         assertEq(escrow.manifestUrl(), MOCK_URL, "URL is not the same");
         assertEq(escrow.manifestHash(), MOCK_HASH, "Hash is not the same");
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Pending), "Escrow status is not Pending");
     }
 
     function testFundEscrow() public {
@@ -208,10 +210,185 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         vm.expectEmit();
         emit IntermediateStorage(MOCK_URL, MOCK_HASH);
-        //Perform the call 
+        //Perform the call
         escrow.storeResults(MOCK_URL, MOCK_HASH);
         vm.stopPrank();
     }
 
-    function 
+    function testStoreResults() public {
+        vm.prank(owner);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        // Recording Oracle stores results
+        vm.startPrank(recordingOracle);
+        vm.expectEmit();
+        emit IntermediateStorage(MOCK_URL, MOCK_HASH);
+        escrow.storeResults(MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        // Trusted Handler stores results
+        vm.startPrank(owner);
+        _initTrustedHandlers();
+        escrow.addTrustedHandlers(trustedHandlers);
+        vm.stopPrank();
+        vm.startPrank(trustedHandlers[0]);
+        vm.expectEmit();
+        emit IntermediateStorage(MOCK_URL, MOCK_HASH);
+        escrow.storeResults(MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+    }
+
+    function testFail_SetupEscrowWrongCaller() public {
+        vm.prank(externalAddress);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+    }
+
+    function testFail_InvalidReputationOracle() public {
+        vm.prank(owner);
+        vm.expectRevert(bytes("INVALID_REPUTATION_ORACLE_ADDRESS"));
+        escrow.setup(address(0), recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+    }
+
+    function testFail_InvalidExchangeOracle() public {
+        vm.prank(owner);
+        vm.expectRevert(bytes("INVALID_EXCHANGE_ORACLE_ADDRESS"));
+        escrow.setup(reputationOracle, recordingOracle, address(0), 10, 10, 10, MOCK_URL, MOCK_HASH);
+    }
+
+    function testFail_FeePercentageOutOfBound() public {
+        vm.prank(owner);
+        vm.expectRevert(bytes("FEE_PERCENTAGE_OUT_OF_BOUND"));
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 40, 40, 40, MOCK_URL, MOCK_HASH);
+    }
+
+    function testEmitEventOnPending() public {
+        vm.startPrank(owner);
+        vm.expectEmit();
+        emit Pending(MOCK_URL, MOCK_HASH);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+    }
+
+    function setUpEscrowByTrustHandlers() public {
+        vm.startPrank(owner);
+        _initTrustedHandlers();
+        escrow.addTrustedHandlers(trustedHandlers);
+        vm.stopPrank();
+        vm.startPrank(trustedHandlers[0]);
+        vm.expectEmit();
+        emit Pending(MOCK_URL, MOCK_HASH);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        assertEq(escrow.reputationOracle(), reputationOracle, "Reputation oracle address is not the same");
+        assertEq(escrow.recordingOracle(), recordingOracle, "Recording oracle address is not the same");
+        assertEq(escrow.exchangeOracle(), exchangeOracle, "Exchange oracle address is not the same");
+        assertEq(escrow.manifestUrl(), MOCK_URL, "URL is not the same");
+        assertEq(escrow.manifestHash(), MOCK_HASH, "Hash is not the same");
+        vm.stopPrank();
+    }
+
+    function testFail_CancelWithInvalidCaller() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        vm.prank(externalAddress);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.cancel();
+        vm.prank(reputationOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.cancel();
+        vm.prank(recordingOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.cancel();
+    }
+
+    function testCancelEscrowByOwner() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        vm.prank(owner);
+        escrow.cancel();
+        uint256 balanceEscrow = hmToken.balanceOf(address(escrow));
+        assertEq(balanceEscrow, 0);
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Cancelled));
+    }
+
+    function testCancelEscrowByTrustedHandler() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        vm.startPrank(trustedHandlers[0]);
+        escrow.cancel();
+        uint256 balanceEscrow = hmToken.balanceOf(address(escrow));
+        assertEq(balanceEscrow, 0);
+        uint256 status = uint256(escrow.status());
+        assertEq(status, uint256(Status.Cancelled));
+    }
+
+    function testFail_BulkPayoutByNotTrustedCaller() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 10;
+        _initTrustedHandlers();
+        vm.prank(externalAddress);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.bulkPayOut(restAccounts, amounts, MOCK_URL, MOCK_HASH, 0);
+        vm.prank(recordingOracle);
+        vm.expectRevert(bytes("ADDRESS_CALLING_NOT_TRUSTED"));
+        escrow.bulkPayOut(restAccounts, amounts, MOCK_URL, MOCK_HASH, 0);
+    }
+
+    function testFail_RecipientsMoreThanValues() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        vm.prank(reputationOracle);
+        address[] memory recipients;
+        recipients[0] = vm.addr(7);
+        recipients[1] = vm.addr(8);
+        recipients[2] = vm.addr(9);
+        uint256[] memory amounts;
+        amounts[0] = 10;
+        amounts[1] = 20;
+        vm.expectRevert(bytes("RECIPIENTS AND VALUES DO NOT MATCH"));
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+    }
+
+    function testFail_ValuesMoreThanRecipients() public {
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.stopPrank();
+        vm.prank(reputationOracle);
+        address[] memory recipients;
+        recipients[0] = vm.addr(7);
+        recipients[1] = vm.addr(8);
+        uint256[] memory amounts;
+        amounts[0] = 10;
+        amounts[1] = 20;
+        amounts[2] = 30;
+        vm.expectRevert(bytes("RECIPIENTS AND VALUES DO NOT MATCH"));
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+    }
+
+    function testFail_TooManyRecipients() public {
+        // Should fail with too many recipients
+        vm.startPrank(owner);
+        hmToken.transfer(address(escrow), 100);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        vm.prank(reputationOracle);
+        // Loops through 100 recipients
+        (address[] memory recipients, uint256[] memory amounts) = _initRecipientsAndAmounts(100);
+        vm.expectRevert(bytes("TOO_MANY_RECIPIENTS"));
+        escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
+    }
+
+    // function testEmitOnBulkTransfer() public {
+
+    // }
 }

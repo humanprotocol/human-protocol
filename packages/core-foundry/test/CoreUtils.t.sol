@@ -28,10 +28,25 @@ contract CoreUtils is Test {
         vm.deal(trustedHandlers[0], 100 ether);
     }
 
+    /**
+     * @dev init Trusted Handlers addresses
+     */
     function _initTrustedHandlers() internal {
         trustedHandlers[0] = vm.addr(12);
         trustedHandlers[1] = vm.addr(13);
-        restAccounts[0] = vm.addr(14);
-        restAccounts[1] = vm.addr(15);
+    }
+
+    /**
+     * @dev init a large number of recipients and amounts
+     */
+    function _initRecipientsAndAmounts(uint16 _maxRecipients) internal returns (address[] memory, uint256[] memory) {
+        address[] memory recipients = new address[](_maxRecipients);
+        uint256[] memory amounts = new uint256[](_maxRecipients);
+
+        for (uint256 i = 0; i < _maxRecipients; i++) {
+            recipients[i] = vm.addr(i);
+            amounts[i] = 1;
+        }
+        return (recipients, amounts);
     }
 }
