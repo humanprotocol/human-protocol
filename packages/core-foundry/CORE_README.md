@@ -3,7 +3,7 @@
 ## Overview 
 
 This document contains information about scripts that helps with the deployment, initialization and interaction with
-Core Contracts for Human Protocol. 
+Core Contracts for Human Protocol using [Foundry](https://book.getfoundry.sh/)
 
 ## Upgrading Contract Using Proxies  
 -Create an .env file based on .env.example 
