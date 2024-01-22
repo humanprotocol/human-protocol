@@ -28,7 +28,6 @@ import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { EventData, JobSolutionsRequestDto, WebhookBody } from './job.dto';
-import { EXCHANGE_INVALID_ENDPOINT } from '../../common/constants';
 import { EventType } from '@/common/enums/webhook';
 
 @Injectable()
@@ -234,7 +233,7 @@ export class JobService {
       await sendWebhook(
         this.httpService,
         this.logger,
-        exchangeOracleURL + EXCHANGE_INVALID_ENDPOINT,
+        exchangeOracleURL,
         webhookBody,
         this.web3Config.web3PrivateKey,
       );

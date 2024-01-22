@@ -119,6 +119,25 @@ export class JobService {
     });
   }
 
+  public async handleWebhook(wehbook: WebhookDto): Promise<void> {
+    switch (wehbook.eventType) {
+      case EventType.ESCROW_CREATED:
+        break;
+
+      case EventType.ESCROW_CANCELED:
+        break;
+
+      case EventType.SUBMISSION_REJECTED:
+        await this.processInvalidJobSolution(wehbook);
+        break;
+
+      default:
+        throw new BadRequestException(
+          `Invalid webhook event type: ${wehbook.eventType}`,
+        );
+    }
+  }
+
   public async processInvalidJobSolution(
     invalidJobSolution: WebhookDto,
   ): Promise<void> {

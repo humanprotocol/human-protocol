@@ -34,10 +34,7 @@ import { IManifest, ISolution } from '../../common/interfaces/job';
 import { of } from 'rxjs';
 import { JobSolutionsRequestDto } from './job.dto';
 import { StorageService } from '../storage/storage.service';
-import {
-  EXCHANGE_INVALID_ENDPOINT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
 import { EventType } from '@/common/enums/webhook';
 
@@ -653,7 +650,7 @@ describe('JobService', () => {
     };
     expect(result).toEqual('Solution are recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
-      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + EXCHANGE_INVALID_ENDPOINT,
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
       {
         headers: {
@@ -729,7 +726,7 @@ describe('JobService', () => {
     const result = await jobService.processJobSolution(jobSolution);
     expect(result).toEqual('Solution are recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
-      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + EXCHANGE_INVALID_ENDPOINT,
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
       {
         headers: {

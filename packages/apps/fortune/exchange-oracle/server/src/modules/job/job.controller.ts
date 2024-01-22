@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   UseGuards,
   Headers,
@@ -46,12 +45,14 @@ export class JobController {
     );
   }
 
-  @UseGuards(new SignatureAuthGuard([Role.Recording, Role.Reputation]))
-  @Patch('invalid-solution')
-  invalidJobSolution(
+  @UseGuards(
+    new SignatureAuthGuard([Role.Recording, Role.Reputation, Role.JobLaucher]),
+  )
+  @Post('webhook')
+  processWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,
   ): Promise<any> {
-    return this.jobService.processInvalidJobSolution(body);
+    return this.jobService.handleWebhook(body);
   }
 }

@@ -152,24 +152,72 @@ describe('JobController', () => {
     });
   });
 
-  describe('invalidJobSolution-solution', () => {
+  describe('processWebhook', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+    it('should handle an incoming escrow created webhook', async () => {
+      const webhook: WebhookDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_CREATED,
+      };
+      jest.spyOn(jobService, 'handleWebhook');
+
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
+      await jobController.processWebhook(MOCK_SIGNATURE, webhook);
+
+      expect(jobService.handleWebhook).toHaveBeenCalledWith(webhook);
+    });
+
+    it('should handle an incoming escrow canceled webhook', async () => {
+      const webhook: WebhookDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_CANCELED,
+      };
+      jest.spyOn(jobService, 'handleWebhook');
+
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
+      await jobController.processWebhook(MOCK_SIGNATURE, webhook);
+
+      expect(jobService.handleWebhook).toHaveBeenCalledWith(webhook);
+    });
+
     it('should mark a job solution as invalid', async () => {
-      const solveJobDto: WebhookDto = {
+      const webhook: WebhookDto = {
         chainId,
         escrowAddress,
         eventType: EventType.SUBMISSION_REJECTED,
         eventData: [{ assigneeId: workerAddress }],
       };
 
-      jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
+      jest.spyOn(jobService, 'handleWebhook').mockResolvedValue();
 
       (verifySignature as jest.Mock).mockReturnValue(true);
 
-      await jobController.invalidJobSolution(MOCK_SIGNATURE, solveJobDto);
+      await jobController.processWebhook(MOCK_SIGNATURE, webhook);
 
-      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
-        solveJobDto,
-      );
+      expect(jobService.handleWebhook).toHaveBeenCalledWith(webhook);
+    });
+
+    it('should return an error when the event type is invalid', async () => {
+      const webhook: WebhookDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.TASK_CREATION_FAILED,
+      };
+      jest.spyOn(jobService, 'handleWebhook');
+
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
+      await expect(
+        jobController.processWebhook(MOCK_SIGNATURE, webhook),
+      ).rejects.toThrow('Invalid webhook event type: task_creation_failed');
+
+      expect(jobService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
   });
 });
