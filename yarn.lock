@@ -4733,7 +4733,7 @@
     "@rollup/pluginutils" "^5.0.1"
     eslint "^8.24.0"
 
-"@rollup/plugin-inject@^5.0.3":
+"@rollup/plugin-inject@^5.0.5":
   version "5.0.5"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-inject/-/plugin-inject-5.0.5.tgz#616f3a73fe075765f91c5bec90176608bed277a3"
   integrity sha512-2+DEJbNBoPROPkgTDNe8/1YXWcqxbN5DTjASVIOx8HS+pITXushyNiBV56RB08zuptzz8gT3YfkqriTBVycepg==
@@ -23955,20 +23955,12 @@ vite-plugin-chrome-extension@^0.0.7:
     vite "^2.2.0"
     webextension-polyfill "^0.6.0"
 
-vite-plugin-node-polyfills@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/vite-plugin-node-polyfills/-/vite-plugin-node-polyfills-0.7.0.tgz#004f400cfae791338c6f0a46d4ddf559c331c899"
-  integrity sha512-DKBSGDOx3R8pUIsQFRZAWNYp0vIffJOT0NkuByX4WIQq80nJ2eamAph5T9zG91liO1Fyl1lo7/Onh6xoQO52XQ==
+vite-plugin-node-polyfills@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/vite-plugin-node-polyfills/-/vite-plugin-node-polyfills-0.19.0.tgz#54338c47d29fa4c3a19fcd369001331290094c81"
+  integrity sha512-AhdVxAmVnd1doUlIRGUGV6ZRPfB9BvIwDF10oCOmL742IsvsFIAV4tSMxSfu5e0Px0QeJLgWVOSbtHIvblzqMw==
   dependencies:
-    "@rollup/plugin-inject" "^5.0.3"
-    node-stdlib-browser "^1.2.0"
-
-vite-plugin-node-polyfills@^0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/vite-plugin-node-polyfills/-/vite-plugin-node-polyfills-0.9.0.tgz#181d096c43e22cae219c6c2434a204b665044de0"
-  integrity sha512-+i+WPUuIBhJy+ODfxx6S6FTl28URCxUszbl/IL4GwrZvbqqY/8VDIp+zpjMS8Us/a7GwN4Iaqr/fVIBtkNQojQ==
-  dependencies:
-    "@rollup/plugin-inject" "^5.0.3"
+    "@rollup/plugin-inject" "^5.0.5"
     node-stdlib-browser "^1.2.0"
 
 vite@4.4.9:
