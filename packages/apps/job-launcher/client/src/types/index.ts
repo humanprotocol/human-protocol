@@ -8,7 +8,6 @@ export type SignInRequest = {
 export type SignUpRequest = {
   email: string;
   password: string;
-  confirm: string;
 };
 
 export type SignUpResponse = {
@@ -18,7 +17,6 @@ export type SignUpResponse = {
 
 export type ResetPasswordRequest = {
   password: string;
-  confirm: string;
   token: string;
 };
 
