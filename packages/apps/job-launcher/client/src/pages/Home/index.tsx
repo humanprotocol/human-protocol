@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Link } from '@mui/material';
+import { Box, Button, Link } from '@mui/material';
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { SignInForm } from '../../components/Auth/SignInForm';
@@ -9,7 +9,6 @@ import { useAppSelector } from '../../state';
 export default function Home() {
   const [tabValue, setTabValue] = useState(0);
   const [mode, setMode] = useState<string>();
-  const [alertMsg, setAlertMsg] = useState('');
   const { isAuthed } = useAppSelector((state) => state.auth);
 
   if (isAuthed) {
@@ -38,7 +37,6 @@ export default function Home() {
         onChange={(e, newValue) => {
           setTabValue(newValue);
           setMode(undefined);
-          setAlertMsg('');
         }}
         variant="fullWidth"
       >
@@ -59,19 +57,10 @@ export default function Home() {
         }}
         py={8}
       >
-        {alertMsg && alertMsg.length && (
-          <Alert
-            severity="error"
-            onClose={() => setAlertMsg('')}
-            sx={{ mb: 2, maxWidth: '303px', width: '100%' }}
-          >
-            {alertMsg}
-          </Alert>
-        )}
         {tabValue === 0 && (
           <>
             {mode === 'sign_in' ? (
-              <SignInForm onError={(message: string) => setAlertMsg(message)} />
+              <SignInForm />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button
@@ -98,10 +87,7 @@ export default function Home() {
         {tabValue === 1 && (
           <>
             {mode === 'sign_up' ? (
-              <SignUpForm
-                onFinish={handleSignUp}
-                onError={(message: string) => setAlertMsg(message)}
-              />
+              <SignUpForm onFinish={handleSignUp} />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button

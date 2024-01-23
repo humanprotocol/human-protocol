@@ -1,8 +1,6 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
 import {
-  Alert,
-  AlertTitle,
   Box,
   Button,
   FormHelperText,
@@ -13,16 +11,17 @@ import {
 } from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
+import { useSnackbar } from '../../providers/SnackProvider';
 import * as authService from '../../services/auth';
 import { Password } from './Password';
 import { RegisterValidationSchema } from './schema';
 
-export const SignUpForm = ({ onFinish, onError }) => {
+export const SignUpForm = ({ onFinish }) => {
   const captchaRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [email, setEmail] = useState('');
-  const [alertMsg, setAlertMsg] = useState('');
+  const { showError } = useSnackbar();
 
   const handleRegister = async ({ email, password, confirm }) => {
     setIsLoading(true);
@@ -31,7 +30,7 @@ export const SignUpForm = ({ onFinish, onError }) => {
       setEmail(email);
       setIsSuccess(true);
     } catch (err) {
-      onError(err?.response?.data?.message ?? err.message);
+      showError(err);
     }
     setIsLoading(false);
   };
@@ -42,7 +41,7 @@ export const SignUpForm = ({ onFinish, onError }) => {
       await authService.resendEmailVerification(email);
       onFinish();
     } catch (err) {
-      setAlertMsg(err?.response?.data?.message ?? err?.message);
+      showError(err);
     }
     setIsLoading(false);
   };
@@ -57,16 +56,6 @@ export const SignUpForm = ({ onFinish, onError }) => {
   if (isSuccess) {
     return (
       <Box sx={{ maxWidth: '368px', mx: 'auto' }}>
-        {alertMsg && alertMsg.length && (
-          <Alert
-            severity="error"
-            onClose={() => setAlertMsg('')}
-            sx={{ my: 2 }}
-          >
-            <AlertTitle>Send email failed!</AlertTitle>
-            {alertMsg}
-          </Alert>
-        )}
         <Typography variant="h4" fontWeight={600}>
           Verify email
         </Typography>

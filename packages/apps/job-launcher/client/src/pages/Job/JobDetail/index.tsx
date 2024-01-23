@@ -27,7 +27,7 @@ export default function JobDetail() {
   const { jobId } = useParams();
   const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
   const [isCancelling, setIsCancelling] = useState(false);
-  const { openSnackbar } = useSnackbar();
+  const { openSnackbar, showError } = useSnackbar();
 
   const handleCancel = async () => {
     setIsCancelling(true);
@@ -42,10 +42,7 @@ export default function JobDetail() {
       }
       openSnackbar('Job canceled', 'success');
     } catch (err: any) {
-      openSnackbar(
-        err?.response?.data?.message ?? 'Job cancellation failed.',
-        'error',
-      );
+      showError(err);
     }
     setIsCancelling(false);
   };

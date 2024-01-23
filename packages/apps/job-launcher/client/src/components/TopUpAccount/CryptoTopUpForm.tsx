@@ -32,7 +32,7 @@ export const CryptoTopUpForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { data: signer } = useSigner();
   const { data: rate } = useTokenRate('hmt', 'usd');
-  const { openSnackbar } = useSnackbar();
+  const { showError } = useSnackbar();
 
   const totalAmount = useMemo(() => {
     if (!amount) return 0;
@@ -68,7 +68,7 @@ export const CryptoTopUpForm = () => {
 
       setIsSuccess(true);
     } catch (err: any) {
-      openSnackbar(err?.response?.data?.message ?? err?.message, 'error');
+      showError(err);
       setIsSuccess(false);
     }
 
