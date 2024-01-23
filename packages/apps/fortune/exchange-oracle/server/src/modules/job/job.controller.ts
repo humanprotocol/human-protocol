@@ -1,18 +1,7 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-  Headers,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { JobDetailsDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
-import { JobDetailsDto, SolveJobDto, WebhookDto } from './job.dto';
-import { SignatureAuthGuard } from '../../common/guards';
-import { Role } from '../../common/enums/role';
-import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 
 @ApiTags('Job')
 @Controller('job')
@@ -43,16 +32,5 @@ export class JobController {
       body.workerAddress,
       body.solution,
     );
-  }
-
-  @UseGuards(
-    new SignatureAuthGuard([Role.Recording, Role.Reputation, Role.JobLaucher]),
-  )
-  @Post('webhook')
-  processWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() body: WebhookDto,
-  ): Promise<any> {
-    return this.jobService.handleWebhook(body);
   }
 }

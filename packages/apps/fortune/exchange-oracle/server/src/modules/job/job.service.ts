@@ -26,8 +26,9 @@ import { EventType } from '../../common/enums/webhook';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { WebhookDto, JobDetailsDto, ManifestDto } from './job.dto';
+import { JobDetailsDto, ManifestDto } from './job.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
+import { WebhookDto } from '../webhook/webhook.dto';
 
 @Injectable()
 export class JobService {
@@ -117,25 +118,6 @@ export class JobService {
       chainId: chainId,
       solutionsUrl: solutionsUrl,
     });
-  }
-
-  public async handleWebhook(wehbook: WebhookDto): Promise<void> {
-    switch (wehbook.eventType) {
-      case EventType.ESCROW_CREATED:
-        break;
-
-      case EventType.ESCROW_CANCELED:
-        break;
-
-      case EventType.SUBMISSION_REJECTED:
-        await this.processInvalidJobSolution(wehbook);
-        break;
-
-      default:
-        throw new BadRequestException(
-          `Invalid webhook event type: ${wehbook.eventType}`,
-        );
-    }
   }
 
   public async processInvalidJobSolution(

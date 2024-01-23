@@ -30,7 +30,7 @@ import {
 import { signMessage } from '../../common/utils/signature';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { StorageService } from '../storage/storage.service';
-import { ManifestDto, WebhookDto } from './job.dto';
+import { ManifestDto } from './job.dto';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -566,59 +566,6 @@ describe('JobService', () => {
           eventData: [{ assigneeId: workerAddress }],
         }),
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
-    });
-  });
-  describe('handleWebhook', () => {
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-    it('should handle an incoming escrow created webhook', async () => {
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.ESCROW_CREATED,
-      };
-
-      expect(await jobService.handleWebhook(webhook)).toBe(undefined);
-    });
-
-    it('should handle an incoming escrow canceled webhook', async () => {
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.ESCROW_CANCELED,
-      };
-
-      expect(await jobService.handleWebhook(webhook)).toBe(undefined);
-    });
-
-    it('should mark a job solution as invalid', async () => {
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.SUBMISSION_REJECTED,
-        eventData: [{ assigneeId: workerAddress }],
-      };
-
-      jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
-
-      await jobService.handleWebhook(webhook);
-
-      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
-        webhook,
-      );
-    });
-
-    it('should return an error when the event type is invalid', async () => {
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.TASK_CREATION_FAILED,
-      };
-
-      await expect(jobService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: task_creation_failed',
-      );
     });
   });
 });
