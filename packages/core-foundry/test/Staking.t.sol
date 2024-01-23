@@ -5,7 +5,13 @@ import "../src/Staking.sol";
 import "../src/HMToken.sol";
 import "../src/RewardPool.sol";
 import "../src/EscrowFactory.sol";
-import "./StakingUtils.t.sol";
+import "../src/Escrow.sol";
+import "./CoreUtils2.t.sol";
+
+interface EscrowFactoryEvents {
+    event Launched(address token, address escrow);
+    event LaunchedV2(address token, address escrow, string jobRequesterId);
+}
 
 interface StakingEvents {
     event StakeDeposited(address indexed staker, uint256 tokens);
@@ -19,11 +25,12 @@ interface StakingEvents {
     event SetRewardPool(address indexed rewardPool);
 }
 
-contract StakingTest is StakingUtils, StakingEvents {
+contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
     Staking public staking;
     HMToken public hmToken;
     RewardPool public rewardPool;
     EscrowFactory public escrowFactory;
+    Escrow public escrow;
 
     function setUp() public {
         vm.startPrank(owner);
@@ -151,13 +158,38 @@ contract StakingTest is StakingUtils, StakingEvents {
         assertEq(staker.tokensLockedUntil, untilLocked);
     }
 
-    function testAllocation() public {
+    function testFail_WithdrawalWitoutAllocation() public {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        Stakes.Staker memory staker = staking.getStaker(operator);
         address[] memory trustedHandlers = _initTrustedHandlers();
         escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
-        vm.stopPrank();
+        vm.expectRevert("STAKE_HAS_NO_AVAILABLE_TOKENS_FOR_WITHDRAWAL");
+        staking.withdraw();
+    }
+
+    // function testEmitEventOnStakeWithdrawal() public {
+    //     vm.startPrank(operator);
+    //     uint256 amount = 10;
+    //     uint256 lockedTokens = 5;
+    //     staking.stake(amount);
+    //     address[] memory trustedHandlers = _initTrustedHandlers();
+    //     escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+    //     staking.unstake(lockedTokens);
+    //     vm.expectEmit();
+    //     emit StakeWithdrawn(operator, lockedTokens);
+    //     staking.withdraw();
+    //     vm.stopPrank();
+    // }
+
+    function testDecreaseAmountOfTokensStaked() public {
+        vm.startPrank(operator);
+        uint256 amount = 10;
+        uint256 lockedTokens = 5;
+        staking.stake(amount);
+        staking.unstake(lockedTokens);
+        Stakes.Staker memory staker = staking.getStaker(operator);
+        uint256 latestBlockNumber = vm.getBlockNumber();
+        console.log(latestBlockNumber);
     }
 }
