@@ -442,9 +442,7 @@ export class JobService {
       fundAmount = dto.fundAmount;
     }
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const feePercentage = this.configService.get<number>(
-      ConfigNames.JOB_LAUNCHER_FEE,
-    )!;
+    const feePercentage = Number(await this.getOracleFee(chainId));
     const fee = mul(div(feePercentage, 100), fundAmount);
     const usdTotalAmount = add(fundAmount, fee);
 
@@ -593,16 +591,16 @@ export class JobService {
       reputationOracle: oracleAddresses.recordingOracle,
       exchangeOracle: oracleAddresses.exchangeOracle,
       recordingOracleFee: await this.getOracleFee(
-        oracleAddresses.recordingOracle,
         jobEntity.chainId,
+        oracleAddresses.recordingOracle,
       ),
       reputationOracleFee: await this.getOracleFee(
-        oracleAddresses.reputationOracle,
         jobEntity.chainId,
+        oracleAddresses.reputationOracle,
       ),
       exchangeOracleFee: await this.getOracleFee(
-        oracleAddresses.exchangeOracle,
         jobEntity.chainId,
+        oracleAddresses.exchangeOracle,
       ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
@@ -1460,14 +1458,17 @@ export class JobService {
   }
 
   private async getOracleFee(
-    oracleAddress: string,
     chainId: ChainId,
+    oracleAddress?: string,
   ): Promise<bigint> {
     const signer = this.web3Service.getSigner(chainId);
 
     const kvStoreClient = await KVStoreClient.build(signer);
 
-    const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
+    const feeValue = await kvStoreClient.get(
+      oracleAddress || signer.address,
+      KVStoreKeys.fee,
+    );
 
     return BigInt(feeValue ? feeValue : 1);
   }
