@@ -7,6 +7,7 @@ import "../src/Escrow.sol";
 import "../src/EscrowFactory.sol";
 import "../src/RewardPool.sol";
 import "./CoreUtils2.t.sol";
+import "../src/utils/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 interface RewardPoolEvents {
@@ -14,6 +15,8 @@ interface RewardPoolEvents {
 }
 
 contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
+    using SafeMath for uint256;
+
     HMToken public hmToken;
     Staking public staking;
     EscrowFactory public escrowFactory;
@@ -76,7 +79,7 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
     }
 
     function testSetFee() public {
-        assertEq(rewardPool.fees(), 1, "Fee is not set correctly");
+        assertEq(rewardPool.fees(), 2, "Fee is not set correctly");
     }
 
     function testFail_OnlyStakingCanAddReward() public {
@@ -143,4 +146,83 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
         assertEq(rewards[0].slasher, validator);
         assertEq(rewards[0].tokens, slashedTokens - rewardFee);
     }
+
+    function testFail_RevertWhenNoReward() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 8;
+
+        // Init validator
+        address[] memory trustedHandlers = new address[](1);
+        trustedHandlers[0] = validator;
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.prank(validator2);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+
+        vm.expectRevert("NO_REWARDS_FOR_ESCROW");
+        rewardPool.distributeReward(escrowAddress);
+        vm.stopPrank();
+    }
+
+    function testDistributeReward() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 8;
+        uint256 vSlashAmount = 2; 
+        uint256 v2SlashAmount= 3; 
+
+        // Init validator
+        address[] memory trustedHandlers = new address[](1);
+        trustedHandlers[0] = validator;
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.prank(validator2);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+        vm.stopPrank();
+
+        vm.startPrank(owner); 
+        staking.slash(validator, operator, escrowAddress, vSlashAmount);
+        staking.slash(validator2, operator, escrowAddress, v2SlashAmount);
+
+        uint256 vBalanceBefore = hmToken.balanceOf(validator);
+        uint256 v2BalanceBefore = hmToken.balanceOf(validator2);
+        rewardPool.distributeReward(escrowAddress);
+        assertEq(hmToken.balanceOf(validator), vBalanceBefore + (vSlashAmount - rewardFee));
+        assertEq(hmToken.balanceOf(validator2), v2BalanceBefore + (v2SlashAmount - rewardFee));
+        assertEq(hmToken.balanceOf(address(rewardPool)), rewardFee.mul(2));
+
+    }
+
+    function testWithdrawReward() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 8;
+        uint256 vSlashAmount = 2; 
+        uint256 v2SlashAmount= 3; 
+
+        // Init validator
+        address[] memory trustedHandlers = new address[](1);
+        trustedHandlers[0] = validator;
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.prank(validator2);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+        vm.stopPrank();
+
+        vm.startPrank(owner);
+        uint256 oBalanceBefore = hmToken.balanceOf(owner);
+        rewardPool.withdraw(owner);
+        assertEq(hmToken.balanceOf(owner) / (10**25), (oBalanceBefore+ rewardFee.mul(2))/(10**25));
+    } 
 }
