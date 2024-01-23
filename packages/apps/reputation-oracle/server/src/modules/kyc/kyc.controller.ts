@@ -18,39 +18,39 @@ import {
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import {
-  KYCSessionDto,
-  KYCStatusDto,
-  KYCUpdateWebhookQueryDto,
+  KycSessionDto,
+  KycStatusDto,
+  KycUpdateWebhookQueryDto,
 } from './kyc.dto';
-import { KYCService } from './kyc.service';
+import { KycService } from './kyc.service';
 
-@ApiTags('KYC')
+@ApiTags('Kyc')
 @Controller('/kyc')
-export class KYCController {
-  constructor(private readonly kycService: KYCService) {}
+export class KycController {
+  constructor(private readonly kycService: KycService) {}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('/start')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Start KYC',
-    description: 'Endpoint to start KYC process for the user.',
+    summary: 'Start Kyc',
+    description: 'Endpoint to start Kyc process for the user.',
   })
   @ApiResponse({
     status: 200,
-    description: 'KYC session started successfully',
-    type: KYCSessionDto,
+    description: 'Kyc session started successfully',
+    type: KycSessionDto,
   })
-  async startKYC(@Req() request: RequestWithUser): Promise<KYCSessionDto> {
+  async startKyc(@Req() request: RequestWithUser): Promise<KycSessionDto> {
     return this.kycService.initSession(request.user);
   }
 
   @Post('/update')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Update KYC status',
-    description: 'Endpoint to update KYC process for the user.',
+    summary: 'Update Kyc status',
+    description: 'Endpoint to update Kyc process for the user.',
   })
   @ApiQuery({
     name: 'secret',
@@ -58,15 +58,15 @@ export class KYCController {
     type: String,
     required: true,
   })
-  @ApiBody({ type: KYCStatusDto })
+  @ApiBody({ type: KycStatusDto })
   @ApiResponse({
     status: 200,
-    description: 'KYC status updated successfully',
+    description: 'Kyc status updated successfully',
   })
-  public updateKYCStatus(
-    @Query() query: KYCUpdateWebhookQueryDto,
-    @Body() data: KYCStatusDto,
+  public updateKycStatus(
+    @Query() query: KycUpdateWebhookQueryDto,
+    @Body() data: KycStatusDto,
   ): Promise<void> {
-    return this.kycService.updateKYCStatus(query.secret, data);
+    return this.kycService.updateKycStatus(query.secret, data);
   }
 }

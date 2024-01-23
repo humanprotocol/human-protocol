@@ -34,8 +34,6 @@ import {
   SENDGRID_TEMPLATES,
   SERVICE_NAME,
 } from '../../common/constants';
-import { Web3Service } from '../web3/web3.service';
-import { ChainId } from '@human-protocol/sdk';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +49,6 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
-    private readonly web3Service: Web3Service,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -315,16 +312,5 @@ export class AuthService {
     await this.userService.updateNonce(userEntity);
 
     return this.auth(userEntity);
-  }
-
-  public async registerAddress(
-    user: UserEntity,
-    address: string,
-  ): Promise<string> {
-    await this.userService.updateEvmAddress(user, address);
-
-    return await this.web3Service
-      .getSigner(ChainId.POLYGON)
-      .signMessage(address);
   }
 }

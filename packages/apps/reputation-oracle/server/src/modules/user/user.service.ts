@@ -8,18 +8,23 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Not } from 'typeorm';
 import { ErrorUser } from '../../common/constants/errors';
-import { KYCStatus, UserStatus, UserType } from '../../common/enums/user';
+import { KycStatus, UserStatus, UserType } from '../../common/enums/user';
 import { getNonce } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
+import { ChainId } from '@human-protocol/sdk';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   private HASH_ROUNDS = 12;
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private readonly web3Service: Web3Service,
+  ) {}
 
   public async update(userId: number, dto: UserUpdateDto): Promise<UserEntity> {
     return this.userRepository.updateOne({ id: userId }, dto);
@@ -111,22 +116,6 @@ export class UserService {
     }
   }
 
-  public async updateEvmAddress(
-    userEntity: UserEntity,
-    address: string,
-  ): Promise<UserEntity> {
-    if (userEntity.evmAddress && userEntity.evmAddress !== address) {
-      throw new BadRequestException(ErrorUser.IncorrectAddress);
-    }
-
-    if (userEntity.kycStatus !== KYCStatus.APPROVED) {
-      throw new BadRequestException(ErrorUser.KYCNotApproved);
-    }
-
-    userEntity.evmAddress = address;
-    return userEntity.save();
-  }
-
   public async getByAddress(address: string): Promise<UserEntity> {
     const userEntity = await this.userRepository.findOne({
       evmAddress: address,
@@ -144,24 +133,23 @@ export class UserService {
     return userEntity.save();
   }
 
-  public async startKYC(userEntity: UserEntity, sessionId: string) {
-    userEntity.kycSessionId = sessionId;
-    return userEntity.save();
-  }
-
-  public async updateKYCStatus(
-    sessionId: string,
-    kycStatus: KYCStatus,
-  ): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOne({
-      kycSessionId: sessionId,
-    });
-
-    if (!userEntity) {
-      throw new NotFoundException(ErrorUser.NotFound);
+  public async registerAddress(
+    user: UserEntity,
+    address: string,
+  ): Promise<string> {
+    if (user.evmAddress && user.evmAddress !== address) {
+      throw new BadRequestException(ErrorUser.IncorrectAddress);
     }
 
-    userEntity.kycStatus = kycStatus;
-    return userEntity.save();
+    if (user.kyc.status !== KycStatus.APPROVED) {
+      throw new BadRequestException(ErrorUser.KycNotApproved);
+    }
+
+    user.evmAddress = address;
+    await user.save();
+
+    return await this.web3Service
+      .getSigner(ChainId.POLYGON)
+      .signMessage(address);
   }
 }

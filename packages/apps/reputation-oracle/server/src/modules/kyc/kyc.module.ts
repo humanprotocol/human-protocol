@@ -2,14 +2,22 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { KycService } from './kyc.service';
+import { KycController } from './kyc.controller';
+import { KycRepository } from './kyc.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { KycEntity } from './kyc.entity';
 import { UserModule } from '../user/user.module';
-import { KYCService } from './kyc.service';
-import { KYCController } from './kyc.controller';
 
 @Module({
-  imports: [UserModule, ConfigModule, HttpModule],
-  providers: [KYCService],
-  controllers: [KYCController],
-  exports: [KYCService],
+  imports: [
+    UserModule,
+    TypeOrmModule.forFeature([KycEntity]),
+    ConfigModule,
+    HttpModule,
+  ],
+  providers: [KycService, KycRepository],
+  controllers: [KycController],
+  exports: [KycService],
 })
-export class KYCModule {}
+export class KycModule {}

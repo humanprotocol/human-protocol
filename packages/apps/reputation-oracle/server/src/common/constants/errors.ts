@@ -50,7 +50,7 @@ export enum ErrorUser {
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
   IncorrectAddress = 'Incorrect address',
-  KYCNotApproved = 'KYC not approved',
+  KycNotApproved = 'KYC not approved',
 }
 
 /**
@@ -77,4 +77,8 @@ export enum ErrorToken {
 export enum ErrorSendGrid {
   EmailNotSent = 'Email was not sent',
   InvalidApiKey = 'Invalid SendGrid API key',
+}
+
+export enum ErrorKyc {
+  NotFound = 'KYC session not found',
 }

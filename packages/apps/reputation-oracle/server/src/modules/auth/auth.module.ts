@@ -13,7 +13,6 @@ import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
-import { Web3Module } from '../web3/web3.module';
 
 @Module({
   imports: [
@@ -34,7 +33,6 @@ import { Web3Module } from '../web3/web3.module';
     }),
     TypeOrmModule.forFeature([AuthEntity, TokenEntity]),
     SendGridModule,
-    Web3Module,
   ],
   providers: [JwtHttpStrategy, AuthService, AuthRepository, TokenRepository],
   controllers: [AuthJwtController],

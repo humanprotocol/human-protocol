@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { KYCStatus } from '../../common/enums/user';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { KycStatus } from '../../common/enums/user';
 
-export class KYCSessionDto {
+export class KycSessionDto {
   @ApiProperty({ name: 'session_id' })
   @IsString()
   public sessionId: string;
 }
 
-export class KYCStatusDto {
+export class KycStatusDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
@@ -27,14 +27,38 @@ export class KYCStatusDto {
   public sessionId: string;
 
   @ApiProperty({
-    enum: KYCStatus,
+    enum: KycStatus,
   })
-  @IsEnum(KYCStatus)
-  public state: KYCStatus;
+  @IsEnum(KycStatus)
+  public state: KycStatus;
 }
 
-export class KYCUpdateWebhookQueryDto {
+export class KycUpdateWebhookQueryDto {
   @ApiProperty()
   @IsString()
   public secret: string;
+}
+
+export class KycCreateDto {
+  @ApiProperty()
+  @IsString()
+  public sessionId: string;
+
+  @ApiProperty({
+    enum: KycStatus,
+  })
+  @IsEnum(KycStatus)
+  public status: KycStatus;
+
+  @ApiProperty()
+  @IsNumber()
+  public userId: number;
+}
+
+export class KycUpdateDto {
+  @ApiProperty({
+    enum: KycStatus,
+  })
+  @IsEnum(KycStatus)
+  public status: KycStatus;
 }

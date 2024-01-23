@@ -11,7 +11,7 @@ export enum UserType {
   WORKER = 'WORKER',
 }
 
-export enum KYCStatus {
+export enum KycStatus {
   NONE = 'NONE',
   APPROVED = 'APPROVED',
   SUBMISSION_REQUIRED = 'SUBMISSION_REQUIRED',

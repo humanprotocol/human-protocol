@@ -1,41 +1,41 @@
 import { Test } from '@nestjs/testing';
 
-import { KYCController } from './kyc.controller';
-import { KYCService } from './kyc.service';
-import { KYCSessionDto } from './kyc.dto';
-import { KYCStatus } from '../../common/enums/user';
+import { KycController } from './kyc.controller';
+import { KycService } from './kyc.service';
+import { KycSessionDto } from './kyc.dto';
+import { KycStatus } from '../../common/enums/user';
 
-describe('KYCController', () => {
-  let kycController: KYCController;
-  let kycService: KYCService;
+describe('KycController', () => {
+  let kycController: KycController;
+  let kycService: KycService;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
-          provide: KYCService,
+          provide: KycService,
           useValue: {
             initSession: jest.fn(),
-            updateKYCStatus: jest.fn(),
+            updateKycStatus: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    kycService = moduleRef.get<KYCService>(KYCService);
-    kycController = new KYCController(kycService);
+    kycService = moduleRef.get<KycService>(KycService);
+    kycController = new KycController(kycService);
   });
 
-  describe('startKYC', () => {
+  describe('startKyc', () => {
     it('should call service for authorized user', async () => {
-      const session: KYCSessionDto = {
+      const session: KycSessionDto = {
         sessionId: '123',
       };
 
       jest.spyOn(kycService, 'initSession').mockResolvedValueOnce(session);
 
       expect(
-        await kycController.startKYC({
+        await kycController.startKyc({
           user: {
             email: 'test@example.com',
           },
@@ -44,23 +44,23 @@ describe('KYCController', () => {
     });
   });
 
-  describe('updateKYCStatus', () => {
+  describe('updateKycStatus', () => {
     it('should call service', async () => {
-      kycService.updateKYCStatus = jest.fn();
+      kycService.updateKycStatus = jest.fn();
 
-      await kycController.updateKYCStatus(
+      await kycController.updateKycStatus(
         {
           secret: 'secret',
         },
         {
           session_id: '123',
-          state: KYCStatus.APPROVED,
+          state: KycStatus.APPROVED,
         } as any,
       );
 
-      expect(kycService.updateKYCStatus).toHaveBeenCalledWith('secret', {
+      expect(kycService.updateKycStatus).toHaveBeenCalledWith('secret', {
         session_id: '123',
-        state: KYCStatus.APPROVED,
+        state: KycStatus.APPROVED,
       });
     });
   });

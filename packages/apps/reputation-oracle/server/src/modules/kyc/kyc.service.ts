@@ -1,29 +1,25 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
 import { ConfigNames } from '../../common/config';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from '@nestjs/terminus/dist/health-indicator/http/axios.interfaces';
-import { KYCSessionDto, KYCStatusDto } from './kyc.dto';
+import { KycSessionDto, KycStatusDto } from './kyc.dto';
+import { KycRepository } from './kyc.repository';
+import { KycStatus } from '../../common/enums/user';
 
 @Injectable()
-export class KYCService {
-  private readonly logger = new Logger(KYCService.name);
+export class KycService {
+  private readonly logger = new Logger(KycService.name);
   private readonly synapsBaseURL: string;
   private readonly synapsApiKey: string;
   private readonly synapsWebhookSecret: string;
 
   constructor(
+    private kycRepository: KycRepository,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-    private readonly userService: UserService,
   ) {
     this.synapsBaseURL = 'https://api.synaps.io/v4';
 
@@ -59,9 +55,11 @@ export class KYCService {
       });
   }
 
-  public async initSession(userEntity: UserEntity): Promise<KYCSessionDto> {
-    if (userEntity.kycSessionId) {
-      throw new BadRequestException('User already has an active KYC session');
+  public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
+    if (userEntity.kyc.sessionId) {
+      return {
+        sessionId: userEntity.kyc.sessionId,
+      };
     }
 
     const { data } = await this.synapsAPIRequest<{ session_id: string }>(
@@ -72,20 +70,32 @@ export class KYCService {
       },
     );
 
-    await this.userService.startKYC(userEntity, data.session_id);
+    await this.kycRepository.create({
+      sessionId: data.session_id,
+      status: KycStatus.NONE,
+      userId: userEntity.id,
+    });
 
     return {
       sessionId: data.session_id,
     };
   }
 
-  public async updateKYCStatus(
+  public async updateKycStatus(
     secret: string,
-    data: KYCStatusDto,
+    data: KycStatusDto,
   ): Promise<void> {
     if (secret !== this.synapsWebhookSecret) {
       throw new UnauthorizedException('Invalid secret');
     }
-    await this.userService.updateKYCStatus(data.sessionId, data.state);
+
+    await this.kycRepository.updateOne(
+      {
+        sessionId: data.sessionId,
+      },
+      {
+        status: data.state,
+      },
+    );
   }
 }

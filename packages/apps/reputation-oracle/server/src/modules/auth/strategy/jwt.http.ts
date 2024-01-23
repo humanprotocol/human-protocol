@@ -37,7 +37,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
         userId: payload.userId,
       },
       {
-        relations: ['user'],
+        relations: ['user', 'user.kyc'],
       },
     );
 

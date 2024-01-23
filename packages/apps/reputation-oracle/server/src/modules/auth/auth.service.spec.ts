@@ -55,7 +55,6 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
-  let web3Service: Web3Service;
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -102,7 +101,6 @@ describe('AuthService', () => {
     userService = moduleRef.get<UserService>(UserService);
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
-    web3Service = moduleRef.get<Web3Service>(Web3Service);
   });
 
   afterEach(() => {
@@ -718,35 +716,6 @@ describe('AuthService', () => {
           }),
         ).rejects.toThrow(ConflictException);
       });
-    });
-  });
-
-  describe('registerAddress', () => {
-    it('should update evm address and sign the address', async () => {
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email: '',
-      };
-
-      const address = '0x123';
-
-      web3Service.getSigner = jest.fn().mockReturnValue({
-        signMessage: jest.fn().mockResolvedValue('signature'),
-      });
-
-      userService.updateEvmAddress = jest.fn();
-
-      const result = await authService.registerAddress(
-        userEntity as UserEntity,
-        address,
-      );
-
-      expect(userService.updateEvmAddress).toHaveBeenCalledWith(
-        userEntity,
-        address,
-      );
-
-      expect(result).toBe('signature');
     });
   });
 });
