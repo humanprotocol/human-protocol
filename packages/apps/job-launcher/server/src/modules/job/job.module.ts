@@ -14,6 +14,7 @@ import { EncryptionModule } from '../encryption/encryption.module';
 import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
 import { WebhookModule } from '../webhook/webhook.module';
+import { CronJobController } from './cron.job.controller';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { WebhookModule } from '../webhook/webhook.module';
     StorageModule,
     WebhookModule,
   ],
-  controllers: [JobController],
+  controllers: [JobController, CronJobController],
   providers: [Logger, JobService, JobRepository, RoutingProtocolService],
   exports: [JobService],
 })
