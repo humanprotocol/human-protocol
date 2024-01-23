@@ -28,7 +28,6 @@ interface StakingEvents {
 contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
     Staking public staking;
     HMToken public hmToken;
-    RewardPool public rewardPool;
     EscrowFactory public escrowFactory;
     Escrow public escrow;
 

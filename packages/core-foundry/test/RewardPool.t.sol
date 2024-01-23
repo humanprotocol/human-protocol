@@ -23,10 +23,6 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
     RewardPool public rewardPool;
     Escrow public escrow;
 
-    uint256 minimumStake = 2;
-    uint32 lockPeriod = 2;
-    uint256 rewardFee = 2;
-
     function setUp() public {
         // Deploy HMTToken Contract
         vm.startPrank(owner);
@@ -172,8 +168,8 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
     function testDistributeReward() public {
         uint256 stakedTokens = 10;
         uint256 allocatedTokens = 8;
-        uint256 vSlashAmount = 2; 
-        uint256 v2SlashAmount= 3; 
+        uint256 vSlashAmount = 2;
+        uint256 v2SlashAmount = 3;
 
         // Init validator
         address[] memory trustedHandlers = new address[](1);
@@ -188,7 +184,7 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
         staking.allocate(escrowAddress, allocatedTokens);
         vm.stopPrank();
 
-        vm.startPrank(owner); 
+        vm.startPrank(owner);
         staking.slash(validator, operator, escrowAddress, vSlashAmount);
         staking.slash(validator2, operator, escrowAddress, v2SlashAmount);
 
@@ -198,15 +194,12 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
         assertEq(hmToken.balanceOf(validator), vBalanceBefore + (vSlashAmount - rewardFee));
         assertEq(hmToken.balanceOf(validator2), v2BalanceBefore + (v2SlashAmount - rewardFee));
         assertEq(hmToken.balanceOf(address(rewardPool)), rewardFee.mul(2));
-
     }
 
     function testWithdrawReward() public {
         uint256 stakedTokens = 10;
         uint256 allocatedTokens = 8;
-        uint256 vSlashAmount = 2; 
-        uint256 v2SlashAmount= 3; 
-
+    
         // Init validator
         address[] memory trustedHandlers = new address[](1);
         trustedHandlers[0] = validator;
@@ -223,6 +216,6 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
         vm.startPrank(owner);
         uint256 oBalanceBefore = hmToken.balanceOf(owner);
         rewardPool.withdraw(owner);
-        assertEq(hmToken.balanceOf(owner) / (10**25), (oBalanceBefore+ rewardFee.mul(2))/(10**25));
-    } 
+        assertEq(hmToken.balanceOf(owner) / (10 ** 25), (oBalanceBefore + rewardFee.mul(2)) / (10 ** 25));
+    }
 }

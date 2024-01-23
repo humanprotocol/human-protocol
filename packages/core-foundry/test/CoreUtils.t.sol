@@ -43,7 +43,7 @@ contract CoreUtils is Test {
     /**
      * @dev init a large number of recipients and amounts
      */
-    function _initRecipientsAndAmounts(uint16 _maxRecipients) internal returns (address[] memory, uint256[] memory) {
+    function _initRecipientsAndAmounts(uint16 _maxRecipients) internal pure returns (address[] memory, uint256[] memory) {
         address[] memory recipients = new address[](_maxRecipients);
         uint256[] memory amounts = new uint256[](_maxRecipients);
 

@@ -1,0 +1,68 @@
+pragma solidity 0.8.20;
+
+import "forge-std/test.sol";
+import "../src/Staking.sol";
+import "../src/HMToken.sol";
+import "../src/Escrow.sol";
+import "../src/EscrowFactory.sol";
+import "./CoreUtils2.t.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+interface EscrowFactoryEvents {
+    event Launched(address token, address escrow);
+    event LaunchedV2(address token, address escrow, string jobRequesterId);
+}
+
+contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
+    HMToken public hmToken;
+    Staking public staking;
+    EscrowFactory public escrowFactory;
+
+    function setUp() public {
+        vm.startPrank(owner);
+        hmToken = new HMToken(1000000000, 'Human Token', 18, 'HMT');
+        hmToken.transfer(operator, 1000);
+
+        //Deploy Staking
+        address stakingImpl = address(new Staking());
+        bytes memory stakingData =
+            abi.encodeWithSelector(Staking.initialize.selector, address(hmToken), minimumStake, lockPeriod);
+        address stakingProxy = address(new ERC1967Proxy(stakingImpl, stakingData));
+        staking = Staking(stakingProxy);
+        vm.stopPrank();
+
+        // Approve spend HMT tokens staking contract
+        vm.prank(operator);
+        hmToken.approve(address(staking), 1000);
+
+        vm.startPrank(owner);
+        // Deploy EscrowFactory Contract
+        address escrowFactoryImpl = address(new EscrowFactory());
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
+        address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
+        escrowFactory = EscrowFactory(escrowFactoryProxy);
+        vm.stopPrank();
+    }
+
+    function testSetRightCounter() public {
+        uint256 initialCounter = escrowFactory.counter();
+        assertEq(initialCounter, 0);
+    }
+
+    // function testFail_NoEscrowWithoutStaking() public {
+    //     vm.prank(operator);
+    //     vm.expectRevert("STAKE_HMT_TO_CREATE_ESCROW");
+    //     address[] memory trustHandlers = new address[](1);
+    //     trustHandlers[0] = reputationOracle;
+    //     escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
+    // }
+
+    // function testEscrowAfterStaking() public {
+    //     vm.prank(operator);
+    //     staking.stake(1000);
+    //     address[] memory trustHandlers = new address[](1);
+    //     trustHandlers[0] = reputationOracle;
+    //     escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
+    //     assertEq(escrowFactory.counter(), 1);
+    // }
+}

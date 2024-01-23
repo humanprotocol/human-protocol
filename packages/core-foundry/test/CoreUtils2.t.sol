@@ -30,9 +30,12 @@ contract CoreUtils2 is Test {
         externalAccount
     ];
 
+    uint256 public minimumStake = 2;
+    uint256 public lockPeriod = 2;
+    uint256 rewardFee = 2;
     string jobRequesterId = "job-requester-id";
 
-    function _initTrustedHandlers() internal returns (address[] memory) {
+    function _initTrustedHandlers() internal view returns (address[] memory) {
         address[] memory trustedHandlers = new address[](1);
         trustedHandlers[0] = validator;
         return trustedHandlers;
