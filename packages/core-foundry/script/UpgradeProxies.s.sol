@@ -22,19 +22,19 @@ contract UpgradeProxiesScript is Script {
         EscrowFactory proxyEscrowFactory = EscrowFactory(payable(escrowFactoryProxy));
         address newEscrowFactory = address(new EscrowFactory());
         proxyEscrowFactory.upgradeTo(newEscrowFactory);
-        console.log("Upgraded successfully to", newEscrowFactory);
+        console.log("Upgraded EscrowFactory successfully to", newEscrowFactory);
 
         // Upgrade Staking
         Staking proxyStaking = Staking(payable(stakingProxy));
         address newStaking = address(new Staking());
         proxyStaking.upgradeTo(newStaking);
-        console.log("Upgraded successfully to", newStaking);
+        console.log("Upgraded Staking successfully to", newStaking);
 
         // Upgrade RewardPool
         RewardPool proxyRewardPool = RewardPool(payable(rewardPoolProxy));
         address newRewardPool = address(new RewardPool());
         proxyRewardPool.upgradeTo(newRewardPool);
-        console.log("Upgraded successfully to", newRewardPool);
+        console.log("Upgraded RewardPool successfully to", newRewardPool);
 
         vm.stopBroadcast();
     }

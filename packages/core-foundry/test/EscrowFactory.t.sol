@@ -17,6 +17,7 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
     HMToken public hmToken;
     Staking public staking;
     EscrowFactory public escrowFactory;
+    Escrow public escrow;
 
     function setUp() public {
         vm.startPrank(owner);
@@ -49,20 +50,35 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
         assertEq(initialCounter, 0);
     }
 
-    // function testFail_NoEscrowWithoutStaking() public {
-    //     vm.prank(operator);
-    //     vm.expectRevert("STAKE_HMT_TO_CREATE_ESCROW");
-    //     address[] memory trustHandlers = new address[](1);
-    //     trustHandlers[0] = reputationOracle;
-    //     escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
-    // }
+    function testFail_NoEscrowWithoutStaking() public {
+        vm.startPrank(operator);
+        address[] memory trustHandlers = new address[](1);
+        trustHandlers[0] = reputationOracle;
+        vm.expectRevert("STAKE_HMT_TO_CREATE_ESCROW");
+        escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
+        vm.stopPrank();
+    }
 
-    // function testEscrowAfterStaking() public {
-    //     vm.prank(operator);
-    //     staking.stake(1000);
-    //     address[] memory trustHandlers = new address[](1);
-    //     trustHandlers[0] = reputationOracle;
-    //     escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
-    //     assertEq(escrowFactory.counter(), 1);
-    // }
+    function testEscrowAfterStaking() public {
+        vm.startPrank(operator);
+        staking.stake(1000);
+        address[] memory trustHandlers = new address[](1);
+        trustHandlers[0] = reputationOracle;
+        escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
+        assertEq(escrowFactory.counter(), 1);
+        vm.stopPrank();
+    }
+
+    function testEmitEventOnLaunched() public {
+        vm.startPrank(operator);
+        staking.stake(1000);
+        address[] memory trustHandlers = new address[](2);
+        trustHandlers[0] = reputationOracle;
+        trustHandlers[1] = recordingOracle;
+        vm.expectEmit();
+        emit LaunchedV2(address(hmToken), address(escrow), jobRequesterId);
+        escrowFactory.createEscrow(address(hmToken), trustHandlers, jobRequesterId);
+    }
+
+    function testFindEscrowFromDepoyedEscrow() public {}
 }

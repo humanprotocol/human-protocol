@@ -17,3 +17,23 @@ To test contracts using Foundry run :
 
 - ```forge test --match-path ./test/<FILE_NAME>``` to run all tests for a specific file. 
 - ```forge test --match-path ./test/<FILE_NALE> --match-test "<TEST_NAME"``` to run a specific test for a specific file. 
+
+## Deploying to Mumbai (test)
+
+
+- Deploy Proxies : 
+
+- ```forge script script/DeployCore.s.sol:DeployCoreScript --rpc-url polygonMumbai --broadcast --verify --legacy```
+
+- After adding **HMT_ADDRESS, STAKING_PROXY, ESCROW_FACTORY_PROXY, REWARD_POOL_PROXY** on .env, run : 
+
+- ```forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript --rpc-url polygonMumbai --broadcast --verify --legacy```
+
+- Staking : 
+
+- ```forge script script/Staking.s.sol:StakingScript --rpc-url polygonMumbai --broadcast --verify --legacy```
+
+
+
+
+

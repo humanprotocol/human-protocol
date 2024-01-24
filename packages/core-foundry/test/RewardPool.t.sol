@@ -199,7 +199,7 @@ contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
     function testWithdrawReward() public {
         uint256 stakedTokens = 10;
         uint256 allocatedTokens = 8;
-    
+
         // Init validator
         address[] memory trustedHandlers = new address[](1);
         trustedHandlers[0] = validator;
