@@ -211,21 +211,6 @@ export class JobController {
   }
 
   @ApiOperation({
-    summary: 'Cancel a cron job',
-    description: 'Endpoint to cancel a cron job.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job launched successfully.',
-  })
-  @Get('/cron/cancel')
-  public async cancelCronJob(): Promise<void> {
-    await this.jobService.cancelCronJob();
-    return;
-  }
-
-  @ApiOperation({
     summary: 'Handle escrow failed webhook',
     description: 'Endpoint to handle an escrow failed webhook.',
   })

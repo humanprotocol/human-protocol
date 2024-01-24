@@ -1,26 +1,18 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
-import { JwtAuthGuard } from '../../common/guards';
-import { JobService } from './job.service';
+import { CronJobService } from './cron-job.service';
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-@ApiTags('Cron Job')
-@Controller('/job/cron')
+@Public()
+@ApiTags('Cron')
+@Controller('/cron')
 export class CronJobController {
-  constructor(private readonly jobService: JobService) {}
+  constructor(private readonly cronJobService: CronJobService) {}
 
   @ApiOperation({
     summary: 'Launch the cron job to create escrows',
     description: 'Endpoint to launch the cron job to create escrows.',
   })
-  @Public()
   @ApiResponse({
     status: 200,
     description: 'Cron job to create escrows launched successfully.',
@@ -29,9 +21,9 @@ export class CronJobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Get('/create-escrow')
+  @Get('/escrow/create')
   public async launchCreateEscrowCronJob(): Promise<void> {
-    await this.jobService.createEscrowCronJob();
+    await this.cronJobService.createEscrowCronJob();
     return;
   }
 
@@ -39,7 +31,6 @@ export class CronJobController {
     summary: 'Launch the cron job to setup escrows',
     description: 'Endpoint to launch the cron job to setup escrows.',
   })
-  @Public()
   @ApiResponse({
     status: 200,
     description: 'Cron job to setup escrows launched successfully.',
@@ -48,9 +39,9 @@ export class CronJobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Get('/setup-escrow')
+  @Get('/escrow/setup')
   public async launchSetupEscrowCronJob(): Promise<void> {
-    await this.jobService.setupEscrowCronJob();
+    await this.cronJobService.setupEscrowCronJob();
     return;
   }
 
@@ -58,7 +49,6 @@ export class CronJobController {
     summary: 'Launch the cron job to fund escrows',
     description: 'Endpoint to launch the cron job to fund escrows.',
   })
-  @Public()
   @ApiResponse({
     status: 200,
     description: 'Cron job to fund escrows launched successfully.',
@@ -67,9 +57,37 @@ export class CronJobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Get('/fund-escrow')
+  @Get('/escrow/fund')
   public async launchFundEscrowCronJob(): Promise<void> {
-    await this.jobService.fundEscrowCronJob();
+    await this.cronJobService.fundEscrowCronJob();
+    return;
+  }
+
+  @ApiOperation({
+    summary: 'Cancel cron job',
+    description: 'Endpoint to launch cancel cron job.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cron job launched successfully.',
+  })
+  @Get('/escrow/cancel')
+  public async cancelCronJob(): Promise<void> {
+    await this.cronJobService.cancelCronJob();
+    return;
+  }
+
+  @ApiOperation({
+    summary: 'Process pending webhooks cron job',
+    description: 'Endpoint to launch Process pending webhooks cron job.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cron job launched successfully.',
+  })
+  @Get('/wehbhook/process')
+  public async processPendingWebhooks(): Promise<any> {
+    await this.cronJobService.processPendingWebhooks();
     return;
   }
 }

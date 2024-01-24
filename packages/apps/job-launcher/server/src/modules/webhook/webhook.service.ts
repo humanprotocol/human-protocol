@@ -7,7 +7,6 @@ import {
   KVStoreKeys,
 } from '@human-protocol/sdk';
 import { LessThanOrEqual } from 'typeorm';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { signMessage } from '../../common/utils/signature';
@@ -22,8 +21,6 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookEntity } from './webhook.entity';
-import { CronJobService } from '../cron-job/cron-job.service';
-import { CronJobType } from '../../common/enums/cron-job';
 import { WebhookDataDto, WebhookDto } from './webhook.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 @Injectable()
@@ -36,7 +33,6 @@ export class WebhookService {
     private readonly webhookRepository: WebhookRepository,
     public readonly configService: ConfigService,
     public readonly httpService: HttpService,
-    private readonly cronJobService: CronJobService,
   ) {}
 
   /**
@@ -75,7 +71,7 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    * @throws {Error} - Throws an error if an issue occurs during the process.
    */
-  private async sendWebhook(webhook: WebhookEntity): Promise<void> {
+  public async sendWebhook(webhook: WebhookEntity): Promise<void> {
     // Configure the HTTP request object.
     let config = {};
     const webhookUrl = await this.getExchangeOracleWebhookUrl(
@@ -149,66 +145,13 @@ export class WebhookService {
   }
 
   /**
-   * Process a pending webhook job.
-   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
-   */
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  public async processPendingWebhooks(): Promise<void> {
-    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
-      CronJobType.ProcessPendingWebhook,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Pending webhooks START');
-    const cronJob = await this.cronJobService.startCronJob(
-      CronJobType.ProcessPendingWebhook,
-    );
-
-    try {
-      const webhookEntities = await this.webhookRepository.find({
-        status: WebhookStatus.PENDING,
-        retriesCount: LessThanOrEqual(
-          this.configService.get(
-            ConfigNames.MAX_RETRY_COUNT,
-            DEFAULT_MAX_RETRY_COUNT,
-          ),
-        ),
-        waitUntil: LessThanOrEqual(new Date()),
-      });
-
-      for (const webhookEntity of webhookEntities) {
-        try {
-          await this.sendWebhook(webhookEntity);
-          await this.webhookRepository.updateOne(
-            { id: webhookEntity.id },
-            {
-              status: WebhookStatus.COMPLETED,
-            },
-          );
-        } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.handleWebhookError(webhookEntity, err);
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Pending webhooks STOP');
-    await this.cronJobService.completeCronJob(cronJob);
-  }
-
-  /**
    * Handles errors that occur during webhook processing.
    * It logs the error and, based on retry count, updates the webhook status accordingly.
    * @param webhookEntity - The entity representing the webhook data.
    * @param error - The error object thrown during processing.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  private async handleWebhookError(
+  public async handleWebhookError(
     webhookEntity: WebhookEntity,
     error: any,
   ): Promise<void> {
@@ -237,6 +180,45 @@ export class WebhookService {
       'An error occurred during webhook validation: ',
       error,
       WebhookService.name,
+    );
+  }
+  /**
+   * Finds webhooks based on the provided status and additional criteria.
+   * @param status - WebhookStatus enum representing the status to filter by.
+   * @returns {Promise<WebhookEntity[]>} - Returns a promise that resolves with an array of WebhookEntity objects.
+   * @throws {Error} - Throws an error if an issue occurs during the retrieval process.
+   */
+  public async findWebhookByStatus(
+    status: WebhookStatus,
+  ): Promise<WebhookEntity[]> {
+    return this.webhookRepository.find({
+      status: status,
+      retriesCount: LessThanOrEqual(
+        this.configService.get(
+          ConfigNames.MAX_RETRY_COUNT,
+          DEFAULT_MAX_RETRY_COUNT,
+        ),
+      ),
+      waitUntil: LessThanOrEqual(new Date()),
+    });
+  }
+
+  /**
+   * Updates the status of a webhook identified by its ID.
+   * @param id - The ID of the webhook to update.
+   * @param status - WebhookStatus enum representing the new status.
+   * @returns {Promise<void>} - Returns a promise that resolves when the update operation is complete.
+   * @throws {Error} - Throws an error if an issue occurs during the update process.
+   */
+  public async updateWebhookStatus(
+    id: number,
+    status: WebhookStatus,
+  ): Promise<void> {
+    await this.webhookRepository.updateOne(
+      { id: id },
+      {
+        status: status,
+      },
     );
   }
 }
