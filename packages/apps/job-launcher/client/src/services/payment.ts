@@ -34,3 +34,9 @@ export const getRate = async (from: string, to: string) => {
 
   return data;
 };
+
+export const getOperatorAddress = async () => {
+  const { data } = await api.get('/web3/operator-address');
+
+  return data;
+};

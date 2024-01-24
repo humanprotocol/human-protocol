@@ -50,7 +50,7 @@ export const CryptoTopUpForm = () => {
       const tokenAmount = ethers.utils.parseUnits(amount, 18);
 
       const tx = await contract.transfer(
-        import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
+        await paymentService.getOperatorAddress(),
         tokenAmount,
       );
 
