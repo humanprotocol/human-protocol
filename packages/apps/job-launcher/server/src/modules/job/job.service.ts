@@ -442,7 +442,12 @@ export class JobService {
       fundAmount = dto.fundAmount;
     }
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const feePercentage = Number(await this.getOracleFee(chainId));
+    const feePercentage = Number(
+      await this.getOracleFee(
+        await this.web3Service.getOperatorAddress(),
+        chainId,
+      ),
+    );
     const fee = mul(div(feePercentage, 100), fundAmount);
     const usdTotalAmount = add(fundAmount, fee);
 
@@ -591,16 +596,16 @@ export class JobService {
       reputationOracle: oracleAddresses.recordingOracle,
       exchangeOracle: oracleAddresses.exchangeOracle,
       recordingOracleFee: await this.getOracleFee(
-        jobEntity.chainId,
         oracleAddresses.recordingOracle,
+        jobEntity.chainId,
       ),
       reputationOracleFee: await this.getOracleFee(
-        jobEntity.chainId,
         oracleAddresses.reputationOracle,
+        jobEntity.chainId,
       ),
       exchangeOracleFee: await this.getOracleFee(
-        jobEntity.chainId,
         oracleAddresses.exchangeOracle,
+        jobEntity.chainId,
       ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
@@ -1458,8 +1463,8 @@ export class JobService {
   }
 
   private async getOracleFee(
+    oracleAddress: string,
     chainId: ChainId,
-    oracleAddress?: string,
   ): Promise<bigint> {
     const signer = this.web3Service.getSigner(chainId);
 

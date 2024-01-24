@@ -239,6 +239,8 @@ describe('JobService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             validateChainId: jest.fn().mockReturnValue(new Error()),
+            calculateGasPrice: jest.fn().mockReturnValue(1000n),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
@@ -279,8 +281,6 @@ describe('JobService', () => {
     });
 
     storageService.download = jest.fn();
-
-    web3Service.calculateGasPrice = jest.fn().mockReturnValue(1000n);
   });
 
   beforeEach(async () => {
