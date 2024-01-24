@@ -70,7 +70,6 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123',
       };
       const hashedPassword =
         '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
@@ -102,7 +101,6 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123',
       };
 
       jest
