@@ -442,9 +442,12 @@ export class JobService {
       fundAmount = dto.fundAmount;
     }
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const feePercentage = this.configService.get<number>(
-      ConfigNames.JOB_LAUNCHER_FEE,
-    )!;
+    const feePercentage = Number(
+      await this.getOracleFee(
+        await this.web3Service.getOperatorAddress(),
+        chainId,
+      ),
+    );
     const fee = mul(div(feePercentage, 100), fundAmount);
     const usdTotalAmount = add(fundAmount, fee);
 
