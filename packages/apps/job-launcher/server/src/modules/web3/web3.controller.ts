@@ -31,4 +31,19 @@ export class Web3Controller {
   getValidChains(): ChainId[] {
     return this.web3Service.getValidChains();
   }
+
+  @ApiOperation({
+    summary: 'Get the address of the Job Launcher',
+    description: 'Endpoint to get the address of the Job Launcher.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job Launcher address',
+    type: String,
+  })
+  @Public()
+  @Get('/operator-address')
+  getOperatorAddress(): string {
+    return this.web3Service.getOperatorAddress();
+  }
 }
