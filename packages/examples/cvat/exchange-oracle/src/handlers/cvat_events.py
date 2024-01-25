@@ -29,6 +29,7 @@ def handle_update_job_event(payload: dict) -> None:
 
         if "state" in payload.before_update:
             job_assignments = job.assignments
+            new_status = JobStatuses(payload.job["state"])
 
             if not job_assignments:
                 logger.warning(
@@ -36,7 +37,6 @@ def handle_update_job_event(payload: dict) -> None:
                     "No assignments for this job, ignoring the update"
                 )
             else:
-                new_status = JobStatuses(payload.job["state"])
                 webhook_time = parse_aware_datetime(payload.job["updated_date"])
                 webhook_assignee_id = (payload.job["assignee"] or {}).get("id")
 
