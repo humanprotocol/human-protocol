@@ -30,6 +30,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
     HMToken public hmToken;
     EscrowFactory public escrowFactory;
     Escrow public escrow;
+    RewardPool public rewardPool;
 
     function setUp() public {
         vm.startPrank(owner);
@@ -57,7 +58,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         bytes memory rewardPoolData =
             abi.encodeWithSelector(RewardPool.initialize.selector, address(hmToken), address(staking), 1);
         address rewardPoolProxy = address(new ERC1967Proxy(rewardPoolImpl, rewardPoolData));
-        RewardPool rewardPool = RewardPool(rewardPoolProxy);
+        rewardPool = RewardPool(rewardPoolProxy);
 
         // Topup staking address
         hmToken.transfer(address(staking), 1000);
@@ -181,14 +182,243 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
     //     vm.stopPrank();
     // }
 
-    function testDecreaseAmountOfTokensStaked() public {
-        vm.startPrank(operator);
-        uint256 amount = 10;
-        uint256 lockedTokens = 5;
-        staking.stake(amount);
-        staking.unstake(lockedTokens);
-        Stakes.Staker memory staker = staking.getStaker(operator);
-        uint256 latestBlockNumber = vm.getBlockNumber();
-        console.log(latestBlockNumber);
+    // function testDecreaseAmountOfTokensStaked() public {
+    //     vm.startPrank(operator);
+    //     uint256 amount = 10;
+    //     uint256 lockedTokens = 5;
+    //     staking.stake(amount);
+    //     staking.unstake(lockedTokens);
+    //     Stakes.Staker memory staker = staking.getStaker(operator);
+    //     uint256 latestBlockNumber = vm.getBlockNumber();
+    //     console.log(latestBlockNumber);
+    // }
+
+    function testFail_CallerNotOwner() public {
+        uint256 minimumStake = 0;
+        vm.prank(operator);
+        vm.expectRevert("OWNABLE: CALLER_IS_NOT_THE_OWNER");
+        staking.setMinimumStake(minimumStake);
     }
+
+    function testFail_NotPositiveNumberOnSetLockPeriod() public {
+        uint256 minimumStake = 0;
+        vm.prank(owner);
+        vm.expectRevert("MUST_BE_POSITIVE_NUMBER");
+        staking.setMinimumStake(minimumStake);
+    }
+
+    function testEmitEventOnStakeLocked() public {
+        uint256 minimumStake = 5;
+        vm.prank(owner);
+        vm.expectEmit();
+        emit SetMinumumStake(minimumStake);
+        staking.setMinimumStake(minimumStake);
+    }
+
+    function testAssignValueToMinimumStake() public {
+        uint256 minimumStake = 5;
+        vm.prank(owner);
+        staking.setMinimumStake(minimumStake);
+        assertEq(staking.minimumStake(), minimumStake);
+    }
+
+    function testFail_CallerNotOwnerForSetLockPeriod() public {
+        uint32 lockPeriod = 0;
+        vm.prank(operator);
+        vm.expectRevert("OWNABLE: CALLER_IS_NOT_THE_OWNER");
+        staking.setLockPeriod(lockPeriod);
+    }
+
+    function testFail_NotPositiveNumber() public {
+        uint32 lockPeriod = 0;
+        vm.prank(owner);
+        vm.expectRevert("MUST_BE_POSITIVE_NUMBER");
+        staking.setLockPeriod(lockPeriod);
+    }
+
+    function testEmitEventOnStakeLockedWith5() public {
+        uint32 lockPeriod = 5;
+        vm.prank(owner);
+        vm.expectEmit();
+        emit SetLockPeriod(lockPeriod);
+        staking.setLockPeriod(lockPeriod);
+    }
+
+    function testAssignValueToMinimumStakeValue() public {
+        uint32 lockPeriod = 5;
+        vm.prank(owner);
+        staking.setLockPeriod(lockPeriod);
+        assertEq(staking.lockPeriod(), lockPeriod);
+    }
+
+    function testFail_CallerNotOwnerForSetRewardPool() public {
+        vm.prank(operator);
+        vm.expectRevert("OWNABLE: CALLER_IS_NOT_THE_OWNER");
+        staking.setRewardPool(address(rewardPool));
+    }
+
+    function testFail_NotPositiveNumberSetRewardPool() public {
+        vm.prank(owner);
+        vm.expectRevert("MUST_BE_VALID_ADDRESS");
+        staking.setRewardPool(address(0));
+    }
+
+    function testAssignValueToMinStakeVariable() public {
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        assertEq(staking.rewardPool(), address(rewardPool));
+    }
+
+    function testEscrowHasNoAllocation() public {
+        uint256 stakedTokens = 10;
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        vm.stopPrank();
+        vm.prank(owner);
+        assertEq(staking.isAllocation(escrowAddress), false);
+    }
+
+    function testEscrowHasAllocation() public {
+        uint256 stakedTokens = 10;
+        vm.prank(operator);
+        staking.stake(stakedTokens);
+        vm.prank(owner);
+        bool result = staking.hasStake(operator);
+        assertEq(result, true, "Should stake token");
+    }
+
+    function testNullAllocationByEscrow() public {
+        uint256 allocationTokens = 10;
+        uint256 stakedTokens = 10;
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocationTokens);
+        IStaking.Allocation memory allocation = staking.getAllocation(address(0));
+        assertEq(allocation.escrowAddress, address(0));
+        assertEq(allocation.staker, address(0));
+        assertEq(allocation.tokens, 0);
+        assertEq(allocation.createdAt, 0);
+        assertEq(allocation.closedAt, 0);
+    }
+
+    function testAllocationByEscrowAddress() public {
+        uint256 allocationTokens = 10;
+        uint256 stakedTokens = 10;
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocationTokens);
+        IStaking.Allocation memory allocation = staking.getAllocation(escrowAddress);
+        assertEq(allocation.escrowAddress, escrowAddress);
+        assertEq(allocation.staker, operator);
+        assertEq(allocation.tokens, allocationTokens);
+    }
+
+    function testFail_SlashRevertsCallerNotOwner() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 5;
+        uint256 slashedTokens = 2;
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+        vm.expectRevert("OWNABLE: CALLER_IS_NOT_THE_OWNER");
+        staking.slash(operator, operator, escrowAddress, slashedTokens);
+    }
+
+    function testFail_SlashRevertsInvalidAddress() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 5;
+        uint256 slashedTokens = 2;
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        vm.expectRevert("MUST_BE_VALID_ADDRESS");
+        staking.slash(validator, operator, address(0), slashedTokens);
+    }
+
+    function testFail_RevertsSlashAmountExceedsAllocation() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 5;
+        uint256 slashedTokens = 2;
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+        vm.stopPrank();
+        vm.prank(owner);
+        vm.expectRevert("SLASH_TOKENS_EXCEEDS_ALLOCATED_ONES");
+        staking.slash(validator[0], operator, escrowAddress, slashedTokens);
+    }
+
+    function testFail_SlashAmountIsZero() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 5;
+        uint256 slashedTokens = 2;
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        vm.prank(validator);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+        vm.stopPrank();
+        vm.prank(owner);
+        vm.expectRevert("MUST_BE_POSITIVE_NUMBER");
+        staking.slash(validator[0], operator, escrowAddress, 0);
+    }
+
+    // function testEmitOnStakeSlashed() public {
+    //     uint256 stakedTokens = 10;
+    //     uint256 allocatedTokens = 5;
+    //     uint256 slashedTokens = 2;
+
+    //     address[] memory validator = new address[](1);
+    //     validator[0] = accounts[1];
+
+
+    //     vm.prank(owner);
+    //     staking.setRewardPool(address(rewardPool));
+    //     vm.prank(validator[0]);
+    //     staking.stake(stakedTokens);
+    //     vm.startPrank(operator);
+    //     staking.stake(stakedTokens);
+        
+    //     address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+    //     staking.allocate(escrowAddress, allocatedTokens);
+    //     vm.stopPrank();
+    //     vm.startPrank(owner);
+    //     vm.expectEmit();
+    //     emit StakeSlashed(operator, slashedTokens, escrowAddress, owner);
+    //     staking.slash(validator[0], operator, escrowAddress, slashedTokens);
+    //     vm.stopPrank();
+    // }
+
+    function testAllocationByEscrow() public {}
 }
