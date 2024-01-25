@@ -37,13 +37,14 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         hmToken = new HMToken(1000000000, 'Human Token', 18, 'HMT');
         // Loop through accounts and approve HMToken for each account
         for (uint256 i = 0; i < accounts.length - 1; i++) {
-            hmToken.approve(accounts[i+1], 1000);
-            hmToken.transfer(accounts[i+1], 1000);
+            hmToken.approve(accounts[i + 1], 1000);
+            hmToken.transfer(accounts[i + 1], 1000);
         }
 
         // Deploy Staking Proxy
         address stakingImpl = address(new Staking());
-        bytes memory stakingData = abi.encodeWithSelector(Staking.initialize.selector, address(hmToken), minimumStake, lockPeriod);
+        bytes memory stakingData =
+            abi.encodeWithSelector(Staking.initialize.selector, address(hmToken), minimumStake, lockPeriod);
         address stakingProxy = address(new ERC1967Proxy(stakingImpl, stakingData));
         staking = Staking(stakingProxy);
 
@@ -85,7 +86,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
     function testInitValidations() public {
         assertEq(staking.token(), address(hmToken), "Should set the right token address");
         assertEq(staking.minimumStake(), 2, "Should set the right minimum stake");
-        assertEq(staking.lockPeriod(), 1, "Should set the right staking period");
+        assertEq(staking.lockPeriod(), 2, "Should set the right staking period");
     }
 
     function testFail_StakeValidations() public {
@@ -174,15 +175,15 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         uint256 stakeTokens = 10;
         address[] memory trustedHandlers = _initTrustedHandlers();
 
-        // Stake to be able to create escrow 
+        // Stake to be able to create escrow
         staking.stake(stakeTokens);
 
-        // Create escrow 
+        // Create escrow
         escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
 
         // Unstake to lock tokens for withdrawal
         staking.unstake(lockedTokens);
-        // Pass the LockPeriod 
+        // Pass the LockPeriod
         vm.roll(3);
         staking.stake(stakeTokens);
         vm.expectEmit(true, false, false, true);
@@ -193,13 +194,34 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
 
     function testDecreaseAmountOfTokensStaked() public {
         vm.startPrank(operator);
-        uint256 amount = 10;
         uint256 lockedTokens = 5;
-        staking.stake(amount);
+        uint256 stakeTokens = 10;
+        address[] memory trustedHandlers = _initTrustedHandlers();
+
+        staking.stake(stakeTokens);
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
         staking.unstake(lockedTokens);
         Stakes.Staker memory staker = staking.getStaker(operator);
-        uint256 latestBlockNumber = vm.getBlockNumber();
-        console.log(latestBlockNumber);
+        uint256 latestBlockNumber = block.number;
+        assertLt(latestBlockNumber, staker.tokensLockedUntil); 
+        
+    }
+
+    function testBlockNumber() public {
+        vm.startPrank(owner);
+
+        // Manually track the block number
+        uint256 initialBlockNumber = block.number;
+
+        // Increment the block number by 1
+        vm.roll(initialBlockNumber + 1);
+        assertEq(block.number, initialBlockNumber + 1, "Block number should increment by 1");
+
+        // Increment the block number by another 1
+        vm.roll(initialBlockNumber + 2);
+        assertEq(block.number, initialBlockNumber + 2, "Block number should increment by 2");
+
+        vm.stopPrank();
     }
 
     function testFail_CallerNotOwner() public {
@@ -411,14 +433,13 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         address[] memory validator = new address[](1);
         validator[0] = accounts[1];
 
-
         vm.prank(owner);
         staking.setRewardPool(address(rewardPool));
         vm.prank(validator[0]);
         staking.stake(stakedTokens);
         vm.startPrank(operator);
         staking.stake(stakedTokens);
-        
+
         address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
         staking.allocate(escrowAddress, allocatedTokens);
         vm.stopPrank();

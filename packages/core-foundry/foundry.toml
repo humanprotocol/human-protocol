@@ -2,7 +2,7 @@
 src = "src"
 out = "out"
 libs = ["lib"]
-via-ir=true
+via-ir=false
 optimizer_runs = 10
 gas_reports = ["*"]
 
