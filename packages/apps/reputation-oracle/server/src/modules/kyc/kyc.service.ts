@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../user/user.entity';
 import { ConfigNames } from '../../common/config';
 import { HttpService } from '@nestjs/axios';
-import { AxiosResponse } from '@nestjs/terminus/dist/health-indicator/http/axios.interfaces';
 import { KycSessionDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
@@ -40,38 +39,11 @@ export class KycService {
     );
   }
 
-  private async synapsAPIRequest<T>(
-    method: string,
-    url: string,
-    data: any,
-  ): Promise<AxiosResponse<T>> {
-    return this.httpService.axiosRef
-      .request({
-        method,
-        url,
-        data,
-        baseURL: this.synapsBaseURL,
-        headers: {
-          'Api-Key': this.synapsApiKey,
-        },
-      })
-      .catch((err) => {
-        this.logger.error(err);
-        throw err;
-      });
-  }
-
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
-      if (userEntity.kyc.status === KycStatus.APPROVED) {
-        return {
-          sessionId: null,
-          message: 'KYC is already approved',
-        };
-      }
-
       return {
         sessionId: userEntity.kyc.sessionId,
+        status: userEntity.kyc.status,
       };
     }
 
@@ -102,6 +74,7 @@ export class KycService {
 
     return {
       sessionId: data.session_id,
+      status: KycStatus.NONE,
     };
   }
 
@@ -113,12 +86,25 @@ export class KycService {
       throw new UnauthorizedException('Invalid secret');
     }
 
+    const { data: sessionData } = await firstValueFrom(
+      await this.httpService.get(`/individual/session/${data.sessionId}`, {
+        baseURL: this.synapsBaseURL,
+        headers: {
+          'Api-Key': this.synapsApiKey,
+        },
+      }),
+    );
+
+    if (!sessionData?.session?.status) {
+      throw new InternalServerErrorException('Invalid response from Synaps');
+    }
+
     await this.kycRepository.updateOne(
       {
-        sessionId: data.sessionId,
+        sessionId: sessionData.session.id,
       },
       {
-        status: data.state,
+        status: sessionData.session.status,
       },
     );
   }

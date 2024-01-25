@@ -144,7 +144,7 @@ export class UserService {
       throw new BadRequestException(ErrorUser.IncorrectAddress);
     }
 
-    if (user.kyc.status !== KycStatus.APPROVED) {
+    if (user.kyc?.status !== KycStatus.APPROVED) {
       throw new BadRequestException(ErrorUser.KycNotApproved);
     }
 

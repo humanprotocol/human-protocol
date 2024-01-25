@@ -55,7 +55,7 @@ describe('Kyc Service', () => {
   });
 
   describe('initSession', () => {
-    it('Should return existing session id if user already has an active Kyc session and the status is not approved', async () => {
+    it('Should return existing session id with status if user already has an active Kyc session', async () => {
       const mockUserEntity = {
         kyc: {
           sessionId: '123',
@@ -67,26 +67,11 @@ describe('Kyc Service', () => {
 
       expect(result).toEqual({
         sessionId: '123',
+        status: KycStatus.SUBMISSION_REQUIRED,
       });
     });
 
-    it('Should return null session id if user already has an active Kyc session and the status is approved', async () => {
-      const mockUserEntity = {
-        kyc: {
-          sessionId: '123',
-          status: KycStatus.APPROVED,
-        },
-      };
-
-      const result = await kycService.initSession(mockUserEntity as any);
-
-      expect(result).toEqual({
-        sessionId: null,
-        message: 'KYC is already approved',
-      });
-    });
-
-    it("Should throw an error if synapse doesn't return a session id", async () => {
+    it("Should throw an error if synaps doesn't return a session id", async () => {
       const mockUserEntity = {
         kyc: {
           sessionId: null,
@@ -127,6 +112,7 @@ describe('Kyc Service', () => {
 
       expect(result).toEqual({
         sessionId: '123',
+        status: KycStatus.NONE,
       });
       expect(httpService.post).toHaveBeenCalledWith(
         'session/init',
@@ -159,8 +145,33 @@ describe('Kyc Service', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
+    it('Should throw an error if the session data is invalid from synaps', async () => {
+      jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
+
+      httpService.get = jest.fn().mockImplementation(() => {
+        return of({
+          data: {},
+        });
+      });
+
+      await expect(
+        kycService.updateKycStatus('synaps-webhook-secret', mockKycUpdate),
+      ).rejects.toThrow();
+    });
+
     it('Should update the Kyc status of the user', async () => {
       jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
+
+      httpService.get = jest.fn().mockImplementation(() => {
+        return of({
+          data: {
+            session: {
+              id: '123',
+              status: KycStatus.APPROVED,
+            },
+          },
+        });
+      });
 
       await kycService.updateKycStatus('synaps-webhook-secret', mockKycUpdate);
 

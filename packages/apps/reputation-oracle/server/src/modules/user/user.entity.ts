@@ -40,5 +40,5 @@ export class UserEntity extends BaseEntity implements IUser {
   public token: TokenEntity;
 
   @OneToOne(() => KycEntity, (kyc) => kyc.user)
-  public kyc: KycEntity;
+  public kyc?: KycEntity;
 }

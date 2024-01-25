@@ -5,11 +5,13 @@ import { KycStatus } from '../../common/enums/user';
 export class KycSessionDto {
   @ApiProperty({ name: 'session_id' })
   @IsString()
-  public sessionId: string | null;
+  public sessionId: string;
 
-  @ApiPropertyOptional()
-  @IsString()
-  public message?: string;
+  @ApiPropertyOptional({
+    enum: KycStatus,
+  })
+  @IsEnum(KycStatus)
+  public status?: KycStatus;
 }
 
 export class KycStatusDto {
