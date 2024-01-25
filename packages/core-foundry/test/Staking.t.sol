@@ -36,14 +36,14 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(owner);
         hmToken = new HMToken(1000000000, 'Human Token', 18, 'HMT');
         // Loop through accounts and approve HMToken for each account
-        for (uint256 i = 0; i < accounts.length; i++) {
-            hmToken.approve(accounts[i], 1000);
-            hmToken.transfer(accounts[i], 1000);
+        for (uint256 i = 0; i < accounts.length - 1; i++) {
+            hmToken.approve(accounts[i+1], 1000);
+            hmToken.transfer(accounts[i+1], 1000);
         }
 
         // Deploy Staking Proxy
         address stakingImpl = address(new Staking());
-        bytes memory stakingData = abi.encodeWithSelector(Staking.initialize.selector, address(hmToken), 2, 1);
+        bytes memory stakingData = abi.encodeWithSelector(Staking.initialize.selector, address(hmToken), minimumStake, lockPeriod);
         address stakingProxy = address(new ERC1967Proxy(stakingImpl, stakingData));
         staking = Staking(stakingProxy);
 
@@ -56,7 +56,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         // Deploy Reward Pool
         address rewardPoolImpl = address(new RewardPool());
         bytes memory rewardPoolData =
-            abi.encodeWithSelector(RewardPool.initialize.selector, address(hmToken), address(staking), 1);
+            abi.encodeWithSelector(RewardPool.initialize.selector, address(hmToken), address(staking), rewardFee);
         address rewardPoolProxy = address(new ERC1967Proxy(rewardPoolImpl, rewardPoolData));
         rewardPool = RewardPool(rewardPoolProxy);
 
@@ -168,30 +168,39 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         staking.withdraw();
     }
 
-    // function testEmitEventOnStakeWithdrawal() public {
-    //     vm.startPrank(operator);
-    //     uint256 amount = 10;
-    //     uint256 lockedTokens = 5;
-    //     staking.stake(amount);
-    //     address[] memory trustedHandlers = _initTrustedHandlers();
-    //     escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
-    //     staking.unstake(lockedTokens);
-    //     vm.expectEmit();
-    //     emit StakeWithdrawn(operator, lockedTokens);
-    //     staking.withdraw();
-    //     vm.stopPrank();
-    // }
+    function testEmitEventOnStakeWithdrawal() public {
+        vm.startPrank(operator);
+        uint256 lockedTokens = 5;
+        uint256 stakeTokens = 10;
+        address[] memory trustedHandlers = _initTrustedHandlers();
 
-    // function testDecreaseAmountOfTokensStaked() public {
-    //     vm.startPrank(operator);
-    //     uint256 amount = 10;
-    //     uint256 lockedTokens = 5;
-    //     staking.stake(amount);
-    //     staking.unstake(lockedTokens);
-    //     Stakes.Staker memory staker = staking.getStaker(operator);
-    //     uint256 latestBlockNumber = vm.getBlockNumber();
-    //     console.log(latestBlockNumber);
-    // }
+        // Stake to be able to create escrow 
+        staking.stake(stakeTokens);
+
+        // Create escrow 
+        escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+
+        // Unstake to lock tokens for withdrawal
+        staking.unstake(lockedTokens);
+        // Pass the LockPeriod 
+        vm.roll(3);
+        staking.stake(stakeTokens);
+        vm.expectEmit(true, false, false, true);
+        emit StakeWithdrawn(operator, lockedTokens);
+        staking.withdraw();
+        vm.stopPrank();
+    }
+
+    function testDecreaseAmountOfTokensStaked() public {
+        vm.startPrank(operator);
+        uint256 amount = 10;
+        uint256 lockedTokens = 5;
+        staking.stake(amount);
+        staking.unstake(lockedTokens);
+        Stakes.Staker memory staker = staking.getStaker(operator);
+        uint256 latestBlockNumber = vm.getBlockNumber();
+        console.log(latestBlockNumber);
+    }
 
     function testFail_CallerNotOwner() public {
         uint256 minimumStake = 0;
@@ -394,31 +403,31 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         staking.slash(validator[0], operator, escrowAddress, 0);
     }
 
-    // function testEmitOnStakeSlashed() public {
-    //     uint256 stakedTokens = 10;
-    //     uint256 allocatedTokens = 5;
-    //     uint256 slashedTokens = 2;
+    function testEmitOnStakeSlashed() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 5;
+        uint256 slashedTokens = 2;
 
-    //     address[] memory validator = new address[](1);
-    //     validator[0] = accounts[1];
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
 
 
-    //     vm.prank(owner);
-    //     staking.setRewardPool(address(rewardPool));
-    //     vm.prank(validator[0]);
-    //     staking.stake(stakedTokens);
-    //     vm.startPrank(operator);
-    //     staking.stake(stakedTokens);
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        vm.prank(validator[0]);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
         
-    //     address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
-    //     staking.allocate(escrowAddress, allocatedTokens);
-    //     vm.stopPrank();
-    //     vm.startPrank(owner);
-    //     vm.expectEmit();
-    //     emit StakeSlashed(operator, slashedTokens, escrowAddress, owner);
-    //     staking.slash(validator[0], operator, escrowAddress, slashedTokens);
-    //     vm.stopPrank();
-    // }
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+        vm.stopPrank();
+        vm.startPrank(owner);
+        vm.expectEmit(true, true, true, true);
+        emit StakeSlashed(operator, slashedTokens, escrowAddress, validator[0]);
+        staking.slash(validator[0], operator, escrowAddress, slashedTokens);
+        vm.stopPrank();
+    }
 
     function testAllocationByEscrow() public {}
 }
