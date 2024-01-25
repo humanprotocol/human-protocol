@@ -9,6 +9,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { KycStatus } from '../../common/enums/user';
 import { KycRepository } from './kyc.repository';
 import { KycEntity } from './kyc.entity';
+import { of } from 'rxjs';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
@@ -54,10 +55,11 @@ describe('Kyc Service', () => {
   });
 
   describe('initSession', () => {
-    it('Should return existing session id if user already has an active Kyc session', async () => {
+    it('Should return existing session id if user already has an active Kyc session and the status is not approved', async () => {
       const mockUserEntity = {
         kyc: {
           sessionId: '123',
+          status: KycStatus.SUBMISSION_REQUIRED,
         },
       };
 
@@ -66,6 +68,40 @@ describe('Kyc Service', () => {
       expect(result).toEqual({
         sessionId: '123',
       });
+    });
+
+    it('Should return null session id if user already has an active Kyc session and the status is approved', async () => {
+      const mockUserEntity = {
+        kyc: {
+          sessionId: '123',
+          status: KycStatus.APPROVED,
+        },
+      };
+
+      const result = await kycService.initSession(mockUserEntity as any);
+
+      expect(result).toEqual({
+        sessionId: null,
+        message: 'KYC is already approved',
+      });
+    });
+
+    it("Should throw an error if synapse doesn't return a session id", async () => {
+      const mockUserEntity = {
+        kyc: {
+          sessionId: null,
+        },
+      };
+
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          data: {},
+        });
+      });
+
+      await expect(
+        kycService.initSession(mockUserEntity as any),
+      ).rejects.toThrow();
     });
 
     it('Should start a Kyc session for the user', async () => {
@@ -77,10 +113,12 @@ describe('Kyc Service', () => {
         email: 'test@example.com',
       };
 
-      httpService.axiosRef.request = jest.fn().mockResolvedValueOnce({
-        data: {
-          session_id: '123',
-        },
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          data: {
+            session_id: '123',
+          },
+        });
       });
 
       jest.spyOn(kycRepository, 'create').mockResolvedValue({} as KycEntity);
@@ -90,17 +128,14 @@ describe('Kyc Service', () => {
       expect(result).toEqual({
         sessionId: '123',
       });
-      expect(httpService.axiosRef.request).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'session/init',
-        data: {
-          alias: 'test@example.com',
+      expect(httpService.post).toHaveBeenCalledWith(
+        'session/init',
+        { alias: 'test@example.com' },
+        {
+          baseURL: 'https://api.synaps.io/v4',
+          headers: { 'Api-Key': 'synaps-api-key' },
         },
-        baseURL: 'https://api.synaps.io/v4',
-        headers: {
-          'Api-Key': 'synaps-api-key',
-        },
-      });
+      );
       expect(kycRepository.create).toHaveBeenCalledWith({
         sessionId: '123',
         status: KycStatus.NONE,

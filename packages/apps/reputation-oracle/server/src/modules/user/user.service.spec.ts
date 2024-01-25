@@ -15,6 +15,7 @@ import { getNonce } from '../../common/utils/signature';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
+import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('@human-protocol/sdk');
 
@@ -260,7 +261,7 @@ describe('UserService', () => {
 
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        address,
+        { chainId: ChainId.POLYGON_MUMBAI, address },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -277,7 +278,10 @@ describe('UserService', () => {
       const address = '0x456';
 
       await expect(
-        userService.registerAddress(userEntity as UserEntity, address),
+        userService.registerAddress(userEntity as UserEntity, {
+          chainId: ChainId.POLYGON_MUMBAI,
+          address,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -294,7 +298,10 @@ describe('UserService', () => {
       const address = '0x123';
 
       await expect(
-        userService.registerAddress(userEntity as UserEntity, address),
+        userService.registerAddress(userEntity as UserEntity, {
+          chainId: ChainId.POLYGON_MUMBAI,
+          address,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
   });

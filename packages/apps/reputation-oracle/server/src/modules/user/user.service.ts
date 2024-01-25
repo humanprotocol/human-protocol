@@ -11,10 +11,13 @@ import { ErrorUser } from '../../common/constants/errors';
 import { KycStatus, UserStatus, UserType } from '../../common/enums/user';
 import { getNonce } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
-import { UserCreateDto, UserUpdateDto } from './user.dto';
+import {
+  RegisterAddressRequestDto,
+  UserCreateDto,
+  UserUpdateDto,
+} from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { ChainId } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
@@ -135,9 +138,9 @@ export class UserService {
 
   public async registerAddress(
     user: UserEntity,
-    address: string,
+    data: RegisterAddressRequestDto,
   ): Promise<string> {
-    if (user.evmAddress && user.evmAddress !== address) {
+    if (user.evmAddress && user.evmAddress !== data.address) {
       throw new BadRequestException(ErrorUser.IncorrectAddress);
     }
 
@@ -145,11 +148,11 @@ export class UserService {
       throw new BadRequestException(ErrorUser.KycNotApproved);
     }
 
-    user.evmAddress = address;
+    user.evmAddress = data.address;
     await user.save();
 
     return await this.web3Service
-      .getSigner(ChainId.POLYGON)
-      .signMessage(address);
+      .getSigner(data.chainId)
+      .signMessage(data.address);
   }
 }

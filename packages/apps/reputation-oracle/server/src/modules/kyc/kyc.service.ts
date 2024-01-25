@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../user/user.entity';
@@ -8,6 +13,7 @@ import { AxiosResponse } from '@nestjs/terminus/dist/health-indicator/http/axios
 import { KycSessionDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class KycService {
@@ -56,19 +62,37 @@ export class KycService {
   }
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
-    if (userEntity.kyc.sessionId) {
+    if (userEntity.kyc?.sessionId) {
+      if (userEntity.kyc.status === KycStatus.APPROVED) {
+        return {
+          sessionId: null,
+          message: 'KYC is already approved',
+        };
+      }
+
       return {
         sessionId: userEntity.kyc.sessionId,
       };
     }
 
-    const { data } = await this.synapsAPIRequest<{ session_id: string }>(
-      'POST',
-      'session/init',
-      {
-        alias: userEntity.email,
-      },
+    const { data } = await firstValueFrom(
+      await this.httpService.post(
+        'session/init',
+        {
+          alias: userEntity.email,
+        },
+        {
+          baseURL: this.synapsBaseURL,
+          headers: {
+            'Api-Key': this.synapsApiKey,
+          },
+        },
+      ),
     );
+
+    if (!data?.session_id) {
+      throw new InternalServerErrorException('Invalid response from Synaps');
+    }
 
     await this.kycRepository.create({
       sessionId: data.session_id,

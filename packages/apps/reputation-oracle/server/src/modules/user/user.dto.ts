@@ -3,6 +3,7 @@ import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
+import { ChainId } from '@human-protocol/sdk';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -56,6 +57,10 @@ export class UserUpdateDto {
 }
 
 export class RegisterAddressRequestDto {
+  @ApiProperty({ name: 'chain_id' })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
   @ApiProperty()
   @IsString()
   public address: string;

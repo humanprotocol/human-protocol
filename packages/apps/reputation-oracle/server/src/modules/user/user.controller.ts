@@ -59,7 +59,7 @@ export class UserController {
   ): Promise<RegisterAddressResponseDto> {
     const signedAddress = await this.userService.registerAddress(
       request.user,
-      data.address,
+      data,
     );
 
     return { signedAddress };

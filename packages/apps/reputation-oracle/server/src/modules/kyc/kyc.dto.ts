@@ -1,11 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { KycStatus } from '../../common/enums/user';
 
 export class KycSessionDto {
   @ApiProperty({ name: 'session_id' })
   @IsString()
-  public sessionId: string;
+  public sessionId: string | null;
+
+  @ApiPropertyOptional()
+  @IsString()
+  public message?: string;
 }
 
 export class KycStatusDto {
