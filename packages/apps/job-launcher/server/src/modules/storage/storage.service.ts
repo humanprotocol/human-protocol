@@ -5,7 +5,7 @@ import {
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
+import { S3ConfigType, s3ConfigKey } from '../../common/config';
 import { ErrorBucket } from '../../common/constants/errors';
 import stringify from 'json-stable-stringify';
 import { ContentType, Extension } from '../../common/enums/storage';
@@ -20,6 +20,7 @@ export class StorageService {
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
     public readonly configService: ConfigService,
+    @Inject(Encryption) private readonly encryption: Encryption,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -38,16 +39,11 @@ export class StorageService {
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
-
       if (
         typeof fileContent === 'string' &&
         EncryptionUtils.isEncrypted(fileContent)
       ) {
-        const encryption = await Encryption.build(
-          this.configService.get<string>(ConfigNames.PGP_ENCRYPT, ''),
-        );
-
-        return await encryption.decrypt(fileContent);
+        return await this.encryption.decrypt(fileContent);
       } else {
         return fileContent;
       }

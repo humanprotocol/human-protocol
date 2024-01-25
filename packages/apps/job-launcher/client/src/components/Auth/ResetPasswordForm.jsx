@@ -16,12 +16,11 @@ export const ResetPasswordForm = () => {
   const navigate = useNavigate();
   const token = new URLSearchParams(window.location.search).get('token');
 
-  const handleResetPassword = async ({ password, repeatPassword }) => {
+  const handleResetPassword = async ({ password }) => {
     setIsLoading(true);
     try {
       await authService.resetPassword({
         password,
-        confirm: repeatPassword,
         token,
       });
 

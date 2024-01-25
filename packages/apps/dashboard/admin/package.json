@@ -6,6 +6,7 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
+    "prebuild": "yarn workspace @human-protocol/core install && yarn workspace @human-protocol/sdk install && yarn workspace @human-protocol/sdk build",
     "build": "strapi build",
     "strapi": "strapi"
   },

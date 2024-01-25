@@ -84,7 +84,7 @@ export const CryptoPayForm = ({
           );
 
           const tx = await contract.transfer(
-            import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
+            await paymentService.getOperatorAddress(),
             ethers.utils.parseUnits(tokenAmount.toFixed(2), 18),
           );
 
