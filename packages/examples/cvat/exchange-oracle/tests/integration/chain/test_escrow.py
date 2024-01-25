@@ -93,7 +93,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_escrow_manifest_invalid_url(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
-            self.escrow_data.manifestUrl = "invalid_url"
+            self.escrow_data.manifest_url = "invalid_url"
             mock_function.return_value = self.escrow_data
             with self.assertRaises(StorageClientError) as error:
                 get_escrow_manifest(chain_id, escrow_address)
@@ -125,7 +125,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_recording_oracle_address(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
-            self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_function.return_value = self.escrow_data
             recording_oracle_address = get_recording_oracle_address(chain_id, escrow_address)
             self.assertIsInstance(recording_oracle_address, str)

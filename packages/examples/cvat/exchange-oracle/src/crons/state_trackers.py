@@ -282,7 +282,7 @@ def retrieve_annotations() -> None:
                 existing_storage_files = set(
                     f.key
                     for f in storage_client.list_files(
-                        StorageConfig.results_bucket_name,
+                        StorageConfig.data_bucket_name,
                         path=compose_output_annotation_filename(
                             project.escrow_address,
                             project.chain_id,
@@ -295,7 +295,7 @@ def retrieve_annotations() -> None:
                         continue
 
                     storage_client.create_file(
-                        StorageConfig.results_bucket_name,
+                        StorageConfig.data_bucket_name,
                         compose_output_annotation_filename(
                             project.escrow_address,
                             project.chain_id,

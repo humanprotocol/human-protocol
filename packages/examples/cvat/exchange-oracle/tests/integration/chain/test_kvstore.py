@@ -68,7 +68,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.kvstore.get_web3") as mock_function, patch(
             "src.chain.kvstore.get_escrow"
         ) as mock_escrow, patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader:
-            self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = {"webhook_url": DEFAULT_URL}
             mock_function.return_value = self.w3
@@ -86,7 +86,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.kvstore.get_web3") as mock_function, patch(
             "src.chain.kvstore.get_escrow"
         ) as mock_escrow, patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader:
-            self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = {"webhook_url": ""}
             mock_function.return_value = self.w3

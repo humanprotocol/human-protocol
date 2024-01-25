@@ -51,7 +51,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         mock_escrow.status = status
         mock_escrow.balance = balance
         mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
-        mock_escrow.manifestUrl = DEFAULT_URL
+        mock_escrow.manifest_url = DEFAULT_URL
         return mock_escrow
 
     def test_validate_escrow(self):

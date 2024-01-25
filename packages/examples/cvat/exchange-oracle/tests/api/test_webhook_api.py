@@ -23,7 +23,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         mock_get_web3.return_value = Web3(HTTPProvider(Networks.localhost))
         mock_escrow = Mock()
         mock_escrow.launcher = JOB_LAUNCHER
-        mock_escrow.recordingOracle = RECORDING_ORACLE_ADDRESS
+        mock_escrow.recording_oracle = RECORDING_ORACLE_ADDRESS
         mock_get_escrow.return_value = mock_escrow
 
         response = client.post(
@@ -130,7 +130,7 @@ def test_incoming_webhook_401(client: TestClient) -> None:
         mock_get_web3.return_value = Web3(HTTPProvider(Networks.localhost))
         mock_escrow = Mock()
         mock_escrow.launcher = escrow_address
-        mock_escrow.recordingOracle = RECORDING_ORACLE_ADDRESS
+        mock_escrow.recording_oracle = RECORDING_ORACLE_ADDRESS
         mock_get_escrow.return_value = mock_escrow
         response = client.post(
             "/oracle-webhook",

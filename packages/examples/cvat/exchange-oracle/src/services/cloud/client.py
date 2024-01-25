@@ -4,6 +4,7 @@
 
 from io import BytesIO
 from typing import List, Optional
+from urllib.parse import unquote
 
 import boto3
 from botocore.exceptions import ClientError
@@ -22,7 +23,7 @@ class S3Client:
             "s3",
             **(dict(aws_access_key_id=access_key) if access_key else {}),
             **(dict(aws_secret_access_key=secret_key) if secret_key else {}),
-            endpoint_url=endpoint_url,
+            endpoint_url=unquote(endpoint_url),
         )
 
         self.resource = s3
@@ -32,14 +33,14 @@ class S3Client:
             self.client.meta.events.register("choose-signer.s3.*", disable_signing)
 
     def create_file(self, bucket: str, filename: str, data: bytes = b""):
-        self.client.put_object(Body=data, Bucket=bucket, Key=filename)
+        self.client.put_object(Body=data, Bucket=unquote(bucket), Key=unquote(filename))
 
     def remove_file(self, bucket: str, filename: str):
-        self.client.delete_object(Bucket=bucket, Key=filename)
+        self.client.delete_object(Bucket=unquote(bucket), Key=unquote(filename))
 
     def file_exists(self, bucket: str, filename: str) -> bool:
         try:
-            self.client.head_object(Bucket=bucket, Key=filename)
+            self.client.head_object(Bucket=unquote(bucket), Key=unquote(filename))
             return True
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
@@ -49,13 +50,13 @@ class S3Client:
 
     def download_fileobj(self, bucket: str, key: str) -> bytes:
         with BytesIO() as data:
-            self.client.download_fileobj(Bucket=bucket, Key=key, Fileobj=data)
+            self.client.download_fileobj(Bucket=unquote(bucket), Key=unquote(key), Fileobj=data)
             return data.getvalue()
 
     def list_files(self, bucket: str, path: Optional[str] = None) -> List:
-        objects = self.resource.Bucket(bucket).objects
+        objects = self.resource.Bucket(unquote(bucket)).objects
         if path:
-            objects = objects.filter(Prefix=path.strip("/\\") + "/")
+            objects = objects.filter(Prefix=unquote(path).strip("/\\") + "/")
         else:
             objects = objects.all()
         return list(objects)

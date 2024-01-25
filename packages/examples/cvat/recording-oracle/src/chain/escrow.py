@@ -42,7 +42,7 @@ def validate_escrow(
 
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
-    manifest_content = StorageClient.download_file_from_url(escrow.manifestUrl)
+    manifest_content = StorageClient.download_file_from_url(escrow.manifest_url)
     return json.loads(manifest_content.decode("utf-8"))
 
 

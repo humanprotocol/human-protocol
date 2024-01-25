@@ -28,7 +28,7 @@ class Project(Base):
     job_type = Column(String, Enum(TaskType), nullable=False)
     escrow_address = Column(String(42), unique=True, nullable=False)
     chain_id = Column(Integer, Enum(Networks), nullable=False)
-    bucket_url = Column(String, nullable=False)
+    bucket_url = Column(String, nullable=False)  # TODO: consider removal
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     cvat_webhook_id = Column(Integer, nullable=True)

@@ -1,0 +1,24 @@
+{
+   "data": {
+       "data_url": "http://127.0.0.1:9010/datasets/",
+       "points_url": "http://127.0.0.1:9010/datasets/task_test-points-for-boxes_annotations_2024_01_24_11_59_58_coco%20keypoints%201.0-good/annotations/person_keypoints_default.json"
+   },
+   "annotation": {
+       "labels": [
+           { "name": "cat" },
+           { "name": "dog" },
+           { "name": "mouse" }
+       ],
+       "description": "Brief task description",
+       "user_guide": "Task description (markdown)",
+       "type": "IMAGE_BOXES_FROM_POINTS",
+       "job_size": 10,
+       "max_time": 1800
+   },
+   "validation": {
+       "min_quality": 0.8,
+       "val_size": 2,
+       "gt_url": "http://127.0.0.1:9010/datasets/gt_boxes/annotations/instances_default.json"
+   },
+   "job_bounty": "0.05"
+}

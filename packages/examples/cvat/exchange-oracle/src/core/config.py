@@ -98,7 +98,7 @@ class StorageConfig:
     region = os.environ.get("STORAGE_REGION", "")
     access_key = os.environ.get("STORAGE_ACCESS_KEY", "")
     secret_key = os.environ.get("STORAGE_SECRET_KEY", "")
-    results_bucket_name = os.environ.get("STORAGE_RESULTS_BUCKET_NAME", "")
+    data_bucket_name = os.environ.get("STORAGE_DATA_BUCKET_NAME", "")
     secure = str_to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
 
     @classmethod
@@ -112,9 +112,9 @@ class StorageConfig:
         scheme = "https://" if cls.secure else "http://"
 
         if is_ipv4(cls.endpoint_url):
-            return f"{scheme}{cls.endpoint_url}/{cls.results_bucket_name}/"
+            return f"{scheme}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
-            return f"{scheme}{cls.results_bucket_name}.{cls.endpoint_url}/"
+            return f"{scheme}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class FeaturesConfig:

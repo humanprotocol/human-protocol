@@ -13,7 +13,7 @@ def get_recording_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     web3 = get_web3(chain_id)
     staking_client = StakingClient(web3)
-    return staking_client.get_leader(escrow.recordingOracle)["webhook_url"]
+    return staking_client.get_leader(escrow.recording_oracle)["webhook_url"]
 
 
 def get_job_launcher_url(chain_id: int, escrow_address: str) -> str:

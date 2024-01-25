@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
@@ -10,6 +11,10 @@ class DataInfo(BaseModel):
     data_url: AnyUrl
     "Bucket URL, s3 only, virtual-hosted-style access"
     # https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-bucket-intro.html
+
+    points_url: Optional[AnyUrl] = None
+    "A path to an archive with a set of points in COCO Keypoints format, "
+    "which provides information about all objects on images"
 
 
 class LabelInfo(BaseModel):

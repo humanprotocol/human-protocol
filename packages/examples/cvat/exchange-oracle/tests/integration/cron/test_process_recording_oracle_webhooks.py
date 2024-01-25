@@ -267,7 +267,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             w3.eth.chain_id = ChainId.LOCALHOST.value
             mock_web3.return_value = w3
             mock_escrow_data = Mock()
-            mock_escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            mock_escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = mock_escrow_data
             mock_leader.return_value = {"webhook_url": DEFAULT_URL}
             mock_response = MagicMock()

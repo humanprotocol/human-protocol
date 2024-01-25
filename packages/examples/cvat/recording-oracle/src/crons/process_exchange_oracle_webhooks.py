@@ -94,7 +94,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
             )
 
             excor_bucket_host = Config.exchange_oracle_storage_config.provider_endpoint_url()
-            excor_bucket_name = Config.exchange_oracle_storage_config.results_bucket_name
+            excor_bucket_name = Config.exchange_oracle_storage_config.data_bucket_name
 
             excor_annotation_meta_path = compose_bucket_filename(
                 webhook.escrow_address,
@@ -175,12 +175,12 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
 
                 # TODO: add encryption
                 storage_client.create_file(
-                    Config.storage_config.results_bucket_name,
+                    Config.storage_config.data_bucket_name,
                     recor_merged_annotations_path,
                     validation_results.resulting_annotations,
                 )
                 storage_client.create_file(
-                    Config.storage_config.results_bucket_name,
+                    Config.storage_config.data_bucket_name,
                     recor_validation_meta_path,
                     validation_metafile,
                 )
