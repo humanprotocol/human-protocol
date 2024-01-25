@@ -6,12 +6,6 @@ export class KycSessionDto {
   @ApiProperty({ name: 'session_id' })
   @IsString()
   public sessionId: string;
-
-  @ApiPropertyOptional({
-    enum: KycStatus,
-  })
-  @IsEnum(KycStatus)
-  public status?: KycStatus;
 }
 
 export class KycStatusDto {
@@ -67,4 +61,9 @@ export class KycUpdateDto {
   })
   @IsEnum(KycStatus)
   public status: KycStatus;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  public message?: string;
 }

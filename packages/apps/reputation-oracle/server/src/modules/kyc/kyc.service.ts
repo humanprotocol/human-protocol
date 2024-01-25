@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -13,6 +14,7 @@ import { KycSessionDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
+import { ErrorKyc } from '../../common/constants/errors';
 
 @Injectable()
 export class KycService {
@@ -41,9 +43,22 @@ export class KycService {
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
+      if (userEntity.kyc.status === KycStatus.APPROVED) {
+        throw new BadRequestException(ErrorKyc.AlreadyApproved);
+      }
+
+      if (userEntity.kyc.status === KycStatus.PENDING_VERIFICATION) {
+        throw new BadRequestException(ErrorKyc.VerificationInProgress);
+      }
+
+      if (userEntity.kyc.status === KycStatus.REJECTED) {
+        throw new BadRequestException(
+          `${ErrorKyc.Rejected}. Reason: ${userEntity.kyc.message}`,
+        );
+      }
+
       return {
         sessionId: userEntity.kyc.sessionId,
-        status: userEntity.kyc.status,
       };
     }
 
@@ -63,7 +78,7 @@ export class KycService {
     );
 
     if (!data?.session_id) {
-      throw new InternalServerErrorException('Invalid response from Synaps');
+      throw new InternalServerErrorException(ErrorKyc.InvalidSynapsAPIResponse);
     }
 
     await this.kycRepository.create({
@@ -74,7 +89,6 @@ export class KycService {
 
     return {
       sessionId: data.session_id,
-      status: KycStatus.NONE,
     };
   }
 
@@ -83,7 +97,7 @@ export class KycService {
     data: KycStatusDto,
   ): Promise<void> {
     if (secret !== this.synapsWebhookSecret) {
-      throw new UnauthorizedException('Invalid secret');
+      throw new UnauthorizedException(ErrorKyc.InvalidWebhookSecret);
     }
 
     const { data: sessionData } = await firstValueFrom(
@@ -95,16 +109,20 @@ export class KycService {
       }),
     );
 
-    if (!sessionData?.session?.status) {
-      throw new InternalServerErrorException('Invalid response from Synaps');
+    if (
+      !sessionData?.session?.status ||
+      sessionData.session.status !== data.state
+    ) {
+      throw new InternalServerErrorException(ErrorKyc.InvalidSynapsAPIResponse);
     }
 
     await this.kycRepository.updateOne(
       {
-        sessionId: sessionData.session.id,
+        sessionId: data.sessionId,
       },
       {
-        status: sessionData.session.status,
+        status: data.state,
+        message: data.reason,
       },
     );
   }

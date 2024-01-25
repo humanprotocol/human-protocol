@@ -5,11 +5,12 @@ import { KycService } from './kyc.service';
 import { HttpService } from '@nestjs/axios';
 import { DeepPartial } from 'typeorm';
 import { createMock } from '@golevelup/ts-jest';
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { KycStatus } from '../../common/enums/user';
 import { KycRepository } from './kyc.repository';
 import { KycEntity } from './kyc.entity';
 import { of } from 'rxjs';
+import { ErrorKyc } from '../../common/constants/errors';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
@@ -55,20 +56,112 @@ describe('Kyc Service', () => {
   });
 
   describe('initSession', () => {
-    it('Should return existing session id with status if user already has an active Kyc session', async () => {
+    describe('Should return existing session id if user already has an active Kyc session, and is waiting for user to make an action', () => {
+      it('status is NONE', async () => {
+        const mockUserEntity = {
+          kyc: {
+            sessionId: '123',
+            status: KycStatus.NONE,
+          },
+        };
+
+        const result = await kycService.initSession(mockUserEntity as any);
+
+        expect(result).toEqual({
+          sessionId: '123',
+        });
+      });
+
+      it('status is SUBMISSION_REQUIRED', async () => {
+        const mockUserEntity = {
+          kyc: {
+            sessionId: '123',
+            status: KycStatus.SUBMISSION_REQUIRED,
+          },
+        };
+
+        const result = await kycService.initSession(mockUserEntity as any);
+
+        expect(result).toEqual({
+          sessionId: '123',
+        });
+      });
+
+      it('status is RESUBMISSION_REQUIRED', async () => {
+        const mockUserEntity = {
+          kyc: {
+            sessionId: '123',
+            status: KycStatus.RESUBMISSION_REQUIRED,
+          },
+        };
+
+        const result = await kycService.initSession(mockUserEntity as any);
+
+        expect(result).toEqual({
+          sessionId: '123',
+        });
+      });
+
+      it('status is RESET', async () => {
+        const mockUserEntity = {
+          kyc: {
+            sessionId: '123',
+            status: KycStatus.RESET,
+          },
+        };
+
+        const result = await kycService.initSession(mockUserEntity as any);
+
+        expect(result).toEqual({
+          sessionId: '123',
+        });
+      });
+    });
+
+    it('Should throw an error if user already has an active Kyc session, but is approved already', async () => {
       const mockUserEntity = {
         kyc: {
           sessionId: '123',
-          status: KycStatus.SUBMISSION_REQUIRED,
+          status: KycStatus.APPROVED,
         },
       };
 
-      const result = await kycService.initSession(mockUserEntity as any);
+      await expect(
+        kycService.initSession(mockUserEntity as any),
+      ).rejects.toThrow(new BadRequestException(ErrorKyc.AlreadyApproved));
+    });
 
-      expect(result).toEqual({
-        sessionId: '123',
-        status: KycStatus.SUBMISSION_REQUIRED,
-      });
+    it("Should throw an error if user already has an active Kyc session, but it's pending verification", async () => {
+      const mockUserEntity = {
+        kyc: {
+          sessionId: '123',
+          status: KycStatus.PENDING_VERIFICATION,
+        },
+      };
+
+      await expect(
+        kycService.initSession(mockUserEntity as any),
+      ).rejects.toThrow(
+        new BadRequestException(ErrorKyc.VerificationInProgress),
+      );
+    });
+
+    it("Should throw an error if user already has an active Kyc session, but it's rejected", async () => {
+      const mockUserEntity = {
+        kyc: {
+          sessionId: '123',
+          status: KycStatus.REJECTED,
+          message: 'test',
+        },
+      };
+
+      await expect(
+        kycService.initSession(mockUserEntity as any),
+      ).rejects.toThrow(
+        new BadRequestException(
+          `${ErrorKyc.Rejected}. Reason: ${mockUserEntity.kyc.message}`,
+        ),
+      );
     });
 
     it("Should throw an error if synaps doesn't return a session id", async () => {
@@ -112,7 +205,6 @@ describe('Kyc Service', () => {
 
       expect(result).toEqual({
         sessionId: '123',
-        status: KycStatus.NONE,
       });
       expect(httpService.post).toHaveBeenCalledWith(
         'session/init',
@@ -132,7 +224,6 @@ describe('Kyc Service', () => {
 
   describe('updateKycStatus', () => {
     const mockKycUpdate = {
-      reason: '',
       stepId: 'xx',
       service: 'ID DOCUMENT',
       sessionId: '123',

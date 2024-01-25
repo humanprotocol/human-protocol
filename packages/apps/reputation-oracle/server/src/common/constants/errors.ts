@@ -81,4 +81,9 @@ export enum ErrorSendGrid {
 
 export enum ErrorKyc {
   NotFound = 'KYC session not found',
+  AlreadyApproved = 'KYC session already approved',
+  VerificationInProgress = 'KYC session verification in progress',
+  Rejected = 'KYC session rejected',
+  InvalidSynapsAPIResponse = 'Invalid Synaps API response',
+  InvalidWebhookSecret = 'Invalid webhook secret',
 }
