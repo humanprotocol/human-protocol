@@ -1470,10 +1470,7 @@ export class JobService {
 
     const kvStoreClient = await KVStoreClient.build(signer);
 
-    const feeValue = await kvStoreClient.get(
-      oracleAddress || signer.address,
-      KVStoreKeys.fee,
-    );
+    const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
 
     return BigInt(feeValue ? feeValue : 1);
   }
