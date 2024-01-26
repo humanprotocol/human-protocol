@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { handleQueryFailedError } from '../../database/handleQueryFailedError';
+import { handleQueryFailedError } from '../../database/database.error';
 
 @Injectable()
 export class UserRepository extends Repository<UserEntity> {
