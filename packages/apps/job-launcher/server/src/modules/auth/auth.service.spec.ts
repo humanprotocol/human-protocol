@@ -469,7 +469,6 @@ describe('AuthService', () => {
         authService.restorePassword({
           token: 'token',
           password: 'password',
-          confirm: 'password',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -485,7 +484,6 @@ describe('AuthService', () => {
       await authService.restorePassword({
         token: 'token',
         password: 'password',
-        confirm: 'password',
       });
 
       expect(updatePasswordMock).toHaveBeenCalled();

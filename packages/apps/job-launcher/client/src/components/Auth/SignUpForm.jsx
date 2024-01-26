@@ -24,10 +24,10 @@ export const SignUpForm = ({ onFinish, onError }) => {
   const [email, setEmail] = useState('');
   const [alertMsg, setAlertMsg] = useState('');
 
-  const handleRegister = async ({ email, password, confirm }) => {
+  const handleRegister = async ({ email, password }) => {
     setIsLoading(true);
     try {
-      await authService.signUp({ email, password, confirm });
+      await authService.signUp({ email, password });
       setEmail(email);
       setIsSuccess(true);
     } catch (err) {

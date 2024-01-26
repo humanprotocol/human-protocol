@@ -233,6 +233,8 @@ describe('JobService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             validateChainId: jest.fn().mockReturnValue(new Error()),
+            calculateGasPrice: jest.fn().mockReturnValue(1000n),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
@@ -271,8 +273,6 @@ describe('JobService', () => {
     });
 
     storageService.download = jest.fn();
-
-    web3Service.calculateGasPrice = jest.fn().mockReturnValue(1000n);
   });
 
   beforeEach(async () => {
@@ -295,12 +295,6 @@ describe('JobService', () => {
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
-    });
-
-    beforeAll(() => {
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-      }));
     });
 
     afterEach(() => {
@@ -326,6 +320,14 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
+
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -365,6 +367,14 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
+
       await jobService.createJob(userId, JobRequestType.FORTUNE, {
         ...fortuneJobDto,
         chainId: undefined,
@@ -399,6 +409,10 @@ describe('JobService', () => {
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
 
+      (KVStoreClient.build as any).mockImplementationOnce(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
@@ -410,6 +424,14 @@ describe('JobService', () => {
       const userBalance = 25;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
+
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
@@ -900,6 +922,14 @@ describe('JobService', () => {
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
+
       await jobService.createJob(
         userId,
         JobRequestType.IMAGE_POINTS,
@@ -952,6 +982,10 @@ describe('JobService', () => {
         type: JobRequestType.IMAGE_POINTS,
       };
 
+      (KVStoreClient.build as any).mockImplementationOnce(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
       await expect(
         jobService.createJob(
           userId,
@@ -986,6 +1020,10 @@ describe('JobService', () => {
         type: JobRequestType.IMAGE_POINTS,
       };
 
+      (KVStoreClient.build as any).mockImplementationOnce(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
       await expect(
         jobService.createJob(
           userId,
@@ -1018,6 +1056,10 @@ describe('JobService', () => {
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
+
+      (KVStoreClient.build as any).mockImplementationOnce(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
 
       await expect(
         jobService.createJob(
@@ -1052,6 +1094,10 @@ describe('JobService', () => {
         type: JobRequestType.IMAGE_POINTS,
       };
 
+      (KVStoreClient.build as any).mockImplementationOnce(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
       await expect(
         jobService.createJob(
           userId,
@@ -1073,6 +1119,14 @@ describe('JobService', () => {
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
+
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
 
       await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
         ...imageLabelBinaryJobDto,
@@ -1115,6 +1169,10 @@ describe('JobService', () => {
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
+      (KVStoreClient.build as any).mockImplementationOnce(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
       await expect(
         jobService.createJob(
           userId,
@@ -1130,6 +1188,14 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
+
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
 
       await expect(
         jobService.createJob(
@@ -1170,6 +1236,13 @@ describe('JobService', () => {
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
     });
 
     afterEach(() => {

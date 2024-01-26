@@ -69,4 +69,8 @@ export class Web3Service {
 
     return 1n;
   }
+
+  public getOperatorAddress(): string {
+    return Object.values(this.signers)[0].address;
+  }
 }

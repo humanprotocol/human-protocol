@@ -69,7 +69,12 @@ export class JobRepository {
   ): Promise<JobEntity[]> {
     const statusFilter =
       status === JobStatusFilter.PENDING
-        ? In([JobStatus.PENDING, JobStatus.PAID])
+        ? In([
+            JobStatus.PENDING,
+            JobStatus.PAID,
+            JobStatus.CREATED,
+            JobStatus.SET_UP,
+          ])
         : In([status]);
 
     return this.find(
