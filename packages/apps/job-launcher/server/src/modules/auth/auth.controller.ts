@@ -60,6 +60,10 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Unprocessable entity. User already exists.',
+  })
   public async signup(@Body() data: UserCreateDto): Promise<void> {
     await this.authService.signup(data);
     return;
