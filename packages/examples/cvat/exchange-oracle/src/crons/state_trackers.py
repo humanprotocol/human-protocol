@@ -15,14 +15,14 @@ from src.core.oracle_events import (
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatus
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
-from src.handlers.annotation import (
+from src.handlers.job_export import (
     CVAT_EXPORT_FORMAT_MAPPING,
     FileDescriptor,
     postprocess_annotations,
     prepare_annotation_metafile,
 )
 from src.log import ROOT_LOGGER_NAME
-from src.utils.assignments import compose_output_annotation_filename, parse_manifest
+from src.utils.assignments import compose_results_bucket_filename, parse_manifest
 from src.utils.logging import get_function_logger
 
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
@@ -266,8 +266,10 @@ def retrieve_annotations() -> None:
                 )
                 annotation_files.extend(job_annotations.values())
                 postprocess_annotations(
-                    annotation_files,
-                    project_annotations_file_desc,
+                    escrow_address=project.escrow_address,
+                    chain_id=project.chain_id,
+                    annotations=annotation_files,
+                    merged_annotation=project_annotations_file_desc,
                     manifest=manifest,
                     project_images=cvat_service.get_project_images(session, project.cvat_id),
                 )
@@ -283,7 +285,7 @@ def retrieve_annotations() -> None:
                     f.key
                     for f in storage_client.list_files(
                         StorageConfig.data_bucket_name,
-                        path=compose_output_annotation_filename(
+                        prefix=compose_results_bucket_filename(
                             project.escrow_address,
                             project.chain_id,
                             "",
@@ -296,7 +298,7 @@ def retrieve_annotations() -> None:
 
                     storage_client.create_file(
                         StorageConfig.data_bucket_name,
-                        compose_output_annotation_filename(
+                        compose_results_bucket_filename(
                             project.escrow_address,
                             project.chain_id,
                             file_descriptor.filename,

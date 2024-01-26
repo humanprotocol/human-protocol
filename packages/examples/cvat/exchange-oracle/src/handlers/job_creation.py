@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import os
 import random
 import uuid
@@ -16,7 +17,7 @@ import cv2
 import datumaro as dm
 import numpy as np
 from attrs import frozen
-from datumaro.util import dump_json, take_by
+from datumaro.util import dump_json, parse_json, take_by
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
 import src.cvat.api_calls as cvat_api
@@ -28,9 +29,9 @@ from src.core.manifest import TaskManifest
 from src.core.types import CvatLabelType, TaskStatus, TaskType
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
-from src.services.cloud import CloudProviders, StorageClient, s3
+from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url, parse_bucket_url
-from src.utils.assignments import parse_manifest
+from src.utils.assignments import compose_data_bucket_filename, parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
 
 LABEL_TYPE_MAPPING = {
@@ -88,6 +89,26 @@ class BoxesFromPointsTaskBuilder:
     class InvalidImageInfo(DatasetValidationError):
         pass
 
+    BboxPointMapping = Dict[int, int]
+
+    @frozen
+    class RoiInfo:
+        point_id: int
+        original_image_key: int
+        point_x: int
+        point_y: int
+        roi_x: int
+        roi_y: int
+        roi_w: int
+        roi_h: int
+
+        def asdict(self) -> dict:
+            return attrs.asdict(self, recurse=False)
+
+    RoiInfos = Sequence[RoiInfo]
+
+    RoiFilenames = Dict[int, str]
+
     max_discarded_threshold = 0.5
     "The maximum allowed percent of discarded "
     "GT boxes, points, or samples for successful job launch"
@@ -111,7 +132,9 @@ class BoxesFromPointsTaskBuilder:
         # Output values
         self.gt_dataset: Union[dm.Dataset, self._NotConfigured] = self._not_configured
 
-        self.bbox_point_mapping: Union[Dict[int, int], self._NotConfigured] = self._not_configured
+        self.bbox_point_mapping: Union[
+            self.BboxPointMapping, self._NotConfigured
+        ] = self._not_configured
         "bbox_id -> point_id"
 
         self.roi_size_estimations: Union[
@@ -119,8 +142,8 @@ class BoxesFromPointsTaskBuilder:
         ] = self._not_configured
         "label_id -> (rel. w, rel. h)"
 
-        self.rois: Union[Sequence[self.RoiInfo], self._NotConfigured] = self._not_configured
-        self.roi_filenames: Union[Dict[int, str], self._NotConfigured] = self._not_configured
+        self.rois: Union[self.RoiInfos, self._NotConfigured] = self._not_configured
+        self.roi_filenames: Union[self.RoiFilenames, self._NotConfigured] = self._not_configured
 
         self.job_layout: Union[Sequence[Sequence[str]], self._NotConfigured] = self._not_configured
         "File lists per CVAT job"
@@ -152,9 +175,6 @@ class BoxesFromPointsTaskBuilder:
         # TODO: add
         # credentials=BucketCredentials()
         "Exchange Oracle's private bucket info"
-
-        self.oracle_data_bucket_prefix = f"{self.escrow_address}@{self.chain_id}"
-        "Filename prefix"
 
         self.min_class_samples_for_roi_estimation = 100
 
@@ -559,7 +579,6 @@ class BoxesFromPointsTaskBuilder:
         ]
 
         bbox_sizes_per_label = {}
-        gt_counts_per_label = {}
         for sample in self.gt_dataset:
             image_h, image_w = self.input_points_dataset.get(sample.id, sample.subset).image.size
 
@@ -572,8 +591,6 @@ class BoxesFromPointsTaskBuilder:
                     )
                 )
 
-                gt_counts_per_label[gt_bbox.label] = gt_counts_per_label.get(gt_bbox.label, 0) + 1
-
         # Consider bbox sides as normally-distributed random variables, estimate sigmas
         # For big enough datasets, it should be reasonable approximation
         # (due to the central limit theorem). This can work bad for small datasets,
@@ -581,9 +598,9 @@ class BoxesFromPointsTaskBuilder:
         classes_with_default_roi = []
         roi_size_estimations_per_label = {}  # label id -> (w, h)
         for label_id, label_sizes in bbox_sizes_per_label.items():
-            if gt_counts_per_label[label_id] < self.min_class_samples_for_roi_estimation:
+            if len(label_sizes) < self.min_class_samples_for_roi_estimation:
                 classes_with_default_roi.append(label_id)
-                estimated_size = (1, 1)
+                estimated_size = (2, 2)  # 2 will yield just the image size after halving
             else:
                 mean_size = np.average(label_sizes, axis=0)
                 sigma = np.sqrt(np.var(label_sizes, axis=0))
@@ -603,20 +620,6 @@ class BoxesFromPointsTaskBuilder:
             )
 
         self.roi_size_estimations = roi_size_estimations_per_label
-
-    @frozen
-    class RoiInfo:
-        point_id: int
-        image_id: int
-        point_x: int
-        point_y: int
-        roi_x: int
-        roi_y: int
-        roi_w: int
-        roi_h: int
-
-        def asdict(self) -> dict:
-            return attrs.asdict(self, recurse=False)
 
     def _prepare_roi_info(self):
         assert self.gt_dataset is not self._not_configured
@@ -654,7 +657,7 @@ class BoxesFromPointsTaskBuilder:
                 rois.append(
                     self.RoiInfo(
                         point_id=skeleton.id,
-                        image_id=sample.attributes["id"],
+                        original_image_key=sample.attributes["id"],
                         point_x=new_point_x,
                         point_y=new_point_y,
                         roi_x=roi_left,
@@ -706,49 +709,114 @@ class BoxesFromPointsTaskBuilder:
     def _prepare_label_configuration(self):
         self.label_configuration = make_label_configuration(self.manifest)
 
-    class TaskParamsLayout:
+    class TaskMetaLayout:
         GT_FILENAME = "gt.json"
+        POINTS_FILENAME = "points.json"
         BBOX_POINT_MAPPING_FILENAME = "bbox_point_mapping.json"
         ROI_INFO_FILENAME = "rois.json"
 
         ROI_FILENAMES_FILENAME = "roi_filenames.json"
         # this is separated from the general roi info to make name mangling more "optional"
 
-    def _upload_config(self):
+    class TaskMetaSerializer:
+        GT_DATASET_FORMAT = "coco_instances"
+        POINTS_DATASET_FORMAT = "coco_person_keypoints"
+
+        def serialize_gt_annotations(self, gt_dataset: dm.Dataset) -> bytes:
+            with TemporaryDirectory() as temp_dir:
+                gt_dataset_dir = os.path.join(temp_dir, "gt_dataset")
+                gt_dataset.export(gt_dataset_dir, self.GT_DATASET_FORMAT)
+                return (
+                    Path(gt_dataset_dir) / "annotations" / "instances_default.json"
+                ).read_bytes()
+
+        def serialize_bbox_point_mapping(
+            self, bbox_point_mapping: BoxesFromPointsTaskBuilder.BboxPointMapping
+        ) -> bytes:
+            return dump_json({str(k): str(v) for k, v in bbox_point_mapping.items()})
+
+        def serialize_roi_info(self, rois_info: BoxesFromPointsTaskBuilder.RoiInfos) -> bytes:
+            return dump_json([roi_info.asdict() for roi_info in rois_info])
+
+        def serialize_roi_filenames(
+            self, roi_filenames: BoxesFromPointsTaskBuilder.RoiFilenames
+        ) -> bytes:
+            return dump_json({str(k): v for k, v in roi_filenames.items()})
+
+        def parse_gt_annotations(self, gt_dataset_data: bytes) -> dm.Dataset:
+            with TemporaryDirectory() as temp_dir:
+                annotations_filename = os.path.join(temp_dir, "annotations.json")
+                with open(annotations_filename, "wb") as f:
+                    f.write(gt_dataset_data)
+
+                dataset = dm.Dataset.import_from(
+                    annotations_filename, format=self.GT_DATASET_FORMAT
+                )
+                dataset.init_cache()
+                return dataset
+
+        def parse_points_annotations(self, points_dataset_data: bytes) -> dm.Dataset:
+            with TemporaryDirectory() as temp_dir:
+                annotations_filename = os.path.join(temp_dir, "annotations.json")
+                with open(annotations_filename, "wb") as f:
+                    f.write(points_dataset_data)
+
+                dataset = dm.Dataset.import_from(
+                    annotations_filename, format=self.POINTS_DATASET_FORMAT
+                )
+                dataset.init_cache()
+                return dataset
+
+        def parse_bbox_point_mapping(
+            self, bbox_point_mapping_data: bytes
+        ) -> BoxesFromPointsTaskBuilder.BboxPointMapping:
+            return {int(k): int(v) for k, v in parse_json(bbox_point_mapping_data).items()}
+
+        def parse_roi_info(self, rois_info_data: bytes) -> BoxesFromPointsTaskBuilder.RoiInfos:
+            return [
+                BoxesFromPointsTaskBuilder.RoiInfo(**roi_info)
+                for roi_info in parse_json(rois_info_data)
+            ]
+
+        def parse_roi_filenames(
+            self, roi_filenames_data: bytes
+        ) -> BoxesFromPointsTaskBuilder.RoiFilenames:
+            return {int(k): v for k, v in parse_json(roi_filenames_data).items()}
+
+    def _upload_meta(self):
         # TODO: maybe extract into a separate function / class / library,
         # extract constants, serialization methods return TaskConfig from build()
 
-        layout = self.TaskParamsLayout
+        layout = self.TaskMetaLayout()
+        serializer = self.TaskMetaSerializer()
 
         file_list = []
-        with TemporaryDirectory() as temp_dir:
-            gt_dataset_dir = os.path.join(temp_dir, "gt_dataset")
-            self.gt_dataset.export(gt_dataset_dir, self.points_format)
-            file_list.append(
-                (
-                    (
-                        Path(gt_dataset_dir) / "annotations" / "person_keypoints_default.json"
-                    ).read_bytes(),
-                    layout.GT_FILENAME,
-                )
+        file_list.append((self.input_points_data, layout.POINTS_FILENAME))
+        file_list.append(
+            (
+                serializer.serialize_gt_annotations(self.gt_dataset),
+                layout.GT_FILENAME,
             )
-
-        bbox_point_mapping_file = dump_json(
-            {str(k): str(v) for k, v in self.bbox_point_mapping.items()}
         )
-        file_list.append((bbox_point_mapping_file, layout.BBOX_POINT_MAPPING_FILENAME))
-
-        rois_file = dump_json([roi_info.asdict() for roi_info in self.rois])
-        file_list.append((rois_file, layout.ROI_INFO_FILENAME))
-
-        roi_filenames_file = dump_json({str(k): v for k, v in self.roi_filenames.items()})
-        file_list.append((roi_filenames_file, layout.ROI_FILENAMES_FILENAME))
+        file_list.append(
+            (
+                serializer.serialize_bbox_point_mapping(self.bbox_point_mapping),
+                layout.BBOX_POINT_MAPPING_FILENAME,
+            )
+        )
+        file_list.append((serializer.serialize_roi_info(self.rois), layout.ROI_INFO_FILENAME))
+        file_list.append(
+            (serializer.serialize_roi_filenames(self.roi_filenames), layout.ROI_FILENAMES_FILENAME)
+        )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
         bucket_name = self.oracle_data_bucket.url.bucket_name
-        prefix = self.oracle_data_bucket_prefix
         for file_data, filename in file_list:
-            storage_client.create_file(bucket_name, os.path.join(prefix, filename), file_data)
+            storage_client.create_file(
+                bucket_name,
+                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
+                file_data,
+            )
 
     def _draw_roi_point(self, roi_pixels: np.ndarray, roi_info: RoiInfo) -> np.ndarray:
         center = (roi_info.point_x, roi_info.point_y)
@@ -791,7 +859,6 @@ class BoxesFromPointsTaskBuilder:
         src_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
         src_prefix = ""
         dst_bucket = self.oracle_data_bucket
-        dst_prefix = self.oracle_data_bucket_prefix
 
         src_client = self._make_cloud_storage_client(src_bucket)
         dst_client = self._make_cloud_storage_client(dst_bucket)
@@ -802,7 +869,7 @@ class BoxesFromPointsTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self.input_points_dataset}
 
-        _roi_key = lambda e: e.image_id
+        _roi_key = lambda e: e.original_image_key
         rois_by_image: Dict[str, self.RoiInfo] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(sorted(self.rois, key=_roi_key), key=_roi_key)
@@ -845,7 +912,9 @@ class BoxesFromPointsTaskBuilder:
 
             for roi_filename, roi_bytes in image_rois.items():
                 dst_client.create_file(
-                    dst_bucket.url.bucket_name, os.path.join(dst_prefix, roi_filename), roi_bytes
+                    dst_bucket.url.bucket_name,
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, roi_filename),
+                    roi_bytes,
                 )
 
     def _create_on_cvat(self):
@@ -853,9 +922,7 @@ class BoxesFromPointsTaskBuilder:
         assert self.label_configuration is not self._not_configured
 
         input_data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
-
         oracle_bucket = self.oracle_data_bucket
-        oracle_bucket_prefix = self.oracle_data_bucket_prefix
 
         # Register cloud storage on CVAT to pass user dataset
         cloud_storage = cvat_api.create_cloudstorage(
@@ -896,7 +963,14 @@ class BoxesFromPointsTaskBuilder:
                 ),
                 cvat_webhook_id=webhook.id,
             )
-            db_service.add_project_images(session, project.id, list(self.roi_filenames.values()))
+            db_service.add_project_images(
+                session,
+                project.id,
+                [
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
+                    for fn in self.roi_filenames.values()
+                ],
+            )
 
         for job_filenames in self.job_layout:
             task = cvat_api.create_task(project.id, self.escrow_address)
@@ -909,7 +983,10 @@ class BoxesFromPointsTaskBuilder:
             cvat_api.put_task_data(
                 task.id,
                 cloud_storage.id,
-                filenames=[os.path.join(oracle_bucket_prefix, fn) for fn in job_filenames],
+                filenames=[
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
+                    for fn in job_filenames
+                ],
                 sort_images=False,
             )
 
@@ -937,7 +1014,7 @@ class BoxesFromPointsTaskBuilder:
 
         # Data preparation
         self._extract_and_upload_rois()
-        self._upload_config()
+        self._upload_meta()
 
         self._create_on_cvat()
 

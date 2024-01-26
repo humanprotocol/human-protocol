@@ -99,6 +99,7 @@ class StorageConfig:
     access_key = os.environ.get("STORAGE_ACCESS_KEY", "")
     secret_key = os.environ.get("STORAGE_SECRET_KEY", "")
     data_bucket_name = os.environ.get("STORAGE_DATA_BUCKET_NAME", "")
+    results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure = str_to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
 
     @classmethod

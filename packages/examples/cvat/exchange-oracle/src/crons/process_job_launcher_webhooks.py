@@ -3,7 +3,7 @@ import logging
 import httpx
 from human_protocol_sdk.constants import Status as EscrowStatus
 
-import src.cvat.tasks as cvat
+import src.handlers.job_creation as cvat
 import src.services.cvat as cvat_db_service
 import src.services.webhook as oracle_db_service
 from src.chain.escrow import validate_escrow
