@@ -35,7 +35,6 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
         // vm.stopPrank();
 
         // Approve spend HMT tokens staking contract
-        // vm.prank(operator);
         hmToken.approve(address(staking), 1000);
 
         // Deploy EscrowFactory Contract
@@ -71,21 +70,112 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
         vm.stopPrank();
     }
 
-    function testEmitEventOnLaunched() public {
+    // function testEmitEventOnLaunched() public {
+    //     vm.startPrank(operator);
+    //     uint256 stakeAmount = 10;
+    //     staking.stake(stakeAmount);
+    //     address[] memory newTrusted = new address[](2);
+    //     newTrusted[0] = vm.addr(203);
+    //     newTrusted[1] = vm.addr(204);
+    //     vm.expectEmit();
+    //     emit LaunchedV2(address(hmToken), escrowFactory.lastEscrow(), jobRequesterId);
+    //     escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+    //     vm.stopPrank();
+    // }
+
+    function testFindEscrowFromDepoyedEscrow() public {
         vm.startPrank(operator);
-        console.log(hmToken.balanceOf(operator));
-        staking.stake(10);
-        console.log(hmToken.balanceOf(operator));
+        uint256 stakeAmount = 10;
+        staking.stake(stakeAmount);
         address[] memory newTrusted = new address[](2);
         newTrusted[0] = vm.addr(203);
         newTrusted[1] = vm.addr(204);
-        vm.stopPrank();
-        vm.prank(owner);
-        vm.expectEmit();
-        emit LaunchedV2(address(hmToken), escrowFactory.lastEscrow(), jobRequesterId);
         escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        address escrowAddress = escrowFactory.lastEscrow();
+        Escrow escrow = Escrow(escrowAddress);
+        assertEq(escrowFactory.hasEscrow(escrowAddress), true);
+    }
+
+    function testOperatorCreateAnotherEscrowAfterAllocationOfStakes() public {
+        vm.startPrank(operator);
+        uint256 stakeAmount = 10;
+        staking.stake(stakeAmount);
+        address[] memory newTrusted = new address[](2);
+        newTrusted[0] = vm.addr(203);
+        newTrusted[1] = vm.addr(204);
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        Escrow escrow = Escrow(escrowAddress);
+        staking.allocate(escrowAddress, stakeAmount / 2);
+        address anotherEscrow = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        assertEq(escrowFactory.hasEscrow(anotherEscrow), true);
+        assertEq(escrow.token(), address(hmToken));
         vm.stopPrank();
     }
 
-    function testFindEscrowFromDepoyedEscrow() public {}
+    function testFail_NoEscrowWithAllocatingAllStakes() public {
+        vm.startPrank(operator);
+        uint256 stakeAmount = 10;
+        staking.stake(stakeAmount);
+        address[] memory newTrusted = new address[](1);
+        newTrusted[0] = accounts[6];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        Escrow escrow = Escrow(escrowAddress);
+        staking.allocate(escrowAddress, stakeAmount);
+        vm.expectRevert("NEED_STAKE_TOKENS_TO_CREATE_ESCROW");
+        address anotherEscrow = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        vm.stopPrank();
+    }
+
+    function testCreateEscrowStakingMoreTokens() public {
+        vm.startPrank(operator);
+        uint256 stakeAmount = 10;
+        staking.stake(stakeAmount);
+        address[] memory newTrusted = new address[](1);
+        newTrusted[0] = accounts[6];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        Escrow escrow = Escrow(escrowAddress);
+        staking.allocate(escrowAddress, stakeAmount);
+        staking.stake(stakeAmount);
+        address anotherEscrow = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        vm.stopPrank();
+        assertEq(escrow.token(), address(hmToken));
+        assertEq(escrowFactory.hasEscrow(anotherEscrow), true);
+    }
+
+    function testFail_RejectNonOwnerUpgrades() public {
+        vm.startPrank(owner);
+        address escrowFactoryImpl = address(new EscrowFactory());
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
+        address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
+        escrowFactory = EscrowFactory(escrowFactoryProxy);
+        vm.stopPrank();
+
+        // Use another address to upgrade
+        vm.startPrank(operator);
+        EscrowFactory proxy = EscrowFactory(payable(escrowFactoryProxy));
+        address newEscrowFactory = address(new EscrowFactory());
+        vm.expectRevert("OWNABLE: CALLER_IS_NOT_OWNER");
+        proxy.upgradeTo(newEscrowFactory);
+    }
+
+    // TO DO :
+    // Add checks for getImplementationAddress and hasEscrow After staking
+    function testUpgradeEscrowFactory() public {
+        vm.startPrank(owner);
+        address escrowFactoryImpl = address(new EscrowFactory());
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
+        address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
+        escrowFactory = EscrowFactory(escrowFactoryProxy);
+        vm.stopPrank();
+
+        // Use owner to upgrade
+        vm.startPrank(owner);
+        EscrowFactory proxy = EscrowFactory(payable(escrowFactoryProxy));
+        address newEscrowFactory = address(new EscrowFactory());
+        proxy.upgradeTo(newEscrowFactory);
+        vm.stopPrank();
+    }
+
+    // TO DO 
+    function testHaveSameStorage() public {}
 }

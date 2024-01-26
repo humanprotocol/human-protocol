@@ -580,7 +580,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         _amounts[0] = 100;
         address[] memory operator2 = new address[](1);
         operator2[0] = vm.addr(1212);
-        escrow.bulkPayOut(operator2, _amounts , MOCK_URL, MOCK_HASH, 0);
+        escrow.bulkPayOut(operator2, _amounts, MOCK_URL, MOCK_HASH, 0);
         escrow.complete();
 
         //Close allocation

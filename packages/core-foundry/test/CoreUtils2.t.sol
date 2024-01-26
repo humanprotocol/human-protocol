@@ -32,7 +32,7 @@ contract CoreUtils2 is Test {
 
     uint256 public minimumStake = 2;
     uint256 public lockPeriod = 2;
-    uint256 rewardFee = 1;
+    uint256 rewardFee = 2;
     string jobRequesterId = "job-requester-id";
 
     function _initTrustedHandlers() internal view returns (address[] memory) {
