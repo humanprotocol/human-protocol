@@ -14,11 +14,6 @@ contract StakingScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // // HMToken hmToken = HMToken(hmtAddress);
-        // // Staking proxyStaking = Staking(payable(stakingProxy));
-        // // address newStaking = address(new Staking());
-        // proxyStaking.upgradeTo(newStaking);
-        // hmToken.approve(address(proxyStaking), 5);
 
         bytes memory data = abi.encodeWithSelector(Staking.stake.selector, 3);
         (bool success,) = stakingProxy.call(data);

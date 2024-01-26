@@ -70,18 +70,18 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
         vm.stopPrank();
     }
 
-    // function testEmitEventOnLaunched() public {
-    //     vm.startPrank(operator);
-    //     uint256 stakeAmount = 10;
-    //     staking.stake(stakeAmount);
-    //     address[] memory newTrusted = new address[](2);
-    //     newTrusted[0] = vm.addr(203);
-    //     newTrusted[1] = vm.addr(204);
-    //     vm.expectEmit();
-    //     emit LaunchedV2(address(hmToken), escrowFactory.lastEscrow(), jobRequesterId);
-    //     escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
-    //     vm.stopPrank();
-    // }
+    function testEmitEventOnLaunched() public {
+        vm.startPrank(operator);
+        uint256 stakeAmount = 10;
+        staking.stake(stakeAmount);
+        address[] memory newTrusted = new address[](2);
+        newTrusted[0] = vm.addr(203);
+        newTrusted[1] = vm.addr(204);
+        vm.expectEmit();
+        emit LaunchedV2(address(hmToken), escrowFactory.lastEscrow(), jobRequesterId);
+        escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+        vm.stopPrank();
+    }
 
     function testFindEscrowFromDepoyedEscrow() public {
         vm.startPrank(operator);
