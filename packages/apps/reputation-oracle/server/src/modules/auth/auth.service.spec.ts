@@ -161,7 +161,6 @@ describe('AuthService', () => {
     const userCreateDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
-      confirm: MOCK_PASSWORD,
       type: UserType.WORKER,
     };
 
@@ -456,7 +455,6 @@ describe('AuthService', () => {
         authService.restorePassword({
           token: 'token',
           password: 'password',
-          confirm: 'password',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -472,7 +470,6 @@ describe('AuthService', () => {
       await authService.restorePassword({
         token: 'token',
         password: 'password',
-        confirm: 'password',
       });
 
       expect(updatePasswordMock).toHaveBeenCalled();
