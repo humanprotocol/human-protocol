@@ -1,16 +1,15 @@
-import { Test } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
-import { PaymentService } from '../payment/payment.service';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
-import { ErrorUser } from '../../common/constants/errors';
+import { HttpService } from '@nestjs/axios';
+import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { Currency } from '../../common/enums/payment';
+import { UserStatus, UserType } from '../../common/enums/user';
+import { PaymentService } from '../payment/payment.service';
+import { UserBalanceDto, UserCreateDto } from './user.dto';
+import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { UserBalanceDto, UserCreateDto, UserUpdateDto } from './user.dto';
-import { UserEntity } from './user.entity';
-import { UserStatus, UserType } from '../../common/enums/user';
-import { Currency } from '../../common/enums/payment';
 
 jest.mock('@human-protocol/sdk');
 
@@ -37,83 +36,28 @@ describe('UserService', () => {
     paymentService = moduleRef.get(PaymentService);
   });
 
-  describe('update', () => {
-    it('should update a user and return the updated user entity', async () => {
-      const userId = 1;
-      const dto: UserUpdateDto = {
-        email: 'test@example.com',
-        status: UserStatus.ACTIVE,
-      };
-
-      const updatedUser: Partial<UserEntity> = {
-        id: userId,
-        email: dto.email,
-        status: dto.status,
-      };
-
-      jest
-        .spyOn(userRepository, 'updateOne')
-        .mockResolvedValue(updatedUser as UserEntity);
-
-      const result = await userService.update(userId, dto);
-
-      expect(userRepository.updateOne).toHaveBeenCalledWith(
-        { id: userId },
-        dto,
-      );
-      expect(result).toBe(updatedUser);
-    });
-  });
-
   describe('create', () => {
     it('should create a new user and return the created user entity', async () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
       };
-      const hashedPassword =
-        '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
       const createdUser: Partial<UserEntity> = {
-        id: 1,
         email: dto.email,
-        password: hashedPassword,
+        password: expect.any(String),
+        type: UserType.REQUESTER,
+        status: UserStatus.PENDING,
       };
 
-      jest.spyOn(userService, 'checkEmail').mockResolvedValue(undefined);
-      jest
-        .spyOn(userRepository, 'create')
-        .mockResolvedValue(createdUser as UserEntity);
-
       const result = await userService.create(dto);
-
-      expect(userService.checkEmail).toHaveBeenCalledWith(dto.email, 0);
-      expect(userRepository.create).toHaveBeenCalledWith({
+      expect(userRepository.createUnique).toHaveBeenCalledWith({
         ...dto,
         email: dto.email,
         password: expect.any(String),
         type: UserType.REQUESTER,
         status: UserStatus.PENDING,
       });
-      expect(result).toBe(createdUser);
-    });
-
-    it('should throw ConflictException if the email is already taken', async () => {
-      const dto: UserCreateDto = {
-        email: 'test@example.com',
-        password: 'password123',
-      };
-
-      jest
-        .spyOn(userService, 'checkEmail')
-        .mockRejectedValue(
-          new ConflictException(ErrorUser.AccountCannotBeRegistered),
-        );
-
-      await expect(userService.create(dto)).rejects.toThrow(
-        ErrorUser.AccountCannotBeRegistered,
-      );
-
-      expect(userService.checkEmail).toHaveBeenCalledWith(dto.email, 0);
+      expect(result).toMatchObject(createdUser);
     });
   });
 
@@ -137,7 +81,7 @@ describe('UserService', () => {
       const result = await userService.getByCredentials(email, password);
 
       expect(userRepository.findOne).toHaveBeenCalledWith({
-        email,
+        where: { email },
       });
       expect(result).toBe(userEntity);
     });
@@ -150,7 +94,7 @@ describe('UserService', () => {
       ).rejects.toThrow(NotFoundException);
 
       expect(userRepository.findOne).toHaveBeenCalledWith({
-        email,
+        where: { email },
       });
     });
   });
