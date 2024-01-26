@@ -14,6 +14,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { KycModule } from './modules/kyc/kyc.module';
 
 @Module({
   providers: [
@@ -40,6 +41,7 @@ import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
     WebhookModule,
     Web3Module,
     AuthModule,
+    KycModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,

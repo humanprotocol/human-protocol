@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -7,18 +8,26 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Not } from 'typeorm';
 import { ErrorUser } from '../../common/constants/errors';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { KycStatus, UserStatus, UserType } from '../../common/enums/user';
 import { getNonce } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
-import { UserCreateDto, UserUpdateDto } from './user.dto';
+import {
+  RegisterAddressRequestDto,
+  UserCreateDto,
+  UserUpdateDto,
+} from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   private HASH_ROUNDS = 12;
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private readonly web3Service: Web3Service,
+  ) {}
 
   public async update(userId: number, dto: UserUpdateDto): Promise<UserEntity> {
     return this.userRepository.updateOne({ id: userId }, dto);
@@ -125,5 +134,25 @@ export class UserService {
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.nonce = getNonce();
     return userEntity.save();
+  }
+
+  public async registerAddress(
+    user: UserEntity,
+    data: RegisterAddressRequestDto,
+  ): Promise<string> {
+    if (user.evmAddress && user.evmAddress !== data.address) {
+      throw new BadRequestException(ErrorUser.IncorrectAddress);
+    }
+
+    if (user.kyc?.status !== KycStatus.APPROVED) {
+      throw new BadRequestException(ErrorUser.KycNotApproved);
+    }
+
+    user.evmAddress = data.address;
+    await user.save();
+
+    return await this.web3Service
+      .getSigner(data.chainId)
+      .signMessage(data.address);
   }
 }

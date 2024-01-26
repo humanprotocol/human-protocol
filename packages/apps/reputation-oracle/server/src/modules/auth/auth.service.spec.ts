@@ -40,6 +40,7 @@ import {
   WEB3_SIGNUP_MESSAGE,
 } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -85,6 +86,12 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
+        {
+          provide: Web3Service,
+          useValue: {
+            signMessage: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
