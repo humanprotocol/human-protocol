@@ -61,7 +61,6 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123',
         type: UserType.WORKER,
       };
       const hashedPassword =
@@ -94,7 +93,6 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123',
         type: UserType.WORKER,
       };
 
