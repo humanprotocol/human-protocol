@@ -49,11 +49,6 @@ class CvatLabelType(str, Enum, metaclass=BetterEnumMeta):
     rectangle = "rectangle"
 
 
-class CloudProviders(str, Enum, metaclass=BetterEnumMeta):
-    aws = "AWS_S3_BUCKET"
-    gcs = "GOOGLE_CLOUD_STORAGE"
-
-
 class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
     exchange_oracle = "exchange_oracle"
     job_launcher = "job_launcher"
