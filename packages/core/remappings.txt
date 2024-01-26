@@ -1,0 +1,6 @@
+ds-test/=lib/forge-std/lib/ds-test/src/
+erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/
+forge-std/=lib/forge-std/src/
+@openzeppelin/contracts/=./node_modules/@openzeppelin/contracts/
+@openzeppelin/contracts-upgradeable/=./node_modules/@openzeppelin/contracts-upgradeable/
+@openzeppelin/upgrades/=lib/openzeppelin-foundry-upgrades/src/
