@@ -7,6 +7,7 @@ import "../src/RewardPool.sol";
 import "../src/EscrowFactory.sol";
 import "../src/Escrow.sol";
 import "./CoreUtils2.t.sol";
+import "./CoreUtils.t.sol";
 
 interface EscrowFactoryEvents {
     event Launched(address token, address escrow);
@@ -31,6 +32,9 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
     EscrowFactory public escrowFactory;
     Escrow public escrow;
     RewardPool public rewardPool;
+
+    string MOCK_URL = "http://google.com/fake";
+    string MOCK_HASH = "kGKmnj9BRf";
 
     function setUp() public {
         vm.startPrank(owner);
@@ -67,19 +71,19 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.stopPrank();
 
         // Approve spend HMT tokens staking contract
-        vm.prank(validator);
+        vm.prank(accounts[1]);
         hmToken.approve(address(staking), 1000);
-        vm.prank(operator);
+        vm.prank(accounts[2]);
         hmToken.approve(address(staking), 1000);
-        vm.prank(operator2);
+        vm.prank(accounts[3]);
         hmToken.approve(address(staking), 1000);
-        vm.prank(operator3);
+        vm.prank(accounts[4]);
         hmToken.approve(address(staking), 1000);
-        vm.prank(exchangeOracle);
+        vm.prank(accounts[5]);
         hmToken.approve(address(staking), 1000);
-        vm.prank(reputationOracle);
+        vm.prank(accounts[6]);
         hmToken.approve(address(staking), 1000);
-        vm.prank(recordingOracle);
+        vm.prank(accounts[7]);
         hmToken.approve(address(staking), 1000);
     }
 
@@ -203,25 +207,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         staking.unstake(lockedTokens);
         Stakes.Staker memory staker = staking.getStaker(operator);
         uint256 latestBlockNumber = block.number;
-        assertLt(latestBlockNumber, staker.tokensLockedUntil); 
-        
-    }
-
-    function testBlockNumber() public {
-        vm.startPrank(owner);
-
-        // Manually track the block number
-        uint256 initialBlockNumber = block.number;
-
-        // Increment the block number by 1
-        vm.roll(initialBlockNumber + 1);
-        assertEq(block.number, initialBlockNumber + 1, "Block number should increment by 1");
-
-        // Increment the block number by another 1
-        vm.roll(initialBlockNumber + 2);
-        assertEq(block.number, initialBlockNumber + 2, "Block number should increment by 2");
-
-        vm.stopPrank();
+        assertLt(latestBlockNumber, staker.tokensLockedUntil);
     }
 
     function testFail_CallerNotOwner() public {
@@ -450,5 +436,160 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.stopPrank();
     }
 
-    function testAllocationByEscrow() public {}
+    function testSlashTOkensFromStakeAndTransferToRewardPool() public {
+        uint256 stakedTokens = 10;
+        uint256 allocatedTokens = 5;
+        uint256 slashedTokens = 2;
+        address[] memory validator = new address[](1);
+        validator[0] = accounts[1];
+        vm.prank(owner);
+        staking.setRewardPool(address(rewardPool));
+        vm.prank(validator[0]);
+        staking.stake(stakedTokens);
+        vm.startPrank(operator);
+        staking.stake(stakedTokens);
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), validator, jobRequesterId);
+        staking.allocate(escrowAddress, allocatedTokens);
+
+        vm.prank(owner);
+        staking.slash(validator[0], operator, escrowAddress, slashedTokens);
+        vm.startPrank(operator);
+        IStaking.Allocation memory allocation = staking.getAllocation(escrowAddress);
+        assertEq(allocation.tokens, allocatedTokens - slashedTokens);
+        Stakes.Staker memory stakerAfterSlash = staking.getStaker(operator);
+        assertEq(stakerAfterSlash.tokensStaked, (stakedTokens - slashedTokens));
+        assertEq(hmToken.balanceOf(address(rewardPool)), slashedTokens);
+    }
+
+    function testReturnListOfStakers() public {
+        uint256 stakedTokens = 2;
+        for (uint8 i = 2; i < 8; i++) {
+            vm.prank(accounts[i]);
+            staking.stake(stakedTokens * (i + 1));
+        }
+
+        (address[] memory stakers, Stakes.Staker[] memory stakes) = staking.getListOfStakers();
+
+        assertEq(stakers.length, 6);
+        assertEq(stakes.length, 6);
+
+        for (uint8 i = 0; i < 6; i++) {
+            assertEq(stakers[i], accounts[i + 2]);
+            assertEq(stakes[i].tokensStaked, stakedTokens * (i + 3));
+        }
+    }
+
+    function testFail_CloseAllocationNotValidAddress() public {
+        uint256 amount = 10;
+        uint256 allocationAmount = 5;
+        vm.startPrank(accounts[2]);
+        staking.stake(amount);
+        address[] memory trustedHandlers = new address[](3);
+        trustedHandlers[0] = accounts[1];
+        trustedHandlers[1] = accounts[6];
+        trustedHandlers[2] = accounts[7];
+        // create escrow
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        vm.stopPrank();
+        vm.prank(owner);
+        // Fund escrow
+        hmToken.transfer(escrowAddress, 100);
+        // Setup escrow
+        vm.startPrank(accounts[2]);
+        Escrow escrow = Escrow(escrowAddress);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        staking.allocate(escrowAddress, allocationAmount);
+        vm.expectRevert("MUST_BE_VALID_ADDRESS");
+        staking.closeAllocation(address(0));
+        vm.stopPrank();
+    }
+
+    function testFail_CloseAllocationCallerNotAllocator() public {
+        uint256 amount = 10;
+        uint256 allocationAmount = 5;
+        vm.startPrank(accounts[2]);
+        staking.stake(amount);
+        address[] memory trustedHandlers = new address[](3);
+        trustedHandlers[0] = accounts[1];
+        trustedHandlers[1] = accounts[6];
+        trustedHandlers[2] = accounts[7];
+        // create escrow
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        Escrow escrow = Escrow(escrowAddress);
+        vm.stopPrank();
+        vm.prank(owner);
+        // Fund escrow
+        hmToken.transfer(escrowAddress, 100);
+        vm.prank(accounts[2]);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        staking.allocate(escrowAddress, allocationAmount);
+        vm.prank(accounts[1]);
+        vm.expectRevert("CALLER_IS_NOT_THE_ALLOCATOR");
+        staking.closeAllocation(escrowAddress);
+    }
+
+    function testFail_CloseAllocationRevertsEscrowNotCompletedNorCancelled() public {
+        uint256 amount = 10;
+        uint256 allocationAmount = 5;
+        vm.startPrank(accounts[2]);
+        staking.stake(amount);
+        address[] memory trustedHandlers = new address[](3);
+        trustedHandlers[0] = accounts[1];
+        trustedHandlers[1] = accounts[6];
+        trustedHandlers[2] = accounts[7];
+        // create escrow
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        Escrow escrow = Escrow(escrowAddress);
+        vm.stopPrank();
+        vm.prank(owner);
+        // Fund escrow
+        hmToken.transfer(escrowAddress, 100);
+        vm.startPrank(accounts[2]);
+        escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
+        staking.allocate(escrowAddress, allocationAmount);
+        vm.expectRevert("ALLOCATION_NOT_IN_COMPLETED_STATE");
+        staking.closeAllocation(escrowAddress);
+        vm.stopPrank();
+    }
+
+    function testCloseAllocationOnCompletedEscrows() public {
+        uint256 amount = 10;
+        uint256 allocationAmount = 5;
+
+        vm.startPrank(accounts[2]);
+        // stake tokens and create escrow
+        staking.stake(amount);
+        address[] memory escrowParams = new address[](3);
+        address[] memory trustedHandlers = new address[](3);
+        trustedHandlers[0] = accounts[1];
+        trustedHandlers[1] = accounts[6];
+        trustedHandlers[2] = accounts[7];
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
+        Escrow escrow = Escrow(escrowAddress);
+        vm.stopPrank();
+
+        // Fund escrow
+        vm.prank(owner);
+        hmToken.transfer(escrowAddress, 100);
+
+        // Setup escrow
+        vm.startPrank(accounts[2]);
+        escrow.setup(accounts[6], accounts[7], accounts[5], 10, 10, 10, MOCK_URL, MOCK_HASH);
+        staking.allocate(escrowAddress, allocationAmount);
+        uint256[] memory _amounts = new uint256[](1);
+        _amounts[0] = 100;
+        address[] memory operator2 = new address[](1);
+        operator2[0] = vm.addr(1212);
+        escrow.bulkPayOut(operator2, _amounts , MOCK_URL, MOCK_HASH, 0);
+        escrow.complete();
+
+        //Close allocation
+        vm.roll(4);
+        staking.closeAllocation(escrowAddress);
+        IStaking.Allocation memory allocation = staking.getAllocation(escrowAddress);
+        assertGt(allocation.closedAt, 0);
+        assertEq(allocation.tokens, 0);
+
+        vm.stopPrank();
+    }
 }
