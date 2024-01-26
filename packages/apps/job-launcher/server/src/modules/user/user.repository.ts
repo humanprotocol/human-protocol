@@ -15,7 +15,6 @@ export class UserRepository extends Repository<UserEntity> {
     try {
       await this.insert(user);
     } catch (error) {
-      console.log(error);
       if (error instanceof QueryFailedError) {
         throw handleQueryFailedError(error);
       } else {
