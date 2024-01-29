@@ -1,6 +1,12 @@
-import { ExceptionFilter, Catch, ArgumentsHost, Logger } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  Logger,
+  HttpStatus,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseError } from 'src/database/database.error';
+import { DatabaseError, DatabaseErrorCodes } from 'src/database/database.error';
 
 @Catch(DatabaseError)
 export class DatabaseExceptionFilter implements ExceptionFilter {
@@ -11,7 +17,15 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = Number(exception.code);
+    let status: number;
+    switch (exception.code) {
+      case DatabaseErrorCodes.EntityDuplication:
+        status = HttpStatus.UNPROCESSABLE_ENTITY;
+        break;
+      default:
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        break;
+    }
     const message = exception.message;
     this.logger.error(`Database error: ${message}`, exception.stack);
 

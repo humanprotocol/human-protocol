@@ -1,5 +1,9 @@
-import { HttpStatus } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
+
+export enum DatabaseErrorCodes {
+  EntityDuplication = 'ENTITY_DUPLICATION',
+  Unknown = 'UNKNOWN',
+}
 
 export class DatabaseError extends Error {
   public readonly code: string;
@@ -11,18 +15,17 @@ export class DatabaseError extends Error {
 }
 
 export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
+  const stack = error.stack || '';
   let message = error.message,
     code: string;
-  const stack = error.stack || '';
 
   switch ((error.driverError as any).code) {
     case '23505':
       message = (error.driverError as any).detail;
-      code = String(HttpStatus.UNPROCESSABLE_ENTITY);
+      code = DatabaseErrorCodes.EntityDuplication;
       break;
-    // Add more cases as needed
     default:
-      code = String(HttpStatus.INTERNAL_SERVER_ERROR);
+      code = DatabaseErrorCodes.Unknown;
       break;
   }
   return new DatabaseError(message, code, stack);
