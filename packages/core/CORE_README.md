@@ -20,18 +20,18 @@ To test contracts using Foundry run :
 
 ## Deploying to Mumbai (test)
 
+- Deploy Core : 
+
+- ```forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy```
 
 - Deploy Proxies : 
 
-- ```forge script script/DeployCore.s.sol:DeployCoreScript --rpc-url polygonMumbai --broadcast --verify --legacy```
+- ```forge script script/DeployProxies.s.sol:DeployProxies --rpc-url polygonMumbai --broadcast --verify --legacy```
 
 - After adding **HMT_ADDRESS, STAKING_PROXY, ESCROW_FACTORY_PROXY, REWARD_POOL_PROXY** on .env, run : 
 
 - ```forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript --rpc-url polygonMumbai --broadcast --verify --legacy```
 
-- Staking : 
-
-- ```forge script script/Staking.s.sol:StakingScript --rpc-url polygonMumbai --broadcast --verify --legacy```
 
 
 

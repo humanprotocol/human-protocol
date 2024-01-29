@@ -9,7 +9,7 @@ import "../src/RewardPool.sol";
 import "../src/KVStore.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract DeployCoreScript is Script {
+contract DeployCore is Script {
     HMToken public hmToken;
     Staking public staking;
     EscrowFactory public escrowFactory;

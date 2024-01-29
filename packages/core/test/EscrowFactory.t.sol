@@ -176,6 +176,6 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
         vm.stopPrank();
     }
 
-    // TO DO 
+    // TO DO
     function testHaveSameStorage() public {}
 }

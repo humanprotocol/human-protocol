@@ -14,7 +14,6 @@ contract StakingScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-
         bytes memory data = abi.encodeWithSelector(Staking.stake.selector, 3);
         (bool success,) = stakingProxy.call(data);
         require(success, "Stake function call failed");
