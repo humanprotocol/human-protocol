@@ -6,6 +6,7 @@ import "../src/HMToken.sol";
 import "../src/Escrow.sol";
 import "../src/EscrowFactory.sol";
 import "./CoreUtils2.t.sol";
+import "./Helpers/EscrowFactoryUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 interface EscrowFactoryEvents {
@@ -18,6 +19,7 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
     Staking public staking;
     EscrowFactory public escrowFactory;
     Escrow public escrow;
+    EscrowFactoryUpgradeableProxy public escrowFactoryProxy;
 
     function setUp() public {
         vm.startPrank(owner);
@@ -158,24 +160,40 @@ contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
         proxy.upgradeTo(newEscrowFactory);
     }
 
-    // TO DO :
-    // Add checks for getImplementationAddress and hasEscrow After staking
-    function testUpgradeEscrowFactory() public {
+    function testOwnerUpgradeEscrowFactory() public {
         vm.startPrank(owner);
         address escrowFactoryImpl = address(new EscrowFactory());
         bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
-        address escrowFactoryProxy = address(new ERC1967Proxy(escrowFactoryImpl, escrowFactoryData));
-        escrowFactory = EscrowFactory(escrowFactoryProxy);
-        vm.stopPrank();
-
-        // Use owner to upgrade
-        vm.startPrank(owner);
-        EscrowFactory proxy = EscrowFactory(payable(escrowFactoryProxy));
+        escrowFactoryProxy = new EscrowFactoryUpgradeableProxy(escrowFactoryImpl, escrowFactoryData);
+        // escrowFactory = EscrowFactory(address(escrowFactoryProxy));
+        EscrowFactory proxy = EscrowFactory(payable(address(escrowFactoryProxy)));
         address newEscrowFactory = address(new EscrowFactory());
+        assertEq(escrowFactoryProxy.implementation(), escrowFactoryImpl);
         proxy.upgradeTo(newEscrowFactory);
+        assertNotEq(escrowFactoryProxy.implementation(), escrowFactoryImpl);
+        assertEq(escrowFactoryProxy.implementation(), newEscrowFactory);
         vm.stopPrank();
     }
 
-    // TO DO
-    function testHaveSameStorage() public {}
+    function testHaveSameStorage() public {
+        vm.startPrank(operator);
+        uint256 stakeAmount = 10;
+        staking.stake(stakeAmount);
+        address[] memory newTrusted = new address[](2);
+        newTrusted[0] = vm.addr(203);
+        newTrusted[1] = vm.addr(204);
+        escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
+
+        address escrowFactoryImpl = address(new EscrowFactory());
+        bytes memory escrowFactoryData = abi.encodeWithSelector(EscrowFactory.initialize.selector, address(staking));
+        escrowFactoryProxy = new EscrowFactoryUpgradeableProxy(escrowFactoryImpl, escrowFactoryData);
+        address oldLastEscrow = escrowFactory.lastEscrow();
+        address oldImplementationAddress = escrowFactoryProxy.implementation();
+        EscrowFactory proxy = EscrowFactory(payable(address(escrowFactoryProxy)));
+        address newEscrowFactory = address(new EscrowFactory());
+        proxy.upgradeTo(newEscrowFactory);
+
+        assertNotEq(escrowFactoryProxy.implementation(), oldImplementationAddress);
+        assertEq(escrowFactory.lastEscrow(), oldLastEscrow);
+    }
 }

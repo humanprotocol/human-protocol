@@ -213,7 +213,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         staking.stake(amount);
         address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
         uint256 allocationAmount = 5;
-        vm.expectEmit(); 
+        vm.expectEmit();
         emit StakeAllocated(operator, allocationAmount, escrowAddress, block.number);
         staking.allocate(escrowAddress, allocationAmount);
         vm.stopPrank();
@@ -694,10 +694,9 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         //Close allocation
         vm.roll(4);
         IStaking.Allocation memory allocation = staking.getAllocation(escrowAddress);
-        vm.expectEmit(); 
+        vm.expectEmit();
         emit AllocationClosed(allocation.staker, allocation.tokens, escrowAddress, block.number);
         staking.closeAllocation(escrowAddress);
         vm.stopPrank();
-
     }
 }
