@@ -117,7 +117,7 @@ jobs:
           esac
       - name: Upgrade Proxies
         if: github.event.inputs.escrowFactory == 'true' || github.event.inputs.staking == 'true' || github.event.inputs.rewardPool== 'true'
-        run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
+        run: yarn upgrade:proxy --rpc-url ${{ github.event.inputs.network }} --broadcast --verify --legacy
         working-directory: ./packages/core
         env:
           PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
@@ -128,19 +128,7 @@ jobs:
           STAKING_ADDRESS: ${{ steps.networks.outputs.staking }}
           REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
 
-      - name: Verify Escrow Factory Proxy
-        if: always() && github.event.inputs.escrowFactory == 'true'
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
-        working-directory: ./packages/core
-      - name: Verify Staking Proxy
-        if: always() && github.event.inputs.staking == 'true'
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.staking }}
-        working-directory: ./packages/core
-      - name: Verify Reward Pool Proxy
-        if: always() && github.event.inputs.rewardPool== 'true'
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
-        working-directory: ./packages/core
-        #Commit changes to develop
+
       - name: Check for Changes
         if: always()
         id: check_changes
