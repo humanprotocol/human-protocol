@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 import os
 import random
 import uuid
@@ -8,31 +7,32 @@ from contextlib import ExitStack
 from itertools import groupby
 from logging import Logger
 from math import ceil
-from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Dict, List, Sequence, Tuple, Union, cast
 
-import attrs
 import cv2
 import datumaro as dm
 import numpy as np
-from attrs import frozen
-from datumaro.util import dump_json, parse_json, take_by
+from datumaro.util import take_by
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
+import src.core.tasks.boxes_from_points as boxes_from_points_task
 import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
 from src.core.manifest import TaskManifest
+from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelType, TaskStatus, TaskType
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url, parse_bucket_url
-from src.utils.assignments import compose_data_bucket_filename, parse_manifest
+from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
+
+module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
 LABEL_TYPE_MAPPING = {
     TaskType.image_label_binary: CvatLabelType.tag,
@@ -61,7 +61,25 @@ CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
     CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
 }
 
-module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
+
+class DatasetValidationError(Exception):
+    pass
+
+
+class MismatchingAnnotations(DatasetValidationError):
+    pass
+
+
+class TooFewSamples(DatasetValidationError):
+    pass
+
+
+class InvalidCategories(DatasetValidationError):
+    pass
+
+
+class InvalidImageInfo(DatasetValidationError):
+    pass
 
 
 class BoxesFromPointsTaskBuilder:
@@ -70,48 +88,6 @@ class BoxesFromPointsTaskBuilder:
             return False
 
     _not_configured = _NotConfigured()
-
-    class DatasetValidationError(Exception):
-        pass
-
-    class MismatchingAnnotations(DatasetValidationError):
-        pass
-
-    class TooFewSamples(DatasetValidationError):
-        pass
-
-    class TooManyBoxesDiscarded(DatasetValidationError):
-        pass
-
-    class InvalidCategories(DatasetValidationError):
-        pass
-
-    class InvalidImageInfo(DatasetValidationError):
-        pass
-
-    BboxPointMapping = Dict[int, int]
-
-    @frozen
-    class RoiInfo:
-        point_id: int
-        original_image_key: int
-        point_x: int
-        point_y: int
-        roi_x: int
-        roi_y: int
-        roi_w: int
-        roi_h: int
-
-        def asdict(self) -> dict:
-            return attrs.asdict(self, recurse=False)
-
-    RoiInfos = Sequence[RoiInfo]
-
-    RoiFilenames = Dict[int, str]
-
-    max_discarded_threshold = 0.5
-    "The maximum allowed percent of discarded "
-    "GT boxes, points, or samples for successful job launch"
 
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
         self.exit_stack = ExitStack()
@@ -133,7 +109,7 @@ class BoxesFromPointsTaskBuilder:
         self.gt_dataset: Union[dm.Dataset, self._NotConfigured] = self._not_configured
 
         self.bbox_point_mapping: Union[
-            self.BboxPointMapping, self._NotConfigured
+            boxes_from_points_task.BboxPointMapping, self._NotConfigured
         ] = self._not_configured
         "bbox_id -> point_id"
 
@@ -142,8 +118,12 @@ class BoxesFromPointsTaskBuilder:
         ] = self._not_configured
         "label_id -> (rel. w, rel. h)"
 
-        self.rois: Union[self.RoiInfos, self._NotConfigured] = self._not_configured
-        self.roi_filenames: Union[self.RoiFilenames, self._NotConfigured] = self._not_configured
+        self.rois: Union[
+            boxes_from_points_task.RoiInfos, self._NotConfigured
+        ] = self._not_configured
+        self.roi_filenames: Union[
+            boxes_from_points_task.RoiFilenames, self._NotConfigured
+        ] = self._not_configured
 
         self.job_layout: Union[Sequence[Sequence[str]], self._NotConfigured] = self._not_configured
         "File lists per CVAT job"
@@ -177,6 +157,12 @@ class BoxesFromPointsTaskBuilder:
         "Exchange Oracle's private bucket info"
 
         self.min_class_samples_for_roi_estimation = 50
+
+        self.max_discarded_threshold = 0.5
+        """
+        The maximum allowed percent of discarded
+        GT boxes, points, or samples for successful job launch
+        """
 
     def __enter__(self):
         return self
@@ -249,7 +235,7 @@ class BoxesFromPointsTaskBuilder:
         )
         manifest_labels = set(label.name for label in self.manifest.annotation.labels)
         if gt_labels - manifest_labels:
-            raise self.DatasetValidationError(
+            raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
                     self._format_list(gt_labels - manifest_labels),
                 )
@@ -269,14 +255,14 @@ class BoxesFromPointsTaskBuilder:
         if len(gt_filenames) != len(matched_gt_filenames):
             extra_gt = list(map(os.path.basename, gt_filenames - matched_gt_filenames))
 
-            raise self.MismatchingAnnotations(
+            raise MismatchingAnnotations(
                 "Failed to find several validation samples in the dataset files: {}".format(
                     self._format_list(extra_gt)
                 )
             )
 
         if len(gt_filenames) < self.manifest.validation.val_size:
-            raise self.TooFewSamples(
+            raise TooFewSamples(
                 f"Too few validation samples provided ({len(gt_filenames)}), "
                 f"at least {self.manifest.validation.val_size} required."
             )
@@ -319,7 +305,7 @@ class BoxesFromPointsTaskBuilder:
                 )
 
         if invalid_point_categories_messages:
-            raise self.InvalidCategories(
+            raise InvalidCategories(
                 "Invalid categories in the input point annotations: {}".format(
                     self._format_list(invalid_point_categories_messages, separator="; ")
                 )
@@ -328,7 +314,7 @@ class BoxesFromPointsTaskBuilder:
         points_labels = set(label.name for label in points_dataset_label_cat if not label.parent)
         manifest_labels = set(label.name for label in self.manifest.annotation.labels)
         if manifest_labels != points_labels:
-            raise self.DatasetValidationError("Point labels do not match job labels")
+            raise DatasetValidationError("Point labels do not match job labels")
 
         self.input_points_dataset.transform(
             "project_labels", dst_labels=[label.name for label in self.manifest.annotation.labels]
@@ -349,7 +335,7 @@ class BoxesFromPointsTaskBuilder:
                     break
 
         if filenames_with_invalid_points:
-            raise self.MismatchingAnnotations(
+            raise MismatchingAnnotations(
                 "Some images have invalid points: {}".format(
                     self._format_list(filenames_with_invalid_points)
                 )
@@ -366,7 +352,7 @@ class BoxesFromPointsTaskBuilder:
                 map(os.path.basename, points_filenames - matched_points_filenames)
             )
 
-            raise self.MismatchingAnnotations(
+            raise MismatchingAnnotations(
                 "Mismatching points info and input files: {}".format(
                     "; ".join(
                         "{} missing points".format(self._format_list(missing_point_samples)),
@@ -402,7 +388,7 @@ class BoxesFromPointsTaskBuilder:
                     excluded_samples.append(((sample.id, sample.subset), message))
 
         if len(excluded_samples) > len(self.input_points_dataset) * self.max_discarded_threshold:
-            raise self.DatasetValidationError(
+            raise DatasetValidationError(
                 "Too many samples discarded, canceling job creation. Errors: {}".format(
                     self._format_list([message for _, message in excluded_samples])
                 )
@@ -548,7 +534,7 @@ class BoxesFromPointsTaskBuilder:
             gt_dataset.put(gt_sample.wrap(annotations=matched_boxes))
 
         if len(bbox_point_mapping) < (1 - self.max_discarded_threshold) * total_boxes:
-            raise self.TooManyBoxesDiscarded(
+            raise DatasetValidationError(
                 "Too many GT boxes discarded ({} out of {}). "
                 "Please make sure each GT box matches exactly 1 point".format(
                     total_boxes - len(bbox_point_mapping), total_boxes
@@ -563,7 +549,7 @@ class BoxesFromPointsTaskBuilder:
             if not label_count
         ]
         if gt_labels_without_anns:
-            raise self.DatasetValidationError(
+            raise DatasetValidationError(
                 "No matching GT boxes/points annotations found for some classes: {}".format(
                     self._format_list(gt_labels_without_anns)
                 )
@@ -625,7 +611,7 @@ class BoxesFromPointsTaskBuilder:
         assert self.roi_size_estimations is not self._not_configured
         assert self.input_points_dataset is not self._not_configured
 
-        rois: List[self.RoiInfo] = []
+        rois: List[boxes_from_points_task.RoiInfo] = []
         for sample in self.input_points_dataset:
             for skeleton in sample.annotations:
                 if not isinstance(skeleton, dm.Skeleton):
@@ -654,7 +640,7 @@ class BoxesFromPointsTaskBuilder:
                 new_point_y = original_point_y - roi_top
 
                 rois.append(
-                    self.RoiInfo(
+                    boxes_from_points_task.RoiInfo(
                         point_id=skeleton.id,
                         original_image_key=sample.attributes["id"],
                         point_x=new_point_x,
@@ -708,86 +694,12 @@ class BoxesFromPointsTaskBuilder:
     def _prepare_label_configuration(self):
         self.label_configuration = make_label_configuration(self.manifest)
 
-    class TaskMetaLayout:
-        GT_FILENAME = "gt.json"
-        POINTS_FILENAME = "points.json"
-        BBOX_POINT_MAPPING_FILENAME = "bbox_point_mapping.json"
-        ROI_INFO_FILENAME = "rois.json"
-
-        ROI_FILENAMES_FILENAME = "roi_filenames.json"
-        # this is separated from the general roi info to make name mangling more "optional"
-
-    class TaskMetaSerializer:
-        GT_DATASET_FORMAT = "coco_instances"
-        POINTS_DATASET_FORMAT = "coco_person_keypoints"
-
-        def serialize_gt_annotations(self, gt_dataset: dm.Dataset) -> bytes:
-            with TemporaryDirectory() as temp_dir:
-                gt_dataset_dir = os.path.join(temp_dir, "gt_dataset")
-                gt_dataset.export(gt_dataset_dir, self.GT_DATASET_FORMAT)
-                return (
-                    Path(gt_dataset_dir) / "annotations" / "instances_default.json"
-                ).read_bytes()
-
-        def serialize_bbox_point_mapping(
-            self, bbox_point_mapping: BoxesFromPointsTaskBuilder.BboxPointMapping
-        ) -> bytes:
-            return dump_json({str(k): str(v) for k, v in bbox_point_mapping.items()})
-
-        def serialize_roi_info(self, rois_info: BoxesFromPointsTaskBuilder.RoiInfos) -> bytes:
-            return dump_json([roi_info.asdict() for roi_info in rois_info])
-
-        def serialize_roi_filenames(
-            self, roi_filenames: BoxesFromPointsTaskBuilder.RoiFilenames
-        ) -> bytes:
-            return dump_json({str(k): v for k, v in roi_filenames.items()})
-
-        def parse_gt_annotations(self, gt_dataset_data: bytes) -> dm.Dataset:
-            with TemporaryDirectory() as temp_dir:
-                annotations_filename = os.path.join(temp_dir, "annotations.json")
-                with open(annotations_filename, "wb") as f:
-                    f.write(gt_dataset_data)
-
-                dataset = dm.Dataset.import_from(
-                    annotations_filename, format=self.GT_DATASET_FORMAT
-                )
-                dataset.init_cache()
-                return dataset
-
-        def parse_points_annotations(self, points_dataset_data: bytes) -> dm.Dataset:
-            with TemporaryDirectory() as temp_dir:
-                annotations_filename = os.path.join(temp_dir, "annotations.json")
-                with open(annotations_filename, "wb") as f:
-                    f.write(points_dataset_data)
-
-                dataset = dm.Dataset.import_from(
-                    annotations_filename, format=self.POINTS_DATASET_FORMAT
-                )
-                dataset.init_cache()
-                return dataset
-
-        def parse_bbox_point_mapping(
-            self, bbox_point_mapping_data: bytes
-        ) -> BoxesFromPointsTaskBuilder.BboxPointMapping:
-            return {int(k): int(v) for k, v in parse_json(bbox_point_mapping_data).items()}
-
-        def parse_roi_info(self, rois_info_data: bytes) -> BoxesFromPointsTaskBuilder.RoiInfos:
-            return [
-                BoxesFromPointsTaskBuilder.RoiInfo(**roi_info)
-                for roi_info in parse_json(rois_info_data)
-            ]
-
-        def parse_roi_filenames(
-            self, roi_filenames_data: bytes
-        ) -> BoxesFromPointsTaskBuilder.RoiFilenames:
-            return {int(k): v for k, v in parse_json(roi_filenames_data).items()}
-
     def _upload_task_meta(self):
         # TODO: maybe extract into a separate function / class / library,
         # extract constants, serialization methods return TaskConfig from build()
 
-        layout = self.TaskMetaLayout()
-        serializer = self.TaskMetaSerializer()
+        layout = boxes_from_points_task.TaskMetaLayout()
+        serializer = boxes_from_points_task.TaskMetaSerializer()
 
         file_list = []
         file_list.append((self.input_points_data, layout.POINTS_FILENAME))
@@ -817,7 +729,9 @@ class BoxesFromPointsTaskBuilder:
                 file_data,
             )
 
-    def _draw_roi_point(self, roi_pixels: np.ndarray, roi_info: RoiInfo) -> np.ndarray:
+    def _draw_roi_point(
+        self, roi_pixels: np.ndarray, roi_info: boxes_from_points_task.RoiInfo
+    ) -> np.ndarray:
         center = (roi_info.point_x, roi_info.point_y)
 
         roi_r = (roi_info.roi_w**2 + roi_info.roi_h**2) ** 0.5 / 2
@@ -869,7 +783,7 @@ class BoxesFromPointsTaskBuilder:
         filename_to_sample = {sample.image.path: sample for sample in self.input_points_dataset}
 
         _roi_key = lambda e: e.original_image_key
-        rois_by_image: Dict[str, self.RoiInfo] = {
+        rois_by_image: Dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(sorted(self.rois, key=_roi_key), key=_roi_key)
         }
@@ -889,13 +803,12 @@ class BoxesFromPointsTaskBuilder:
                 # TODO: maybe rois should be regenerated instead
                 # Option 2: accumulate errors, fail when some threshold is reached
                 # Option 3: add special handling for cases when image is only rotated (exif etc.)
-                raise self.InvalidImageInfo(
+                raise InvalidImageInfo(
                     f"Sample '{filename}': invalid size provided in the point annotations"
                 )
 
             image_rois = {}
             for roi_info in image_roi_infos:
-                roi_info = cast(self.RoiInfo, roi_info)
                 roi_pixels = image_pixels[
                     roi_info.roi_y : roi_info.roi_y + roi_info.roi_h,
                     roi_info.roi_x : roi_info.roi_x + roi_info.roi_w,
@@ -1040,7 +953,7 @@ def get_gt_filenames(
         missing_gt = gt_filenames - matched_gt_filenames
         missing_gt_display_threshold = 10
         remainder = len(missing_gt) - missing_gt_display_threshold
-        raise Exception(
+        raise DatasetValidationError(
             "Failed to find several validation samples in the dataset files: {}{}".format(
                 ", ".join(missing_gt[:missing_gt_display_threshold]),
                 f"(and {remainder} more)" if remainder else "",
@@ -1048,7 +961,7 @@ def get_gt_filenames(
         )
 
     if len(gt_filenames) < manifest.validation.val_size:
-        raise Exception(
+        raise TooFewSamples(
             f"Too few validation samples provided ({len(gt_filenames)}), "
             f"at least {manifest.validation.val_size} required."
         )
