@@ -13,11 +13,11 @@ from defusedxml import ElementTree as ET
 from src.core.annotation_meta import ANNOTATION_METAFILE_NAME, AnnotationMeta, JobMeta
 from src.core.config import Config
 from src.core.manifest import TaskManifest
+from src.core.storage import compose_data_bucket_filename
 from src.core.types import TaskType
 from src.handlers.job_creation import DM_DATASET_FORMAT_MAPPING
 from src.models.cvat import Image, Job
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.assignments import compose_data_bucket_filename
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
 
 CVAT_EXPORT_FORMAT_MAPPING = {

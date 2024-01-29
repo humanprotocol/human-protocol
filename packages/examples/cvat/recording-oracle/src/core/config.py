@@ -101,6 +101,7 @@ class ExchangeOracleStorageConfig:
     access_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY", "")
     secret_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_SECRET_KEY", "")
     data_bucket_name = os.environ.get("EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME", "")
+    results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure = str_to_bool(os.environ.get("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
 
     @classmethod

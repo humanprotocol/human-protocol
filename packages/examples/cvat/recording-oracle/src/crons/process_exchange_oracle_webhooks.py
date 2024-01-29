@@ -29,10 +29,13 @@ from src.handlers.process_intermediate_results import (
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
 from src.services.cloud import download_file
-from src.utils.assignments import compute_resulting_annotations_hash, parse_manifest
-from src.utils.cloud_storage import parse_bucket_url
+from src.services.cloud.utils import parse_bucket_url
+from src.utils.assignments import (
+    compose_results_bucket_filename,
+    compute_resulting_annotations_hash,
+    parse_manifest,
+)
 from src.utils.logging import get_function_logger
-from src.utils.storage import compose_bucket_filename
 from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_message
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
@@ -96,7 +99,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
             excor_bucket_host = Config.exchange_oracle_storage_config.provider_endpoint_url()
             excor_bucket_name = Config.exchange_oracle_storage_config.data_bucket_name
 
-            excor_annotation_meta_path = compose_bucket_filename(
+            excor_annotation_meta_path = compose_results_bucket_filename(
                 webhook.escrow_address,
                 webhook.chain_id,
                 annotation.ANNOTATION_METAFILE_NAME,
@@ -108,7 +111,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
 
             job_annotations: Dict[int, bytes] = {}
             for job_meta in annotation_meta.jobs:
-                job_filename = compose_bucket_filename(
+                job_filename = compose_results_bucket_filename(
                     webhook.escrow_address,
                     webhook.chain_id,
                     job_meta.annotation_filename,
@@ -127,7 +130,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
                 gt_filename,
             )
 
-            excor_merged_annotation_path = compose_bucket_filename(
+            excor_merged_annotation_path = compose_results_bucket_filename(
                 webhook.escrow_address,
                 webhook.chain_id,
                 annotation.RESULTING_ANNOTATIONS_FILE,
@@ -154,13 +157,13 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
                     f"average annotation quality is {validation_results.average_quality:.2f}"
                 )
 
-                recor_merged_annotations_path = compose_bucket_filename(
+                recor_merged_annotations_path = compose_results_bucket_filename(
                     webhook.escrow_address,
                     webhook.chain_id,
                     validation.RESULTING_ANNOTATIONS_FILE,
                 )
 
-                recor_validation_meta_path = compose_bucket_filename(
+                recor_validation_meta_path = compose_results_bucket_filename(
                     webhook.escrow_address,
                     webhook.chain_id,
                     validation.VALIDATION_METAFILE_NAME,

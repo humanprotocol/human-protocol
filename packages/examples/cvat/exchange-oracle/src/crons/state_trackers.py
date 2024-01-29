@@ -12,6 +12,7 @@ from src.core.oracle_events import (
     ExchangeOracleEvent_TaskCreationFailed,
     ExchangeOracleEvent_TaskFinished,
 )
+from src.core.storage import compose_results_bucket_filename
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatus
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
@@ -22,7 +23,7 @@ from src.handlers.job_export import (
     prepare_annotation_metafile,
 )
 from src.log import ROOT_LOGGER_NAME
-from src.utils.assignments import compose_results_bucket_filename, parse_manifest
+from src.utils.assignments import parse_manifest
 from src.utils.logging import get_function_logger
 
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
