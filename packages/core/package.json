@@ -1,12 +1,17 @@
 {
     "name": "core-human-contracts",
     "version": "1.0.0",
-    "description": "Your project description",
-    "main": "index.js",
+    "description": "Core Human Protocol contracts ",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
+      "contracts:test": "forge test",
+      "contracts:coverage": "forge coverage",
+      "proxies:deploy": "forge script script/DeployProxies.s.sol:DeployProxies --rpc-url polygonMumbai --broadcast --verify --legacy",
+      "core:deploy": "forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy",
+      "contracts:upgrade-proxies": "forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript --rpc-url polygonMumbai --broadcast --verify --legacy",
+      "contracts:compile": "forge compile",
+      "contracts:size": "forge build --sizes"
     },
-    "author": "Mehdi Rhouzlane",
+    "author": "HUMAN PROTOCOL",
     "license": "ISC",
     "dependencies": {
       "@openzeppelin/contracts": "^4.9.2",

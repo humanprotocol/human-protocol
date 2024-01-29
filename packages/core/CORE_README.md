@@ -28,7 +28,7 @@ To test contracts using Foundry run :
 
 - ```forge script script/DeployProxies.s.sol:DeployProxies --rpc-url polygonMumbai --broadcast --verify --legacy```
 
-- After adding **HMT_ADDRESS, STAKING_PROXY, ESCROW_FACTORY_PROXY, REWARD_POOL_PROXY** on .env, run : 
+- Upgrade Proxies : (add **HMT_ADDRESS, STAKING_PROXY, ESCROW_FACTORY_PROXY, REWARD_POOL_PROXY** in .env ) 
 
 - ```forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript --rpc-url polygonMumbai --broadcast --verify --legacy```
 
