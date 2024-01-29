@@ -23,7 +23,7 @@ def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     web3 = get_web3(chain_id)
     staking_client = StakingClient(web3)
-    return staking_client.get_leader(escrow.exchangeOracle)["webhook_url"]
+    return staking_client.get_leader(escrow.exchange_oracle)["webhook_url"]
 
 
 def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
@@ -34,4 +34,4 @@ def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     web3 = get_web3(chain_id)
     staking_client = StakingClient(web3)
-    return staking_client.get_leader(escrow.reputationOracle)["webhook_url"]
+    return staking_client.get_leader(escrow.reputation_oracle)["webhook_url"]

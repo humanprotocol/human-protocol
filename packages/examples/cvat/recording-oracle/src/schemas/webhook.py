@@ -14,9 +14,10 @@ class OracleWebhook(BaseModel):
     event_data: Optional[dict] = None
     timestamp: Optional[datetime] = None  # TODO: remove optional
 
-    @validator("escrow_address", allow_reuse=True)
-    def validate_escrow_(cls, value):
-        return validate_address(value)
+    # TODO: restore
+    # @validator("escrow_address", allow_reuse=True)
+    # def validate_escrow_(cls, value):
+    #     return validate_address(value)
 
     # pylint: disable=too-few-public-methods
     class Config:

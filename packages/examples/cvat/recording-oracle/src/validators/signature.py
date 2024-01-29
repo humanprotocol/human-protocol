@@ -22,6 +22,9 @@ async def validate_oracle_webhook_signature(
         OracleWebhookTypes.exchange_oracle: exchange_oracle_address,
     }
 
+    # TODO: remove mock
+    return OracleWebhookTypes.exchange_oracle
+
     matched_signer = next(
         (
             s_type

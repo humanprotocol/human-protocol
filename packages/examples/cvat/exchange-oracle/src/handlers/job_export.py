@@ -10,7 +10,7 @@ from datumaro.components.dataset import Dataset
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
 import src.utils.annotations as annotation_utils
-from src.core.annotation_meta import ANNOTATION_METAFILE_NAME, AnnotationMeta, JobMeta
+from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, AnnotationMeta, JobMeta
 from src.core.config import Config
 from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
@@ -59,7 +59,7 @@ def prepare_annotation_metafile(
         ]
     )
 
-    return FileDescriptor(ANNOTATION_METAFILE_NAME, file=io.BytesIO(meta.json().encode()))
+    return FileDescriptor(ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.json().encode()))
 
 
 class _TaskProcessor:
@@ -177,7 +177,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
 
         roi_info_by_id = {roi_info.point_id: roi_info for roi_info in roi_infos}
 
-        self.roi_name_to_roi_id: Dict[str, boxes_from_points_task.RoiInfo] = {
+        self.roi_name_to_roi_info: Dict[str, boxes_from_points_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -235,7 +235,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         )
 
         for roi_sample in point_roi_dataset:
-            roi_info = self.roi_name_to_roi_id[os.path.basename(roi_sample.id)]
+            roi_info = self.roi_name_to_roi_info[os.path.basename(roi_sample.id)]
             original_sample = self.original_key_to_sample[roi_info.original_image_key]
 
             merged_sample = merged_sample_dataset.get(original_sample.id)
@@ -249,6 +249,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
                 skeleton
                 for skeleton in original_sample.annotations
                 if skeleton.id == roi_info.point_id
+                if isinstance(skeleton, dm.Skeleton)
             ).elements[0]
             old_x, old_y = old_point.points[:2]
 

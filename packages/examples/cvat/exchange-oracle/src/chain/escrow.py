@@ -10,6 +10,7 @@ from src.services.cloud.utils import parse_bucket_url
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
+    # TODO: remove mock
     if escrow_address.startswith("test-"):
         from human_protocol_sdk.constants import ChainId
 
