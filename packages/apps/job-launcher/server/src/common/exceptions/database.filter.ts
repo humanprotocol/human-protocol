@@ -1,16 +1,19 @@
-import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from 'src/database/database.error';
 
 @Catch(DatabaseError)
 export class DatabaseExceptionFilter implements ExceptionFilter {
+  private logger = new Logger(DatabaseExceptionFilter.name);
+
   catch(exception: DatabaseError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = exception.getStatus();
-    const message = exception.getResponse();
+    const status = Number(exception.code);
+    const message = exception.message;
+    this.logger.error(`Database error: ${message}`, exception.stack);
 
     response.status(status).json({
       statusCode: status,

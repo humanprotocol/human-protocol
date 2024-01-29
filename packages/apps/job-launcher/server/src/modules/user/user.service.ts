@@ -33,11 +33,7 @@ export class UserService {
     email: string,
     password: string,
   ): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOne({
-      where: {
-        email,
-      },
-    });
+    const userEntity = await this.userRepository.findByEmail(email);
 
     if (!userEntity) {
       throw new NotFoundException(ErrorUser.InvalidCredentials);
@@ -51,7 +47,7 @@ export class UserService {
   }
 
   public async getByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findByEmail(email);
   }
 
   public updatePassword(

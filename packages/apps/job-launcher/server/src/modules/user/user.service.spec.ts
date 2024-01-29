@@ -75,27 +75,23 @@ describe('UserService', () => {
 
     it('should return the user entity if credentials are valid', async () => {
       jest
-        .spyOn(userRepository, 'findOne')
+        .spyOn(userRepository, 'findByEmail')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByCredentials(email, password);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        where: { email },
-      });
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
       expect(result).toBe(userEntity);
     });
 
     it('should throw NotFoundException if credentials are invalid', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
 
       await expect(
         userService.getByCredentials(email, password),
       ).rejects.toThrow(NotFoundException);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        where: { email },
-      });
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
     });
   });
 
