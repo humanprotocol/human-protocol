@@ -5,7 +5,7 @@ import "../src/Staking.sol";
 import "../src/HMToken.sol";
 import "../src/Escrow.sol";
 import "../src/EscrowFactory.sol";
-import "./CoreUtils2.t.sol";
+import "./CoreUtils.t.sol";
 import "./Helpers/EscrowFactoryUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
@@ -14,7 +14,7 @@ interface EscrowFactoryEvents {
     event LaunchedV2(address token, address escrow, string jobRequesterId);
 }
 
-contract EscrowFactoryTest is CoreUtils2, EscrowFactoryEvents {
+contract EscrowFactoryTest is CoreUtils, EscrowFactoryEvents {
     HMToken public hmToken;
     Staking public staking;
     EscrowFactory public escrowFactory;

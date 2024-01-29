@@ -6,7 +6,7 @@ import "../src/HMToken.sol";
 import "../src/Escrow.sol";
 import "../src/EscrowFactory.sol";
 import "../src/RewardPool.sol";
-import "./CoreUtils2.t.sol";
+import "./CoreUtils.t.sol";
 import "../src/utils/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
@@ -14,7 +14,7 @@ interface RewardPoolEvents {
     event RewardAdded(address indexed escrowAddress, address indexed staker, address indexed slasher, uint256 tokens);
 }
 
-contract RewardPoolTest is CoreUtils2, RewardPoolEvents {
+contract RewardPoolTest is CoreUtils, RewardPoolEvents {
     using SafeMath for uint256;
 
     HMToken public hmToken;

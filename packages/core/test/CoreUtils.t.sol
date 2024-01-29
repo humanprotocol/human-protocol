@@ -1,44 +1,44 @@
 pragma solidity 0.8.20;
 
 import "forge-std/test.sol";
-import "../src/Escrow.sol";
+import "../src/Staking.sol";
 import "../src/HMToken.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract CoreUtils is Test {
     address owner = vm.addr(1);
-    address launcher = vm.addr(2);
-    address reputationOracle = vm.addr(3);
-    address recordingOracle = vm.addr(4);
-    address exchangeOracle = vm.addr(5);
-    address externalAddress = vm.addr(6);
-    address validator = vm.addr(7);
-    address operator = vm.addr(8);
-    address operator2 = vm.addr(9);
-    address operator3 = vm.addr(10);
+    address validator = vm.addr(2);
+    address validator2 = vm.addr(9);
+    address operator = vm.addr(3);
+    address operator2 = vm.addr(4);
+    address operator3 = vm.addr(5);
+    address exchangeOracle = vm.addr(6);
+    address reputationOracle = vm.addr(7);
+    address recordingOracle = vm.addr(8);
+    address externalAccount = vm.addr(10);
+    address launcher = vm.addr(11);
+    address externalAddress = vm.addr(12);
     address[] restAccounts = new address[](2);
     address[] trustedHandlers = new address[](2);
 
-    /**
-     * @dev fund accounts with Ether
-     */
-    function _fundEther() internal {
-        vm.deal(owner, 100 ether);
-        vm.deal(launcher, 100 ether);
-        vm.deal(reputationOracle, 100 ether);
-        vm.deal(recordingOracle, 100 ether);
-        vm.deal(exchangeOracle, 100 ether);
-        vm.deal(externalAddress, 100 ether);
-        vm.deal(restAccounts[0], 100 ether);
-        vm.deal(trustedHandlers[0], 100 ether);
-    }
+    address[11] accounts = [
+        owner,
+        validator,
+        operator,
+        operator2,
+        operator3,
+        exchangeOracle,
+        reputationOracle,
+        recordingOracle,
+        validator2,
+        externalAccount,
+        launcher
+    ];
 
-    /**
-     * @dev init Trusted Handlers addresses
-     */
-    function _initTrustedHandlers() internal {
-        trustedHandlers[0] = vm.addr(12);
-        trustedHandlers[1] = vm.addr(13);
-    }
+    uint256 public minimumStake = 2;
+    uint256 public lockPeriod = 2;
+    uint256 rewardFee = 2;
+    string jobRequesterId = "job-requester-id";
 
     /**
      * @dev init a large number of recipients and amounts
@@ -56,5 +56,13 @@ contract CoreUtils is Test {
             amounts[i] = 1;
         }
         return (recipients, amounts);
+    }
+
+    /**
+     * @dev init Trusted Handlers addresses
+     */
+    function _initTrustedHandlers() internal {
+        trustedHandlers[0] = vm.addr(55);
+        trustedHandlers[1] = vm.addr(56);
     }
 }

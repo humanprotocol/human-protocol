@@ -6,7 +6,6 @@ import "../src/HMToken.sol";
 import "../src/RewardPool.sol";
 import "../src/EscrowFactory.sol";
 import "../src/Escrow.sol";
-import "./CoreUtils2.t.sol";
 import "./CoreUtils.t.sol";
 
 interface EscrowFactoryEvents {
@@ -26,7 +25,7 @@ interface StakingEvents {
     event SetRewardPool(address indexed rewardPool);
 }
 
-contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
+contract StakingTest is CoreUtils, StakingEvents, EscrowFactoryEvents {
     Staking public staking;
     HMToken public hmToken;
     EscrowFactory public escrowFactory;
@@ -167,7 +166,8 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        _initTrustedHandlers();
+        escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         vm.expectRevert("MUST_BE_VALID_ADDRESS");
         uint256 allocationAmount = 5;
         staking.allocate(address(0), allocationAmount);
@@ -178,7 +178,8 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        _initTrustedHandlers();
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         uint256 allocationAmount = 20;
         vm.expectRevert("INSUFFICIENT_AMOUNT_STAKED");
         staking.allocate(escrowAddress, allocationAmount);
@@ -189,7 +190,8 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        _initTrustedHandlers();
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         uint256 allocationAmount = 0;
         vm.expectRevert("MUST_BE_POSITIVE_NUMBER");
         staking.allocate(escrowAddress, allocationAmount);
@@ -200,7 +202,8 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        _initTrustedHandlers();
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         uint256 allocationAmount = 3;
         staking.allocate(escrowAddress, allocationAmount);
         vm.expectRevert("ALLOCATION_ALREADY_EXISTS");
@@ -211,7 +214,8 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        _initTrustedHandlers();
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         uint256 allocationAmount = 5;
         vm.expectEmit();
         emit StakeAllocated(operator, allocationAmount, escrowAddress, block.number);
@@ -223,7 +227,8 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        _initTrustedHandlers();
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         uint256 allocationAmount = 5;
         staking.allocate(escrowAddress, allocationAmount);
         IStaking.Allocation memory allocation = staking.getAllocation(escrowAddress);
@@ -234,7 +239,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 amount = 10;
         staking.stake(amount);
-        address[] memory trustedHandlers = _initTrustedHandlers();
+        _initTrustedHandlers();
         escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         vm.expectRevert("STAKE_HAS_NO_AVAILABLE_TOKENS_FOR_WITHDRAWAL");
         staking.withdraw();
@@ -244,7 +249,7 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 lockedTokens = 5;
         uint256 stakeTokens = 10;
-        address[] memory trustedHandlers = _initTrustedHandlers();
+        _initTrustedHandlers();
 
         // Stake to be able to create escrow
         staking.stake(stakeTokens);
@@ -267,10 +272,10 @@ contract StakingTest is CoreUtils2, StakingEvents, EscrowFactoryEvents {
         vm.startPrank(operator);
         uint256 lockedTokens = 5;
         uint256 stakeTokens = 10;
-        address[] memory trustedHandlers = _initTrustedHandlers();
+        _initTrustedHandlers();
 
         staking.stake(stakeTokens);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), _initTrustedHandlers(), jobRequesterId);
+        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         staking.unstake(lockedTokens);
         Stakes.Staker memory staker = staking.getStaker(operator);
         uint256 latestBlockNumber = block.number;

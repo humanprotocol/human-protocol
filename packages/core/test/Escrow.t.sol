@@ -137,6 +137,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         hmToken.approve(address(escrow), 100);
         hmToken.transfer(address(escrow), 100);
         vm.stopPrank();
+        _initTrustedHandlers();
         vm.prank(trustedHandlers[0]);
         escrow.abort();
         uint256 balanceEscrow = hmToken.balanceOf(address(escrow));
@@ -175,7 +176,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         vm.startPrank(owner);
         escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         _initTrustedHandlers();
-        vm.startPrank(trustedHandlers[0]);
+        vm.prank(trustedHandlers[0]);
         escrow.addTrustedHandlers(trustedHandlers);
     }
 
@@ -275,6 +276,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         _initTrustedHandlers();
         escrow.addTrustedHandlers(trustedHandlers);
         vm.stopPrank();
+        _initTrustedHandlers();
         vm.startPrank(trustedHandlers[0]);
         vm.expectEmit();
         emit Pending(MOCK_URL, MOCK_HASH);
@@ -321,6 +323,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         hmToken.transfer(address(escrow), 100);
         escrow.setup(reputationOracle, recordingOracle, exchangeOracle, 10, 10, 10, MOCK_URL, MOCK_HASH);
         vm.stopPrank();
+        _initTrustedHandlers();
         vm.startPrank(trustedHandlers[0]);
         escrow.cancel();
         uint256 balanceEscrow = hmToken.balanceOf(address(escrow));
@@ -582,6 +585,7 @@ contract EscrowTest is CoreUtils, EscrowEvents {
         // Completed by Trusted Handler
         escrow.bulkPayOut(recipients, amounts, MOCK_URL, MOCK_HASH, 0);
         vm.stopPrank();
+        _initTrustedHandlers();
         vm.startPrank(trustedHandlers[0]);
         escrow.complete();
         uint256 status = uint256(escrow.status());

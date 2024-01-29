@@ -3,14 +3,14 @@ pragma solidity 0.8.20;
 import "forge-std/test.sol";
 import "../src/HMToken.sol";
 import "../src/KVStore.sol";
-import "./CoreUtils2.t.sol";
+import "./CoreUtils.t.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 interface KVStoreEvents {
     event DataSaved(address indexed sender, string key, string value);
 }
 
-contract KVStoreTest is CoreUtils2, KVStoreEvents {
+contract KVStoreTest is CoreUtils, KVStoreEvents {
     KVStore public kvStore;
 
     address account1;
