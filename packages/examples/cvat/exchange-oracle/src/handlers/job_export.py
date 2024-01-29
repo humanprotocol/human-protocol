@@ -265,7 +265,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
 
         super().__init__(*args, **kwargs)
 
-        roi_filenames, roi_infos, points_dataset = self._download_task_metadata()
+        roi_filenames, roi_infos, points_dataset = self._download_task_meta()
 
         self.points_dataset = points_dataset
         self.original_key_to_sample = {sample.attributes["id"]: sample for sample in points_dataset}
@@ -277,7 +277,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
             for roi_id, roi_filename in roi_filenames.items()
         }
 
-    def _download_task_metadata(self):
+    def _download_task_meta(self):
         # TODO: refactor, move to domain/core
         from src.handlers.job_creation import BoxesFromPointsTaskBuilder
         from src.services.cloud import make_client as make_storage_client

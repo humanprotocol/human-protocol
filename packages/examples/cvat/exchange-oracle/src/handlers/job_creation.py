@@ -782,7 +782,7 @@ class BoxesFromPointsTaskBuilder:
         ) -> BoxesFromPointsTaskBuilder.RoiFilenames:
             return {int(k): v for k, v in parse_json(roi_filenames_data).items()}
 
-    def _upload_meta(self):
+    def _upload_task_meta(self):
         # TODO: maybe extract into a separate function / class / library,
         # extract constants, serialization methods return TaskConfig from build()
 
@@ -1013,7 +1013,7 @@ class BoxesFromPointsTaskBuilder:
 
         # Data preparation
         self._extract_and_upload_rois()
-        self._upload_meta()
+        self._upload_task_meta()
 
         self._create_on_cvat()
 
