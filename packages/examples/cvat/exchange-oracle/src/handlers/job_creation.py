@@ -176,7 +176,7 @@ class BoxesFromPointsTaskBuilder:
         # credentials=BucketCredentials()
         "Exchange Oracle's private bucket info"
 
-        self.min_class_samples_for_roi_estimation = 100
+        self.min_class_samples_for_roi_estimation = 50
 
     def __enter__(self):
         return self
@@ -591,7 +591,7 @@ class BoxesFromPointsTaskBuilder:
                     )
                 )
 
-        # Consider bbox sides as normally-distributed random variables, estimate sigmas
+        # Consider bbox sides as normally-distributed random variables, estimate max
         # For big enough datasets, it should be reasonable approximation
         # (due to the central limit theorem). This can work bad for small datasets,
         # so we only do this if there are enough class samples.
@@ -602,9 +602,8 @@ class BoxesFromPointsTaskBuilder:
                 classes_with_default_roi.append(label_id)
                 estimated_size = (2, 2)  # 2 will yield just the image size after halving
             else:
-                mean_size = np.average(label_sizes, axis=0)
-                sigma = np.sqrt(np.var(label_sizes, axis=0))
-                estimated_size = (mean_size + 3 * sigma) * self.roi_size_mult
+                max_bbox = np.max(label_sizes, axis=0)
+                estimated_size = max_bbox * self.roi_size_mult
 
             roi_size_estimations_per_label[label_id] = estimated_size
 
