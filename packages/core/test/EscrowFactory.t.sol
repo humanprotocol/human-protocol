@@ -15,10 +15,6 @@ interface EscrowFactoryEvents {
 }
 
 contract EscrowFactoryTest is CoreUtils, EscrowFactoryEvents {
-    HMToken public hmToken;
-    Staking public staking;
-    EscrowFactory public escrowFactory;
-    Escrow public escrow;
     EscrowFactoryUpgradeableProxy public escrowFactoryProxy;
 
     function setUp() public {

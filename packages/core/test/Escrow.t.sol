@@ -20,9 +20,6 @@ interface EscrowEvents {
 contract EscrowTest is CoreUtils, EscrowEvents {
     using SafeMath for uint256;
 
-    Escrow public escrow;
-    HMToken public hmToken;
-
     enum Status {
         Launched,
         Pending,

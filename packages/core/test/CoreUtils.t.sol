@@ -3,9 +3,17 @@ pragma solidity 0.8.20;
 import "forge-std/test.sol";
 import "../src/Staking.sol";
 import "../src/HMToken.sol";
+import "../src/EscrowFactory.sol";
+import "../src/RewardPool.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract CoreUtils is Test {
+    Staking public staking;
+    EscrowFactory public escrowFactory;
+    Escrow public escrow;
+    HMToken public hmToken;
+    RewardPool public rewardPool;
+
     address owner = vm.addr(1);
     address validator = vm.addr(2);
     address validator2 = vm.addr(9);
@@ -64,5 +72,18 @@ contract CoreUtils is Test {
     function _initTrustedHandlers() internal {
         trustedHandlers[0] = vm.addr(55);
         trustedHandlers[1] = vm.addr(56);
+    }
+
+    /**
+     * @dev stake and create escrow
+     */
+    function stakeAndCreateEscrow(uint256 amount, address token) internal returns (Escrow) {
+        staking.stake(amount);
+        address[] memory trustedHandlers = new address[](3);
+        trustedHandlers[0] = accounts[1];
+        trustedHandlers[1] = accounts[6];
+        trustedHandlers[2] = accounts[7];
+        address escrowAddress = escrowFactory.createEscrow(address(token), trustedHandlers, jobRequesterId);
+        return Escrow(escrowAddress);
     }
 }

@@ -17,12 +17,6 @@ interface RewardPoolEvents {
 contract RewardPoolTest is CoreUtils, RewardPoolEvents {
     using SafeMath for uint256;
 
-    HMToken public hmToken;
-    Staking public staking;
-    EscrowFactory public escrowFactory;
-    RewardPool public rewardPool;
-    Escrow public escrow;
-
     function setUp() public {
         // Deploy HMTToken Contract
         vm.startPrank(owner);

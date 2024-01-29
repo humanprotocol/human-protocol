@@ -70,14 +70,6 @@ contract KVStoreTest is CoreUtils, KVStoreEvents {
         vm.stopPrank();
     }
 
-    // function testStoreEncryptedValueAndDecryptValue() public {
-    //     vm.startPrank(account1);
-    //     bytes32 encryptedValue = keccak256(abi.encodePacked("secret_value"));
-    //     kvStore.set("satoshi", encryptedValue);
-    //     string memory value = kvStore.get(account1, "satoshi");
-    //     assertEq(value, "secret_value");
-    // }
-
     function testFail_StoreInvalidPair() public {
         vm.prank(account1);
         vm.expectRevert("KEY_AND_VALUE_MUST_BE_LESS_HAVE_THE_SAME_LENGTH");
