@@ -1,5 +1,6 @@
+from human_protocol_sdk.constants import ChainId
 from human_protocol_sdk.kvstore import KVStoreClient
-from human_protocol_sdk.staking import StakingClient
+from human_protocol_sdk.staking import StakingUtils
 
 from src.chain.escrow import get_escrow
 from src.chain.web3 import get_web3
@@ -21,9 +22,7 @@ def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     escrow = get_escrow(chain_id, escrow_address)
 
-    web3 = get_web3(chain_id)
-    staking_client = StakingClient(web3)
-    return staking_client.get_leader(escrow.exchange_oracle)["webhook_url"]
+    return StakingUtils.get_leader(ChainId(chain_id), escrow.exchange_oracle).webhook_url
 
 
 def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
@@ -32,6 +31,4 @@ def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     escrow = get_escrow(chain_id, escrow_address)
 
-    web3 = get_web3(chain_id)
-    staking_client = StakingClient(web3)
-    return staking_client.get_leader(escrow.reputation_oracle)["webhook_url"]
+    return StakingUtils.get_leader(ChainId(chain_id), escrow.reputation_oracle).webhook_url

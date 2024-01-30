@@ -2,7 +2,7 @@ import datetime
 import json
 from typing import List
 
-from human_protocol_sdk.constants import Status
+from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageClient
 
