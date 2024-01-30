@@ -30,7 +30,7 @@ def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
             manifest_url="http://127.0.0.1:9010/manifests/manifest_boxes_from_points_local.json",
         )
 
-    escrow = EscrowUtils.get_escrow(chain_id, escrow_address.lower())
+    escrow = EscrowUtils.get_escrow(ChainId(chain_id), escrow_address)
     if not escrow:
         raise Exception(f"Can't find escrow {escrow_address}")
 
