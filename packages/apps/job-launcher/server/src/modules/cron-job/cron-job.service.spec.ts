@@ -811,7 +811,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(webhookRepository, 'find')
+        .spyOn(webhookRepository, 'findByStatus')
         .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
       sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');
@@ -853,13 +853,13 @@ describe('CronJobService', () => {
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity1);
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity2);
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledTimes(2);
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
+      expect(webhookRepository.updateOneById).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
+        webhookEntity1.id,
         { status: WebhookStatus.COMPLETED },
       );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity2.id },
+      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
+        webhookEntity2.id,
         { status: WebhookStatus.COMPLETED },
       );
     });
@@ -868,8 +868,8 @@ describe('CronJobService', () => {
       sendWebhookMock.mockRejectedValueOnce(new Error());
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
+      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
+        webhookEntity1.id,
         {
           retriesCount: 1,
           waitUntil: expect.any(Date),
@@ -884,8 +884,8 @@ describe('CronJobService', () => {
 
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
+      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
+        webhookEntity1.id,
         { status: WebhookStatus.FAILED },
       );
     });

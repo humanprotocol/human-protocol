@@ -110,12 +110,12 @@ describe('WebhookService', () => {
       };
 
       jest
-        .spyOn(webhookRepository, 'create')
+        .spyOn(webhookRepository, 'createUnique')
         .mockResolvedValueOnce(webhookEntity as WebhookEntity);
 
       const result = await webhookService.createWebhook(dto);
 
-      expect(webhookRepository.create).toHaveBeenCalledWith({
+      expect(webhookRepository.createUnique).toHaveBeenCalledWith({
         chainId: dto.chainId,
         escrowAddress: dto.escrowAddress,
         eventType: EventType.ESCROW_CREATED,
@@ -128,19 +128,9 @@ describe('WebhookService', () => {
       expect(result).toBe(undefined);
     });
 
-    it('should throw an error if incoming webhook entity is not created', async () => {
-      jest
-        .spyOn(webhookRepository, 'create')
-        .mockResolvedValueOnce(undefined as any);
-
-      await expect(webhookService.createWebhook(dto)).rejects.toThrowError(
-        ErrorWebhook.NotCreated,
-      );
-    });
-
     it('should throw an error if an error occurs', async () => {
       jest
-        .spyOn(webhookRepository, 'create')
+        .spyOn(webhookRepository, 'createUnique')
         .mockRejectedValueOnce(new Error());
 
       await expect(webhookService.createWebhook(dto)).rejects.toThrowError();
@@ -319,10 +309,9 @@ describe('WebhookService', () => {
         { id: 1, retriesCount: MOCK_MAX_RETRY_COUNT } as any,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: 1 },
-        { status: WebhookStatus.FAILED },
-      );
+      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(1, {
+        status: WebhookStatus.FAILED,
+      });
     });
 
     it('should increment retries count if below threshold', async () => {
@@ -330,13 +319,10 @@ describe('WebhookService', () => {
         { id: 1, retriesCount: 0 } as any,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: 1 },
-        {
-          retriesCount: 1,
-          waitUntil: expect.any(Date),
-        },
-      );
+      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(1, {
+        retriesCount: 1,
+        waitUntil: expect.any(Date),
+      });
     });
   });
 });

@@ -3,10 +3,10 @@ import { DatabaseErrorCodes, PostgresErrorCodes } from './database.enum';
 
 export class DatabaseError extends Error {
   public readonly code: string;
-  constructor(message: string, code: string, stack: string) {
+  constructor(message: string, code: string, stack?: string) {
     super(message);
     this.code = code;
-    this.stack = stack;
+    if (stack) this.stack = stack;
   }
 }
 

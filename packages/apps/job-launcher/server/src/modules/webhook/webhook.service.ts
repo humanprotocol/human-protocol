@@ -6,7 +6,6 @@ import {
   KVStoreClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
-import { LessThanOrEqual } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { signMessage } from '../../common/utils/signature';
@@ -42,27 +41,19 @@ export class WebhookService {
    * @throws {Error} - Throws an error if an issue occurs during the process.
    */
   public async createWebhook(dto: WebhookDto): Promise<void> {
-    try {
-      // Create a webhook entity with the provided data.
-      const webhookEntity = await this.webhookRepository.create({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        eventType: dto.eventType,
-        oracleType: dto.oracleType,
-        hasSignature: dto.hasSignature,
-        status: WebhookStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      });
-
-      // Check if the webhook entity was created successfully.
-      if (!webhookEntity) {
-        this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
-        throw new NotFoundException(ErrorWebhook.NotCreated);
-      }
-    } catch (e) {
-      throw new Error(e);
-    }
+    // Create a webhook entity with the provided data.
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, {
+      chainId: dto.chainId,
+      escrowAddress: dto.escrowAddress,
+      eventType: dto.eventType,
+      oracleType: dto.oracleType,
+      hasSignature: dto.hasSignature,
+      status: WebhookStatus.PENDING,
+      waitUntil: new Date(),
+      retriesCount: 0,
+    });
+    await this.webhookRepository.createUnique(webhookEntity);
   }
 
   /**
@@ -162,18 +153,12 @@ export class WebhookService {
         DEFAULT_MAX_RETRY_COUNT,
       )
     ) {
-      await this.webhookRepository.updateOne(
-        { id: webhookEntity.id },
-        { status: WebhookStatus.FAILED },
-      );
+      await this.updateWebhookStatus(webhookEntity.id, WebhookStatus.FAILED);
     } else {
-      await this.webhookRepository.updateOne(
-        { id: webhookEntity.id },
-        {
-          retriesCount: webhookEntity.retriesCount + 1,
-          waitUntil: new Date(),
-        },
-      );
+      await this.webhookRepository.updateOneById(webhookEntity.id, {
+        retriesCount: webhookEntity.retriesCount + 1,
+        waitUntil: new Date(),
+      });
     }
 
     this.logger.error(
@@ -191,16 +176,7 @@ export class WebhookService {
   public async findWebhookByStatus(
     status: WebhookStatus,
   ): Promise<WebhookEntity[]> {
-    return this.webhookRepository.find({
-      status: status,
-      retriesCount: LessThanOrEqual(
-        this.configService.get(
-          ConfigNames.MAX_RETRY_COUNT,
-          DEFAULT_MAX_RETRY_COUNT,
-        ),
-      ),
-      waitUntil: LessThanOrEqual(new Date()),
-    });
+    return this.webhookRepository.findByStatus(status);
   }
 
   /**
@@ -214,11 +190,8 @@ export class WebhookService {
     id: number,
     status: WebhookStatus,
   ): Promise<void> {
-    await this.webhookRepository.updateOne(
-      { id: id },
-      {
-        status: status,
-      },
-    );
+    await this.webhookRepository.updateOneById(id, {
+      status: status,
+    });
   }
 }
