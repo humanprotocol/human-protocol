@@ -60,6 +60,10 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiResponse({
+    status: 422,
+    description: 'Unprocessable entity.',
+  })
   public async signup(@Body() data: UserCreateDto): Promise<void> {
     await this.authService.signup(data);
     return;
