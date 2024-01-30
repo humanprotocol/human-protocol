@@ -14,18 +14,18 @@ contract CoreUtils is Test {
     HMToken public hmToken;
     RewardPool public rewardPool;
 
-    address owner = vm.addr(1);
-    address validator = vm.addr(2);
-    address validator2 = vm.addr(9);
-    address operator = vm.addr(3);
-    address operator2 = vm.addr(4);
-    address operator3 = vm.addr(5);
-    address exchangeOracle = vm.addr(6);
-    address reputationOracle = vm.addr(7);
-    address recordingOracle = vm.addr(8);
-    address externalAccount = vm.addr(10);
-    address launcher = vm.addr(11);
-    address externalAddress = vm.addr(12);
+    address owner = makeAddr("owner");
+    address validator = makeAddr("validator");
+    address validator2 = makeAddr("validator2");
+    address operator = makeAddr("operator");
+    address operator2 = makeAddr("operator2");
+    address operator3 = makeAddr("operator3");
+    address exchangeOracle = makeAddr("exchangeOracle");
+    address reputationOracle = makeAddr("reputationOracle");
+    address recordingOracle = makeAddr("recordingOracle");
+    address externalAccount = makeAddr("externalAccount");
+    address launcher = makeAddr("launcher");
+    address externalAddress = makeAddr("externalAddress");
     address[] restAccounts = new address[](2);
     address[] trustedHandlers = new address[](2);
 
