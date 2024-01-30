@@ -1,9 +1,5 @@
 import { QueryFailedError } from 'typeorm';
-
-export enum DatabaseErrorCodes {
-  EntityDuplication = 'ENTITY_DUPLICATION',
-  Unknown = 'UNKNOWN',
-}
+import { DatabaseErrorCodes, PostgresErrorCodes } from './database.enum';
 
 export class DatabaseError extends Error {
   public readonly code: string;
@@ -20,7 +16,7 @@ export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
     code: string;
 
   switch ((error.driverError as any).code) {
-    case '23505':
+    case PostgresErrorCodes.Duplicated:
       message = (error.driverError as any).detail;
       code = DatabaseErrorCodes.EntityDuplication;
       break;

@@ -62,7 +62,7 @@ export class AuthJwtController {
   })
   @ApiResponse({
     status: 422,
-    description: 'Unprocessable entity. User already exists.',
+    description: 'Unprocessable entity.',
   })
   public async signup(@Body() data: UserCreateDto): Promise<void> {
     await this.authService.signup(data);
