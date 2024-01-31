@@ -305,24 +305,33 @@ describe('WebhookService', () => {
 
   describe('handleWebhookError', () => {
     it('should set webhook status to FAILED if retries exceed threshold', async () => {
+      const webhookEntity: Partial<WebhookEntity> = {
+        id: 1,
+        status: WebhookStatus.PENDING,
+        retriesCount: MOCK_MAX_RETRY_COUNT,
+      };
       await (webhookService as any).handleWebhookError(
-        { id: 1, retriesCount: MOCK_MAX_RETRY_COUNT } as any,
+        webhookEntity,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(1, {
-        status: WebhookStatus.FAILED,
-      });
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity.status).toBe(WebhookStatus.FAILED);
     });
 
     it('should increment retries count if below threshold', async () => {
+      const webhookEntity: Partial<WebhookEntity> = {
+        id: 1,
+        status: WebhookStatus.PENDING,
+        retriesCount: 0,
+      };
       await (webhookService as any).handleWebhookError(
-        { id: 1, retriesCount: 0 } as any,
+        webhookEntity,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(1, {
-        retriesCount: 1,
-        waitUntil: expect.any(Date),
-      });
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
+      expect(webhookEntity.retriesCount).toBe(1);
+      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
     });
   });
 });

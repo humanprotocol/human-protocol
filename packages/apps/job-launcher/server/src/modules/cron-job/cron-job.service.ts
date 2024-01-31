@@ -278,7 +278,7 @@ export class CronJobService {
         try {
           await this.webhookService.sendWebhook(webhookEntity);
           await this.webhookService.updateWebhookStatus(
-            webhookEntity.id,
+            webhookEntity,
             WebhookStatus.COMPLETED,
           );
         } catch (err) {

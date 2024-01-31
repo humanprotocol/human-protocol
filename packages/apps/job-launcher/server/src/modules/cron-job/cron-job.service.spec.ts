@@ -853,28 +853,19 @@ describe('CronJobService', () => {
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity1);
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity2);
 
-      expect(webhookRepository.updateOneById).toHaveBeenCalledTimes(2);
-      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
-        webhookEntity1.id,
-        { status: WebhookStatus.COMPLETED },
-      );
-      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
-        webhookEntity2.id,
-        { status: WebhookStatus.COMPLETED },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalledTimes(2);
+      expect(webhookEntity1.status).toBe(WebhookStatus.COMPLETED);
+      expect(webhookEntity2.status).toBe(WebhookStatus.COMPLETED);
     });
 
     it('should increase retriesCount by 1 if sending webhook fails', async () => {
       sendWebhookMock.mockRejectedValueOnce(new Error());
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
-        webhookEntity1.id,
-        {
-          retriesCount: 1,
-          waitUntil: expect.any(Date),
-        },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity1.status).toBe(WebhookStatus.PENDING);
+      expect(webhookEntity1.retriesCount).toBe(1);
+      expect(webhookEntity1.waitUntil).toBeInstanceOf(Date);
     });
 
     it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
@@ -884,10 +875,8 @@ describe('CronJobService', () => {
 
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOneById).toHaveBeenCalledWith(
-        webhookEntity1.id,
-        { status: WebhookStatus.FAILED },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity1.status).toBe(WebhookStatus.FAILED);
     });
 
     it('should complete the cron job entity to unlock', async () => {

@@ -153,12 +153,11 @@ export class WebhookService {
         DEFAULT_MAX_RETRY_COUNT,
       )
     ) {
-      await this.updateWebhookStatus(webhookEntity.id, WebhookStatus.FAILED);
+      await this.updateWebhookStatus(webhookEntity, WebhookStatus.FAILED);
     } else {
-      await this.webhookRepository.updateOneById(webhookEntity.id, {
-        retriesCount: webhookEntity.retriesCount + 1,
-        waitUntil: new Date(),
-      });
+      webhookEntity.waitUntil = new Date();
+      webhookEntity.retriesCount = webhookEntity.retriesCount + 1;
+      this.webhookRepository.updateOne(webhookEntity.id, webhookEntity);
     }
 
     this.logger.error(
@@ -187,11 +186,10 @@ export class WebhookService {
    * @throws {Error} - Throws an error if an issue occurs during the update process.
    */
   public async updateWebhookStatus(
-    id: number,
+    webhookEntity: WebhookEntity,
     status: WebhookStatus,
   ): Promise<void> {
-    await this.webhookRepository.updateOneById(id, {
-      status: status,
-    });
+    webhookEntity.status = status;
+    this.webhookRepository.updateOne(webhookEntity.id, webhookEntity);
   }
 }

@@ -7,16 +7,11 @@ import {
   DataSource,
   LessThanOrEqual,
 } from 'typeorm';
-import { ErrorWebhook } from '../../common/constants/errors';
-import {
-  DatabaseError,
-  handleQueryFailedError,
-} from '../../database/database.error';
+import { handleQueryFailedError } from '../../database/database.error';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ConfigNames } from '../../common/config';
 import { ConfigService } from '@nestjs/config';
 import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
-import { DatabaseErrorCodes } from '../../database/database.enum';
 
 @Injectable()
 export class WebhookRepository extends Repository<WebhookEntity> {
@@ -41,23 +36,25 @@ export class WebhookRepository extends Repository<WebhookEntity> {
     return webhook;
   }
 
-  public async updateOneById(
+  public async updateOne(
     id: number,
     webhook: Partial<WebhookEntity>,
-  ): Promise<WebhookEntity> {
-    const webhookEntity = await this.findOne({ where: { id: id } });
+  ): Promise<WebhookEntity | null> {
+    try {
+      const result = await super.update(id, webhook);
+      console.log(webhook);
 
-    if (!webhookEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
-      throw new DatabaseError(
-        ErrorWebhook.NotFound,
-        DatabaseErrorCodes.EntityNotFound,
-      );
+      if (result.affected && result.affected > 0) {
+        return await this.findOne({ where: { id } });
+      }
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
     }
-
-    Object.assign(webhookEntity, webhook);
-
-    return webhookEntity.save();
+    return null;
   }
 
   public findByStatus(status: WebhookStatus): Promise<WebhookEntity[]> {
