@@ -37,16 +37,10 @@ export class WebhookRepository extends Repository<WebhookEntity> {
   }
 
   public async updateOne(
-    id: number,
-    webhook: Partial<WebhookEntity>,
+    webhook: WebhookEntity,
   ): Promise<WebhookEntity | null> {
     try {
-      const result = await super.update(id, webhook);
-      console.log(webhook);
-
-      if (result.affected && result.affected > 0) {
-        return await this.findOne({ where: { id } });
-      }
+      await this.save(webhook);
     } catch (error) {
       if (error instanceof QueryFailedError) {
         throw handleQueryFailedError(error);
@@ -54,7 +48,7 @@ export class WebhookRepository extends Repository<WebhookEntity> {
         throw error;
       }
     }
-    return null;
+    return webhook;
   }
 
   public findByStatus(status: WebhookStatus): Promise<WebhookEntity[]> {

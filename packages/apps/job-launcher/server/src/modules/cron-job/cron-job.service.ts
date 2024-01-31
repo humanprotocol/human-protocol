@@ -18,6 +18,8 @@ import {
 import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
+import { WebhookRepository } from '../webhook/webhook.repository';
+import { WebhookEntity } from '../webhook/webhook.entity';
 
 @Injectable()
 export class CronJobService {
@@ -29,6 +31,7 @@ export class CronJobService {
     private readonly webhookService: WebhookService,
     private readonly storageService: StorageService,
     private readonly paymentService: PaymentService,
+    private readonly webhookRepository: WebhookRepository,
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
@@ -164,13 +167,14 @@ export class CronJobService {
           );
 
           if ((manifest as CvatManifestDto)?.annotation?.type) {
-            await this.webhookService.createWebhook({
+            const webhookEntity = new WebhookEntity({
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CREATED,
               oracleType: OracleType.CVAT,
               hasSignature: false,
             });
+            await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
           this.logger.error(`Error funding escrow: ${err.message}`);
@@ -229,7 +233,7 @@ export class CronJobService {
 
           const oracleType = this.jobService.getOracleType(manifest);
           if (oracleType !== OracleType.HCAPTCHA) {
-            await this.webhookService.createWebhook({
+            const webhookEntity = new WebhookEntity({
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CANCELED,
@@ -238,6 +242,7 @@ export class CronJobService {
                 (manifest as FortuneManifestDto).requestType ===
                 JobRequestType.FORTUNE,
             });
+            await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
           this.logger.error(`Error canceling escrow: ${err.message}`);
@@ -270,21 +275,20 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
-      const webhookEntities = await this.webhookService.findWebhookByStatus(
+      const webhookEntities = await this.webhookRepository.findByStatus(
         WebhookStatus.PENDING,
       );
 
       for (const webhookEntity of webhookEntities) {
         try {
           await this.webhookService.sendWebhook(webhookEntity);
-          await this.webhookService.updateWebhookStatus(
-            webhookEntity,
-            WebhookStatus.COMPLETED,
-          );
         } catch (err) {
           this.logger.error(`Error sending webhook: ${err.message}`);
           await this.webhookService.handleWebhookError(webhookEntity, err);
+          continue;
         }
+        webhookEntity.status = WebhookStatus.COMPLETED;
+        await this.webhookRepository.updateOne(webhookEntity);
       }
     } catch (e) {
       this.logger.error(e);

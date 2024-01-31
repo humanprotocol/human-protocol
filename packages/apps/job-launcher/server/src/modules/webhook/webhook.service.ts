@@ -35,28 +35,6 @@ export class WebhookService {
   ) {}
 
   /**
-   * Create a webhook using the DTO data.
-   * @param dto - Data to create an incoming webhook.
-   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
-   * @throws {Error} - Throws an error if an issue occurs during the process.
-   */
-  public async createWebhook(dto: WebhookDto): Promise<void> {
-    // Create a webhook entity with the provided data.
-    const webhookEntity = new WebhookEntity();
-    Object.assign(webhookEntity, {
-      chainId: dto.chainId,
-      escrowAddress: dto.escrowAddress,
-      eventType: dto.eventType,
-      oracleType: dto.oracleType,
-      hasSignature: dto.hasSignature,
-      status: WebhookStatus.PENDING,
-      waitUntil: new Date(),
-      retriesCount: 0,
-    });
-    await this.webhookRepository.createUnique(webhookEntity);
-  }
-
-  /**
    * Send a webhook with the provided data.
    * @param webhook - Webhook entity containing data for the webhook.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
@@ -153,43 +131,11 @@ export class WebhookService {
         DEFAULT_MAX_RETRY_COUNT,
       )
     ) {
-      await this.updateWebhookStatus(webhookEntity, WebhookStatus.FAILED);
+      webhookEntity.status = WebhookStatus.FAILED;
     } else {
       webhookEntity.waitUntil = new Date();
       webhookEntity.retriesCount = webhookEntity.retriesCount + 1;
-      this.webhookRepository.updateOne(webhookEntity.id, webhookEntity);
     }
-
-    this.logger.error(
-      'An error occurred during webhook validation: ',
-      error,
-      WebhookService.name,
-    );
-  }
-  /**
-   * Finds webhooks based on the provided status and additional criteria.
-   * @param status - WebhookStatus enum representing the status to filter by.
-   * @returns {Promise<WebhookEntity[]>} - Returns a promise that resolves with an array of WebhookEntity objects.
-   * @throws {Error} - Throws an error if an issue occurs during the retrieval process.
-   */
-  public async findWebhookByStatus(
-    status: WebhookStatus,
-  ): Promise<WebhookEntity[]> {
-    return this.webhookRepository.findByStatus(status);
-  }
-
-  /**
-   * Updates the status of a webhook identified by its ID.
-   * @param id - The ID of the webhook to update.
-   * @param status - WebhookStatus enum representing the new status.
-   * @returns {Promise<void>} - Returns a promise that resolves when the update operation is complete.
-   * @throws {Error} - Throws an error if an issue occurs during the update process.
-   */
-  public async updateWebhookStatus(
-    webhookEntity: WebhookEntity,
-    status: WebhookStatus,
-  ): Promise<void> {
-    webhookEntity.status = status;
-    this.webhookRepository.updateOne(webhookEntity.id, webhookEntity);
+    this.webhookRepository.updateOne(webhookEntity);
   }
 }

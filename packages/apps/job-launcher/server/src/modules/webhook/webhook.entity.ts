@@ -8,10 +8,20 @@ import {
   WebhookStatus,
 } from '../../common/enums/webhook';
 import { ChainId } from '@human-protocol/sdk';
+import { WebhookDto } from './webhook.dto';
 
 @Entity({ schema: NS, name: 'webhook' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
 export class WebhookEntity extends BaseEntity {
+  constructor(dto: WebhookDto) {
+    super();
+    this.chainId = dto.chainId;
+    this.escrowAddress = dto.escrowAddress;
+    this.eventType = dto.eventType;
+    this.oracleType = dto.oracleType;
+    this.hasSignature = dto.hasSignature;
+  }
+
   @Column({ type: 'int' })
   public chainId: ChainId;
 
@@ -34,14 +44,14 @@ export class WebhookEntity extends BaseEntity {
   public hasSignature: boolean;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  public retriesCount = 0;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  public waitUntil: Date = new Date();
 
   @Column({
     type: 'enum',
     enum: WebhookStatus,
   })
-  public status: WebhookStatus;
+  public status: WebhookStatus = WebhookStatus.PENDING;
 }
