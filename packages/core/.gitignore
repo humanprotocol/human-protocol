@@ -8,10 +8,10 @@ out/
 /broadcast/**/dry-run/
 /broadcast
 
-# Lib 
+# Lib
 lib/
 
-#abis 
+#abis
 abis/
 
 # Docs
@@ -240,3 +240,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# typechain
+typechain-types

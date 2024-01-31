@@ -35,7 +35,10 @@
   },
   "workspaces": {
     "packages": [
-      "packages/**/*"
+      "packages/apps/**/*",
+      "packages/core",
+      "packages/sdk/**/*",
+      "packages/tools/**/*"
     ]
   },
   "devDependencies": {
