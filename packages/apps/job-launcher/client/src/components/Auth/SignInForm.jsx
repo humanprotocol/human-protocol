@@ -4,17 +4,19 @@ import { Box, FormHelperText, Link as MuiLink, TextField } from '@mui/material';
 import { useFormik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSnackbar } from '../../providers/SnackProvider';
 import * as authService from '../../services/auth';
 import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync, signIn } from '../../state/auth/reducer';
 import { Password } from './Password';
 import { LoginValidationSchema } from './schema';
 
-export const SignInForm = ({ onError }) => {
+export const SignInForm = () => {
   const captchaRef = useRef(null);
   const [hcaptchaToken, setHcaptchaToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const { showError } = useSnackbar();
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -35,7 +37,7 @@ export const SignInForm = ({ onError }) => {
       dispatch(signIn(data));
       dispatch(fetchUserBalanceAsync());
     } catch (err) {
-      onError(err?.response?.data?.message ?? err.message);
+      showError(err);
     }
     setIsLoading(false);
   };
