@@ -11,27 +11,24 @@ gas_reports = ["*"]
 default_network = "http://127.0.0.1:8545"
 localhost = "http://127.0.0.1:8545"
 
-mainnet = "https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}"
-sepolia = "https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+
+mainnet = "https://eth-mainnet.alchemyapi.io/v2/${ETH_MAINNET_URL}"
 goerli = "https://rpc.ankr.com/eth_goerli"
-optimism = "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
-optimismGoerli = "https://opt-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 polygon = "https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 polygonMumbai = "https://rpc.ankr.com/polygon_mumbai"
-gnosis = "https://rpc.gnosischain.com"
-linea = "https://rpc.goerli.linea.build"
-mantleTestnet = "https://rpc.testnet.mantle.xyz"
-neonDevnet = "https://devnet.neonevm.org"
-gnosisChiado = "https://rpc.chiadochain.net"
+bnbTesnet=""
+moonBaseAlpha=""
+avalancheFuji=""
+celoAlfajores=""
+
 
 [etherscan]
-polygonMumbai = { key = "${ETHERSCAN_API_KEY}" }
 goerli = { key = "${ETHERSCAN_API_KEY}" }
-arbitrumGoerli = { key = "${ETHERSCAN_API_KEY}" }
-baseGoerli = { key = "${ETHERSCAN_API_KEY}" }
+polygonMumbai = { key = "${ETHERSCAN_API_KEY}" }
+bnbTesnet = { key = "${ETHERSCAN_API_KEY}" }
+moonBaseAlpha = { key = "${ETHERSCAN_API_KEY}" }
+avalancheFuji = { key = "${ETHERSCAN_API_KEY}" }
 celoAlfajores = { key = "${ETHERSCAN_API_KEY}" }
-scrollSepolia = { key = "${ETHERSCAN_API_KEY}" , url = "https://api-sepolia.scrollscan.dev/api" }
-
 
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
