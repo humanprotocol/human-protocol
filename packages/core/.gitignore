@@ -12,7 +12,7 @@ out/
 lib/
 
 #abis 
-abis/**
+abis/
 
 # Docs
 docs/
