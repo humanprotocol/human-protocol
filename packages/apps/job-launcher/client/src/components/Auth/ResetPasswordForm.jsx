@@ -1,24 +1,18 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  FormHelperText,
-  Link,
-  Typography,
-} from '@mui/material';
+import { Box, FormHelperText, Link, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from '../../providers/SnackProvider';
 import * as authService from '../../services/auth';
 import { Password } from './Password';
 import { ResetPasswordValidationSchema } from './schema';
 
 export const ResetPasswordForm = () => {
   const captchaRef = useRef(null);
-  const [alertMsg, setAlertMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { showError } = useSnackbar();
   const navigate = useNavigate();
   const token = new URLSearchParams(window.location.search).get('token');
 
@@ -32,7 +26,7 @@ export const ResetPasswordForm = () => {
 
       navigate('/');
     } catch (err) {
-      console.error(err);
+      showError(err);
     }
     setIsLoading(false);
   };
@@ -45,12 +39,6 @@ export const ResetPasswordForm = () => {
 
   return (
     <Box sx={{ maxWidth: '303px', mx: 'auto', py: 8 }}>
-      {alertMsg && alertMsg.length && (
-        <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ mb: 2 }}>
-          <AlertTitle>Reset password failed!</AlertTitle>
-          {alertMsg}
-        </Alert>
-      )}
       <Typography fontSize={20} fontWeight={600} mb={4} lineHeight={1.5}>
         Reset Password
       </Typography>
