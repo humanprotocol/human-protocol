@@ -13,7 +13,7 @@
     "deploy:core": "forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy",
     "upgrade:proxy": "forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript",
     "compile": "forge compile",
-    "build": "./build-and-extract-abi.sh",
+    "build": "forge build",
     "build:size": "forge build --sizes"
   },
   "repository": {
