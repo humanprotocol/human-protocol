@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/hm-token/HMToken.sol";
+import "../src/HMToken.sol";
 import "./DeploymentUtils.sol";
 
 contract HMTDeployment is Script, DeploymentUtils {

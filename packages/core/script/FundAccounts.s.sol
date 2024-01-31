@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "../src/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
 import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
+import "../src/HMToken.sol";
 
 contract FundAccounts is Script {
     function run() external {

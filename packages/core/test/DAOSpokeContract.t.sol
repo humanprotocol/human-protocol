@@ -2,7 +2,7 @@ import "forge-std/Test.sol";
 import "../src/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
 import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
+import "../src/HMToken.sol";
 import "../src/wormhole/IWormhole.sol";
 import "./TestUtil.sol";
 

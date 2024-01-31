@@ -1,6 +1,6 @@
 import "forge-std/Test.sol";
 import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
+import "../src/HMToken.sol";
 import "../src/MetaHumanGovernor.sol";
 import "../src/wormhole/IWormhole.sol";
 
