@@ -260,10 +260,10 @@ describe('JobService', () => {
 
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
-    paymentRepository = moduleRef.get(PaymentRepository);
+    paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
     paymentService = moduleRef.get(PaymentService);
     routingProtocolService = moduleRef.get(RoutingProtocolService);
-    createPaymentMock = jest.spyOn(paymentRepository, 'create');
+    createPaymentMock = jest.spyOn(paymentRepository, 'createUnique');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
 
@@ -334,7 +334,7 @@ describe('JobService', () => {
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
         source: PaymentSource.BALANCE,
@@ -937,7 +937,7 @@ describe('JobService', () => {
       );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
         source: PaymentSource.BALANCE,
@@ -1280,7 +1280,7 @@ describe('JobService', () => {
       );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
         source: PaymentSource.BALANCE,

@@ -104,6 +104,7 @@ import {
 } from '../../common/utils/storage';
 import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
+import { PaymentEntity } from '../payment/payment.entity';
 
 @Injectable()
 export class JobService {
@@ -115,8 +116,8 @@ export class JobService {
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
-    private readonly paymentRepository: PaymentRepository,
     private readonly paymentService: PaymentService,
+    private readonly paymentRepository: PaymentRepository,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
@@ -493,7 +494,8 @@ export class JobService {
     }
 
     try {
-      await this.paymentRepository.create({
+      const paymentEntity = new PaymentEntity();
+      Object.assign(paymentEntity, {
         userId,
         jobId: jobEntity.id,
         source: PaymentSource.BALANCE,
@@ -503,6 +505,7 @@ export class JobService {
         rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
+      await this.paymentRepository.createUnique(paymentEntity);
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
