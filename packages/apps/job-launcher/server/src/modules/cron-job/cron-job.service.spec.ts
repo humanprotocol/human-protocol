@@ -538,7 +538,7 @@ describe('CronJobService', () => {
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
 
-      createWebhookMock = jest.spyOn(webhookService, 'createWebhook');
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
 
       const cvatManifestMock: DeepPartial<CvatManifestDto> = {
         data: {
@@ -709,7 +709,7 @@ describe('CronJobService', () => {
     });
 
     it('should cancel all of the jobs with status TO_CANCEL', async () => {
-      jest.spyOn(webhookService, 'createWebhook');
+      jest.spyOn(webhookRepository, 'createUnique');
       const result = await service.cancelCronJob();
 
       expect(result).toBeTruthy();
@@ -721,7 +721,7 @@ describe('CronJobService', () => {
         jobEntityMock2,
       );
       expect(jobEntityMock2.save).toHaveBeenCalled();
-      expect(webhookService.createWebhook).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.createUnique).toHaveBeenCalledTimes(2);
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {

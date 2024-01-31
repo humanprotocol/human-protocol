@@ -167,7 +167,8 @@ export class CronJobService {
           );
 
           if ((manifest as CvatManifestDto)?.annotation?.type) {
-            const webhookEntity = new WebhookEntity({
+            const webhookEntity = new WebhookEntity();
+            Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CREATED,
@@ -233,7 +234,8 @@ export class CronJobService {
 
           const oracleType = this.jobService.getOracleType(manifest);
           if (oracleType !== OracleType.HCAPTCHA) {
-            const webhookEntity = new WebhookEntity({
+            const webhookEntity = new WebhookEntity();
+            Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CANCELED,
@@ -284,7 +286,7 @@ export class CronJobService {
           await this.webhookService.sendWebhook(webhookEntity);
         } catch (err) {
           this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.webhookService.handleWebhookError(webhookEntity, err);
+          await this.webhookService.handleWebhookError(webhookEntity);
           continue;
         }
         webhookEntity.status = WebhookStatus.COMPLETED;

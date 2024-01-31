@@ -17,7 +17,6 @@ import {
   WebhookStatus,
 } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
-import { WebhookDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
@@ -87,54 +86,6 @@ describe('WebhookService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('createWebhook', () => {
-    const dto: WebhookDto = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      eventType: EventType.ESCROW_CREATED,
-      oracleType: OracleType.FORTUNE,
-      hasSignature: false,
-    };
-
-    it('should create a webhook entity', async () => {
-      const webhookEntity: Partial<WebhookEntity> = {
-        id: 1,
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        status: WebhookStatus.PENDING,
-        eventType: dto.eventType,
-        oracleType: dto.oracleType,
-        waitUntil: new Date(),
-      };
-
-      jest
-        .spyOn(webhookRepository, 'createUnique')
-        .mockResolvedValueOnce(webhookEntity as WebhookEntity);
-
-      const result = await webhookService.createWebhook(dto);
-
-      expect(webhookRepository.createUnique).toHaveBeenCalledWith({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        eventType: EventType.ESCROW_CREATED,
-        hasSignature: false,
-        oracleType: OracleType.FORTUNE,
-        retriesCount: 0,
-        status: WebhookStatus.PENDING,
-        waitUntil: expect.any(Date),
-      });
-      expect(result).toBe(undefined);
-    });
-
-    it('should throw an error if an error occurs', async () => {
-      jest
-        .spyOn(webhookRepository, 'createUnique')
-        .mockRejectedValueOnce(new Error());
-
-      await expect(webhookService.createWebhook(dto)).rejects.toThrowError();
-    });
   });
 
   describe('sendWebhook', () => {

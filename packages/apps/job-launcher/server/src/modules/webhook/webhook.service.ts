@@ -20,7 +20,7 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookEntity } from './webhook.entity';
-import { WebhookDataDto, WebhookDto } from './webhook.dto';
+import { WebhookDataDto } from './webhook.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 @Injectable()
 export class WebhookService {
@@ -120,10 +120,7 @@ export class WebhookService {
    * @param error - The error object thrown during processing.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  public async handleWebhookError(
-    webhookEntity: WebhookEntity,
-    error: any,
-  ): Promise<void> {
+  public async handleWebhookError(webhookEntity: WebhookEntity): Promise<void> {
     if (
       webhookEntity.retriesCount >=
       this.configService.get(
