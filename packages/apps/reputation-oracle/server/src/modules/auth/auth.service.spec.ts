@@ -40,6 +40,7 @@ import {
   WEB3_SIGNUP_MESSAGE,
 } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -85,6 +86,12 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
+        {
+          provide: Web3Service,
+          useValue: {
+            signMessage: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -161,7 +168,6 @@ describe('AuthService', () => {
     const userCreateDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
-      confirm: MOCK_PASSWORD,
       type: UserType.WORKER,
     };
 
@@ -456,7 +462,6 @@ describe('AuthService', () => {
         authService.restorePassword({
           token: 'token',
           password: 'password',
-          confirm: 'password',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -472,7 +477,6 @@ describe('AuthService', () => {
       await authService.restorePassword({
         token: 'token',
         password: 'password',
-        confirm: 'password',
       });
 
       expect(updatePasswordMock).toHaveBeenCalled();

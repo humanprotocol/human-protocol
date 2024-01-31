@@ -1,26 +1,39 @@
 {
-    "name": "core-human-contracts",
-    "version": "1.0.0",
-    "description": "Core Human Protocol contracts ",
-    "scripts": {
-      "contracts:oppenzeplin": "forge install OpenZeppelin/openzeppelin-contracts@v4.9.2 --no-commit",
-      "contracts:oppenzeplin-upgradeable": "forge install OpenZeppelin/openzeppelin-contracts-upgradeable@v4.9.2 --no-commit",
-      "clean": "forge clean", 
-      "test": "forge test",
-      "gas:report": "forge test --gas-report",
-      "coverage": "forge coverage",
-      "deploy:proxies": "forge script script/DeployProxies.s.sol:DeployProxies --rpc-url polygonMumbai --broadcast --verify --legacy",
-      "deploy:core": "forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy",
-      "upgrade:proxy": "forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript",
-      "compile": "forge compile",
-      "build": "forge build",
-      "build:size": "forge build --sizes"
-    },
-    "author": "HUMAN PROTOCOL",
-    "license": "ISC",
-    "dependencies": {
-      "@openzeppelin/contracts": "^4.9.2",
-      "@openzeppelin/contracts-upgradeable": "^4.9.2"
-    }
+  "name": "@human-protocol/core",
+  "version": "1.0.0",
+  "description": "Human Protocol Core Smart Contracts",
+  "scripts": {
+    "contracts:oppenzeplin": "forge install OpenZeppelin/openzeppelin-contracts@v4.9.2 --no-commit",
+    "contracts:oppenzeplin-upgradeable": "forge install OpenZeppelin/openzeppelin-contracts-upgradeable@v4.9.2 --no-commit",
+    "clean": "forge clean", 
+    "test": "forge test",
+    "gas:report": "forge test --gas-report",
+    "coverage": "forge coverage",
+    "deploy:proxies": "forge script script/DeployProxies.s.sol:DeployProxies --rpc-url polygonMumbai --broadcast --verify --legacy",
+    "deploy:core": "forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy",
+    "upgrade:proxy": "forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript",
+    "compile": "forge compile",
+    "build": "./build-and-extract-abi.sh",
+    "build:size": "forge build --sizes"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "human-protocol",
+    "core",
+    "solidity",
+    "ethereum",
+    "contracts"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.2",
+    "@openzeppelin/contracts-upgradeable": "^4.9.2"
+  }, 
+  "exports": {
+    "./out/*:" : "./out/*"
   }
-  
+}

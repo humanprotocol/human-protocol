@@ -1,22 +1,28 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
-from human_protocol_sdk.escrow import EscrowClientError
-from human_protocol_sdk.storage import StorageClientError
+import pytest
+from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
 from src.chain.escrow import (
-    get_escrow_job_type,
+    get_escrow_manifest,
     get_reputation_oracle_address,
     store_results,
     validate_escrow,
 )
-from src.core.types import JobTypes
+from src.core.config import Config
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, DEFAULT_HASH, DEFAULT_URL
+from tests.utils.constants import (
+    DEFAULT_GAS_PAYER_PRIV,
+    DEFAULT_HASH,
+    DEFAULT_URL,
+    REPUTATION_ORACLE_ADDRESS,
+)
 from tests.utils.setup_escrow import (
+    amount,
     bulk_payout,
     create_escrow,
     fund_escrow,
@@ -35,31 +41,34 @@ class ServiceIntegrationTest(unittest.TestCase):
             "construct_sign_and_send_raw_middleware",
         )
         self.w3.eth.default_account = self.gas_payer.address
+        self.network_config = Config.localhost
+
+        self.escrow_address = create_escrow(self.w3)
+        fund_escrow(self.w3, self.escrow_address)
+
+    def escrow(self, status: str = "Pending", balance: float = amount):
+        mock_escrow = MagicMock()
+        mock_escrow.status = status
+        mock_escrow.balance = balance
+        mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
+        mock_escrow.manifestUrl = DEFAULT_URL
+        return mock_escrow
 
     def test_validate_escrow(self):
-        escrow_address = create_escrow(self.w3)
-        fund_escrow(self.w3, escrow_address)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            validation = validate_escrow(self.w3.eth.chain_id, escrow_address)
-            self.assertIsNone(validation)
-
-    def test_validate_escrow_invalid_address(self):
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                validate_escrow(self.w3.eth.chain_id, "invalid_address")
-
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        with patch("src.chain.escrow.get_escrow") as mock_get_escrow:
+            mock_get_escrow.return_value = self.escrow("Pending", amount)
+            # should not throw an exception
+            validate_escrow(self.network_config.chain_id, self.escrow_address)
 
     def test_validate_escrow_without_funds(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(ValueError) as error:
-                validate_escrow(self.w3.eth.chain_id, escrow_address)
+        with patch("src.chain.escrow.get_escrow") as mock_get_escrow:
+            mock_get_escrow.return_value = self.escrow("Pending", 0)
 
-        self.assertEqual(f"Escrow doesn't have funds", str(error.exception))
+            with pytest.raises(ValueError, match="Escrow doesn't have funds"):
+                validate_escrow(-1, "", allow_no_funds=False)
+
+            # should not throw an exception
+            validate_escrow(self.network_config.chain_id, self.escrow_address, allow_no_funds=True)
 
     def test_validate_escrow_invalid_status(self):
         escrow_address = create_escrow(self.w3)
@@ -68,57 +77,18 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.w3,
             escrow_address,
             self.gas_payer.address,
-            Web3.toWei(50, "milliether"),
+            Web3.to_wei(50, "milliether"),
         )
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
+        with patch("src.chain.escrow.get_escrow") as mock_get_escrow:
+            mock_get_escrow.return_value = self.escrow("Partial", 0.95)
 
-            with self.assertRaises(ValueError) as error:
+            with pytest.raises(ValueError, match="Escrow is not in any of the accepted states"):
                 validate_escrow(self.w3.eth.chain_id, escrow_address)
-        self.assertEqual(
-            f"Escrow is not in a Pending state. Current state: Partial",
-            str(error.exception),
-        )
 
-    def test_validate_escrow_invalid_job_type(self):
-        escrow_address = create_escrow(self.w3)
-        fund_escrow(self.w3, escrow_address)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            with patch("src.chain.escrow.StorageClient.download_file_from_url") as mock_json:
-                mock_function.return_value = self.w3
-                mock_json.return_value = '{"requestType":"test"}'.encode()
-
-                with self.assertRaises(ValueError) as error:
-                    validate_escrow(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(
-                f"Oracle doesn't support job type test",
-                str(error.exception),
-            )
-
-    def test_get_escrow_job_type(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            job_type = get_escrow_job_type(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(job_type, JobTypes.image_label_binary)
-
-    def test_get_escrow_job_type_invalid_address(self):
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                get_escrow_job_type(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
-
-    def test_get_escrow_job_type_invalid_url(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            with patch("src.chain.escrow.EscrowClient") as mock_client:
-                mock_escrow_client = mock_client.return_value
-                mock_escrow_client.get_manifest_url.return_value = "invalid_url"
-                mock_function.return_value = self.w3
-                with self.assertRaises(StorageClientError) as error:
-                    get_escrow_job_type(self.w3.eth.chain_id, escrow_address)
-        self.assertEqual(f"Invalid URL: invalid_url", str(error.exception))
+    def test_get_escrow_manifest(self):
+        with patch("src.chain.escrow.get_escrow") as mock_get_escrow:
+            mock_get_escrow.return_value = self.escrow()
+            get_escrow_manifest(self.network_config.chain_id, self.escrow_address)
 
     def test_store_results(self):
         escrow_address = create_escrow(self.w3)
@@ -147,22 +117,23 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_reputation_oracle_address(self):
         escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            job_launcher_address = get_reputation_oracle_address(
-                self.w3.eth.chain_id, escrow_address
-            )
-            self.assertIsInstance(job_launcher_address, str)
-            self.assertIsNotNone(job_launcher_address)
+        with patch("src.chain.escrow.get_web3") as mock_get_web3, patch(
+            "src.chain.escrow.get_escrow"
+        ) as mock_get_escrow:
+            mock_get_web3.return_value = self.w3
+            mock_escrow = MagicMock()
+            mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
+            mock_get_escrow.return_value = mock_escrow
+            address = get_reputation_oracle_address(self.w3.eth.chain_id, escrow_address)
+            self.assertIsInstance(address, str)
+            self.assertIsNotNone(address)
 
     def test_get_reputation_oracle_address_invalid_address(self):
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
+            with pytest.raises(EscrowClientError, match="Invalid escrow address:"):
                 get_reputation_oracle_address(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_reputation_oracle_address_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(Exception, match="Can't find escrow"):
             get_reputation_oracle_address(1, "0x1234567890123456789012345678901234567890")
-        self.assertEqual(f"1 is not in available list of networks.", str(error.exception))

@@ -1,6 +1,13 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsString, IsDate, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  IsDate,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import {
   EventType,
   OracleType,
@@ -92,4 +99,22 @@ export class UpdateWebhookDto {
   @ApiPropertyOptional()
   @IsDate()
   public waitUntil: Date;
+}
+
+export class WebhookDataDto {
+  @ApiProperty({ enum: ChainId, name: 'chain_id' })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty({ name: 'escrow_address' })
+  public escrowAddress: string;
+
+  @ApiProperty({ enum: EventType, name: 'event_type' })
+  @IsEnum(EventType)
+  public eventType: EventType;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  public reason?: string;
 }

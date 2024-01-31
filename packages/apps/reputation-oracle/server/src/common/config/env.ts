@@ -32,6 +32,9 @@ export const ConfigNames = {
   REPUTATION_LEVEL_HIGH: 'REPUTATION_LEVEL_HIGH',
   ENCRYPTION_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
   ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
+  PGP_ENCRYPT: 'PGP_ENCRYPT',
+  SYNAPS_API_KEY: 'SYNAPS_API_KEY',
+  SYNAPS_WEBHOOK_SECRET: 'SYNAPS_WEBHOOK_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -75,4 +78,8 @@ export const envValidator = Joi.object({
   // Encryption
   ENCRYPTION_PRIVATE_KEY: Joi.string().default(''),
   ENCRYPTION_PASSPHRASE: Joi.string().default(''),
+  PGP_ENCRYPT: Joi.string().default(false),
+  // Synaps Kyc
+  SYNAPS_API_KEY: Joi.string().required(),
+  SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
 });

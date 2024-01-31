@@ -219,7 +219,7 @@ describe('JobService', () => {
         escrow_address: escrowAddress,
         chain_id: chainId,
         event_type: EventType.TASK_CREATION_FAILED,
-        reason: 'Unable to get manifest',
+        event_data: [{ reason: 'Unable to get manifest' }],
       };
       expect(httpServicePostMock).toHaveBeenCalledWith(
         JOB_LAUNCHER_WEBHOOK_URL + ESCROW_FAILED_ENDPOINT,
@@ -385,9 +385,9 @@ describe('JobService', () => {
         'solution',
       );
       const expectedBody = {
-        escrowAddress,
-        chainId,
-        solutionsUrl,
+        escrow_address: escrowAddress,
+        chain_id: chainId,
+        solutions_url: solutionsUrl,
       };
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -526,7 +526,8 @@ describe('JobService', () => {
       await jobService.processInvalidJobSolution({
         chainId,
         escrowAddress,
-        workerAddress,
+        eventType: EventType.SUBMISSION_REJECTED,
+        eventData: [{ assigneeId: workerAddress }],
       });
 
       expect(storageService.uploadJobSolutions).toHaveBeenCalledWith(
@@ -561,7 +562,8 @@ describe('JobService', () => {
         jobService.processInvalidJobSolution({
           chainId,
           escrowAddress,
-          workerAddress,
+          eventType: EventType.SUBMISSION_REJECTED,
+          eventData: [{ assigneeId: workerAddress }],
         }),
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });

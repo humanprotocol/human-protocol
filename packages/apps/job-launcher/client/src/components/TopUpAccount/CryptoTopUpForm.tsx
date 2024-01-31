@@ -1,4 +1,4 @@
-import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import HMTokenABI from '@human-protocol/core/out/HMToken.sol/HMToken.json';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -50,7 +50,7 @@ export const CryptoTopUpForm = () => {
       const tokenAmount = ethers.utils.parseUnits(amount, 18);
 
       const tx = await contract.transfer(
-        import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
+        await paymentService.getOperatorAddress(),
         tokenAmount,
       );
 

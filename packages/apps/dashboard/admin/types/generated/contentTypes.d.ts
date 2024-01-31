@@ -512,6 +512,30 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   };
 }
 
+export interface ApiDailyTaskSummaryDailyTaskSummary extends Schema.CollectionType {
+  collectionName: 'daily_task_summaries';
+  info: {
+    singularName: 'daily-task-summary';
+    pluralName: 'daily-task-summaries';
+    displayName: 'DailyTaskSummary';
+  };
+  options: {
+    draftAndPublish: false;
+    comment: '';
+  };
+  attributes: {
+    date: Attribute.String;
+    served_count: Attribute.Integer;
+    solved_count: Attribute.Integer;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'api::daily-task-summary.daily-task-summary', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<'api::daily-task-summary.daily-task-summary', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiMonthlyTaskSummaryMonthlyTaskSummary extends Schema.CollectionType {
   collectionName: 'monthly_task_summaries';
   info: {
@@ -603,6 +627,7 @@ declare module '@strapi/types' {
       'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
       'plugin::users-permissions.role': PluginUsersPermissionsRole;
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
+      'api::daily-task-summary.daily-task-summary': ApiDailyTaskSummaryDailyTaskSummary;
       'api::monthly-task-summary.monthly-task-summary': ApiMonthlyTaskSummaryMonthlyTaskSummary;
       'api::network-data-item.network-data-item': ApiNetworkDataItemNetworkDataItem;
       'api::news-item.news-item': ApiNewsItemNewsItem;
