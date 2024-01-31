@@ -1,4 +1,4 @@
-import HMTokenABI from '@human-protocol/core/out/HMToken.sol/HMToken.json';
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import { NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import {

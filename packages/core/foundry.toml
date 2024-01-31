@@ -1,6 +1,6 @@
 [profile.default]
 src = "src"
-out = "out"
+out = "abis"
 libs = ["lib"]
 via-ir=true
 optimizer_runs = 10
