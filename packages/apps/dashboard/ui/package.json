@@ -26,7 +26,7 @@
     "react-dom": "^18.2.0",
     "react-gtm-module": "^2.0.11",
     "react-loading-skeleton": "^3.3.1",
-    "react-redux": "^9.0.4",
+    "react-redux": "^9.1.0",
     "react-router-dom": "^6.4.3",
     "react-test-renderer": "^18.2.0",
     "recharts": "2.9.0",
@@ -59,7 +59,7 @@
     "jsdom": "^22.1.0",
     "merkletreejs": "^0.3.11",
     "resize-observer-polyfill": "^1.5.1",
-    "sinon": "^15.0.4",
+    "sinon": "^17.0.1",
     "vite": "^5.0.12",
     "vite-plugin-node-polyfills": "^0.19.0",
     "vitest": "^0.30.1"
