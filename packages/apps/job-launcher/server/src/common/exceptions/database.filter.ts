@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseError } from 'src/database/database.error';
+import { DatabaseError } from '../../database/database.error';
 
 @Catch(DatabaseError)
 export class DatabaseExceptionFilter implements ExceptionFilter {
