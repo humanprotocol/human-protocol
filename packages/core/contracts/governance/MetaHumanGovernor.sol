@@ -8,9 +8,9 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFractio
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "./CrossChainGovernorCountingSimple.sol";
 import "./DAOSpokeContract.sol";
-import "./../wormhole/IWormholeRelayer.sol";
-import "./../wormhole/IWormholeReceiver.sol";
-import "./../magistrate/Magistrate.sol";
+import "./wormhole/IWormholeRelayer.sol";
+import "./wormhole/IWormholeReceiver.sol";
+import "./magistrate/Magistrate.sol";
 
 /**
  * @title MetaHumanGovernor

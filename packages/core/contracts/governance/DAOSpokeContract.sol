@@ -5,9 +5,9 @@ import "@openzeppelin/contracts/utils/Timers.sol";
 import "@openzeppelin/contracts/utils/Checkpoints.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import "./MetaHumanGovernor.sol";
-import "./../wormhole/IWormholeRelayer.sol";
-import "./../wormhole/IWormholeReceiver.sol";
-import "./../magistrate/Magistrate.sol";
+import "./wormhole/IWormholeRelayer.sol";
+import "./wormhole/IWormholeReceiver.sol";
+import "./magistrate/Magistrate.sol";
 
 /**
  * @title DAOSpokeContract
