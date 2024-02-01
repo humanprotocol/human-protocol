@@ -1,19 +1,25 @@
 #!/bin/bash
 
-if command -v foundryup &> /dev/null; then
-    echo "Updating Foundry tools..."
-    foundryup
-else
-    echo "Installing Foundry..."
-    curl -L https://foundry.paradigm.xyz | bash
-    source $HOME/.profile || source $HOME/.bashrc || echo "Unable to source profile files. You may need to manually update your PATH or start a new shell session."
-    foundryup || echo "Failed to run foundryup. Please ensure it's installed and in your PATH."
-fi
-
 if command -v forge &> /dev/null; then
-    echo "Forge installation verified."
+    echo "Forge is already installed."
     echo "Forge version is $(forge --version)"
 else
-    echo "Forge installation failed or Forge is not in your PATH."
-    exit 1
+    echo "Forge is not installed, installing Foundry..."
+    curl -L https://foundry.paradigm.xyz | bash
+
+    sleep 10
+
+    if command -v foundryup &> /dev/null; then
+        foundryup || echo "Failed to run foundryup."
+        if command -v forge &> /dev/null; then
+            echo "Forge installation was successful."
+            echo "Forge version is $(forge --version)"
+        else
+            echo "Forge installation failed. Please check your PATH or Foundry installation."
+            exit 1
+        fi
+    else
+        echo "foundryup command not found. Please ensure the Foundry installation script ran successfully and your PATH is correctly updated."
+        exit 1
+    fi
 fi
