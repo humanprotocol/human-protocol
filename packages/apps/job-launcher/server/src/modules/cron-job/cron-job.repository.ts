@@ -1,34 +1,44 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { CronJobType } from 'src/common/enums/cron-job';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { handleQueryFailedError } from '../../database/database.error';
 import { CronJobEntity } from './cron-job.entity';
-import { CronJobType } from '../../common/enums/cron-job';
 
 @Injectable()
-export class CronJobRepository {
-  private readonly logger = new Logger(CronJobRepository.name);
-
-  constructor(
-    @InjectRepository(CronJobEntity)
-    private readonly cronJobEntityRepository: Repository<CronJobEntity>,
-  ) {}
-
-  public async create(cronJobType: CronJobType): Promise<CronJobEntity> {
-    return this.cronJobEntityRepository
-      .create({
-        cronJobType,
-        startedAt: new Date(),
-      })
-      .save();
+export class CronJobRepository extends Repository<CronJobEntity> {
+  constructor(private dataSource: DataSource) {
+    super(CronJobEntity, dataSource.createEntityManager());
   }
 
-  public async findOne(
-    where: FindOptionsWhere<CronJobEntity>,
-    options?: FindOneOptions<CronJobEntity>,
-  ): Promise<CronJobEntity | null> {
-    return this.cronJobEntityRepository.findOne({
-      where,
-      ...options,
-    });
+  async createUnique(type: CronJobType): Promise<CronJobEntity> {
+    const cronJobEntity = new CronJobEntity();
+    cronJobEntity.cronJobType = type;
+    try {
+      await this.insert(cronJobEntity);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return cronJobEntity;
+  }
+
+  public async updateOne(cron: CronJobEntity): Promise<CronJobEntity> {
+    try {
+      await this.save(cron);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return cron;
+  }
+
+  public async findOneByType(type: CronJobType): Promise<CronJobEntity | null> {
+    return this.findOne({ where: { cronJobType: type } });
   }
 }

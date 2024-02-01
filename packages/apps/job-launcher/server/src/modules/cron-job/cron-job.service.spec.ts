@@ -130,43 +130,43 @@ describe('CronJobService', () => {
       cronJobEntity.cronJobType = cronJobType;
       cronJobEntity.startedAt = new Date();
 
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
 
-      const createSpy = jest
-        .spyOn(repository, 'create')
+      const createUniqueSpy = jest
+        .spyOn(repository, 'createUnique')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.startCronJob(cronJobType);
 
-      expect(createSpy).toHaveBeenCalledWith(cronJobType);
+      expect(createUniqueSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(cronJobEntity);
     });
 
     it('should start a cron job if exists', async () => {
       const cronJobType = CronJobType.CreateEscrow;
-      const cronJobEntity = new CronJobEntity();
-      cronJobEntity.cronJobType = cronJobType;
-      cronJobEntity.startedAt = new Date();
-      cronJobEntity.completedAt = new Date();
+      const cronJobEntity: Partial<CronJobEntity> = {
+        cronJobType: cronJobType,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        save: jest.fn(),
+      };
 
       const mockDate = new Date(2023, 12, 23);
       jest.useFakeTimers();
       jest.setSystemTime(mockDate);
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
-        .mockResolvedValue(cronJobEntity);
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValue(cronJobEntity as any);
 
-      const saveSpy = jest
-        .spyOn(cronJobEntity, 'save')
-        .mockResolvedValue(cronJobEntity);
+      const updateOneSpy = jest
+        .spyOn(repository, 'updateOne')
+        .mockResolvedValue(cronJobEntity as any);
 
       const result = await service.startCronJob(cronJobType);
 
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
-      expect(saveSpy).toHaveBeenCalled();
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
+      expect(updateOneSpy).toHaveBeenCalled();
       cronJobEntity.startedAt = mockDate;
       expect(result).toEqual(cronJobEntity);
 
@@ -180,15 +180,13 @@ describe('CronJobService', () => {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
         .mockResolvedValue(null);
 
       const result = await service.isCronJobRunning(cronJobType);
 
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(false);
     });
 
@@ -198,15 +196,13 @@ describe('CronJobService', () => {
       cronJobEntity.cronJobType = cronJobType;
       cronJobEntity.completedAt = new Date();
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.isCronJobRunning(cronJobType);
 
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(false);
     });
 
@@ -215,14 +211,12 @@ describe('CronJobService', () => {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.isCronJobRunning(cronJobType);
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(true);
     });
   });
@@ -238,13 +232,13 @@ describe('CronJobService', () => {
       jest.useFakeTimers();
       jest.setSystemTime(mockDate);
 
-      const saveSpy = jest
-        .spyOn(cronJobEntity, 'save')
+      const updateOneSpy = jest
+        .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.completeCronJob(cronJobEntity);
 
-      expect(saveSpy).toHaveBeenCalled();
+      expect(updateOneSpy).toHaveBeenCalled();
       expect(cronJobEntity.completedAt).toEqual(mockDate);
       expect(result).toEqual(cronJobEntity);
 
@@ -257,12 +251,12 @@ describe('CronJobService', () => {
       cronJobEntity.cronJobType = cronJobType;
       cronJobEntity.completedAt = new Date();
 
-      const saveSpy = jest
-        .spyOn(cronJobEntity, 'save')
+      const updateOneSpy = jest
+        .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
       await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow();
-      expect(saveSpy).not.toHaveBeenCalled();
+      expect(updateOneSpy).not.toHaveBeenCalled();
     });
   });
 

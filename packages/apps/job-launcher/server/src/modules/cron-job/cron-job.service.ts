@@ -32,25 +32,21 @@ export class CronJobService {
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
-    let cronJob = await this.cronJobRepository.findOne({
-      cronJobType,
-    });
+    let cronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!cronJob) {
-      cronJob = await this.cronJobRepository.create(cronJobType);
+      cronJob = await this.cronJobRepository.createUnique(cronJobType);
     } else {
       cronJob.startedAt = new Date();
       cronJob.completedAt = null;
-      await cronJob.save();
+      await this.cronJobRepository.updateOne(cronJob);
     }
 
     return cronJob;
   }
 
   public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
-    const lastCronJob = await this.cronJobRepository.findOne({
-      cronJobType,
-    });
+    const lastCronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!lastCronJob || lastCronJob.completedAt) {
       return false;
@@ -69,7 +65,7 @@ export class CronJobService {
     }
 
     cronJobEntity.completedAt = new Date();
-    return cronJobEntity.save();
+    return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
