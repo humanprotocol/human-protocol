@@ -47,15 +47,20 @@ const config: HardhatUserConfig = {
         version: '0.6.2',
       },
       {
-        version: '0.8.9',
+        version: '0.8.23',
         settings: {
-          viaIR: true, 
-          optimizer: 
-            { enabled: true, runs: 10000, details: {
-              yul: true
-              
-            }} },
-      },
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 10,
+            details: {
+              yulDetails: {
+                optimizerSteps: "u",
+              },
+            },
+          },
+        },
+      }
     ],
   },
   defaultNetwork: 'hardhat',

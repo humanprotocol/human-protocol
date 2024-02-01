@@ -89,5 +89,10 @@
       "import": "./typechain-types/index.ts",
       "types": "./dist/typechain-types/index.d.ts"
     }
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "hardhat-celo": "^0.0.7"
   }
 }
