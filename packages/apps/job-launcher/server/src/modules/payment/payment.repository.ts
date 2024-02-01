@@ -25,10 +25,10 @@ export class PaymentRepository extends Repository<PaymentEntity> {
   }
 
   public async updateOne(
-    webhook: PaymentEntity,
+    payment: PaymentEntity,
   ): Promise<PaymentEntity | null> {
     try {
-      await this.save(webhook);
+      await this.save(payment);
     } catch (error) {
       if (error instanceof QueryFailedError) {
         throw handleQueryFailedError(error);
@@ -36,7 +36,7 @@ export class PaymentRepository extends Repository<PaymentEntity> {
         throw error;
       }
     }
-    return webhook;
+    return payment;
   }
 
   public async findOneByTransaction(
