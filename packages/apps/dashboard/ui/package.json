@@ -74,7 +74,7 @@
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
     "format": "npm run format:prettier && npm run format:lint",
-    "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
+    "vercel-build": "yarn workspace @human-protocol/core build && yarn workspace @human-protocol/sdk build && yarn build"
   },
   "browserslist": {
     "production": [
