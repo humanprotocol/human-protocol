@@ -37,23 +37,18 @@ jobs:
       BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
       MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
       AVALANCHE_API_KEY: ${{ secrets.AVALANCHE_API_KEY }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
+    
+    steps: 
+      - uses : actions/checkout@v3
+        with : 
+          submodules : recursive 
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
+      - name : Install Foundry
+        uses : foundry-rs/foundry-toolchain@v1
 
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
-
-      - name: Build with Foundry
-        run: |
-          yarn install
-          yarn workspace @human-protocol/core build
+          
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core

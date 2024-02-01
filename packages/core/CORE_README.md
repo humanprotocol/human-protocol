@@ -5,6 +5,18 @@
 This document contains information about scripts that helps with the deployment, initialization and interaction with
 Core Contracts for Human Protocol using [Foundry](https://book.getfoundry.sh/)
 
+## Installation 
+
+### Install Foundry
+
+Foundry is required for compiling, testing, and deploying the smart contracts. To install Foundry, run the following command in your terminal:
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+source $HOME/.profile  # or .bash_profile, .bashrc, .zshrc etc. depending on your shell
+foundryup
+```
+
 ## Upgrading Contract Using Proxies  
 -Create an .env file based on .env.example 
 - Fill out these variables (**HMT_ADDRESS, STAKING_PROXY, ESCROW_FACTORY_PROXY, REWARD_POOL_PROXY**) with their respective values. 
