@@ -43,21 +43,17 @@ jobs:
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
 
       - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@v1
         with:
-            version: nightly
-
-      - name: Verify Foundry Installation
-        run: forge --version
+          version: nightly
 
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
 
-      - name: Build with Forge
+      - name: Build with Foundry
         run: |
           yarn install
           yarn workspace @human-protocol/core build
-
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
