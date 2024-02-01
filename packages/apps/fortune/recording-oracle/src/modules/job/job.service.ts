@@ -186,8 +186,12 @@ export class JobService {
       jobSolutionUploaded.hash,
     );
 
-    const reputationOracleAddress = await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
-    const reputationOracleWebhook = (await kvstoreClient.get(reputationOracleAddress, KVStoreKeys.webhookUrl)) as string;
+    const reputationOracleAddress =
+      await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
+    const reputationOracleWebhook = (await kvstoreClient.get(
+      reputationOracleAddress,
+      KVStoreKeys.webhookUrl,
+    )) as string;
 
     if (
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
