@@ -5,7 +5,7 @@ from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
 from time import sleep
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -234,9 +234,16 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             raise
 
 
-def create_task(project_id: int, escrow_address: str) -> models.TaskRead:
+def create_task(
+    project_id: int, escrow_address: str, *, labels: Optional[dict[str, Any]] = None
+) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        kwargs = {}
+
+        if labels:
+            kwargs["labels"] = labels
+
         task_write_request = models.TaskWriteRequest(
             name=escrow_address,
             project_id=project_id,
@@ -271,6 +278,7 @@ def put_task_data(
     cloudstorage_id: int,
     *,
     filenames: Optional[list[str]] = None,
+    job_filenames: Optional[list[list[str]]] = None,
     sort_images: bool = True,
 ) -> None:
     logger = logging.getLogger("app")
@@ -281,6 +289,9 @@ def put_task_data(
             kwargs["server_files"] = filenames
         else:
             kwargs["filename_pattern"] = "*"
+
+        if job_filenames:
+            kwargs["job_file_mapping"] = job_filenames
 
         data_request = models.DataRequest(
             chunk_size=Config.cvat_config.cvat_job_segment_size,
