@@ -1,72 +1,71 @@
 // SPDX-License-Identifier: UNLICENSED
 const { ethers } = require("hardhat");
+import { HMToken } from 'typechain-types';
+import { MetaHumanGovernor } from 'typechain-types';
+import {Signer} from 'ethers';
+require('dotenv').config()
 
 async function main() {
+    const [deployer] = await ethers.getSigners();
 
-  const [deployer] = await ethers.getSigners();
+    // HMTDeployment 
+    const HMToken = await ethers.getContractFactory(
+      'contracts/HMToken.sol:HMToken'
+    );
+    const HMTokenContract = await HMToken.deploy(
+      1000000000,
+      'Human Token',
+      18,
+      'HMT'
+    );
+    await HMTokenContract.waitForDeployment();
+    console.log('HMToken Address: ', await HMTokenContract.getAddress());
 
-  // HMT Deployment 
-  const HMToken = await ethers.getContractFactory("HMToken");
-  const hmToken = await HMToken.deploy(
-    ethers.utils.parseEther("1000"),
-    "HMToken", 
-    18, 
-    "HMT" 
-  );
-  await hmToken.deployed();
-  console.log("HMToken deployed to:", hmToken.address);
+    //vHMT Deployment 
+    const hmTokenAddress = HMTokenContract.getAddress(); 
+    if (!hmTokenAddress) {
+        throw new Error("HM_TOKEN_ADDRESS environment variable is not set");
+    }
 
-  //vHMT Deployment 
-  const hmTokenAddress = hmToken.address; 
-  if (!hmTokenAddress) {
-    throw new Error("HM_TOKEN_ADDRESS environment variable is not set.");
-  }
+    const VHMToken = await ethers.getContractFactory('contracts/governance/vhm-token/VHMToken.sol:VHMToken'); 
+    const VHMTokenContract = await VHMToken.deploy(hmTokenAddress);
+    await VHMTokenContract.waitForDeployment();
+    console.log("VHMToken deployed to:", await VHMTokenContract.getAddress());
 
-  const VHMToken = await ethers.getContractFactory("VHMToken");
-  const vhmToken = await VHMToken.deploy(hmTokenAddress);
+    //DeployHUB 
 
-  await vhmToken.deployed();
+    const chainId = process.env.HUB_CHAIN_ID ? parseInt(process.env.HUB_CHAIN_ID) : 0; 
+    const hubAutomaticRelayerAddress = process.env.HUB_AUTOMATIC_RELAYER_ADDRESS ?? "";
+    const magistrateAddress = process.env.MAGISTRATE_ADDRESS ?? "";
+    const hubSecondsPerBlock = process.env.HUB_SECONDS_PER_BLOCK ? parseInt(process.env.HUB_SECONDS_PER_BLOCK) : 0;
 
-  console.log("VHMToken deployed to:", vhmToken.address);
+    const TimelockController = await ethers.getContractFactory("TimelockController");
+    const TimelockControllerContract = await TimelockController.deploy(
+            1, 
+            [], 
+            [], 
+            await deployer.getAddress()
+    );
+    await TimelockControllerContract.waitForDeployment();
+    console.log('TimelockController Address:', await TimelockControllerContract.getAddress());
+    const MetaHumanGovernor = await ethers.getContractFactory("contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor");
+    
+    const governanceContract = await MetaHumanGovernor.deploy(
+        VHMTokenContract.getAddress(),
+        TimelockControllerContract.getAddress(), 
+        [],
+        chainId,
+        hubAutomaticRelayerAddress,
+        magistrateAddress,
+        hubSecondsPerBlock
+    );
+    console.log(governanceContract);
 
-
-  // DeployHub 
-  const chainId = process.env.HUB_WORMHOLE_CHAIN_ID; 
-  const vHMTAddress = process.env.HUB_VOTE_TOKEN_ADDRESS; 
-  const voteToken = await ethers.getContractAt("VHMToken", vHMTAddress);
-
-  const TimelockController = await ethers.getContractFactory("TimelockController");
-  const timelockController = await TimelockController.deploy(
-    1, 
-    [], 
-    [] 
-  );
-
-  const MetaHumanGovernor = await ethers.getContractFactory("MetaHumanGovernor");
-  const governanceContract = await MetaHumanGovernor.deploy(
-    voteToken.address,
-    timelockController.address,
-    [], 
-    chainId,
-    process.env.HUB_AUTOMATIC_RELAYER_ADDRESS, 
-    process.env.MAGISTRATE_ADDRESS, 
-    process.env.TARGET_SECONDS_PER_BLOCK 
-  );
-
-  await governanceContract.deployed();
-
-  const PROPOSER_ROLE = await timelockController.PROPOSER_ROLE();
-  await timelockController.grantRole(PROPOSER_ROLE, governanceContract.address);
-
-  const TIMELOCK_ADMIN_ROLE = await timelockController.TIMELOCK_ADMIN_ROLE();
-  await timelockController.revokeRole(TIMELOCK_ADMIN_ROLE, deployer.address);
-
-  console.log("Governance Contract Address:", governanceContract.address);
+    await governanceContract.waitForDeployment();
+    console.log('Governance deploy to:', await governanceContract.getAddress());
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
+main().catch((error) => {
     console.error(error);
-    process.exit(1);
+    process.exitCode = 1;
   });
