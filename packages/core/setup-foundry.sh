@@ -1,25 +1,37 @@
 #!/bin/bash
 
 if ! command -v cargo &> /dev/null; then
-    echo "Cargo (Rust) is not installed, installing now..."
+    echo "Rust and Cargo are not installed. Installing now..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     source "$HOME/.cargo/env"
+else
+    echo "Rust and Cargo are already installed."
 fi
 
-FOUNDRY_BIN="$HOME/.foundry/bin"
+FOUND_BIN="$HOME/.foundry/bin"
 
-if [ ! -x "$FOUNDRY_BIN/forge" ]; then
+if [ ! -f "$FOUND_BIN/forge" ]; then
     echo "Installing Foundry..."
     curl -L https://foundry.paradigm.xyz | bash
-    export PATH="$FOUNDRY_BIN:$PATH"
 fi
 
-if ! command -v forge &> /dev/null; then
+if [ -f "$FOUND_BIN/foundryup" ]; then
+    "$FOUND_BIN/foundryup"
+else
+    echo "Foundry installation seems to have failed. `foundryup` not found."
+    exit 1
+fi
+
+if [ -f "$FOUND_BIN/forge" ]; then
+    echo "Forge version: "
+    "$FOUND_BIN/forge" --version
+else
     echo "Forge installation failed or Forge is not in your PATH."
     exit 1
-else
-    echo "Forge is installed."
-    forge --version
 fi
 
+echo "Building with Foundry..."
+"$FOUND_BIN/forge" build
 
+node postProcessABIs.js
+yarn abi:typechain
