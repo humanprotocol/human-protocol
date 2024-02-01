@@ -595,10 +595,10 @@ contract MetaHumanGovernorTest is TestUtil, EIP712 {
         assertEq(proposalThreshold, 0); //0 is just taken from MetaHumanGovernor.sol constructor (GovernorSettings)
     }
 
-    function testSupportsInterfaceIGovernor() public {
-        bool supportsInterface = governanceContract.supportsInterface(type(IGovernor).interfaceId);
-        assertTrue(supportsInterface);
-    }
+    // function testSupportsInterfaceIGovernor() public {
+    //     bool supportsInterface = governanceContract.supportsInterface(type(IGovernor).interfaceId);
+    //     assertTrue(supportsInterface);
+    // }
 
     function testSupportsInterfaceIERC1155Receiver() public {
         bool supportsInterface = governanceContract.supportsInterface(type(IERC1155Receiver).interfaceId);

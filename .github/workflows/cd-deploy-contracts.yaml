@@ -43,6 +43,21 @@ jobs:
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
+
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          echo "$HOME/.foundry/bin" >> $GITHUB_PATH
+
+      - name: Verify Foundry Installation
+        run: forge --version
+
+      - name: Build with Forge
+        run: |
+          yarn install
+          yarn workspace @human-protocol/core build
+
+
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
