@@ -111,7 +111,7 @@ export const envValidator = Joi.object({
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
   //PGP
-  PGP_PRIVATE_KEY: Joi.string().required(),
+  PGP_PRIVATE_KEY: Joi.string().default(null),
   PGP_ENCRYPT: Joi.string().default(false),
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),

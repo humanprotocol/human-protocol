@@ -49,15 +49,29 @@ export class StorageService {
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
-      try {
-        return JSON.parse(fileContent);
-      } catch {
-        const encryption = await Encryption.build(
-          this.serverConfig.encryptionPrivateKey,
-          this.serverConfig.encryptionPassphrase,
-        );
 
-        return JSON.parse(await encryption.decrypt(fileContent));
+      if (
+        typeof fileContent === 'string' &&
+        EncryptionUtils.isEncrypted(fileContent)
+      ) {
+        try {
+          const encryption = await Encryption.build(
+            this.serverConfig.encryptionPrivateKey,
+            this.serverConfig.encryptionPassphrase,
+          );
+
+          return JSON.parse(await encryption.decrypt(fileContent));
+        } catch {
+          throw new Error('Unable to decrypt manifest');
+        }
+      } else {
+        try {
+          return typeof fileContent === 'string'
+            ? JSON.parse(fileContent)
+            : fileContent;
+        } catch {
+          return null;
+        }
       }
     } catch {
       return [];

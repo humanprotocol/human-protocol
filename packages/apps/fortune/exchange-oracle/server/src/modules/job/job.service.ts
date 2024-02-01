@@ -1,6 +1,7 @@
 import {
   ChainId,
   Encryption,
+  EncryptionUtils,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
@@ -217,23 +218,28 @@ export class JobService {
       await StorageClient.downloadFileFromUrl(manifestUrl);
 
     let manifest: ManifestDto | null;
-
-    try {
-      manifest = JSON.parse(manifestEncrypted);
-    } catch {
-      manifest = null;
-    }
-
-    if (!manifest) {
+    if (
+      typeof manifestEncrypted === 'string' &&
+      EncryptionUtils.isEncrypted(manifestEncrypted)
+    ) {
       try {
         const encryption = await Encryption.build(
-          this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
-          this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+          this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
+          this.configService.get(ConfigNames.PGP_PASSPHRASE),
         );
 
         manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
       } catch {
         throw new Error('Unable to decrypt manifest');
+      }
+    } else {
+      try {
+        manifest =
+          typeof manifestEncrypted === 'string'
+            ? JSON.parse(manifestEncrypted)
+            : manifestEncrypted;
+      } catch {
+        manifest = null;
       }
     }
 

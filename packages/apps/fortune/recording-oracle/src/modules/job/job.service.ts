@@ -28,7 +28,7 @@ import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { EventData, JobSolutionsRequestDto, WebhookBody } from './job.dto';
-import { EventType } from '@/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 
 @Injectable()
 export class JobService {
@@ -180,19 +180,14 @@ export class JobService {
       recordingOracleSolutions,
     );
 
-    if (!existingJobSolutionsURL) {
-      await escrowClient.storeResults(
-        jobSolution.escrowAddress,
-        jobSolutionUploaded.url,
-        jobSolutionUploaded.hash,
-      );
-    }
+    await escrowClient.storeResults(
+      jobSolution.escrowAddress,
+      jobSolutionUploaded.url,
+      jobSolutionUploaded.hash,
+    );
 
-    // TODO: Uncomment this to read reputation oracle URL from KVStore
-    // const reputationOracleAddress = await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
-    // const reputationOracleURL = (await kvstoreClient.get(reputationOracleAddress, "url")) as string;
-
-    // TODO: Remove this when KVStore is used
+    const reputationOracleAddress = await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
+    const reputationOracleWebhook = (await kvstoreClient.get(reputationOracleAddress, KVStoreKeys.webhookUrl)) as string;
 
     if (
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
@@ -201,7 +196,7 @@ export class JobService {
       await sendWebhook(
         this.httpService,
         this.logger,
-        this.serverConfig.reputationOracleWebhookUrl,
+        reputationOracleWebhook,
         {
           chainId: jobSolution.chainId,
           escrowAddress: jobSolution.escrowAddress,
@@ -229,7 +224,6 @@ export class JobService {
         eventData: eventData,
       };
 
-      // Enviar la llamada al webhook una vez con todos los errores
       await sendWebhook(
         this.httpService,
         this.logger,
@@ -239,6 +233,6 @@ export class JobService {
       );
     }
 
-    return 'Solution are recorded.';
+    return 'Solutions are recorded.';
   }
 }

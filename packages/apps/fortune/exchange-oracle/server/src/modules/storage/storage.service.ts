@@ -46,8 +46,8 @@ export class StorageService {
     const url = this.getJobUrl(escrowAddress, chainId);
     try {
       const encryption = await Encryption.build(
-        this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
-        this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+        this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
+        this.configService.get(ConfigNames.PGP_PASSPHRASE),
       );
 
       const encryptedSolution = await StorageClient.downloadFileFromUrl(url);
