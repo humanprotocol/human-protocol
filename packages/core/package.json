@@ -14,7 +14,7 @@
     "deploy:core": "forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy",
     "upgrade:proxy": "forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript",
     "build": "forge build && node postProcessABIs.js && yarn abi:typechain",
-    "abi:typechain": "typechain --target ethers-v6 \"abis/**/*.sol/!(*.abi).json\" --out-dir typechain-types"
+    "abi:typechain": "typechain --target ethers-v6 \"abis/**/*.json\" --out-dir typechain-types"
   },
   "keywords": [
     "human-protocol",
@@ -27,8 +27,5 @@
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.1",
     "typechain": "^8.3.2"
-  },
-  "exports": {
-    "./out/*:": "./out/*"
   }
 }

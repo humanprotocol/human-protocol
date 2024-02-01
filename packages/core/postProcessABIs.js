@@ -5,8 +5,11 @@ const abisDirectory = path.join(__dirname, './abis');
 
 const removeDirIfEmpty = (dir) => {
   if (fs.existsSync(dir) && fs.readdirSync(dir).length === 0) {
-    fs.rmdirSync(dir);
-    console.log(`Removed directory: ${dir}`);
+    fs.rm(dir, { recursive: true }, (err) => {
+      if (err) {
+        console.error(`Error removing directory: ${dir}`, err);
+      }
+    });
   }
 };
 
@@ -18,21 +21,20 @@ const moveAndRenameABIFiles = () => {
     }
 
     fs.readdirSync(abisDirectory).forEach(contractDir => {
-      const contractName = contractDir.split('.')[0]; 
       const contractPath = path.join(abisDirectory, contractDir);
-      const abiFilePath = path.join(contractPath, `${contractName}.json`);
 
-      if (fs.lstatSync(contractPath).isDirectory() && fs.existsSync(abiFilePath)) {
-        const newAbiFilePath = path.join(abisDirectory, `${contractName}.json`);
-        console.log(`Moving ${abiFilePath} to ${newAbiFilePath}`);
-
-        fs.renameSync(abiFilePath, newAbiFilePath);
+      if (fs.lstatSync(contractPath).isDirectory()) {
+        fs.readdirSync(contractPath).forEach(file => {
+          if (path.extname(file) === '.json') {
+            const newAbiFilePath = path.join(abisDirectory, file);
+            const abiFilePath = path.join(contractPath, file);
+            fs.renameSync(abiFilePath, newAbiFilePath);
+          }
+        });
 
         removeDirIfEmpty(contractPath);
       }
     });
-
-    console.log('ABI file path changed');
   } catch (error) {
     console.error('An error occurred:', error);
   }

@@ -239,10 +239,7 @@ contract StakingTest is CoreUtils, StakingEvents, EscrowFactoryEvents {
         uint256 lockedTokens = 5;
         uint256 stakeTokens = 10;
         _initTrustedHandlers();
-
-        Escrow escrow = stakeAndCreateEscrow(stakeTokens, address(hmToken));
-        address escrowAddress = address(escrow);
-
+        stakeAndCreateEscrow(stakeTokens, address(hmToken));
         // Unstake to lock tokens for withdrawal
         staking.unstake(lockedTokens);
         // Pass the LockPeriod
@@ -261,7 +258,6 @@ contract StakingTest is CoreUtils, StakingEvents, EscrowFactoryEvents {
         _initTrustedHandlers();
 
         staking.stake(stakeTokens);
-        address escrowAddress = escrowFactory.createEscrow(address(hmToken), trustedHandlers, jobRequesterId);
         staking.unstake(lockedTokens);
         Stakes.Staker memory staker = staking.getStaker(operator);
         uint256 latestBlockNumber = block.number;
@@ -417,7 +413,6 @@ contract StakingTest is CoreUtils, StakingEvents, EscrowFactoryEvents {
 
     function testFail_SlashRevertsInvalidAddress() public {
         uint256 stakedTokens = 10;
-        uint256 allocatedTokens = 5;
         uint256 slashedTokens = 2;
         vm.prank(owner);
         staking.setRewardPool(address(rewardPool));
@@ -452,7 +447,6 @@ contract StakingTest is CoreUtils, StakingEvents, EscrowFactoryEvents {
     function testFail_SlashAmountIsZero() public {
         uint256 stakedTokens = 10;
         uint256 allocatedTokens = 5;
-        uint256 slashedTokens = 2;
         vm.prank(owner);
         staking.setRewardPool(address(rewardPool));
         vm.prank(validator);

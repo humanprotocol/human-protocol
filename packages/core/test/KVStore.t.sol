@@ -56,9 +56,9 @@ contract KVStoreTest is CoreUtils, KVStoreEvents {
         );
     }
 
-    function testOutputsAddressOnDeployment() public {
+    function testOutputsAddressOnDeployment() public view {
         address kvStoreAddress = address(kvStore);
-        assert(kvStoreAddress != address(0)); // This checks that kvStoreAddress is a non-zero address
+        assert(kvStoreAddress != address(0));
         console.log(kvStoreAddress);
     }
 

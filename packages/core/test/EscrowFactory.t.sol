@@ -90,7 +90,6 @@ contract EscrowFactoryTest is CoreUtils, EscrowFactoryEvents {
         newTrusted[1] = vm.addr(204);
         escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
         address escrowAddress = escrowFactory.lastEscrow();
-        Escrow escrow = Escrow(escrowAddress);
         assertEq(escrowFactory.hasEscrow(escrowAddress), true);
     }
 
@@ -117,10 +116,9 @@ contract EscrowFactoryTest is CoreUtils, EscrowFactoryEvents {
         address[] memory newTrusted = new address[](1);
         newTrusted[0] = accounts[6];
         address escrowAddress = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
-        Escrow escrow = Escrow(escrowAddress);
+        Escrow(escrowAddress);
         staking.allocate(escrowAddress, stakeAmount);
         vm.expectRevert("NEED_STAKE_TOKENS_TO_CREATE_ESCROW");
-        address anotherEscrow = escrowFactory.createEscrow(address(hmToken), newTrusted, jobRequesterId);
         vm.stopPrank();
     }
 
