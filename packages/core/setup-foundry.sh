@@ -1,32 +1,23 @@
 #!/bin/bash
 
-FOUND_BIN="$HOME/.foundry/bin"
+FOUND_BIN="/home/runner/.foundry/bin"
 
-if ! command -v cargo &> /dev/null; then
-    echo "Rust and Cargo are not installed. Installing now..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    source "$HOME/.cargo/env"
-fi
-
-echo "Installing or updating Foundry..."
-curl -L https://foundry.paradigm.xyz | bash
-
-export PATH="$FOUND_BIN:$PATH"
-echo "Updated PATH to include Foundry bin: $PATH"
-
-if [ -x "$FOUND_BIN/foundryup" ]; then
-    echo "Running foundryup to update Foundry tools..."
-    "$FOUND_BIN/foundryup"
-else
-    echo "Foundryup is not found or executable. Installation may have failed."
-    exit 1
-fi
+source /home/runner/.bashrc || echo "Unable to source /home/runner/.bashrc"
 
 if command -v forge &> /dev/null; then
-    echo "Forge is installed. Version: $(forge --version)"
+    echo "Forge is available. Version: $(forge --version)"
 else
-    echo "Forge installation failed or Forge is not in your PATH."
-    exit 1
+    echo "Attempting to install or update Foundry..."
+    curl -L https://foundry.paradigm.xyz | bash
+    export PATH="$FOUND_BIN:$PATH"
+    echo "Attempting to source bashrc again..."
+    source /home/runner/.bashrc || echo "Still unable to source /home/runner/.bashrc"
+    if command -v forge &> /dev/null; then
+        echo "Forge installation verified. Version: $(forge --version)"
+    else
+        echo "Forge installation failed or Forge is not in your PATH."
+        exit 1
+    fi
 fi
 
 forge build
