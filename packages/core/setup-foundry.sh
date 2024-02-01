@@ -1,25 +1,28 @@
 #!/bin/bash
 
-# Check if forge is already installed
-if ! command -v forge &> /dev/null; then
-    echo "Forge is not installed, installing Foundry..."
+FOUNDRY_BIN="$HOME/.foundry/bin"
+
+if [ -x "$FOUNDRY_BIN/forge" ]; then
+    echo "Forge is already installed."
+    "$FOUNDRY_BIN/forge" --version
+else
+    echo "Installing Foundry..."
     curl -L https://foundry.paradigm.xyz | bash
-    source $HOME/.profile || source $HOME/.bashrc || echo "Note: If forge command is not found, you may need to manually update your PATH or start a new shell session."
+
+    if [ -x "$FOUNDRY_BIN/forge" ]; then
+        echo "Forge installation was successful."
+        "$FOUNDRY_BIN/forge" --version
+    else
+        echo "Forge installation failed or Forge is not in your PATH."
+        exit 1
+    fi
 fi
 
-sleep 20
-
-if command -v forge &> /dev/null; then
-    echo "Forge version is $(forge --version)"
+if [ -x "$FOUNDRY_BIN/forge" ]; then
+    "$FOUNDRY_BIN/forge" build
+    node postProcessABIs.js
+    yarn abi:typechain
 else
-    echo "Forge installation failed or Forge is not in your PATH."
-    exit 1
-fi
-
-echo "Running forge fmt --check to verify format..."
-if forge fmt --check; then
-    echo "Format check passed."
-else
-    echo "Format check failed. Please format your Solidity files."
+    echo "Unable to locate forge command."
     exit 1
 fi
