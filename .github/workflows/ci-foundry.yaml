@@ -1,0 +1,41 @@
+name: Smartcontracts
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./packages/core
+
+env:
+  FOUNDRY-PROFILE: ci
+  ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
+  ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
+  ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
+  ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
+  ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
+  ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
+  ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
+  ETH_MAINNET_URL: ${{ secrets.ETH_MAINNET_URL }}
+  ETH_FUJI_URL: ${{ secrets.ETH_FUJI_URL }}
+  ETH_AVALANCHE_URL: ${{ secrets.ETH_AVALANCHE_URL }}
+  ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+  POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
+  BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
+  MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
+  AVALANCHE_API_KEY: ${{ secrets.AVALANCHE_API_KEY }}
+
+jobs:
+  check:
+    name: Foundry project
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
