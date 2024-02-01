@@ -13,7 +13,7 @@
     "deploy:proxies": "forge script script/DeployProxies.s.sol:DeployProxies --rpc-url polygonMumbai --broadcast --verify --legacy",
     "deploy:core": "forge script script/DeployCore.s.sol:DeployCore --rpc-url polygonMumbai --broadcast --verify --legacy",
     "upgrade:proxy": "forge script script/UpgradeProxies.s.sol:UpgradeProxiesScript",
-    "build": "forge build && node postProcessABIs.js && yarn abi:typechain",
+    "build": "bash setup-foundry.sh && forge build && node postProcessABIs.js && yarn abi:typechain",
     "abi:typechain": "typechain --target ethers-v6 \"abis/**/*.json\" --out-dir typechain-types"
   },
   "keywords": [
