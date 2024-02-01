@@ -24,6 +24,19 @@ export class UserRepository extends Repository<UserEntity> {
     return user;
   }
 
+  public async updateOne(user: UserEntity): Promise<UserEntity> {
+    try {
+      await this.save(user);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return user;
+  }
+
   async findByEmail(email: string): Promise<UserEntity | null> {
     return this.findOne({ where: { email } });
   }

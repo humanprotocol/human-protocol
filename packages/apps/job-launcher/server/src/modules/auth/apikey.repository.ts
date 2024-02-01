@@ -1,16 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { handleQueryFailedError } from '../../database/database.error';
 import { ApiKeyEntity } from './apikey.entity';
 
 @Injectable()
-export class ApiKeyRepository {
-  private readonly logger = new Logger(ApiKeyRepository.name);
-
-  constructor(
-    @InjectRepository(ApiKeyEntity)
-    private readonly apiKeyRepository: Repository<ApiKeyEntity>,
-  ) {}
+export class ApiKeyRepository extends Repository<ApiKeyEntity> {
+  constructor(private dataSource: DataSource) {
+    super(ApiKeyEntity, dataSource.createEntityManager());
+  }
 
   async createOrUpdateAPIKey(
     userId: number,
@@ -18,35 +15,37 @@ export class ApiKeyRepository {
     salt: string,
   ): Promise<ApiKeyEntity> {
     let apiKeyEntity = await this.findAPIKeyByUserId(userId);
+    try {
+      if (!apiKeyEntity) {
+        apiKeyEntity = new ApiKeyEntity();
+        apiKeyEntity.user.id = userId;
+        await this.insert(apiKeyEntity);
+      }
 
-    if (!apiKeyEntity) {
-      apiKeyEntity = this.apiKeyRepository.create({ user: { id: userId } });
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
+      return this.save(apiKeyEntity);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
     }
-
-    apiKeyEntity.hashedAPIKey = hashedAPIKey;
-    apiKeyEntity.salt = salt;
-
-    return this.apiKeyRepository.save(apiKeyEntity);
   }
 
   public async findAPIKeyByUserId(
     userId: number,
   ): Promise<ApiKeyEntity | null> {
-    return this.apiKeyRepository.findOne({
+    return this.findOne({
       where: { user: { id: userId } },
       relations: ['user'],
     });
   }
 
-  async findAPIKeyByHash(hashedAPIKey: string): Promise<ApiKeyEntity | null> {
-    return this.apiKeyRepository.findOne({
-      where: { hashedAPIKey },
-      relations: ['user'],
-    });
-  }
-
   async findAPIKeyById(apiKeyId: number): Promise<ApiKeyEntity | null> {
-    return this.apiKeyRepository.findOne({
+    return this.findOne({
       where: { id: apiKeyId },
       relations: ['user'],
     });
