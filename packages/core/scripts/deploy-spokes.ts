@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 import { ethers } from 'hardhat';
+import { DAOSpokeContract } from 'typechain-types';
 import dotenv from 'dotenv';
 dotenv.config();
 
 async function main() {
-  const deployer = await ethers.getSigners();
-  const hubChainId = process.env.HUB_WORMHOLE_CHAIN_ID;
+  const chainId = process.env.HUB_WORMHOLE_CHAIN_ID;
   const governorAddress = process.env.GOVERNOR;
   const spokeChainId = process.env.SPOKE_WORMHOLE_CHAIN_ID;
   const vHMTokenAddress = process.env.SPOKE_VOTE_TOKEN_ADDRESS;
@@ -23,11 +23,12 @@ async function main() {
     throw new Error('One or more required environment variables are missing');
   }
 
-  const DAOSpokeContractFactory =
-    await ethers.getContractFactory('DAOSpokeContract');
-  const daoSpokeContract = await DAOSpokeContractFactory.deploy(
+  const DAOSpokeContract = await ethers.getContractFactory(
+    'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+  );
+  const daoSpokeContract = await DAOSpokeContract.deploy(
     ethers.zeroPadValue(governorAddress, 32),
-    hubChainId,
+    chainId,
     vHMTokenAddress,
     targetSecondsPerBlock,
     spokeChainId,
