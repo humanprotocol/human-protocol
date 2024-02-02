@@ -34,7 +34,7 @@ async function main() {
 
     //DeployHUB 
 
-    const chainId = process.env.HUB_CHAIN_ID ? parseInt(process.env.HUB_CHAIN_ID) : 0; 
+    const chainId = process.env.HUB_WORMHOLE_CHAIN_ID;
     const hubAutomaticRelayerAddress = process.env.HUB_AUTOMATIC_RELAYER_ADDRESS ?? "";
     const magistrateAddress = process.env.MAGISTRATE_ADDRESS ?? "";
     const hubSecondsPerBlock = process.env.HUB_SECONDS_PER_BLOCK ? parseInt(process.env.HUB_SECONDS_PER_BLOCK) : 0;
@@ -59,7 +59,6 @@ async function main() {
         magistrateAddress,
         hubSecondsPerBlock
     );
-    console.log(governanceContract);
 
     await governanceContract.waitForDeployment();
     console.log('Governance deploy to:', await governanceContract.getAddress());
