@@ -24,14 +24,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
-import { LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { LessThanOrEqual } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
   ErrorEscrow,
   ErrorJob,
-  ErrorPayment,
-  ErrorPostgres,
 } from '../../common/constants/errors';
 import {
   JobRequestType,
@@ -493,31 +491,18 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    try {
-      const paymentEntity = new PaymentEntity();
-      Object.assign(paymentEntity, {
-        userId,
-        jobId: jobEntity.id,
-        source: PaymentSource.BALANCE,
-        type: PaymentType.WITHDRAWAL,
-        amount: -tokenTotalAmount,
-        currency: TokenId.HMT,
-        rate: div(1, rate),
-        status: PaymentStatus.SUCCEEDED,
-      });
-      await this.paymentRepository.createUnique(paymentEntity);
-    } catch (error) {
-      if (
-        error instanceof QueryFailedError &&
-        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
-      ) {
-        this.logger.log(ErrorPostgres.NumericFieldOverflow, JobService.name);
-        throw new ConflictException(ErrorPayment.IncorrectAmount);
-      } else {
-        this.logger.log(error, JobService.name);
-        throw new ConflictException(ErrorPayment.NotSuccess);
-      }
-    }
+    const paymentEntity = new PaymentEntity();
+    Object.assign(paymentEntity, {
+      userId,
+      jobId: jobEntity.id,
+      source: PaymentSource.BALANCE,
+      type: PaymentType.WITHDRAWAL,
+      amount: -tokenTotalAmount,
+      currency: TokenId.HMT,
+      rate: div(1, rate),
+      status: PaymentStatus.SUCCEEDED,
+    });
+    await this.paymentRepository.createUnique(paymentEntity);
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();

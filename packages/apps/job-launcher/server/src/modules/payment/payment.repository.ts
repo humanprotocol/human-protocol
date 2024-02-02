@@ -24,9 +24,7 @@ export class PaymentRepository extends Repository<PaymentEntity> {
     return payment;
   }
 
-  public async updateOne(
-    payment: PaymentEntity,
-  ): Promise<PaymentEntity> {
+  public async updateOne(payment: PaymentEntity): Promise<PaymentEntity> {
     try {
       await this.save(payment);
     } catch (error) {
