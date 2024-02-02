@@ -10,18 +10,22 @@ import { Web3Module } from '../web3/web3.module';
 import { StorageModule } from '../storage/storage.module';
 import { WebhookModule } from '../webhook/webhook.module';
 import { JobModule } from '../job/job.module';
+import { JobEntity } from '../job/job.entity';
+import { JobRepository } from '../job/job.repository';
+import { ConfigModule } from '@nestjs/config';
 
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CronJobEntity]),
+    TypeOrmModule.forFeature([CronJobEntity, JobEntity]),
+    ConfigModule,
     JobModule,
     PaymentModule,
     Web3Module,
     StorageModule,
     WebhookModule,
   ],
-  providers: [CronJobService, CronJobRepository],
+  providers: [CronJobService, CronJobRepository, JobRepository],
   controllers: [CronJobController],
   exports: [CronJobService],
 })
