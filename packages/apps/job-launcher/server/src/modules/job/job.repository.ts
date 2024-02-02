@@ -4,50 +4,18 @@ import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
-import {
-  DataSource,
-  In,
-  LessThanOrEqual,
-  QueryFailedError,
-  Repository,
-} from 'typeorm';
+import { DataSource, In, LessThanOrEqual } from 'typeorm';
 import { JobStatus, JobStatusFilter } from '../../common/enums/job';
-import { handleQueryFailedError } from '../../database/database.error';
 import { JobEntity } from './job.entity';
+import { BaseRepository } from '../../database/base.repository';
 
 @Injectable()
-export class JobRepository extends Repository<JobEntity> {
+export class JobRepository extends BaseRepository<JobEntity> {
   constructor(
     private dataSource: DataSource,
     public readonly configService: ConfigService,
   ) {
-    super(JobEntity, dataSource.createEntityManager());
-  }
-
-  async createUnique(job: JobEntity): Promise<JobEntity> {
-    try {
-      await this.insert(job);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
-    }
-    return job;
-  }
-
-  async updateOne(job: JobEntity): Promise<JobEntity> {
-    try {
-      await this.save(job);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
-    }
-    return job;
+    super(JobEntity, dataSource);
   }
 
   public async findOneByIdAndUserId(
