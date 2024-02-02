@@ -1,28 +1,26 @@
 import { QueryFailedError } from 'typeorm';
-import { DatabaseErrorCodes, PostgresErrorCodes } from './database.enum';
+import { PostgresErrorCodes } from './database.enum';
 
 export class DatabaseError extends Error {
-  public readonly code: string;
-  constructor(message: string, code: string, stack: string) {
+  constructor(message: string, stack: string) {
     super(message);
-    this.code = code;
     this.stack = stack;
   }
 }
 
 export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
   const stack = error.stack || '';
-  let message = error.message,
-    code: string;
+  let message = error.message;
 
   switch ((error.driverError as any).code) {
     case PostgresErrorCodes.Duplicated:
       message = (error.driverError as any).detail;
-      code = DatabaseErrorCodes.EntityDuplication;
+      break;
+    case PostgresErrorCodes.NumericFieldOverflow:
+      message = 'Incorrect amount';
       break;
     default:
-      code = DatabaseErrorCodes.Unknown;
       break;
   }
-  return new DatabaseError(message, code, stack);
+  return new DatabaseError(message, stack);
 }
