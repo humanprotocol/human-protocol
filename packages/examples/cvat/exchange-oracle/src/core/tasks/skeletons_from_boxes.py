@@ -50,23 +50,23 @@ TilesetInfos = Sequence[TilesetInfo]
 # TilesetMap = Dict[int, TilesetInfo]
 
 
-class TaskMetaLayout:
-    TILESET_MAP_FILENAME = "tileset_map.json"
-    TILESET_NAME_PATTERN = "tileset-{}"
+# class TaskMetaLayout:
+#     TILESET_MAP_FILENAME = "tileset_map.json"
+#     TILESET_NAME_PATTERN = "tileset-{}"
 
-    @classmethod
-    def make_tileset_sample_id(cls, tileset_id: int) -> str:
-        return cls.TILESET_NAME_PATTERN.format(tileset_id)
+#     @classmethod
+#     def make_tileset_sample_id(cls, tileset_id: int) -> str:
+#         return cls.TILESET_NAME_PATTERN.format(tileset_id)
 
 
-class TaskMetaSerializer:
-    def dump_tileset_map(tile_map: TilesetMap, filename: str):
-        tile_map = {str(k): attrs.asdict(v) for k, v in tile_map.items()}
-        return dump_json(filename, tile_map, indent=True, append_newline=True)
+# class TaskMetaSerializer:
+#     def dump_tileset_map(tile_map: TilesetMap, filename: str):
+#         tile_map = {str(k): attrs.asdict(v) for k, v in tile_map.items()}
+#         return dump_json(filename, tile_map, indent=True, append_newline=True)
 
-    def parse_tileset_map(filename: str) -> TilesetMap:
-        data = parse_json(filename)
-        return {
-            int(k): TilesetInfo(tiles=[TileInfo(**vv) for vv in v.pop("tiles", [])], **v)
-            for k, v in data.items()
-        }
+#     def parse_tileset_map(filename: str) -> TilesetMap:
+#         data = parse_json(filename)
+#         return {
+#             int(k): TilesetInfo(tiles=[TileInfo(**vv) for vv in v.pop("tiles", [])], **v)
+#             for k, v in data.items()
+#         }

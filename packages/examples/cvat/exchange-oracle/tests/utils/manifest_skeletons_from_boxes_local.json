@@ -1,0 +1,51 @@
+{
+  "data": {
+    "data_url": "http://127.0.0.1:9010/datasets/",
+    "boxes_url": "http://127.0.0.1:9010/datasets/task_test-boxes-to-skeletons_annotations_2024_02_02_13_18_32_coco%201.0-good/annotations/instances_default.json"
+  },
+  "annotation": {
+    "labels": [
+      {
+        "name": "cat",
+        "type": "skeleton",
+        "nodes": [
+          "head",
+          "neck",
+          "torso",
+          "l front leg",
+          "r front leg",
+          "l back leg",
+          "r back leg"
+        ],
+        "joints": [
+          [0, 1],
+          [1, 2],
+          [1, 3],
+          [1, 4],
+          [3, 5],
+          [3, 6]
+        ]
+      },
+      {
+        "name": "dog",
+        "type": "skeleton",
+        "nodes": ["nose", "l ear", "r ear"],
+        "joints": [
+          [0, 1],
+          [0, 2]
+        ]
+      }
+    ],
+    "description": "Brief task description",
+    "user_guide": "Task description (markdown)",
+    "type": "IMAGE_SKELETONS_FROM_BOXES",
+    "job_size": 10,
+    "max_time": 1800
+  },
+  "validation": {
+    "min_quality": 0.8,
+    "val_size": 2,
+    "gt_url": "http://127.0.0.1:9010/datasets/gt_skeletons/annotations/person_keypoints_default.json"
+  },
+  "job_bounty": "0.05"
+}
