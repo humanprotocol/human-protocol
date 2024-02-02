@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
             runs: 10,
           },
         },
-      }
+      },
     ],
   },
   defaultNetwork: 'hardhat',
