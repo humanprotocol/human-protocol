@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-const { ethers } = require("hardhat");
+const { ethers} = require("hardhat");
 import { HMToken } from 'typechain-types';
 import { MetaHumanGovernor } from 'typechain-types';
-import {Signer} from 'ethers';
 require('dotenv').config()
 
 async function main() {
