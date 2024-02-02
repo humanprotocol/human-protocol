@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from human_protocol_sdk.escrow import EscrowClientError
@@ -33,15 +33,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.kvstore.get_web3") as mock_get_web3,
             patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
-            patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader,
+            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
         ):
             mock_get_web3.return_value = self.w3
             mock_escrow = Mock()
             mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
             mock_get_escrow.return_value = mock_escrow
-            mock_leader.return_value = {"webhook_url": DEFAULT_URL}
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
 
-            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
+            reputation_url = get_reputation_oracle_url(
+                self.w3.eth.chain_id, escrow_address
+            )
             self.assertEqual(reputation_url, DEFAULT_URL)
 
     def test_get_reputation_oracle_url_invalid_escrow(self):
@@ -56,13 +58,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.kvstore.get_web3") as mock_get_web3,
             patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
-            patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader,
+            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
         ):
             mock_get_web3.return_value = self.w3
             mock_escrow = Mock()
             mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
             mock_get_escrow.return_value = mock_escrow
-            mock_leader.return_value = {"webhook_url": ""}
+            mock_leader.return_value = MagicMock(webhook_url="")
 
             reputation_url = get_reputation_oracle_url(
                 self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
@@ -73,7 +75,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         store_kvstore_value("role", "Reputation Oracle")
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
+            reputation_url = get_role_by_address(
+                self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
+            )
             self.assertEqual(reputation_url, "Reputation Oracle")
 
     def test_get_role_by_address_invalid_escrow(self):
@@ -88,5 +92,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         store_kvstore_value("role", "")
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
+            reputation_url = get_role_by_address(
+                self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
+            )
             self.assertEqual(reputation_url, "")
