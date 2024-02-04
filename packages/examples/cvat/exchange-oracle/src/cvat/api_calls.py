@@ -1,11 +1,14 @@
 import io
 import logging
 import zipfile
+import json
+
+from io import BytesIO
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
 from time import sleep
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -102,21 +105,49 @@ def get_api_client() -> ApiClient:
 
 
 def create_cloudstorage(
-    provider: str, bucket_host: str, bucket_name: str
+    provider: str,
+    bucket_name: str,
+    *,
+    credentials: Optional[Dict[str, Any]] = None,
+    bucket_host: Optional[str] = None,
 ) -> models.CloudStorageRead:
+    # credentials: access_key | secret_key | service_account_key
+    # CVAT credentials: key | secret_key | key_file
+    def to_cvat_credentials() -> Dict:
+        credentials_ = dict()
+        for cvat_field, field in zip(('key', 'secret_key', 'key_file'), ('access_key', 'secret_key', 'service_account_key')):
+            if (value := credentials.get(field)):
+                if cvat_field == 'key_file':
+                    key_file = BytesIO(json.dumps(value).encode('utf-8'))
+                    key_file.name = 'key_file.json'
+                    key_file.seek(0)
+                    credentials_[cvat_field] = key_file
+                else:
+                    credentials_[cvat_field] = value
+        return credentials_
+
+    converted_credentials = to_cvat_credentials()
+    if converted_credentials:
+        credentials_type = models.CredentialsTypeEnum("KEY_SECRET_KEY_PAIR") if provider == "AWS_S3_BUCKET" \
+            else models.CredentialsTypeEnum("KEY_FILE_PATH")
+    else:
+        credentials_type = models.CredentialsTypeEnum("ANONYMOUS_ACCESS")
     logger = logging.getLogger("app")
+
     with get_api_client() as api_client:
         cloud_storage_write_request = models.CloudStorageWriteRequest(
             provider_type=models.ProviderTypeEnum(provider),
             resource=bucket_name,
             display_name=bucket_name,
-            credentials_type=models.CredentialsTypeEnum("ANONYMOUS_ACCESS"),
+            credentials_type=credentials_type,
             description=bucket_name,
-            specific_attributes=f"endpoint_url={bucket_host}",
+            **({"specific_attributes": f"endpoint_url={bucket_host}"} if bucket_host else {}),
+            **(converted_credentials if converted_credentials else {}),
         )  # CloudStorageWriteRequest
         try:
             (data, response) = api_client.cloudstorages_api.create(
                 cloud_storage_write_request,
+                _content_type="multipart/form-data",
             )
 
             return data

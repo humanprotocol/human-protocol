@@ -3,17 +3,12 @@
 import os
 
 from dotenv import load_dotenv
+from attrs.converters import to_bool
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
 load_dotenv()
-
-
-def str_to_bool(val: str) -> bool:
-    from distutils.util import strtobool
-
-    return val is True or strtobool(val)
 
 
 class Postgres:
@@ -77,22 +72,23 @@ class StorageConfig:
     access_key = os.environ.get("STORAGE_ACCESS_KEY", "")
     secret_key = os.environ.get("STORAGE_SECRET_KEY", "")
     data_bucket_name = os.environ.get("STORAGE_RESULTS_BUCKET_NAME", "")
-    secure = str_to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    secure = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    # TODO: GCS key file
+
+    @classmethod
+    def get_scheme(cls) -> str:
+        return "https://" if cls.secure else "http://"
 
     @classmethod
     def provider_endpoint_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
-        return f"{scheme}{cls.endpoint_url}"
+        return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
     def bucket_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
         if is_ipv4(cls.endpoint_url):
-            return f"{scheme}{cls.endpoint_url}/{cls.data_bucket_name}/"
+            return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
-            return f"{scheme}{cls.data_bucket_name}.{cls.endpoint_url}/"
+            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class ExchangeOracleStorageConfig:
@@ -102,26 +98,27 @@ class ExchangeOracleStorageConfig:
     secret_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_SECRET_KEY", "")
     data_bucket_name = os.environ.get("EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME", "")
     results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
-    secure = str_to_bool(os.environ.get("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
+    secure = to_bool(os.environ.get("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
+    # TODO: GCS key file
+
+    @classmethod
+    def get_scheme(cls) -> str:
+        return "https://" if cls.secure else "http://"
 
     @classmethod
     def provider_endpoint_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
-        return f"{scheme}{cls.endpoint_url}"
+        return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
     def bucket_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
         if is_ipv4(cls.endpoint_url):
-            return f"{scheme}{cls.endpoint_url}/{cls.data_bucket_name}/"
+            return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
-            return f"{scheme}{cls.data_bucket_name}.{cls.endpoint_url}/"
+            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = str_to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
     default_point_validity_relative_radius = float(

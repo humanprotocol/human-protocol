@@ -283,8 +283,7 @@ def retrieve_annotations() -> None:
                     secret_key=StorageConfig.secret_key,
                 )
                 existing_storage_files = set(
-                    f.key
-                    for f in storage_client.list_files(
+                    storage_client.list_files(
                         StorageConfig.data_bucket_name,
                         prefix=compose_results_bucket_filename(
                             project.escrow_address,

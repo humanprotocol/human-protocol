@@ -1,24 +1,35 @@
 from abc import ABCMeta, abstractmethod
 from typing import List, Optional
+from urllib.parse import unquote
 
 
 class StorageClient(metaclass=ABCMeta):
+    def __init__(
+        self,
+        bucket: Optional[str] = None,
+    ) -> None:
+        self._bucket = unquote(bucket) if bucket else None
+
     @abstractmethod
-    def create_file(self, bucket: str, filename: str, data: bytes = b""):
+    def create_file(self, key: str, data: bytes = b"", *, bucket: Optional[str] = None):
         ...
 
     @abstractmethod
-    def remove_file(self, bucket: str, filename: str):
+    def remove_file(self, key: str, *, bucket: Optional[str] = None):
         ...
 
     @abstractmethod
-    def file_exists(self, bucket: str, filename: str) -> bool:
+    def file_exists(self, key: str, *, bucket: Optional[str] = None) -> bool:
         ...
 
     @abstractmethod
-    def download_file(self, bucket: str, key: str) -> bytes:
+    def download_fileobj(self, key: str, *, bucket: Optional[str] = None) -> bytes:
         ...
 
     @abstractmethod
-    def list_filenames(self, bucket: str, *, prefix: Optional[str] = None) -> List[str]:
+    def list_files(self, path: Optional[str] = None, *, bucket: Optional[str] = None) -> List[str]:
         ...
+
+    @staticmethod
+    def normalize_prefix(prefix: Optional[str]) -> Optional[str]:
+        return unquote(prefix).strip("/\\") + "/" if prefix else prefix

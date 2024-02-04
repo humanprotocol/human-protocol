@@ -27,8 +27,8 @@ from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelType, TaskStatus, TaskType
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
-from src.services.cloud import CloudProviders, StorageClient
-from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url, parse_bucket_url
+from src.services.cloud import CloudProvider, StorageClient
+from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
 
@@ -57,8 +57,8 @@ DM_GT_DATASET_FORMAT_MAPPING = {
 }
 
 CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
-    CloudProviders.aws: "AWS_S3_BUCKET",
-    CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
+    CloudProvider.aws: "AWS_S3_BUCKET",
+    CloudProvider.gcs: "GOOGLE_CLOUD_STORAGE",
 }
 
 
@@ -151,7 +151,7 @@ class BoxesFromPointsTaskBuilder:
         self.max_embedded_point_radius_percent = 0.01
         self.embedded_point_color = (0, 255, 255)
 
-        self.oracle_data_bucket = BucketAccessInfo.from_raw_url(Config.storage_config.bucket_url())
+        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config.bucket_url())
         # TODO: add
         # credentials=BucketCredentials()
         "Exchange Oracle's private bucket info"
@@ -179,29 +179,20 @@ class BoxesFromPointsTaskBuilder:
         return self
 
     def _download_input_data(self):
-        data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
-        gt_bucket = BucketAccessInfo.from_raw_url(self.manifest.validation.gt_url)
-        points_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.points_url)
+        data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        points_bucket = BucketAccessInfo.parse_obj(self.manifest.data.points_url)
 
         data_storage_client = self._make_cloud_storage_client(data_bucket)
         gt_storage_client = self._make_cloud_storage_client(gt_bucket)
         points_storage_client = self._make_cloud_storage_client(points_bucket)
 
-        data_filenames = data_storage_client.list_filenames(
-            data_bucket.url.bucket_name,
-            prefix=data_bucket.url.path,
-        )
+        data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
         self.input_filenames = filter_image_files(data_filenames)
 
-        self.input_gt_data = gt_storage_client.download_file(
-            gt_bucket.url.bucket_name,
-            gt_bucket.url.path,
-        )
+        self.input_gt_data = gt_storage_client.download_fileobj(gt_bucket.path)
 
-        self.input_points_data = points_storage_client.download_file(
-            points_bucket.url.bucket_name,
-            points_bucket.url.path,
-        )
+        self.input_points_data = points_storage_client.download_fileobj(points_bucket.path)
 
     def _parse_dataset(self, annotation_file_data: bytes, dataset_format: str) -> dm.Dataset:
         temp_dir = self.exit_stack.enter_context(TemporaryDirectory())
@@ -721,7 +712,7 @@ class BoxesFromPointsTaskBuilder:
         )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
-        bucket_name = self.oracle_data_bucket.url.bucket_name
+        bucket_name = self.oracle_data_bucket.bucket_name
         for file_data, filename in file_list:
             storage_client.create_file(
                 bucket_name,
@@ -769,7 +760,7 @@ class BoxesFromPointsTaskBuilder:
         assert self.input_filenames is not self._not_configured
         assert self.roi_filenames is not self._not_configured
 
-        src_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
+        src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = ""
         dst_bucket = self.oracle_data_bucket
 
@@ -793,9 +784,7 @@ class BoxesFromPointsTaskBuilder:
             if not image_roi_infos:
                 continue
 
-            image_bytes = src_client.download_file(
-                src_bucket.url.bucket_name, os.path.join(src_prefix, filename)
-            )
+            image_bytes = src_client.download_fileobj(os.path.join(src_prefix, filename))
             image_pixels = decode_image(image_bytes)
 
             sample = filename_to_sample[filename]
@@ -824,7 +813,6 @@ class BoxesFromPointsTaskBuilder:
 
             for roi_filename, roi_bytes in image_rois.items():
                 dst_client.create_file(
-                    dst_bucket.url.bucket_name,
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, roi_filename),
                     roi_bytes,
                 )
@@ -833,20 +821,19 @@ class BoxesFromPointsTaskBuilder:
         assert self.job_layout is not self._not_configured
         assert self.label_configuration is not self._not_configured
 
-        input_data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
+        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
         cloud_storage = cvat_api.create_cloudstorage(
             CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[oracle_bucket.provider],
-            oracle_bucket.url.host_url.replace(
+            oracle_bucket.bucket_name,
+            bucket_host=oracle_bucket.host_url.replace(
                 # TODO: remove mock
                 "127.0.0.1",
                 "172.22.0.1",
             ),
-            oracle_bucket.url.bucket_name,
-            # TODO: add
-            # credentials=...
+            **({ "credentials": oracle_bucket.credentials.to_dict() } if oracle_bucket.credentials else {})
         )
 
         # Create a project
@@ -859,7 +846,6 @@ class BoxesFromPointsTaskBuilder:
         # Setup webhooks for a project (update:task, update:job)
         webhook = cvat_api.create_cvat_webhook(project.id)
 
-        input_data_bucket = parse_bucket_url(self.manifest.data.data_url)
         with SessionLocal.begin() as session:
             db_service.create_project(
                 session,
@@ -1019,21 +1005,19 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         TaskType.image_points,
         TaskType.image_label_binary,
     ]:
-        data_bucket = parse_bucket_url(manifest.data.data_url)
-        gt_bucket = parse_bucket_url(manifest.validation.gt_url)
+        data_bucket = BucketAccessInfo.parse_obj(manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(manifest.validation.gt_url)
 
         data_bucket_client = cloud_service.make_client(data_bucket)
         gt_bucket_client = cloud_service.make_client(gt_bucket)
 
         # Task configuration creation
-        data_filenames = data_bucket_client.list_filenames(
-            data_bucket.bucket_name,
+        data_filenames = data_bucket_client.list_files(
             prefix=data_bucket.path,
         )
         data_filenames = filter_image_files(data_filenames)
 
-        gt_file_data = gt_bucket_client.download_file(
-            gt_bucket.bucket_name,
+        gt_file_data = gt_bucket_client.download_fileobj(
             gt_bucket.path,
         )
 
@@ -1046,8 +1030,9 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         # Register cloud storage on CVAT to pass user dataset
         cloud_storage = cvat_api.create_cloudstorage(
             CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[data_bucket.provider],
-            data_bucket.host_url,
             data_bucket.bucket_name,
+            bucket_host=data_bucket.host_url,
+            **({ "credentials": data_bucket.credentials.to_dict() } if data_bucket.credentials else {})
         )
 
         # Create a project

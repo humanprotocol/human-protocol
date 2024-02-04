@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Union, Dict
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
@@ -8,11 +8,11 @@ from src.core.types import TaskType
 
 
 class DataInfo(BaseModel):
-    data_url: AnyUrl
-    "Bucket URL, s3 only, virtual-hosted-style access"
+    data_url: Union[AnyUrl, Dict]
+    "Bucket URL, AWS s3 | GCS, virtual-hosted-style access"
     # https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-bucket-intro.html
 
-    points_url: Optional[AnyUrl] = None
+    points_url: Optional[Union[AnyUrl, Dict]] = None
     "A path to an archive with a set of points in COCO Keypoints format, "
     "which provides information about all objects on images"
 
@@ -57,7 +57,7 @@ class ValidationInfo(BaseModel):
     val_size: int = Field(default=2, gt=0)
     "Validation frames per job"
 
-    gt_url: AnyUrl
+    gt_url: Union[AnyUrl, Dict]
     "URL to the archive with Ground Truth annotations, the format is COCO keypoints"
 
 

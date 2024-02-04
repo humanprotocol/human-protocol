@@ -46,7 +46,7 @@ class _TaskValidator:
         self.db_session = db_session
         self.logger: Logger = NullLogger()
 
-        self.data_bucket = BucketAccessInfo.from_raw_url(
+        self.data_bucket = BucketAccessInfo.parse_obj(
             Config.exchange_oracle_storage_config.bucket_url()
         )
 
@@ -66,8 +66,8 @@ class _TaskValidator:
             self.chain_id,
             annotation.ANNOTATION_RESULTS_METAFILE_NAME,
         )
-        annotation_metafile_data = data_bucket_client.download_file(
-            self.data_bucket.url.bucket_name, annotation_meta_path
+        annotation_metafile_data = data_bucket_client.download_fileobj(
+            annotation_meta_path
         )
         self.annotation_meta = parse_annotation_metafile(io.BytesIO(annotation_metafile_data))
 
@@ -83,26 +83,22 @@ class _TaskValidator:
                 self.chain_id,
                 job_meta.annotation_filename,
             )
-            job_annotations[job_meta.job_id] = data_bucket_client.download_file(
-                self.data_bucket.url.bucket_name, job_filename
-            )
+            job_annotations[job_meta.job_id] = data_bucket_client.download_fileobj(job_filename)
 
         excor_merged_annotation_path = compose_annotation_results_bucket_filename(
             self.escrow_address,
             self.chain_id,
             annotation.RESULTING_ANNOTATIONS_FILE,
         )
-        merged_annotations = data_bucket_client.download_file(
-            self.data_bucket.url.bucket_name, excor_merged_annotation_path
-        )
+        merged_annotations = data_bucket_client.download_fileobj(excor_merged_annotation_path)
 
         self.job_annotations = job_annotations
         self.merged_annotations = merged_annotations
 
     def _download_gt(self):
-        gt_bucket = BucketAccessInfo.from_raw_url(self.manifest.validation.gt_url)
+        gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
         gt_bucket_client = make_cloud_client(gt_bucket)
-        self.gt_data = gt_bucket_client.download_file(gt_bucket.url.bucket_name, gt_bucket.url.path)
+        self.gt_data = gt_bucket_client.download_fileobj(gt_bucket.path)
 
     def _download_results(self):
         self._download_results_meta()

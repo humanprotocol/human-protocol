@@ -186,7 +186,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         layout = boxes_from_points_task.TaskMetaLayout()
         serializer = boxes_from_points_task.TaskMetaSerializer()
 
-        oracle_data_bucket = BucketAccessInfo.from_raw_url(Config.storage_config.bucket_url())
+        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config.bucket_url())
         # TODO: add
         # credentials=BucketCredentials()
         "Exchange Oracle's private bucket info"
@@ -194,8 +194,8 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         storage_client = make_cloud_client(oracle_data_bucket)
 
         roi_filenames = serializer.parse_roi_filenames(
-            storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
+            storage_client.download_fileobj(
+                oracle_data_bucket.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_FILENAMES_FILENAME
                 ),
@@ -203,8 +203,8 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         )
 
         rois = serializer.parse_roi_info(
-            storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
+            storage_client.download_fileobj(
+                oracle_data_bucket.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_INFO_FILENAME
                 ),
@@ -212,8 +212,8 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         )
 
         points_dataset = serializer.parse_points_annotations(
-            storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
+            storage_client.download_fileobj(
+                oracle_data_bucket.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.POINTS_FILENAME
                 ),
