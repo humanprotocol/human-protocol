@@ -7,10 +7,12 @@ import {
   HMToken,
   TimelockController,
   DAOSpokeContract,
+  Governor,
 } from '../typechain-types';
 import {
   createMockUserWithVotingPower,
   createBasicProposal,
+  mineNBlocks,
 } from './GovernanceUtils';
 
 describe('MetaHumanGovernor', function () {
@@ -21,6 +23,7 @@ describe('MetaHumanGovernor', function () {
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
   let governor: MetaHumanGovernor;
+  let governance: Governor;
   let voteToken: VHMToken;
   let token: HMToken;
   let timelockController: TimelockController;
@@ -300,26 +303,40 @@ describe('MetaHumanGovernor', function () {
   });
 
   // it('Should allow voting on a proposal', async function () {
-  //   const proposalId = await createBasicProposal(voteToken, governor, owner);
-  //   const someUserWallet = await createMockUserWithVotingPower(1, voteToken);
-  //   const someUserAddress = someUserWallet.address;
-
-  //   // Log the balance of someUser for debugging
-  //   const balance = await voteToken.balanceOf(someUserAddress);
-  //   console.log('Balance of someUser:', balance.toString());
-
+  //   const proposalId = await createBasicProposal(
+  //     voteToken,
+  //     governor,
+  //     governance,
+  //     owner
+  //   );
+  //   const someUser = await createMockUserWithVotingPower(voteToken, user1);
   //   // Mine 2 blocks
-  //   // await helpers.mine(2);
 
+  //   await mineNBlocks(2);
   //   // Cast vote
-  //   // Use the connect method on the governor contract with someUserWallet to perform actions as someUser
-  //   await governor.connect(someUserWallet).castVote(proposalId, 1);
+  //   await governor.connect(someUser).castVote(proposalId, 1);
 
   //   const { againstVotes, forVotes, abstainVotes } =
   //     await governor.proposalVotes(proposalId);
+  //   console.log('Against votes:', againstVotes.toString());
+  //   console.log('For votes:', forVotes.toString());
+  //   console.log('Abstain votes:', abstainVotes.toString());
 
-  //   expect((againstVotes).to.be.equal(0));
-  //   expect(forVotes.to.equal(ethers.parseEther('1')));
-  //   expect(abstainVotes.to.equal(0));
+  //   expect(againstVotes).to.equal(0);
+  //   expect(forVotes).to.equal(1);
+  //   expect(abstainVotes).to.equal(0);
+  // });
+
+  // it('Should revert when voting on a non-active proposal', async function () {
+  //   const proposalId = await createBasicProposal(
+  //     voteToken,
+  //     governor,
+  //     governance,
+  //     owner
+  //   );
+  //   const someUser = await createMockUserWithVotingPower(voteToken, user1);
+  //   await expect(
+  //     governor.connect(someUser).castVote(proposalId, 1)
+  //   ).to.be.revertedWith('Governor: vote not currently active');
   // });
 });

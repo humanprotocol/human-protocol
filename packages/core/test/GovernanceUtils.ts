@@ -1,39 +1,38 @@
 import { ethers } from 'hardhat';
-import { Signer, BigNumberish } from 'ethers';
+import { Signer } from 'ethers';
 import {
   MetaHumanGovernor,
   VHMToken,
   DAOSpokeContract,
+  Governor,
 } from '../typechain-types';
-import { IWormholeVM } from './GovernanceTypes';
+import { IWormholeVM, IWormholeSignature } from './GovernanceTypes';
 
 let owner: Signer;
+let someUser: Signer;
+
+export const mineNBlocks = async (n: number) => {
+  await Promise.all(
+    Array(n)
+      .fill(0)
+      .map(async () => {
+        await ethers.provider.send('evm_mine', []);
+      })
+  );
+};
 
 export async function createMockUserWithVotingPower(
-  privateKeySeed: number,
-  voteToken: VHMToken
-): Promise<string> {
-  const privateKey = ethers.keccak256(
-    ethers.toUtf8Bytes(privateKeySeed.toString())
-  );
-  const userWallet = new ethers.Wallet(privateKey, ethers.provider);
-  const deployerWallet = (await ethers.getSigners())[0];
+  voteToken: VHMToken,
+  user: Signer
+): Promise<Signer> {
+  [owner, someUser, user] = await ethers.getSigners();
 
-  await deployerWallet.sendTransaction({
-    to: userWallet.address,
-    value: ethers.parseEther('1.0'),
-  });
-
-  const voteTokenWithSigner = voteToken.connect(owner);
-  await voteTokenWithSigner.transfer(
-    userWallet.address,
-    ethers.parseUnits('1', 18)
-  );
-
-  const voteTokenWithUser = voteToken.connect(userWallet);
-  await voteTokenWithUser.delegate(userWallet.address);
-
-  return userWallet.getAddress();
+  voteToken
+    .connect(owner)
+    .transfer(await user.getAddress(), ethers.parseEther('1'));
+  const voteTokenWithUser = voteToken.connect(user);
+  await voteTokenWithUser.delegate(await user.getAddress());
+  return user;
 }
 
 async function _createMessageWithPayload(
@@ -41,7 +40,7 @@ async function _createMessageWithPayload(
   emitterChainId: number,
   emitterAddress: string
 ): Promise<IWormholeVM> {
-  const signatures: Signature[] = [];
+  const signatures: IWormholeSignature[] = [];
   const mockVM: IWormholeVM = {
     version: 1,
     timestamp: 0,
@@ -112,22 +111,39 @@ export async function createProposalOnSpoke(
 export async function createBasicProposal(
   voteToken: VHMToken,
   governor: MetaHumanGovernor,
+  governance: Governor,
   owner: Signer
-): Promise<BigNumberish> {
+): Promise<any> {
   const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
     await owner.getAddress(),
     1,
   ]);
   const targets = [await voteToken.getAddress()];
-  const values: BigNumberish[] = [0];
+  const values = [0];
   const calldatas = [encodedCall];
 
-  const proposalId: BN = await governor.crossChainPropose(
+  const txResponse = await governor.crossChainPropose(
     targets,
     values,
     calldatas,
     ''
   );
+  const receipt = await txResponse.wait();
+  const eventSignature = ethers.id(
+    'ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)'
+  );
 
+  const event = receipt?.logs?.find((log) => log.topics[0] === eventSignature);
+
+  if (!event) throw new Error('ProposalCreated event not found');
+
+  const decodedData = governor.interface.decodeEventLog(
+    'ProposalCreated',
+    event.data,
+    event.topics
+  );
+
+  const proposalId = decodedData[0];
+  console.log('Proposal ID: ', proposalId.toString());
   return proposalId;
 }
