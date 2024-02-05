@@ -1,6 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { assert, expect } from 'chai';
+import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import { ethers, network } from 'hardhat';
+import * as helpers from '@nomicfoundation/hardhat-network-helpers';
+import { BN } from 'bn.js';
 import { Signer, BigNumberish } from 'ethers';
 import {
   MetaHumanGovernor,
@@ -29,6 +31,26 @@ interface IWormholeVM {
   guardianSetIndex: number;
   signatures: IWormholeSignature[];
   hash: string;
+}
+
+async function createMockUserWithVotingPower(
+  privateKeySeed: number,
+  voteToken: VHMToken
+): Promise<string> {
+  const privateKey = ethers.keccak256(
+    ethers.toUtf8Bytes(privateKeySeed.toString())
+  );
+  const userWallet = new ethers.Wallet(privateKey, ethers.provider);
+
+  const deployerWallet = (await ethers.getSigners())[0];
+  const voteTokenWithSigner = voteToken.connect(deployerWallet);
+  await voteTokenWithSigner.transfer(
+    userWallet.address,
+    ethers.parseEther('1')
+  );
+  const voteTokenWithUser = voteToken.connect(userWallet);
+  await voteTokenWithUser.delegate(userWallet.address);
+  return userWallet.address;
 }
 
 async function createMessageWithPayload(
@@ -109,7 +131,7 @@ async function createBasicProposal(
   voteToken: VHMToken,
   governor: MetaHumanGovernor,
   owner: Signer
-): Promise<BigNumber> {
+): Promise<BigNumberish> {
   const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
     await owner.getAddress(),
     1,
@@ -118,7 +140,7 @@ async function createBasicProposal(
   const values: BigNumberish[] = [0];
   const calldatas = [encodedCall];
 
-  const proposalId: BigNumber = await governor.crossChainPropose(
+  const proposalId: BN = await governor.crossChainPropose(
     targets,
     values,
     calldatas,
@@ -130,6 +152,7 @@ async function createBasicProposal(
 
 describe('MetaHumanGovernor', function () {
   let owner: Signer;
+  let user1: Signer;
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
   let governor: MetaHumanGovernor;
@@ -141,8 +164,7 @@ describe('MetaHumanGovernor', function () {
   let wormholeRelayerAddress: Signer;
 
   this.beforeEach(async () => {
-    const [deployer] = await ethers.getSigners();
-    owner = deployer;
+    [owner, user1] = await ethers.getSigners();
 
     // Deploy HMToken
     const HMToken = await ethers.getContractFactory(
@@ -363,5 +385,79 @@ describe('MetaHumanGovernor', function () {
 
   it('Should grant proposal creation', async function () {
     const proposalId = await createBasicProposal(voteToken, governor, owner);
+  });
+
+  it('Should create a cross-chain grant proposal successfully', async function () {
+    const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+      await owner.getAddress(),
+      50,
+    ]);
+
+    const targets = [await voteToken.getAddress()];
+    const values: BigNumberish[] = [0];
+    const calldatas = [encodedCall];
+
+    const tx = await governor.crossChainPropose(targets, values, calldatas, '');
+    const receipt = await tx.wait();
+    if (!receipt) {
+      throw new Error('No receipt');
+    }
+    expect(receipt.status).to.equal(1);
+    await expect(tx.wait()).to.not.be.reverted;
+  });
+
+  it('Should allow cross-chain propose when spokes are empty', async function () {
+    await governor.updateSpokeContracts([]);
+
+    const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+      await owner.getAddress(),
+      50,
+    ]);
+    const targets = [voteToken.getAddress()];
+    const values: BigNumberish[] = [0];
+    const calldatas = [encodedCall];
+
+    const tx = await governor.crossChainPropose(
+      targets,
+      values,
+      calldatas,
+      'Sample proposal with empty spokes'
+    );
+    const receipt = await tx.wait();
+
+    if (!receipt) {
+      throw new Error('No receipt');
+    }
+    expect(receipt.status).to.equal(
+      1,
+      'The transaction should be successful even when spokes are empty'
+    );
+    await expect(tx.wait()).to.not.be.reverted;
+  });
+
+  it('Should revert cross-chain propose when called by a non-magistrate', async function () {
+    const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+      await owner.getAddress(),
+      50,
+    ]);
+    const targets = [await voteToken.getAddress()];
+    const values = [0];
+    const calldatas = [encodedCall];
+
+    await expect(
+      governor
+        .connect(user1)
+        .crossChainPropose(targets, values, calldatas, 'Should fail')
+    ).to.be.revertedWith('Magistrate: caller is not the magistrate');
+  });
+
+  it('Should allow voting on a proposal', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(1, voteToken);
+
+    // wait for next block
+    await helpers.mine(2);
+    // cast vote
+    governor.connect(someUser).castVote(proposalId, 1);
   });
 });
