@@ -24,7 +24,7 @@
     "@rollup/plugin-eslint": "^9.0.3",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-replace": "^5.0.2",
-    "@rollup/plugin-typescript": "^11.0.0",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/chrome": "^0.0.246",
     "@types/jest": "^29.5.11",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
