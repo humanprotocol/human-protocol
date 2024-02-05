@@ -126,15 +126,20 @@ def create_cloudstorage(
 
 
 def create_project(
-    escrow_address: str, labels: list, *, user_guide: str = ""
+    escrow_address: str, *, labels: Optional[list] = None, user_guide: str = ""
 ) -> models.ProjectRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        kwargs = {}
+
+        if labels is not None:
+            kwargs["labels"] = labels
+
         try:
             (project, response) = api_client.projects_api.create(
                 models.ProjectWriteRequest(
                     name=escrow_address,
-                    labels=labels,
+                    **kwargs
                 )
             )
             if user_guide:
@@ -278,7 +283,6 @@ def put_task_data(
     cloudstorage_id: int,
     *,
     filenames: Optional[list[str]] = None,
-    job_filenames: Optional[list[list[str]]] = None,
     sort_images: bool = True,
 ) -> None:
     logger = logging.getLogger("app")
@@ -289,9 +293,6 @@ def put_task_data(
             kwargs["server_files"] = filenames
         else:
             kwargs["filename_pattern"] = "*"
-
-        if job_filenames:
-            kwargs["job_file_mapping"] = job_filenames
 
         data_request = models.DataRequest(
             chunk_size=Config.cvat_config.cvat_job_segment_size,

@@ -933,26 +933,6 @@ class SkeletonsFromBoxesTaskBuilder:
     class _JobParams:
         label_id: int
         roi_ids: List[int]
-        tileset_ids: _MaybeUnset[List[int]] = _unset
-
-    @dataclass
-    class _TilesetParams:
-        roi_ids: List[int]
-
-        all_tile_coords: np.ndarray
-        "N x (x, y, w, h)"
-
-        all_roi_coords: np.ndarray
-        "N x (x, y, w, h)"
-
-        frame_size: np.ndarray
-        "h, w"
-
-        roi_border_size: np.ndarray
-        "h, w"
-
-        tile_margin_size: np.ndarray
-        "h, w"
 
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
         self.exit_stack = ExitStack()
@@ -970,14 +950,17 @@ class SkeletonsFromBoxesTaskBuilder:
         self.input_gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self.input_boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
 
-        self.tileset_filenames: _MaybeUnset[Dict[int, str]] = _unset
+        self.roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
         self.job_params: _MaybeUnset[List[self._JobParams]] = _unset
         self.gt_dataset: _MaybeUnset[dm.Dataset] = _unset
 
         # Configuration / constants
+        self.job_size_mult = 6
+        "Job size multiplier"
+
         # TODO: consider WebP if produced files are too big
-        self.tileset_file_ext = ".png"  # supposed to be lossless and reasonably compressing
-        "File extension for tileset images, with leading dot (.) included"
+        self.roi_file_ext = ".png"  # supposed to be lossless and reasonably compressing
+        "File extension for RoI images, with leading dot (.) included"
 
         self.list_display_threshold = 5
         "The maximum number of rendered list items in a message"
@@ -993,10 +976,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self.embed_tile_border = True
 
         self.roi_embedded_bbox_color = (0, 255, 255)  # BGR
-
-        self.tileset_size = (3, 2)  # W, H
-        self.tileset_background_color = (245, 240, 242)  # BGR - CVAT background color
-        self.tile_border_color = (255, 255, 255)
+        self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
 
         self.oracle_data_bucket = BucketAccessInfo.from_raw_url(Config.storage_config.bucket_url())
         # TODO: add
@@ -1388,24 +1368,18 @@ class SkeletonsFromBoxesTaskBuilder:
                 if not isinstance(bbox, dm.Bbox):
                     continue
 
-                original_bbox_x = int(bbox.x)
-                original_bbox_y = int(bbox.y)
+                # RoI is centered on bbox center
+                original_bbox_cx = int(bbox.x + bbox.w / 2)
+                original_bbox_cy = int(bbox.y + bbox.h / 2)
 
-                image_h, image_w = sample.image.size
+                roi_w = ceil(bbox.w * self.roi_size_mult)
+                roi_h = ceil(bbox.h * self.roi_size_mult)
 
-                roi_margin_w = bbox.w * self.roi_size_mult
-                roi_margin_h = bbox.h * self.roi_size_mult
+                roi_x = original_bbox_cx - int(roi_w / 2)
+                roi_y = original_bbox_cy - int(roi_h / 2)
 
-                roi_left = max(0, original_bbox_x - int(roi_margin_w / 2))
-                roi_top = max(0, original_bbox_y - int(roi_margin_h / 2))
-                roi_right = min(image_w, original_bbox_x + ceil(roi_margin_w / 2))
-                roi_bottom = min(image_h, original_bbox_y + ceil(roi_margin_h / 2))
-
-                roi_w = roi_right - roi_left
-                roi_h = roi_bottom - roi_top
-
-                new_bbox_x = original_bbox_x - roi_left
-                new_bbox_y = original_bbox_y - roi_top
+                new_bbox_x = original_bbox_cx - roi_x
+                new_bbox_y = original_bbox_cy - roi_y
 
                 rois.append(
                     skeletons_from_boxes_task.RoiInfo(
@@ -1414,8 +1388,8 @@ class SkeletonsFromBoxesTaskBuilder:
                         bbox_label=bbox.label,
                         bbox_x=new_bbox_x,
                         bbox_y=new_bbox_y,
-                        roi_x=roi_left,
-                        roi_y=roi_top,
+                        roi_x=roi_x,
+                        roi_y=roi_y,
                         roi_w=roi_w,
                         roi_h=roi_h,
                     )
@@ -1423,122 +1397,17 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self.roi_infos = rois
 
-    def _prepare_dataset_tileset_params(self):
-        assert self.gt_dataset is not _unset
-        assert self.input_boxes_dataset is not _unset
-        assert self.roi_infos is not _unset
-        assert self.job_params is not _unset
-
-        combined_tileset_params: Dict[int, self._TilesetParams] = {}
-        self.tileset_params = combined_tileset_params
-        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self.roi_infos}
-
-        for job_params in self.job_params:
-            assert job_params.tileset_ids is _unset
-            tileset_ids = []
-            for tileset_roi_ids in take_by(job_params.roi_ids, np.prod(self.tileset_size)):
-                tileset_id = len(combined_tileset_params)
-                combined_tileset_params[tileset_id] = self._prepare_tileset_params(
-                    [roi_info_by_id[roi_id] for roi_id in tileset_roi_ids],
-                    grid_size=self.tileset_size,
-                )
-                tileset_ids.append(tileset_id)
-
-            job_params.tileset_ids = tileset_ids
-
-        self.tileset_params = combined_tileset_params
-
-    @classmethod
-    def _prepare_tileset_params(
-        cls,
-        rois: skeletons_from_boxes_task.RoiInfos,
-        *,
-        grid_size: Tuple[int, int],
-    ) -> _TilesetParams:
-        """
-        RoI is inside tile, centered
-        border is for RoI
-        border is inside tile or margin
-        margin is for tile
-        margin size is shared between 2 adjacent tiles
-
-        A regular row/col looks like (b - border, m - margin, T - tile):
-        b|RoI1|b|tile - RoI1 - b|m - 2 * b|tile - RoI2 - b|b|RoI2|b
-
-        A tileset looks like this:
-        bbbbbbb
-        bTmTmTb
-        bmmmmmb
-        bTmTmTb
-        bbbbbbb
-        """
-
-        assert len(rois) <= np.prod(grid_size)
-
-        # FIXME: RoI size is not limited by size, it can lead to highly uneven tiles
-        base_tile_size = np.max([(sample.roi_h, sample.roi_w) for sample in rois], axis=0).astype(
-            int
-        )
-
-        grid_size = np.array(grid_size, dtype=int)
-        roi_border = np.array((2, 2), dtype=int)
-        tile_margin = np.array((20, 20), dtype=int)
-        assert np.all(2 * roi_border < tile_margin)
-
-        frame_size = (
-            base_tile_size * grid_size[::-1] + tile_margin * (grid_size[::-1] - 1) + 2 * roi_border
-        )
-
-        all_tile_coords = np.zeros((np.prod(grid_size), 4), dtype=float)  # x, y, w, h
-        for grid_id, grid_pos in enumerate(product(range(grid_size[1]), range(grid_size[0]))):
-            grid_pos = np.array(grid_pos[::-1], dtype=int)
-            tile_coords = all_tile_coords[grid_id]
-            tile_coords[:2] = (
-                base_tile_size[::-1] * grid_pos
-                + tile_margin / 2 * grid_pos
-                + tile_margin / 2 * np.clip(grid_pos - 1, 0, None)
-                + roi_border * (grid_pos > 0)
-            )
-            tile_coords[2:] = (
-                base_tile_size[::-1]
-                + tile_margin / 2
-                + np.where(
-                    (grid_pos == 0) | (grid_pos == (grid_size - 1)),
-                    roi_border,
-                    tile_margin / 2,
-                )
-            )
-
-        all_roi_coords = np.zeros((np.prod(grid_size), 4), dtype=int)  # x, y, w, h
-        for grid_id, roi_info in enumerate(rois):
-            tile_coords = all_tile_coords[grid_id]
-            roi_coords = all_roi_coords[grid_id]
-
-            roi_size = np.array((roi_info.roi_h, roi_info.roi_w), dtype=int)
-            roi_offset = tile_coords[2:] / 2 - roi_size[::-1] / 2
-            roi_coords[:] = [*(tile_coords[:2] + roi_offset), *roi_size[::-1]]  # (x, y, w, h)
-
-        return cls._TilesetParams(
-            roi_ids=[roi.bbox_id for roi in rois],
-            all_roi_coords=all_roi_coords,
-            all_tile_coords=all_tile_coords,
-            frame_size=frame_size[::-1],
-            roi_border_size=roi_border,
-            tile_margin_size=tile_margin,
-        )
-
     def _mangle_filenames(self):
         """
         Mangle filenames in the dataset to make them less recognizable by annotators
         and hide private dataset info
         """
-        assert self.tileset_params is not _unset
+        assert self.roi_infos is not _unset
 
         # TODO: maybe add different names for the same GT images in
         # different jobs to make them even less recognizable
-        self.tileset_filenames = {
-            tileset_id: str(uuid.uuid4()) + self.tileset_file_ext
-            for tileset_id in self.tileset_params.keys()
+        self.roi_filenames = {
+            roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self.roi_infos
         }
 
     def _prepare_job_params(self):
@@ -1549,31 +1418,19 @@ class SkeletonsFromBoxesTaskBuilder:
         # 1 job per task, 1 task for each point label
         #
         # Unlike other task types, here we use a grid of RoIs,
-        # so the absolute job size numbers from manifest are multiplied by the grid size.
+        # so the absolute job size numbers from manifest are multiplied by the job size multiplier.
         # Then, we add a percent of job tiles for validation, keeping the requested ratio.
-        gt_percent = self.manifest.validation.val_size / (self.manifest.annotation.job_size or 1)
+        gt_ratio = self.manifest.validation.val_size / (self.manifest.annotation.job_size or 1)
+        job_size_mult = self.job_size_mult
 
         job_params: List[self._JobParams] = []
 
-        _roi_key_label = lambda roi_info: roi_info.bbox_label
-        rois_by_label = {
-            label: list(g)
-            for label, g in groupby(sorted(self.roi_infos, key=_roi_key_label), key=_roi_key_label)
-        }
-
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self.roi_infos}
-
-        tileset_size = np.prod(self.tileset_size)
-        for label, label_rois in rois_by_label.items():
-            # FIXME: RoI sizes are not limited, so they can occupy up to the whole image.
-            # Sort by frame size to make tile sizes more aligned.
-            # This doesn't totally solve the problem, but makes things better.
-            label_rois = sorted(label_rois, key=lambda roi_info: roi_info.roi_w * roi_info.roi_h)
-
+        for label_id, _ in enumerate(self.manifest.annotation.labels):
             label_gt_roi_ids = set(
                 roi_id
                 for roi_id in self.skeleton_bbox_mapping.values()
-                if roi_info_by_id[roi_id].bbox_label == label
+                if roi_info_by_id[roi_id].bbox_label == label_id
             )
 
             label_data_roi_ids = [
@@ -1581,93 +1438,77 @@ class SkeletonsFromBoxesTaskBuilder:
                 for roi_info in self.roi_infos
                 if roi_info.bbox_id not in label_gt_roi_ids
             ]
-            # Can't really shuffle if we sort by size
-            # TODO: maybe shuffle within bins by size
-            # random.shuffle(label_data_roi_ids)
+            random.shuffle(label_data_roi_ids)
 
             for job_data_roi_ids in take_by(
-                label_data_roi_ids, tileset_size * self.manifest.annotation.job_size
+                label_data_roi_ids, int(job_size_mult * self.manifest.annotation.job_size)
             ):
                 job_gt_count = max(
-                    self.manifest.validation.val_size, int(gt_percent * len(job_data_roi_ids))
+                    self.manifest.validation.val_size, int(gt_ratio * len(job_data_roi_ids))
                 )
                 job_gt_count = min(len(label_gt_roi_ids), job_gt_count)
 
-                # TODO: maybe use size bins and take from them to match data sizes
                 job_gt_roi_ids = random.sample(label_gt_roi_ids, k=job_gt_count)
 
                 job_roi_ids = list(job_data_roi_ids) + list(job_gt_roi_ids)
                 random.shuffle(job_roi_ids)
 
-                job_params.append(self._JobParams(label_id=label, roi_ids=job_roi_ids))
+                job_params.append(self._JobParams(label_id=label_id, roi_ids=job_roi_ids))
 
         self.job_params = job_params
-
-        self._prepare_dataset_tileset_params()
 
     def _upload_task_meta(self):
         # TODO:
         # raise NotImplementedError
         pass
 
-    def _create_tileset_frame(
-        self,
-        tileset_params: _TilesetParams,
-        roi_images: dict[int, np.ndarray],
+    def _extract_roi(
+        self, source_pixels: np.ndarray, roi_info: skeletons_from_boxes_task.RoiInfo
     ) -> np.ndarray:
-        frame = np.zeros((*tileset_params.frame_size, 3), dtype=np.uint8)
-        frame[:, :] = self.tileset_background_color
+        img_h, img_w, *_ = source_pixels.shape
 
-        roi_border = tileset_params.roi_border_size
-        border_color = self.tile_border_color
+        roi_pixels = source_pixels[
+            max(0, roi_info.roi_y) : min(img_h, roi_info.roi_y + roi_info.roi_h),
+            max(0, roi_info.roi_x) : min(img_w, roi_info.roi_x + roi_info.roi_w),
+        ]
 
-        for grid_pos, roi_id in enumerate(tileset_params.roi_ids):
-            roi_coords = tileset_params.all_roi_coords[grid_pos].astype(int)
-            roi_image = roi_images[grid_pos]
+        if not (
+            (0 <= roi_info.roi_x < roi_info.roi_x + roi_info.roi_w < img_w)
+            and (0 <= roi_info.roi_y < roi_info.roi_y + roi_info.roi_h < img_h)
+        ):
+            # Coords can be outside the original image
+            # In this case a border should be added to RoI, so that the image was centered on bbox
+            wrapped_roi_pixels = np.zeros((roi_info.roi_h, roi_info.roi_w, 3), dtype=np.float32)
+            wrapped_roi_pixels[:, :] = self.roi_background_color
 
-            if self.embed_tile_border:
-                tile_coords = tileset_params.all_tile_coords[grid_pos].astype(int)
-                frame[
-                    tile_coords[1] : tile_coords[1] + tile_coords[3],
-                    tile_coords[0] : tile_coords[0] + tile_coords[2],
-                ] = 0
+            dst_y = max(-roi_info.roi_y, 0)
+            dst_x = max(-roi_info.roi_x, 0)
+            wrapped_roi_pixels[
+                dst_y : dst_y + roi_pixels.shape[0],
+                dst_x : dst_x + roi_pixels.shape[1],
+            ] = roi_pixels
 
-                frame[
-                    tile_coords[1] + 1 : tile_coords[1] + tile_coords[3] - 2,
-                    tile_coords[0] + 1 : tile_coords[0] + tile_coords[2] - 2,
-                ] = self.tileset_background_color
+            roi_pixels = wrapped_roi_pixels
+        else:
+            roi_pixels = roi_pixels.copy()
 
-            border_coords = np.array(
-                [*(roi_coords[:2] - roi_border), *(roi_coords[2:] + 2 * roi_border)],
-                dtype=int,
-            )
-            frame[
-                border_coords[1] : border_coords[1] + border_coords[3],
-                border_coords[0] : border_coords[0] + border_coords[2],
-            ] = border_color
-
-            frame[
-                roi_coords[1] : roi_coords[1] + roi_coords[3],
-                roi_coords[0] : roi_coords[0] + roi_coords[2],
-            ] = roi_image[
-                : roi_coords[3], : roi_coords[2]
-            ]  # in some cases size can be truncated on previous iterations
-
-        return frame
+        return roi_pixels
 
     def _draw_roi_bbox(self, roi_image: np.ndarray, bbox: dm.Bbox) -> np.ndarray:
+        roi_cy = roi_image.shape[0] // 2
+        roi_cx = roi_image.shape[1] // 2
         return cv2.rectangle(
             roi_image,
-            tuple(map(int, (bbox.x, bbox.y))),
-            tuple(map(int, (bbox.x + bbox.w, bbox.y + bbox.h))),
+            tuple(map(int, (roi_cx - bbox.w / 2, roi_cy - bbox.h / 2))),
+            tuple(map(int, (roi_cx + bbox.w / 2, roi_cy + bbox.h / 2))),
             self.roi_embedded_bbox_color,
             2,  # TODO: maybe improve line thickness
             cv2.LINE_4,
         )
 
-    def _create_and_upload_tilesets(self):
-        assert self.tileset_filenames is not _unset
-        assert self.tileset_params is not _unset
+    def _extract_and_upload_rois(self):
+        assert self.roi_filenames is not _unset
+        assert self.roi_infos is not _unset
 
         # TODO: optimize downloading, this implementation won't work for big datasets
         src_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
@@ -1696,7 +1537,6 @@ class SkeletonsFromBoxesTaskBuilder:
             if isinstance(bbox, dm.Bbox)
         }
 
-        roi_images = {}
         for filename in self.input_filenames:
             image_roi_infos = roi_info_by_image.get(filename, [])
             if not image_roi_infos:
@@ -1717,32 +1557,46 @@ class SkeletonsFromBoxesTaskBuilder:
                 )
 
             for roi_info in image_roi_infos:
-                roi_pixels = image_pixels[
-                    roi_info.roi_y : roi_info.roi_y + roi_info.roi_h,
-                    roi_info.roi_x : roi_info.roi_x + roi_info.roi_w,
-                ]
+                roi_pixels = self._extract_roi(image_pixels, roi_info)
 
                 if self.embed_bbox_in_roi_image:
                     roi_pixels = self._draw_roi_bbox(roi_pixels, bbox_by_id[roi_info.bbox_id])
 
-                roi_images[roi_info.bbox_id] = roi_pixels
+                filename = self.roi_filenames[roi_info.bbox_id]
+                roi_bytes = encode_image(roi_pixels, os.path.splitext(filename)[-1])
 
-        for tileset_id, tileset_params in self.tileset_params.items():
-            tileset_pixels = self._create_tileset_frame(
-                tileset_params, roi_images=[roi_images[roi_id] for roi_id in tileset_params.roi_ids]
-            )
-
-            filename = self.tileset_filenames[tileset_id]
-            tileset_bytes = encode_image(tileset_pixels, os.path.splitext(filename)[-1])
-
-            dst_client.create_file(
-                dst_bucket.url.bucket_name,
-                filename=compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
-                data=tileset_bytes,
-            )
+                dst_client.create_file(
+                    dst_bucket.url.bucket_name,
+                    filename=compose_data_bucket_filename(
+                        self.escrow_address, self.chain_id, filename
+                    ),
+                    data=roi_bytes,
+                )
 
     def _create_on_cvat(self):
         assert self.job_params is not _unset
+
+        # TODO: Find a way to handle different labels in tasks in a project
+        _job_params_label_key = lambda ts: ts.label_id
+        jobs_by_label = {
+            label_id: list(g)
+            for label_id, g in groupby(
+                sorted(self.job_params, key=_job_params_label_key), key=_job_params_label_key
+            )
+        }
+
+        label_specs_by_skeleton = {
+            skeleton_label_id: [
+                {
+                    "name": point_name
+                    if len(self.manifest.annotation.labels) == 1
+                    else f"{skeleton_label}.{point_name}",
+                    "type": "points",
+                }
+                for point_name in skeleton_label.nodes
+            ]
+            for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
+        }
 
         input_data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
@@ -1760,96 +1614,71 @@ class SkeletonsFromBoxesTaskBuilder:
             # credentials=...
         )
 
-        # Create a project
-        project = cvat_api.create_project(
-            self.escrow_address,
-            user_guide=self.manifest.annotation.user_guide,
-            # TODO: improve guide handling - split for different points
-        )
-
-        # Setup webhooks for a project (update:task, update:job)
-        webhook = cvat_api.create_cvat_webhook(project.id)
-
-        input_data_bucket = parse_bucket_url(self.manifest.data.data_url)
-        with SessionLocal.begin() as session:
-            db_service.create_project(
-                session,
-                project.id,
-                cloud_storage.id,
-                self.manifest.annotation.type,
+        for label_id, label_jobs in jobs_by_label.items():
+            # Create a project. CVAT doesn't support tasks with different labels in a project
+            project = cvat_api.create_project(
                 self.escrow_address,
-                self.chain_id,
-                compose_bucket_url(
-                    input_data_bucket.bucket_name,
-                    bucket_host=input_data_bucket.host_url,
-                    provider=input_data_bucket.provider,
-                ),
-                cvat_webhook_id=webhook.id,
-            )
-            db_service.add_project_images(
-                session,
-                project.id,
-                [
-                    compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
-                    for fn in self.tileset_filenames.values()
-                ],
+                user_guide=self.manifest.annotation.user_guide,
+                # TODO: improve guide handling - split for different points
             )
 
-        _job_params_label_key = lambda ts: ts.label_id
-        jobs_by_label = {
-            label_id: list(g)
-            for label_id, g in groupby(
-                sorted(self.job_params, key=_job_params_label_key), key=_job_params_label_key
-            )
-        }
+            # Setup webhooks for a project (update:task, update:job)
+            webhook = cvat_api.create_cvat_webhook(project.id)
 
-        job_label_specs = {
-            skeleton_label_id: [
-                {
-                    "name": point_name
-                    if len(self.manifest.annotation.labels) == 1
-                    else f"{skeleton_label}.{point_name}",
-                    "type": "points",
-                }
-                for point_name in skeleton_label.nodes
-            ]
-            for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
-        }
-        for skeleton_label_id, skeleton_label_jobs in jobs_by_label.items():
+            with SessionLocal.begin() as session:
+                db_service.create_project(
+                    session,
+                    project.id,
+                    cloud_storage.id,
+                    self.manifest.annotation.type,
+                    self.escrow_address,
+                    self.chain_id,
+                    compose_bucket_url(
+                        input_data_bucket.url.bucket_name,
+                        bucket_host=input_data_bucket.url.host_url,
+                        provider=input_data_bucket.url.provider,
+                    ),
+                    cvat_webhook_id=webhook.id,
+                )
+                db_service.add_project_images(
+                    session,
+                    project.id,
+                    [
+                        compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
+                        for fn in self.roi_filenames.values()
+                    ],
+                )
+
             job_filenames_map = []
-            for job_filenames_map in skeleton_label_jobs:
+            for label_job in label_jobs:
                 job_filenames_map.append(
                     [
                         compose_data_bucket_filename(
-                            self.escrow_address, self.chain_id, self.tileset_filenames[tileset_id]
+                            self.escrow_address, self.chain_id, self.roi_filenames[roi_id]
                         )
-                        for tileset_id in skeleton_label_jobs.tileset_ids
+                        for roi_id in label_job.roi_ids
                     ]
                 )
 
-            skeleton_label_specs = job_label_specs[skeleton_label_id]
-            for label_spec in skeleton_label_specs:
-                task = cvat_api.create_task(project.id, self.escrow_address, labels=[label_spec])
+            point_label_specs = label_specs_by_skeleton[label_id]
+            for label_spec in point_label_specs:
+                for job_filenames in job_filenames_map:
+                    task = cvat_api.create_task(project.id, self.escrow_address, labels=[label_spec])
 
-                with SessionLocal.begin() as session:
-                    db_service.create_task(session, task.id, project.id, TaskStatus[task.status])
+                    with SessionLocal.begin() as session:
+                        db_service.create_task(session, task.id, project.id, TaskStatus[task.status])
 
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
-                # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
-                cvat_api.put_task_data(
-                    task.id,
-                    cloud_storage.id,
-                    filenames=[
-                        compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
-                        for job_filenames in job_filenames_map
-                        for fn in job_filenames
-                    ],
-                    sort_images=False,
-                    job_filenames=job_filenames_map,
-                )
+                    # Actual task creation in CVAT takes some time, so it's done in an async process.
+                    # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
+                    cvat_api.put_task_data(
+                        task.id,
+                        cloud_storage.id,
+                        filenames=job_filenames,
+                        sort_images=False,
+                    )
 
-                with SessionLocal.begin() as session:
-                    db_service.create_data_upload(session, cvat_task_id=task.id)
+                    with SessionLocal.begin() as session:
+                        db_service.create_data_upload(session, cvat_task_id=task.id)
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
@@ -1869,7 +1698,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._mangle_filenames()
 
         # Data preparation
-        self._create_and_upload_tilesets()
+        self._extract_and_upload_rois()
         self._upload_task_meta()
 
         self._create_on_cvat()

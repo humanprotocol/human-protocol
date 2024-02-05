@@ -15,6 +15,10 @@ class RoiInfo:
     bbox_x: int
     bbox_y: int
     bbox_label: int
+
+    # RoI is centered on the bbox center
+    # Coordinates can be out of image boundaries.
+    # In this case RoI includes extra margins to be centered on bbox center
     roi_x: int
     roi_y: int
     roi_w: int
