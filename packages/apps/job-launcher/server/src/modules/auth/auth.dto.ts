@@ -21,6 +21,10 @@ export class SignInDto {
   @ApiProperty()
   @IsString()
   public password: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class ValidatePasswordDto {
@@ -40,6 +44,10 @@ export class RestorePasswordDto extends ValidatePasswordDto {
   @ApiProperty()
   @IsString()
   public token: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class VerifyEmailDto {

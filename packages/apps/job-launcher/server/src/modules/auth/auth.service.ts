@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Injectable,
   Logger,
@@ -30,6 +31,7 @@ import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateHash } from '../../common/utils/crypto';
 import { ApiKeyRepository } from './apikey.repository';
 import * as crypto from 'crypto';
+import { verifyToken } from '../../common/utils/hcaptcha';
 
 @Injectable()
 export class AuthService {
@@ -72,7 +74,20 @@ export class AuthService {
     );
   }
 
-  public async signin(data: SignInDto): Promise<AuthDto> {
+  public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
+    if (
+      !(
+        await verifyToken(
+          this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+          data.hCaptchaToken,
+          ip,
+        )
+      ).success
+    ) {
+      throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -89,7 +104,20 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async signup(data: UserCreateDto): Promise<UserEntity> {
+  public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
+    if (
+      !(
+        await verifyToken(
+          this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+          data.hCaptchaToken,
+          ip,
+        )
+      ).success
+    ) {
+      throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    }
     const userEntity = await this.userService.create(data);
 
     const tokenEntity = await this.tokenRepository.create({
@@ -189,7 +217,23 @@ export class AuthService {
     });
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<void> {
+  public async restorePassword(
+    data: RestorePasswordDto,
+    ip: string,
+  ): Promise<void> {
+    if (
+      !(
+        await verifyToken(
+          this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+          data.hCaptchaToken,
+          ip,
+        )
+      ).success
+    ) {
+      throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    }
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.PASSWORD,

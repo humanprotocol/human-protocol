@@ -26,7 +26,12 @@ export const SignUpForm = ({ onFinish }) => {
   const handleRegister = async ({ email, password }) => {
     setIsLoading(true);
     try {
-      await authService.signUp({ email, password });
+      const hCaptchaToken = await captchaRef.current.getResponse();
+      await authService.signUp({
+        email,
+        password,
+        hCaptchaToken,
+      });
       setEmail(email);
       setIsSuccess(true);
     } catch (err) {
