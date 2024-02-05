@@ -1,9 +1,6 @@
-import { assert, expect } from 'chai';
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { ethers, network } from 'hardhat';
-import * as helpers from '@nomicfoundation/hardhat-network-helpers';
-import { BN } from 'bn.js';
-import { Signer, BigNumberish } from 'ethers';
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { Signer } from 'ethers';
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -41,13 +38,14 @@ async function createMockUserWithVotingPower(
     ethers.toUtf8Bytes(privateKeySeed.toString())
   );
   const userWallet = new ethers.Wallet(privateKey, ethers.provider);
-
   const deployerWallet = (await ethers.getSigners())[0];
+  // Transfer some ETH to the mock user to cover transaction fees
+  await deployerWallet.sendTransaction({
+    to: userWallet.address,
+    value: ethers.parseEther('1.0'), // Sending 1 ETH to the mock user
+  });
   const voteTokenWithSigner = voteToken.connect(deployerWallet);
-  await voteTokenWithSigner.transfer(
-    userWallet.address,
-    ethers.parseEther('1')
-  );
+  await voteTokenWithSigner.transfer(userWallet.address, 1);
   const voteTokenWithUser = voteToken.connect(userWallet);
   await voteTokenWithUser.delegate(userWallet.address);
   return userWallet.address;
@@ -454,10 +452,17 @@ describe('MetaHumanGovernor', function () {
   it('Should allow voting on a proposal', async function () {
     const proposalId = await createBasicProposal(voteToken, governor, owner);
     const someUser = await createMockUserWithVotingPower(1, voteToken);
+    console.log(await voteToken.balanceOf(someUser));
 
     // wait for next block
-    await helpers.mine(2);
+    // await helpers.mine(2);
     // cast vote
-    governor.connect(someUser).castVote(proposalId, 1);
+
+    governor.connect(user1).castVote(proposalId, 1);
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
+    expect(againstVotes).to.equal(0, 'Against votes should be 0');
+    expect(forVotes).to.equal(1, 'For votes should be equal to 1');
+    expect(abstainVotes).to.equal(0, 'Abstain votes should be 0');
   });
 });
