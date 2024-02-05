@@ -60,21 +60,25 @@ async function _createMessageWithPayload(
 
 async function _callReceiveMessageOnSpokeWithMock(
   daoSpoke: DAOSpokeContract,
+  wormholeMock: Signer,
   result: IWormholeVM
 ): Promise<void> {
   const vaas: string[] = [];
 
-  await daoSpoke.receiveWormholeMessages(
-    result.payload,
-    vaas,
-    result.emitterAddress,
-    result.emitterChainId,
-    result.hash
-  );
+  await daoSpoke
+    .connect(wormholeMock)
+    .receiveWormholeMessages(
+      result.payload,
+      vaas,
+      ethers.zeroPadBytes(result.emitterAddress, 32),
+      result.emitterChainId,
+      result.hash
+    );
 }
 
 export async function createProposalOnSpoke(
   daoSpoke: DAOSpokeContract,
+  wormholeMock: Signer,
   proposalId: number,
   governorAddress: string
 ): Promise<number> {
@@ -88,14 +92,22 @@ export async function createProposalOnSpoke(
   const currentBlockTimestamp = latestBlock.timestamp;
   const futureTimestamp = currentBlockTimestamp + 1000;
 
-  const message = ethers.solidityPacked(
-    ['uint256', 'uint256', 'uint256', 'uint256'],
-    [0, proposalId, currentBlockTimestamp, futureTimestamp]
+  const defaultAbiCoder = new ethers.AbiCoder();
+
+  const message = defaultAbiCoder.encode(
+    ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+    [
+      0,
+      proposalId,
+      currentBlockTimestamp,
+      currentBlockTimestamp,
+      futureTimestamp,
+    ]
   );
 
-  const payload = ethers.solidityPacked(
+  const payload = defaultAbiCoder.encode(
     ['address', 'uint256', 'address', 'bytes'],
-    [daoSpoke.getAddress(), spokeChainId, governorAddress, message]
+    [await daoSpoke.getAddress(), spokeChainId, governorAddress, message]
   );
 
   const mockResult = await _createMessageWithPayload(
@@ -104,7 +116,7 @@ export async function createProposalOnSpoke(
     governorAddress
   );
 
-  await _callReceiveMessageOnSpokeWithMock(daoSpoke, mockResult);
+  await _callReceiveMessageOnSpokeWithMock(daoSpoke, wormholeMock, mockResult);
   return proposalId;
 }
 
