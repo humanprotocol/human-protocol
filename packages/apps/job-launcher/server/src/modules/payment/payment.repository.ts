@@ -1,49 +1,63 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindOptionsWhere,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-} from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { PaymentEntity } from './payment.entity';
-import { PaymentCreateDto } from './payment.dto';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { handleQueryFailedError } from '../../database/database.error';
+import { PaymentStatus } from 'src/common/enums/payment';
+import { ChainId } from '@human-protocol/sdk';
 
 @Injectable()
-export class PaymentRepository {
-  private readonly logger = new Logger(PaymentRepository.name);
-
-  constructor(
-    @InjectRepository(PaymentEntity)
-    private readonly paymentEntityRepository: Repository<PaymentEntity>,
-  ) {}
-
-  public async findOne(
-    where: FindOptionsWhere<PaymentEntity>,
-    options?: FindOneOptions<PaymentEntity>,
-  ): Promise<PaymentEntity | null> {
-    const paymentEntity = await this.paymentEntityRepository.findOne({
-      where,
-      ...options,
-    });
-
-    return paymentEntity;
+export class PaymentRepository extends Repository<PaymentEntity> {
+  constructor(private dataSource: DataSource) {
+    super(PaymentEntity, dataSource.createEntityManager());
   }
 
-  public find(
-    where: FindOptionsWhere<PaymentEntity>,
-    options?: FindManyOptions<PaymentEntity>,
+  async createUnique(payment: PaymentEntity): Promise<PaymentEntity> {
+    try {
+      await this.insert(payment);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return payment;
+  }
+
+  public async updateOne(payment: PaymentEntity): Promise<PaymentEntity> {
+    try {
+      await this.save(payment);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return payment;
+  }
+
+  public async findOneByTransaction(
+    transaction: string,
+    chainId?: ChainId,
+  ): Promise<PaymentEntity | null> {
+    const whereOptions: any = { transaction, ...(chainId && { chainId }) };
+
+    return this.findOne({ where: whereOptions });
+  }
+
+  public findByUserAndStatus(
+    userId: number,
+    status: PaymentStatus,
   ): Promise<PaymentEntity[]> {
-    return this.paymentEntityRepository.find({
-      where,
+    return this.find({
+      where: {
+        userId,
+        status,
+      },
       order: {
         createdAt: 'DESC',
       },
-      ...options,
     });
-  }
-
-  public async create(dto: PaymentCreateDto): Promise<PaymentEntity> {
-    return this.paymentEntityRepository.create(dto).save();
   }
 }
