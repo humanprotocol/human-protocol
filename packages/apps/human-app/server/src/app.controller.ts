@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Post, Redirect, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AppService } from './app.service';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SignupDto } from './interfaces/signup-worker-request.dto';
+import { SignupWorkerDto } from './interfaces/signup-worker-request.dto';
+import { AuthWorkerService } from './modules/auth-worker/auth-worker.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly authWorkerService: AuthWorkerService) {}
 
   @Get('/')
   @Redirect('/swagger', 301)
@@ -18,9 +18,13 @@ export class AppController {
   @ApiTags('Auth')
   @Post('/auth/signup')
   @ApiOperation({ summary: 'Worker registration' })
-  @UsePipes(new ValidationPipe())
-  public signup(@Req() req: Request, @Res() res: Response, @Body() signupDto: SignupDto): Promise<void> {
+  @UsePipes(new ValidationPipe()) // validation pipe for request body
+  public signupWorker(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() signupWorkerDto: SignupWorkerDto
+  ): Promise<void> {
     req.body.type = 'WORKER';
-    return this.appService.proxy(req, res);
+    return this.authWorkerService.signupWorker(req, res);
   }
 }
