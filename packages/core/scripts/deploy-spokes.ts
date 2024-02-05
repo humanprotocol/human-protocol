@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 import { ethers } from 'hardhat';
-import { DAOSpokeContract } from 'typechain-types';
 import dotenv from 'dotenv';
 dotenv.config();
 

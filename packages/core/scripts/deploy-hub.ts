@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import { ethers } from 'hardhat';
-import { HMToken, MetaHumanGovernor } from 'typechain-types';
 import dotenv from 'dotenv';
 dotenv.config();
 
