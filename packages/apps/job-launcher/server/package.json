@@ -39,7 +39,7 @@
     "@nestjs/schedule": "^4.0.0",
     "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^7.1.13",
-    "@nestjs/terminus": "^10.2.0",
+    "@nestjs/terminus": "^10.2.1",
     "@nestjs/typeorm": "^10.0.1",
     "@sendgrid/mail": "^7.7.0",
     "@types/cookie-parser": "^1.4.3",
