@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService: ConfigService = app.get(ConfigService);
 
   const config = new DocumentBuilder()
     .addBearerAuth()
@@ -14,6 +17,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  await app.listen(3000);
+  const host = configService.get<string>('HOST', 'localhost');
+  const port = configService.get<string>('PORT', '5010');
+
+  await app.listen(port, host, async () => {
+    console.info(`Human APP server is running on http://${host}:${port}`);
+  });
 }
 bootstrap();
