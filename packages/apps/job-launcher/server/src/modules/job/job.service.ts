@@ -24,7 +24,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
-import { LessThanOrEqual } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
@@ -85,7 +84,6 @@ import {
   HCAPTCHA_POLYGON_MAX_POINTS,
   HCAPTCHA_POLYGON_MIN_POINTS,
 } from '../../common/constants';
-import { SortDirection } from '../../common/enums/collection';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   HMToken,
@@ -475,37 +473,32 @@ export class JobService {
     }
     const { url, hash } = await this.uploadManifest(manifestOrigin, chainId);
 
-    const jobEntity = await this.jobRepository.create({
-      chainId,
-      userId,
-      manifestUrl: url,
-      manifestHash: hash,
-      fee: tokenFee,
-      fundAmount: tokenFundAmount,
-      status: JobStatus.PENDING,
-      waitUntil: new Date(),
-    });
+    let jobEntity = new JobEntity();
+    jobEntity.chainId = chainId;
+    jobEntity.userId = userId;
+    jobEntity.manifestUrl = url;
+    jobEntity.manifestHash = hash;
+    jobEntity.fee = tokenFee;
+    jobEntity.fundAmount = tokenFundAmount;
+    jobEntity.status = JobStatus.PENDING;
+    jobEntity.waitUntil = new Date();
 
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorJob.NotCreated);
-    }
+    jobEntity = await this.jobRepository.createUnique(jobEntity);
 
     const paymentEntity = new PaymentEntity();
-    Object.assign(paymentEntity, {
-      userId,
-      jobId: jobEntity.id,
-      source: PaymentSource.BALANCE,
-      type: PaymentType.WITHDRAWAL,
-      amount: -tokenTotalAmount,
-      currency: TokenId.HMT,
-      rate: div(1, rate),
-      status: PaymentStatus.SUCCEEDED,
-    });
+    paymentEntity.userId = userId;
+    paymentEntity.jobId = jobEntity.id;
+    paymentEntity.source = PaymentSource.BALANCE;
+    paymentEntity.type = PaymentType.WITHDRAWAL;
+    paymentEntity.amount = -tokenTotalAmount;
+    paymentEntity.currency = TokenId.HMT;
+    paymentEntity.rate = div(1, rate);
+    paymentEntity.status = PaymentStatus.SUCCEEDED;
+
     await this.paymentRepository.createUnique(paymentEntity);
 
     jobEntity.status = JobStatus.PAID;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
   }
@@ -547,7 +540,7 @@ export class JobService {
 
     jobEntity.status = JobStatus.CREATED;
     jobEntity.escrowAddress = escrowAddress;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
   }
@@ -595,7 +588,7 @@ export class JobService {
     });
 
     jobEntity.status = JobStatus.SET_UP;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
   }
@@ -614,13 +607,13 @@ export class JobService {
     });
 
     jobEntity.status = JobStatus.LAUNCHED;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
   }
 
   public async requestToCancelJob(userId: number, id: number): Promise<void> {
-    const jobEntity = await this.jobRepository.findOne({ id, userId });
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -646,7 +639,7 @@ export class JobService {
       jobEntity.status = JobStatus.TO_CANCEL;
     }
     jobEntity.retriesCount = 0;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
   }
 
   private getOracleAddresses(manifest: any) {
@@ -770,7 +763,7 @@ export class JobService {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
         case JobStatusFilter.CANCELED:
-          jobs = await this.jobRepository.findJobsByStatusFilter(
+          jobs = await this.jobRepository.findByStatusFilter(
             networks,
             userId,
             status,
@@ -791,7 +784,7 @@ export class JobService {
             ethers.getAddress(escrow.address),
           );
 
-          jobs = await this.jobRepository.findJobsByEscrowAddresses(
+          jobs = await this.jobRepository.findByEscrowAddresses(
             userId,
             escrowAddresses,
           );
@@ -872,10 +865,10 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<FortuneFinalResultDto[] | string> {
-    const jobEntity = await this.jobRepository.findOne({
-      id: jobId,
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
       userId,
-    });
+    );
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
@@ -926,26 +919,6 @@ export class JobService {
     return finalResultUrl;
   }
 
-  public findJobByStatus = async (status: JobStatus) => {
-    return this.jobRepository.find(
-      {
-        status: status,
-        retriesCount: LessThanOrEqual(
-          this.configService.get(
-            ConfigNames.MAX_RETRY_COUNT,
-            DEFAULT_MAX_RETRY_COUNT,
-          ),
-        ),
-        waitUntil: LessThanOrEqual(new Date()),
-      },
-      {
-        order: {
-          waitUntil: SortDirection.ASC,
-        },
-      },
-    );
-  };
-
   public handleProcessJobFailure = async (jobEntity: JobEntity) => {
     if (
       jobEntity.retriesCount <
@@ -958,8 +931,7 @@ export class JobService {
     } else {
       jobEntity.status = JobStatus.FAILED;
     }
-
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
   };
 
   public getOracleType(manifest: any): OracleType {
@@ -1013,10 +985,10 @@ export class JobService {
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }
 
-    const jobEntity = await this.jobRepository.findOne({
-      chainId: dto.chainId,
-      escrowAddress: dto.escrowAddress,
-    });
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      dto.chainId,
+      dto.escrowAddress,
+    );
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -1030,14 +1002,17 @@ export class JobService {
 
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason!;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
   }
 
   public async getDetails(
     userId: number,
     jobId: number,
   ): Promise<JobDetailsDto> {
-    let jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
+    let jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
+      userId,
+    );
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -1232,11 +1207,10 @@ export class JobService {
     if (
       escrow.status === EscrowStatus[EscrowStatus.Complete] &&
       job.status !== JobStatus.COMPLETED
-    )
-      updatedJob = await this.jobRepository.updateOne(
-        { id: job.id },
-        { status: JobStatus.COMPLETED },
-      );
+    ) {
+      job.status = JobStatus.COMPLETED;
+      updatedJob = await this.jobRepository.updateOne(job);
+    }
     return updatedJob;
   }
 }

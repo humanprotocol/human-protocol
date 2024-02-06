@@ -18,6 +18,7 @@ import {
 import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
+import { JobRepository } from '../job/job.repository';
 
 @Injectable()
 export class CronJobService {
@@ -26,6 +27,7 @@ export class CronJobService {
   constructor(
     private readonly cronJobRepository: CronJobRepository,
     private readonly jobService: JobService,
+    private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
     private readonly storageService: StorageService,
     private readonly paymentService: PaymentService,
@@ -86,7 +88,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(JobStatus.PAID);
+      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
@@ -117,7 +119,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(
+      const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.CREATED,
       );
 
@@ -151,7 +153,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.FundEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(
+      const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.SET_UP,
       );
 
@@ -199,7 +201,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CancelEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(
+      const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.TO_CANCEL,
       );
 
