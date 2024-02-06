@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Timers.sol";
-import "@openzeppelin/contracts/utils/Checkpoints.sol";
-import "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import "./MetaHumanGovernor.sol";
-import "./wormhole/IWormholeRelayer.sol";
-import "./wormhole/IWormholeReceiver.sol";
-import "./magistrate/Magistrate.sol";
+import '@openzeppelin/contracts/utils/Timers.sol';
+import '@openzeppelin/contracts/utils/Checkpoints.sol';
+import '@openzeppelin/contracts/governance/utils/IVotes.sol';
+import './MetaHumanGovernor.sol';
+import './wormhole/IWormholeRelayer.sol';
+import './wormhole/IWormholeReceiver.sol';
+import './magistrate/Magistrate.sol';
+import 'hardhat/console.sol';
 
 /**
  * @title DAOSpokeContract
@@ -49,7 +50,13 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         bool voteFinished;
     }
 
-    event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
+    event VoteCast(
+        address indexed voter,
+        uint256 proposalId,
+        uint8 support,
+        uint256 weight,
+        string reason
+    );
 
     /**
      * @dev Contract constructor.
@@ -84,7 +91,10 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function hasVoted(uint256 proposalId, address account) public view virtual returns (bool) {
+    function hasVoted(
+        uint256 proposalId,
+        address account
+    ) public view virtual returns (bool) {
         return proposalVotes[proposalId].hasVoted[account];
     }
 
@@ -103,19 +113,26 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      *  @param support The vote type (0 - Against, 1 - For, 2 - Abstain).
      *  @return The voting weight of the voter.
      */
-    function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256) {
+    function castVote(
+        uint256 proposalId,
+        uint8 support
+    ) public virtual returns (uint256) {
         RemoteProposal storage proposal = proposals[proposalId];
-        require(isProposal(proposalId), "DAOSpokeContract: not a started vote");
-        require(!proposal.voteFinished, "DAOSpokeContract: vote finished");
+        require(isProposal(proposalId), 'DAOSpokeContract: not a started vote');
+        require(!proposal.voteFinished, 'DAOSpokeContract: vote finished');
         require(
-            block.timestamp >= proposal.localVoteStart && block.timestamp < proposal.localVoteEnd,
-            "DAOSpokeContract: vote not currently active"
+            block.timestamp >= proposal.localVoteStart &&
+                block.timestamp < proposal.localVoteEnd,
+            'DAOSpokeContract: vote not currently active'
         );
 
-        uint256 weight = token.getPastVotes(msg.sender, proposal.localVoteStartBlock);
+        uint256 weight = token.getPastVotes(
+            msg.sender,
+            proposal.localVoteStartBlock
+        );
         _countVote(proposalId, msg.sender, support, weight);
 
-        emit VoteCast(msg.sender, proposalId, support, weight, "");
+        emit VoteCast(msg.sender, proposalId, support, weight, '');
 
         return weight;
     }
@@ -127,10 +144,18 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      *  @param support The vote type (0 - Against, 1 - For, 2 - Abstain).
      *  @param weight The voting weight of the voter.
      */
-    function _countVote(uint256 proposalId, address account, uint8 support, uint256 weight) internal virtual {
+    function _countVote(
+        uint256 proposalId,
+        address account,
+        uint8 support,
+        uint256 weight
+    ) internal virtual {
         ProposalVote storage proposalVote = proposalVotes[proposalId];
 
-        require(!proposalVote.hasVoted[account], "DAOSpokeContract: vote already cast");
+        require(
+            !proposalVote.hasVoted[account],
+            'DAOSpokeContract: vote already cast'
+        );
         proposalVote.hasVoted[account] = true;
 
         if (support == uint8(VoteType.Against)) {
@@ -140,7 +165,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         } else if (support == uint8(VoteType.Abstain)) {
             proposalVote.abstainVotes += weight;
         } else {
-            revert("DAOSpokeContract: invalid value for enum VoteType");
+            revert('DAOSpokeContract: invalid value for enum VoteType');
         }
     }
 
@@ -148,7 +173,9 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      * @dev Estimates what block number will be the current block on given timestamp.
      *  @return timestampToEstimate Timestamp to estimate the block for.
      */
-    function estimateBlockFromTimestamp(uint256 timestampToEstimate) internal view returns (uint256) {
+    function estimateBlockFromTimestamp(
+        uint256 timestampToEstimate
+    ) internal view returns (uint256) {
         uint256 currentTimestamp = block.timestamp;
         uint256 currentBlock = block.number;
         uint256 estimatedBlock = 0;
@@ -171,35 +198,38 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      * @dev Receives messages from the Wormhole protocol's relay mechanism and processes them accordingly.
      *  This function is intended to be called only by the designated Wormhole relayer.
      *  @param payload The payload of the received message.
-     *  @param additionalVaas An array of additional data (not used in this function).
      *  @param sourceAddress The address that initiated the message transmission (HelloWormhole contract address).
      *  @param sourceChain The chain ID of the source contract.
      *  @param deliveryHash A unique hash representing the delivery of the message to prevent duplicate processing.
      */
     function receiveWormholeMessages(
         bytes memory payload,
-        bytes[] memory additionalVaas, // additionalVaas
+        bytes[] memory, // additionalVaas
         bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (HelloWormhole contract address)
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) public payable override {
-        require(msg.sender == address(wormholeRelayer), "Only relayer allowed");
+        require(msg.sender == address(wormholeRelayer), 'Only relayer allowed');
 
         require(
-            hubContractAddress == sourceAddress && hubContractChainId == sourceChain,
-            "Only messages from the hub contract can be received!"
+            hubContractAddress == sourceAddress &&
+                hubContractChainId == sourceChain,
+            'Only messages from the hub contract can be received!'
         );
 
-        require(!processedMessages[deliveryHash], "Message already processed");
+        require(!processedMessages[deliveryHash], 'Message already processed');
 
         (
-            address intendedRecipient,
-            , //chainId
-            , //sender
+            address intendedRecipient, //chainId //sender
+            ,
+            ,
             bytes memory decodedMessage
         ) = abi.decode(payload, (address, uint16, address, bytes));
 
-        require(intendedRecipient == address(this), "Message is not addressed for this contract");
+        require(
+            intendedRecipient == address(this),
+            'Message is not addressed for this contract'
+        );
 
         processedMessages[deliveryHash] = true;
 
@@ -211,13 +241,17 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         if (option == 0) {
             // Begin a proposal on the local chain, with local block times
             (
-                , //function selector
+                ,
+                //function selector
                 uint256 proposalId,
                 uint256 proposalCreationTimestamp,
                 uint256 voteStartTimestamp,
                 uint256 voteEndTimestamp
-            ) = abi.decode(decodedMessage, (uint16, uint256, uint256, uint256, uint256));
-            require(!isProposal(proposalId), "Proposal ID must be unique.");
+            ) = abi.decode(
+                    decodedMessage,
+                    (uint16, uint256, uint256, uint256, uint256)
+                );
+            require(!isProposal(proposalId), 'Proposal ID must be unique.');
 
             proposals[proposalId] = RemoteProposal(
                 proposalCreationTimestamp,
@@ -228,11 +262,24 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
             );
         } else if (option == 1) {
             // Send vote results back to the hub chain
-            (, uint256 proposalId) = abi.decode(decodedMessage, (uint16, uint256));
+            (, uint256 proposalId) = abi.decode(
+                decodedMessage,
+                (uint16, uint256)
+            );
             ProposalVote storage votes = proposalVotes[proposalId];
-            bytes memory messageToSend =
-                abi.encode(0, proposalId, votes.forVotes, votes.againstVotes, votes.abstainVotes);
-            bytes memory payloadToSend = abi.encode(hubContractAddress, hubContractChainId, msg.sender, messageToSend);
+            bytes memory messageToSend = abi.encode(
+                0,
+                proposalId,
+                votes.forVotes,
+                votes.againstVotes,
+                votes.abstainVotes
+            );
+            bytes memory payloadToSend = abi.encode(
+                hubContractAddress,
+                hubContractChainId,
+                msg.sender,
+                messageToSend
+            );
 
             // Send a message to other contracts
             // Cost of requesting a message to be sent to
@@ -255,7 +302,13 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      * @dev Retrieves the quote for cross chain message delivery.
      *  @return cost Price, in units of current chain currency, that the delivery provider charges to perform the relay
      */
-    function quoteCrossChainMessage(uint16 targetChain) internal view returns (uint256 cost) {
-        (cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, 0, GAS_LIMIT);
+    function quoteCrossChainMessage(
+        uint16 targetChain
+    ) internal view returns (uint256 cost) {
+        (cost, ) = wormholeRelayer.quoteEVMDeliveryPrice(
+            targetChain,
+            0,
+            GAS_LIMIT
+        );
     }
 }

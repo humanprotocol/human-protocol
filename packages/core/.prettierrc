@@ -1,0 +1,12 @@
+{
+  "overrides": [
+    {
+      "files": "*.sol",
+      "options": {
+        "semi": true,
+        "printWidth": 80,
+        "explicitTypes": "always"
+      }
+    }
+  ]
+}

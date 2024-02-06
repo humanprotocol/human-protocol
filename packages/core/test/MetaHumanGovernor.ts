@@ -1,6 +1,6 @@
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { Signer, BigNumberish } from 'ethers';
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { Signer, BigNumberish } from "ethers";
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -8,18 +8,20 @@ import {
   TimelockController,
   DAOSpokeContract,
   Governor,
-} from '../typechain-types';
+  WormholeMock,
+} from "../typechain-types";
 import {
   createMockUserWithVotingPower,
   createBasicProposal,
   mineNBlocks,
-} from './GovernanceUtils';
+} from "./GovernanceUtils";
 
-describe('MetaHumanGovernor', function () {
+describe("MetaHumanGovernor", function () {
   let owner: Signer;
   let user1: Signer;
   let user2: Signer;
   let user3: Signer;
+  let wormholeMock: WormholeMock;
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
   let governor: MetaHumanGovernor;
@@ -35,18 +37,18 @@ describe('MetaHumanGovernor', function () {
 
     // Deploy HMToken
     const HMToken = await ethers.getContractFactory(
-      'contracts/HMToken.sol:HMToken'
+      "contracts/HMToken.sol:HMToken",
     );
     token = (await HMToken.deploy(
       1000000000,
-      'Human Token',
+      "Human Token",
       18,
-      'HMT'
+      "HMT",
     )) as HMToken;
 
     // Deploy VHMToken
     const VHMToken = await ethers.getContractFactory(
-      'contracts/governance/vhm-token/VHMToken.sol:VHMToken'
+      "contracts/governance/vhm-token/VHMToken.sol:VHMToken",
     );
     voteToken = (await VHMToken.deploy(await token.getAddress())) as VHMToken;
 
@@ -57,32 +59,36 @@ describe('MetaHumanGovernor', function () {
     // Deploy TimelockController
     proposers = [await owner.getAddress()];
     const TimelockController =
-      await ethers.getContractFactory('TimelockController');
+      await ethers.getContractFactory("TimelockController");
     timelockController = await TimelockController.deploy(
       1,
       proposers,
       executors,
-      owner.getAddress()
+      owner.getAddress(),
     );
     await timelockController.waitForDeployment();
 
+    // Deploy WormholeMock
+    const WormholeMock = await ethers.getContractFactory("WormholeMock");
+    wormholeMock = await WormholeMock.deploy();
+
     // Deploy MetaHumanGovernor
     const MetaHumanContract = await ethers.getContractFactory(
-      'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
+      "contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor",
     );
     governor = (await MetaHumanContract.deploy(
       voteToken.getAddress(),
       timelockController.getAddress(),
       [],
       5, // voting delay
-      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
+      await wormholeMock.getAddress(),
       owner.getAddress(),
-      12
+      12,
     )) as MetaHumanGovernor;
 
     // Deploy DAOSpokeContract
     const DAOSpokeContract = await ethers.getContractFactory(
-      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+      "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
     );
     daoSpoke = (await DAOSpokeContract.deploy(
       ethers.zeroPadBytes(await governor.getAddress(), 32),
@@ -90,15 +96,15 @@ describe('MetaHumanGovernor', function () {
       voteToken.getAddress(),
       12, // voting period
       6, // spokeChainId
-      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
-      owner.getAddress() // admin address
+      await wormholeMock.getAddress(),
+      owner.getAddress(), // admin address
     )) as DAOSpokeContract;
   });
 
-  it('Should update spoke contracts correctly', async function () {
+  it("Should update spoke contracts correctly", async function () {
     // Deploy new Spoke
     const DAOSpokeContract = await ethers.getContractFactory(
-      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+      "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
     );
 
     newDAOSpoke = (await DAOSpokeContract.deploy(
@@ -107,15 +113,15 @@ describe('MetaHumanGovernor', function () {
       await voteToken.getAddress(),
       12,
       6,
-      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
-      await owner.getAddress() // admin address
+      "0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0",
+      await owner.getAddress(), // admin address
     )) as DAOSpokeContract;
 
     const spokeContractsX = [
       {
         contractAddress: ethers.zeroPadBytes(
           await newDAOSpoke.getAddress(),
-          32
+          32,
         ),
         chainId: 6,
       },
@@ -123,19 +129,19 @@ describe('MetaHumanGovernor', function () {
 
     await expect(governor.updateSpokeContracts(spokeContractsX)).to.emit(
       governor,
-      'SpokesUpdated'
+      "SpokesUpdated",
     );
 
     const updated = await governor.spokeContractsMapping(
       ethers.zeroPadBytes(await newDAOSpoke.getAddress(), 32),
-      6
+      6,
     );
     expect(updated).to.be.true;
   });
 
-  it('Should revert when updating spoke contracts with duplicates', async function () {
+  it("Should revert when updating spoke contracts with duplicates", async function () {
     const DAOSpokeContract = await ethers.getContractFactory(
-      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+      "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
     );
 
     const newDAOSpoke = (await DAOSpokeContract.deploy(
@@ -144,34 +150,34 @@ describe('MetaHumanGovernor', function () {
       voteToken.getAddress(),
       12,
       6,
-      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
-      owner.getAddress()
+      "0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0",
+      owner.getAddress(),
     )) as DAOSpokeContract;
 
     const spokeContracts = [
       {
         contractAddress: ethers.zeroPadBytes(
           await newDAOSpoke.getAddress(),
-          32
+          32,
         ),
         chainId: 6,
       },
       {
         contractAddress: ethers.zeroPadBytes(
           await newDAOSpoke.getAddress(),
-          32
+          32,
         ),
         chainId: 6,
       },
     ];
     await expect(
-      governor.updateSpokeContracts(spokeContracts)
-    ).to.be.revertedWith('Duplicates are not allowed');
+      governor.updateSpokeContracts(spokeContracts),
+    ).to.be.revertedWith("Duplicates are not allowed");
   });
 
-  it('Should update spoke contracts with unique entries successfully', async function () {
+  it("Should update spoke contracts with unique entries successfully", async function () {
     const DAOSpokeContract = await ethers.getContractFactory(
-      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+      "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
     );
     const newlyDeployedSpoke = await DAOSpokeContract.deploy(
       ethers.zeroPadBytes(await governor.getAddress(), 32),
@@ -179,22 +185,22 @@ describe('MetaHumanGovernor', function () {
       await voteToken.getAddress(),
       12,
       6,
-      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
-      await owner.getAddress()
+      "0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0",
+      await owner.getAddress(),
     );
 
     const spokeContracts = [
       {
         contractAddress: ethers.zeroPadBytes(
           await newlyDeployedSpoke.getAddress(),
-          32
+          32,
         ),
         chainId: 6,
       },
       {
         contractAddress: ethers.zeroPadBytes(
           await newlyDeployedSpoke.getAddress(),
-          32
+          32,
         ),
         chainId: 7,
       },
@@ -204,20 +210,20 @@ describe('MetaHumanGovernor', function () {
 
     const updated1 = await governor.spokeContractsMapping(
       ethers.zeroPadBytes(await newlyDeployedSpoke.getAddress(), 32),
-      6
+      6,
     );
     expect(updated1).to.be.true;
 
     const updated2 = await governor.spokeContractsMapping(
       ethers.zeroPadBytes(await newlyDeployedSpoke.getAddress(), 32),
-      7
+      7,
     );
     expect(updated2).to.be.true;
   });
 
-  it('cannot update spoke contracts after transferring ownership', async function () {
+  it("cannot update spoke contracts after transferring ownership", async function () {
     const DAOSpokeContract = await ethers.getContractFactory(
-      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+      "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
     );
     const newlyDeployedSpoke = (await DAOSpokeContract.deploy(
       ethers.zeroPadBytes(await governor.getAddress(), 32),
@@ -225,8 +231,8 @@ describe('MetaHumanGovernor', function () {
       await voteToken.getAddress(),
       12,
       6,
-      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
-      await owner.getAddress()
+      "0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0",
+      await owner.getAddress(),
     )) as DAOSpokeContract;
     const spokeChainId = 6;
 
@@ -234,7 +240,7 @@ describe('MetaHumanGovernor', function () {
       {
         contractAddress: ethers.zeroPadBytes(
           await newlyDeployedSpoke.getAddress(),
-          32
+          32,
         ),
         chainId: spokeChainId,
       },
@@ -246,17 +252,17 @@ describe('MetaHumanGovernor', function () {
       .transferOwnership(await timelockController.getAddress());
 
     await expect(
-      governor.connect(owner).updateSpokeContracts(spokeContracts)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+      governor.connect(owner).updateSpokeContracts(spokeContracts),
+    ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it('Should create a grant proposal', async function () {
+  it("Should create a grant proposal", async function () {
     // const proposalId = await createBasicProposal(voteToken, governor, owner);
     // expect(proposalId).to.equal(0);
   });
 
-  it('Should create a cross-chain grant proposal successfully', async function () {
-    const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+  it("Should create a cross-chain grant proposal successfully", async function () {
+    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
       await owner.getAddress(),
       50,
     ]);
@@ -265,19 +271,19 @@ describe('MetaHumanGovernor', function () {
     const values: BigNumberish[] = [0];
     const calldatas = [encodedCall];
 
-    const tx = await governor.crossChainPropose(targets, values, calldatas, '');
+    const tx = await governor.crossChainPropose(targets, values, calldatas, "");
     const receipt = await tx.wait();
     if (!receipt) {
-      throw new Error('No receipt');
+      throw new Error("No receipt");
     }
     expect(receipt.status).to.equal(1);
     await expect(tx.wait()).to.not.be.reverted;
   });
 
-  it('Should allow cross-chain propose when spokes are empty', async function () {
+  it("Should allow cross-chain propose when spokes are empty", async function () {
     await governor.updateSpokeContracts([]);
 
-    const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
       await owner.getAddress(),
       50,
     ]);
@@ -289,26 +295,27 @@ describe('MetaHumanGovernor', function () {
       targets,
       values,
       calldatas,
-      'Sample proposal with empty spokes'
+      "Sample proposal with empty spokes",
     );
     const receipt = await tx.wait();
 
     if (!receipt) {
-      throw new Error('No receipt');
+      throw new Error("No receipt");
     }
     expect(receipt.status).to.equal(
       1,
-      'The transaction should be successful even when spokes are empty'
+      "The transaction should be successful even when spokes are empty",
     );
     await expect(tx.wait()).to.not.be.reverted;
   });
 
-  it('Should allow voting on a proposal', async function () {
+  it("Should allow voting on a proposal", async function () {
     const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
       voteToken,
       governor,
-      governance,
-      owner
+      owner,
     );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     // Mine 2 blocks
@@ -319,25 +326,37 @@ describe('MetaHumanGovernor', function () {
 
     const { againstVotes, forVotes, abstainVotes } =
       await governor.proposalVotes(proposalId);
-    console.log('Against votes:', againstVotes.toString());
-    console.log('For votes:', forVotes.toString());
-    console.log('Abstain votes:', abstainVotes.toString());
+    console.log("Against votes:", againstVotes.toString());
+    console.log("For votes:", forVotes.toString());
+    console.log("Abstain votes:", abstainVotes.toString());
 
     expect(againstVotes).to.equal(0);
     expect(forVotes).to.equal(1);
     expect(abstainVotes).to.equal(0);
   });
 
-  it('Should revert when voting on a non-active proposal', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should revert when voting on a non-active proposal", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     await expect(
-      governor.connect(someUser).castVote(proposalId, 1)
-    ).to.be.revertedWith('Governor: vote not currently active');
+      governor.connect(someUser).castVote(proposalId, 1),
+    ).to.be.revertedWith("Governor: vote not currently active");
   });
 
-  it('Should allow voting against', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should allow voting against", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     await mineNBlocks(2);
     await governor.connect(someUser).castVote(proposalId, 0);
@@ -348,8 +367,14 @@ describe('MetaHumanGovernor', function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it('Should allow voting abstain', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should allow voting abstain", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     await mineNBlocks(2);
     await governor.connect(someUser).castVote(proposalId, 2);
@@ -360,50 +385,74 @@ describe('MetaHumanGovernor', function () {
     expect(abstainVotes).to.equal(1);
   });
 
-  it('Should revert when voting with invalid option', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should revert when voting with invalid option", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     await mineNBlocks(2);
     await expect(
-      governor.connect(someUser).castVote(proposalId, 5)
+      governor.connect(someUser).castVote(proposalId, 5),
     ).to.be.revertedWith(
-      'GovernorVotingSimple: invalid value for enum VoteType'
+      "GovernorVotingSimple: invalid value for enum VoteType",
     );
   });
 
-  it('Should revert when vote already cast', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should revert when vote already cast", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     await mineNBlocks(2);
     await governor.connect(someUser).castVote(proposalId, 1);
     await expect(
-      governor.connect(someUser).castVote(proposalId, 1)
-    ).to.be.revertedWith('GovernorVotingSimple: vote already cast');
+      governor.connect(someUser).castVote(proposalId, 1),
+    ).to.be.revertedWith("GovernorVotingSimple: vote already cast");
   });
 
-  it('Should retrieve counting mode', async function () {
+  it("Should retrieve counting mode", async function () {
     const countingMode = await governor.COUNTING_MODE();
-    expect(countingMode).to.equal('support=bravo&quorum=for,abstain');
+    expect(countingMode).to.equal("support=bravo&quorum=for,abstain");
   });
 
-  it('Should not count vote when vote not cast', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should not count vote when vote not cast", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     const hasVoted = await governor.hasVoted(
       proposalId,
-      await someUser.getAddress()
+      await someUser.getAddress(),
     );
     expect(hasVoted).to.be.false;
   });
 
-  it('Should count vote when vote cast', async function () {
-    const proposalId = await createBasicProposal(voteToken, governor, owner);
+  it("Should count vote when vote cast", async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const someUser = await createMockUserWithVotingPower(voteToken, user1);
     await mineNBlocks(2);
     await governor.connect(someUser).castVote(proposalId, 1);
     const hasVoted = await governor.hasVoted(
       proposalId,
-      await someUser.getAddress()
+      await someUser.getAddress(),
     );
     expect(hasVoted).to.be.true;
   });

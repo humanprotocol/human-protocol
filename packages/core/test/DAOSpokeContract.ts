@@ -1,6 +1,6 @@
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { Signer, BigNumberish } from 'ethers';
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { Signer, BigNumberish } from "ethers";
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -8,20 +8,22 @@ import {
   TimelockController,
   DAOSpokeContract,
   Governor,
-} from '../typechain-types';
+  WormholeMock,
+} from "../typechain-types";
 import {
   createMockUserWithVotingPower,
   createBasicProposal,
   mineNBlocks,
   createProposalOnSpoke,
-} from './GovernanceUtils';
+  finishProposal,
+} from "./GovernanceUtils";
 
-describe.only('DAOSpokeContract', function () {
+describe.only("DAOSpokeContract", function () {
   let owner: Signer;
   let user1: Signer;
   let user2: Signer;
   let user3: Signer;
-  let wormholeMock: Signer;
+  let wormholeMock: WormholeMock;
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
   let governor: MetaHumanGovernor;
@@ -33,44 +35,51 @@ describe.only('DAOSpokeContract', function () {
   let newDAOSpoke: DAOSpokeContract;
 
   beforeEach(async () => {
-    [owner, user1, user2, user3, wormholeMock] = await ethers.getSigners();
+    [owner, user1, user2, user3] = await ethers.getSigners();
 
     // Deploy HMToken
     const HMToken = await ethers.getContractFactory(
-      'contracts/HMToken.sol:HMToken'
+      "contracts/HMToken.sol:HMToken",
     );
     token = (await HMToken.deploy(
       1000000000,
-      'Human Token',
+      "Human Token",
       18,
-      'HMT'
+      "HMT",
     )) as HMToken;
 
     // Deploy VHMToken
     const VHMToken = await ethers.getContractFactory(
-      'contracts/governance/vhm-token/VHMToken.sol:VHMToken'
+      "contracts/governance/vhm-token/VHMToken.sol:VHMToken",
     );
     voteToken = (await VHMToken.deploy(await token.getAddress())) as VHMToken;
 
     // Deposit vhmTokens
-    await token.approve(voteToken.getAddress(), 5000000);
-    await voteToken.depositFor(owner.getAddress(), 5000000);
+    await token.approve(voteToken.getAddress(), ethers.parseEther("5000000"));
+    await voteToken.depositFor(
+      owner.getAddress(),
+      ethers.parseEther("5000000"),
+    );
 
     // Deploy TimelockController
     proposers = [await owner.getAddress()];
     const TimelockController =
-      await ethers.getContractFactory('TimelockController');
+      await ethers.getContractFactory("TimelockController");
     timelockController = await TimelockController.deploy(
       1,
       proposers,
       executors,
-      owner.getAddress()
+      owner.getAddress(),
     );
     await timelockController.waitForDeployment();
 
+    // Deploy WormholeMock
+    const WormholeMock = await ethers.getContractFactory("WormholeMock");
+    wormholeMock = await WormholeMock.deploy();
+
     // Deploy MetaHumanGovernor
     const MetaHumanContract = await ethers.getContractFactory(
-      'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
+      "contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor",
     );
     governor = (await MetaHumanContract.deploy(
       voteToken.getAddress(),
@@ -79,12 +88,12 @@ describe.only('DAOSpokeContract', function () {
       5, // voting delay
       await wormholeMock.getAddress(),
       owner.getAddress(),
-      12
+      12,
     )) as MetaHumanGovernor;
 
     // Deploy DAOSpokeContract
     const DAOSpokeContract = await ethers.getContractFactory(
-      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+      "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
     );
     daoSpoke = (await DAOSpokeContract.deploy(
       ethers.zeroPadBytes(await governor.getAddress(), 32),
@@ -93,25 +102,19 @@ describe.only('DAOSpokeContract', function () {
       12, // voting period
       6, // spokeChainId
       await wormholeMock.getAddress(),
-      owner.getAddress() // admin address
+      owner.getAddress(), // admin address
     )) as DAOSpokeContract;
+
+    // Set DAOSpokeContract on worm hole mock
+    await wormholeMock.setDAOSpokeContract(await daoSpoke.getAddress());
   });
 
-  it('should hasVoted return true when voted', async () => {
-    // uint256 proposalId = _createProposalOnSpoke();
-    // address someUser = _createMockUserWithVotingPower(1, voteToken);
-    // vm.roll(block.number + 3);
-    // vm.startPrank(someUser);
-    // daoSpokeContract.castVote(proposalId, 0);
-    // vm.stopPrank();
-    // bool hasVoted = daoSpokeContract.hasVoted(proposalId, someUser);
-    // assertTrue(hasVoted);
-
+  it("should hasVoted return true when voted", async () => {
     const proposalId = await createProposalOnSpoke(
       daoSpoke,
       wormholeMock,
       1,
-      await governor.getAddress()
+      await governor.getAddress(),
     );
 
     await createMockUserWithVotingPower(voteToken, user1);
@@ -121,8 +124,153 @@ describe.only('DAOSpokeContract', function () {
     await daoSpoke.connect(user1).castVote(proposalId, 0);
     const hasVoted = await daoSpoke.hasVoted(
       proposalId,
-      await user1.getAddress()
+      await user1.getAddress(),
     );
     expect(hasVoted).to.be.true;
+  });
+
+  it("should hasVoted return false when hasn't voted", async () => {
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    await createMockUserWithVotingPower(voteToken, user1);
+
+    await mineNBlocks(3);
+
+    const hasVoted = await daoSpoke.hasVoted(
+      proposalId,
+      await user1.getAddress(),
+    );
+
+    expect(hasVoted).to.be.false;
+  });
+
+  it("should isProposal return false when proposal doesn't exist", async () => {
+    const isProposal = await daoSpoke.isProposal(1);
+    expect(isProposal).to.be.false;
+  });
+
+  it("should isProposal return true when proposal exists", async () => {
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    const isProposal = await daoSpoke.isProposal(proposalId);
+    expect(isProposal).to.be.true;
+  });
+
+  it("should emit VoteCast event when user votes for", async () => {
+    await createMockUserWithVotingPower(voteToken, user1);
+
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    await mineNBlocks(3);
+
+    await expect(daoSpoke.connect(user1).castVote(proposalId, 0))
+      .to.emit(daoSpoke, "VoteCast")
+      .withArgs(
+        await user1.getAddress(),
+        proposalId,
+        0,
+        ethers.parseEther("1"),
+        "",
+      );
+  });
+
+  it("should emit VoteCast event when user votes against", async () => {
+    await createMockUserWithVotingPower(voteToken, user1);
+
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    await mineNBlocks(3);
+
+    await expect(daoSpoke.connect(user1).castVote(proposalId, 1))
+      .to.emit(daoSpoke, "VoteCast")
+      .withArgs(
+        await user1.getAddress(),
+        proposalId,
+        1,
+        ethers.parseEther("1"),
+        "",
+      );
+  });
+
+  it("should emit VoteCast event when user votes abstain", async () => {
+    await createMockUserWithVotingPower(voteToken, user1);
+
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    await mineNBlocks(3);
+
+    await expect(daoSpoke.connect(user1).castVote(proposalId, 2))
+      .to.emit(daoSpoke, "VoteCast")
+      .withArgs(
+        await user1.getAddress(),
+        proposalId,
+        2,
+        ethers.parseEther("1"),
+        "",
+      );
+  });
+
+  it("should revert when vote option is invalid", async () => {
+    await createMockUserWithVotingPower(voteToken, user1);
+
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    await mineNBlocks(3);
+
+    await expect(
+      daoSpoke.connect(user1).castVote(proposalId, 3),
+    ).to.be.revertedWith("DAOSpokeContract: invalid value for enum VoteType");
+  });
+
+  it("should revert when vote is finished", async () => {
+    await createMockUserWithVotingPower(voteToken, user1);
+
+    const proposalId = await createProposalOnSpoke(
+      daoSpoke,
+      wormholeMock,
+      1,
+      await governor.getAddress(),
+    );
+
+    await finishProposal(
+      daoSpoke,
+      wormholeMock,
+      proposalId,
+      await governor.getAddress(),
+    );
+
+    await expect(
+      daoSpoke.connect(user1).castVote(proposalId, 0),
+    ).to.be.revertedWith("DAOSpokeContract: vote finished");
   });
 });
