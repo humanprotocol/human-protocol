@@ -534,7 +534,7 @@ describe('CronJobService', () => {
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
 
-      createWebhookMock = jest.spyOn(webhookService, 'createWebhook');
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
 
       const cvatManifestMock: DeepPartial<CvatManifestDto> = {
         data: {
@@ -705,7 +705,7 @@ describe('CronJobService', () => {
     });
 
     it('should cancel all of the jobs with status TO_CANCEL', async () => {
-      jest.spyOn(webhookService, 'createWebhook');
+      jest.spyOn(webhookRepository, 'createUnique');
       const result = await service.cancelCronJob();
 
       expect(result).toBeTruthy();
@@ -717,7 +717,7 @@ describe('CronJobService', () => {
         jobEntityMock2,
       );
       expect(jobEntityMock2.save).toHaveBeenCalled();
-      expect(webhookService.createWebhook).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.createUnique).toHaveBeenCalledTimes(2);
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {
@@ -807,7 +807,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(webhookRepository, 'find')
+        .spyOn(webhookRepository, 'findByStatus')
         .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
       sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');
@@ -850,27 +850,18 @@ describe('CronJobService', () => {
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity2);
 
       expect(webhookRepository.updateOne).toHaveBeenCalledTimes(2);
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
-        { status: WebhookStatus.COMPLETED },
-      );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity2.id },
-        { status: WebhookStatus.COMPLETED },
-      );
+      expect(webhookEntity1.status).toBe(WebhookStatus.COMPLETED);
+      expect(webhookEntity2.status).toBe(WebhookStatus.COMPLETED);
     });
 
     it('should increase retriesCount by 1 if sending webhook fails', async () => {
       sendWebhookMock.mockRejectedValueOnce(new Error());
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
-        {
-          retriesCount: 1,
-          waitUntil: expect.any(Date),
-        },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity1.status).toBe(WebhookStatus.PENDING);
+      expect(webhookEntity1.retriesCount).toBe(1);
+      expect(webhookEntity1.waitUntil).toBeInstanceOf(Date);
     });
 
     it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
@@ -880,10 +871,8 @@ describe('CronJobService', () => {
 
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
-        { status: WebhookStatus.FAILED },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity1.status).toBe(WebhookStatus.FAILED);
     });
 
     it('should complete the cron job entity to unlock', async () => {

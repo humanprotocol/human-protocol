@@ -1,77 +1,72 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { WebhookEntity } from './webhook.entity';
 import {
-  FindOptionsWhere,
-  FindManyOptions,
-  FindOneOptions,
   Repository,
+  QueryFailedError,
+  DataSource,
+  LessThanOrEqual,
 } from 'typeorm';
-import { ErrorWebhook } from '../../common/constants/errors';
-import { CreateWebhookDto, UpdateWebhookDto } from './webhook.dto';
+import { handleQueryFailedError } from '../../database/database.error';
+import { WebhookStatus } from '../../common/enums/webhook';
+import { ConfigNames } from '../../common/config';
+import { ConfigService } from '@nestjs/config';
+import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
 
 @Injectable()
-export class WebhookRepository {
+export class WebhookRepository extends Repository<WebhookEntity> {
   private readonly logger = new Logger(WebhookRepository.name);
-
   constructor(
-    @InjectRepository(WebhookEntity)
-    private readonly webhookEntityRepository: Repository<WebhookEntity>,
-  ) {}
+    private dataSource: DataSource,
+    public readonly configService: ConfigService,
+  ) {
+    super(WebhookEntity, dataSource.createEntityManager());
+  }
+
+  async createUnique(webhook: WebhookEntity): Promise<WebhookEntity> {
+    try {
+      await this.insert(webhook);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return webhook;
+  }
 
   public async updateOne(
-    where: FindOptionsWhere<WebhookEntity>,
-    dto: Partial<UpdateWebhookDto>,
-  ): Promise<WebhookEntity> {
-    const webhookEntity = await this.webhookEntityRepository.findOneBy(where);
-
-    if (!webhookEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
-      throw new NotFoundException(ErrorWebhook.NotFound);
+    webhook: WebhookEntity,
+  ): Promise<WebhookEntity | null> {
+    try {
+      await this.save(webhook);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
     }
-
-    Object.assign(webhookEntity, dto);
-    return webhookEntity.save();
+    return webhook;
   }
 
-  public async findOne(
-    where: FindOptionsWhere<WebhookEntity>,
-    options?: FindOneOptions<WebhookEntity>,
-  ): Promise<WebhookEntity> {
-    const webhookEntity = await this.webhookEntityRepository.findOne({
-      where,
-      ...options,
-    });
+  public findByStatus(status: WebhookStatus): Promise<WebhookEntity[]> {
+    return this.find({
+      where: {
+        status: status,
+        retriesCount: LessThanOrEqual(
+          this.configService.get(
+            ConfigNames.MAX_RETRY_COUNT,
+            DEFAULT_MAX_RETRY_COUNT,
+          ),
+        ),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
 
-    if (!webhookEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookEntity.name);
-      throw new NotFoundException(ErrorWebhook.NotFound);
-    }
-
-    return webhookEntity;
-  }
-
-  public find(
-    where: FindOptionsWhere<WebhookEntity>,
-    options?: FindManyOptions<WebhookEntity>,
-  ): Promise<WebhookEntity[]> {
-    return this.webhookEntityRepository.find({
-      where,
       order: {
         createdAt: 'DESC',
       },
-      ...options,
     });
-  }
-
-  public async create(
-    dto: CreateWebhookDto,
-  ): Promise<WebhookEntity | undefined> {
-    try {
-      return this.webhookEntityRepository.create(dto).save();
-    } catch (e) {
-      return;
-    }
   }
 }
