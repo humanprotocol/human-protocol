@@ -219,7 +219,7 @@ export class AuthService {
 
   public async restorePassword(
     data: RestorePasswordDto,
-    ip: string,
+    ip?: string,
   ): Promise<void> {
     if (
       !(

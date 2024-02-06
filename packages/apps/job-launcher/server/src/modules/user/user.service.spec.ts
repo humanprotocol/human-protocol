@@ -41,6 +41,7 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
+        hCaptchaToken: 'test',
       };
       const createdUser: Partial<UserEntity> = {
         email: dto.email,
@@ -51,7 +52,6 @@ describe('UserService', () => {
 
       const result = await userService.create(dto);
       expect(userRepository.createUnique).toHaveBeenCalledWith({
-        ...dto,
         email: dto.email,
         password: expect.any(String),
         type: UserType.REQUESTER,

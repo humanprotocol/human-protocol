@@ -33,6 +33,9 @@ import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { ApiKeyRepository } from './apikey.repository';
 
 jest.mock('@human-protocol/sdk');
+jest.mock('../../common/utils/hcaptcha', () => ({
+  verifyToken: jest.fn().mockReturnValue({ success: true }),
+}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
@@ -97,6 +100,7 @@ describe('AuthService', () => {
     const signInDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
+      hCaptchaToken: 'token',
     };
 
     const userEntity: Partial<UserEntity> = {
@@ -154,7 +158,7 @@ describe('AuthService', () => {
     const userCreateDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
-      confirm: MOCK_PASSWORD,
+      hCaptchaToken: 'token',
     };
 
     const userEntity: Partial<UserEntity> = {
@@ -469,6 +473,7 @@ describe('AuthService', () => {
         authService.restorePassword({
           token: 'token',
           password: 'password',
+          hCaptchaToken: 'token',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -484,6 +489,7 @@ describe('AuthService', () => {
       await authService.restorePassword({
         token: 'token',
         password: 'password',
+        hCaptchaToken: 'token',
       });
 
       expect(updatePasswordMock).toHaveBeenCalled();
