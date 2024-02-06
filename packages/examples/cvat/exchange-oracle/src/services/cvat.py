@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 
 from sqlalchemy import delete, insert, update
 from sqlalchemy.orm import Session
 
-from src.core.types import AssignmentStatus, JobStatuses, ProjectStatuses, TaskStatus
+from src.core.types import AssignmentStatus, JobStatuses, ProjectStatuses, TaskStatus, TaskType
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
@@ -73,19 +73,40 @@ def get_project_by_escrow_address(
     )
 
 
+def get_projects_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+    limit: Optional[int] = 5,
+) -> List[Project]:
+    projects = _maybe_for_update(session.query(Project), enable=for_update).where(
+        Project.escrow_address == escrow_address
+    )
+
+    if limit is not None:
+        projects = projects.limit(limit)
+
+    return projects.all()
+
+
 def get_projects_by_status(
     session: Session,
     status: ProjectStatuses,
     *,
+    included_types: Optional[Sequence[TaskType]] = None,
     limit: int = 5,
     for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
-    projects = (
-        _maybe_for_update(session.query(Project), enable=for_update)
-        .where(Project.status == status.value)
-        .limit(limit)
-        .all()
+    projects = _maybe_for_update(session.query(Project), enable=for_update).where(
+        Project.status == status.value
     )
+
+    if included_types is not None:
+        projects = projects.where(Project.job_type.in_([t.value for t in included_types]))
+
+    projects = projects.limit(limit).all()
+
     return projects
 
 

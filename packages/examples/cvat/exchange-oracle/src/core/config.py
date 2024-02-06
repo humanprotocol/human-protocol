@@ -75,7 +75,7 @@ class CronConfig:
     track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
-    retrieve_annotations_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60))
+    track_completed_escrows_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60))
     retrieve_annotations_chunk_size = os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5)
 
 

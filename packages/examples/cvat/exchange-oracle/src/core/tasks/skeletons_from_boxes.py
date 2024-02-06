@@ -1,6 +1,10 @@
-from typing import Dict, List, Sequence
+import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Dict, Sequence, Tuple
 
 import attrs
+import datumaro as dm
 from attrs import frozen
 from datumaro.util import dump_json, parse_json
 
@@ -8,7 +12,7 @@ SkeletonBboxMapping = Dict[int, int]
 
 
 # TODO: migrate to pydantic
-@frozen
+@frozen(kw_only=True)
 class RoiInfo:
     original_image_key: int
     bbox_id: int
@@ -30,47 +34,93 @@ class RoiInfo:
 
 RoiInfos = Sequence[RoiInfo]
 
+RoiFilenames = Dict[int, str]
 
-@frozen(kw_only=True)
-class TileInfo:
-    roi_id: int
-    roi_x: float  # top left
-    roi_y: float  # top left
-    roi_w: float
-    roi_h: float
+PointLabelsMapping = Dict[Tuple[str, str], str]
+"(skeleton, point) -> job point name"
 
 
-@frozen(kw_only=True)
-class TilesetInfo:
-    id: int
-    label: int
-    w: int
-    h: int
-    tiles: List[TileInfo]
+class TaskMetaLayout:
+    GT_FILENAME = "gt.json"
+    BOXES_FILENAME = "boxes.json"
+    POINT_LABELS_FILENAME = "point_labels.json"
+    SKELETON_BBOX_MAPPING_FILENAME = "skeleton_bbox_mapping.json"
+    ROI_INFO_FILENAME = "rois.json"
+
+    ROI_FILENAMES_FILENAME = "roi_filenames.json"
+    # this is separated from the general roi info to make name mangling more "optional"
 
 
-TilesetInfos = Sequence[TilesetInfo]
+class TaskMetaSerializer:
+    GT_DATASET_FORMAT = "coco_person_keypoints"
+    BBOX_DATASET_FORMAT = "coco_instances"
 
-# TilesetMap = Dict[int, TilesetInfo]
+    def serialize_gt_annotations(self, gt_dataset: dm.Dataset) -> bytes:
+        with TemporaryDirectory() as temp_dir:
+            gt_dataset_dir = os.path.join(temp_dir, "gt_dataset")
+            gt_dataset.export(gt_dataset_dir, self.GT_DATASET_FORMAT)
+            return (
+                Path(gt_dataset_dir) / "annotations" / "person_keypoints_default.json"
+            ).read_bytes()
 
+    def serialize_bbox_annotations(self, bbox_dataset: dm.Dataset) -> bytes:
+        with TemporaryDirectory() as temp_dir:
+            bbox_dataset_dir = os.path.join(temp_dir, "bbox_dataset")
+            bbox_dataset.export(bbox_dataset_dir, self.BBOX_DATASET_FORMAT)
+            return (Path(bbox_dataset_dir) / "annotations" / "instances_default.json").read_bytes()
 
-# class TaskMetaLayout:
-#     TILESET_MAP_FILENAME = "tileset_map.json"
-#     TILESET_NAME_PATTERN = "tileset-{}"
+    def serialize_skeleton_bbox_mapping(self, skeleton_bbox_mapping: SkeletonBboxMapping) -> bytes:
+        return dump_json({str(k): str(v) for k, v in skeleton_bbox_mapping.items()})
 
-#     @classmethod
-#     def make_tileset_sample_id(cls, tileset_id: int) -> str:
-#         return cls.TILESET_NAME_PATTERN.format(tileset_id)
+    def serialize_roi_info(self, rois_info: RoiInfos) -> bytes:
+        return dump_json([roi_info.asdict() for roi_info in rois_info])
 
+    def serialize_roi_filenames(self, roi_filenames: RoiFilenames) -> bytes:
+        return dump_json({str(k): v for k, v in roi_filenames.items()})
 
-# class TaskMetaSerializer:
-#     def dump_tileset_map(tile_map: TilesetMap, filename: str):
-#         tile_map = {str(k): attrs.asdict(v) for k, v in tile_map.items()}
-#         return dump_json(filename, tile_map, indent=True, append_newline=True)
+    def serialize_point_labels(self, point_labels: PointLabelsMapping) -> bytes:
+        return dump_json(
+            [
+                {
+                    "skeleton_label": k[0],
+                    "point_label": k[1],
+                    "job_point_label": v,
+                }
+                for k, v in point_labels.items()
+            ]
+        )
 
-#     def parse_tileset_map(filename: str) -> TilesetMap:
-#         data = parse_json(filename)
-#         return {
-#             int(k): TilesetInfo(tiles=[TileInfo(**vv) for vv in v.pop("tiles", [])], **v)
-#             for k, v in data.items()
-#         }
+    def parse_gt_annotations(self, gt_dataset_data: bytes) -> dm.Dataset:
+        with TemporaryDirectory() as temp_dir:
+            annotations_filename = os.path.join(temp_dir, "annotations.json")
+            with open(annotations_filename, "wb") as f:
+                f.write(gt_dataset_data)
+
+            dataset = dm.Dataset.import_from(annotations_filename, format=self.GT_DATASET_FORMAT)
+            dataset.init_cache()
+            return dataset
+
+    def parse_bbox_annotations(self, bbox_dataset_data: bytes) -> dm.Dataset:
+        with TemporaryDirectory() as temp_dir:
+            annotations_filename = os.path.join(temp_dir, "annotations.json")
+            with open(annotations_filename, "wb") as f:
+                f.write(bbox_dataset_data)
+
+            dataset = dm.Dataset.import_from(annotations_filename, format=self.BBOX_DATASET_FORMAT)
+            dataset.init_cache()
+            return dataset
+
+    def parse_skeleton_bbox_mapping(self, skeleton_bbox_mapping_data: bytes) -> SkeletonBboxMapping:
+        return {int(k): int(v) for k, v in parse_json(skeleton_bbox_mapping_data).items()}
+
+    def parse_roi_info(self, rois_info_data: bytes) -> RoiInfos:
+        return [RoiInfo(**roi_info) for roi_info in parse_json(rois_info_data)]
+
+    def parse_roi_filenames(self, roi_filenames_data: bytes) -> RoiFilenames:
+        return {int(k): v for k, v in parse_json(roi_filenames_data).items()}
+
+    def parse_point_labels(self, point_labels_data: bytes) -> PointLabelsMapping:
+        return {
+            (v["skeleton_label"], v["point_label"]): v["job_point_label"]
+            for v in parse_json(point_labels_data)
+        }

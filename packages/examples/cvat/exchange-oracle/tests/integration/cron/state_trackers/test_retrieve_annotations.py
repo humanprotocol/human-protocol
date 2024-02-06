@@ -19,7 +19,7 @@ from src.core.types import (
     TaskStatus,
     TaskType,
 )
-from src.crons.state_trackers import retrieve_annotations
+from src.crons.state_trackers import track_completed_escrows
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Image, Job, Project, Task, User
 from src.models.webhook import Webhook
@@ -132,7 +132,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_cloud_client.make_client = Mock(return_value=mock_storage_client)
             mock_cloud_client.S3Client = Mock(return_value=mock_storage_client)
 
-            retrieve_annotations()
+            track_completed_escrows()
 
         webhook = (
             self.session.query(Webhook)
@@ -180,7 +180,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(cvat_job)
         self.session.commit()
 
-        retrieve_annotations()
+        track_completed_escrows()
 
         self.session.commit()
         db_project = self.session.query(Project).filter_by(id=project_id).first()
@@ -259,7 +259,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_S3Client.return_value.create_file = mock_create_file
             mock_annotations.side_effect = Exception("Connection error")
 
-            retrieve_annotations()
+            track_completed_escrows()
 
         webhook = (
             self.session.query(Webhook)
@@ -338,7 +338,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
 
-            retrieve_annotations()
+            track_completed_escrows()
 
         webhook = (
             self.session.query(Webhook)
