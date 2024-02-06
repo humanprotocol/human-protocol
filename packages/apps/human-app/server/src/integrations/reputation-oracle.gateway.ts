@@ -6,7 +6,7 @@ import { SignupWorkerCommand } from '../modules/auth-worker/auth-worker.command'
 import { IntegrationsMap } from '../common/config/integrations';
 
 @Injectable()
-export class ReputationOracleService {
+export class ReputationOracleGateway {
   private integrationsMap: IntegrationsMap;
   constructor(
     private configService: ConfigService,

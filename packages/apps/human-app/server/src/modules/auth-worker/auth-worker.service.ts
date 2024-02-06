@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReputationOracleService } from '../../integrations/reputation-oracle.service';
+import { ReputationOracleGateway } from '../../integrations/reputation-oracle.gateway';
 import { SignupWorkerDto } from '../../interfaces/signup-worker-request.dto';
 import { InjectMapper } from '@automapper/nestjs';
 import { SignupWorkerCommand } from './auth-worker.command';
@@ -8,7 +8,7 @@ import { Mapper } from '@automapper/core';
 @Injectable()
 export class AuthWorkerService {
   constructor(
-    private reputationOracleService: ReputationOracleService,
+    private reputationOracleService: ReputationOracleGateway,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
