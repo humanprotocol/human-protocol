@@ -205,23 +205,6 @@ describe('AuthService', () => {
     });
   });
 
-  describe('logout', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-    };
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should delete the authentication entities based on email', async () => {
-      const result = await authService.logout(userEntity as UserEntity);
-
-      expect(authRepository.deleteByUserId).toHaveBeenCalledWith(userEntity.id);
-      expect(result).toBe(undefined);
-    });
-  });
-
   describe('auth', () => {
     const userEntity: Partial<UserEntity> = {
       id: 1,
@@ -251,7 +234,7 @@ describe('AuthService', () => {
         .mockReturnValueOnce(MOCK_ACCESS_TOKEN_HASHED)
         .mockReturnValueOnce(MOCK_REFRESH_TOKEN_HASHED);
       logoutMock = jest
-        .spyOn(authService, 'logout' as any)
+        .spyOn(authRepository, 'deleteByUserId' as any)
         .mockResolvedValueOnce(undefined);
     });
 

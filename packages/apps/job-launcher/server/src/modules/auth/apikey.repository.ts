@@ -1,38 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
-import { handleQueryFailedError } from '../../database/database.error';
+import { BaseRepository } from '../../database/base.repository';
+import { DataSource } from 'typeorm';
 import { ApiKeyEntity } from './apikey.entity';
 
 @Injectable()
-export class ApiKeyRepository extends Repository<ApiKeyEntity> {
+export class ApiKeyRepository extends BaseRepository<ApiKeyEntity> {
   constructor(private dataSource: DataSource) {
-    super(ApiKeyEntity, dataSource.createEntityManager());
-  }
-
-  async createOrUpdateAPIKey(
-    userId: number,
-    hashedAPIKey: string,
-    salt: string,
-  ): Promise<ApiKeyEntity> {
-    let apiKeyEntity = await this.findAPIKeyByUserId(userId);
-    try {
-      if (!apiKeyEntity) {
-        apiKeyEntity = new ApiKeyEntity();
-        apiKeyEntity.user.id = userId;
-        await this.insert(apiKeyEntity);
-      }
-
-      apiKeyEntity.hashedAPIKey = hashedAPIKey;
-      apiKeyEntity.salt = salt;
-
-      return this.save(apiKeyEntity);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
-    }
+    super(ApiKeyEntity, dataSource);
   }
 
   public async findAPIKeyByUserId(

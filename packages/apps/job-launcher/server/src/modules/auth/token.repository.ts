@@ -1,30 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { handleQueryFailedError } from '../../database/database.error';
-import {
-  DataSource,
-  DeleteResult,
-  QueryFailedError,
-  Repository,
-} from 'typeorm';
+import { BaseRepository } from '../../database/base.repository';
+import { DataSource, DeleteResult } from 'typeorm';
 import { TokenEntity, TokenType } from './token.entity';
 
 @Injectable()
-export class TokenRepository extends Repository<TokenEntity> {
+export class TokenRepository extends BaseRepository<TokenEntity> {
   constructor(private dataSource: DataSource) {
-    super(TokenEntity, dataSource.createEntityManager());
-  }
-
-  async createUnique(token: TokenEntity): Promise<TokenEntity> {
-    try {
-      await this.insert(token);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
-    }
-    return token;
+    super(TokenEntity, dataSource);
   }
 
   public async findOneByUuidAndTokenType(

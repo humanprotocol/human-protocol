@@ -33,6 +33,7 @@ import * as crypto from 'crypto';
 import { AuthRepository } from './auth.repository';
 import { AuthEntity } from './auth.entity';
 import { UserRepository } from '../user/user.repository';
+import { ApiKeyEntity } from './apikey.entity';
 
 @Injectable()
 export class AuthService {
@@ -117,10 +118,6 @@ export class AuthService {
     return userEntity;
   }
 
-  public async logout(user: UserEntity): Promise<void> {
-    await this.authRepository.deleteByUserId(user.id);
-  }
-
   public async auth(userEntity: UserEntity): Promise<AuthDto> {
     const auth = await this.authRepository.findOneByUserId(userEntity.id);
 
@@ -143,7 +140,7 @@ export class AuthService {
     const refreshTokenHashed = this.hashToken(refreshToken);
 
     if (auth) {
-      await this.logout(userEntity);
+      await this.authRepository.deleteByUserId(userEntity.id);
     }
 
     const authEntity = new AuthEntity();
@@ -294,11 +291,17 @@ export class AuthService {
       this.keyLength,
     );
 
-    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(
-      userId,
-      hashedAPIKey,
-      salt,
-    );
+    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+    if (!apiKeyEntity) {
+      apiKeyEntity = new ApiKeyEntity();
+      apiKeyEntity.user.id = userId;
+      await this.apiKeyRepository.createUnique(apiKeyEntity);
+    }
+
+    apiKeyEntity.hashedAPIKey = hashedAPIKey;
+    apiKeyEntity.salt = salt;
+
+    this.apiKeyRepository.updateOne(apiKeyEntity);
 
     return `${apiKey}-${apiKeyEntity.id}`;
   }

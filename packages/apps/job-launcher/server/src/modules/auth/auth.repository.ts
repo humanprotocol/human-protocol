@@ -1,30 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { handleQueryFailedError } from '../../database/database.error';
-import {
-  DataSource,
-  DeleteResult,
-  QueryFailedError,
-  Repository,
-} from 'typeorm';
+import { BaseRepository } from '../../database/base.repository';
+import { DataSource, DeleteResult } from 'typeorm';
 import { AuthEntity } from './auth.entity';
 
 @Injectable()
-export class AuthRepository extends Repository<AuthEntity> {
+export class AuthRepository extends BaseRepository<AuthEntity> {
   constructor(private dataSource: DataSource) {
-    super(AuthEntity, dataSource.createEntityManager());
-  }
-
-  async createUnique(auth: AuthEntity): Promise<AuthEntity> {
-    try {
-      await this.insert(auth);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
-    }
-    return auth;
+    super(AuthEntity, dataSource);
   }
 
   public async findOneByUserId(userId: number): Promise<AuthEntity | null> {
