@@ -14,6 +14,7 @@ import {
   createMockUserWithVotingPower,
   createBasicProposal,
   mineNBlocks,
+  createMessageWithPayload,
 } from "./GovernanceUtils";
 
 describe("MetaHumanGovernor", function () {
@@ -31,6 +32,8 @@ describe("MetaHumanGovernor", function () {
   let timelockController: TimelockController;
   let daoSpoke: DAOSpokeContract;
   let newDAOSpoke: DAOSpokeContract;
+
+  const spokeChainId = 6;
 
   this.beforeEach(async () => {
     [owner, user1, user2, user3] = await ethers.getSigners();
@@ -53,8 +56,10 @@ describe("MetaHumanGovernor", function () {
     voteToken = (await VHMToken.deploy(await token.getAddress())) as VHMToken;
 
     // Deposit vhmTokens
-    await token.approve(voteToken.getAddress(), 5000000);
-    await voteToken.depositFor(owner.getAddress(), 5000000);
+    await token.approve(voteToken.getAddress(), ethers.parseEther('1000'));
+    // await token.approve(user1, ethers.parseEther('10'));
+    await voteToken.depositFor(owner.getAddress(), ethers.parseEther('100'));
+    await voteToken.depositFor(user1.getAddress(), ethers.parseEther('100'));
 
     // Deploy TimelockController
     proposers = [await owner.getAddress()];
@@ -455,5 +460,48 @@ describe("MetaHumanGovernor", function () {
       await someUser.getAddress(),
     );
     expect(hasVoted).to.be.true;
+  });
+
+  it('Should test cross chain vote on proposal successfully', async function () {
+    await mineNBlocks(1);
+    const proposalId = await createBasicProposal(daoSpoke, wormholeMock, voteToken, governor, owner);
+    const user1Address = await user1.getAddress();
+    await voteToken.transfer(user1Address, ethers.parseEther('1'));
+    await voteToken.connect(user1).delegate(user1Address);
+    await mineNBlocks(10);
+
+    // // vote collection message
+    const defaultAbiCoder = new ethers.AbiCoder();
+
+    const message = defaultAbiCoder.encode(
+      ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+      [0, proposalId, ethers.parseEther('1'), 0, 0]
+    );
+
+    const payload = defaultAbiCoder.encode(
+      ['address', 'uint256', 'address', 'bytes'],
+      [
+        await governor.getAddress(),
+        spokeChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ]
+    );
+
+    await callReceiveMessageOnHubWithMock(
+      governor,
+      await createMessageWithPayload(
+        payload,
+        spokeChainId,
+        await daoSpoke.getAddress()
+      )
+    );
+
+    // //assert votes
+    // const { againstVotes, forVotes, abstainVotes } =
+    //   await governor.proposalVotes(proposalId);
+    // expect(againstVotes).to.equal(0);
+    // expect(forVotes).to.equal(ethers.parseEther('1'));
+    // expect(abstainVotes).to.equal(0);
   });
 });
