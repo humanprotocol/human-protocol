@@ -1,5 +1,9 @@
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+
+export enum WorkerType {
+  WORKER = 'WORKER',
+}
 
 export class SignupWorkerDto {
   @ApiProperty({ example: 'string' })
@@ -9,4 +13,7 @@ export class SignupWorkerDto {
   @ApiProperty({ example: 'string' })
   @IsString()
   password: string;
+
+  @ApiHideProperty()
+  type: WorkerType = WorkerType.WORKER;
 }

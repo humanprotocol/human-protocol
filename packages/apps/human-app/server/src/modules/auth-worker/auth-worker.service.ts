@@ -1,45 +1,16 @@
-import { Injectable, Req, Res } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
-import { Request, Response } from 'express';
-import { lastValueFrom } from 'rxjs';
+import { Injectable } from '@nestjs/common';
+import { ReputationOracleService } from '../../integrations/reputation-oracle.service';
+import {
+  SignupWorkerDto,
+  WorkerType,
+} from '../../interfaces/signup-worker-request.dto';
 
 @Injectable()
 export class AuthWorkerService {
-  constructor(
-    private configService: ConfigService,
-    private httpService: HttpService) {
-  }
+  constructor(private reputationOracleService: ReputationOracleService) {}
 
-  async signupWorker(@Req() req: Request, @Res() res: Response) {
-    try {
-      const method = req.method.toLowerCase();
-      const baseUrl = this.configService.get<string>('REPUTATION_ORACLE_URL');
-      const url = `${baseUrl}${req.url}`;
-
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.authorization
-      };
-
-      const options = {
-        method,
-        url,
-        headers,
-        data: req.body,
-      };
-
-      const response = await lastValueFrom(this.httpService.request(options));
-      res.status(response.status).send(response.data);
-    } catch (error) {
-      if (error.response) {
-        res.status(error.response.status).send(error.response.data);
-      } else {
-        res.status(500).send({
-          source: 'human-app',
-          message: 'Error occurred while redirecting request.'
-        });
-      }
-    }
+  async signupWorker(signupWorkerDto: SignupWorkerDto) {
+    signupWorkerDto.type = WorkerType.WORKER;
+    return this.reputationOracleService.signupWorker(signupWorkerDto);
   }
 }
