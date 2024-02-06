@@ -260,10 +260,10 @@ describe('JobService', () => {
 
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
-    paymentRepository = moduleRef.get(PaymentRepository);
+    paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
     paymentService = moduleRef.get(PaymentService);
     routingProtocolService = moduleRef.get(RoutingProtocolService);
-    createPaymentMock = jest.spyOn(paymentRepository, 'create');
+    createPaymentMock = jest.spyOn(paymentRepository, 'createUnique');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
 
@@ -329,12 +329,12 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
-      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
         source: PaymentSource.BALANCE,
@@ -344,7 +344,7 @@ describe('JobService', () => {
         rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
-      expect(jobRepository.create).toHaveBeenCalledWith({
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: fortuneJobDto.chainId,
         userId,
         manifestUrl: expect.any(String),
@@ -381,7 +381,7 @@ describe('JobService', () => {
       });
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(jobRepository.create).toHaveBeenCalledWith({
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
         manifestUrl: expect.any(String),
@@ -418,26 +418,6 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
-    });
-
-    it('should throw an exception if job entity creation fails', async () => {
-      const userBalance = 25;
-
-      getUserBalanceMock.mockResolvedValue(userBalance);
-
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
-
-      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
-
-      await expect(
-        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });
 
@@ -920,7 +900,7 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
       (KVStoreClient.build as any)
         .mockImplementationOnce(() => ({
@@ -937,7 +917,7 @@ describe('JobService', () => {
       );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
         source: PaymentSource.BALANCE,
@@ -947,7 +927,7 @@ describe('JobService', () => {
         rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
-      expect(jobRepository.create).toHaveBeenCalledWith({
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: imageLabelBinaryJobDto.chainId,
         userId,
         manifestUrl: expect.any(String),
@@ -1134,7 +1114,7 @@ describe('JobService', () => {
       });
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(jobRepository.create).toHaveBeenCalledWith({
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
         manifestUrl: expect.any(String),
@@ -1180,30 +1160,6 @@ describe('JobService', () => {
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
-    });
-
-    it('should throw an exception if job entity creation fails', async () => {
-      const userBalance = 100;
-
-      getUserBalanceMock.mockResolvedValue(userBalance);
-
-      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
-
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
-
-      await expect(
-        jobService.createJob(
-          userId,
-          JobRequestType.IMAGE_POINTS,
-          imageLabelBinaryJobDto,
-        ),
-      ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });
 
@@ -1271,7 +1227,7 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
       await jobService.createJob(
         userId,
@@ -1280,7 +1236,7 @@ describe('JobService', () => {
       );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
         source: PaymentSource.BALANCE,
@@ -1290,7 +1246,7 @@ describe('JobService', () => {
         rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
-      expect(jobRepository.create).toHaveBeenCalledWith({
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: hCaptchaJobDto.chainId,
         userId,
         manifestUrl: expect.any(String),
@@ -1322,7 +1278,7 @@ describe('JobService', () => {
       });
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(jobRepository.create).toHaveBeenCalledWith({
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
         manifestUrl: expect.any(String),
@@ -1346,18 +1302,6 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
-    });
-
-    it('should throw an exception if job entity creation fails', async () => {
-      const userBalance = 100;
-
-      getUserBalanceMock.mockResolvedValue(userBalance);
-
-      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
-
-      await expect(
-        jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
-      ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });
 
@@ -1386,7 +1330,7 @@ describe('JobService', () => {
       mockJobEntity.status = JobStatus.CREATED;
       mockJobEntity.escrowAddress = MOCK_ADDRESS;
       expect(jobEntityResult).toMatchObject(mockJobEntity);
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobRepository.updateOne).toHaveBeenCalled();
     });
 
     it('should handle error during job creation', async () => {
@@ -1447,7 +1391,7 @@ describe('JobService', () => {
       );
 
       mockJobEntity.status = JobStatus.SET_UP;
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
 
@@ -1533,7 +1477,7 @@ describe('JobService', () => {
       );
 
       mockJobEntity.status = JobStatus.LAUNCHED;
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
 
@@ -1571,12 +1515,17 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
 
       await jobService.requestToCancelJob(userId, jobId);
 
-      expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobRepository.findOneByIdAndUserId).toHaveBeenCalledWith(
+        jobId,
+        userId,
+      );
+      expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
     });
 
@@ -1591,24 +1540,31 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
       paymentService.createRefundPayment = jest
         .fn()
         .mockResolvedValue(mockJobEntity);
 
       await jobService.requestToCancelJob(userId, jobId);
 
-      expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
+      expect(jobRepository.findOneByIdAndUserId).toHaveBeenCalledWith(
+        jobId,
+        userId,
+      );
       expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
         jobId,
         userId,
         refundAmount: fundAmount,
       });
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobRepository.updateOne).toHaveBeenCalled();
     });
 
     it('should throw not found exception if job not found', async () => {
-      jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(undefined);
 
       await expect(
         jobService.requestToCancelJob(userId, jobId),
@@ -1624,7 +1580,9 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
 
       await expect(
         jobService.requestToCancelJob(userId, jobId),
@@ -1645,7 +1603,6 @@ describe('JobService', () => {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
       retriesCount: 1,
-      save: jest.fn(),
     };
 
     it('should cancel escrow', async () => {
@@ -2021,12 +1978,13 @@ describe('JobService', () => {
       manifestHash: MOCK_FILE_HASH,
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      save: jest.fn(),
     };
 
     beforeEach(() => {
       downloadFileFromUrlMock = storageService.download;
-      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
     });
 
     afterEach(() => {
@@ -2130,7 +2088,7 @@ describe('JobService', () => {
         skip,
         limit,
       );
-      expect(jobRepository.findJobsByStatusFilter).toHaveBeenCalledWith(
+      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
         [ChainId.LOCALHOST],
         userId,
         JobStatusFilter.PENDING,
@@ -2146,7 +2104,7 @@ describe('JobService', () => {
         skip,
         limit,
       );
-      expect(jobRepository.findJobsByStatusFilter).toHaveBeenCalledWith(
+      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
         [ChainId.LOCALHOST],
         userId,
         JobStatusFilter.FAILED,
@@ -2171,7 +2129,7 @@ describe('JobService', () => {
           status: EscrowStatus[EscrowStatus.Launched],
         },
       ];
-      jobRepository.findJobsByEscrowAddresses = jest
+      jobRepository.findByEscrowAddresses = jest
         .fn()
         .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
@@ -2193,10 +2151,12 @@ describe('JobService', () => {
           network: NETWORKS[ChainId.LOCALHOST]?.title,
         },
       ]);
-      expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
-        userId,
-        [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
-      );
+      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
+        MOCK_ADDRESS,
+        MOCK_ADDRESS,
+        MOCK_ADDRESS,
+        MOCK_ADDRESS,
+      ]);
     });
     it('should call the database with CANCELLED status', async () => {
       jobService.getJobsByStatus(
@@ -2206,7 +2166,7 @@ describe('JobService', () => {
         skip,
         limit,
       );
-      expect(jobRepository.findJobsByStatusFilter).toHaveBeenCalledWith(
+      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
         [ChainId.LOCALHOST],
         userId,
         JobStatusFilter.PENDING,
@@ -2237,7 +2197,9 @@ describe('JobService', () => {
         escrowAddress: 'address',
         reason: 'invalid manifest',
       };
-      jobRepository.findOne = jest.fn().mockResolvedValue(null);
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(null);
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
         NotFoundException,
@@ -2253,9 +2215,10 @@ describe('JobService', () => {
       };
       const mockJobEntity = {
         status: 'ANOTHER_STATUS' as JobStatus,
-        save: jest.fn(),
       };
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
         ConflictException,
@@ -2272,15 +2235,16 @@ describe('JobService', () => {
       const mockJobEntity = {
         status: JobStatus.LAUNCHED,
         failedReason: dto.reason,
-        save: jest.fn(),
       };
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
 
       await jobService.escrowFailedWebhook(dto);
 
       expect(mockJobEntity.status).toBe(JobStatus.FAILED);
       expect(mockJobEntity.failedReason).toBe(dto.reason);
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobRepository.updateOne).toHaveBeenCalled();
     });
   });
 
@@ -2312,7 +2276,6 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        save: jest.fn(),
       };
 
       const expectedJobDetailsDto: JobDetailsDto = {
@@ -2354,7 +2317,9 @@ describe('JobService', () => {
         reputationOracle: MOCK_ADDRESS,
       };
 
-      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
       (StakingClient.build as any).mockImplementation(() => ({
         getAllocation: jest.fn().mockResolvedValue(allocationMock),
@@ -2384,7 +2349,6 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         escrowAddress: null,
         chainId: ChainId.LOCALHOST,
-        save: jest.fn(),
       };
 
       const expectedJobDetailsDto: JobDetailsDto = {
@@ -2416,7 +2380,9 @@ describe('JobService', () => {
         },
       };
 
-      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock as any);
       storageService.download = jest.fn().mockResolvedValue(manifestMock);
       jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 
@@ -2425,7 +2391,9 @@ describe('JobService', () => {
     });
 
     it('should throw not found exception when job not found', async () => {
-      jobService.jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
+      jobService.jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(undefined);
 
       await expect(jobService.getDetails(1, 123)).rejects.toThrow(
         NotFoundException,

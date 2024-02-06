@@ -1,8 +1,9 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
+from human_protocol_sdk.staking import LeaderData
 
 from src.chain.kvstore import get_job_launcher_url, get_recording_oracle_url
 
@@ -23,72 +24,74 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.w3 = Mock()
         self.w3.eth.chain_id = ChainId.LOCALHOST.value
         self.escrow_data = EscrowData(
-            escrow_address,
-            escrow_address,
-            "0",
-            "1000",
-            0,
-            FACTORY_ADDRESS,
-            JOB_LAUNCHER_ADDRESS,
-            Status.Pending.name,
-            TOKEN_ADDRESS,
-            "1000",
-            "",
-            ChainId.LOCALHOST.name,
+            chain_id=ChainId.LOCALHOST.name,
+            id=1,
+            address=escrow_address,
+            amount_paid=100,
+            balance=100,
+            count=0,
+            factory_address=FACTORY_ADDRESS,
+            launcher=JOB_LAUNCHER_ADDRESS,
+            status=Status.Pending.name,
+            token=TOKEN_ADDRESS,
+            total_funded_amount=1000,
+            created_at="",
+            manifest_url=DEFAULT_URL,
+            recording_oracle=RECORDING_ORACLE_ADDRESS,
         )
 
     def test_get_job_launcher_url(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function, patch(
-            "src.chain.kvstore.get_escrow"
-        ) as mock_escrow, patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader:
+        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
+            "src.chain.kvstore.StakingUtils.get_leader"
+        ) as mock_leader:
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = {"webhook_url": DEFAULT_URL}
-            mock_function.return_value = self.w3
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
             self.assertEqual(recording_url, DEFAULT_URL)
 
     def test_get_job_launcher_url_invalid_escrow(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        with self.assertRaises(EscrowClientError) as error:
+            get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
+        self.assertEqual(
+            f"Invalid escrow address: invalid_address", str(error.exception)
+        )
 
     def test_get_job_launcher_url_invalid_recording_address(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function, patch(
-            "src.chain.kvstore.get_escrow"
-        ) as mock_escrow, patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader:
+        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
+            "src.chain.kvstore.StakingUtils.get_leader"
+        ) as mock_leader:
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = {"webhook_url": ""}
-            mock_function.return_value = self.w3
+            mock_leader.return_value = MagicMock(webhook_url="")
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
             self.assertEqual(recording_url, "")
 
     def test_get_recording_oracle_url(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function, patch(
-            "src.chain.kvstore.get_escrow"
-        ) as mock_escrow, patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader:
+        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
+            "src.chain.kvstore.StakingUtils.get_leader"
+        ) as mock_leader:
             self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = {"webhook_url": DEFAULT_URL}
-            mock_function.return_value = self.w3
-            recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
+            recording_url = get_recording_oracle_url(
+                self.w3.eth.chain_id, escrow_address
+            )
             self.assertEqual(recording_url, DEFAULT_URL)
 
     def test_get_recording_oracle_url_invalid_escrow(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        with self.assertRaises(EscrowClientError) as error:
+            get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
+        self.assertEqual(
+            f"Invalid escrow address: invalid_address", str(error.exception)
+        )
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function, patch(
-            "src.chain.kvstore.get_escrow"
-        ) as mock_escrow, patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader:
+        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
+            "src.chain.kvstore.StakingUtils.get_leader"
+        ) as mock_leader:
             self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = {"webhook_url": ""}
-            mock_function.return_value = self.w3
-            recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
+            mock_leader.return_value = MagicMock(webhook_url="")
+            recording_url = get_recording_oracle_url(
+                self.w3.eth.chain_id, escrow_address
+            )
             self.assertEqual(recording_url, "")

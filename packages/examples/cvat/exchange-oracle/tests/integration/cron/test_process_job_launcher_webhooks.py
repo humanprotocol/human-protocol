@@ -82,7 +82,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -95,7 +97,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
 
-    def test_process_incoming_job_launcher_webhooks_escrow_created_type_invalid_escrow_status(self):
+    def test_process_incoming_job_launcher_webhooks_escrow_created_type_invalid_escrow_status(
+        self,
+    ):
         webhok_id = str(uuid.uuid4())
         webhook = Webhook(
             id=webhok_id,
@@ -124,7 +128,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
         self.assertEqual(updated_webhook.attempts, 1)
 
-    def test_process_incoming_job_launcher_webhooks_escrow_created_type_exceed_max_retries(self):
+    def test_process_incoming_job_launcher_webhooks_escrow_created_type_exceed_max_retries(
+        self,
+    ):
         webhok_id = str(uuid.uuid4())
         webhook = Webhook(
             id=webhok_id,
@@ -167,7 +173,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(new_webhook.status, OracleWebhookStatuses.pending.value)
         self.assertEqual(new_webhook.attempts, 0)
 
-    def test_process_incoming_job_launcher_webhooks_escrow_created_type_remove_when_error(self):
+    def test_process_incoming_job_launcher_webhooks_escrow_created_type_remove_when_error(
+        self,
+    ):
         webhok_id = str(uuid.uuid4())
         webhook = Webhook(
             id=webhok_id,
@@ -189,7 +197,10 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.cvat.tasks.cvat_api") as mock_cvat_api,
             patch("src.cvat.tasks.cloud_service"),
             patch("src.cvat.tasks.get_gt_filenames"),
-            patch("src.cvat.tasks.db_service.add_project_images", side_effect=Exception("Error")),
+            patch(
+                "src.cvat.tasks.db_service.add_project_images",
+                side_effect=Exception("Error"),
+            ),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -205,7 +216,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -255,7 +268,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -268,7 +283,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.canceled.value)
 
-    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_status(self):
+    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_status(
+        self,
+    ):
         project_id = str(uuid.uuid4())
         cvat_project = Project(
             id=project_id,
@@ -304,7 +321,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -317,7 +336,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
 
-    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_balance(self):
+    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_balance(
+        self,
+    ):
         project_id = str(uuid.uuid4())
         cvat_project = Project(
             id=project_id,
@@ -354,7 +375,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -385,18 +408,16 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(webhook)
         self.session.commit()
         with (
-            patch("src.chain.kvstore.get_web3") as mock_web3,
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader,
+            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
             patch("httpx.Client.post") as mock_httpx_post,
         ):
             w3 = Mock()
             w3.eth.chain_id = ChainId.LOCALHOST.value
-            mock_web3.return_value = w3
             mock_escrow_data = Mock()
             mock_escrow_data.launcher = JOB_LAUNCHER_ADDRESS
             mock_escrow.return_value = mock_escrow_data
-            mock_leader.return_value = {"webhook_url": DEFAULT_URL}
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response
@@ -404,7 +425,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_outgoing_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -432,7 +455,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_outgoing_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
+            .scalars()
+            .first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)

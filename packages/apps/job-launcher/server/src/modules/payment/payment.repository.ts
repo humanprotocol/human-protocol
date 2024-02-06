@@ -1,49 +1,37 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindOptionsWhere,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-} from 'typeorm';
+import { ChainId } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { PaymentStatus } from '../../common/enums/payment';
+import { BaseRepository } from '../../database/base.repository';
 import { PaymentEntity } from './payment.entity';
-import { PaymentCreateDto } from './payment.dto';
 
 @Injectable()
-export class PaymentRepository {
-  private readonly logger = new Logger(PaymentRepository.name);
-
-  constructor(
-    @InjectRepository(PaymentEntity)
-    private readonly paymentEntityRepository: Repository<PaymentEntity>,
-  ) {}
-
-  public async findOne(
-    where: FindOptionsWhere<PaymentEntity>,
-    options?: FindOneOptions<PaymentEntity>,
-  ): Promise<PaymentEntity | null> {
-    const paymentEntity = await this.paymentEntityRepository.findOne({
-      where,
-      ...options,
-    });
-
-    return paymentEntity;
+export class PaymentRepository extends BaseRepository<PaymentEntity> {
+  constructor(private dataSource: DataSource) {
+    super(PaymentEntity, dataSource);
   }
 
-  public find(
-    where: FindOptionsWhere<PaymentEntity>,
-    options?: FindManyOptions<PaymentEntity>,
+  public async findOneByTransaction(
+    transaction: string,
+    chainId?: ChainId,
+  ): Promise<PaymentEntity | null> {
+    const whereOptions: any = { transaction, ...(chainId && { chainId }) };
+
+    return this.findOne({ where: whereOptions });
+  }
+
+  public findByUserAndStatus(
+    userId: number,
+    status: PaymentStatus,
   ): Promise<PaymentEntity[]> {
-    return this.paymentEntityRepository.find({
-      where,
+    return this.find({
+      where: {
+        userId,
+        status,
+      },
       order: {
         createdAt: 'DESC',
       },
-      ...options,
     });
-  }
-
-  public async create(dto: PaymentCreateDto): Promise<PaymentEntity> {
-    return this.paymentEntityRepository.create(dto).save();
   }
 }

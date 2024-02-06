@@ -61,7 +61,8 @@ describe('CronJobService', () => {
     webhookService: WebhookService,
     webhookRepository: WebhookRepository,
     storageService: StorageService,
-    jobService: JobService;
+    jobService: JobService,
+    jobRepository: JobRepository;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -116,6 +117,7 @@ describe('CronJobService', () => {
 
     service = module.get<CronJobService>(CronJobService);
     jobService = module.get<JobService>(JobService);
+    jobRepository = module.get<JobRepository>(JobRepository);
     repository = module.get<CronJobRepository>(CronJobRepository);
     webhookService = module.get<WebhookService>(WebhookService);
     webhookRepository = module.get<WebhookRepository>(WebhookRepository);
@@ -299,7 +301,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       createEscrowMock = jest.spyOn(jobService, 'createEscrow');
@@ -411,7 +413,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       setupEscrowMock = jest.spyOn(jobService, 'setupEscrow');
@@ -524,7 +526,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       fundEscrowMock = jest.spyOn(jobService, 'fundEscrow');
@@ -652,7 +654,7 @@ describe('CronJobService', () => {
       };
 
       findJobMock = jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
@@ -725,7 +727,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValueOnce([jobEntityWithoutEscrow as any]);
       jest
         .spyOn(jobService, 'processEscrowCancellation')
