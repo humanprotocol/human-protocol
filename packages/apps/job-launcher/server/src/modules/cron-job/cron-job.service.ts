@@ -43,11 +43,10 @@ export class CronJobService {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
       return this.cronJobRepository.createUnique(cronJobEntity);
-    } else {
-      cronJob.startedAt = new Date();
-      cronJob.completedAt = null;
-      return this.cronJobRepository.updateOne(cronJob);
     }
+    cronJob.startedAt = new Date();
+    cronJob.completedAt = null;
+    return this.cronJobRepository.updateOne(cronJob);
   }
 
   public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
