@@ -39,7 +39,7 @@ contract WormholeMock {
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) external payable {
-        IWormholeReceiver(daoSpoke).receiveWormholeMessages{value: 100}(
+        IWormholeReceiver(daoSpoke).receiveWormholeMessages{value: msg.value}(
             payload,
             additionalVaas,
             sourceAddress,

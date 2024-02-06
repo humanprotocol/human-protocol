@@ -4,7 +4,6 @@ import {
   MetaHumanGovernor,
   VHMToken,
   DAOSpokeContract,
-  Governor,
   WormholeMock,
 } from "../typechain-types";
 import { IWormholeVM, IWormholeSignature } from "./GovernanceTypes";
@@ -36,7 +35,7 @@ export async function createMockUserWithVotingPower(
   return user;
 }
 
-async function _createMessageWithPayload(
+export async function createMessageWithPayload(
   payload: string,
   emitterChainId: number,
   emitterAddress: string,
@@ -59,7 +58,7 @@ async function _createMessageWithPayload(
   return mockVM;
 }
 
-async function _callReceiveMessageOnSpokeWithMock(
+export async function callReceiveMessageOnSpokeWithMock(
   wormholeMock: WormholeMock,
   result: IWormholeVM,
 ): Promise<void> {
@@ -71,15 +70,17 @@ async function _callReceiveMessageOnSpokeWithMock(
     ethers.zeroPadBytes(result.emitterAddress, 32),
     result.emitterChainId,
     result.hash,
+    {
+      value: ethers.parseEther("0.1"),
+    },
   );
 }
 
-export async function createProposalOnSpoke(
-  daoSpoke: DAOSpokeContract,
-  wormholeMock: WormholeMock,
+export async function createProposalMessage(
+  contractAddress: string,
   proposalId: number,
-  governorAddress: string,
-): Promise<number> {
+  emitterAddress: string,
+): Promise<IWormholeVM> {
   const spokeChainId = 6;
   const hubChainId = 5;
 
@@ -105,16 +106,25 @@ export async function createProposalOnSpoke(
 
   const payload = defaultAbiCoder.encode(
     ["address", "uint256", "address", "bytes"],
-    [await daoSpoke.getAddress(), spokeChainId, governorAddress, message],
+    [contractAddress, spokeChainId, emitterAddress, message],
   );
 
-  const mockResult = await _createMessageWithPayload(
-    payload,
-    hubChainId,
+  return await createMessageWithPayload(payload, hubChainId, emitterAddress);
+}
+
+export async function createProposalOnSpoke(
+  daoSpoke: DAOSpokeContract,
+  wormholeMock: WormholeMock,
+  proposalId: number,
+  governorAddress: string,
+): Promise<number> {
+  const mockResult = await createProposalMessage(
+    await daoSpoke.getAddress(),
+    proposalId,
     governorAddress,
   );
 
-  await _callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
+  await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
   return proposalId;
 }
 
@@ -132,15 +142,6 @@ export async function createBasicProposal(
   const targets = [await voteToken.getAddress()];
   const values = [0];
   const calldatas = [encodedCall];
-
-  // Compute the proposal ID in advance
-  const proposalIdPrecomputed = await governor.hashProposal(
-    targets,
-    values,
-    calldatas,
-    ethers.encodeBytes32String("Description"),
-  );
-  console.log("Precomputed proposal ID: ", proposalIdPrecomputed);
 
   const txResponse = await governor.crossChainPropose(
     targets,
@@ -164,7 +165,6 @@ export async function createBasicProposal(
   );
 
   const proposalId = decodedData[0];
-  console.log("Proposal ID: ", proposalId.toString());
 
   await createProposalOnSpoke(
     daoSpoke,
@@ -195,11 +195,11 @@ export async function finishProposal(
     [await daoSpoke.getAddress(), spokeChainId, governorAddress, message],
   );
 
-  const mockResult = await _createMessageWithPayload(
+  const mockResult = await createMessageWithPayload(
     payload,
     hubChainId,
     governorAddress,
   );
 
-  await _callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
+  await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
 }
