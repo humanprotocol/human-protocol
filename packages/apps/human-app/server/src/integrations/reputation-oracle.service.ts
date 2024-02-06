@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { SignupWorkerDto } from '../interfaces/signup-worker-request.dto';
+import { SignupWorkerCommand } from '../modules/auth-worker/auth-worker.command';
 
 @Injectable()
 export class ReputationOracleService {
@@ -11,7 +11,7 @@ export class ReputationOracleService {
     private httpService: HttpService,
   ) {}
 
-  async signupWorker(signupWorkerDto: SignupWorkerDto): Promise<void> {
+  async signupWorker(signupWorkerCommand: SignupWorkerCommand): Promise<void> {
     try {
       const method = 'POST';
       const baseUrl = this.configService.get<string>('REPUTATION_ORACLE_URL');
@@ -25,16 +25,22 @@ export class ReputationOracleService {
         method,
         url,
         headers,
-        data: signupWorkerDto,
+        data: signupWorkerCommand,
       };
 
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
     } catch (error) {
-      throw new HttpException(
-        'Error occurred while redirecting request.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (error.response) {
+        if (error.response) {
+          throw new HttpException(error.response.data, error.response.status);
+        } else {
+          throw new HttpException(
+            'Error occurred while redirecting request.',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
     }
   }
 }
