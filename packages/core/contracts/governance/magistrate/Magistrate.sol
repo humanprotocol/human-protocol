@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Context.sol";
+import '@openzeppelin/contracts/utils/Context.sol';
 
 /**
  * @dev This contract is based on OpenZeppelin's access/Ownable.sol contract.
@@ -11,7 +11,10 @@ import "@openzeppelin/contracts/utils/Context.sol";
 abstract contract Magistrate is Context {
     address private _magistrate;
 
-    event MagistrateChanged(address indexed previousMagistrate, address indexed newMagistrate);
+    event MagistrateChanged(
+        address indexed previousMagistrate,
+        address indexed newMagistrate
+    );
 
     /**
      * @dev Initializes the contract setting the provided address as the initial magistrate.
@@ -39,15 +42,23 @@ abstract contract Magistrate is Context {
      * @dev Throws if the sender is not the magistrate.
      */
     function _checkMagistrate() internal view virtual {
-        require(magistrate() == _msgSender(), "Magistrate: caller is not the magistrate");
+        require(
+            magistrate() == _msgSender(),
+            'Magistrate: caller is not the magistrate'
+        );
     }
 
     /**
      * @dev Transfers magistrate of the contract to a new account (`newMagistrate`).
      * Can only be called by the current magistrate.
      */
-    function transferMagistrate(address newMagistrate) public virtual onlyMagistrate {
-        require(newMagistrate != address(0), "Magistrate: new magistrate is the zero address");
+    function transferMagistrate(
+        address newMagistrate
+    ) public virtual onlyMagistrate {
+        require(
+            newMagistrate != address(0),
+            'Magistrate: new magistrate is the zero address'
+        );
         _transferMagistrate(newMagistrate);
     }
 

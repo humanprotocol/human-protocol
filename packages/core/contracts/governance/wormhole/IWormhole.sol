@@ -73,41 +73,59 @@ interface IWormhole {
     }
 
     event LogMessagePublished(
-        address indexed sender, uint64 sequence, uint32 nonce, bytes payload, uint8 consistencyLevel
+        address indexed sender,
+        uint64 sequence,
+        uint32 nonce,
+        bytes payload,
+        uint8 consistencyLevel
     );
-    event ContractUpgraded(address indexed oldContract, address indexed newContract);
+    event ContractUpgraded(
+        address indexed oldContract,
+        address indexed newContract
+    );
     event GuardianSetAdded(uint32 indexed index);
 
-    function publishMessage(uint32 nonce, bytes memory payload, uint8 consistencyLevel)
-        external
-        payable
-        returns (uint64 sequence);
+    function publishMessage(
+        uint32 nonce,
+        bytes memory payload,
+        uint8 consistencyLevel
+    ) external payable returns (uint64 sequence);
 
     function initialize() external;
 
-    function parseAndVerifyVM(bytes calldata encodedVM)
-        external
-        view
-        returns (VM memory vm, bool valid, string memory reason);
+    function parseAndVerifyVM(
+        bytes calldata encodedVM
+    ) external view returns (VM memory vm, bool valid, string memory reason);
 
-    function verifyVM(VM memory vm) external view returns (bool valid, string memory reason);
+    function verifyVM(
+        VM memory vm
+    ) external view returns (bool valid, string memory reason);
 
-    function verifySignatures(bytes32 hash, Signature[] memory signatures, GuardianSet memory guardianSet)
-        external
-        pure
-        returns (bool valid, string memory reason);
+    function verifySignatures(
+        bytes32 hash,
+        Signature[] memory signatures,
+        GuardianSet memory guardianSet
+    ) external pure returns (bool valid, string memory reason);
 
-    function parseVM(bytes memory encodedVM) external pure returns (VM memory vm);
+    function parseVM(
+        bytes memory encodedVM
+    ) external pure returns (VM memory vm);
 
-    function quorum(uint256 numGuardians) external pure returns (uint256 numSignaturesRequiredForQuorum);
+    function quorum(
+        uint256 numGuardians
+    ) external pure returns (uint256 numSignaturesRequiredForQuorum);
 
-    function getGuardianSet(uint32 index) external view returns (GuardianSet memory);
+    function getGuardianSet(
+        uint32 index
+    ) external view returns (GuardianSet memory);
 
     function getCurrentGuardianSetIndex() external view returns (uint32);
 
     function getGuardianSetExpiry() external view returns (uint32);
 
-    function governanceActionIsConsumed(bytes32 hash) external view returns (bool);
+    function governanceActionIsConsumed(
+        bytes32 hash
+    ) external view returns (bool);
 
     function isInitialized(address impl) external view returns (bool);
 
@@ -125,21 +143,25 @@ interface IWormhole {
 
     function nextSequence(address emitter) external view returns (uint64);
 
-    function parseContractUpgrade(bytes memory encodedUpgrade) external pure returns (ContractUpgrade memory cu);
+    function parseContractUpgrade(
+        bytes memory encodedUpgrade
+    ) external pure returns (ContractUpgrade memory cu);
 
-    function parseGuardianSetUpgrade(bytes memory encodedUpgrade)
-        external
-        pure
-        returns (GuardianSetUpgrade memory gsu);
+    function parseGuardianSetUpgrade(
+        bytes memory encodedUpgrade
+    ) external pure returns (GuardianSetUpgrade memory gsu);
 
-    function parseSetMessageFee(bytes memory encodedSetMessageFee) external pure returns (SetMessageFee memory smf);
+    function parseSetMessageFee(
+        bytes memory encodedSetMessageFee
+    ) external pure returns (SetMessageFee memory smf);
 
-    function parseTransferFees(bytes memory encodedTransferFees) external pure returns (TransferFees memory tf);
+    function parseTransferFees(
+        bytes memory encodedTransferFees
+    ) external pure returns (TransferFees memory tf);
 
-    function parseRecoverChainId(bytes memory encodedRecoverChainId)
-        external
-        pure
-        returns (RecoverChainId memory rci);
+    function parseRecoverChainId(
+        bytes memory encodedRecoverChainId
+    ) external pure returns (RecoverChainId memory rci);
 
     function submitContractUpgrade(bytes memory _vm) external;
 

@@ -2,8 +2,8 @@
 
 pragma solidity >=0.6.2;
 
-import "../governance/wormhole/IWormholeReceiver.sol";
-import "hardhat/console.sol";
+import '../governance/wormhole/IWormholeReceiver.sol';
+import 'hardhat/console.sol';
 
 contract WormholeMock {
     address public daoSpoke;

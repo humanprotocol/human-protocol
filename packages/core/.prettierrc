@@ -5,8 +5,8 @@
       "files": "*.sol",
       "options": {
         "semi": true,
-        "printWidth": 80,
-        "explicitTypes": "always"
+        "singleQuote": true,
+        "printWidth": 80
       }
     }
   ]

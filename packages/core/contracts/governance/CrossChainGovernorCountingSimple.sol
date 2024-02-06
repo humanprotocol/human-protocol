@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/governance/Governor.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import '@openzeppelin/contracts/governance/Governor.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 
 /**
  * @title CrossChainGovernorCountingSimple
@@ -12,9 +12,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
     mapping(bytes32 => mapping(uint16 => bool)) public spokeContractsMapping;
     CrossChainAddress[] public spokeContracts;
-    mapping(uint256 => mapping(bytes32 => mapping(uint16 => bool))) public spokeContractsMappingSnapshots;
+    mapping(uint256 => mapping(bytes32 => mapping(uint16 => bool)))
+        public spokeContractsMappingSnapshots;
     mapping(uint256 => CrossChainAddress[]) public spokeContractsSnapshots;
-    mapping(uint256 => mapping(bytes32 => mapping(uint16 => SpokeProposalVote))) public spokeVotes;
+    mapping(uint256 => mapping(bytes32 => mapping(uint16 => SpokeProposalVote)))
+        public spokeVotes;
     mapping(uint256 => ProposalVote) private _proposalVotes;
 
     struct CrossChainAddress {
@@ -58,8 +60,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
     function createSnapshot(uint256 proposalId) internal {
         for (uint256 i = 1; i <= spokeContracts.length; ++i) {
             CrossChainAddress memory addressToSnapshot = spokeContracts[i - 1];
-            spokeContractsMappingSnapshots[proposalId][addressToSnapshot.contractAddress][addressToSnapshot.chainId] =
-                true;
+            spokeContractsMappingSnapshots[proposalId][
+                addressToSnapshot.contractAddress
+            ][addressToSnapshot.chainId] = true;
         }
         spokeContractsSnapshots[proposalId] = spokeContracts;
     }
@@ -68,22 +71,32 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
      * @dev Updates the spoke contracts.
      *   @param _spokeContracts An array of CrossChainAddress structs representing the spoke contracts.
      */
-    function updateSpokeContracts(CrossChainAddress[] memory _spokeContracts) public onlyOwner {
+    function updateSpokeContracts(
+        CrossChainAddress[] memory _spokeContracts
+    ) public onlyOwner {
         uint256 spokeContractsLength = spokeContracts.length;
         //clear existing mapping
         for (uint256 i = 1; i <= spokeContractsLength; ++i) {
             CrossChainAddress memory addressToRemove = spokeContracts[i - 1];
-            spokeContractsMapping[addressToRemove.contractAddress][addressToRemove.chainId] = false;
+            spokeContractsMapping[addressToRemove.contractAddress][
+                addressToRemove.chainId
+            ] = false;
         }
         delete spokeContracts;
         uint256 newSpokeContractsLength = _spokeContracts.length;
         for (uint256 i = 1; i <= newSpokeContractsLength; ++i) {
             CrossChainAddress memory addressToAdd = _spokeContracts[i - 1];
-            if (spokeContractsMapping[addressToAdd.contractAddress][addressToAdd.chainId] == true) {
+            if (
+                spokeContractsMapping[addressToAdd.contractAddress][
+                    addressToAdd.chainId
+                ] == true
+            ) {
                 //check if duplicate
-                revert("Duplicates are not allowed");
+                revert('Duplicates are not allowed');
             }
-            spokeContractsMapping[addressToAdd.contractAddress][addressToAdd.chainId] = true;
+            spokeContractsMapping[addressToAdd.contractAddress][
+                addressToAdd.chainId
+            ] = true;
             spokeContracts.push(addressToAdd);
         }
 
@@ -94,14 +107,23 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
      * @dev See {IGovernor-COUNTING_MODE}.
      */
     // solhint-disable-next-line func-name-mixedcase
-    function COUNTING_MODE() public pure virtual override returns (string memory) {
-        return "support=bravo&quorum=for,abstain";
+    function COUNTING_MODE()
+        public
+        pure
+        virtual
+        override
+        returns (string memory)
+    {
+        return 'support=bravo&quorum=for,abstain';
     }
 
     /**
      * @dev See {IGovernor-hasVoted}.
      */
-    function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
+    function hasVoted(
+        uint256 proposalId,
+        address account
+    ) public view virtual override returns (bool) {
         return _proposalVotes[proposalId].hasVoted[account];
     }
 
@@ -112,7 +134,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
      * @return forVotes For vote count.
      * @return abstainVotes Abstain vote count.
      */
-    function proposalVotes(uint256 proposalId)
+    function proposalVotes(
+        uint256 proposalId
+    )
         public
         view
         virtual
@@ -127,8 +151,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
         uint256 spokeContractsLength = spokeContracts.length;
         for (uint16 i = 1; i <= spokeContractsLength; ++i) {
             CrossChainAddress memory currentContract = spokeContracts[i - 1];
-            SpokeProposalVote storage v =
-                spokeVotes[proposalId][currentContract.contractAddress][currentContract.chainId];
+            SpokeProposalVote storage v = spokeVotes[proposalId][
+                currentContract.contractAddress
+            ][currentContract.chainId];
             sumAgainstVotes += v.againstVotes;
             sumForVotes += v.forVotes;
             sumAbstainVotes += v.abstainVotes;
@@ -140,7 +165,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
     /**
      * @dev See {Governor-_quorumReached}.
      */
-    function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
+    function _quorumReached(
+        uint256 proposalId
+    ) internal view virtual override returns (bool) {
         ProposalVote storage proposalVote = _proposalVotes[proposalId];
         uint256 abstainVotes = proposalVote.abstainVotes;
         uint256 forVotes = proposalVote.forVotes;
@@ -148,8 +175,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
         uint256 spokeContractsLength = spokeContracts.length;
         for (uint16 i = 1; i <= spokeContractsLength; ++i) {
             CrossChainAddress memory currentContract = spokeContracts[i - 1];
-            SpokeProposalVote storage v =
-                spokeVotes[proposalId][currentContract.contractAddress][currentContract.chainId];
+            SpokeProposalVote storage v = spokeVotes[proposalId][
+                currentContract.contractAddress
+            ][currentContract.chainId];
             abstainVotes += v.abstainVotes;
             forVotes += v.forVotes;
         }
@@ -160,7 +188,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
     /**
      * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be strictly over the againstVotes.
      */
-    function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
+    function _voteSucceeded(
+        uint256 proposalId
+    ) internal view virtual override returns (bool) {
         ProposalVote storage proposalVote = _proposalVotes[proposalId];
         uint256 againstVotes = proposalVote.againstVotes;
         uint256 forVotes = proposalVote.forVotes;
@@ -168,8 +198,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
         uint256 spokeContractsLength = spokeContracts.length;
         for (uint16 i = 1; i <= spokeContractsLength; ++i) {
             CrossChainAddress memory currentContract = spokeContracts[i - 1];
-            SpokeProposalVote storage v =
-                spokeVotes[proposalId][currentContract.contractAddress][currentContract.chainId];
+            SpokeProposalVote storage v = spokeVotes[proposalId][
+                currentContract.contractAddress
+            ][currentContract.chainId];
             againstVotes += v.againstVotes;
             forVotes += v.forVotes;
         }
@@ -188,7 +219,10 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
     ) internal virtual override {
         ProposalVote storage proposalVote = _proposalVotes[proposalId];
 
-        require(!proposalVote.hasVoted[account], "GovernorVotingSimple: vote already cast");
+        require(
+            !proposalVote.hasVoted[account],
+            'GovernorVotingSimple: vote already cast'
+        );
         proposalVote.hasVoted[account] = true;
 
         if (support == uint8(VoteType.Against)) {
@@ -198,7 +232,7 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
         } else if (support == uint8(VoteType.Abstain)) {
             proposalVote.abstainVotes += weight;
         } else {
-            revert("GovernorVotingSimple: invalid value for enum VoteType");
+            revert('GovernorVotingSimple: invalid value for enum VoteType');
         }
     }
 }
