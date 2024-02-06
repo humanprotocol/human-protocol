@@ -11,12 +11,15 @@ import { StorageModule } from '../storage/storage.module';
 import { WebhookModule } from '../webhook/webhook.module';
 import { JobModule } from '../job/job.module';
 import { WebhookRepository } from '../webhook/webhook.repository';
+import { JobEntity } from '../job/job.entity';
+import { JobRepository } from '../job/job.repository';
 import { ConfigModule } from '@nestjs/config';
 
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CronJobEntity]),
+    TypeOrmModule.forFeature([CronJobEntity, JobEntity]),
+    ConfigModule,
     JobModule,
     PaymentModule,
     Web3Module,
@@ -24,7 +27,12 @@ import { ConfigModule } from '@nestjs/config';
     WebhookModule,
     ConfigModule,
   ],
-  providers: [CronJobService, CronJobRepository, WebhookRepository],
+  providers: [
+    CronJobService,
+    CronJobRepository,
+    WebhookRepository,
+    JobRepository,
+  ],
   controllers: [CronJobController],
   exports: [CronJobService],
 })
