@@ -497,11 +497,11 @@ describe("MetaHumanGovernor", function () {
       )
     );
 
-    // //assert votes
-    // const { againstVotes, forVotes, abstainVotes } =
-    //   await governor.proposalVotes(proposalId);
-    // expect(againstVotes).to.equal(0);
-    // expect(forVotes).to.equal(ethers.parseEther('1'));
-    // expect(abstainVotes).to.equal(0);
+    //assert votes
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
+    expect(againstVotes).to.equal(0);
+    expect(forVotes).to.equal(ethers.parseEther('1'));
+    expect(abstainVotes).to.equal(0);
   });
 });
