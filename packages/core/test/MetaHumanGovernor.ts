@@ -250,9 +250,10 @@ describe('MetaHumanGovernor', function () {
     ).to.be.revertedWith('Ownable: caller is not the owner');
   });
 
-  // it('Should grant proposal creation', async function () {
-  //   const proposalId = await createBasicProposal(voteToken, governor, owner);
-  // });
+  it('Should create a grant proposal', async function () {
+    // const proposalId = await createBasicProposal(voteToken, governor, owner);
+    // expect(proposalId).to.equal(0);
+  });
 
   it('Should create a cross-chain grant proposal successfully', async function () {
     const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
@@ -302,41 +303,108 @@ describe('MetaHumanGovernor', function () {
     await expect(tx.wait()).to.not.be.reverted;
   });
 
-  // it('Should allow voting on a proposal', async function () {
-  //   const proposalId = await createBasicProposal(
-  //     voteToken,
-  //     governor,
-  //     governance,
-  //     owner
-  //   );
-  //   const someUser = await createMockUserWithVotingPower(voteToken, user1);
-  //   // Mine 2 blocks
+  it('Should allow voting on a proposal', async function () {
+    const proposalId = await createBasicProposal(
+      voteToken,
+      governor,
+      governance,
+      owner
+    );
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    // Mine 2 blocks
 
-  //   await mineNBlocks(2);
-  //   // Cast vote
-  //   await governor.connect(someUser).castVote(proposalId, 1);
+    await mineNBlocks(2);
+    // Cast vote
+    await governor.connect(someUser).castVote(proposalId, 1);
 
-  //   const { againstVotes, forVotes, abstainVotes } =
-  //     await governor.proposalVotes(proposalId);
-  //   console.log('Against votes:', againstVotes.toString());
-  //   console.log('For votes:', forVotes.toString());
-  //   console.log('Abstain votes:', abstainVotes.toString());
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
+    console.log('Against votes:', againstVotes.toString());
+    console.log('For votes:', forVotes.toString());
+    console.log('Abstain votes:', abstainVotes.toString());
 
-  //   expect(againstVotes).to.equal(0);
-  //   expect(forVotes).to.equal(1);
-  //   expect(abstainVotes).to.equal(0);
-  // });
+    expect(againstVotes).to.equal(0);
+    expect(forVotes).to.equal(1);
+    expect(abstainVotes).to.equal(0);
+  });
 
-  // it('Should revert when voting on a non-active proposal', async function () {
-  //   const proposalId = await createBasicProposal(
-  //     voteToken,
-  //     governor,
-  //     governance,
-  //     owner
-  //   );
-  //   const someUser = await createMockUserWithVotingPower(voteToken, user1);
-  //   await expect(
-  //     governor.connect(someUser).castVote(proposalId, 1)
-  //   ).to.be.revertedWith('Governor: vote not currently active');
-  // });
+  it('Should revert when voting on a non-active proposal', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    await expect(
+      governor.connect(someUser).castVote(proposalId, 1)
+    ).to.be.revertedWith('Governor: vote not currently active');
+  });
+
+  it('Should allow voting against', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    await mineNBlocks(2);
+    await governor.connect(someUser).castVote(proposalId, 0);
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
+    expect(againstVotes).to.equal(1);
+    expect(forVotes).to.equal(0);
+    expect(abstainVotes).to.equal(0);
+  });
+
+  it('Should allow voting abstain', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    await mineNBlocks(2);
+    await governor.connect(someUser).castVote(proposalId, 2);
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
+    expect(againstVotes).to.equal(0);
+    expect(forVotes).to.equal(0);
+    expect(abstainVotes).to.equal(1);
+  });
+
+  it('Should revert when voting with invalid option', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    await mineNBlocks(2);
+    await expect(
+      governor.connect(someUser).castVote(proposalId, 5)
+    ).to.be.revertedWith(
+      'GovernorVotingSimple: invalid value for enum VoteType'
+    );
+  });
+
+  it('Should revert when vote already cast', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    await mineNBlocks(2);
+    await governor.connect(someUser).castVote(proposalId, 1);
+    await expect(
+      governor.connect(someUser).castVote(proposalId, 1)
+    ).to.be.revertedWith('GovernorVotingSimple: vote already cast');
+  });
+
+  it('Should retrieve counting mode', async function () {
+    const countingMode = await governor.COUNTING_MODE();
+    expect(countingMode).to.equal('support=bravo&quorum=for,abstain');
+  });
+
+  it('Should not count vote when vote not cast', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    const hasVoted = await governor.hasVoted(
+      proposalId,
+      await someUser.getAddress()
+    );
+    expect(hasVoted).to.be.false;
+  });
+
+  it('Should count vote when vote cast', async function () {
+    const proposalId = await createBasicProposal(voteToken, governor, owner);
+    const someUser = await createMockUserWithVotingPower(voteToken, user1);
+    await mineNBlocks(2);
+    await governor.connect(someUser).castVote(proposalId, 1);
+    const hasVoted = await governor.hasVoted(
+      proposalId,
+      await someUser.getAddress()
+    );
+    expect(hasVoted).to.be.true;
+  });
 });

@@ -123,9 +123,8 @@ export async function createProposalOnSpoke(
 export async function createBasicProposal(
   voteToken: VHMToken,
   governor: MetaHumanGovernor,
-  governance: Governor,
   owner: Signer
-): Promise<any> {
+): Promise<string> {
   const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
     await owner.getAddress(),
     1,
@@ -133,6 +132,15 @@ export async function createBasicProposal(
   const targets = [await voteToken.getAddress()];
   const values = [0];
   const calldatas = [encodedCall];
+
+  // Compute the proposal ID in advance
+  const proposalIdPrecomputed = await governor.hashProposal(
+    targets,
+    values,
+    calldatas,
+    ethers.encodeBytes32String('Description')
+  );
+  console.log('Precomputed proposal ID: ', proposalIdPrecomputed);
 
   const txResponse = await governor.crossChainPropose(
     targets,
@@ -157,5 +165,6 @@ export async function createBasicProposal(
 
   const proposalId = decodedData[0];
   console.log('Proposal ID: ', proposalId.toString());
+
   return proposalId;
 }
