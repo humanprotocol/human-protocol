@@ -32,14 +32,12 @@ export class ReputationOracleService {
       return response.data;
     } catch (error) {
       if (error.response) {
-        if (error.response) {
-          throw new HttpException(error.response.data, error.response.status);
-        } else {
-          throw new HttpException(
-            'Error occurred while redirecting request.',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-        }
+        throw new HttpException(error.response.data, error.response.status);
+      } else {
+        throw new HttpException(
+          'Error occurred while redirecting request.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
     }
   }
