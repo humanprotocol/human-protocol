@@ -2,11 +2,13 @@
 
 pragma solidity >=0.6.2;
 
-import '../governance/wormhole/IWormholeReceiver.sol';
-import 'hardhat/console.sol';
+import "../governance/wormhole/IWormholeReceiver.sol";
+import "hardhat/console.sol";
 
 contract WormholeMock {
     address public daoSpoke;
+
+    receive() external payable {}
 
     function setDAOSpokeContract(address _daoSpoke) external {
         daoSpoke = _daoSpoke;
@@ -37,7 +39,7 @@ contract WormholeMock {
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) external payable {
-        IWormholeReceiver(daoSpoke).receiveWormholeMessages(
+        IWormholeReceiver(daoSpoke).receiveWormholeMessages{value: 100}(
             payload,
             additionalVaas,
             sourceAddress,

@@ -77,6 +77,12 @@ describe.only("DAOSpokeContract", function () {
     const WormholeMock = await ethers.getContractFactory("WormholeMock");
     wormholeMock = await WormholeMock.deploy();
 
+    // Send 1 ether to wormholeMock
+    await owner.sendTransaction({
+      to: await wormholeMock.getAddress(),
+      value: ethers.parseEther("1"),
+    });
+
     // Deploy MetaHumanGovernor
     const MetaHumanContract = await ethers.getContractFactory(
       "contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor",

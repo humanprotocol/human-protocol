@@ -74,6 +74,9 @@
     "xdeployer": "3.0.0"
   },
   "lint-staged": {
+    "*.sol": [
+      "prettier --write"
+    ],
     "*.ts": [
       "prettier --write",
       "eslint --fix"
