@@ -3,18 +3,22 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { SignupWorkerCommand } from '../modules/auth-worker/auth-worker.command';
+import { IntegrationsMap } from '../common/config/integrations';
 
 @Injectable()
 export class ReputationOracleService {
+  private integrationsMap: IntegrationsMap;
   constructor(
     private configService: ConfigService,
     private httpService: HttpService,
-  ) {}
+  ) {
+    this.integrationsMap = new IntegrationsMap(configService);
+  }
 
   async signupWorker(signupWorkerCommand: SignupWorkerCommand): Promise<void> {
     try {
       const method = 'POST';
-      const baseUrl = this.configService.get<string>('REPUTATION_ORACLE_URL');
+      const baseUrl = this.integrationsMap.getMap().reputation_oracle.url;
       const url = `${baseUrl}/auth/signup`;
 
       const headers = {

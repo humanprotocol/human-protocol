@@ -7,10 +7,15 @@ import { AuthWorkerModule } from './modules/auth-worker/auth-worker.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
+import { envValidator } from './common/config/env';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+      validationSchema: envValidator,
+    }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
