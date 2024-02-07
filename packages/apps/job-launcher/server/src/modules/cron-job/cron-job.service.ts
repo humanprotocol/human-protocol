@@ -37,17 +37,16 @@ export class CronJobService {
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
-    let cronJob = await this.cronJobRepository.findOneByType(cronJobType);
+    const cronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!cronJob) {
-      cronJob = await this.cronJobRepository.createUnique(cronJobType);
-    } else {
-      cronJob.startedAt = new Date();
-      cronJob.completedAt = null;
-      await this.cronJobRepository.updateOne(cronJob);
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+      return this.cronJobRepository.createUnique(cronJobEntity);
     }
-
-    return cronJob;
+    cronJob.startedAt = new Date();
+    cronJob.completedAt = null;
+    return this.cronJobRepository.updateOne(cronJob);
   }
 
   public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
@@ -224,7 +223,7 @@ export class CronJobService {
             });
           }
           jobEntity.status = JobStatus.CANCELED;
-          await jobEntity.save();
+          await this.jobRepository.updateOne(jobEntity);
 
           const manifest = await this.storageService.download(
             jobEntity.manifestUrl,
