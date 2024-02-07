@@ -9,6 +9,10 @@ import {
 import { IWormholeVM, IWormholeSignature } from "./GovernanceTypes";
 
 let owner: Signer;
+<<<<<<< HEAD
+=======
+let wormholeMocker: Signer;
+>>>>>>> 2bf238dd (feat: add current changes)
 
 export const mineNBlocks = async (n: number) => {
   await Promise.all(
@@ -130,7 +134,7 @@ export async function createProposalOnSpoke(
 
 export async function createBasicProposal(
   daoSpoke: DAOSpokeContract,
-  wormholeMock: WormholeMock,
+  wormholeCaller: wormholeMocker,
   voteToken: VHMToken,
   governor: MetaHumanGovernor,
   owner: Signer,
@@ -168,7 +172,7 @@ export async function createBasicProposal(
 
   await createProposalOnSpoke(
     daoSpoke,
-    wormholeMock,
+    wormholeCaller,
     proposalId,
     await governor.getAddress(),
   );
@@ -201,5 +205,30 @@ export async function finishProposal(
     governorAddress,
   );
 
+<<<<<<< HEAD
   await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
 }
+=======
+  await _callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
+}
+
+export async function callReceiveMessageOnHubWithMock(
+  governor: MetaHumanGovernor,
+  result: IWormholeVM,
+): Promise<void> {
+  const vaas: string[] = [];
+
+  [wormholeMock, owner] = await ethers.getSigners();
+  console.log("WormholeMock: ", wormholeMock.getAddress());
+
+  await governor
+    .connect(wormholeMock)
+    .receiveWormholeMessages(
+      result.payload,
+      vaas,
+      ethers.zeroPadBytes(result.emitterAddress, 32),
+      result.emitterChainId,
+      result.hash,
+    );
+}
+>>>>>>> 2bf238dd (feat: add current changes)
