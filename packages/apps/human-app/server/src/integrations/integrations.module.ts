@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ReputationOracleGateway } from './reputation-oracle.gateway';
+import { ReputationOracleGateway } from './reputation-oracle/reputation-oracle.gateway';
 import { HttpModule } from '@nestjs/axios';
+import { GatewayConfigService } from "./gateway-config.service";
 
 @Module({
   imports: [HttpModule],
-  providers: [ReputationOracleGateway],
-  exports: [ReputationOracleGateway],
+  providers: [ReputationOracleGateway, GatewayConfigService],
+  exports: [ReputationOracleGateway, GatewayConfigService],
 })
 export class IntegrationsModule {}

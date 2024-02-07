@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { WorkerService } from './worker.service';
 import { IntegrationsModule } from '../../integrations/integrations.module';
-import { AuthWorkerProfile } from './worker.mapper';
+import { WorkerProfile } from './worker.mapper';
 
 @Module({
   imports: [IntegrationsModule],
-  providers: [WorkerService, AuthWorkerProfile],
+  providers: [WorkerService, WorkerProfile],
   exports: [WorkerService],
 })
 export class WorkerModule {}
