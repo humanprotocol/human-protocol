@@ -19,10 +19,11 @@ import {
   createMessageWithPayload,
 } from "./GovernanceUtils";
 
-describe("DAOSpokeContract", function () {
+describe.only("DAOSpokeContract", function () {
   let owner: Signer;
   let user1: Signer;
-  let wormholeMock: WormholeMock;
+  let wormholeMockForDaoSpoke: WormholeMock;
+  let wormholeMockForGovernor: WormholeMock;
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
   let governor: MetaHumanGovernor;
@@ -71,13 +72,14 @@ describe("DAOSpokeContract", function () {
     );
     await timelockController.waitForDeployment();
 
-    // Deploy WormholeMock
     const WormholeMock = await ethers.getContractFactory("WormholeMock");
-    wormholeMock = await WormholeMock.deploy();
 
-    // Send 1 ether to wormholeMock
+    // Deploy WormholeMock for Governor
+    wormholeMockForGovernor = await WormholeMock.deploy();
+
+    // Send 1 ether to wormholeMockForGovernor
     await owner.sendTransaction({
-      to: await wormholeMock.getAddress(),
+      to: await wormholeMockForGovernor.getAddress(),
       value: ethers.parseEther("1"),
     });
 
@@ -90,10 +92,22 @@ describe("DAOSpokeContract", function () {
       timelockController.getAddress(),
       [],
       5, // voting delay
-      await wormholeMock.getAddress(),
+      await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
       12,
     )) as MetaHumanGovernor;
+
+    // Set Governor on worm hole mock
+    await wormholeMockForGovernor.setReceiver(await governor.getAddress());
+
+    // Deploy WormholeMock for DAOSpokeContract
+    wormholeMockForDaoSpoke = await WormholeMock.deploy();
+
+    // Send 1 ether to wormholeMockForDaoSpoke
+    await owner.sendTransaction({
+      to: await wormholeMockForDaoSpoke.getAddress(),
+      value: ethers.parseEther("1"),
+    });
 
     // Deploy DAOSpokeContract
     const DAOSpokeContract = await ethers.getContractFactory(
@@ -105,18 +119,18 @@ describe("DAOSpokeContract", function () {
       voteToken.getAddress(),
       secondsPerBlock, // voting period
       6, // spokeChainId
-      await wormholeMock.getAddress(),
+      await wormholeMockForDaoSpoke.getAddress(),
       owner.getAddress(), // admin address
     )) as DAOSpokeContract;
 
     // Set DAOSpokeContract on worm hole mock
-    await wormholeMock.setDAOSpokeContract(await daoSpoke.getAddress());
+    await wormholeMockForDaoSpoke.setReceiver(await daoSpoke.getAddress());
   });
 
   it("should hasVoted return true when voted", async () => {
     const proposalId = await createProposalOnSpoke(
       daoSpoke,
-      wormholeMock,
+      wormholeMockForDaoSpoke,
       1,
       await governor.getAddress(),
     );
@@ -136,7 +150,7 @@ describe("DAOSpokeContract", function () {
   it("should hasVoted return false when hasn't voted", async () => {
     const proposalId = await createProposalOnSpoke(
       daoSpoke,
-      wormholeMock,
+      wormholeMockForDaoSpoke,
       1,
       await governor.getAddress(),
     );
@@ -161,7 +175,7 @@ describe("DAOSpokeContract", function () {
   it("should isProposal return true when proposal exists", async () => {
     const proposalId = await createProposalOnSpoke(
       daoSpoke,
-      wormholeMock,
+      wormholeMockForDaoSpoke,
       1,
       await governor.getAddress(),
     );
@@ -176,7 +190,7 @@ describe("DAOSpokeContract", function () {
 
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -199,7 +213,7 @@ describe("DAOSpokeContract", function () {
 
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -222,7 +236,7 @@ describe("DAOSpokeContract", function () {
 
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -245,7 +259,7 @@ describe("DAOSpokeContract", function () {
 
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -262,14 +276,14 @@ describe("DAOSpokeContract", function () {
 
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
 
       await finishProposal(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         proposalId,
         await governor.getAddress(),
       );
@@ -292,7 +306,7 @@ describe("DAOSpokeContract", function () {
 
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -318,7 +332,7 @@ describe("DAOSpokeContract", function () {
       );
 
       await expect(
-        callReceiveMessageOnSpokeWithMock(wormholeMock, mockPayload),
+        callReceiveMessageOnSpokeWithMock(wormholeMockForDaoSpoke, mockPayload),
       ).to.be.revertedWith(
         "Only messages from the hub contract can be received!",
       );
@@ -326,13 +340,13 @@ describe("DAOSpokeContract", function () {
 
     it("should revert when contract is not intended recipient", async () => {
       const mockPayload = await createProposalMessage(
-        await wormholeMock.getAddress(),
+        await wormholeMockForDaoSpoke.getAddress(),
         1,
         await governor.getAddress(),
       );
 
       await expect(
-        callReceiveMessageOnSpokeWithMock(wormholeMock, mockPayload),
+        callReceiveMessageOnSpokeWithMock(wormholeMockForDaoSpoke, mockPayload),
       ).to.be.revertedWith("Message is not addressed for this contract");
     });
 
@@ -343,9 +357,12 @@ describe("DAOSpokeContract", function () {
         await governor.getAddress(),
       );
 
-      await callReceiveMessageOnSpokeWithMock(wormholeMock, mockPayload);
+      await callReceiveMessageOnSpokeWithMock(
+        wormholeMockForDaoSpoke,
+        mockPayload,
+      );
       await expect(
-        callReceiveMessageOnSpokeWithMock(wormholeMock, mockPayload),
+        callReceiveMessageOnSpokeWithMock(wormholeMockForDaoSpoke, mockPayload),
       ).to.be.revertedWith("Message already processed");
     });
 
@@ -384,7 +401,7 @@ describe("DAOSpokeContract", function () {
       );
 
       await callReceiveMessageOnSpokeWithMock(
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         await createMessageWithPayload(
           payload,
           hubChainId,
@@ -441,7 +458,7 @@ describe("DAOSpokeContract", function () {
       );
 
       await callReceiveMessageOnSpokeWithMock(
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         await createMessageWithPayload(
           payload,
           hubChainId,
@@ -466,7 +483,7 @@ describe("DAOSpokeContract", function () {
     it("should process message sending votes back to hub", async () => {
       const proposalId = await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -492,7 +509,7 @@ describe("DAOSpokeContract", function () {
       );
 
       await callReceiveMessageOnSpokeWithMock(
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         await createMessageWithPayload(
           payload,
           hubChainId,
@@ -509,7 +526,7 @@ describe("DAOSpokeContract", function () {
     it("should withdraw as magistrate", async () => {
       await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );
@@ -544,7 +561,7 @@ describe("DAOSpokeContract", function () {
     it("should revert when not magistrate", async () => {
       await createProposalOnSpoke(
         daoSpoke,
-        wormholeMock,
+        wormholeMockForDaoSpoke,
         1,
         await governor.getAddress(),
       );

@@ -6,12 +6,12 @@ import '../governance/wormhole/IWormholeReceiver.sol';
 import 'hardhat/console.sol';
 
 contract WormholeMock {
-    address public daoSpoke;
+    address public receiver;
 
     receive() external payable {}
 
-    function setDAOSpokeContract(address _daoSpoke) external {
-        daoSpoke = _daoSpoke;
+    function setReceiver(address _receiver) external {
+        receiver = _receiver;
     }
 
     function quoteEVMDeliveryPrice(
@@ -39,7 +39,7 @@ contract WormholeMock {
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) external payable {
-        IWormholeReceiver(daoSpoke).receiveWormholeMessages{value: msg.value}(
+        IWormholeReceiver(receiver).receiveWormholeMessages{value: msg.value}(
             payload,
             additionalVaas,
             sourceAddress,

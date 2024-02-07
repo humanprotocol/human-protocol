@@ -131,7 +131,7 @@ export async function createProposalOnSpoke(
 
 export async function createBasicProposal(
   daoSpoke: DAOSpokeContract,
-  wormholeCaller: wormholeMocker,
+  wormholeMock: WormholeMock,
   voteToken: VHMToken,
   governor: MetaHumanGovernor,
   owner: Signer,
@@ -169,7 +169,7 @@ export async function createBasicProposal(
 
   await createProposalOnSpoke(
     daoSpoke,
-    wormholeCaller,
+    wormholeMock,
     proposalId,
     await governor.getAddress(),
   );
@@ -206,21 +206,19 @@ export async function finishProposal(
 }
 
 export async function callReceiveMessageOnHubWithMock(
-  governor: MetaHumanGovernor,
+  wormholeMock: WormholeMock,
   result: IWormholeVM,
 ): Promise<void> {
   const vaas: string[] = [];
 
-  [wormholeRelayer, owner] = await ethers.getSigners();
-  console.log("WormholeMock: ", wormholeRelayer.getAddress());
-
-  await governor
-    .connect(wormholeRelayer)
-    .receiveWormholeMessages(
-      result.payload,
-      vaas,
-      ethers.zeroPadBytes(result.emitterAddress, 32),
-      result.emitterChainId,
-      result.hash,
-    );
+  await wormholeMock.receiveWormholeMessages(
+    result.payload,
+    vaas,
+    ethers.zeroPadBytes(result.emitterAddress, 32),
+    result.emitterChainId,
+    result.hash,
+    {
+      value: ethers.parseEther("0.1"),
+    },
+  );
 }
