@@ -16,7 +16,7 @@ import { GatewayConfig } from "../../common/config/enpoint.interface";
 
 @Injectable()
 export class ReputationOracleGateway {
-  private reputationOracleConfig: GatewayConfig;
+  private readonly reputationOracleConfig: GatewayConfig;
   constructor(
     private httpService: HttpService,
     gatewayConfigService: GatewayConfigService,
