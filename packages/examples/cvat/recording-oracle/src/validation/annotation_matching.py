@@ -103,6 +103,8 @@ def match_annotations(
             for a, _ in itertools.zip_longest(a_anns, range(max_ann_count), fillvalue=None)
         ]
     )
+
+    distances[~np.isfinite(distances)] = 1
     distances[distances > 1 - min_similarity] = 1
 
     if a_anns and b_anns:

@@ -468,6 +468,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
                 skeleton_sample.annotations.append(merged_skeleton)
 
             # TODO: think about discarding invalid annotations (points)
+            # e.g. everything beyond the bbox, duplicates, and extra points.
             # For now, just take the first one available, as only 1 must be put by annotators
             job_sample_points = annotation_utils.flatten_points(
                 [p for p in job_sample.annotations if isinstance(p, dm.Points)]

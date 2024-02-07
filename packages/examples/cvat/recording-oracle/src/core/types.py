@@ -15,6 +15,7 @@ class TaskType(str, Enum, metaclass=BetterEnumMeta):
     image_points = "IMAGE_POINTS"
     image_boxes = "IMAGE_BOXES"
     image_boxes_from_points = "IMAGE_BOXES_FROM_POINTS"
+    image_skeletons_from_boxes = "IMAGE_SKELETONS_FROM_BOXES"
 
 
 class OracleWebhookTypes(str, Enum):
