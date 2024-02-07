@@ -14,6 +14,7 @@ import {
   createBasicProposal,
   mineNBlocks,
   createMessageWithPayload,
+  callReceiveMessageOnHubWithMock,
 } from "./GovernanceUtils";
 
 describe("MetaHumanGovernor", function () {
@@ -21,6 +22,7 @@ describe("MetaHumanGovernor", function () {
   let user1: Signer;
   let user2: Signer;
   let user3: Signer;
+  let wormholeRelayer: Signer;
   let wormholeMock: WormholeMock;
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
@@ -34,7 +36,7 @@ describe("MetaHumanGovernor", function () {
   const spokeChainId = 6;
 
   this.beforeEach(async () => {
-    [owner, user1, user2, user3, wormholeMocker] = await ethers.getSigners();
+    [owner, user1, user2, user3, wormholeRelayer] = await ethers.getSigners();
 
     // Deploy HMToken
     const HMToken = await ethers.getContractFactory(
@@ -90,7 +92,7 @@ describe("MetaHumanGovernor", function () {
       timelockController.getAddress(),
       [],
       5, // voting delay
-      await wormholeMocker.getAddress(),
+      await wormholeRelayer.getAddress(),
       owner.getAddress(),
       12,
     )) as MetaHumanGovernor;
@@ -105,7 +107,7 @@ describe("MetaHumanGovernor", function () {
       voteToken.getAddress(),
       12, // voting period
       6, // spokeChainId
-      await wormholeMocker.getAddress(),
+      await wormholeRelayer.getAddress(),
       owner.getAddress(), // admin address
     )) as DAOSpokeContract;
   });
@@ -321,7 +323,7 @@ describe("MetaHumanGovernor", function () {
   it("Should allow voting on a proposal", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -347,7 +349,7 @@ describe("MetaHumanGovernor", function () {
   it("Should revert when voting on a non-active proposal", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -361,7 +363,7 @@ describe("MetaHumanGovernor", function () {
   it("Should allow voting against", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -379,7 +381,7 @@ describe("MetaHumanGovernor", function () {
   it("Should allow voting abstain", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -397,7 +399,7 @@ describe("MetaHumanGovernor", function () {
   it("Should revert when voting with invalid option", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -414,7 +416,7 @@ describe("MetaHumanGovernor", function () {
   it("Should revert when vote already cast", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -435,7 +437,7 @@ describe("MetaHumanGovernor", function () {
   it("Should not count vote when vote not cast", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -451,7 +453,7 @@ describe("MetaHumanGovernor", function () {
   it("Should count vote when vote cast", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMocker,
+      wormholeRelayer,
       voteToken,
       governor,
       owner,
@@ -468,7 +470,13 @@ describe("MetaHumanGovernor", function () {
 
   it("Should test cross chain vote on proposal successfully", async function () {
     await mineNBlocks(1);
-    const proposalId = await createBasicProposal(daoSpoke, wormholeMock, voteToken, governor, owner);
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMock,
+      voteToken,
+      governor,
+      owner,
+    );
     const user1Address = await user1.getAddress();
     await voteToken.transfer(user1Address, ethers.parseEther("1"));
     await voteToken.connect(user1).delegate(user1Address);

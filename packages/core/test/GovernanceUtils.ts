@@ -9,10 +9,7 @@ import {
 import { IWormholeVM, IWormholeSignature } from "./GovernanceTypes";
 
 let owner: Signer;
-<<<<<<< HEAD
-=======
-let wormholeMocker: Signer;
->>>>>>> 2bf238dd (feat: add current changes)
+let wormholeRelayer: Signer;
 
 export const mineNBlocks = async (n: number) => {
   await Promise.all(
@@ -205,11 +202,7 @@ export async function finishProposal(
     governorAddress,
   );
 
-<<<<<<< HEAD
   await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
-}
-=======
-  await _callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
 }
 
 export async function callReceiveMessageOnHubWithMock(
@@ -218,11 +211,11 @@ export async function callReceiveMessageOnHubWithMock(
 ): Promise<void> {
   const vaas: string[] = [];
 
-  [wormholeMock, owner] = await ethers.getSigners();
-  console.log("WormholeMock: ", wormholeMock.getAddress());
+  [wormholeRelayer, owner] = await ethers.getSigners();
+  console.log("WormholeMock: ", wormholeRelayer.getAddress());
 
   await governor
-    .connect(wormholeMock)
+    .connect(wormholeRelayer)
     .receiveWormholeMessages(
       result.payload,
       vaas,
@@ -231,4 +224,3 @@ export async function callReceiveMessageOnHubWithMock(
       result.hash,
     );
 }
->>>>>>> 2bf238dd (feat: add current changes)
