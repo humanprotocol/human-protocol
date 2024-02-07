@@ -15,6 +15,8 @@ import { ConfigNames } from '../../common/config';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
 import { ApiKeyRepository } from './apikey.repository';
 import { ApiKeyEntity } from './apikey.entity';
+import { UserEntity } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
 
 @Module({
   imports: [
@@ -33,7 +35,12 @@ import { ApiKeyEntity } from './apikey.entity';
         },
       }),
     }),
-    TypeOrmModule.forFeature([AuthEntity, TokenEntity, ApiKeyEntity]),
+    TypeOrmModule.forFeature([
+      AuthEntity,
+      TokenEntity,
+      ApiKeyEntity,
+      UserEntity,
+    ]),
     SendGridModule,
   ],
   providers: [
@@ -42,6 +49,7 @@ import { ApiKeyEntity } from './apikey.entity';
     AuthRepository,
     TokenRepository,
     ApiKeyRepository,
+    UserRepository,
   ],
   controllers: [AuthJwtController],
   exports: [AuthService],
