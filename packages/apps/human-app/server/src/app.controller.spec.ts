@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AuthWorkerService } from "./modules/auth-worker/auth-worker.service";
-import { authWorkerServiceMock } from "./modules/auth-worker/auth-worker.service.mock";
+import { WorkerService } from "./modules/user-worker/worker.service";
+import { workerServiceMock } from "./modules/user-worker/worker.service.mock";
 
 describe('AppController', () => {
   let appController: AppController;
@@ -9,10 +9,10 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AuthWorkerService],
+      providers: [WorkerService],
     })
-    .overrideProvider(AuthWorkerService)
-    .useValue(authWorkerServiceMock)
+    .overrideProvider(WorkerService)
+    .useValue(workerServiceMock)
     .compile();
 
     appController = app.get<AppController>(AppController);

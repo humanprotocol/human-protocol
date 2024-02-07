@@ -24,7 +24,7 @@ Models represent business logic flow in the application. Each model is divided i
 - Service - Main business logic class
 - Mapper - Mapping between datatype, using nestjs automapper
 - Module - Component managing the dependency injection
-- Types - Custom types used in the module: see **Interfaces**
+- Interfaces: see **Interfaces** section
 - Spec - Unit tests for the module
 #### Common components:
 Components shared between different modules and solving common concerns.
@@ -38,5 +38,6 @@ nest js provides a lot of built-in pipes, check documentation before creating a 
 - Interceptors - used to bind extra logic before/after method execution or extend behavior of the method
 #### Interfaces:
 Interfaces are used to define the shape and responsibility of the data:
-- Dto - data sent from/to external sources and frontend, naming convention should include Request/Response part to indicate direction
-- Domain - Datatype used for data manipulation in business logic
+- Dto - Data sent from/to frontend
+- Command - Datatype used for data manipulation in business logic
+- Data - External API data shape

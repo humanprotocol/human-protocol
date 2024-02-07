@@ -8,12 +8,20 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SignupWorkerDto } from './interfaces/signup-worker-request.dto';
-import { AuthWorkerService } from './modules/auth-worker/auth-worker.service';
+import {
+  SignupWorkerCommand,
+  SignupWorkerDto,
+} from './modules/user-worker/interfaces/worker-registration.interface';
+import { WorkerService } from './modules/user-worker/worker.service';
+import { InjectMapper } from '@automapper/nestjs';
+import { Mapper } from '@automapper/core';
 
 @Controller()
 export class AppController {
-  constructor(private readonly authWorkerService: AuthWorkerService) {}
+  constructor(
+    private readonly authWorkerService: WorkerService,
+    @InjectMapper() private readonly mapper: Mapper,
+  ) {}
 
   @Get('/')
   @Redirect('/swagger', 301)
@@ -22,11 +30,16 @@ export class AppController {
     return 'OK';
   }
 
-  @ApiTags('Auth')
+  @ApiTags('User-Worker')
   @Post('/auth/signup')
-  @ApiOperation({ summary: 'Worker registration' })
+  @ApiOperation({ summary: 'Worker signup' })
   @UsePipes(new ValidationPipe())
   public signupWorker(@Body() signupWorkerDto: SignupWorkerDto): Promise<void> {
-    return this.authWorkerService.signupWorker(signupWorkerDto);
+    const signupWorkerCommand = this.mapper.map(
+      signupWorkerDto,
+      SignupWorkerDto,
+      SignupWorkerCommand,
+    );
+    return this.authWorkerService.signupWorker(signupWorkerCommand);
   }
 }

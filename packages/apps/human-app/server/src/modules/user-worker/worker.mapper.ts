@@ -1,8 +1,11 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
-import { SignupWorkerDto } from '../../interfaces/signup-worker-request.dto';
-import { SignupWorkerCommand } from './auth-worker.command';
+import {
+  SignupWorkerCommand,
+  SignupWorkerData,
+  SignupWorkerDto,
+} from './interfaces/worker-registration.interface';
 
 @Injectable()
 export class AuthWorkerProfile extends AutomapperProfile {
@@ -13,6 +16,7 @@ export class AuthWorkerProfile extends AutomapperProfile {
   override get profile() {
     return (mapper: Mapper) => {
       createMap(mapper, SignupWorkerDto, SignupWorkerCommand);
+      createMap(mapper, SignupWorkerCommand, SignupWorkerData);
     };
   }
 }

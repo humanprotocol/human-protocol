@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { AuthWorkerModule } from './modules/auth-worker/auth-worker.module';
+import { WorkerModule } from './modules/user-worker/worker.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -20,7 +20,7 @@ import { envValidator } from './common/config/env';
       strategyInitializer: classes(),
     }),
     HttpModule,
-    AuthWorkerModule,
+    WorkerModule,
     IntegrationsModule,
   ],
   controllers: [AppController],
