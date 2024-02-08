@@ -583,6 +583,10 @@ describe.only("MetaHumanGovernor", function () {
   });
 
   it.only("Should execute proposal successfully", async function () {
+    // mock account with voting power
+    await voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
+    await voteToken.connect(user1).delegate(await user1.getAddress());
+
     const encodedCall = token.interface.encodeFunctionData("transfer", [
       await user1.getAddress(),
       ethers.parseEther("1"),
@@ -620,10 +624,6 @@ describe.only("MetaHumanGovernor", function () {
     );
 
     const proposalId = decodedData[0];
-
-    // mock account with voting power
-    await voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
-    await voteToken.connect(user1).delegate(await user1.getAddress());
 
     // wait for next block
     await mineNBlocks(2);
