@@ -1243,67 +1243,38 @@ describe.only("MetaHumanGovernor", function () {
   it.only("Should vote on proposal by signature", async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
-      await owner.getAddress(),
-      ethers.parseEther("1"),
-    ]);
-
-    await token.transfer(
-      await timelockController.getAddress(),
-      ethers.parseEther("1"),
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner,
     );
-
-    const targets = [await voteToken.getAddress()];
-    const values = [0];
-    const calldatas = [encodedCall];
-
-    const txReponse = await governor.crossChainPropose(
-      targets,
-      values,
-      calldatas,
-      "test1",
-      {
-        value: 100,
-      },
-    );
-    const receipt = await txReponse.wait();
-    const eventSignature = ethers.id(
-      "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
-    );
-
-    const event = receipt?.logs?.find(
-      (log) => log.topics[0] === eventSignature,
-    );
-    if (!event) throw new Error("ProposalCreated event not found");
-    const decodedData = governor.interface.decodeEventLog(
-      "ProposalCreated",
-      event.data,
-      event.topics,
-    );
-
-    const proposalId = decodedData[0];
 
     // create signature
     const support = 1;
 
-    const wallet: signer = ethers.Wallet;
+    const hash = await getHashToSignProposal(governor, proposalId, support);
+    console.log("hash", hash);
+    const { v, r, s } = await signHash(proposalId, governor);
+    console.log("v", v);
+    console.log("r", r);
+    console.log("s", s);
 
-    // const hash = await getHashToSignProposal(governor, proposalId, support);
-    // console.log(hash);
-    // const { v, r, s } = await signHash(proposalId, governor, wallet);
+    // wait for next block
+    await mineNBlocks(2);
+    // // cast vote
+    await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
 
-    // // wait for next block
-    // await mineNBlocks(2);
-    // //cast vote
-    // await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
+    //assert votes
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
 
-    // //assert votes
-    // const { againstVotes, forVotes, abstainVotes } =
-    //   await governor.proposalVotes(proposalId);
+    await daoSpoke.connect(user1).castVote(proposalId, 1);
 
-    // expect(againstVotes).to.equal(0);
-    // expect(forVotes).to.equal(ethers.parseEther("1"));
-    // expect(abstainVotes).to.equal(0);
+    expect(againstVotes).to.equal(0);
+    expect(forVotes).to.equal(ethers.parseEther("1"));
+    expect(abstainVotes).to.equal(0);
   });
 
   it("Should fail to vote on proposal by signature when not active", async function () {});

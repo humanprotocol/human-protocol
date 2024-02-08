@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { BytesLike, Signer, Wallet } from "ethers";
+import { BytesLike, Signer, Wallet, isBytesLike } from "ethers";
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -243,9 +243,9 @@ export async function collectVotesFromSpoke(
 
 export async function getHashToSignProposal(
   governor: MetaHumanGovernor,
-  proposalId: number,
+  proposalId: string,
   support: number,
-): Promise<BytesLike> {
+): Promise<string> {
   const defaultAbiCoder = new ethers.AbiCoder();
 
   const blockChaindId = (await ethers.provider.getNetwork()).chainId;
@@ -262,7 +262,7 @@ export async function getHashToSignProposal(
         ethers.keccak256(ethers.toUtf8Bytes("MetaHumanGovernor")),
         ethers.keccak256(ethers.toUtf8Bytes("1")),
         blockChaindId,
-        governor.getAddress(),
+        await governor.getAddress(),
       ],
     ),
   );
@@ -277,7 +277,7 @@ export async function getHashToSignProposal(
 
   const digest = ethers.keccak256(
     ethers.solidityPacked(
-      ["bytes", "bytes32"],
+      ["string", "bytes", "bytes32"],
       ["0x1901", domainSeparator, structHash], // 0x1901 is the EIP-191 header for EIP-712 structured data
     ),
   );
@@ -285,15 +285,23 @@ export async function getHashToSignProposal(
   return digest;
 }
 
-export async function signHash(
-  proposalId: number,
-  governor: MetaHumanGovernor,
-  signer: Wallet,
-) {
-  const hash = await getHashToSignProposal(governor, proposalId, 1);
-  const signature = await signer.signMessage(hash);
+interface SignatureComponents {
+  v: number;
+  r: string;
+  s: string;
+}
 
-  // Split the signature into its components (r, s, v)
+export async function signHash(
+  proposalId: string,
+  governor: MetaHumanGovernor,
+): Promise<SignatureComponents> {
+  const hash = await getHashToSignProposal(governor, proposalId, 1);
+  const privateKey =
+    "0xaa14145ebc43af1552ebb30faaa9e92bec80da0573dba89446baa7f0259ffae0"; // Replace this with an actual private key
+  const wallet = new ethers.Wallet(privateKey);
+  const signature = await wallet.signMessage(ethers.toBeArray(hash));
+
+  // Extract the signature components
   const r = signature.slice(0, 66);
   const s = "0x" + signature.slice(66, 130);
   const v = parseInt(signature.slice(130, 132), 16);
