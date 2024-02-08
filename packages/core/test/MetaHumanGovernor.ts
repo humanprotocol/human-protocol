@@ -1288,8 +1288,8 @@ describe.only("MetaHumanGovernor", function () {
 
     const wallet: signer = ethers.Wallet;
 
-    const hash = await getHashToSignProposal(governor, proposalId, support);
-    console.log(hash);
+    // const hash = await getHashToSignProposal(governor, proposalId, support);
+    // console.log(hash);
     // const { v, r, s } = await signHash(proposalId, governor, wallet);
 
     // // wait for next block
