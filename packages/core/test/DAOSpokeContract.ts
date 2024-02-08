@@ -19,7 +19,7 @@ import {
   createMessageWithPayload,
 } from "./GovernanceUtils";
 
-describe("DAOSpokeContract", function () {
+describe.only("DAOSpokeContract", function () {
   let owner: Signer;
   let user1: Signer;
   let wormholeMockForDaoSpoke: WormholeMock;

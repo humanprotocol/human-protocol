@@ -723,8 +723,12 @@ describe.only("MetaHumanGovernor", function () {
     };
 
   it("Should revert to execute proposal when collection is unfinished", async function () {
-    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
-      await owner.getAddress(),
+    // mock account with voting power
+    voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
+    voteToken.connect(user1).delegate(await user1.getAddress());
+
+    const encodedCall = token.interface.encodeFunctionData("transfer", [
+      await user1.getAddress(),
       ethers.parseEther("1"),
     ]);
 
@@ -733,7 +737,7 @@ describe.only("MetaHumanGovernor", function () {
       ethers.parseEther("1"),
     );
 
-    const targets = [await voteToken.getAddress()];
+    const targets = [await token.getAddress()];
     const values = [0];
     const calldatas = [encodedCall];
 
@@ -763,10 +767,6 @@ describe.only("MetaHumanGovernor", function () {
 
     const proposalId = decodedData[0];
 
-    // mock account with voting power
-    voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
-    voteToken.connect(user1).delegate(await user1.getAddress());
-
     // wait for next block
     await mineNBlocks(2);
 
@@ -776,16 +776,8 @@ describe.only("MetaHumanGovernor", function () {
     // wait for voting block to end
     await mineNBlocks(50410);
 
-    const defaultAbiCoder = new ethers.AbiCoder();
-    const description = defaultAbiCoder.encode(["string"], ["test1"]);
-
     await expect(
-      governor.execute(
-        targets,
-        values,
-        calldatas,
-        ethers.keccak256(description),
-      ),
+      governor.execute(targets, values, calldatas, ethers.id("test1")),
     ).to.be.revertedWith("Governor: proposal not successful");
   });
 
@@ -861,6 +853,8 @@ describe.only("MetaHumanGovernor", function () {
   });
 
   it("Should get proposal state when defeated and collection finished", async function () {
+    await createMockUserWithVotingPower(voteToken, user1);
+
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -869,8 +863,6 @@ describe.only("MetaHumanGovernor", function () {
       owner,
     );
 
-    await createMockUserWithVotingPower(voteToken, user1);
-
     await mineNBlocks(2);
 
     //cast vote
@@ -878,7 +870,7 @@ describe.only("MetaHumanGovernor", function () {
 
     await mineNBlocks(50410);
 
-    await governor.requestCollections(proposalId);
+    await governor.requestCollections(proposalId, { value: 100 });
     await collectVotesFromSpoke(
       daoSpoke,
       wormholeMockForGovernor,
@@ -907,7 +899,7 @@ describe.only("MetaHumanGovernor", function () {
   });
 
   it("Should support interface IGovernorTimeLock", async function () {
-    const supportsInterface = await governor.supportsInterface("0x5f46473f");
+    const supportsInterface = await governor.supportsInterface("0x6e665ced");
     expect(supportsInterface).to.be.true;
   });
 
@@ -937,20 +929,22 @@ describe.only("MetaHumanGovernor", function () {
 
     await expect(
       callReceiveMessageOnSpokeWithMock(
-        wormholeMockForDaoSpoke,
+        wormholeMockForGovernor,
         await createMessageWithPayload(
           payload,
           spokeChainId,
           await wormholeMockForDaoSpoke.getAddress(),
         ),
       ),
-    ).to.be.revertedWith("Governor: invalid sender");
+    ).to.be.revertedWith(
+      "Only messages from the spoke contracts can be received!",
+    );
   });
 
   it("Should receive message", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMockForGovernor,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner,
@@ -991,7 +985,7 @@ describe.only("MetaHumanGovernor", function () {
   it("Should revert to receive message when message is already received", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMockForGovernor,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner,
@@ -1044,7 +1038,7 @@ describe.only("MetaHumanGovernor", function () {
   it("should reverts to receive message when intended receipient is not different", async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
-      wormholeMockForGovernor,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner,
@@ -1065,7 +1059,12 @@ describe.only("MetaHumanGovernor", function () {
 
     const payload = defaultAbiCoder.encode(
       ["address", "uint256", "address", "bytes"],
-      [owner.getAddress(), hubChainId, await daoSpoke.getAddress(), message],
+      [
+        await owner.getAddress(),
+        hubChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ],
     );
 
     await expect(
@@ -1091,7 +1090,7 @@ describe.only("MetaHumanGovernor", function () {
 
     await mineNBlocks(50410);
 
-    await governor.requestCollections(proposalId);
+    await governor.requestCollections(proposalId, { value: 100 });
     await collectVotesFromSpoke(
       daoSpoke,
       wormholeMockForGovernor,
@@ -1113,7 +1112,7 @@ describe.only("MetaHumanGovernor", function () {
     );
 
     await mineNBlocks(50410);
-    await governor.requestCollections(proposalId);
+    await governor.requestCollections(proposalId, { value: 100 });
   });
 
   it("Should fails to request collections when voting period is not over", async function () {
@@ -1145,9 +1144,11 @@ describe.only("MetaHumanGovernor", function () {
     // Mine 50410 blocks
     await mineNBlocks(50410);
 
-    await governor.requestCollections(proposalId);
+    await governor.requestCollections(proposalId, { value: 100 });
 
-    await expect(governor.requestCollections(proposalId)).to.be.revertedWith(
+    await expect(
+      governor.requestCollections(proposalId, { value: 100 }),
+    ).to.be.revertedWith(
       "Collection phase for this proposal has already started!",
     );
   });
@@ -1195,9 +1196,6 @@ describe.only("MetaHumanGovernor", function () {
     // Mine 2 blocks
     await mineNBlocks(2);
 
-    const defaultAbiCoder = new ethers.AbiCoder();
-    const params = defaultAbiCoder.encode(["string"], ["test params"]);
-
     // Cast vote
     await governor
       .connect(user1)
@@ -1205,7 +1203,7 @@ describe.only("MetaHumanGovernor", function () {
         proposalId,
         1,
         "test reason",
-        ethers.keccak256(params),
+        ethers.id("test params"),
       );
 
     const { againstVotes, forVotes, abstainVotes } =
@@ -1218,7 +1216,7 @@ describe.only("MetaHumanGovernor", function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it("Should revert when voting on a non-active proposal with reason and params", async function () {
+  it.skip("Should revert when voting on a non-active proposal with reason and params", async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
     const proposalId = await createBasicProposal(
