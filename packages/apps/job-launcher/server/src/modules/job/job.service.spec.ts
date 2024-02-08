@@ -500,7 +500,7 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      const result = await jobService.createHCaptchaManifest(jobType, jobDto);
+      const result = await jobService.createHCaptchaManifest(jobDto);
 
       expect(result).toEqual({
         job_mode: JobCaptchaMode.BATCH,
@@ -555,7 +555,7 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      const result = await jobService.createHCaptchaManifest(jobType, jobDto);
+      const result = await jobService.createHCaptchaManifest(jobDto);
 
       expect(result).toEqual({
         job_mode: JobCaptchaMode.BATCH,
@@ -629,7 +629,7 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      const result = await jobService.createHCaptchaManifest(jobType, jobDto);
+      const result = await jobService.createHCaptchaManifest(jobDto);
 
       expect(result).toEqual({
         job_mode: JobCaptchaMode.BATCH,
@@ -703,7 +703,7 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      const result = await jobService.createHCaptchaManifest(jobType, jobDto);
+      const result = await jobService.createHCaptchaManifest(jobDto);
 
       expect(result).toEqual({
         job_mode: JobCaptchaMode.BATCH,
@@ -775,7 +775,7 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      const result = await jobService.createHCaptchaManifest(jobType, jobDto);
+      const result = await jobService.createHCaptchaManifest(jobDto);
 
       expect(result).toEqual({
         job_mode: JobCaptchaMode.BATCH,
@@ -839,7 +839,7 @@ describe('JobService', () => {
       };
 
       await expect(
-        jobService.createHCaptchaManifest(jobType, jobDto),
+        jobService.createHCaptchaManifest(jobDto),
       ).rejects.toThrowError(BadRequestException);
     });
   });
