@@ -225,7 +225,7 @@ export async function callReceiveMessageOnHubWithMock(
 export async function collectVotesFromSpoke(
   daoSpoke: DAOSpokeContract,
   wormholeMock: WormholeMock,
-  proposalId: number,
+  proposalId: string,
   governor: MetaHumanGovernor,
 ): Promise<void> {
   const spokeChainId = 6;
