@@ -221,3 +221,32 @@ export async function callReceiveMessageOnHubWithMock(
     },
   );
 }
+
+export async function collectVotesFromSpoke(
+  daoSpoke: DAOSpokeContract,
+  wormholeMock: WormholeMock,
+  proposalId: number,
+  governor: MetaHumanGovernor,
+): Promise<void> {
+  const spokeChainId = 6;
+  const hubChainId = 5;
+  const defaultAbiCoder = new ethers.AbiCoder();
+
+  const message = defaultAbiCoder.encode(
+    ["uint16", "uint256", "uint256", "uint256", "uint256"],
+    [2, proposalId, ethers.parseEther("1"), 0, 0],
+  );
+
+  const payload = defaultAbiCoder.encode(
+    ["address", "uint256", "address", "bytes"],
+    [await governor.getAddress(), hubChainId, daoSpoke.getAddress(), message],
+  );
+
+  const mockResult = await createMessageWithPayload(
+    payload,
+    spokeChainId,
+    await daoSpoke.getAddress(),
+  );
+
+  await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
+}
