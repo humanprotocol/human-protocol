@@ -582,7 +582,7 @@ describe.only("MetaHumanGovernor", function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it.only("Should execute proposal successfully", async function () {
+  it("Should execute proposal successfully", async function () {
     // mock account with voting power
     await voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
     await voteToken.connect(user1).delegate(await user1.getAddress());
@@ -639,10 +639,6 @@ describe.only("MetaHumanGovernor", function () {
       proposalId,
       governor,
     );
-
-    console.log(await daoSpoke.proposalVotes(proposalId));
-    console.log(await governor.proposalVotes(proposalId));
-    console.log(await governor.proposalThreshold());
 
     await governor.queue(targets, values, calldatas, ethers.id("test1"));
     // vm.warp(block.timestamp + 10) ??
