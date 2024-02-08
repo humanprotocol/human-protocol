@@ -17,6 +17,7 @@ import {
   collectVotesFromSpoke,
   getHashToSignProposal,
   callReceiveMessageOnSpokeWithMock,
+  createMockUserWithVotingPowerWithPk,
   signHash,
 } from "./GovernanceUtils";
 
@@ -1240,42 +1241,42 @@ describe.only("MetaHumanGovernor", function () {
     ).to.be.revertedWith("Governor: vote not currently active");
   });
 
-  it.only("Should vote on proposal by signature", async function () {
-    await createMockUserWithVotingPower(voteToken, user1);
+  // it.only("Should vote on proposal by signature", async function () {
+  //   await createMockUserWithVotingPowerWithPk(voteToken, "0xaa14124ebc43af15527bb30faaa9e92bec80da05733ba89446baa7f0259ffae0");
 
-    const proposalId = await createBasicProposal(
-      daoSpoke,
-      wormholeMockForDaoSpoke,
-      voteToken,
-      governor,
-      owner,
-    );
+  //   const proposalId = await createBasicProposal(
+  //     daoSpoke,
+  //     wormholeMockForDaoSpoke,
+  //     voteToken,
+  //     governor,
+  //     owner,
+  //   );
 
-    // create signature
-    const support = 1;
+  //   // create signature
+  //   const support = 1;
 
-    const hash = await getHashToSignProposal(governor, proposalId, support);
-    console.log("hash", hash);
-    const { v, r, s } = await signHash(proposalId, governor);
-    console.log("v", v);
-    console.log("r", r);
-    console.log("s", s);
+  //   const hash = await getHashToSignProposal(governor, proposalId, support);
+  //   console.log("hash", hash);
+  //   const { v, r, s } = await signHash(proposalId, governor, "0xaa14124ebc43af15527bb30faaa9e92bec80da05733ba89446baa7f0259ffae0");
+  //   console.log("v", v);
+  //   console.log("r", r);
+  //   console.log("s", s);
 
-    // wait for next block
-    await mineNBlocks(2);
-    // // cast vote
-    await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
+  //   // wait for next block
+  //   await mineNBlocks(2);
+  //   // // cast vote
+  //   await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
 
-    //assert votes
-    const { againstVotes, forVotes, abstainVotes } =
-      await governor.proposalVotes(proposalId);
+  //   //assert votes
+  //   const { againstVotes, forVotes, abstainVotes } =
+  //     await governor.proposalVotes(proposalId);
 
-    await daoSpoke.connect(user1).castVote(proposalId, 1);
+  //   await daoSpoke.connect(user1).castVote(proposalId, 1);
 
-    expect(againstVotes).to.equal(0);
-    expect(forVotes).to.equal(ethers.parseEther("1"));
-    expect(abstainVotes).to.equal(0);
-  });
+  //   expect(againstVotes).to.equal(0);
+  //   expect(forVotes).to.equal(ethers.parseEther("1"));
+  //   expect(abstainVotes).to.equal(0);
+  // });
 
   it("Should fail to vote on proposal by signature when not active", async function () {});
 

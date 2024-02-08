@@ -7,8 +7,7 @@ import '../governance/wormhole/IWormholeRelayer.sol';
 import 'hardhat/console.sol';
 
 contract WormholeMock {
-
-    address receiver; 
+    address receiver;
 
     receive() external payable {}
 

@@ -20,6 +20,21 @@ export const mineNBlocks = async (n: number) => {
   );
 };
 
+export async function createMockUserWithVotingPowerWithPk(
+  voteToken: VHMToken,
+  privateKey: string,
+): Promise<Signer> {
+  const provider = new ethers.JsonRpcProvider("http://localhost:8545");
+  const userWallet = new ethers.Wallet(privateKey).connect(provider);
+  await voteToken
+    .connect(userWallet)
+    .transfer(await userWallet.getAddress(), ethers.parseEther("1"));
+
+  const voteTokenWithUser = voteToken.connect(userWallet);
+  await voteTokenWithUser.delegate(await userWallet.getAddress());
+  return userWallet;
+}
+
 export async function createMockUserWithVotingPower(
   voteToken: VHMToken,
   user: Signer,
@@ -294,10 +309,9 @@ interface SignatureComponents {
 export async function signHash(
   proposalId: string,
   governor: MetaHumanGovernor,
+  privateKey: string,
 ): Promise<SignatureComponents> {
   const hash = await getHashToSignProposal(governor, proposalId, 1);
-  const privateKey =
-    "0xaa14145ebc43af1552ebb30faaa9e92bec80da0573dba89446baa7f0259ffae0"; // Replace this with an actual private key
   const wallet = new ethers.Wallet(privateKey);
   const signature = await wallet.signMessage(ethers.toBeArray(hash));
 
