@@ -250,3 +250,61 @@ export async function collectVotesFromSpoke(
 
   await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
 }
+
+export async function getHashToSignProposal(
+  governor: MetaHumanGovernor,
+  proposalId: number,
+  support: number,
+): Promise<string> {
+  const defaultAbiCoder = new ethers.AbiCoder();
+
+  const blockChaindId = (await ethers.provider.getNetwork()).chainId;
+
+  const domainSeparator = ethers.keccak256(
+    defaultAbiCoder.encode(
+      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
+      [
+        ethers.keccak256(
+          ethers.toUtf8Bytes(
+            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)",
+          ),
+        ),
+        ethers.keccak256(ethers.toUtf8Bytes("MetaHumanGovernor")),
+        ethers.keccak256(ethers.toUtf8Bytes("1")),
+        blockChaindId,
+        governor.getAddress(),
+      ],
+    ),
+  );
+
+  const ballotTypeHash = await governor.BALLOT_TYPEHASH();
+  const structHash = ethers.keccak256(
+    defaultAbiCoder.encode(
+      ["bytes32", "uint256", "uint8"],
+      [ballotTypeHash, proposalId, support],
+    ),
+  );
+
+  const digest = ethers.keccak256(
+    ethers.solidityPacked(
+      ["bytes", "bytes32"],
+      ["0x1901", domainSeparator, structHash], // 0x1901 is the EIP-191 header for EIP-712 structured data
+    ),
+  );
+
+  return digest;
+}
+
+// async function signHash(privateKeySeed: string, hashToSign: string) {
+//   const signer = new ethers.Wallet(privateKeySeed);
+
+//   const ss = ethers.arrayify(hashToSign);
+//   const signature = await signer.signMessage(ethers.arrayify(hashToSign));
+
+//   // Split the signature into its components (r, s, v)
+//   const r = signature.slice(0, 66);
+//   const s = '0x' + signature.slice(66, 130);
+//   const v = parseInt(signature.slice(130, 132), 16);
+
+//   return { v, r, s };
+// }

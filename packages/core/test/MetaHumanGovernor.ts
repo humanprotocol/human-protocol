@@ -16,6 +16,7 @@ import {
   createMessageWithPayload,
   callReceiveMessageOnHubWithMock,
   collectVotesFromSpoke,
+  getHashToSignProposal,
 } from "./GovernanceUtils";
 import { assert } from "console";
 
@@ -1216,15 +1217,77 @@ describe.only("MetaHumanGovernor", function () {
   it("Should vote on proposal by signature", async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposal(
-      daoSpoke,
-      wormholeMockForDaoSpoke,
-      voteToken,
-      governor,
-      owner,
+    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
+      await owner.getAddress(),
+      ethers.parseEther("1"),
+    ]);
+
+    await token.transfer(
+      await timelockController.getAddress(),
+      ethers.parseEther("1"),
     );
+
+    const targets = [await voteToken.getAddress()];
+    const values = [0];
+    const calldatas = [encodedCall];
+
+    const txReponse = await governor.crossChainPropose(
+      targets,
+      values,
+      calldatas,
+      "test1",
+    );
+    const receipt = await txReponse.wait();
+    const eventSignature = ethers.id(
+      "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
+    );
+
+    const event = receipt?.logs?.find(
+      (log) => log.topics[0] === eventSignature,
+    );
+    if (!event) throw new Error("ProposalCreated event not found");
+    const decodedData = governor.interface.decodeEventLog(
+      "ProposalCreated",
+      event.data,
+      event.topics,
+    );
+
+    const proposalId = decodedData[0];
 
     // create signature
     const support = 1;
+
+    const hash = getHashToSignProposal(governor, proposalId, support);
+
+    // wait for next block
+    await mineNBlocks(2);
+    //cast vote
+    // await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
+  });
+
+  it("Should revert when creating proposal with propose()", async function () {
+    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
+      await owner.getAddress(),
+      ethers.parseEther("1"),
+    ]);
+
+    const targets = [await voteToken.getAddress()];
+    const values = [0];
+    const calldatas = [encodedCall];
+
+    await expect(
+      governor.propose(targets, values, calldatas, "test"),
+    ).to.be.revertedWith("Please use crossChainPropose instead.");
+  });
+
+  it("Should return magistrate", async function () {
+    const magistrate = await governor.magistrate();
+    expect(magistrate).to.equal(await owner.getAddress());
+  });
+
+  it("Should reverts when to transfer magistrate when it's address zero", async function () {
+    await expect(
+      governor.transferMagistrate(ethers.ZeroAddress),
+    ).to.be.revertedWith("Magistrate: new magistrate is the zero address");
   });
 });
