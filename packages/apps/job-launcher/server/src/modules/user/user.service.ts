@@ -55,12 +55,7 @@ export class UserService {
     data: ValidatePasswordDto,
   ): Promise<UserEntity> {
     userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
-    return userEntity.save();
-  }
-
-  public activate(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.status = UserStatus.ACTIVE;
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
   }
 
   public async getBalance(userId: number): Promise<UserBalanceDto> {

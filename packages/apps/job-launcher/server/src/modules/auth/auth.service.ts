@@ -22,7 +22,7 @@ import {
 } from './auth.dto';
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { AuthRepository } from './auth.repository';
+
 import { ConfigNames } from '../../common/config';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
@@ -32,6 +32,10 @@ import { generateHash } from '../../common/utils/crypto';
 import { ApiKeyRepository } from './apikey.repository';
 import * as crypto from 'crypto';
 import { verifyToken } from '../../common/utils/hcaptcha';
+import { AuthRepository } from './auth.repository';
+import { AuthEntity } from './auth.entity';
+import { UserRepository } from '../user/user.repository';
+import { ApiKeyEntity } from './apikey.entity';
 
 @Injectable()
 export class AuthService {
@@ -50,6 +54,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly apiKeyRepository: ApiKeyRepository,
+    private readonly userRepository: UserRepository,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -141,12 +146,8 @@ export class AuthService {
     return userEntity;
   }
 
-  public async logout(user: UserEntity): Promise<void> {
-    await this.authRepository.delete({ userId: user.id });
-  }
-
   public async auth(userEntity: UserEntity): Promise<AuthDto> {
-    const auth = await this.authRepository.findOne({ userId: userEntity.id });
+    const auth = await this.authRepository.findOneByUserId(userEntity.id);
 
     const accessToken = await this.jwtService.signAsync({
       email: userEntity.email,
@@ -167,14 +168,15 @@ export class AuthService {
     const refreshTokenHashed = this.hashToken(refreshToken);
 
     if (auth) {
-      await this.logout(userEntity);
+      await this.authRepository.deleteByUserId(userEntity.id);
     }
 
-    await this.authRepository.create({
-      user: userEntity,
-      refreshToken: refreshTokenHashed,
-      accessToken: accessTokenHashed,
-    });
+    const authEntity = new AuthEntity();
+    authEntity.user = userEntity;
+    authEntity.refreshToken = refreshTokenHashed;
+    authEntity.accessToken = accessTokenHashed;
+
+    await this.authRepository.createUnique(authEntity);
 
     return { accessToken, refreshToken };
   }
@@ -189,13 +191,14 @@ export class AuthService {
     if (userEntity.status !== UserStatus.ACTIVE)
       throw new UnauthorizedException(ErrorAuth.UserNotActive);
 
-    const existingToken = await this.tokenRepository.findOne({
-      userId: userEntity.id,
-      tokenType: TokenType.PASSWORD,
-    });
+    const existingToken =
+      await this.tokenRepository.findOneByUserIdAndTokenType(
+        userEntity.id,
+        TokenType.PASSWORD,
+      );
 
     if (existingToken) {
-      await existingToken.remove();
+      await this.tokenRepository.deleteOne(existingToken);
     }
 
     const newTokenEntity = await this.tokenRepository.create({
@@ -234,10 +237,11 @@ export class AuthService {
     ) {
       throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
     }
-    const tokenEntity = await this.tokenRepository.findOne({
-      uuid: data.token,
-      tokenType: TokenType.PASSWORD,
-    });
+
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndTokenType(
+      data.token,
+      TokenType.PASSWORD,
+    );
 
     if (!tokenEntity) {
       throw new NotFoundException('Token not found');
@@ -256,21 +260,22 @@ export class AuthService {
       templateId: SENDGRID_TEMPLATES.passwordChanged,
     });
 
-    await tokenEntity.remove();
+    await this.tokenRepository.deleteOne(tokenEntity);
   }
 
   public async emailVerification(data: VerifyEmailDto): Promise<void> {
-    const tokenEntity = await this.tokenRepository.findOne({
-      uuid: data.token,
-      tokenType: TokenType.EMAIL,
-    });
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndTokenType(
+      data.token,
+      TokenType.EMAIL,
+    );
 
     if (!tokenEntity) {
       throw new NotFoundException('Token not found');
     }
 
-    this.userService.activate(tokenEntity.user);
-    await tokenEntity.remove();
+    tokenEntity.user.status = UserStatus.ACTIVE;
+    this.userRepository.updateOne(tokenEntity.user);
+    await this.tokenRepository.deleteOne(tokenEntity);
   }
 
   public async resendEmailVerification(
@@ -282,10 +287,11 @@ export class AuthService {
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
-    const existingToken = await this.tokenRepository.findOne({
-      userId: userEntity.id,
-      tokenType: TokenType.EMAIL,
-    });
+    const existingToken =
+      await this.tokenRepository.findOneByUserIdAndTokenType(
+        userEntity.id,
+        TokenType.EMAIL,
+      );
 
     if (existingToken) {
       await existingToken.remove();
@@ -330,11 +336,17 @@ export class AuthService {
       this.keyLength,
     );
 
-    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(
-      userId,
-      hashedAPIKey,
-      salt,
-    );
+    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+    if (!apiKeyEntity) {
+      apiKeyEntity = new ApiKeyEntity();
+      apiKeyEntity.user.id = userId;
+      await this.apiKeyRepository.createUnique(apiKeyEntity);
+    }
+
+    apiKeyEntity.hashedAPIKey = hashedAPIKey;
+    apiKeyEntity.salt = salt;
+
+    this.apiKeyRepository.updateOne(apiKeyEntity);
 
     return `${apiKey}-${apiKeyEntity.id}`;
   }
