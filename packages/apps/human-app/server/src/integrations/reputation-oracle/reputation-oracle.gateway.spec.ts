@@ -4,7 +4,7 @@ import { GatewayConfigService } from '../../common/config/gateway-config.service
 import { Mapper } from '@automapper/core';
 import { of, throwError } from 'rxjs';
 import { ReputationOracleGateway } from './reputation-oracle.gateway';
-import { SignupWorkerCommand } from '../../modules/user-worker/interfaces/worker-registration.interface';
+import { SignupWorkerCommand } from '../../modules/worker/interfaces/worker-registration.interface';
 import nock from 'nock';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { SignupOperatorCommand } from '../../modules/operator/interfaces/operator-registration.interface';

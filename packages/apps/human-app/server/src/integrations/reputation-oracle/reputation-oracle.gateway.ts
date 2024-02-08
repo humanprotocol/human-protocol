@@ -6,7 +6,7 @@ import { Mapper } from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
-} from '../../modules/user-worker/interfaces/worker-registration.interface';
+} from '../../modules/worker/interfaces/worker-registration.interface';
 import {
   SignupOperatorCommand,
   SignupOperatorData,

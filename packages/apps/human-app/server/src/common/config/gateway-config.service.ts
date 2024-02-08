@@ -12,7 +12,7 @@ export class GatewayConfigService {
     return {
       gateways: {
         [ExternalApiName.REPUTATION_ORACLE]: {
-          url: this.envConfig.reputationOracleUrl!,
+          url: this.envConfig.reputationOracleUrl,
           endpoints: {
             [EndpointName.WORKER_SIGNUP]: {
               endpoint: '/auth/signup',

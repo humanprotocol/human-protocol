@@ -5,7 +5,10 @@ import {
   SignupOperatorCommand,
   SignupOperatorDto,
 } from './modules/operator/interfaces/operator-registration.interface';
-import { SignupWorkerCommand, SignupWorkerDto } from "./modules/user-worker/interfaces/worker-registration.interface";
+import {
+  SignupWorkerCommand,
+  SignupWorkerDto,
+} from './modules/worker/interfaces/worker-registration.interface';
 
 @Injectable()
 export class ControllerProfile extends AutomapperProfile {

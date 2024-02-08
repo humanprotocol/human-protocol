@@ -3,12 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
 import {
   SignupOperatorCommand,
-  SignupOperatorData
-} from "../../modules/operator/interfaces/operator-registration.interface";
+  SignupOperatorData,
+} from '../../modules/operator/interfaces/operator-registration.interface';
 import {
   SignupWorkerCommand,
-  SignupWorkerData
-} from "../../modules/user-worker/interfaces/worker-registration.interface";
+  SignupWorkerData,
+} from '../../modules/worker/interfaces/worker-registration.interface';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
