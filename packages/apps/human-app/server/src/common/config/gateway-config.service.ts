@@ -22,7 +22,7 @@ export class GatewayConfigService {
               },
             },
             [EndpointName.OPERATOR_SIGNUP]: {
-              endpoint: '/auth/signup',
+              endpoint: '/auth/web3/signup',
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
