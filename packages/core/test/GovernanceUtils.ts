@@ -9,7 +9,6 @@ import {
 import { IWormholeVM, IWormholeSignature } from "./GovernanceTypes";
 
 let owner: Signer;
-let wormholeRelayer: Signer;
 
 export const mineNBlocks = async (n: number) => {
   await Promise.all(

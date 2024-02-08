@@ -1,14 +1,14 @@
-import { ethers, upgrades } from 'hardhat';
-import { EventLog, Signer } from 'ethers';
+import { ethers, upgrades } from "hardhat";
+import { EventLog, Signer } from "ethers";
 import {
   EscrowFactory,
   HMToken,
   RewardPool,
   Staking,
-} from '../typechain-types';
-import { expect } from 'chai';
+} from "../typechain-types";
+import { expect } from "chai";
 
-describe('RewardPool', function () {
+describe("RewardPool", function () {
   let token: HMToken,
     escrowFactory: EscrowFactory,
     staking: Staking,
@@ -25,7 +25,7 @@ describe('RewardPool', function () {
   const minimumStake = 2;
   const lockPeriod = 2;
   const rewardFee = 2;
-  const jobRequesterId = 'job-requester-id';
+  const jobRequesterId = "job-requester-id";
 
   this.beforeAll(async () => {
     [
@@ -41,32 +41,32 @@ describe('RewardPool', function () {
 
     // Deploy HMTToken Contract
     const HMToken = await ethers.getContractFactory(
-      'contracts/HMToken.sol:HMToken'
+      "contracts/HMToken.sol:HMToken",
     );
     token = (await HMToken.deploy(
       1000000000,
-      'Human Token',
+      "Human Token",
       18,
-      'HMT'
+      "HMT",
     )) as HMToken;
 
     // Deploy Staking Conract
-    const Staking = await ethers.getContractFactory('Staking');
+    const Staking = await ethers.getContractFactory("Staking");
     staking = (await upgrades.deployProxy(
       Staking,
       [await token.getAddress(), minimumStake, lockPeriod],
-      { kind: 'uups', initializer: 'initialize' }
+      { kind: "uups", initializer: "initialize" },
     )) as unknown as Staking;
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory(
-      'contracts/EscrowFactory.sol:EscrowFactory'
+      "contracts/EscrowFactory.sol:EscrowFactory",
     );
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
       [await staking.getAddress()],
-      { kind: 'uups', initializer: 'initialize' }
+      { kind: "uups", initializer: "initialize" },
     )) as unknown as EscrowFactory;
   });
 
@@ -87,16 +87,16 @@ describe('RewardPool', function () {
         .transferFrom(
           await owner.getAddress(),
           await account.getAddress(),
-          1000
+          1000,
         );
     });
 
     // Deploy Reward Pool Conract
-    const RewardPool = await ethers.getContractFactory('RewardPool');
+    const RewardPool = await ethers.getContractFactory("RewardPool");
     rewardPool = (await upgrades.deployProxy(
       RewardPool,
       [await token.getAddress(), await staking.getAddress(), rewardFee],
-      { kind: 'uups', initializer: 'initialize' }
+      { kind: "uups", initializer: "initialize" },
     )) as unknown as RewardPool;
 
     // Configure RewardPool in Staking
@@ -116,15 +116,15 @@ describe('RewardPool', function () {
     });
   });
 
-  it('Should set token address given to constructor', async () => {
+  it("Should set token address given to constructor", async () => {
     expect(await rewardPool.token()).to.equal(await token.getAddress());
   });
 
-  it('Should set fee given to constructor', async () => {
+  it("Should set fee given to constructor", async () => {
     expect(await rewardPool.fees()).to.equal(rewardFee);
   });
 
-  describe('Add Reward', () => {
+  describe("Add Reward", () => {
     let escrowAddress: string;
     const stakedTokens = 10;
     const allocatedTokens = 5;
@@ -140,18 +140,18 @@ describe('RewardPool', function () {
           .createEscrow(
             await token.getAddress(),
             [await validator.getAddress()],
-            jobRequesterId
+            jobRequesterId,
           )
       ).wait();
       const event = (
         result?.logs?.find(({ topics }) =>
-          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+          topics.includes(ethers.id("LaunchedV2(address,address,string)")),
         ) as EventLog
       )?.args;
 
       expect(event?.token).to.equal(
         await token.getAddress(),
-        'token address is correct'
+        "token address is correct",
       );
       expect(event?.escrow).to.not.be.null;
 
@@ -160,7 +160,7 @@ describe('RewardPool', function () {
       await staking.connect(operator).allocate(escrowAddress, allocatedTokens);
     });
 
-    it('Only staking can add reward', async () => {
+    it("Only staking can add reward", async () => {
       await expect(
         rewardPool
           .connect(operator)
@@ -168,12 +168,12 @@ describe('RewardPool', function () {
             ethers.ZeroAddress,
             ethers.ZeroAddress,
             ethers.ZeroAddress,
-            1
-          )
-      ).to.be.revertedWith('Caller is not staking contract');
+            1,
+          ),
+      ).to.be.revertedWith("Caller is not staking contract");
     });
 
-    it('When slashed is lower than fee, reward record is not created', async () => {
+    it("When slashed is lower than fee, reward record is not created", async () => {
       const slashedTokens = 1;
 
       await staking
@@ -182,18 +182,18 @@ describe('RewardPool', function () {
           await validator.getAddress(),
           await operator.getAddress(),
           escrowAddress,
-          slashedTokens
+          slashedTokens,
         );
 
       expect(await token.balanceOf(await rewardPool.getAddress())).to.equal(
-        slashedTokens
+        slashedTokens,
       );
 
       const rewards = await rewardPool.getRewards(escrowAddress);
       expect(rewards.length).to.equal(0);
     });
 
-    it('When slashed is higher than fee, reward record is created', async () => {
+    it("When slashed is higher than fee, reward record is created", async () => {
       const slashedTokens = 3;
       await expect(
         await staking
@@ -202,19 +202,19 @@ describe('RewardPool', function () {
             await validator.getAddress(),
             await operator.getAddress(),
             escrowAddress,
-            slashedTokens
-          )
+            slashedTokens,
+          ),
       )
-        .to.emit(rewardPool, 'RewardAdded')
+        .to.emit(rewardPool, "RewardAdded")
         .withArgs(
           escrowAddress,
           await operator.getAddress(),
           await validator.getAddress(),
-          slashedTokens - rewardFee
+          slashedTokens - rewardFee,
         );
 
       expect(await token.balanceOf(await rewardPool.getAddress())).to.equal(
-        slashedTokens
+        slashedTokens,
       );
 
       const rewards = await rewardPool.getRewards(escrowAddress);
@@ -225,7 +225,7 @@ describe('RewardPool', function () {
     });
   });
 
-  describe('Distribute & Withdraw Reward', () => {
+  describe("Distribute & Withdraw Reward", () => {
     let escrowAddress: string;
     const stakedTokens = 10;
     const allocatedTokens = 8;
@@ -243,18 +243,18 @@ describe('RewardPool', function () {
           .createEscrow(
             await token.getAddress(),
             [await validator.getAddress()],
-            jobRequesterId
+            jobRequesterId,
           )
       ).wait();
       const event = (
         result?.logs?.find(({ topics }) =>
-          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+          topics.includes(ethers.id("LaunchedV2(address,address,string)")),
         ) as EventLog
       )?.args;
 
       expect(event?.token).to.equal(
         await token.getAddress(),
-        'token address is correct'
+        "token address is correct",
       );
       expect(event?.escrow).to.not.be.null;
 
@@ -263,13 +263,13 @@ describe('RewardPool', function () {
       await staking.connect(operator).allocate(escrowAddress, allocatedTokens);
     });
 
-    it('Should revert if there is no reward', async () => {
+    it("Should revert if there is no reward", async () => {
       await expect(
-        rewardPool.distributeReward(escrowAddress)
-      ).to.be.revertedWith('No rewards for escrow');
+        rewardPool.distributeReward(escrowAddress),
+      ).to.be.revertedWith("No rewards for escrow");
     });
 
-    it('Should distribute the reward.', async () => {
+    it("Should distribute the reward.", async () => {
       const vSlashAmount = 2;
       const v2SlashAmount = 3;
       await staking
@@ -278,7 +278,7 @@ describe('RewardPool', function () {
           await validator.getAddress(),
           await operator.getAddress(),
           escrowAddress,
-          vSlashAmount
+          vSlashAmount,
         );
       await staking
         .connect(owner)
@@ -286,32 +286,32 @@ describe('RewardPool', function () {
           await validator2.getAddress(),
           await operator.getAddress(),
           escrowAddress,
-          v2SlashAmount
+          v2SlashAmount,
         );
 
       const vBalanceBefore = await token.balanceOf(
-        await validator.getAddress()
+        await validator.getAddress(),
       );
       const v2BalanceBefore = await token.balanceOf(
-        await validator2.getAddress()
+        await validator2.getAddress(),
       );
 
       await rewardPool.distributeReward(escrowAddress);
 
       expect(await token.balanceOf(await validator.getAddress())).to.equal(
-        vBalanceBefore + BigInt(vSlashAmount - rewardFee)
+        vBalanceBefore + BigInt(vSlashAmount - rewardFee),
       );
 
       expect(await token.balanceOf(await validator2.getAddress())).to.equal(
-        v2BalanceBefore + BigInt(v2SlashAmount - rewardFee)
+        v2BalanceBefore + BigInt(v2SlashAmount - rewardFee),
       );
 
       expect(await token.balanceOf(await rewardPool.getAddress())).to.equal(
-        rewardFee * 2
+        rewardFee * 2,
       );
     });
 
-    it('Should withdraw the reward', async () => {
+    it("Should withdraw the reward", async () => {
       const vSlashAmount = 2;
       const v2SlashAmount = 3;
       await staking
@@ -320,7 +320,7 @@ describe('RewardPool', function () {
           await validator.getAddress(),
           await operator.getAddress(),
           escrowAddress,
-          vSlashAmount
+          vSlashAmount,
         );
       await staking
         .connect(owner)
@@ -328,7 +328,7 @@ describe('RewardPool', function () {
           await validator2.getAddress(),
           await operator.getAddress(),
           escrowAddress,
-          v2SlashAmount
+          v2SlashAmount,
         );
 
       const oBalanceBefore = await token.balanceOf(await owner.getAddress());
@@ -336,7 +336,7 @@ describe('RewardPool', function () {
       await rewardPool.withdraw(await owner.getAddress());
 
       expect(await token.balanceOf(await owner.getAddress())).to.equal(
-        oBalanceBefore + BigInt(rewardFee * 2)
+        oBalanceBefore + BigInt(rewardFee * 2),
       );
     });
   });

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { ethers, upgrades } from 'hardhat';
+import { ethers, upgrades } from "hardhat";
 
 async function main() {
   const escrowFactoryAddress = process.env.ESCROW_FACTORY_ADDRESS;
@@ -10,78 +10,78 @@ async function main() {
   const deployRewardPool = process.env.DEPLOY_REWARD_POOL;
 
   if (!escrowFactoryAddress && !stakingAddress && !rewardPoolAddress) {
-    console.error('Env variable missing');
+    console.error("Env variable missing");
     return;
   }
 
-  if (deployEscrowFactory == 'true' && escrowFactoryAddress) {
+  if (deployEscrowFactory == "true" && escrowFactoryAddress) {
     const EscrowFactory = await ethers.getContractFactory(
-      'contracts/EscrowFactory.sol:EscrowFactory'
+      "contracts/EscrowFactory.sol:EscrowFactory",
     );
     // await upgrades.forceImport(escrowFactoryAddress, EscrowFactory, { kind: 'uups' });  //use this to get ./openzeppelin/[network].json
     const escrowFactoryContract = await upgrades.upgradeProxy(
       escrowFactoryAddress,
-      EscrowFactory
+      EscrowFactory,
     );
     const contract = await escrowFactoryContract.deployed();
     await ethers.provider.getTransactionReceipt(
-      contract.deployTransaction.hash
+      contract.deployTransaction.hash,
     );
 
     console.log(
-      'Escrow Factory Proxy Address: ',
-      await escrowFactoryContract.getAddress()
+      "Escrow Factory Proxy Address: ",
+      await escrowFactoryContract.getAddress(),
     );
     console.log(
-      'New Escrow Factory Implementation Address: ',
+      "New Escrow Factory Implementation Address: ",
       await upgrades.erc1967.getImplementationAddress(
-        await escrowFactoryContract.getAddress()
-      )
+        await escrowFactoryContract.getAddress(),
+      ),
     );
   }
 
-  if (deployStaking == 'true' && stakingAddress) {
-    const Staking = await ethers.getContractFactory('Staking');
+  if (deployStaking == "true" && stakingAddress) {
+    const Staking = await ethers.getContractFactory("Staking");
     // await upgrades.forceImport(stakingAddress, Staking, { kind: 'uups' }); //use this to get ./openzeppelin/[network].json
     const stakingContract = await upgrades.upgradeProxy(
       stakingAddress,
-      Staking
+      Staking,
     );
     const contract = await stakingContract.deployed();
     await ethers.provider.getTransactionReceipt(
-      contract.deployTransaction.hash
+      contract.deployTransaction.hash,
     );
 
-    console.log('Staking Proxy Address: ', await stakingContract.getAddress());
+    console.log("Staking Proxy Address: ", await stakingContract.getAddress());
     console.log(
-      'New Staking Implementation Address: ',
+      "New Staking Implementation Address: ",
       await upgrades.erc1967.getImplementationAddress(
-        await stakingContract.getAddress()
-      )
+        await stakingContract.getAddress(),
+      ),
     );
   }
 
-  if (deployRewardPool == 'true' && rewardPoolAddress) {
-    const RewardPool = await ethers.getContractFactory('RewardPool');
+  if (deployRewardPool == "true" && rewardPoolAddress) {
+    const RewardPool = await ethers.getContractFactory("RewardPool");
     // await upgrades.forceImport(rewardPoolAddress, RewardPool, { kind: 'uups' }); //use this to get ./openzeppelin/[network].json
     const rewardPoolContract = await upgrades.upgradeProxy(
       rewardPoolAddress,
-      RewardPool
+      RewardPool,
     );
     const contract = await rewardPoolContract.deployed();
     await ethers.provider.getTransactionReceipt(
-      contract.deployTransaction.hash
+      contract.deployTransaction.hash,
     );
 
     console.log(
-      'Reward Pool Proxy Address: ',
-      await rewardPoolContract.getAddress()
+      "Reward Pool Proxy Address: ",
+      await rewardPoolContract.getAddress(),
     );
     console.log(
-      'New Reward Pool Implementation Address: ',
+      "New Reward Pool Implementation Address: ",
       await upgrades.erc1967.getImplementationAddress(
-        await rewardPoolContract.getAddress()
-      )
+        await rewardPoolContract.getAddress(),
+      ),
     );
   }
 }

@@ -3,10 +3,12 @@
 pragma solidity >=0.6.2;
 
 import '../governance/wormhole/IWormholeReceiver.sol';
+import '../governance/wormhole/IWormholeRelayer.sol';
 import 'hardhat/console.sol';
 
 contract WormholeMock {
-    address public receiver;
+
+    address receiver; 
 
     receive() external payable {}
 

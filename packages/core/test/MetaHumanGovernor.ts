@@ -88,7 +88,7 @@ describe.only("MetaHumanGovernor", function () {
       voteToken.getAddress(),
       timelockController.getAddress(),
       [],
-      5, // voting delay
+      0,
       await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
       12,
@@ -280,8 +280,15 @@ describe.only("MetaHumanGovernor", function () {
   });
 
   it("Should create a grant proposal", async function () {
-    // const proposalId = await createBasicProposal(voteToken, governor, owner);
-    // expect(proposalId).to.equal(0);
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner,
+    );
+
+    expect(proposalId).to.not.be.null;
   });
 
   it("Should create a cross-chain grant proposal successfully", async function () {
@@ -360,7 +367,7 @@ describe.only("MetaHumanGovernor", function () {
   });
 
   it("Should revert when voting on a non-active proposal", async function () {
-    await createMockUserWithVotingPower(voteToken, user1);
+    // create proposal
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -368,7 +375,8 @@ describe.only("MetaHumanGovernor", function () {
       governor,
       owner,
     );
-
+    // mock account with voting power
+    await createMockUserWithVotingPower(voteToken, user1);
     await expect(
       governor.connect(user1).castVote(proposalId, 1),
     ).to.be.revertedWith("Governor: vote not currently active");

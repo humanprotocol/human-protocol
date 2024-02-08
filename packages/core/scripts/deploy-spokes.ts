@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-import { ethers } from 'hardhat';
-import dotenv from 'dotenv';
+import { ethers } from "hardhat";
+import dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
@@ -19,11 +19,11 @@ async function main() {
     !spokeAutomaticRelayerAddress ||
     !magistrateAddress
   ) {
-    throw new Error('One or more required environment variables are missing');
+    throw new Error("One or more required environment variables are missing");
   }
 
   const DAOSpokeContract = await ethers.getContractFactory(
-    'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+    "contracts/governance/DAOSpokeContract.sol:DAOSpokeContract",
   );
   const daoSpokeContract = await DAOSpokeContract.deploy(
     ethers.zeroPadValue(governorAddress, 32),
@@ -32,13 +32,13 @@ async function main() {
     targetSecondsPerBlock,
     spokeChainId,
     spokeAutomaticRelayerAddress,
-    magistrateAddress
+    magistrateAddress,
   );
 
   await daoSpokeContract.waitForDeployment();
   console.log(
-    'DAOSpokeContract deployed to:',
-    await daoSpokeContract.getAddress()
+    "DAOSpokeContract deployed to:",
+    await daoSpokeContract.getAddress(),
   );
 }
 

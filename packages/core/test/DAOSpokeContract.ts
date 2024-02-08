@@ -91,7 +91,7 @@ describe.only("DAOSpokeContract", function () {
       voteToken.getAddress(),
       timelockController.getAddress(),
       [],
-      5, // voting delay
+      0,
       await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
       12,
