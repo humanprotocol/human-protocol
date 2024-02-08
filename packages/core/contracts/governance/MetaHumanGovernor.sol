@@ -504,8 +504,6 @@ contract MetaHumanGovernor is
             descriptionHash
         );
 
-        console.log(uint256(state(proposalId)));
-
         require(
             state(proposalId) == ProposalState.Succeeded,
             'Governor: proposal not successful'
