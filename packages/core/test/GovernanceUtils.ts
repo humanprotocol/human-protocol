@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Signer } from "ethers";
+import { BytesLike, Signer, Wallet } from "ethers";
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -245,7 +245,7 @@ export async function getHashToSignProposal(
   governor: MetaHumanGovernor,
   proposalId: number,
   support: number,
-): Promise<string> {
+): Promise<BytesLike> {
   const defaultAbiCoder = new ethers.AbiCoder();
 
   const blockChaindId = (await ethers.provider.getNetwork()).chainId;
@@ -285,16 +285,18 @@ export async function getHashToSignProposal(
   return digest;
 }
 
-// async function signHash(privateKeySeed: string, hashToSign: string) {
-//   const signer = new ethers.Wallet(privateKeySeed);
+export async function signHash(
+  proposalId: number,
+  governor: MetaHumanGovernor,
+  signer: Wallet,
+) {
+  const hash = await getHashToSignProposal(governor, proposalId, 1);
+  const signature = await signer.signMessage(hash);
 
-//   const ss = ethers.arrayify(hashToSign);
-//   const signature = await signer.signMessage(ethers.arrayify(hashToSign));
+  // Split the signature into its components (r, s, v)
+  const r = signature.slice(0, 66);
+  const s = "0x" + signature.slice(66, 130);
+  const v = parseInt(signature.slice(130, 132), 16);
 
-//   // Split the signature into its components (r, s, v)
-//   const r = signature.slice(0, 66);
-//   const s = '0x' + signature.slice(66, 130);
-//   const v = parseInt(signature.slice(130, 132), 16);
-
-//   return { v, r, s };
-// }
+  return { v, r, s };
+}

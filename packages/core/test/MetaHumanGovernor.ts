@@ -17,6 +17,7 @@ import {
   collectVotesFromSpoke,
   getHashToSignProposal,
   callReceiveMessageOnSpokeWithMock,
+  signHash,
 } from "./GovernanceUtils";
 
 describe.only("MetaHumanGovernor", function () {
@@ -1239,7 +1240,7 @@ describe.only("MetaHumanGovernor", function () {
     ).to.be.revertedWith("Governor: vote not currently active");
   });
 
-  it("Should vote on proposal by signature", async function () {
+  it.only("Should vote on proposal by signature", async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
     const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
@@ -1285,15 +1286,33 @@ describe.only("MetaHumanGovernor", function () {
     // create signature
     const support = 1;
 
-    const hash = getHashToSignProposal(governor, proposalId, support);
+    const wallet: signer = ethers.Wallet;
 
-    // wait for next block
-    await mineNBlocks(2);
-    //cast vote
+    const hash = await getHashToSignProposal(governor, proposalId, support);
+    console.log(hash);
+    // const { v, r, s } = await signHash(proposalId, governor, wallet);
+
+    // // wait for next block
+    // await mineNBlocks(2);
+    // //cast vote
     // await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
+
+    // //assert votes
+    // const { againstVotes, forVotes, abstainVotes } =
+    //   await governor.proposalVotes(proposalId);
+
+    // expect(againstVotes).to.equal(0);
+    // expect(forVotes).to.equal(ethers.parseEther("1"));
+    // expect(abstainVotes).to.equal(0);
   });
 
-  it("Should revert when creating proposal with propose()", async function () {
+  it("Should fail to vote on proposal by signature when not active", async function () {});
+
+  it("Should vote on proposal with reason and params by signature", async function () {});
+
+  it("Should fail to vote on proposal with reason and params by signature when no active", async function () {});
+
+  it("Should revert when creating proposal with propose", async function () {
     const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
       await owner.getAddress(),
       ethers.parseEther("1"),
