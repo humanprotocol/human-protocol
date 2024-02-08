@@ -21,7 +21,7 @@ export class OperatorController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
   @ApiTags('User-Operator')
-  @Post('/auth/signup')
+  @Post('/auth/web3/signup')
   @ApiOperation({ summary: 'Operator signup' })
   @UsePipes(new ValidationPipe())
   public signupOperator(

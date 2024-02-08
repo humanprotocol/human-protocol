@@ -8,7 +8,9 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { envValidator } from './common/config/env';
-import { OperatorModule } from "./modules/operator/operator.module";
+import { OperatorModule } from './modules/operator/operator.module';
+import { OperatorController } from './modules/operator/operator.conroller';
+import { WorkerController } from './modules/user-worker/worker.controller';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { OperatorModule } from "./modules/operator/operator.module";
     OperatorModule,
     IntegrationsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, OperatorController, WorkerController],
   providers: [AppService],
   exports: [HttpModule],
 })
