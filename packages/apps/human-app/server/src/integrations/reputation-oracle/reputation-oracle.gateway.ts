@@ -29,7 +29,10 @@ export class ReputationOracleGateway {
       ExternalApiName.REPUTATION_ORACLE,
     );
   }
-  getEndpointOptions<dataType>(endpointName: EndpointName, data: dataType) {
+  private getEndpointOptions<dataType>(
+    endpointName: EndpointName,
+    data: dataType,
+  ) {
     const { method, endpoint, headers } =
       this.reputationOracleConfig.endpoints[endpointName];
     return {
@@ -40,7 +43,7 @@ export class ReputationOracleGateway {
     };
   }
 
-  async handleRequestToReputationOracle<T>(
+  private async handleRequestToReputationOracle<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
     try {
