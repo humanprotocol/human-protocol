@@ -9,10 +9,13 @@ import {
 } from '../../modules/user-worker/interfaces/worker-registration.interface';
 import {
   SignupOperatorCommand,
-  SignupOperatorData
-} from "../../modules/operator/interfaces/operator-registration.interface";
-import { GatewayConfigService } from "../gateway-config.service";
-import { GatewayConfig } from "../../common/config/enpoint.interface";
+  SignupOperatorData,
+} from '../../modules/operator/interfaces/operator-registration.interface';
+import { GatewayConfigService } from '../gateway-config.service';
+import { GatewayConfig } from '../../common/config/endpoint.interface';
+import { ExternalApiName } from '../../common/enums/external-api-name';
+import { EndpointName } from '../../common/enums/endpoint-name';
+import { AxiosRequestConfig } from 'axios';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -22,26 +25,25 @@ export class ReputationOracleGateway {
     gatewayConfigService: GatewayConfigService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {
-    this.reputationOracleConfig = gatewayConfigService.getConfig('reputation_oracle');
+    this.reputationOracleConfig = gatewayConfigService.getConfig(
+      ExternalApiName.REPUTATION_ORACLE,
+    );
   }
-  getEndpointOptions<dataType>(endpointName: string, data: dataType) {
-    const endpointConfig = this.reputationOracleConfig.endpoints[endpointName];
+  getEndpointOptions<dataType>(endpointName: EndpointName, data: dataType) {
+    const { method, endpoint, headers } =
+      this.reputationOracleConfig.endpoints[endpointName];
     return {
-      method: endpointConfig.method,
-      url: this.reputationOracleConfig + endpointConfig.endpoint,
-      headers : endpointConfig.headers,
+      method: method,
+      url: `${this.reputationOracleConfig.url}${endpoint}`,
+      headers: headers,
       data: data,
     };
   }
-  async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
-    const signupWorkerData = this.mapper.map(
-      command,
-      SignupWorkerCommand,
-      SignupWorkerData,
-    );
 
+  async handleRequestToReputationOracle<T>(
+    options: AxiosRequestConfig,
+  ): Promise<T> {
     try {
-      const options = this.getEndpointOptions<SignupWorkerData>('workerSignup', signupWorkerData);
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
     } catch (error) {
@@ -55,6 +57,19 @@ export class ReputationOracleGateway {
       }
     }
   }
+  async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
+    const signupWorkerData = this.mapper.map(
+      command,
+      SignupWorkerCommand,
+      SignupWorkerData,
+    );
+
+    const options = this.getEndpointOptions<SignupWorkerData>(
+      EndpointName.WORKER_SIGNUP,
+      signupWorkerData,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
 
   async sendOperatorSignup(command: SignupOperatorCommand): Promise<void> {
     const signupOperatorData = this.mapper.map(
@@ -62,22 +77,10 @@ export class ReputationOracleGateway {
       SignupOperatorCommand,
       SignupOperatorData,
     );
-    // todo: Endpoint name should be an enum
-    // todo: is the logic during processing operator same as worker?
-    const options = this.getEndpointOptions<SignupOperatorData>('operatorSignup', signupOperatorData); // todo: Operations as a type
-
-    try {
-      const response = await lastValueFrom(this.httpService.request(options)); // todo: extract this to a method
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      } else {
-        throw new HttpException(
-          'Error occurred while redirecting request.',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
+    const options = this.getEndpointOptions<SignupOperatorData>(
+      EndpointName.OPERATOR_SIGNUP,
+      signupOperatorData,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
   }
 }

@@ -1,30 +1,31 @@
-import { ConfigService } from "@nestjs/config";
-import { GatewayConfig, Gateways } from "../common/config/enpoint.interface";
-import { Injectable } from "@nestjs/common";
+import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import { ExternalApiName } from '../common/enums/external-api-name';
+import { EndpointName } from '../common/enums/endpoint-name';
+import { GatewayConfig, Gateways } from '../common/config/endpoint.interface';
 
-
-@Injectable // todo: fix this
+@Injectable()
 export class GatewayConfigService {
   constructor(private configService: ConfigService) {}
 
   private getGatewaysConfig(): Gateways {
     return {
       gateways: {
-        reputation_oracle: {
+        [ExternalApiName.REPUTATION_ORACLE]: {
           url: this.configService.get<string>('REPUTATION_ORACLE_URL')!,
           endpoints: {
-            workerSignup: {
-              endpoint: "/auth/signup",
-              method: "POST",
+            [EndpointName.WORKER_SIGNUP]: {
+              endpoint: '/auth/signup',
+              method: 'POST',
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
             },
-            operatorSignup: {
-              endpoint: "/auth/signup",
-              method: "POST",
+            [EndpointName.OPERATOR_SIGNUP]: {
+              endpoint: '/auth/signup',
+              method: 'POST',
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
             },
           },
@@ -32,7 +33,7 @@ export class GatewayConfigService {
       },
     };
   }
-  getConfig(gateway: string): GatewayConfig {
-    return this.getGatewaysConfig()["gateways"][gateway];
+  getConfig(gateway: ExternalApiName): GatewayConfig {
+    return this.getGatewaysConfig().gateways[gateway];
   }
 }
