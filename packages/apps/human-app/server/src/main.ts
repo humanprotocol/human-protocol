@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
-import { EnvironmentConfigService } from './common/config/env';
+import { EnvironmentConfigService } from './common/config/environment-config.service';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');

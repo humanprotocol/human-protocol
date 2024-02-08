@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { OperatorService } from './operator.service';
-import { IntegrationsModule } from '../../integrations/integrations.module';
+import { ReputationOracleModule } from '../../integrations/reputation-oracle/reputation-oracle.module';
 import { OperatorProfile } from './operator.mapper';
 
 @Module({
-  imports: [IntegrationsModule],
+  imports: [ReputationOracleModule],
   providers: [OperatorService, OperatorProfile],
   exports: [OperatorService],
 })

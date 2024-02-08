@@ -1,18 +1,18 @@
-import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
-import { ExternalApiName } from '../common/enums/external-api-name';
-import { EndpointName } from '../common/enums/endpoint-name';
-import { GatewayConfig, Gateways } from '../common/config/endpoint.interface';
+import { ExternalApiName } from '../enums/external-api-name';
+import { EndpointName } from '../enums/endpoint-name';
+import { GatewayConfig, Gateways } from '../interfaces/endpoint.interface';
+import { EnvironmentConfigService } from './environment-config.service';
 
 @Injectable()
 export class GatewayConfigService {
-  constructor(private configService: ConfigService) {}
+  constructor(private envConfig: EnvironmentConfigService) {}
 
   private getGatewaysConfig(): Gateways {
     return {
       gateways: {
         [ExternalApiName.REPUTATION_ORACLE]: {
-          url: this.configService.get<string>('REPUTATION_ORACLE_URL')!,
+          url: this.envConfig.reputationOracleUrl!,
           endpoints: {
             [EndpointName.WORKER_SIGNUP]: {
               endpoint: '/auth/signup',
