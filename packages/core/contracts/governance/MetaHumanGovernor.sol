@@ -11,6 +11,7 @@ import './DAOSpokeContract.sol';
 import './wormhole/IWormholeRelayer.sol';
 import './wormhole/IWormholeReceiver.sol';
 import './magistrate/Magistrate.sol';
+import 'hardhat/console.sol';
 
 /**
  * @title MetaHumanGovernor
@@ -502,6 +503,8 @@ contract MetaHumanGovernor is
             calldatas,
             descriptionHash
         );
+
+        console.log(uint256(state(proposalId)));
 
         require(
             state(proposalId) == ProposalState.Succeeded,

@@ -71,7 +71,7 @@ export async function callReceiveMessageOnSpokeWithMock(
     result.emitterChainId,
     result.hash,
     {
-      value: ethers.parseEther("0.1"),
+      value: 100,
     },
   );
 }
@@ -148,6 +148,9 @@ export async function createBasicProposal(
     values,
     calldatas,
     "",
+    {
+      value: 100,
+    },
   );
   const receipt = await txResponse.wait();
   const eventSignature = ethers.id(
@@ -204,24 +207,6 @@ export async function finishProposal(
   await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
 }
 
-export async function callReceiveMessageOnHubWithMock(
-  wormholeMock: WormholeMock,
-  result: IWormholeVM,
-): Promise<void> {
-  const vaas: string[] = [];
-
-  await wormholeMock.receiveWormholeMessages(
-    result.payload,
-    vaas,
-    ethers.zeroPadBytes(result.emitterAddress, 32),
-    result.emitterChainId,
-    result.hash,
-    {
-      value: ethers.parseEther("0.1"),
-    },
-  );
-}
-
 export async function collectVotesFromSpoke(
   daoSpoke: DAOSpokeContract,
   wormholeMock: WormholeMock,
@@ -234,12 +219,17 @@ export async function collectVotesFromSpoke(
 
   const message = defaultAbiCoder.encode(
     ["uint16", "uint256", "uint256", "uint256", "uint256"],
-    [2, proposalId, ethers.parseEther("1"), 0, 0],
+    [0, proposalId, ethers.parseEther("1"), 0, 0],
   );
 
   const payload = defaultAbiCoder.encode(
     ["address", "uint256", "address", "bytes"],
-    [await governor.getAddress(), hubChainId, daoSpoke.getAddress(), message],
+    [
+      await governor.getAddress(),
+      hubChainId,
+      await daoSpoke.getAddress(),
+      message,
+    ],
   );
 
   const mockResult = await createMessageWithPayload(
