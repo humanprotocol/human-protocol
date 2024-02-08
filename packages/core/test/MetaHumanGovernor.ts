@@ -1285,9 +1285,31 @@ describe.only("MetaHumanGovernor", function () {
     expect(magistrate).to.equal(await owner.getAddress());
   });
 
+  it("Should allow to transfer magistrate", async function () {
+    const newMagistrate = await user1.getAddress();
+    await governor.connect(owner).transferMagistrate(newMagistrate);
+    const magistrate = await governor.magistrate();
+    expect(magistrate).to.equal(newMagistrate);
+  });
+
   it("Should reverts when to transfer magistrate when it's address zero", async function () {
     await expect(
       governor.transferMagistrate(ethers.ZeroAddress),
     ).to.be.revertedWith("Magistrate: new magistrate is the zero address");
+  });
+
+  it("Should withdraw as Magistrate", async function () {
+    const contractBalance = await token.balanceOf(await governor.getAddress());
+    const beforeWithdraw = await token.balanceOf(await owner.getAddress());
+    await governor.connect(owner).withdrawFunds();
+    const afterWithdraw = await token.balanceOf(await owner.getAddress());
+    const diffference = afterWithdraw - beforeWithdraw;
+    expect(diffference).to.equal(contractBalance);
+  });
+
+  it("Should reverts if not magistrate tries to withdraw", async function () {
+    await expect(governor.connect(user1).withdrawFunds()).to.be.revertedWith(
+      "Magistrate: caller is not the magistrate",
+    );
   });
 });
