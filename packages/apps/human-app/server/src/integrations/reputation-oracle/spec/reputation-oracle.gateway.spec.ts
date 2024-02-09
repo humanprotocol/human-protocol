@@ -4,10 +4,10 @@ import { GatewayConfigService } from '../../../common/config/gateway-config.serv
 import { Mapper } from '@automapper/core';
 import { of, throwError } from 'rxjs';
 import { ReputationOracleGateway } from '../reputation-oracle.gateway';
-import { SignupWorkerCommand } from '../../../modules/worker/interfaces/worker-registration.interface';
+import { SignupWorkerCommand } from '../../../modules/user-worker/interfaces/worker-registration.interface';
 import nock from 'nock';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SignupOperatorCommand } from '../../../modules/operator/interfaces/operator-registration.interface';
+import { SignupOperatorCommand } from '../../../modules/user-operator/interfaces/operator-registration.interface';
 import { gatewayConfigServiceMock } from '../../../common/config/gateway-config.service.mock';
 
 describe('ReputationOracleGateway', () => {
@@ -51,7 +51,7 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendWorkerSignup', () => {
-    it('should successfully call the reputation oracle worker signup endpoint', async () => {
+    it('should successfully call the reputation oracle user-worker signup endpoint', async () => {
       const command = new SignupWorkerCommand(
         'asfdsafdd@asdf.cvd',
         'asdfasdf2133!!dasfA',
@@ -105,7 +105,7 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendOperatorSignup', () => {
-    it('should successfully call the reputation oracle operator signup endpoint', async () => {
+    it('should successfully call the reputation oracle user-operator signup endpoint', async () => {
       const command = new SignupOperatorCommand(
         '0x2348237487df12f123a455234',
         '0x23u4dfa32423daf2314',

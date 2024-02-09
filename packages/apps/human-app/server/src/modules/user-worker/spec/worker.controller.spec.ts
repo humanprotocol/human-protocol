@@ -40,7 +40,7 @@ describe('WorkerController', () => {
   });
 
   describe('signup', () => {
-    it('should worker service signup method with proper fields set', async () => {
+    it('should user-worker service signup method with proper fields set', async () => {
       const dto: SignupWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',

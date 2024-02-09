@@ -6,11 +6,11 @@ import { Mapper } from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
-} from '../../modules/worker/interfaces/worker-registration.interface';
+} from '../../modules/user-worker/interfaces/worker-registration.interface';
 import {
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/operator/interfaces/operator-registration.interface';
+} from '../../modules/user-operator/interfaces/operator-registration.interface';
 import { GatewayConfigService } from '../../common/config/gateway-config.service';
 import { GatewayConfig } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';

@@ -4,11 +4,11 @@ import { createMap, Mapper } from '@automapper/core';
 import {
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/operator/interfaces/operator-registration.interface';
+} from '../../modules/user-operator/interfaces/operator-registration.interface';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
-} from '../../modules/worker/interfaces/worker-registration.interface';
+} from '../../modules/user-worker/interfaces/worker-registration.interface';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {

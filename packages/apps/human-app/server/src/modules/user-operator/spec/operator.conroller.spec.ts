@@ -40,7 +40,7 @@ describe('OperatorController', () => {
   });
 
   describe('signup', () => {
-    it('should worker service signup method with proper fields set', async () => {
+    it('should user-worker service signup method with proper fields set', async () => {
       const dto: SignupOperatorDto = {
         address: '0x35d5511213a21f478e3e3f6f7e9d5f0f0e75e7b3',
         signature: '0x49506f2b430af3e3e3f6f7e9d5f0f0e75e7b3',
