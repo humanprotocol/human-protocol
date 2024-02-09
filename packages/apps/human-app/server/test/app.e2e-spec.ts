@@ -8,12 +8,12 @@ import { beforeAll } from '@jest/globals';
 import { generateOperatorSignupRequestBody } from './fixtures/user-operator.fixture';
 import { SignupOperatorData } from '../src/modules/user-operator/interfaces/operator-registration.interface';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentConfigService } from '../src/common/config/environment-config.service';
+import { TestEnvironmentConfigService, testEnvValidator } from '../src/common/config/test-environment-config.service';
 
 describe('Human APP (e2e) tests', () => {
   let app: INestApplication;
   let configService: ConfigService;
-  let envConfigService: EnvironmentConfigService;
+  let envConfigService: TestEnvironmentConfigService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,7 +22,17 @@ describe('Human APP (e2e) tests', () => {
 
     app = moduleFixture.createNestApplication();
     configService = moduleFixture.get<ConfigService>(ConfigService);
-    envConfigService = new EnvironmentConfigService(configService);
+    envConfigService = new TestEnvironmentConfigService(configService);
+
+    const { error } = testEnvValidator.validate({
+      E2E_TESTING_EMAIL_ADDRESS: envConfigService.e2eTestingEmailAddress,
+      E2E_TESTING_PASSWORD: envConfigService.e2eTestingPassword,
+    });
+
+    if (error) {
+      throw new Error(`Test environment is not valid: ${error.message}`);
+    }
+
     await app.init();
   });
 

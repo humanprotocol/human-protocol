@@ -14,18 +14,10 @@ export class EnvironmentConfigService {
   get reputationOracleUrl(): string {
     return this.configService.get<string>('REPUTATION_ORACLE_URL', '');
   }
-  get e2eTestingEmailAddress(): string {
-    return this.configService.get<string>('E2E_TESTING_EMAIL_ADDRESS', '');
-  }
-  get e2eTestingPassword(): string {
-    return this.configService.get<string>('E2E_TESTING_PASSWORD', '');
-  }
 }
 
 export const envValidator = Joi.object({
   HOST: Joi.string().default('localhost'),
   PORT: Joi.string().default(5010),
   REPUTATION_ORACLE_URL: Joi.string().required(),
-  E2E_TESTING_EMAIL_ADDRESS: Joi.string().required(),
-  E2E_TESTING_PASSWORD: Joi.string().required(),
 });
