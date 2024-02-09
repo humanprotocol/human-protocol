@@ -5,7 +5,7 @@ from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageClient
 
-from src.core.config import LocalhostConfig
+from src.core.config import Config
 from src.services.cloud.utils import parse_bucket_url
 
 
@@ -67,4 +67,7 @@ def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
 
 
 def get_recording_oracle_address(chain_id: int, escrow_address: str) -> str:
+    if address := Config.localhost.recording_oracle_address:
+        return address
+
     return get_escrow(chain_id, escrow_address).recording_oracle
