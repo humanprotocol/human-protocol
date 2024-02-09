@@ -85,7 +85,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     # TODO:
     # Fix src/crons/state_trackers.py
     # Where in `cvat_service.get_active_assignments()` return value will be empty
-    # because it actually looking for the expired assignments 
+    # because it actually looking for the expired assignments
 
     # def test_track_canceled_assignments(self):
     #     (_, _, cvat_job) = create_project_task_and_job(

@@ -70,9 +70,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -115,9 +113,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -180,9 +176,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -236,9 +230,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -283,9 +275,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_outgoing_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -313,9 +303,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_outgoing_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)

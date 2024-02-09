@@ -57,10 +57,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/utils/manifest.json") as data,
-            patch("src.cvat.tasks.get_escrow_manifest") as mock_get_manifest,
-            patch("src.cvat.tasks.cvat_api") as mock_cvat_api,
-            patch("src.cvat.tasks.cloud_service") as mock_cloud_service,
-            patch("src.cvat.tasks.get_gt_filenames") as mock_gt_filenames,
+            patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
+            patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
+            patch("src.handlers.job_creation.get_gt_filenames") as mock_gt_filenames,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -77,14 +77,15 @@ class ServiceIntegrationTest(unittest.TestCase):
                 "image2.jpg",
             ]
             mock_gt_filenames.return_value = filenames
-            mock_cloud_service.list_files.return_value = filenames
+
+            mock_cloud_client = Mock()
+            mock_cloud_client.list_filenames.return_value = filenames
+            mock_make_cloud_client.return_value = mock_cloud_client
 
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -193,12 +194,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/utils/manifest.json") as data,
-            patch("src.cvat.tasks.get_escrow_manifest") as mock_get_manifest,
-            patch("src.cvat.tasks.cvat_api") as mock_cvat_api,
-            patch("src.cvat.tasks.cloud_service"),
-            patch("src.cvat.tasks.get_gt_filenames"),
+            patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
+            patch("src.handlers.job_creation.cloud_service"),
+            patch("src.handlers.job_creation.get_gt_filenames"),
             patch(
-                "src.cvat.tasks.db_service.add_project_images",
+                "src.handlers.job_creation.db_service.add_project_images",
                 side_effect=Exception("Error"),
             ),
         ):
@@ -216,9 +217,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -268,9 +267,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -321,9 +318,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -375,9 +370,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -425,9 +418,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_outgoing_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -455,9 +446,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_outgoing_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)

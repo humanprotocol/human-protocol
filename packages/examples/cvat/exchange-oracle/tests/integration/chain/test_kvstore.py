@@ -52,9 +52,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_job_launcher_url_invalid_escrow(self):
         with self.assertRaises(EscrowClientError) as error:
             get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_url_invalid_recording_address(self):
         with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
@@ -72,17 +70,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
-            recording_url = get_recording_oracle_url(
-                self.w3.eth.chain_id, escrow_address
-            )
+            recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
             self.assertEqual(recording_url, DEFAULT_URL)
 
     def test_get_recording_oracle_url_invalid_escrow(self):
         with self.assertRaises(EscrowClientError) as error:
             get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
         with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
@@ -91,7 +85,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")
-            recording_url = get_recording_oracle_url(
-                self.w3.eth.chain_id, escrow_address
-            )
+            recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
             self.assertEqual(recording_url, "")
