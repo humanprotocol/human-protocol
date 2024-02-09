@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
-import { GatewayConfigService } from '../../common/config/gateway-config.service';
+import { GatewayConfigService } from '../../../common/config/gateway-config.service';
 import { Mapper } from '@automapper/core';
 import { of, throwError } from 'rxjs';
-import { ReputationOracleGateway } from './reputation-oracle.gateway';
-import { SignupWorkerCommand } from '../../modules/worker/interfaces/worker-registration.interface';
+import { ReputationOracleGateway } from '../reputation-oracle.gateway';
+import { SignupWorkerCommand } from '../../../modules/worker/interfaces/worker-registration.interface';
 import nock from 'nock';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SignupOperatorCommand } from '../../modules/operator/interfaces/operator-registration.interface';
+import { SignupOperatorCommand } from '../../../modules/operator/interfaces/operator-registration.interface';
+import { gatewayConfigServiceMock } from '../../../common/config/gateway-config.service.mock';
 
 describe('ReputationOracleGateway', () => {
   let service: ReputationOracleGateway;
@@ -18,30 +19,11 @@ describe('ReputationOracleGateway', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReputationOracleGateway,
+        GatewayConfigService,
         {
           provide: HttpService,
           useValue: {
             request: jest.fn().mockReturnValue(of({ data: 'mocked response' })),
-          },
-        },
-        {
-          provide: GatewayConfigService,
-          useValue: {
-            getConfig: jest.fn().mockReturnValue({
-              url: 'https://expample.com',
-              endpoints: {
-                WORKER_SIGNUP: {
-                  endpoint: '/auth/signup',
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                },
-                OPERATOR_SIGNUP: {
-                  endpoint: '/auth/web3/signup',
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                },
-              },
-            }),
           },
         },
         {
@@ -54,7 +36,10 @@ describe('ReputationOracleGateway', () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideProvider(GatewayConfigService)
+      .useValue(gatewayConfigServiceMock)
+      .compile();
 
     service = module.get<ReputationOracleGateway>(ReputationOracleGateway);
     httpService = module.get<HttpService>(HttpService);
