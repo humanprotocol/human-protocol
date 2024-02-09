@@ -17,7 +17,7 @@ import {
   SigninWorkerCommand,
   SigninWorkerDto,
 } from './interfaces/worker-signin.interface';
-import { SigninWorkerResponse } from '../../integrations/reputation-oracle/reputation-oracle.interface';
+import { SigninWorkerResponse } from './interfaces/worker-signin.interface';
 
 @Controller()
 export class WorkerController {

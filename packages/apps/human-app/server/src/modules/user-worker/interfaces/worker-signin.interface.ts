@@ -27,3 +27,8 @@ export class SigninWorkerData {
   @AutoMap()
   password: string;
 }
+
+export class SigninWorkerResponse {
+  refresh_token: string;
+  access_token: string;
+}

@@ -6,8 +6,3 @@ export type RequestDataType =
   | SignupWorkerData
   | SignupOperatorData
   | SigninWorkerData;
-
-export class SigninWorkerResponse {
-  refresh_token: string;
-  access_token: string;
-}

@@ -17,12 +17,11 @@ import { ExternalApiName } from '../../common/enums/external-api-name';
 import { EndpointName } from '../../common/enums/endpoint-name';
 import { AxiosRequestConfig } from 'axios';
 import {
-  RequestDataType,
-  SigninWorkerResponse,
+  RequestDataType
 } from './reputation-oracle.interface';
 import {
   SigninWorkerCommand,
-  SigninWorkerData,
+  SigninWorkerData, SigninWorkerResponse,
 } from '../../modules/user-worker/interfaces/worker-signin.interface';
 
 @Injectable()
