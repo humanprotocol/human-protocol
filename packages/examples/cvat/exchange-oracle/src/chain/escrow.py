@@ -57,6 +57,7 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     manifest_content = StorageClient(endpoint_url=host, secure=secure).download_files(
         [parsed_url.path], bucket=parsed_url.bucket_name
     )[0]
+
     return json.loads(manifest_content.decode("utf-8"))
 
 
