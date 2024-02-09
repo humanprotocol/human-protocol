@@ -7,11 +7,14 @@ import { WorkerModule } from './modules/user-worker/worker.module';
 import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { envValidator } from './common/config/environment-config.service';
+import {
+  EnvironmentConfigService,
+  envValidator,
+} from './common/config/environment-config.service';
 import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
-import { AppConfigModule } from './common/config/app-config.module';
+import { GatewayConfigService } from './common/config/gateway-config.service';
 
 @Module({
   imports: [
@@ -27,10 +30,9 @@ import { AppConfigModule } from './common/config/app-config.module';
     WorkerModule,
     OperatorModule,
     ReputationOracleModule,
-    AppConfigModule,
   ],
   controllers: [AppController, OperatorController, WorkerController],
-  providers: [AppService],
+  providers: [AppService, EnvironmentConfigService, GatewayConfigService],
   exports: [HttpModule],
 })
 export class AppModule {}
