@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { GatewayConfigService } from '../../../common/config/gateway-config.service';
-import { Mapper } from '@automapper/core';
 import { of, throwError } from 'rxjs';
 import { ReputationOracleGateway } from '../reputation-oracle.gateway';
 import { SignupWorkerCommand } from '../../../modules/user-worker/interfaces/worker-registration.interface';
@@ -13,7 +12,6 @@ import { gatewayConfigServiceMock } from '../../../common/config/gateway-config.
 describe('ReputationOracleGateway', () => {
   let service: ReputationOracleGateway;
   let httpService: HttpService;
-  let mapper: Mapper;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,7 +41,6 @@ describe('ReputationOracleGateway', () => {
 
     service = module.get<ReputationOracleGateway>(ReputationOracleGateway);
     httpService = module.get<HttpService>(HttpService);
-    mapper = module.get<Mapper>('automapper:nestjs:default');
   });
 
   it('should be defined', () => {
@@ -105,7 +102,7 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendOperatorSignup', () => {
-    it('should successfully call the reputation oracle user-operator signup endpoint', async () => {
+    it('should successfully call the reputation oracle operator signup endpoint', async () => {
       const command = new SignupOperatorCommand(
         '0x2348237487df12f123a455234',
         '0x23u4dfa32423daf2314',

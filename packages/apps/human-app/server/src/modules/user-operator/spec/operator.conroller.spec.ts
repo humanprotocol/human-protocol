@@ -1,6 +1,5 @@
 import { OperatorController } from '../operator.controller';
 import { OperatorService } from '../operator.service';
-import { Mapper } from '@automapper/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -15,7 +14,6 @@ import { operatorServiceMock } from './operator.service.mock';
 describe('OperatorController', () => {
   let controller: OperatorController;
   let workerService: OperatorService;
-  let mapper: Mapper;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,7 +38,7 @@ describe('OperatorController', () => {
   });
 
   describe('signup', () => {
-    it('should user-worker service signup method with proper fields set', async () => {
+    it('should worker service signup method with proper fields set', async () => {
       const dto: SignupOperatorDto = {
         address: '0x35d5511213a21f478e3e3f6f7e9d5f0f0e75e7b3',
         signature: '0x49506f2b430af3e3e3f6f7e9d5f0f0e75e7b3',
