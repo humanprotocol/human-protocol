@@ -15,10 +15,8 @@ import {
   mineNBlocks,
   createMessageWithPayload,
   collectVotesFromSpoke,
-  getHashToSignProposal,
   callReceiveMessageOnSpokeWithMock,
-  createMockUserWithVotingPowerWithPk,
-  signHash,
+  updateVotingDelay,
 } from "./GovernanceUtils";
 
 describe.only("MetaHumanGovernor", function () {
@@ -402,9 +400,19 @@ describe.only("MetaHumanGovernor", function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it.skip("Should revert when voting on a non-active proposal", async function () {
+  it("Should revert when voting on a non-active proposal", async function () {
     // mock account with voting power
     await createMockUserWithVotingPower(voteToken, user1);
+
+    // Update voting delay to 2
+    await updateVotingDelay(
+      daoSpoke,
+      voteToken,
+      governor,
+      wormholeMockForGovernor,
+      2,
+      user1,
+    );
 
     // create proposal
     const proposalId = await createBasicProposal(
@@ -656,73 +664,61 @@ describe.only("MetaHumanGovernor", function () {
     expect(balanceAfterExecution).to.be.greaterThan(balanceBeforeExecution);
   });
 
-  it(
-    "Should revert to queue a proposal when a collection phase is unfinished ",
-  ),
-    async function () {
-      const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
-        await owner.getAddress(),
-        ethers.parseEther("1"),
-      ]);
-      await token.transfer(
-        await timelockController.getAddress(),
-        ethers.parseEther("1"),
-      );
-      const targets = [await voteToken.getAddress()];
-      const values = [0];
-      const calldatas = [encodedCall];
+  it("Should revert to queue a proposal when a collection phase is unfinished ", async function () {
+    const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
+      await owner.getAddress(),
+      ethers.parseEther("1"),
+    ]);
+    await token.transfer(
+      await timelockController.getAddress(),
+      ethers.parseEther("1"),
+    );
+    const targets = [await voteToken.getAddress()];
+    const values = [0];
+    const calldatas = [encodedCall];
 
-      const txReponse = await governor.crossChainPropose(
-        targets,
-        values,
-        calldatas,
-        "test1",
-        {
-          value: 100,
-        },
-      );
-      const receipt = await txReponse.wait();
-      const eventSignature = ethers.id(
-        "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
-      );
+    const txReponse = await governor.crossChainPropose(
+      targets,
+      values,
+      calldatas,
+      "test1",
+      {
+        value: 100,
+      },
+    );
+    const receipt = await txReponse.wait();
+    const eventSignature = ethers.id(
+      "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
+    );
 
-      const event = receipt?.logs?.find(
-        (log) => log.topics[0] === eventSignature,
-      );
-      if (!event) throw new Error("ProposalCreated event not found");
-      const decodedData = governor.interface.decodeEventLog(
-        "ProposalCreated",
-        event.data,
-        event.topics,
-      );
+    const event = receipt?.logs?.find(
+      (log) => log.topics[0] === eventSignature,
+    );
+    if (!event) throw new Error("ProposalCreated event not found");
+    const decodedData = governor.interface.decodeEventLog(
+      "ProposalCreated",
+      event.data,
+      event.topics,
+    );
 
-      const proposalId = decodedData[0];
+    const proposalId = decodedData[0];
 
-      // mock account with voting power
-      voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
-      voteToken.connect(user1).delegate(await user1.getAddress());
+    // mock account with voting power
+    voteToken.transfer(await user1.getAddress(), ethers.parseEther("5"));
+    voteToken.connect(user1).delegate(await user1.getAddress());
 
-      // wait for next block
-      await mineNBlocks(2);
-      //cast vote
-      await governor.connect(user1).castVote(proposalId, 1);
+    // wait for next block
+    await mineNBlocks(2);
+    //cast vote
+    await governor.connect(user1).castVote(proposalId, 1);
 
-      // wait for voting block to end
-      await mineNBlocks(50410);
+    // wait for voting block to end
+    await mineNBlocks(50410);
 
-      const defaultAbiCoder = new ethers.AbiCoder();
-
-      const description = defaultAbiCoder.encode(["string"], ["test1"]);
-
-      await expect(
-        governor.queue(
-          targets,
-          values,
-          calldatas,
-          ethers.keccak256(description),
-        ),
-      ).to.be.revertedWith("Governor: proposal not successful");
-    };
+    await expect(
+      governor.queue(targets, values, calldatas, ethers.id("test1")),
+    ).to.be.revertedWith("Governor: proposal not successful");
+  });
 
   it("Should revert to execute proposal when collection is unfinished", async function () {
     // mock account with voting power
@@ -1218,8 +1214,17 @@ describe.only("MetaHumanGovernor", function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it.skip("Should revert when voting on a non-active proposal with reason and params", async function () {
+  it("Should revert when voting on a non-active proposal with reason and params", async function () {
     await createMockUserWithVotingPower(voteToken, user1);
+
+    await updateVotingDelay(
+      daoSpoke,
+      voteToken,
+      governor,
+      wormholeMockForGovernor,
+      2,
+      user1,
+    );
 
     const proposalId = await createBasicProposal(
       daoSpoke,

@@ -1,5 +1,6 @@
+import { expect } from "chai";
 import { ethers } from "hardhat";
-import { BytesLike, Signer, Wallet, isBytesLike } from "ethers";
+import { Signer } from "ethers";
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -321,4 +322,77 @@ export async function signHash(
   const v = parseInt(signature.slice(130, 132), 16);
 
   return { v, r, s };
+}
+
+export async function updateVotingDelay(
+  daoSpoke: DAOSpokeContract,
+  voteToken: VHMToken,
+  governor: MetaHumanGovernor,
+  wormholeMockForGovernor: WormholeMock,
+  newDelay: number,
+  executer: Signer,
+): Promise<void> {
+  // mock account with voting power
+  await voteToken.transfer(await executer.getAddress(), ethers.parseEther("5"));
+  await voteToken.connect(executer).delegate(await executer.getAddress());
+
+  const encodedCall = governor.interface.encodeFunctionData("setVotingDelay", [
+    newDelay,
+  ]);
+  const targets = [await governor.getAddress()];
+  const values = [0];
+  const calldatas = [encodedCall];
+
+  const txResponse = await governor.crossChainPropose(
+    targets,
+    values,
+    calldatas,
+    "setVotingDelay",
+    {
+      value: 100,
+    },
+  );
+  const receipt = await txResponse.wait();
+  const eventSignature = ethers.id(
+    "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
+  );
+
+  const event = receipt?.logs?.find((log) => log.topics[0] === eventSignature);
+
+  if (!event) throw new Error("ProposalCreated event not found");
+
+  const decodedData = governor.interface.decodeEventLog(
+    "ProposalCreated",
+    event.data,
+    event.topics,
+  );
+
+  const proposalId = decodedData[0];
+
+  // wait for next block
+  await mineNBlocks(2);
+  //cast vote
+  await governor.connect(executer).castVote(proposalId, 1);
+
+  // wait for voting block to end
+  await mineNBlocks(50410);
+  await governor.requestCollections(proposalId, { value: 100 });
+  await collectVotesFromSpoke(
+    daoSpoke,
+    wormholeMockForGovernor,
+    proposalId,
+    governor,
+  );
+
+  await governor.queue(targets, values, calldatas, ethers.id("setVotingDelay"));
+  await governor.execute(
+    targets,
+    values,
+    calldatas,
+    ethers.id("setVotingDelay"),
+  );
+
+  expect((await governor.votingDelay()).toString()).to.equal(
+    newDelay.toString(),
+  );
 }
