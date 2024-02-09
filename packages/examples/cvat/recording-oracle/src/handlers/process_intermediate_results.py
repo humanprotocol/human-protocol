@@ -21,7 +21,7 @@ from src.core.types import TaskType
 from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.annotations import shift_ann
+from src.utils.annotations import ProjectLabels, shift_ann
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
 from src.validation.dataset_comparison import (
     BboxDatasetComparator,
@@ -736,7 +736,12 @@ def put_gt_into_merged_dataset(
         case TaskType.image_boxes_from_points:
             merged_dataset.update(gt_dataset)
         case TaskType.image_skeletons_from_boxes:
-            merged_dataset.update(gt_dataset)  # TODO: map labels
+            # The original behavior is broken for skeletons
+            gt_dataset = dm.Dataset(gt_dataset)
+            gt_dataset = gt_dataset.transform(
+                ProjectLabels, dst_labels=merged_dataset.categories()[dm.AnnotationType.label]
+            )
+            merged_dataset.update(gt_dataset)
         case _:
             assert False, f"Unknown task type {manifest.annotation.type}"
 
