@@ -142,8 +142,10 @@ class SkeletonDatasetComparator(DatasetComparator):
         super().__init__(*args, **kwargs)
 
         self._skeleton_info: Dict[int, list[str]] = {}
-        self.oks_sigma = 0.1  # TODO: try to estimate from GT
         self.categories: Optional[dm.CategoriesInfo] = None
+
+        # TODO: find better strategy for sigma estimation
+        self.oks_sigma = 0.1  # average value for COCO points
 
     def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
         self.categories = gt_dataset.categories()
