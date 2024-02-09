@@ -3,12 +3,13 @@ import { ChainId } from '@human-protocol/sdk';
 export type SignInRequest = {
   email: string;
   password: string;
+  hCaptchaToken: string;
 };
 
 export type SignUpRequest = {
   email: string;
   password: string;
-  confirm: string;
+  hCaptchaToken: string;
 };
 
 export type SignUpResponse = {
@@ -18,8 +19,8 @@ export type SignUpResponse = {
 
 export type ResetPasswordRequest = {
   password: string;
-  confirm: string;
   token: string;
+  hCaptchaToken: string;
 };
 
 export type CryptoPaymentRequest = {

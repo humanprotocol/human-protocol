@@ -13,7 +13,6 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { EncryptionModule } from '../encryption/encryption.module';
 import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
-import { WebhookModule } from '../webhook/webhook.module';
 
 @Module({
   imports: [
@@ -25,7 +24,6 @@ import { WebhookModule } from '../webhook/webhook.module';
     Web3Module,
     EncryptionModule,
     StorageModule,
-    WebhookModule,
   ],
   controllers: [JobController],
   providers: [Logger, JobService, JobRepository, RoutingProtocolService],

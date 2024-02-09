@@ -24,14 +24,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
-import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
   ErrorEscrow,
   ErrorJob,
-  ErrorPayment,
-  ErrorPostgres,
 } from '../../common/constants/errors';
 import {
   JobRequestType,
@@ -87,7 +84,6 @@ import {
   HCAPTCHA_POLYGON_MAX_POINTS,
   HCAPTCHA_POLYGON_MIN_POINTS,
 } from '../../common/constants';
-import { SortDirection } from '../../common/enums/collection';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   HMToken,
@@ -97,17 +93,14 @@ import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { StorageService } from '../storage/storage.service';
-import { WebhookService } from '../webhook/webhook.service';
 import stringify from 'json-stable-stringify';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { CronJobService } from '../cron-job/cron-job.service';
-import { CronJobType } from '../../common/enums/cron-job';
 import {
   generateBucketUrl,
   listObjectsInBucket,
 } from '../../common/utils/storage';
 import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
+import { PaymentEntity } from '../payment/payment.entity';
 
 @Injectable()
 export class JobService {
@@ -119,14 +112,12 @@ export class JobService {
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
-    private readonly paymentRepository: PaymentRepository,
     private readonly paymentService: PaymentService,
+    private readonly paymentRepository: PaymentRepository,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
-    private readonly encryption: Encryption,
     private readonly storageService: StorageService,
-    private readonly webhookService: WebhookService,
-    private readonly cronJobService: CronJobService,
+    @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
 
   public async createCvatManifest(
@@ -442,9 +433,12 @@ export class JobService {
       fundAmount = dto.fundAmount;
     }
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const feePercentage = this.configService.get<number>(
-      ConfigNames.JOB_LAUNCHER_FEE,
-    )!;
+    const feePercentage = Number(
+      await this.getOracleFee(
+        await this.web3Service.getOperatorAddress(),
+        chainId,
+      ),
+    );
     const fee = mul(div(feePercentage, 100), fundAmount);
     const usdTotalAmount = add(fundAmount, fee);
 
@@ -477,50 +471,38 @@ export class JobService {
         tokenFundAmount,
       );
     }
-    const { url, hash } = await this.uploadManifest(manifestOrigin, chainId);
-
-    const jobEntity = await this.jobRepository.create({
+    const { url, hash } = await this.uploadManifest(
+      requestType,
       chainId,
-      userId,
-      manifestUrl: url,
-      manifestHash: hash,
-      fee: tokenFee,
-      fundAmount: tokenFundAmount,
-      status: JobStatus.PENDING,
-      waitUntil: new Date(),
-    });
+      manifestOrigin,
+    );
 
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorJob.NotCreated);
-    }
+    let jobEntity = new JobEntity();
+    jobEntity.chainId = chainId;
+    jobEntity.userId = userId;
+    jobEntity.manifestUrl = url;
+    jobEntity.manifestHash = hash;
+    jobEntity.fee = tokenFee;
+    jobEntity.fundAmount = tokenFundAmount;
+    jobEntity.status = JobStatus.PENDING;
+    jobEntity.waitUntil = new Date();
 
-    try {
-      await this.paymentRepository.create({
-        userId,
-        jobId: jobEntity.id,
-        source: PaymentSource.BALANCE,
-        type: PaymentType.WITHDRAWAL,
-        amount: -tokenTotalAmount,
-        currency: TokenId.HMT,
-        rate: div(1, rate),
-        status: PaymentStatus.SUCCEEDED,
-      });
-    } catch (error) {
-      if (
-        error instanceof QueryFailedError &&
-        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
-      ) {
-        this.logger.log(ErrorPostgres.NumericFieldOverflow, JobService.name);
-        throw new ConflictException(ErrorPayment.IncorrectAmount);
-      } else {
-        this.logger.log(error, JobService.name);
-        throw new ConflictException(ErrorPayment.NotSuccess);
-      }
-    }
+    jobEntity = await this.jobRepository.createUnique(jobEntity);
+
+    const paymentEntity = new PaymentEntity();
+    paymentEntity.userId = userId;
+    paymentEntity.jobId = jobEntity.id;
+    paymentEntity.source = PaymentSource.BALANCE;
+    paymentEntity.type = PaymentType.WITHDRAWAL;
+    paymentEntity.amount = -tokenTotalAmount;
+    paymentEntity.currency = TokenId.HMT;
+    paymentEntity.rate = div(1, rate);
+    paymentEntity.status = PaymentStatus.SUCCEEDED;
+
+    await this.paymentRepository.createUnique(paymentEntity);
 
     jobEntity.status = JobStatus.PAID;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
   }
@@ -562,7 +544,7 @@ export class JobService {
 
     jobEntity.status = JobStatus.CREATED;
     jobEntity.escrowAddress = escrowAddress;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
   }
@@ -574,10 +556,7 @@ export class JobService {
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      const encription = await Encryption.build(
-        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
-      );
-      manifest = await encription.decrypt(manifest as any);
+      manifest = await this.encryption.decrypt(manifest as any);
     }
 
     if (isValidJSON(manifest)) {
@@ -613,7 +592,7 @@ export class JobService {
     });
 
     jobEntity.status = JobStatus.SET_UP;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
   }
@@ -632,13 +611,13 @@ export class JobService {
     });
 
     jobEntity.status = JobStatus.LAUNCHED;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
   }
 
   public async requestToCancelJob(userId: number, id: number): Promise<void> {
-    const jobEntity = await this.jobRepository.findOne({ id, userId });
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -664,7 +643,7 @@ export class JobService {
       jobEntity.status = JobStatus.TO_CANCEL;
     }
     jobEntity.retriesCount = 0;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
   }
 
   private getOracleAddresses(manifest: any) {
@@ -696,26 +675,25 @@ export class JobService {
   }
 
   public async uploadManifest(
-    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+    requestType: JobRequestType,
     chainId: ChainId,
+    data: any,
   ): Promise<any> {
-    let manifestFile: any = manifest;
+    let manifestFile = data;
     if (this.configService.get(ConfigNames.PGP_ENCRYPT)) {
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
       const publicKeys: string[] = [
         await kvstore.get(signer.address, KVStoreKeys.publicKey),
       ];
-      const oracleAddresses = this.getOracleAddresses(
-        (manifest as FortuneManifestDto).requestType,
-      );
+      const oracleAddresses = this.getOracleAddresses(requestType);
       for (const address in Object.values(oracleAddresses)) {
         const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
         if (publicKey) publicKeys.push(publicKey);
       }
 
       const encryptedManifest = await this.encryption.signAndEncrypt(
-        JSON.stringify(manifest),
+        JSON.stringify(data),
         publicKeys,
       );
       manifestFile = encryptedManifest;
@@ -788,7 +766,7 @@ export class JobService {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
         case JobStatusFilter.CANCELED:
-          jobs = await this.jobRepository.findJobsByStatusFilter(
+          jobs = await this.jobRepository.findByStatusFilter(
             networks,
             userId,
             status,
@@ -809,7 +787,7 @@ export class JobService {
             ethers.getAddress(escrow.address),
           );
 
-          jobs = await this.jobRepository.findJobsByEscrowAddresses(
+          jobs = await this.jobRepository.findByEscrowAddresses(
             userId,
             escrowAddresses,
           );
@@ -890,10 +868,10 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<FortuneFinalResultDto[] | string> {
-    const jobEntity = await this.jobRepository.findOne({
-      id: jobId,
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
       userId,
-    });
+    );
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
@@ -944,254 +922,7 @@ export class JobService {
     return finalResultUrl;
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  public async createEscrowCronJob() {
-    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
-      CronJobType.CreateEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Create escrow START');
-    const cronJob = await this.cronJobService.startCronJob(
-      CronJobType.CreateEscrow,
-    );
-
-    try {
-      const jobEntities = await this.jobRepository.find(
-        {
-          status: In([JobStatus.PAID]),
-          retriesCount: LessThanOrEqual(
-            this.configService.get(
-              ConfigNames.MAX_RETRY_COUNT,
-              DEFAULT_MAX_RETRY_COUNT,
-            ),
-          ),
-          waitUntil: LessThanOrEqual(new Date()),
-        },
-        {
-          order: {
-            waitUntil: SortDirection.ASC,
-          },
-        },
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.createEscrow(jobEntity);
-        } catch (err) {
-          this.logger.error(`Error creating escrow: ${err.message}`);
-          await this.handleProcessJobFailure(jobEntity);
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Create escrow STOP');
-    await this.cronJobService.completeCronJob(cronJob);
-  }
-
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  public async setupEscrowCronJob() {
-    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
-      CronJobType.SetupEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Setup escrow START');
-    const cronJob = await this.cronJobService.startCronJob(
-      CronJobType.SetupEscrow,
-    );
-
-    try {
-      const jobEntities = await this.jobRepository.find(
-        {
-          status: JobStatus.CREATED,
-          retriesCount: LessThanOrEqual(
-            this.configService.get(
-              ConfigNames.MAX_RETRY_COUNT,
-              DEFAULT_MAX_RETRY_COUNT,
-            ),
-          ),
-          waitUntil: LessThanOrEqual(new Date()),
-        },
-        {
-          order: {
-            waitUntil: SortDirection.ASC,
-          },
-        },
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.setupEscrow(jobEntity);
-        } catch (err) {
-          this.logger.error(`Error setting up escrow: ${err.message}`);
-          await this.handleProcessJobFailure(jobEntity);
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Setup escrow STOP');
-    await this.cronJobService.completeCronJob(cronJob);
-  }
-
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  public async fundEscrowCronJob() {
-    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
-      CronJobType.FundEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Fund escrow START');
-    const cronJob = await this.cronJobService.startCronJob(
-      CronJobType.FundEscrow,
-    );
-
-    try {
-      const jobEntities = await this.jobRepository.find(
-        {
-          status: JobStatus.SET_UP,
-          retriesCount: LessThanOrEqual(
-            this.configService.get(
-              ConfigNames.MAX_RETRY_COUNT,
-              DEFAULT_MAX_RETRY_COUNT,
-            ),
-          ),
-          waitUntil: LessThanOrEqual(new Date()),
-        },
-        {
-          order: {
-            waitUntil: SortDirection.ASC,
-          },
-        },
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.fundEscrow(jobEntity);
-
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
-          if ((manifest as CvatManifestDto)?.annotation?.type) {
-            await this.webhookService.createWebhook({
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED,
-              oracleType: OracleType.CVAT,
-              hasSignature: false,
-            });
-          }
-        } catch (err) {
-          this.logger.error(`Error funding escrow: ${err.message}`);
-          await this.handleProcessJobFailure(jobEntity);
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Fund escrow STOP');
-    await this.cronJobService.completeCronJob(cronJob);
-  }
-
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  public async cancelCronJob() {
-    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
-      CronJobType.FundEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Cancel jobs START');
-    const cronJob = await this.cronJobService.startCronJob(
-      CronJobType.CancelEscrow,
-    );
-
-    try {
-      const jobEntities = await this.jobRepository.find(
-        {
-          status: JobStatus.TO_CANCEL,
-          retriesCount: LessThanOrEqual(
-            this.configService.get(
-              ConfigNames.MAX_RETRY_COUNT,
-              DEFAULT_MAX_RETRY_COUNT,
-            ),
-          ),
-          waitUntil: LessThanOrEqual(new Date()),
-        },
-        {
-          order: {
-            waitUntil: SortDirection.ASC,
-          },
-        },
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          if (jobEntity.escrowAddress) {
-            const { amountRefunded } =
-              await this.processEscrowCancellation(jobEntity);
-            await this.paymentService.createRefundPayment({
-              refundAmount: Number(ethers.formatEther(amountRefunded)),
-              userId: jobEntity.userId,
-              jobId: jobEntity.id,
-            });
-          } else {
-            await this.paymentService.createRefundPayment({
-              refundAmount: jobEntity.fundAmount,
-              userId: jobEntity.userId,
-              jobId: jobEntity.id,
-            });
-          }
-          jobEntity.status = JobStatus.CANCELED;
-          await jobEntity.save();
-
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
-          const oracleType = this.getOracleType(manifest);
-          if (oracleType !== OracleType.HCAPTCHA) {
-            await this.webhookService.createWebhook({
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CANCELED,
-              oracleType: this.getOracleType(manifest),
-              hasSignature:
-                (manifest as FortuneManifestDto).requestType ===
-                JobRequestType.FORTUNE,
-            });
-          }
-        } catch (err) {
-          this.logger.error(`Error canceling escrow: ${err.message}`);
-          await this.handleProcessJobFailure(jobEntity);
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-    await this.cronJobService.completeCronJob(cronJob);
-    this.logger.log('Cancel jobs STOP');
-    return true;
-  }
-
-  private handleProcessJobFailure = async (jobEntity: JobEntity) => {
+  public handleProcessJobFailure = async (jobEntity: JobEntity) => {
     if (
       jobEntity.retriesCount <
       this.configService.get(
@@ -1203,11 +934,10 @@ export class JobService {
     } else {
       jobEntity.status = JobStatus.FAILED;
     }
-
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
   };
 
-  private getOracleType(manifest: any): OracleType {
+  public getOracleType(manifest: any): OracleType {
     if (
       (manifest as FortuneManifestDto)?.requestType === JobRequestType.FORTUNE
     ) {
@@ -1258,10 +988,10 @@ export class JobService {
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }
 
-    const jobEntity = await this.jobRepository.findOne({
-      chainId: dto.chainId,
-      escrowAddress: dto.escrowAddress,
-    });
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      dto.chainId,
+      dto.escrowAddress,
+    );
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -1275,14 +1005,17 @@ export class JobService {
 
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason!;
-    await jobEntity.save();
+    await this.jobRepository.updateOne(jobEntity);
   }
 
   public async getDetails(
     userId: number,
     jobId: number,
   ): Promise<JobDetailsDto> {
-    let jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
+    let jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
+      userId,
+    );
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -1310,10 +1043,7 @@ export class JobService {
 
     let manifest;
     if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
-      const encription = await Encryption.build(
-        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
-      );
-      manifestData = await encription.decrypt(manifestData as any);
+      manifestData = await this.encryption.decrypt(manifestData as any);
     }
 
     if (isValidJSON(manifestData)) {
@@ -1480,11 +1210,10 @@ export class JobService {
     if (
       escrow.status === EscrowStatus[EscrowStatus.Complete] &&
       job.status !== JobStatus.COMPLETED
-    )
-      updatedJob = await this.jobRepository.updateOne(
-        { id: job.id },
-        { status: JobStatus.COMPLETED },
-      );
+    ) {
+      job.status = JobStatus.COMPLETED;
+      updatedJob = await this.jobRepository.updateOne(job);
+    }
     return updatedJob;
   }
 }

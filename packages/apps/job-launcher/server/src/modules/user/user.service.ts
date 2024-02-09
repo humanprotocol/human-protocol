@@ -1,16 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Not } from 'typeorm';
 
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
-import { UserBalanceDto, UserCreateDto, UserUpdateDto } from './user.dto';
+import { UserBalanceDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ErrorUser } from '../../common/constants/errors';
@@ -23,35 +16,24 @@ export class UserService {
   private HASH_ROUNDS = 12;
   constructor(
     private userRepository: UserRepository,
-    private readonly configService: ConfigService,
     private readonly paymentService: PaymentService,
   ) {}
 
-  public async update(userId: number, dto: UserUpdateDto): Promise<UserEntity> {
-    return this.userRepository.updateOne({ id: userId }, dto);
-  }
-
   public async create(dto: UserCreateDto): Promise<UserEntity> {
-    const { email, password, ...rest } = dto;
-
-    await this.checkEmail(email, 0);
-
-    return await this.userRepository.create({
-      ...rest,
-      email,
-      password: bcrypt.hashSync(password, this.HASH_ROUNDS),
-      type: UserType.REQUESTER,
-      status: UserStatus.PENDING,
-    });
+    const newUser = new UserEntity();
+    newUser.email = dto.email;
+    newUser.password = bcrypt.hashSync(dto.password, this.HASH_ROUNDS);
+    newUser.type = UserType.REQUESTER;
+    newUser.status = UserStatus.PENDING;
+    await this.userRepository.createUnique(newUser);
+    return newUser;
   }
 
   public async getByCredentials(
     email: string,
     password: string,
   ): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOne({
-      email,
-    });
+    const userEntity = await this.userRepository.findByEmail(email);
 
     if (!userEntity) {
       throw new NotFoundException(ErrorUser.InvalidCredentials);
@@ -65,7 +47,7 @@ export class UserService {
   }
 
   public async getByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ email });
+    return this.userRepository.findByEmail(email);
   }
 
   public updatePassword(
@@ -73,24 +55,7 @@ export class UserService {
     data: ValidatePasswordDto,
   ): Promise<UserEntity> {
     userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
-    return userEntity.save();
-  }
-
-  public activate(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.status = UserStatus.ACTIVE;
-    return userEntity.save();
-  }
-
-  public async checkEmail(email: string, id: number): Promise<void> {
-    const userEntity = await this.userRepository.findOne({
-      email,
-      id: Not(id),
-    });
-
-    if (userEntity) {
-      this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
-      throw new BadRequestException(ErrorUser.AccountCannotBeRegistered);
-    }
+    return this.userRepository.updateOne(userEntity);
   }
 
   public async getBalance(userId: number): Promise<UserBalanceDto> {

@@ -3,8 +3,16 @@ import { AppController } from './app.controller';
 import { JobModule } from './modules/job/job.module';
 import { ConfigModule } from '@nestjs/config';
 import { envValidator } from './common/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 
 @Module({
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SnakeCaseInterceptor,
+    },
+  ],
   imports: [
     JobModule,
     ConfigModule.forRoot({

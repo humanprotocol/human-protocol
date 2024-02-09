@@ -1,8 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsString } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
-import { EventType } from '../../common/enums/webhook';
 
 export class ManifestDto {
   requesterTitle: string;
@@ -18,18 +17,19 @@ export class JobDetailsDto {
 }
 
 export class SolveJobDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'escrow_address' })
   @IsString()
   @IsValidEthereumAddress()
   public escrowAddress: string;
 
   @ApiProperty({
     enum: ChainId,
+    name: 'chain_id',
   })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'worker_address' })
   @IsString()
   @IsValidEthereumAddress()
   public workerAddress: string;
@@ -37,29 +37,4 @@ export class SolveJobDto {
   @ApiProperty()
   @IsString()
   public solution: string;
-}
-
-export class InvalidJobDto {
-  @ApiProperty()
-  @IsString()
-  @IsValidEthereumAddress()
-  public escrowAddress: string;
-
-  @ApiProperty({
-    enum: ChainId,
-  })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @ApiProperty()
-  @IsString()
-  @IsValidEthereumAddress()
-  workerAddress: string;
-}
-
-export class EscrowFailedWebhookDto {
-  public chain_id: ChainId;
-  public escrow_address: string;
-  public event_type: EventType;
-  public reason: string;
 }
