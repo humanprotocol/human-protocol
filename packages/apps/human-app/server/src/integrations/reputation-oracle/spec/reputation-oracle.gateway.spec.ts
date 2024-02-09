@@ -51,7 +51,7 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendWorkerSignup', () => {
-    it('should successfully call the reputation oracle user-worker signup endpoint', async () => {
+    it('should successfully call the reputation oracle worker signup endpoint', async () => {
       const command = new SignupWorkerCommand(
         'asfdsafdd@asdf.cvd',
         'asdfasdf2133!!dasfA',
