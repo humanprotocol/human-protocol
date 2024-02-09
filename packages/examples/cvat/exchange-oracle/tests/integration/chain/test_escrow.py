@@ -14,7 +14,7 @@ from src.chain.escrow import (
 )
 
 from tests.utils.constants import (
-    DEFAULT_URL,
+    DEFAULT_MANIFEST_URL,
     ESCROW_ADDRESS,
     FACTORY_ADDRESS,
     JOB_LAUNCHER_ADDRESS,
@@ -41,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
             created_at="",
-            manifest_url=DEFAULT_URL,
+            manifest_url=DEFAULT_MANIFEST_URL,
             recording_oracle=RECORDING_ORACLE_ADDRESS,
         )
 

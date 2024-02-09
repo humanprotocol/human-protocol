@@ -26,7 +26,7 @@ from src.models.cvat import Job, Project, Task
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTag
 
-from tests.utils.constants import DEFAULT_URL, JOB_LAUNCHER_ADDRESS
+from tests.utils.constants import DEFAULT_MANIFEST_URL, JOB_LAUNCHER_ADDRESS
 
 escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost.value
@@ -410,7 +410,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_escrow_data = Mock()
             mock_escrow_data.launcher = JOB_LAUNCHER_ADDRESS
             mock_escrow.return_value = mock_escrow_data
-            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response

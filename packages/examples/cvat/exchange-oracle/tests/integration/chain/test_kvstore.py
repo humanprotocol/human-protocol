@@ -8,7 +8,7 @@ from human_protocol_sdk.staking import LeaderData
 from src.chain.kvstore import get_job_launcher_url, get_recording_oracle_url
 
 from tests.utils.constants import (
-    DEFAULT_URL,
+    DEFAULT_MANIFEST_URL,
     ESCROW_ADDRESS,
     FACTORY_ADDRESS,
     JOB_LAUNCHER_ADDRESS,
@@ -36,7 +36,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
             created_at="",
-            manifest_url=DEFAULT_URL,
+            manifest_url=DEFAULT_MANIFEST_URL,
             recording_oracle=RECORDING_ORACLE_ADDRESS,
         )
 
@@ -45,9 +45,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             "src.chain.kvstore.StakingUtils.get_leader"
         ) as mock_leader:
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(recording_url, DEFAULT_URL)
+            self.assertEqual(recording_url, DEFAULT_MANIFEST_URL)
 
     def test_get_job_launcher_url_invalid_escrow(self):
         with self.assertRaises(EscrowClientError) as error:
@@ -69,9 +69,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         ) as mock_leader:
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(recording_url, DEFAULT_URL)
+            self.assertEqual(recording_url, DEFAULT_MANIFEST_URL)
 
     def test_get_recording_oracle_url_invalid_escrow(self):
         with self.assertRaises(EscrowClientError) as error:
