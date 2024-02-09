@@ -16,7 +16,14 @@ import { GatewayConfig } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';
 import { EndpointName } from '../../common/enums/endpoint-name';
 import { AxiosRequestConfig } from 'axios';
-import { RequestDataType } from './reputation-oracle.interface';
+import {
+  RequestDataType,
+  SigninWorkerResponse,
+} from './reputation-oracle.interface';
+import {
+  SigninWorkerCommand,
+  SigninWorkerData,
+} from '../../modules/user-worker/interfaces/worker-signin.interface';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -86,5 +93,18 @@ export class ReputationOracleGateway {
       signupOperatorData,
     );
     return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async sendWorkerSignin(signinWorkerCommand: SigninWorkerCommand) {
+    const signinWorkerData = this.mapper.map(
+      signinWorkerCommand,
+      SigninWorkerCommand,
+      SigninWorkerData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.WORKER_SIGNIN,
+      signinWorkerData,
+    );
+    return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
   }
 }

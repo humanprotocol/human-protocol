@@ -5,6 +5,10 @@ import {
   SignupWorkerCommand,
   SignupWorkerDto,
 } from './interfaces/worker-registration.interface';
+import {
+  SigninWorkerCommand,
+  SigninWorkerDto,
+} from './interfaces/worker-signin.interface';
 
 @Injectable()
 export class WorkerProfile extends AutomapperProfile {
@@ -15,6 +19,7 @@ export class WorkerProfile extends AutomapperProfile {
   override get profile() {
     return (mapper: Mapper) => {
       createMap(mapper, SignupWorkerDto, SignupWorkerCommand);
+      createMap(mapper, SigninWorkerDto, SigninWorkerCommand);
     };
   }
 }

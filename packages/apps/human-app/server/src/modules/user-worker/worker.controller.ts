@@ -13,6 +13,11 @@ import {
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { WorkerService } from './worker.service';
+import {
+  SigninWorkerCommand,
+  SigninWorkerDto,
+} from './interfaces/worker-signin.interface';
+import { SigninWorkerResponse } from '../../integrations/reputation-oracle/reputation-oracle.interface';
 
 @Controller()
 export class WorkerController {
@@ -31,5 +36,20 @@ export class WorkerController {
       SignupWorkerCommand,
     );
     return this.authWorkerService.signupWorker(signupWorkerCommand);
+  }
+
+  @ApiTags('User-Worker')
+  @Post('/auth/signin')
+  @ApiOperation({ summary: 'Worker signin' })
+  @UsePipes(new ValidationPipe())
+  public signinWorker(
+    @Body() signinWorkerDto: SigninWorkerDto,
+  ): Promise<SigninWorkerResponse> {
+    const signinWorkerCommand = this.mapper.map(
+      signinWorkerDto,
+      SigninWorkerDto,
+      SigninWorkerCommand,
+    );
+    return this.authWorkerService.signinWorker(signinWorkerCommand);
   }
 }
