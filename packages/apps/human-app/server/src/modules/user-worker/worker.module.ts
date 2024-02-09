@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { WorkerService } from './worker.service';
-import { IntegrationsModule } from '../../integrations/integrations.module';
-import { AuthWorkerProfile } from './worker.mapper';
+import { ReputationOracleModule } from '../../integrations/reputation-oracle/reputation-oracle.module';
+import { WorkerProfile } from './worker.mapper';
 
 @Module({
-  imports: [IntegrationsModule],
-  providers: [WorkerService, AuthWorkerProfile],
+  imports: [ReputationOracleModule],
+  providers: [WorkerService, WorkerProfile],
   exports: [WorkerService],
 })
 export class WorkerModule {}

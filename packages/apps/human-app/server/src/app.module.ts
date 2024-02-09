@@ -4,10 +4,17 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { WorkerModule } from './modules/user-worker/worker.module';
-import { IntegrationsModule } from './integrations/integrations.module';
+import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { envValidator } from './common/config/env';
+import {
+  EnvironmentConfigService,
+  envValidator,
+} from './common/config/environment-config.service';
+import { OperatorModule } from './modules/user-operator/operator.module';
+import { OperatorController } from './modules/user-operator/operator.controller';
+import { WorkerController } from './modules/user-worker/worker.controller';
+import { GatewayConfigService } from './common/config/gateway-config.service';
 
 @Module({
   imports: [
@@ -21,10 +28,11 @@ import { envValidator } from './common/config/env';
     }),
     HttpModule,
     WorkerModule,
-    IntegrationsModule,
+    OperatorModule,
+    ReputationOracleModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, OperatorController, WorkerController],
+  providers: [AppService, EnvironmentConfigService, GatewayConfigService],
   exports: [HttpModule],
 })
 export class AppModule {}

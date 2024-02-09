@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { WorkerService } from "./modules/user-worker/worker.service";
-import { workerServiceMock } from "./modules/user-worker/worker.service.mock";
+import { WorkerService } from './modules/user-worker/worker.service';
+import { workerServiceMock } from './modules/user-worker/spec/worker.service.mock';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -11,9 +11,9 @@ describe('AppController', () => {
       controllers: [AppController],
       providers: [WorkerService],
     })
-    .overrideProvider(WorkerService)
-    .useValue(workerServiceMock)
-    .compile();
+      .overrideProvider(WorkerService)
+      .useValue(workerServiceMock)
+      .compile();
 
     appController = app.get<AppController>(AppController);
   });
