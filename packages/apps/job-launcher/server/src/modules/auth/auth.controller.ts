@@ -10,6 +10,7 @@ import {
   UnprocessableEntityException,
   Logger,
   UsePipes,
+  Ip,
 } from '@nestjs/common';
 
 import {
@@ -68,8 +69,11 @@ export class AuthJwtController {
     status: 422,
     description: 'Unprocessable entity.',
   })
-  public async signup(@Body() data: UserCreateDto): Promise<void> {
-    await this.authService.signup(data);
+  public async signup(
+    @Body() data: UserCreateDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    await this.authService.signup(data, ip);
     return;
   }
 
@@ -93,8 +97,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public signin(@Body() data: SignInDto): Promise<AuthDto> {
-    return this.authService.signin(data);
+  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
+    return this.authService.signin(data, ip);
   }
 
   @ApiBearerAuth()
@@ -168,8 +172,9 @@ export class AuthJwtController {
   })
   public async restorePassword(
     @Body() data: RestorePasswordDto,
+    @Ip() ip: string,
   ): Promise<void> {
-    await this.authService.restorePassword(data);
+    await this.authService.restorePassword(data, ip);
     return;
   }
 

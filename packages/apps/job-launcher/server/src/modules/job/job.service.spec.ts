@@ -1707,8 +1707,9 @@ describe('JobService', () => {
       ]);
 
       const result = await jobService.uploadManifest(
-        fortuneManifestParams,
+        JobRequestType.FORTUNE,
         chainId,
+        fortuneManifestParams,
       );
 
       expect(result).toEqual([
@@ -1734,7 +1735,11 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.uploadManifest(fortuneManifestParams, chainId),
+        jobService.uploadManifest(
+          JobRequestType.FORTUNE,
+          chainId,
+          fortuneManifestParams,
+        ),
       ).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
@@ -1756,7 +1761,11 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.uploadManifest(fortuneManifestParams, chainId),
+        jobService.uploadManifest(
+          JobRequestType.FORTUNE,
+          chainId,
+          fortuneManifestParams,
+        ),
       ).rejects.toThrowError(new Error(errorMessage));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
@@ -1816,7 +1825,11 @@ describe('JobService', () => {
         },
       ]);
 
-      const result = await jobService.uploadManifest(manifest, chainId);
+      const result = await jobService.uploadManifest(
+        JobRequestType.IMAGE_POINTS,
+        chainId,
+        manifest,
+      );
 
       expect(result).toEqual([
         {
@@ -1841,7 +1854,11 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.uploadManifest(manifest, chainId),
+        jobService.uploadManifest(
+          JobRequestType.IMAGE_POINTS,
+          chainId,
+          manifest,
+        ),
       ).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
@@ -1863,7 +1880,11 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.uploadManifest(manifest, chainId),
+        jobService.uploadManifest(
+          JobRequestType.IMAGE_POINTS,
+          chainId,
+          manifest,
+        ),
       ).rejects.toThrowError(new Error(errorMessage));
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -1916,8 +1937,9 @@ describe('JobService', () => {
       ]);
 
       const result = await jobService.uploadManifest(
-        fortuneManifestParams,
+        JobRequestType.FORTUNE,
         chainId,
+        fortuneManifestParams,
       );
 
       expect(result).toEqual([
@@ -1939,7 +1961,11 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.uploadManifest(fortuneManifestParams, chainId),
+        jobService.uploadManifest(
+          JobRequestType.FORTUNE,
+          chainId,
+          fortuneManifestParams,
+        ),
       ).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
@@ -1957,7 +1983,11 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.uploadManifest(fortuneManifestParams, chainId),
+        jobService.uploadManifest(
+          JobRequestType.FORTUNE,
+          chainId,
+          fortuneManifestParams,
+        ),
       ).rejects.toThrowError(new Error(errorMessage));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
