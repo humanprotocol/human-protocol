@@ -323,8 +323,8 @@ class BoxesFromPointsTaskBuilder:
             raise DatasetValidationError("Point labels do not match job labels")
 
         self.input_points_dataset.transform(
-            "project_labels", dst_labels=[label.name for label in self.manifest.annotation.labels]
-        )  # TODO: fix the transform for skeletons
+            ProjectLabels, dst_labels=[label.name for label in self.manifest.annotation.labels]
+        )
         self.input_points_dataset.init_cache()
 
     def _validate_points_filenames(self):
