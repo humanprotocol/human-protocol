@@ -21,21 +21,6 @@ export const mineNBlocks = async (n: number) => {
   );
 };
 
-export async function createMockUserWithVotingPowerWithPk(
-  voteToken: VHMToken,
-  privateKey: string,
-): Promise<Signer> {
-  const provider = new ethers.JsonRpcProvider("http://localhost:8545");
-  const userWallet = new ethers.Wallet(privateKey).connect(provider);
-  await voteToken
-    .connect(userWallet)
-    .transfer(await userWallet.getAddress(), ethers.parseEther("1"));
-
-  const voteTokenWithUser = voteToken.connect(userWallet);
-  await voteTokenWithUser.delegate(await userWallet.getAddress());
-  return userWallet;
-}
-
 export async function createMockUserWithVotingPower(
   voteToken: VHMToken,
   user: Signer,
@@ -74,7 +59,7 @@ export async function createMessageWithPayload(
   return mockVM;
 }
 
-export async function callReceiveMessageOnSpokeWithMock(
+export async function callReceiveMessageWithWormholeMock(
   wormholeMock: WormholeMock,
   result: IWormholeVM,
 ): Promise<void> {
@@ -140,7 +125,7 @@ export async function createProposalOnSpoke(
     governorAddress,
   );
 
-  await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
+  await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
   return proposalId;
 }
 
@@ -220,7 +205,7 @@ export async function finishProposal(
     governorAddress,
   );
 
-  await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
+  await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
 }
 
 export async function collectVotesFromSpoke(
@@ -254,51 +239,7 @@ export async function collectVotesFromSpoke(
     await daoSpoke.getAddress(),
   );
 
-  await callReceiveMessageOnSpokeWithMock(wormholeMock, mockResult);
-}
-
-export async function getHashToSignProposal(
-  governor: MetaHumanGovernor,
-  proposalId: string,
-  support: number,
-): Promise<string> {
-  const defaultAbiCoder = new ethers.AbiCoder();
-
-  const blockChaindId = (await ethers.provider.getNetwork()).chainId;
-
-  const domainSeparator = ethers.keccak256(
-    defaultAbiCoder.encode(
-      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-      [
-        ethers.keccak256(
-          ethers.toUtf8Bytes(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)",
-          ),
-        ),
-        ethers.keccak256(ethers.toUtf8Bytes("MetaHumanGovernor")),
-        ethers.keccak256(ethers.toUtf8Bytes("1")),
-        blockChaindId,
-        await governor.getAddress(),
-      ],
-    ),
-  );
-
-  const ballotTypeHash = await governor.BALLOT_TYPEHASH();
-  const structHash = ethers.keccak256(
-    defaultAbiCoder.encode(
-      ["bytes32", "uint256", "uint8"],
-      [ballotTypeHash, proposalId, support],
-    ),
-  );
-
-  const digest = ethers.keccak256(
-    ethers.solidityPacked(
-      ["string", "bytes", "bytes32"],
-      ["0x1901", domainSeparator, structHash], // 0x1901 is the EIP-191 header for EIP-712 structured data
-    ),
-  );
-
-  return digest;
+  await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
 }
 
 interface SignatureComponents {
@@ -307,14 +248,36 @@ interface SignatureComponents {
   s: string;
 }
 
-export async function signHash(
+export async function signProposal(
   proposalId: string,
   governor: MetaHumanGovernor,
-  privateKey: string,
+  support: number,
+  signer: Signer,
 ): Promise<SignatureComponents> {
-  const hash = await getHashToSignProposal(governor, proposalId, 1);
-  const wallet = new ethers.Wallet(privateKey);
-  const signature = await wallet.signMessage(ethers.toBeArray(hash));
+  const signature = await signer.signTypedData(
+    {
+      name: "MetaHumanGovernor",
+      version: "1",
+      chainId: (await ethers.provider.getNetwork()).chainId,
+      verifyingContract: await governor.getAddress(),
+    },
+    {
+      Ballot: [
+        {
+          name: "proposalId",
+          type: "uint256",
+        },
+        {
+          name: "support",
+          type: "uint8",
+        },
+      ],
+    },
+    {
+      proposalId,
+      support,
+    },
+  );
 
   // Extract the signature components
   const r = signature.slice(0, 66);

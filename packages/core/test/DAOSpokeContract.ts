@@ -15,11 +15,11 @@ import {
   createProposalOnSpoke,
   finishProposal,
   createProposalMessage,
-  callReceiveMessageOnSpokeWithMock,
+  callReceiveMessageWithWormholeMock,
   createMessageWithPayload,
 } from "./GovernanceUtils";
 
-describe("DAOSpokeContract", function () {
+describe.only("DAOSpokeContract", function () {
   let owner: Signer;
   let user1: Signer;
   let wormholeMockForDaoSpoke: WormholeMock;
@@ -332,7 +332,10 @@ describe("DAOSpokeContract", function () {
       );
 
       await expect(
-        callReceiveMessageOnSpokeWithMock(wormholeMockForDaoSpoke, mockPayload),
+        callReceiveMessageWithWormholeMock(
+          wormholeMockForDaoSpoke,
+          mockPayload,
+        ),
       ).to.be.revertedWith(
         "Only messages from the hub contract can be received!",
       );
@@ -346,7 +349,10 @@ describe("DAOSpokeContract", function () {
       );
 
       await expect(
-        callReceiveMessageOnSpokeWithMock(wormholeMockForDaoSpoke, mockPayload),
+        callReceiveMessageWithWormholeMock(
+          wormholeMockForDaoSpoke,
+          mockPayload,
+        ),
       ).to.be.revertedWith("Message is not addressed for this contract");
     });
 
@@ -357,12 +363,15 @@ describe("DAOSpokeContract", function () {
         await governor.getAddress(),
       );
 
-      await callReceiveMessageOnSpokeWithMock(
+      await callReceiveMessageWithWormholeMock(
         wormholeMockForDaoSpoke,
         mockPayload,
       );
       await expect(
-        callReceiveMessageOnSpokeWithMock(wormholeMockForDaoSpoke, mockPayload),
+        callReceiveMessageWithWormholeMock(
+          wormholeMockForDaoSpoke,
+          mockPayload,
+        ),
       ).to.be.revertedWith("Message already processed");
     });
 
@@ -400,7 +409,7 @@ describe("DAOSpokeContract", function () {
         ],
       );
 
-      await callReceiveMessageOnSpokeWithMock(
+      await callReceiveMessageWithWormholeMock(
         wormholeMockForDaoSpoke,
         await createMessageWithPayload(
           payload,
@@ -457,7 +466,7 @@ describe("DAOSpokeContract", function () {
         ],
       );
 
-      await callReceiveMessageOnSpokeWithMock(
+      await callReceiveMessageWithWormholeMock(
         wormholeMockForDaoSpoke,
         await createMessageWithPayload(
           payload,
@@ -508,7 +517,7 @@ describe("DAOSpokeContract", function () {
         ],
       );
 
-      await callReceiveMessageOnSpokeWithMock(
+      await callReceiveMessageWithWormholeMock(
         wormholeMockForDaoSpoke,
         await createMessageWithPayload(
           payload,
