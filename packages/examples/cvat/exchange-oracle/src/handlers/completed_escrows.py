@@ -49,7 +49,7 @@ class _CompletedEscrowsHandler:
                 session,
                 ProjectStatuses.completed,
                 included_types=plain_task_types,
-                limit=CronConfig.retrieve_annotations_chunk_size,
+                limit=CronConfig.track_completed_escrows_chunk_size,
                 for_update=ForUpdateParams(skip_locked=True),
             )
 
@@ -195,7 +195,7 @@ class _CompletedEscrowsHandler:
                 session,
                 ProjectStatuses.completed,
                 included_types=[TaskType.image_skeletons_from_boxes],
-                limit=CronConfig.retrieve_annotations_chunk_size,
+                limit=CronConfig.track_completed_escrows_chunk_size,
             )
 
             escrows_with_completed_projects = set()

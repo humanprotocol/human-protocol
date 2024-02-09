@@ -5,6 +5,7 @@ from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageClient
 
+from src.core.config import LocalhostConfig
 from src.services.cloud.utils import parse_bucket_url
 
 

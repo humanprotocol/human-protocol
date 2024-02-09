@@ -1,3 +1,4 @@
+import itertools
 import uuid
 from datetime import datetime
 from typing import List, Optional, Sequence, Union
@@ -63,6 +64,27 @@ def get_project_by_id(
     )
 
 
+def get_projects_by_cvat_ids(
+    session: Session,
+    project_cvat_ids: Sequence[int],
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+    status_in: Optional[List[ProjectStatuses]] = None,
+    limit: int = 5,
+) -> List[Project]:
+    if status_in:
+        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
+    else:
+        status_filter_arg = []
+
+    return (
+        _maybe_for_update(session.query(Project), enable=for_update)
+        .where(Project.cvat_id.in_(project_cvat_ids), *status_filter_arg)
+        .limit(limit)
+        .all()
+    )
+
+
 def get_project_by_escrow_address(
     session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
 ) -> Optional[Project]:
@@ -88,6 +110,15 @@ def get_projects_by_escrow_address(
         projects = projects.limit(limit)
 
     return projects.all()
+
+
+def get_project_cvat_ids_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+) -> List[int]:
+    projects = session.query(Project).where(Project.escrow_address == escrow_address)
+
+    return list(itertools.chain.from_iterable(projects.values(Project.cvat_id)))
 
 
 def get_projects_by_status(
