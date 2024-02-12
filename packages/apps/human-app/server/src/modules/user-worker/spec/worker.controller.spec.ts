@@ -11,6 +11,7 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { WorkerProfile } from '../worker.mapper';
 import { workerServiceMock } from './worker.service.mock';
+import { SigninWorkerDto } from '../interfaces/worker-signin.interface';
 
 describe('WorkerController', () => {
   let controller: WorkerController;
@@ -40,7 +41,7 @@ describe('WorkerController', () => {
   });
 
   describe('signup', () => {
-    it('should worker service signup method with proper fields set', async () => {
+    it('should service a user signup method with proper fields set', async () => {
       const dto: SignupWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',
@@ -52,6 +53,21 @@ describe('WorkerController', () => {
         type: UserType.WORKER,
       } as SignupWorkerCommand;
       expect(workerService.signupWorker).toHaveBeenCalledWith(expectedCommand);
+    });
+  });
+
+  describe('signin', () => {
+    it('should service a user signin method with proper fields set', async () => {
+      const dto: SigninWorkerDto = {
+        email: 'email@example.com',
+        password: 'Pa55word!',
+      };
+      await controller.signinWorker(dto);
+      const expectedCommand = {
+        email: dto.email,
+        password: dto.password,
+      };
+      expect(workerService.signinWorker).toHaveBeenCalledWith(expectedCommand);
     });
   });
 });

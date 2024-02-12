@@ -39,4 +39,17 @@ describe('WorkerService', () => {
       );
     });
   });
+
+  describe('signinWorker', () => {
+    it('should call reputation oracle gateway without doing anything else', async () => {
+      const command = {
+        email: 'email@example.com',
+        password: 'Pa55word!',
+      };
+      await service.signinWorker(command);
+      expect(reputationOracleGateway.sendWorkerSignin).toHaveBeenCalledWith(
+        command,
+      );
+    });
+  });
 });

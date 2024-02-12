@@ -9,6 +9,7 @@ import {
   SignupWorkerCommand,
   SignupWorkerData,
 } from '../../modules/user-worker/interfaces/worker-registration.interface';
+import { SigninWorkerCommand, SigninWorkerData } from '../../modules/user-worker/interfaces/worker-signin.interface';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
@@ -20,6 +21,7 @@ export class ReputationOracleProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(mapper, SignupWorkerCommand, SignupWorkerData);
       createMap(mapper, SignupOperatorCommand, SignupOperatorData);
+      createMap(mapper, SigninWorkerCommand, SigninWorkerData);
     };
   }
 }

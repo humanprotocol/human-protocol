@@ -28,6 +28,13 @@ export class GatewayConfigService {
                 'Content-Type': 'application/json',
               },
             },
+            [EndpointName.WORKER_SIGNIN]: {
+              endpoint: '/auth/signin',
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
           },
         },
       },
