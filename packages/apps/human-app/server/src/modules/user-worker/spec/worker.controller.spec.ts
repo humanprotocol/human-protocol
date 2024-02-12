@@ -41,7 +41,7 @@ describe('WorkerController', () => {
   });
 
   describe('signup', () => {
-    it('should worker service signup method with proper fields set', async () => {
+    it('should service a user signup method with proper fields set', async () => {
       const dto: SignupWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',
@@ -57,7 +57,7 @@ describe('WorkerController', () => {
   });
 
   describe('signin', () => {
-    it('should worker service signin method with proper fields set', async () => {
+    it('should service a user signin method with proper fields set', async () => {
       const dto: SigninWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',
