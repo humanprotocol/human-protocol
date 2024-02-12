@@ -29,7 +29,7 @@ class LabelType(str, Enum, metaclass=BetterEnumMeta):
 
 
 class LabelInfo(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
     # https://opencv.github.io/cvat/docs/api_sdk/sdk/reference/models/label/
 
     type: LabelType = LabelType.plain
@@ -60,9 +60,22 @@ class SkeletonLabelInfo(LabelInfo):
         if values["type"] != LabelType.skeleton:
             raise ValueError(f"Label type must be {LabelType.skeleton}")
 
-        # TODO: validate label names (empty strings, repeats)
-
         skeleton_name = values["name"]
+
+        existing_names = set()
+        for node_name in values["nodes"]:
+            node_name = node_name.strip()
+
+            if not node_name:
+                raise ValueError(f"Skeleton '{skeleton_name}': point name is empty")
+
+            if node_name.lower() in existing_names:
+                raise ValueError(
+                    f"Skeleton '{skeleton_name}' point {node_name}: label is duplicated"
+                )
+
+            existing_names.add(node_name.lower())
+
         nodes_count = len(values["nodes"])
         joints = values["joints"]
         for joint_idx, joint in enumerate(joints):
