@@ -215,6 +215,14 @@ const config: HardhatUserConfig = {
           browserURL: process.env.SKALE_BROWSER_URL || '',
         },
       },
+      {
+        network: 'okt',
+        chainId: 65,
+        urls: {
+          apiURL: process.env.OKT_BROWSER_API_URL || '',
+          browserURL: process.env.OKT_BROWSER_URL || '',
+        },
+      },
     ],
   },
   mocha: {
