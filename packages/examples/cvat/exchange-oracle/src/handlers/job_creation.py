@@ -4,12 +4,12 @@ import os
 import random
 import uuid
 from contextlib import ExitStack
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import chain, groupby
 from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Sequence, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import cv2
 import datumaro as dm
@@ -32,7 +32,7 @@ from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url, parse_bucket_url
-from src.utils.annotations import ProjectLabels
+from src.utils.annotations import ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
 
@@ -933,6 +933,28 @@ class BoxesFromPointsTaskBuilder:
 
 class SkeletonsFromBoxesTaskBuilder:
     @dataclass
+    class _ExcludedAnnotationsInfo:
+        @dataclass
+        class _ExcludedAnnotationInfo:
+            message: str
+            sample_id: str = field(kw_only=True)
+            sample_subset: str = field(kw_only=True)
+
+        errors: List[_ExcludedAnnotationInfo] = field(default_factory=list)
+
+        excluded_count: int = 0
+        "The number of excluded annotations. Can be different from len(error_messages)"
+
+        total_count: int = 0
+
+        def add_error(self, message: str, *, sample_id: str, sample_subset: str):
+            self.errors.append(
+                self._ExcludedAnnotationInfo(
+                    message=message, sample_id=sample_id, sample_subset=sample_subset
+                )
+            )
+
+    @dataclass
     class _JobParams:
         label_id: int
         roi_ids: List[int]
@@ -945,17 +967,22 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self.logger: Logger = NullLogger()
 
-        self.input_gt_data: _MaybeUnset[bytes] = _unset
-        self.input_boxes_data: _MaybeUnset[bytes] = _unset
+        self._input_gt_data: _MaybeUnset[bytes] = _unset
+        self._input_boxes_data: _MaybeUnset[bytes] = _unset
 
-        # Computed values
-        self.input_filenames: _MaybeUnset[Sequence[str]] = _unset
-        self.gt_dataset: _MaybeUnset[dm.Dataset] = _unset
-        self.boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
+        self._data_filenames: _MaybeUnset[Sequence[str]] = _unset
+        self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
+        self._boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
 
-        self.roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
-        self.job_params: _MaybeUnset[List[self._JobParams]] = _unset
-        self.gt_dataset: _MaybeUnset[dm.Dataset] = _unset
+        self._skeleton_bbox_mapping: _MaybeUnset[
+            skeletons_from_boxes_task.SkeletonBboxMapping
+        ] = _unset
+        self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
+        self._roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
+        self._job_params: _MaybeUnset[List[self._JobParams]] = _unset
+
+        self._excluded_gt_info: _MaybeUnset[self._ExcludedAnnotationsInfo] = _unset
+        self._excluded_boxes_info: _MaybeUnset[self._ExcludedAnnotationsInfo] = _unset
 
         # Configuration / constants
         self.job_size_mult = 6
@@ -1021,14 +1048,14 @@ class SkeletonsFromBoxesTaskBuilder:
             data_bucket.url.bucket_name,
             prefix=data_bucket.url.path,
         )
-        self.input_filenames = filter_image_files(data_filenames)
+        self._data_filenames = filter_image_files(data_filenames)
 
-        self.input_gt_data = gt_storage_client.download_file(
+        self._input_gt_data = gt_storage_client.download_file(
             gt_bucket.url.bucket_name,
             gt_bucket.url.path,
         )
 
-        self.input_boxes_data = boxes_storage_client.download_file(
+        self._input_boxes_data = boxes_storage_client.download_file(
             boxes_bucket.url.bucket_name,
             boxes_bucket.url.path,
         )
@@ -1043,24 +1070,24 @@ class SkeletonsFromBoxesTaskBuilder:
         return dm.Dataset.import_from(annotation_filename, format=dataset_format)
 
     def _parse_gt(self):
-        assert self.input_gt_data is not _unset
+        assert self._input_gt_data is not _unset
 
-        self.gt_dataset = self._parse_dataset(
-            self.input_gt_data,
+        self._gt_dataset = self._parse_dataset(
+            self._input_gt_data,
             dataset_format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
         )
 
     def _parse_boxes(self):
-        assert self.input_boxes_data is not _unset
+        assert self._input_boxes_data is not _unset
 
-        self.boxes_dataset = self._parse_dataset(
-            self.input_boxes_data, dataset_format=self.boxes_format
+        self._boxes_dataset = self._parse_dataset(
+            self._input_boxes_data, dataset_format=self.boxes_format
         )
 
     def _validate_gt_labels(self):
         gt_labels = set(
             (label.name, label.parent)
-            for label in self.gt_dataset.categories()[dm.AnnotationType.label]
+            for label in self._gt_dataset.categories()[dm.AnnotationType.label]
         )
 
         manifest_labels = set()
@@ -1082,15 +1109,15 @@ class SkeletonsFromBoxesTaskBuilder:
             )
 
         # Reorder labels to match the manifest
-        self.gt_dataset.transform(
+        self._gt_dataset.transform(
             ProjectLabels, dst_labels=[label.name for label in self.manifest.annotation.labels]
         )
-        self.gt_dataset.init_cache()
+        self._gt_dataset.init_cache()
 
     def _validate_gt_filenames(self):
-        gt_filenames = set(s.id + s.media.ext for s in self.gt_dataset)
+        gt_filenames = set(s.id + s.media.ext for s in self._gt_dataset)
 
-        known_data_filenames = set(self.input_filenames)
+        known_data_filenames = set(self._data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
 
         if len(gt_filenames) != len(matched_gt_filenames):
@@ -1108,19 +1135,67 @@ class SkeletonsFromBoxesTaskBuilder:
                 f"at least {self.manifest.validation.val_size} required."
             )
 
+    def _validate_gt_annotations(self):
+        def _validate_skeleton(skeleton: dm.Skeleton, *, sample_bbox: dm.Bbox) -> Optional[str]:
+            for element in skeleton.elements:
+                # This is what Datumaro expected to parse
+                assert isinstance(element, dm.Points)
+                assert len(element.points) == 2 and len(element.visibility) == 1
+
+                if element.visibility[0] != dm.Points.Visibility.visible:
+                    continue
+
+                px, py = element.points[:2]
+                if not is_point_in_bbox(px, py, sample_bbox):
+                    raise DatasetValidationError("skeleton point is outside the image")
+
+        excluded_gt_info = self._ExcludedAnnotationsInfo()
+
+        label_cat: dm.LabelCategories = self._gt_dataset.categories()[dm.AnnotationType.label]
+
+        for gt_sample in self._gt_dataset:
+            # Could fail on this as well
+            img_h, img_w = gt_sample.media_as(dm.Image).size
+            sample_bbox = dm.Bbox(0, 0, w=img_w, h=img_h)
+
+            sample_skeletons = [a for a in gt_sample.annotations if isinstance(a, dm.Skeleton)]
+            valid_skeletons = []
+            for skeleton in sample_skeletons:
+                try:
+                    _validate_skeleton(skeleton, sample_bbox=sample_bbox)
+                except DatasetValidationError as error:
+                    excluded_gt_info.add_error(
+                        "Sample '{}': skeleton #{} ({}) skipped - {}".format(
+                            gt_sample.id, skeleton.id, label_cat[skeleton.label].name, error
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
+                    )
+
+            excluded_gt_info.excluded_count += len(sample_skeletons) - len(valid_skeletons)
+            excluded_gt_info.total_count += len(sample_skeletons)
+
+            if len(valid_skeletons) != len(sample_skeletons):
+                # Skeleton boxes can be in the list as well with the same ids / groups
+                skeleton_ids = set(a.id for a in valid_skeletons) - {0}
+                self._gt_dataset.put(
+                    gt_sample.wrap(
+                        annotations=[a for a in gt_sample.annotations if a.id in skeleton_ids]
+                    )
+                )
+
+        self._excluded_gt_info = excluded_gt_info
+
     def _validate_gt(self):
-        assert self.input_filenames is not _unset
-        assert self.gt_dataset is not _unset
+        assert self._data_filenames is not _unset
+        assert self._gt_dataset is not _unset
 
         self._validate_gt_filenames()
         self._validate_gt_labels()
-
-        # TODO: check coordinates
-        # TODO: check there are matching pairs of bbox/skeleton in GT
-        # TODO: pass discarded/total down
+        self._validate_gt_annotations()
 
     def _validate_boxes_categories(self):
-        boxes_dataset_categories = self.boxes_dataset.categories()
+        boxes_dataset_categories = self._boxes_dataset.categories()
         boxes_dataset_label_cat: dm.LabelCategories = boxes_dataset_categories[
             dm.AnnotationType.label
         ]
@@ -1131,15 +1206,15 @@ class SkeletonsFromBoxesTaskBuilder:
             raise DatasetValidationError("Bbox labels do not match job labels")
 
         # Reorder labels to match the manifest
-        self.boxes_dataset.transform(
+        self._boxes_dataset.transform(
             ProjectLabels, dst_labels=[label.name for label in self.manifest.annotation.labels]
         )
-        self.boxes_dataset.init_cache()
+        self._boxes_dataset.init_cache()
 
     def _validate_boxes_filenames(self):
-        boxes_filenames = set(sample.id + sample.media.ext for sample in self.boxes_dataset)
+        boxes_filenames = set(sample.id + sample.media.ext for sample in self._boxes_dataset)
 
-        known_data_filenames = set(self.input_filenames)
+        known_data_filenames = set(self._data_filenames)
         matched_boxes_filenames = boxes_filenames.intersection(known_data_filenames)
 
         if len(known_data_filenames) != len(matched_boxes_filenames):
@@ -1160,48 +1235,67 @@ class SkeletonsFromBoxesTaskBuilder:
             )
 
     def _validate_boxes_annotations(self):
-        label_cat: dm.LabelCategories = self.boxes_dataset.categories()[dm.AnnotationType.label]
+        excluded_boxes_info = self._ExcludedAnnotationsInfo()
 
-        # TODO: check for excluded boxes count
-        excluded_samples = []
-        for sample in self.boxes_dataset:
+        label_cat: dm.LabelCategories = self._boxes_dataset.categories()[dm.AnnotationType.label]
+
+        for sample in self._boxes_dataset:
             # Could fail on this as well
-            image_h, image_w = sample.image.size
+            image_h, image_w = sample.media_as(dm.Image).size
 
-            for bbox in sample.annotations:
-                # Could fail on this as well
-                if not isinstance(bbox, dm.Bbox):
-                    continue
-
+            sample_boxes = [a for a in sample.annotations if isinstance(a, dm.Bbox)]
+            valid_boxes = []
+            for bbox in sample_boxes:
                 if not (
                     (0 <= bbox.x < bbox.x + bbox.w <= image_w)
                     and (0 <= bbox.y < bbox.y + bbox.h <= image_h)
                 ):
-                    message = "Sample '{}': bbox #{} ({}) skipped - " "invalid coordinates".format(
-                        sample.id, bbox.id, label_cat[bbox.label].name
+                    excluded_boxes_info.add_error(
+                        "Sample '{}': bbox #{} ({}) skipped - invalid coordinates".format(
+                            sample.id, bbox.id, label_cat[bbox.label].name
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
                     )
-                    excluded_samples.append(((sample.id, sample.subset), message))
 
-        if len(excluded_samples) > len(self.boxes_dataset) * self.max_discarded_threshold:
-            raise DatasetValidationError(
-                "Too many samples discarded, canceling job creation. Errors: {}".format(
-                    self._format_list([message for _, message in excluded_samples])
+                valid_boxes.append(bbox)
+
+            excluded_boxes_info.excluded_count += len(sample_boxes) - len(valid_boxes)
+            excluded_boxes_info.total_count += len(sample_boxes)
+
+            if len(valid_boxes) != len(sample.annotations):
+                self._boxes_dataset.put(sample.wrap(annotations=valid_boxes))
+
+        if (
+            excluded_boxes_info.excluded_count
+            > excluded_boxes_info.total_count * self.max_discarded_threshold
+        ):
+            raise TooFewSamples(
+                "Too many boxes discarded, canceling job creation. Errors: {}".format(
+                    self._format_list(
+                        [error_info.message for error_info in excluded_boxes_info.errors]
+                    )
                 )
             )
 
-        for excluded_sample, _ in excluded_samples:
-            self.boxes_dataset.remove(*excluded_sample)
+        excluded_samples = set((e.sample_id, e.sample_subset) for e in excluded_boxes_info.errors)
+        for excluded_sample in excluded_samples:
+            self._boxes_dataset.remove(*excluded_sample)
 
         if excluded_samples:
             self.logger.warning(
-                "Some samples were excluded due to errors found: {}".format(
-                    self._format_list([m for _, m in excluded_samples], separator="\n")
+                "Some boxes were excluded due to errors found: {}".format(
+                    self._format_list(
+                        [e.message for e in excluded_boxes_info.errors], separator="\n"
+                    )
                 )
             )
 
+        self._excluded_boxes_info = excluded_boxes_info
+
     def _validate_boxes(self):
-        assert self.input_filenames is not _unset
-        assert self.boxes_dataset is not _unset
+        assert self._data_filenames is not _unset
+        assert self._boxes_dataset is not _unset
 
         self._validate_boxes_categories()
         self._validate_boxes_filenames()
@@ -1223,33 +1317,30 @@ class SkeletonsFromBoxesTaskBuilder:
         return bbox_iou(a, b) > 0
 
     def _prepare_gt(self):
-        assert self.input_filenames is not _unset
-        assert self.boxes_dataset is not _unset
-        assert self.gt_dataset is not _unset
+        assert self._data_filenames is not _unset
+        assert self._boxes_dataset is not _unset
+        assert self._gt_dataset is not _unset
         assert [
             label.name
-            for label in self.gt_dataset.categories()[dm.AnnotationType.label]
+            for label in self._gt_dataset.categories()[dm.AnnotationType.label]
             if not label.parent
         ] == [label.name for label in self.manifest.annotation.labels]
         assert [
             label.name
-            for label in self.boxes_dataset.categories()[dm.AnnotationType.label]
+            for label in self._boxes_dataset.categories()[dm.AnnotationType.label]
             if not label.parent
         ] == [label.name for label in self.manifest.annotation.labels]
 
         updated_gt_dataset = dm.Dataset(
-            categories=self.gt_dataset.categories(), media_type=dm.Image
+            categories=self._gt_dataset.categories(), media_type=dm.Image
         )
 
-        gt_label_cat: dm.LabelCategories = self.gt_dataset.categories()[dm.AnnotationType.label]
+        gt_label_cat: dm.LabelCategories = self._gt_dataset.categories()[dm.AnnotationType.label]
 
-        excluded_skeletons_messages = []
-        total_skeletons = 0
         gt_count_per_class = {}
-
         skeleton_bbox_mapping = {}  # skeleton id -> bbox id
-        for gt_sample in self.gt_dataset:
-            boxes_sample = self.boxes_dataset.get(gt_sample.id, gt_sample.subset)
+        for gt_sample in self._gt_dataset:
+            boxes_sample = self._boxes_dataset.get(gt_sample.id, gt_sample.subset)
             # Samples could be discarded, so we just skip them without an error
             if not boxes_sample:
                 continue
@@ -1261,8 +1352,6 @@ class SkeletonsFromBoxesTaskBuilder:
             if not gt_skeletons:
                 continue
 
-            total_skeletons += len(gt_skeletons)
-
             # Find unambiguous gt skeleton - input bbox pairs
             matched_skeletons = []
             visited_skeletons = set()
@@ -1271,12 +1360,15 @@ class SkeletonsFromBoxesTaskBuilder:
 
                 if len(visited_skeletons) == len(gt_skeletons):
                     # Handle unmatched boxes
-                    excluded_skeletons_messages.append(
+                    self._excluded_gt_info.add_error(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
                         "no matching boxes found".format(
                             gt_sample.id, gt_skeleton_id, gt_label_cat[gt_skeleton.label].name
-                        )
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
                     )
+                    self._excluded_gt_info.excluded_count += 1
                     continue
 
                 matched_boxes: List[dm.Bbox] = []
@@ -1297,26 +1389,32 @@ class SkeletonsFromBoxesTaskBuilder:
 
                 if len(matched_boxes) > 1:
                     # Handle ambiguous matches
-                    excluded_skeletons_messages.append(
+                    self._excluded_gt_info.add_error(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
                         "too many matching boxes ({}) found".format(
                             gt_sample.id,
                             gt_skeleton_id,
                             gt_label_cat[gt_skeleton.label].name,
                             len(matched_boxes),
-                        )
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
                     )
+                    self._excluded_gt_info.excluded_count += 1
                     continue
                 elif len(matched_boxes) == 0:
                     # Handle unmatched boxes
-                    excluded_skeletons_messages.append(
+                    self._excluded_gt_info.add_error(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
                         "no matching boxes found".format(
                             gt_sample.id,
                             gt_skeleton_id,
                             gt_label_cat[gt_skeleton.label].name,
-                        )
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
                     )
+                    self._excluded_gt_info.excluded_count += 1
                     continue
 
                 # TODO: maybe check if the top match is good enough
@@ -1334,15 +1432,24 @@ class SkeletonsFromBoxesTaskBuilder:
 
             updated_gt_dataset.put(gt_sample.wrap(annotations=matched_skeletons))
 
-        if len(skeleton_bbox_mapping) < (1 - self.max_discarded_threshold) * total_skeletons:
+        if (
+            len(skeleton_bbox_mapping)
+            < (1 - self.max_discarded_threshold) * self._excluded_gt_info.total_count
+        ):
             raise DatasetValidationError(
                 "Too many GT skeletons discarded ({} out of {}). "
                 "Please make sure each GT skeleton matches exactly 1 bbox".format(
-                    total_skeletons - len(skeleton_bbox_mapping), total_skeletons
+                    self._excluded_gt_info.total_count - len(skeleton_bbox_mapping),
+                    self._excluded_gt_info.total_count,
                 )
             )
-        elif excluded_skeletons_messages:
-            self.logger.warning(self._format_list(excluded_skeletons_messages, separator="\n"))
+
+        if self._excluded_gt_info.errors:
+            self.logger.warning(
+                "Some GT annotations were excluded due to errors found: {}".format(
+                    self._format_list(self._excluded_gt_info.errors, separator="\n")
+                )
+            )
 
         labels_with_few_gt = [
             gt_label_cat[label_id]
@@ -1356,15 +1463,15 @@ class SkeletonsFromBoxesTaskBuilder:
                 )
             )
 
-        self.gt_dataset = updated_gt_dataset
-        self.skeleton_bbox_mapping = skeleton_bbox_mapping
+        self._gt_dataset = updated_gt_dataset
+        self._skeleton_bbox_mapping = skeleton_bbox_mapping
 
     def _prepare_roi_infos(self):
-        assert self.gt_dataset is not _unset
-        assert self.boxes_dataset is not _unset
+        assert self._gt_dataset is not _unset
+        assert self._boxes_dataset is not _unset
 
         rois: List[skeletons_from_boxes_task.RoiInfo] = []
-        for sample in self.boxes_dataset:
+        for sample in self._boxes_dataset:
             for bbox in sample.annotations:
                 if not isinstance(bbox, dm.Bbox):
                     continue
@@ -1396,24 +1503,24 @@ class SkeletonsFromBoxesTaskBuilder:
                     )
                 )
 
-        self.roi_infos = rois
+        self._roi_infos = rois
 
     def _mangle_filenames(self):
         """
         Mangle filenames in the dataset to make them less recognizable by annotators
         and hide private dataset info
         """
-        assert self.roi_infos is not _unset
+        assert self._roi_infos is not _unset
 
         # TODO: maybe add different names for the same GT images in
         # different jobs to make them even less recognizable
-        self.roi_filenames = {
-            roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self.roi_infos
+        self._roi_filenames = {
+            roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self._roi_infos
         }
 
     def _prepare_job_params(self):
-        assert self.roi_infos is not _unset
-        assert self.skeleton_bbox_mapping is not _unset
+        assert self._roi_infos is not _unset
+        assert self._skeleton_bbox_mapping is not _unset
 
         # Make job layouts wrt. manifest params
         # 1 job per task, 1 task for each point label
@@ -1426,17 +1533,17 @@ class SkeletonsFromBoxesTaskBuilder:
 
         job_params: List[self._JobParams] = []
 
-        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self.roi_infos}
+        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
         for label_id, _ in enumerate(self.manifest.annotation.labels):
             label_gt_roi_ids = set(
                 roi_id
-                for roi_id in self.skeleton_bbox_mapping.values()
+                for roi_id in self._skeleton_bbox_mapping.values()
                 if roi_info_by_id[roi_id].bbox_label == label_id
             )
 
             label_data_roi_ids = [
                 roi_info.bbox_id
-                for roi_info in self.roi_infos
+                for roi_info in self._roi_infos
                 if roi_info.bbox_label == label_id
                 if roi_info.bbox_id not in label_gt_roi_ids
             ]
@@ -1457,7 +1564,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
                 job_params.append(self._JobParams(label_id=label_id, roi_ids=job_roi_ids))
 
-        self.job_params = job_params
+        self._job_params = job_params
 
     def _prepare_job_labels(self):
         self.point_labels = {}
@@ -1475,23 +1582,23 @@ class SkeletonsFromBoxesTaskBuilder:
 
         file_list = []
         file_list.append(
-            (serializer.serialize_bbox_annotations(self.boxes_dataset), layout.BOXES_FILENAME)
+            (serializer.serialize_bbox_annotations(self._boxes_dataset), layout.BOXES_FILENAME)
         )
         file_list.append(
             (
-                serializer.serialize_gt_annotations(self.gt_dataset),
+                serializer.serialize_gt_annotations(self._gt_dataset),
                 layout.GT_FILENAME,
             )
         )
         file_list.append(
             (
-                serializer.serialize_skeleton_bbox_mapping(self.skeleton_bbox_mapping),
+                serializer.serialize_skeleton_bbox_mapping(self._skeleton_bbox_mapping),
                 layout.SKELETON_BBOX_MAPPING_FILENAME,
             )
         )
-        file_list.append((serializer.serialize_roi_info(self.roi_infos), layout.ROI_INFO_FILENAME))
+        file_list.append((serializer.serialize_roi_info(self._roi_infos), layout.ROI_INFO_FILENAME))
         file_list.append(
-            (serializer.serialize_roi_filenames(self.roi_filenames), layout.ROI_FILENAMES_FILENAME)
+            (serializer.serialize_roi_filenames(self._roi_filenames), layout.ROI_FILENAMES_FILENAME)
         )
         file_list.append(
             (serializer.serialize_point_labels(self.point_labels), layout.POINT_LABELS_FILENAME)
@@ -1551,10 +1658,9 @@ class SkeletonsFromBoxesTaskBuilder:
         )
 
     def _extract_and_upload_rois(self):
-        assert self.roi_filenames is not _unset
-        assert self.roi_infos is not _unset
+        assert self._roi_filenames is not _unset
+        assert self._roi_infos is not _unset
 
-        # TODO: optimize downloading, this implementation won't work for big datasets
         src_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
         src_prefix = ""
         dst_bucket = self.oracle_data_bucket
@@ -1563,25 +1669,27 @@ class SkeletonsFromBoxesTaskBuilder:
         dst_client = self._make_cloud_storage_client(dst_bucket)
 
         image_id_to_filename = {
-            sample.attributes["id"]: sample.image.path for sample in self.boxes_dataset
+            sample.attributes["id"]: sample.image.path for sample in self._boxes_dataset
         }
 
-        filename_to_sample = {sample.image.path: sample for sample in self.boxes_dataset}
+        filename_to_sample = {sample.image.path: sample for sample in self._boxes_dataset}
 
         _roi_info_key = lambda e: e.original_image_key
         roi_info_by_image: Dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
-            for image_id, g in groupby(sorted(self.roi_infos, key=_roi_info_key), key=_roi_info_key)
+            for image_id, g in groupby(
+                sorted(self._roi_infos, key=_roi_info_key), key=_roi_info_key
+            )
         }
 
         bbox_by_id = {
             bbox.id: bbox
-            for sample in self.boxes_dataset
+            for sample in self._boxes_dataset
             for bbox in sample.annotations
             if isinstance(bbox, dm.Bbox)
         }
 
-        for filename in self.input_filenames:
+        for filename in self._data_filenames:
             image_roi_infos = roi_info_by_image.get(filename, [])
             if not image_roi_infos:
                 continue
@@ -1606,7 +1714,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 if self.embed_bbox_in_roi_image:
                     roi_pixels = self._draw_roi_bbox(roi_pixels, bbox_by_id[roi_info.bbox_id])
 
-                filename = self.roi_filenames[roi_info.bbox_id]
+                filename = self._roi_filenames[roi_info.bbox_id]
                 roi_bytes = encode_image(roi_pixels, os.path.splitext(filename)[-1])
 
                 dst_client.create_file(
@@ -1618,14 +1726,14 @@ class SkeletonsFromBoxesTaskBuilder:
                 )
 
     def _create_on_cvat(self):
-        assert self.job_params is not _unset
+        assert self._job_params is not _unset
         assert self.point_labels is not _unset
 
         _job_params_label_key = lambda ts: ts.label_id
         jobs_by_skeleton_label = {
             skeleton_label_id: list(g)
             for skeleton_label_id, g in groupby(
-                sorted(self.job_params, key=_job_params_label_key), key=_job_params_label_key
+                sorted(self._job_params, key=_job_params_label_key), key=_job_params_label_key
             )
         }
 
@@ -1663,7 +1771,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 skeleton_label_filenames.append(
                     [
                         compose_data_bucket_filename(
-                            self.escrow_address, self.chain_id, self.roi_filenames[roi_id]
+                            self.escrow_address, self.chain_id, self._roi_filenames[roi_id]
                         )
                         for roi_id in skeleton_label_job.roi_ids
                     ]
