@@ -15,6 +15,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { KycModule } from './modules/kyc/kyc.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 
 @Module({
   providers: [
@@ -49,6 +50,7 @@ import { KycModule } from './modules/kyc/kyc.module';
         'node_modules/swagger-ui-dist',
       ),
     }),
+    CronJobModule,
   ],
   controllers: [AppController],
 })

@@ -11,10 +11,10 @@ import * as Minio from 'minio';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
-import { FortuneFinalResult } from '../webhook/webhook.dto';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
+import { FortuneFinalResult } from '../../common/dto/result';
 
 @Injectable()
 export class StorageService {

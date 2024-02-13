@@ -21,6 +21,7 @@ export enum ErrorReputation {
 export enum ErrorResults {
   IntermediateResultsURLNotSet = 'Intermediate results URL is not set',
   NoIntermediateResultsFound = 'No intermediate results found',
+  NoAnnotationsMetaFound = 'No annotations meta found',
   NoResultsHaveBeenVerified = 'No results have been verified',
   NotAllRequiredSolutionsHaveBeenSent = 'Not all required solutions have been sent',
 }
@@ -86,4 +87,13 @@ export enum ErrorKyc {
   Rejected = 'KYC session rejected',
   InvalidSynapsAPIResponse = 'Invalid Synaps API response',
   InvalidWebhookSecret = 'Invalid webhook secret',
+}
+
+/**
+ * Represents error messages associated with a cron job.
+ */
+export enum ErrorCronJob {
+  NotCreated = 'Cron job has not been created',
+  NotCompleted = 'Cron job is not completed',
+  Completed = 'Cron job is completed',
 }

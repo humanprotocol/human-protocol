@@ -1,0 +1,227 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import { PayoutsResultDto } from './payout.dto';
+import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
+
+import {
+  CVAT_JOB_TYPES,
+  CVAT_RESULTS_ANNOTATIONS_FILENAME,
+  CVAT_VALIDATION_META_FILENAME,
+} from '../../common/constants';
+import { ethers } from 'ethers';
+import { Web3Service } from '../web3/web3.service';
+import { JobRequestType } from '../../common/enums';
+import { StorageService } from '../storage/storage.service';
+import { ConfigService } from '@nestjs/config';
+import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
+import {
+  CvatAnnotationMeta,
+  FortuneFinalResult,
+  ProcessingResultDto,
+} from '../../common/dto/result';
+
+@Injectable()
+export class PayoutService {
+  private readonly logger = new Logger(PayoutService.name);
+  constructor(
+    @Inject(StorageService)
+    private readonly storageService: StorageService,
+    private readonly web3Service: Web3Service,
+    public readonly configService: ConfigService,
+  ) {}
+
+  /**
+   * Performs payouts for workers based on the calculated results.
+   * It retrieves the signer, builds an escrow client, calculates results,
+   * and initiates bulk payouts through the escrow client.
+   * @param chainId The ID of the blockchain chain.
+   * @param escrowAddress The address of the escrow contract.
+   * @returns {Promise<PayoutsResultDto>} An object containing the URL for results and a boolean indicating if checks passed.
+   */
+  public async executePayouts(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<PayoutsResultDto> {
+    this.logger.log('Payouts START');
+
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const results = await this.calculateResults(chainId, escrowAddress);
+
+    await escrowClient.bulkPayOut(
+      escrowAddress,
+      results.recipients,
+      results.amounts,
+      results.url,
+      results.hash,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+      },
+    );
+
+    this.logger.log('Payouts STOP');
+
+    return {
+      url: results.url,
+      checkPassed: results.checkPassed,
+    };
+  }
+
+  /**
+   * Calculates processing results based on the manifest type.
+   * It retrieves the signer, builds an escrow client, retrieves the manifest URL,
+   * downloads the manifest data, and processes it accordingly.
+   * @param chainId The ID of the blockchain chain.
+   * @param escrowAddress The address of the escrow contract.
+   * @returns {Promise<ProcessingResultDto>} An object containing processing results including recipients, amounts, and storage data.
+   */
+  public async calculateResults(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<ProcessingResultDto> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    if (!manifestUrl) {
+      this.logger.log(
+        ErrorManifest.ManifestUrlDoesNotExist,
+        PayoutService.name,
+      );
+      throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
+    }
+
+    const manifest: FortuneManifestDto | CvatManifestDto =
+      await this.storageService.download(manifestUrl);
+
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
+      return this.processFortune(
+        manifest as FortuneManifestDto,
+        chainId,
+        escrowAddress,
+      );
+    } else if (
+      CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)
+    ) {
+      return this.processCvat(
+        manifest as CvatManifestDto,
+        chainId,
+        escrowAddress,
+      );
+    }
+
+    this.logger.log(ErrorManifest.UnsupportedManifestType, PayoutService.name);
+    throw new Error(ErrorManifest.UnsupportedManifestType);
+  }
+
+  /**
+   * Processes a FORTUNE manifest type. It validates the intermediate results, finalizes them,
+   * and calculates payments for the associated workers.
+   * @param manifest The FORTUNE manifest data.
+   * @param intermediateResultsUrl The URL to retrieve intermediate results.
+   * @returns {Promise<ProcessingResultDto>} An object containing processing results including recipients, amounts, and storage data.
+   */
+  public async processFortune(
+    manifest: FortuneManifestDto,
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<ProcessingResultDto> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const intermediateResults = (await this.storageService.download(
+      intermediateResultsUrl,
+    )) as FortuneFinalResult[];
+
+    if (intermediateResults.length === 0) {
+      this.logger.log(
+        ErrorResults.NoIntermediateResultsFound,
+        PayoutService.name,
+      );
+      throw new Error(ErrorResults.NoIntermediateResultsFound);
+    }
+
+    const validResults = intermediateResults.filter((result) => !result.error);
+    if (validResults.length < manifest.submissionsRequired) {
+      this.logger.error(
+        ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
+        PayoutService.name,
+      );
+      throw new Error(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
+    }
+
+    const { url, hash } = await this.storageService.uploadJobSolutions(
+      escrowAddress,
+      chainId,
+      intermediateResults,
+    );
+
+    const recipients = intermediateResults
+      .filter((result) => !result.error)
+      .map((item) => item.workerAddress);
+
+    const payoutAmount =
+      BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
+      BigInt(recipients.length);
+    const amounts = new Array(recipients.length).fill(payoutAmount);
+
+    return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
+  }
+
+  /**
+   * Processes an IMAGE_LABEL_BINARY manifest type. It retrieves annotations, calculates payouts
+   * for qualified annotators, and processes storage tasks.
+   * @param manifest The CVAT manifest data.
+   * @param intermediateResultsUrl The URL to retrieve intermediate results.
+   * @returns {Promise<ProcessingResultDto>} Returns the processing results including recipients, amounts, and storage data.
+   */
+  public async processCvat(
+    manifest: CvatManifestDto,
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<ProcessingResultDto> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+      escrowAddress,
+      chainId,
+      `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
+    );
+    const annotations: CvatAnnotationMeta = await this.storageService.download(
+      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
+    );
+
+    // If annotation meta does not exist
+    if (annotations && Array.isArray(annotations) && annotations.length === 0) {
+      this.logger.log(ErrorResults.NoAnnotationsMetaFound, PayoutService.name);
+      throw new Error(ErrorResults.NoAnnotationsMetaFound);
+    }
+
+    const bountyValue = ethers.parseUnits(manifest.job_bounty, 18);
+    const accumulatedBounties = annotations.results.reduce((accMap, curr) => {
+      if (curr.annotation_quality >= manifest.validation.min_quality) {
+        const existingValue = accMap.get(curr.annotator_wallet_address) || 0n;
+        accMap.set(curr.annotator_wallet_address, existingValue + bountyValue);
+      }
+      return accMap;
+    }, new Map<string, typeof bountyValue>());
+
+    const recipients = [...accumulatedBounties.keys()];
+    const amounts = [...accumulatedBounties.values()];
+
+    return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
+  }
+}
