@@ -30,9 +30,11 @@ export const SignInForm = () => {
   const handleSignIn = async (body) => {
     setIsLoading(true);
     try {
+      const hCaptchaToken = await captchaRef.current.getResponse();
       const data = await authService.signIn({
         email: body.email,
         password: body.password,
+        hCaptchaToken,
       });
       dispatch(signIn(data));
       dispatch(fetchUserBalanceAsync());

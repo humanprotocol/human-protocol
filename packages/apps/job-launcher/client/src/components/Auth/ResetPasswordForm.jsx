@@ -19,9 +19,11 @@ export const ResetPasswordForm = () => {
   const handleResetPassword = async ({ password }) => {
     setIsLoading(true);
     try {
+      const hCaptchaToken = await captchaRef.current.getResponse();
       await authService.resetPassword({
         password,
         token,
+        hCaptchaToken,
       });
 
       navigate('/');

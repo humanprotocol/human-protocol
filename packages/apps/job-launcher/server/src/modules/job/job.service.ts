@@ -471,7 +471,11 @@ export class JobService {
         tokenFundAmount,
       );
     }
-    const { url, hash } = await this.uploadManifest(manifestOrigin, chainId);
+    const { url, hash } = await this.uploadManifest(
+      requestType,
+      chainId,
+      manifestOrigin,
+    );
 
     let jobEntity = new JobEntity();
     jobEntity.chainId = chainId;
@@ -671,26 +675,25 @@ export class JobService {
   }
 
   public async uploadManifest(
-    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+    requestType: JobRequestType,
     chainId: ChainId,
+    data: any,
   ): Promise<any> {
-    let manifestFile: any = manifest;
+    let manifestFile = data;
     if (this.configService.get(ConfigNames.PGP_ENCRYPT)) {
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
       const publicKeys: string[] = [
         await kvstore.get(signer.address, KVStoreKeys.publicKey),
       ];
-      const oracleAddresses = this.getOracleAddresses(
-        (manifest as FortuneManifestDto).requestType,
-      );
+      const oracleAddresses = this.getOracleAddresses(requestType);
       for (const address in Object.values(oracleAddresses)) {
         const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
         if (publicKey) publicKeys.push(publicKey);
       }
 
       const encryptedManifest = await this.encryption.signAndEncrypt(
-        JSON.stringify(manifest),
+        JSON.stringify(data),
         publicKeys,
       );
       manifestFile = encryptedManifest;

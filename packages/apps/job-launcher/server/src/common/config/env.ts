@@ -33,6 +33,8 @@ export const ConfigNames = {
   HCAPTCHA_REPUTATION_ORACLE_URI: 'HCAPTCHA_REPUTATION_ORACLE_URI',
   HCAPTCHA_ORACLE_ADDRESS: 'HCAPTCHA_ORACLE_ADDRESS',
   HCAPTCHA_SITE_KEY: 'HCAPTCHA_SITE_KEY',
+  HCAPTCHA_SECRET: 'HCAPTCHA_SECRET',
+  HCAPTCHA_EXCHANGE_URL: 'HCAPTCHA_EXCHANGE_URL',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -89,6 +91,10 @@ export const envValidator = Joi.object({
   HCAPTCHA_REPUTATION_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
+  HCAPTCHA_SECRET: Joi.string().required(),
+  HCAPTCHA_EXCHANGE_URL: Joi.string()
+    .default('https://foundation-exchange.hmt.ai')
+    .description('hcaptcha exchange url'),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),
