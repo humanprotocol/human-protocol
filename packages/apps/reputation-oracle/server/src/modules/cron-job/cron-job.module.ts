@@ -19,7 +19,6 @@ import { ReputationModule } from '../reputation/reputation.module';
     ConfigModule,
     Web3Module,
     WebhookModule,
-    ConfigModule,
     PayoutModule,
     ReputationModule,
   ],

@@ -16,6 +16,7 @@ import { join } from 'path';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
+import { PayoutModule } from './modules/payout/payout.module';
 
 @Module({
   providers: [
@@ -51,6 +52,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
       ),
     }),
     CronJobModule,
+    PayoutModule,
   ],
   controllers: [AppController],
 })
