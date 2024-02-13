@@ -20,7 +20,7 @@ import {
   SignInDto,
   VerifyEmailDto,
 } from './auth.dto';
-import { TokenType } from './token.entity';
+import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
 import { ConfigNames } from '../../common/config';
@@ -125,10 +125,10 @@ export class AuthService {
     }
     const userEntity = await this.userService.create(data);
 
-    const tokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    let tokenEntity = new TokenEntity();
+    tokenEntity.tokenType = TokenType.EMAIL;
+    tokenEntity.user = userEntity;
+    tokenEntity = await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
