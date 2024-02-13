@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import itertools
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple
+from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
 import datumaro as dm
 import numpy as np
 from attrs import define
+from datumaro.util.annotation_util import BboxCoords
 
 from .annotation_matching import (
     Bbox,
@@ -16,14 +19,21 @@ from .annotation_matching import (
 )
 
 
-class CachedSimilarityFunction:
+class SimilarityFunction(metaclass=ABCMeta):
+    "A function to compute similarity between 2 annotations"
+
+    def __call__(self, gt_ann: dm.Annotation, ds_ann: dm.Annotation) -> float:
+        ...
+
+
+class CachedSimilarityFunction(SimilarityFunction):
     def __init__(
         self, sim_fn: Callable, *, cache: Optional[Dict[Tuple[int, int], float]] = None
     ) -> None:
         self.cache: Dict[Tuple[int, int], float] = cache or {}
         self.sim_fn = sim_fn
 
-    def __call__(self, gt_ann: Any, ds_ann: Any) -> float:
+    def __call__(self, gt_ann: dm.Annotation, ds_ann: dm.Annotation) -> float:
         key = (
             id(gt_ann),
             id(ds_ann),
@@ -44,112 +54,7 @@ class CachedSimilarityFunction:
 class DatasetComparator(metaclass=ABCMeta):
     min_similarity_threshold: float
 
-    @abstractmethod
     def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
-        ...
-
-
-class BboxDatasetComparator(DatasetComparator):
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
-        similarity_fn = CachedSimilarityFunction(bbox_iou)
-
-        all_similarities = []
-
-        for ds_sample in ds_dataset:
-            gt_sample = gt_dataset.get(ds_sample.id)
-
-            if not gt_sample:
-                continue
-
-            ds_boxes = [
-                Bbox(a.x, a.y, a.w, a.h, a.label)
-                for a in ds_sample.annotations
-                if isinstance(a, dm.Bbox)
-            ]
-            gt_boxes = [
-                Bbox(a.x, a.y, a.w, a.h, a.label)
-                for a in gt_sample.annotations
-                if isinstance(a, dm.Bbox)
-            ]
-
-            matching_result = match_annotations(
-                gt_boxes,
-                ds_boxes,
-                similarity=similarity_fn,
-                min_similarity=self.min_similarity_threshold,
-            )
-
-            for gt_bbox, ds_bbox in itertools.chain(
-                matching_result.matches,
-                matching_result.mispred,
-                zip(matching_result.a_extra, itertools.repeat(None)),
-                zip(itertools.repeat(None), matching_result.b_extra),
-            ):
-                sim = similarity_fn(gt_bbox, ds_bbox) if gt_bbox and ds_bbox else 0
-                all_similarities.append(sim)
-
-        return np.mean(all_similarities) if all_similarities else 0
-
-
-class PointsDatasetComparator(DatasetComparator):
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
-        similarity_fn = CachedSimilarityFunction(point_to_bbox_cmp)
-
-        all_similarities = []
-
-        for ds_sample in ds_dataset:
-            gt_sample = gt_dataset.get(ds_sample.id)
-
-            if not gt_sample:
-                continue
-
-            ds_points = [
-                Point(
-                    a.elements[0].points[0],
-                    a.elements[0].points[1],
-                    a.elements[0].label,
-                )
-                for a in ds_sample.annotations
-                if isinstance(a, dm.Skeleton)
-            ]
-            gt_boxes = [
-                Bbox(a.x, a.y, a.w, a.h, a.label)
-                for a in gt_sample.annotations
-                if isinstance(a, dm.Bbox)
-            ]
-
-            matching_result = match_annotations(
-                gt_boxes,
-                ds_points,
-                similarity=similarity_fn,
-                min_similarity=self.min_similarity_threshold,
-            )
-
-            for gt_bbox, ds_point in itertools.chain(
-                matching_result.matches,
-                matching_result.mispred,
-                zip(matching_result.a_extra, itertools.repeat(None)),
-                zip(itertools.repeat(None), matching_result.b_extra),
-            ):
-                sim = similarity_fn(gt_bbox, ds_point) if gt_bbox and ds_point else 0
-                all_similarities.append(sim)
-
-        return np.mean(all_similarities) if all_similarities else 0
-
-
-class SkeletonDatasetComparator(DatasetComparator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._skeleton_info: Dict[int, list[str]] = {}
-        self.categories: Optional[dm.CategoriesInfo] = None
-
-        # TODO: find better strategy for sigma estimation
-        self.oks_sigma = 0.1  # average value for COCO points
-
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
-        self.categories = gt_dataset.categories()
-
         all_similarities = []
         total_anns_to_compare = 0
 
@@ -159,18 +64,18 @@ class SkeletonDatasetComparator(DatasetComparator):
             if not gt_sample:
                 continue
 
-            matching_result, similarity_fn = self.match_skeletons(gt_sample, ds_sample)
+            matching_result, similarity_fn = self.compare_sample_annotations(gt_sample, ds_sample)
 
-            for gt_skeleton, ds_skeleton in itertools.chain(
+            for gt_ann, ds_ann in itertools.chain(
                 matching_result.matches,
                 matching_result.mispred,
                 zip(matching_result.a_extra, itertools.repeat(None)),
                 zip(itertools.repeat(None), matching_result.b_extra),
             ):
-                sim = similarity_fn(gt_skeleton, ds_skeleton) if gt_skeleton and ds_skeleton else 0
+                sim = similarity_fn(gt_ann, ds_ann) if gt_ann and ds_ann else 0
                 all_similarities.append(sim)
 
-                total_anns_to_compare += (gt_skeleton is not None) + (ds_skeleton is not None)
+                total_anns_to_compare += (gt_ann is not None) + (ds_ann is not None)
 
         accuracy = 0
         if total_anns_to_compare:
@@ -178,7 +83,93 @@ class SkeletonDatasetComparator(DatasetComparator):
 
         return accuracy
 
-    def _get_skeleton_info(self, skeleton_label_id: int):
+    @abstractmethod
+    def compare_sample_annotations(
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+    ) -> Tuple[MatchResult, SimilarityFunction]:
+        ...
+
+
+class BboxDatasetComparator(DatasetComparator):
+    def compare_sample_annotations(
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+    ) -> Tuple[MatchResult, SimilarityFunction]:
+        similarity_fn = CachedSimilarityFunction(bbox_iou)
+
+        ds_boxes = [
+            Bbox(a.x, a.y, a.w, a.h, a.label)
+            for a in ds_sample.annotations
+            if isinstance(a, dm.Bbox)
+        ]
+        gt_boxes = [
+            Bbox(a.x, a.y, a.w, a.h, a.label)
+            for a in gt_sample.annotations
+            if isinstance(a, dm.Bbox)
+        ]
+
+        matching_result = match_annotations(
+            gt_boxes,
+            ds_boxes,
+            similarity=similarity_fn,
+            min_similarity=self.min_similarity_threshold,
+        )
+
+        return matching_result, similarity_fn
+
+
+class PointsDatasetComparator(DatasetComparator):
+    def compare_sample_annotations(
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+    ) -> Tuple[MatchResult, SimilarityFunction]:
+        similarity_fn = CachedSimilarityFunction(point_to_bbox_cmp)
+
+        ds_points = [
+            Point(
+                a.elements[0].points[0],
+                a.elements[0].points[1],
+                a.elements[0].label,
+            )
+            for a in ds_sample.annotations
+            if isinstance(a, dm.Skeleton)
+        ]
+        gt_boxes = [
+            Bbox(a.x, a.y, a.w, a.h, a.label)
+            for a in gt_sample.annotations
+            if isinstance(a, dm.Bbox)
+        ]
+
+        matching_result = match_annotations(
+            gt_boxes,
+            ds_points,
+            similarity=similarity_fn,
+            min_similarity=self.min_similarity_threshold,
+        )
+
+        return matching_result, similarity_fn
+
+
+class SkeletonDatasetComparator(DatasetComparator):
+    _SkeletonInfo = list[str]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._skeleton_info: Dict[int, self._SkeletonInfo] = {}
+        self.categories: Optional[dm.CategoriesInfo] = None
+
+        # TODO: find better strategy for sigma estimation
+        self.oks_sigma = 0.1  # average value for COCO points
+
+    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
+        self.categories = gt_dataset.categories()
+        return super().compare(gt_dataset, ds_dataset)
+
+    def compare_sample_annotations(
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+    ) -> Tuple[MatchResult, SimilarityFunction]:
+        return self._match_skeletons(gt_sample, ds_sample)
+
+    def _get_skeleton_info(self, skeleton_label_id: int) -> _SkeletonInfo:
         label_cat: dm.LabelCategories = self.categories[dm.AnnotationType.label]
         skeleton_info = self._skeleton_info.get(skeleton_label_id)
 
@@ -193,7 +184,9 @@ class SkeletonDatasetComparator(DatasetComparator):
 
         return skeleton_info
 
-    def match_skeletons(self, item_a, item_b):
+    def _match_skeletons(
+        self, item_a: dm.DatasetItem, item_b: dm.DatasetItem
+    ) -> Tuple[MatchResult, SimilarityFunction]:
         a_skeletons = [a for a in item_a.annotations if isinstance(a, dm.Skeleton)]
         b_skeletons = [a for a in item_b.annotations if isinstance(a, dm.Skeleton)]
 
@@ -292,7 +285,7 @@ class SkeletonDatasetComparator(DatasetComparator):
                 return 0
 
             bbox = dm.ops.mean_bbox([a_bbox, b_bbox])
-            return self._OKS(
+            return self._compute_oks(
                 a,
                 b,
                 sigma=self.sigma,
@@ -302,11 +295,19 @@ class SkeletonDatasetComparator(DatasetComparator):
             )
 
         @classmethod
-        def _OKS(
-            cls, a, b, sigma=0.1, bbox=None, scale=None, visibility_a=None, visibility_b=None
+        def _compute_oks(
+            cls,
+            a: dm.Points,
+            b: dm.Points,
+            *,
+            sigma: Union[float, np.ndarray] = 0.1,
+            bbox: Optional[BboxCoords] = None,
+            scale: Union[None, float, np.ndarray] = None,
+            visibility_a: Union[None, bool, np.ndarray] = None,
+            visibility_b: Union[None, bool, np.ndarray] = None,
         ) -> float:
             """
-            Object Keypoint Similarity metric.
+            Computes Object Keypoint Similarity metric for a pair of point sets.
             https://cocodataset.org/#keypoints-eval
             """
 
@@ -332,6 +333,9 @@ class SkeletonDatasetComparator(DatasetComparator):
 
             total_vis = np.sum(visibility_a | visibility_b, dtype=float)
             if not total_vis:
+                # We treat this situation as match. It's possible to use alternative approaches,
+                # such as add weight for occluded points. Our current annotation approach
+                # doesn't allow to distinguish between 'occluded' and 'absent' points.
                 return 1.0
 
             dists = np.linalg.norm(p1 - p2, axis=1)
