@@ -20,7 +20,7 @@ import {
   SignInDto,
   VerifyEmailDto,
 } from './auth.dto';
-import { TokenType } from './token.entity';
+import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
 import { ConfigNames } from '../../common/config';
@@ -125,10 +125,10 @@ export class AuthService {
     // }
     const userEntity = await this.userService.create(data);
 
-    const tokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    let tokenEntity = new TokenEntity();
+    tokenEntity.tokenType = TokenType.EMAIL;
+    tokenEntity.userId = userEntity.id;
+    tokenEntity = await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -201,10 +201,10 @@ export class AuthService {
       await this.tokenRepository.deleteOne(existingToken);
     }
 
-    const newTokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.PASSWORD,
-      user: userEntity,
-    });
+    let newTokenEntity = new TokenEntity();
+    newTokenEntity.tokenType = TokenType.EMAIL;
+    newTokenEntity.userId = userEntity.id;
+    newTokenEntity = await this.tokenRepository.createUnique(newTokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -297,10 +297,10 @@ export class AuthService {
       await existingToken.remove();
     }
 
-    const newTokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    let newTokenEntity = new TokenEntity();
+    newTokenEntity.tokenType = TokenType.EMAIL;
+    newTokenEntity.userId = userEntity.id;
+    newTokenEntity = await this.tokenRepository.createUnique(newTokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
