@@ -1,0 +1,15 @@
+{
+  "background_color": "#fff",
+  "display": "standalone",
+  "homepage_url": "https://humanprotocol.org/",
+  "providedBy": {
+    "name": "Human Protocol",
+    "url": "https://humanprotocol.org/"
+  },
+  "orientation": "portrait",
+  "name": "Human Governance",
+  "description": "Human governance frontend based on Uniswap frontend",
+  "short_name": "Human",
+  "start_url": ".",
+  "theme_color": "#FC72FF"
+}
