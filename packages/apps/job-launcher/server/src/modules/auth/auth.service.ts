@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { randomUUID } from 'crypto';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
@@ -166,7 +165,7 @@ export class AuthService {
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.RefreshTokenHasExpired);
+      throw new AuthError(ErrorAuth.TokenExpired);
     }
 
     return this.auth(tokenEntity.user);
@@ -215,7 +214,7 @@ export class AuthService {
     }
 
     if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new AuthError(ErrorAuth.UserNotActive);
+      throw new AuthError(ErrorUser.UserNotActive);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -279,7 +278,7 @@ export class AuthService {
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.RefreshTokenHasExpired);
+      throw new AuthError(ErrorAuth.TokenExpired);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -305,16 +304,15 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new NotFoundException('Token not found');
+      throw new AuthError(ErrorAuth.NotFound);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.RefreshTokenHasExpired);
+      throw new AuthError(ErrorAuth.TokenExpired);
     }
 
     tokenEntity.user.status = UserStatus.ACTIVE;
-    this.userRepository.updateOne(tokenEntity.user);
-    await this.tokenRepository.deleteOne(tokenEntity);
+    await this.userRepository.updateOne(tokenEntity.user);
   }
 
   public async resendEmailVerification(
@@ -323,7 +321,7 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
-      throw new NotFoundException(ErrorUser.NotFound);
+      throw new AuthError(ErrorUser.NotFound);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -389,7 +387,7 @@ export class AuthService {
 
     if (!apiKeyEntity) {
       this.logger.log('API Key Entity not found', AuthService.name);
-      throw new NotFoundException('API Key Entity not found');
+      throw new AuthError(ErrorAuth.ApiKeyNotFound);
     }
 
     const hash = await generateHash(
@@ -410,7 +408,7 @@ export class AuthService {
 
     if (!apiKeyEntity) {
       this.logger.log('API Key Entity not found', AuthService.name);
-      throw new NotFoundException('API Key Entity not found');
+      throw new AuthError(ErrorAuth.ApiKeyNotFound);
     }
     const hash = await generateHash(
       apiKey,
