@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { WorkerModule } from './modules/user-worker/worker.module';
@@ -30,7 +29,7 @@ import { CommonConfigModule } from './common/config/common-config.module';
     CommonConfigModule,
   ],
   controllers: [AppController, OperatorController, WorkerController],
-  providers: [AppService],
+  providers: [],
   exports: [HttpModule],
 })
 export class AppModule {}
