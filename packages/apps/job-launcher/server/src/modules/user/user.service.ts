@@ -32,22 +32,14 @@ export class UserService {
   public async getByCredentials(
     email: string,
     password: string,
-  ): Promise<UserEntity> {
+  ): Promise<UserEntity | null> {
     const userEntity = await this.userRepository.findByEmail(email);
 
-    if (!userEntity) {
-      throw new NotFoundException(ErrorUser.InvalidCredentials);
-    }
-
-    if (!bcrypt.compareSync(password, userEntity.password)) {
-      throw new NotFoundException(ErrorUser.InvalidCredentials);
+    if (!userEntity || !bcrypt.compareSync(password, userEntity.password)) {
+      return null;
     }
 
     return userEntity;
-  }
-
-  public async getByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepository.findByEmail(email);
   }
 
   public updatePassword(
