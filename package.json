@@ -35,6 +35,7 @@
   },
   "workspaces": {
     "packages": [
+      "!packages/apps/governance/**",
       "packages/**/*"
     ]
   },
