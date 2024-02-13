@@ -6,11 +6,8 @@ export class AddCronJobTable1707377515450 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum" AS ENUM(
-                'create-escrow',
-                'setup-escrow',
-                'fund-escrow',
-                'cancel-escrow',
-                'process-pending-webhook'
+                'process-pending-webhook',
+                'process-paid-webhook'
             )
         `);
     await queryRunner.query(`
