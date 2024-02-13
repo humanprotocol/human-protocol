@@ -63,6 +63,7 @@ import {
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   RestrictedAudience,
+  CreateJob,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -101,6 +102,7 @@ import {
 import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
+import { RequestAction } from './job.interface';
 
 @Injectable()
 export class JobService {
@@ -155,9 +157,9 @@ export class JobService {
   }
 
   public async createHCaptchaManifest(
-    jobType: JobCaptchaShapeType,
     jobDto: JobCaptchaDto,
   ): Promise<HCaptchaManifestDto> {
+    const jobType = jobDto.annotations.typeOfJob;
     const dataUrl = generateBucketUrl(jobDto.data, JobRequestType.HCAPTCHA);
     const objectsInBucket = await listObjectsInBucket(
       jobDto.data,
@@ -396,10 +398,54 @@ export class JobService {
     return url;
   }
 
+  private createJobSpecificActions: Record<JobRequestType, RequestAction> = {
+    [JobRequestType.HCAPTCHA]: {
+      calculateFundAmount: async (dto: JobCaptchaDto, rate: number) => {
+        const objectsInBucket = await listObjectsInBucket(
+          dto.data,
+          JobRequestType.HCAPTCHA,
+        );
+        return await div(
+          dto.annotations.taskBidPrice * objectsInBucket.length,
+          rate,
+        );
+      },
+      createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
+    },
+    [JobRequestType.FORTUNE]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: async (
+        dto: JobFortuneDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => ({
+        ...dto,
+        requestType,
+        fundAmount,
+      }),
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
+  };
+
   public async createJob(
     userId: number,
     requestType: JobRequestType,
-    dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
+    dto: CreateJob,
   ): Promise<number> {
     let { chainId } = dto;
 
@@ -409,29 +455,11 @@ export class JobService {
       chainId = this.routingProtocolService.selectNetwork();
     }
 
-    let manifestOrigin, fundAmount;
     const rate = await getRate(Currency.USD, TokenId.HMT);
+    const { calculateFundAmount, createManifest } =
+      this.createJobSpecificActions[requestType];
 
-    if (requestType === JobRequestType.HCAPTCHA) {
-      // hCaptcha
-      dto = dto as JobCaptchaDto;
-      const objectsInBucket = await listObjectsInBucket(
-        dto.data,
-        JobRequestType.HCAPTCHA,
-      );
-      fundAmount = div(
-        dto.annotations.taskBidPrice * objectsInBucket.length,
-        rate,
-      );
-    } else if (requestType === JobRequestType.FORTUNE) {
-      // Fortune
-      dto = dto as JobFortuneDto;
-      fundAmount = dto.fundAmount;
-    } else {
-      // CVAT
-      dto = dto as JobCvatDto;
-      fundAmount = dto.fundAmount;
-    }
+    const fundAmount = await calculateFundAmount(dto, rate);
     const userBalance = await this.paymentService.getUserBalance(userId);
     const feePercentage = Number(
       await this.getOracleFee(
@@ -451,26 +479,11 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-    if (requestType === JobRequestType.HCAPTCHA) {
-      // hCaptcha
-      dto = dto as JobCaptchaDto;
-      manifestOrigin = await this.createHCaptchaManifest(
-        dto.annotations.typeOfJob,
-        dto,
-      );
-    } else if (requestType == JobRequestType.FORTUNE) {
-      // Fortune
-      dto = dto as JobFortuneDto;
-      manifestOrigin = { ...dto, requestType, fundAmount: tokenTotalAmount };
-    } else {
-      // CVAT
-      dto = dto as JobCvatDto;
-      manifestOrigin = await this.createCvatManifest(
-        dto,
-        requestType,
-        tokenFundAmount,
-      );
-    }
+    const manifestOrigin = await createManifest(
+      dto,
+      requestType,
+      tokenFundAmount,
+    );
     const { url, hash } = await this.uploadManifest(
       requestType,
       chainId,
