@@ -200,7 +200,8 @@ export class AuthJwtController {
     await this.authService.emailVerification(data);
   }
 
-  @Public()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Resend Email Verification',

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
@@ -32,12 +33,12 @@ import { AuthEntity } from './auth.entity';
 import { UserRepository } from '../user/user.repository';
 import { ApiKeyEntity } from './apikey.entity';
 import { AuthError } from './auth.error';
-import { hashToken } from './token.utils';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly refreshTokenExpiresIn: string;
+  private readonly accessTokenExpiresIn: string;
   private readonly feURL: string;
   private readonly iterations: number;
   private readonly keyLength: number;
@@ -54,6 +55,11 @@ export class AuthService {
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
+      '100000000',
+    );
+
+    this.accessTokenExpiresIn = this.configService.get<string>(
+      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
       '100000000',
     );
 
@@ -113,10 +119,11 @@ export class AuthService {
     // }
     const userEntity = await this.userService.create(data);
 
-    let tokenEntity = new TokenEntity();
-    tokenEntity.tokenType = TokenType.EMAIL;
-    tokenEntity.userId = userEntity.id;
-    tokenEntity = await this.tokenRepository.createUnique(tokenEntity);
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.EMAIL;
+    tokenEntity.user = userEntity;
+
+    await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -137,12 +144,20 @@ export class AuthService {
   public async auth(userEntity: UserEntity): Promise<AuthDto> {
     const auth = await this.authRepository.findOneByUserId(userEntity.id);
 
-    const accessToken = await this.jwtService.signAsync({
-      email: userEntity.email,
-      userId: userEntity.id,
-      status: userEntity.status,
-    });
+    const accessJwtId = randomUUID();
+    const accessToken = await this.jwtService.signAsync(
+      {
+        email: userEntity.email,
+        userId: userEntity.id,
+        status: userEntity.status,
+      },
+      {
+        expiresIn: this.accessTokenExpiresIn,
+        jwtid: accessJwtId,
+      },
+    );
 
+    const refreshJwtId = randomUUID();
     const refreshToken = await this.jwtService.signAsync(
       {
         email: userEntity.email,
@@ -151,11 +166,9 @@ export class AuthService {
       },
       {
         expiresIn: this.refreshTokenExpiresIn,
+        jwtid: refreshJwtId,
       },
     );
-
-    const accessTokenHashed = hashToken(accessToken);
-    const refreshTokenHashed = hashToken(refreshToken);
 
     if (auth) {
       await this.authRepository.deleteByUserId(userEntity.id);
@@ -163,8 +176,8 @@ export class AuthService {
 
     const authEntity = new AuthEntity();
     authEntity.user = userEntity;
-    authEntity.refreshToken = refreshTokenHashed;
-    authEntity.accessToken = accessTokenHashed;
+    authEntity.accessJwtId = accessJwtId;
+    authEntity.refreshJwtId = refreshJwtId;
 
     await this.authRepository.createUnique(authEntity);
 
@@ -178,20 +191,19 @@ export class AuthService {
       throw new AuthError(ErrorUser.NotFound);
     }
 
-    const existingToken =
-      await this.tokenRepository.findOneByUserIdAndTokenType(
-        userEntity.id,
-        TokenType.PASSWORD,
-      );
+    const existingToken = await this.tokenRepository.findOneByUserIdAndType(
+      userEntity.id,
+      TokenType.PASSWORD,
+    );
 
     if (existingToken) {
       await this.tokenRepository.deleteOne(existingToken);
     }
 
-    let newTokenEntity = new TokenEntity();
-    newTokenEntity.tokenType = TokenType.EMAIL;
-    newTokenEntity.userId = userEntity.id;
-    newTokenEntity = await this.tokenRepository.createUnique(newTokenEntity);
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.PASSWORD;
+    tokenEntity.user = userEntity;
+    await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -199,7 +211,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/reset-password?token=${newTokenEntity.uuid}`,
+            url: `${this.feURL}/reset-password?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -225,7 +237,7 @@ export class AuthService {
     //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
     // }
 
-    const tokenEntity = await this.tokenRepository.findOneByUuidAndTokenType(
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
       TokenType.PASSWORD,
     );
@@ -251,7 +263,7 @@ export class AuthService {
   }
 
   public async emailVerification(data: VerifyEmailDto): Promise<void> {
-    const tokenEntity = await this.tokenRepository.findOneByUuidAndTokenType(
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
       TokenType.EMAIL,
     );
@@ -274,20 +286,20 @@ export class AuthService {
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
-    const existingToken =
-      await this.tokenRepository.findOneByUserIdAndTokenType(
-        userEntity.id,
-        TokenType.EMAIL,
-      );
+    const existingToken = await this.tokenRepository.findOneByUserIdAndType(
+      userEntity.id,
+      TokenType.EMAIL,
+    );
 
     if (existingToken) {
       await existingToken.remove();
     }
 
-    let newTokenEntity = new TokenEntity();
-    newTokenEntity.tokenType = TokenType.EMAIL;
-    newTokenEntity.userId = userEntity.id;
-    newTokenEntity = await this.tokenRepository.createUnique(newTokenEntity);
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.EMAIL;
+    tokenEntity.user = userEntity;
+
+    await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -295,7 +307,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${newTokenEntity.uuid}`,
+            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],

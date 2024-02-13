@@ -9,27 +9,27 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
     super(TokenEntity, dataSource);
   }
 
-  public async findOneByUuidAndTokenType(
+  public async findOneByUuidAndType(
     uuid: string,
-    tokenType: TokenType,
+    type: TokenType,
   ): Promise<TokenEntity | null> {
     return this.findOne({
       where: {
         uuid,
-        tokenType,
+        type,
       },
       relations: ['user'],
     });
   }
 
-  public async findOneByUserIdAndTokenType(
+  public async findOneByUserIdAndType(
     userId: number,
-    tokenType: TokenType,
+    type: TokenType,
   ): Promise<TokenEntity | null> {
     return this.findOne({
       where: {
         userId,
-        tokenType,
+        type,
       },
       relations: ['user'],
     });

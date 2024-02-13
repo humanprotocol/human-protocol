@@ -1,4 +1,5 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -6,16 +7,15 @@ import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../../user/user.entity';
 import { UserStatus } from '../../../common/enums/user';
 import { ConfigNames } from '../../../common/config';
-import { AuthService } from '../auth.service';
 import { JWT_PREFIX } from '../../../common/constants';
 import { AuthRepository } from '../auth.repository';
-import { compareToken } from '../token.utils';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -38,7 +38,10 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       throw new UnauthorizedException('User not found');
     }
 
-    if (auth?.user.status !== UserStatus.ACTIVE) {
+    if (
+      auth?.user.status !== UserStatus.ACTIVE &&
+      request.url !== '/auth/resend-email-verification'
+    ) {
       throw new UnauthorizedException('User not active');
     }
 
@@ -47,13 +50,15 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     if (jwt.toLowerCase().substring(0, JWT_PREFIX.length) === JWT_PREFIX) {
       jwt = jwt.substring(JWT_PREFIX.length);
     }
+
+    const decodedJwt = this.jwtService.decode(jwt);
     if (request.url === '/auth/refresh') {
-      if (!compareToken(jwt, auth?.refreshToken)) {
-        throw new UnauthorizedException('Token expired');
+      if (decodedJwt.jti !== auth?.refreshJwtId) {
+        throw new UnauthorizedException('Invalid token');
       }
     } else {
-      if (!compareToken(jwt, auth?.accessToken)) {
-        throw new UnauthorizedException('Token expired');
+      if (decodedJwt.jti !== auth?.accessJwtId) {
+        throw new UnauthorizedException('Invalid token');
       }
     }
 
