@@ -1,4 +1,12 @@
-import { Column, Entity, Generated, JoinColumn, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Generated,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 
 import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
@@ -8,6 +16,7 @@ import { IBase } from '../../common/interfaces/base';
 export enum TokenType {
   EMAIL = 'EMAIL',
   PASSWORD = 'PASSWORD',
+  REFRESH = 'REFRESH',
 }
 
 export interface IToken extends IBase {
@@ -16,6 +25,7 @@ export interface IToken extends IBase {
 }
 
 @Entity({ schema: NS, name: 'tokens' })
+@Index(['type', 'userId'], { unique: true })
 export class TokenEntity extends BaseEntity implements IToken {
   @Column({ type: 'uuid', unique: true })
   @Generated('uuid')
@@ -27,8 +37,11 @@ export class TokenEntity extends BaseEntity implements IToken {
   })
   public type: TokenType;
 
+  @Column({ type: 'timestamptz' })
+  public expiresAt: Date;
+
   @JoinColumn()
-  @OneToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
   public user: UserEntity;
 
   @Column({ type: 'int' })

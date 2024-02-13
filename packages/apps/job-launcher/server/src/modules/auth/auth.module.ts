@@ -7,10 +7,8 @@ import { UserModule } from '../user/user.module';
 import { JwtHttpStrategy } from './strategy';
 import { AuthService } from './auth.service';
 import { AuthJwtController } from './auth.controller';
-import { AuthEntity } from './auth.entity';
 import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
 import { ApiKeyRepository } from './apikey.repository';
@@ -35,18 +33,12 @@ import { UserRepository } from '../user/user.repository';
         },
       }),
     }),
-    TypeOrmModule.forFeature([
-      AuthEntity,
-      TokenEntity,
-      ApiKeyEntity,
-      UserEntity,
-    ]),
+    TypeOrmModule.forFeature([TokenEntity, ApiKeyEntity, UserEntity]),
     SendGridModule,
   ],
   providers: [
     JwtHttpStrategy,
     AuthService,
-    AuthRepository,
     TokenRepository,
     ApiKeyRepository,
     UserRepository,

@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { AuthEntity } from '../modules/auth/auth.entity';
 import { NS } from '../common/constants';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
@@ -38,7 +37,6 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
           name: 'default',
           type: 'postgres',
           entities: [
-            AuthEntity,
             TokenEntity,
             ApiKeyEntity,
             UserEntity,

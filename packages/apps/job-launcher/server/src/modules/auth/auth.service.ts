@@ -11,6 +11,7 @@ import { UserService } from '../user/user.service';
 import {
   AuthDto,
   ForgotPasswordDto,
+  RefreshDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
   SignInDto,
@@ -28,8 +29,6 @@ import { generateHash } from '../../common/utils/crypto';
 import { ApiKeyRepository } from './apikey.repository';
 import * as crypto from 'crypto';
 import { verifyToken } from '../../common/utils/hcaptcha';
-import { AuthRepository } from './auth.repository';
-import { AuthEntity } from './auth.entity';
 import { UserRepository } from '../user/user.repository';
 import { ApiKeyEntity } from './apikey.entity';
 import { AuthError } from './auth.error';
@@ -37,8 +36,10 @@ import { AuthError } from './auth.error';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly refreshTokenExpiresIn: string;
-  private readonly accessTokenExpiresIn: string;
+  private readonly refreshTokenExpiresIn: number;
+  private readonly accessTokenExpiresIn: number;
+  private readonly verifyEmailTokenExpiresIn: number;
+  private readonly forgotPasswordTokenExpiresIn: number;
   private readonly feURL: string;
   private readonly iterations: number;
   private readonly keyLength: number;
@@ -47,20 +48,29 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
-    private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly apiKeyRepository: ApiKeyRepository,
     private readonly userRepository: UserRepository,
   ) {
-    this.refreshTokenExpiresIn = this.configService.get<string>(
-      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
-      '100000000',
+    this.refreshTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.REFRESH_TOKEN_EXPIRES_IN,
+      3600000,
     );
 
-    this.accessTokenExpiresIn = this.configService.get<string>(
+    this.accessTokenExpiresIn = this.configService.get<number>(
       ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
-      '100000000',
+      300000,
+    );
+
+    this.verifyEmailTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
+      1800000,
+    );
+
+    this.forgotPasswordTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
+      1800000,
     );
 
     this.feURL = this.configService.get<string>(
@@ -122,6 +132,10 @@ export class AuthService {
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.EMAIL;
     tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.verifyEmailTokenExpiresIn,
+    );
 
     await this.tokenRepository.createUnique(tokenEntity);
 
@@ -141,10 +155,30 @@ export class AuthService {
     return userEntity;
   }
 
-  public async auth(userEntity: UserEntity): Promise<AuthDto> {
-    const auth = await this.authRepository.findOneByUserId(userEntity.id);
+  public async refresh(data: RefreshDto): Promise<AuthDto> {
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
+      data.refreshToken,
+      TokenType.REFRESH,
+    );
 
-    const accessJwtId = randomUUID();
+    if (!tokenEntity) {
+      throw new AuthError(ErrorAuth.InvalidToken);
+    }
+
+    if (new Date() > tokenEntity.expiresAt) {
+      throw new AuthError(ErrorAuth.RefreshTokenHasExpired);
+    }
+
+    return this.auth(tokenEntity.user);
+  }
+
+  public async auth(userEntity: UserEntity): Promise<AuthDto> {
+    const refreshTokenEntity =
+      await this.tokenRepository.findOneByUserIdAndType(
+        userEntity.id,
+        TokenType.REFRESH,
+      );
+
     const accessToken = await this.jwtService.signAsync(
       {
         email: userEntity.email,
@@ -153,35 +187,24 @@ export class AuthService {
       },
       {
         expiresIn: this.accessTokenExpiresIn,
-        jwtid: accessJwtId,
       },
     );
 
-    const refreshJwtId = randomUUID();
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        email: userEntity.email,
-        userId: userEntity.id,
-        status: userEntity.status,
-      },
-      {
-        expiresIn: this.refreshTokenExpiresIn,
-        jwtid: refreshJwtId,
-      },
-    );
-
-    if (auth) {
-      await this.authRepository.deleteByUserId(userEntity.id);
+    if (refreshTokenEntity) {
+      await this.tokenRepository.deleteOne(refreshTokenEntity);
     }
 
-    const authEntity = new AuthEntity();
-    authEntity.user = userEntity;
-    authEntity.accessJwtId = accessJwtId;
-    authEntity.refreshJwtId = refreshJwtId;
+    const newRefreshTokenEntity = new TokenEntity();
+    newRefreshTokenEntity.user = userEntity;
+    newRefreshTokenEntity.type = TokenType.REFRESH;
+    const date = new Date();
+    newRefreshTokenEntity.expiresAt = new Date(
+      date.getTime() + this.refreshTokenExpiresIn,
+    );
 
-    await this.authRepository.createUnique(authEntity);
+    await this.tokenRepository.createUnique(newRefreshTokenEntity);
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken: newRefreshTokenEntity.uuid };
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
@@ -189,6 +212,10 @@ export class AuthService {
 
     if (!userEntity) {
       throw new AuthError(ErrorUser.NotFound);
+    }
+
+    if (userEntity.status !== UserStatus.ACTIVE) {
+      throw new AuthError(ErrorAuth.UserNotActive);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -203,6 +230,11 @@ export class AuthService {
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.PASSWORD;
     tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.forgotPasswordTokenExpiresIn,
+    );
+
     await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
@@ -246,6 +278,10 @@ export class AuthService {
       throw new AuthError(ErrorAuth.InvalidToken);
     }
 
+    if (new Date() > tokenEntity.expiresAt) {
+      throw new AuthError(ErrorAuth.RefreshTokenHasExpired);
+    }
+
     await this.userService.updatePassword(tokenEntity.user, data);
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -270,6 +306,10 @@ export class AuthService {
 
     if (!tokenEntity) {
       throw new NotFoundException('Token not found');
+    }
+
+    if (new Date() > tokenEntity.expiresAt) {
+      throw new AuthError(ErrorAuth.RefreshTokenHasExpired);
     }
 
     tokenEntity.user.status = UserStatus.ACTIVE;
@@ -298,6 +338,10 @@ export class AuthService {
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.EMAIL;
     tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.verifyEmailTokenExpiresIn,
+    );
 
     await this.tokenRepository.createUnique(tokenEntity);
 
