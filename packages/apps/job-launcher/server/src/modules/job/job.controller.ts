@@ -255,6 +255,7 @@ export class JobController {
     description: 'Not Found. Could not find the requested content.',
   })
   @Get('/details/:id')
+  @ApiKey()
   public async getDetails(
     @Request() req: RequestWithUser,
     @Param() params: JobIdDto,
