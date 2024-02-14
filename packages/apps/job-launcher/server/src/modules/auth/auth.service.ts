@@ -20,7 +20,7 @@ import {
   SignInDto,
   VerifyEmailDto,
 } from './auth.dto';
-import { TokenType } from './token.entity';
+import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
 import { ConfigNames } from '../../common/config';
@@ -80,19 +80,19 @@ export class AuthService {
   }
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    if (
-      !(
-        await verifyToken(
-          this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
-    }
+    // if (
+    //   !(
+    //     await verifyToken(
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       data.hCaptchaToken,
+    //       ip,
+    //     )
+    //   ).success
+    // ) {
+    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    // }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -110,25 +110,25 @@ export class AuthService {
   }
 
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    if (
-      !(
-        await verifyToken(
-          this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
-    }
+    // if (
+    //   !(
+    //     await verifyToken(
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       data.hCaptchaToken,
+    //       ip,
+    //     )
+    //   ).success
+    // ) {
+    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    // }
     const userEntity = await this.userService.create(data);
 
-    const tokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    let tokenEntity = new TokenEntity();
+    tokenEntity.tokenType = TokenType.EMAIL;
+    tokenEntity.userId = userEntity.id;
+    tokenEntity = await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -201,10 +201,10 @@ export class AuthService {
       await this.tokenRepository.deleteOne(existingToken);
     }
 
-    const newTokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.PASSWORD,
-      user: userEntity,
-    });
+    let newTokenEntity = new TokenEntity();
+    newTokenEntity.tokenType = TokenType.EMAIL;
+    newTokenEntity.userId = userEntity.id;
+    newTokenEntity = await this.tokenRepository.createUnique(newTokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -224,19 +224,19 @@ export class AuthService {
     data: RestorePasswordDto,
     ip?: string,
   ): Promise<void> {
-    if (
-      !(
-        await verifyToken(
-          this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
-    }
+    // if (
+    //   !(
+    //     await verifyToken(
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
+    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       data.hCaptchaToken,
+    //       ip,
+    //     )
+    //   ).success
+    // ) {
+    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    // }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndTokenType(
       data.token,
@@ -297,10 +297,10 @@ export class AuthService {
       await existingToken.remove();
     }
 
-    const newTokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    let newTokenEntity = new TokenEntity();
+    newTokenEntity.tokenType = TokenType.EMAIL;
+    newTokenEntity.userId = userEntity.id;
+    newTokenEntity = await this.tokenRepository.createUnique(newTokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
