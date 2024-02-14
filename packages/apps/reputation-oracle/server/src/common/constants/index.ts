@@ -16,10 +16,8 @@ export const SENDGRID_TEMPLATES = {
 
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
-export const DEFAULT_MAX_RETRY_COUNT = 3;
 
 export const CVAT_JOB_TYPES = [
-  JobRequestType.IMAGE_LABEL_BINARY,
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
 ];

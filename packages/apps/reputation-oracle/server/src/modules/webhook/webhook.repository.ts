@@ -4,7 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
 import { ConfigNames } from '../../common/config';
-import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 
@@ -23,10 +22,7 @@ export class WebhookRepository extends BaseRepository<WebhookIncomingEntity> {
       where: {
         status: status,
         retriesCount: LessThanOrEqual(
-          this.configService.get(
-            ConfigNames.MAX_RETRY_COUNT,
-            DEFAULT_MAX_RETRY_COUNT,
-          ),
+          this.configService.get(ConfigNames.MAX_RETRY_COUNT)!,
         ),
         waitUntil: LessThanOrEqual(new Date()),
       },

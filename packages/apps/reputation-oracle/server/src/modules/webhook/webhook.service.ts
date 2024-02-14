@@ -9,7 +9,6 @@ import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
-import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
 import { EventType, WebhookStatus } from '../../common/enums';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
@@ -64,10 +63,7 @@ export class WebhookService {
   ): Promise<void> {
     if (
       webhookEntity.retriesCount >=
-      this.configService.get(
-        ConfigNames.MAX_RETRY_COUNT,
-        DEFAULT_MAX_RETRY_COUNT,
-      )
+      this.configService.get(ConfigNames.MAX_RETRY_COUNT)
     ) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {

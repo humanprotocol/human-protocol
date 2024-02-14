@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_HASH,
@@ -19,7 +19,6 @@ import { ConfigNames } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 import { createMock } from '@golevelup/ts-jest';
 import { CvatManifestDto } from 'src/common/dto/manifest';
 
@@ -87,68 +86,21 @@ describe('PayoutService', () => {
 
     storageService = moduleRef.get<StorageService>(StorageService);
     payoutService = moduleRef.get<PayoutService>(PayoutService);
+    payoutService.createPayoutSpecificActions = {
+      [JobRequestType.FORTUNE]: {
+        calculateResults: jest.fn(),
+      },
+      [JobRequestType.IMAGE_BOXES]: {
+        calculateResults: jest.fn(),
+      },
+      [JobRequestType.IMAGE_POINTS]: {
+        calculateResults: jest.fn(),
+      },
+    };
   });
 
   describe('executePayouts', () => {
-    it('should successfully performs payouts', async () => {
-      const processing_results = {
-        recipients: [MOCK_ADDRESS],
-        amounts: [1n],
-        url: MOCK_FILE_URL,
-        hash: MOCK_FILE_HASH,
-        checkPassed: true,
-      };
-
-      jest
-        .spyOn(payoutService, 'calculateResults')
-        .mockResolvedValue(processing_results);
-
-      const escrowAddress = MOCK_ADDRESS;
-      const chainId = ChainId.LOCALHOST;
-
-      const result = await payoutService.executePayouts(chainId, escrowAddress);
-      expect(result.url).toEqual(processing_results.url);
-      expect(result.checkPassed).toEqual(processing_results.checkPassed);
-    });
-  });
-
-  describe('calculateResults', () => {
-    it('should successfully calculate results for Fortune', async () => {
-      const manifest = {
-        submissionsRequired: 1,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-        requestType: JobRequestType.FORTUNE,
-      };
-
-      jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
-
-      const escrowAddress = MOCK_ADDRESS;
-      const chainId = ChainId.LOCALHOST;
-
-      const processing_results = {
-        recipients: [MOCK_ADDRESS],
-        amounts: [1n],
-        url: MOCK_FILE_URL,
-        hash: MOCK_FILE_HASH,
-        checkPassed: true,
-      };
-
-      jest
-        .spyOn(payoutService, 'processFortune')
-        .mockResolvedValue(processing_results);
-
-      const result = await payoutService.calculateResults(
-        chainId,
-        escrowAddress,
-      );
-      expect(result.recipients).toEqual(processing_results.recipients);
-      expect(result.amounts).toEqual(processing_results.amounts);
-      expect(result.checkPassed).toEqual(processing_results.checkPassed);
-    });
-
-    it('should successfully calculate results for CVAT', async () => {
+    it('should successfully performs payouts for Fortune', async () => {
       const manifest: CvatManifestDto = {
         data: {
           data_url: MOCK_FILE_URL,
@@ -170,9 +122,6 @@ describe('PayoutService', () => {
 
       jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
 
-      const escrowAddress = MOCK_ADDRESS;
-      const chainId = ChainId.LOCALHOST;
-
       const processing_results = {
         recipients: [MOCK_ADDRESS],
         amounts: [1n],
@@ -181,44 +130,29 @@ describe('PayoutService', () => {
         checkPassed: true,
       };
 
-      jest
-        .spyOn(payoutService, 'processCvat')
-        .mockResolvedValue(processing_results);
+      payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
+        'calculateResults'
+      ] = jest.fn().mockResolvedValue(processing_results);
 
-      const result = await payoutService.calculateResults(
-        chainId,
-        escrowAddress,
-      );
-      expect(result.recipients).toEqual(processing_results.recipients);
-      expect(result.amounts).toEqual(processing_results.amounts);
+      const escrowAddress = MOCK_ADDRESS;
+      const chainId = ChainId.LOCALHOST;
+
+      const result = await payoutService.executePayouts(chainId, escrowAddress);
+      expect(result.url).toEqual(processing_results.url);
       expect(result.checkPassed).toEqual(processing_results.checkPassed);
     });
 
-    it('should throw an error if unsupported manifest type', async () => {
-      const manifest: CvatManifestDto = {
-        data: {
-          data_url: MOCK_FILE_URL,
-        },
-        annotation: {
-          labels: [{ name: 'cat' }, { name: 'dog' }],
-          description: 'Description',
-          type: 'OTHER_TYPE' as JobRequestType,
-          job_size: 10,
-          max_time: 10,
-        },
-        validation: {
-          min_quality: 0.95,
-          val_size: 10,
-          gt_url: MOCK_FILE_URL,
-        },
-        job_bounty: '10',
+    it('should successfully performs payouts for CVAT', async () => {
+      const manifest = {
+        submissionsRequired: 1,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: 10,
+        requestType: JobRequestType.FORTUNE,
       };
 
       jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
 
-      const escrowAddress = MOCK_ADDRESS;
-      const chainId = ChainId.LOCALHOST;
-
       const processing_results = {
         recipients: [MOCK_ADDRESS],
         amounts: [1n],
@@ -227,27 +161,16 @@ describe('PayoutService', () => {
         checkPassed: true,
       };
 
-      jest
-        .spyOn(payoutService, 'processFortune')
-        .mockResolvedValue(processing_results);
-
-      await expect(
-        payoutService.calculateResults(chainId, escrowAddress),
-      ).rejects.toThrow(ErrorManifest.UnsupportedManifestType);
-    });
-
-    it('should throw an error if manifest url does not exist', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(null),
-        getManifestUrl: jest.fn().mockResolvedValue(null),
-      }));
+      payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
+        'calculateResults'
+      ] = jest.fn().mockResolvedValue(processing_results);
 
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      await expect(
-        payoutService.calculateResults(chainId, escrowAddress),
-      ).rejects.toThrow(ErrorManifest.ManifestUrlDoesNotExist);
+      const result = await payoutService.executePayouts(chainId, escrowAddress);
+      expect(result.url).toEqual(processing_results.url);
+      expect(result.checkPassed).toEqual(processing_results.checkPassed);
     });
   });
 

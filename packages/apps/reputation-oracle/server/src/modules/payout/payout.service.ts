@@ -5,7 +5,6 @@ import { PayoutsResultDto } from './payout.dto';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 
 import {
-  CVAT_JOB_TYPES,
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
   CVAT_VALIDATION_META_FILENAME,
 } from '../../common/constants';
@@ -20,6 +19,7 @@ import {
   FortuneFinalResult,
   ProcessingResultDto,
 } from '../../common/dto/result';
+import { RequestAction } from './payout.interface';
 
 @Injectable()
 export class PayoutService {
@@ -48,7 +48,27 @@ export class PayoutService {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
-    const results = await this.calculateResults(chainId, escrowAddress);
+    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    if (!manifestUrl) {
+      this.logger.log(
+        ErrorManifest.ManifestUrlDoesNotExist,
+        PayoutService.name,
+      );
+      throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
+    }
+
+    const manifest = await this.storageService.download(manifestUrl);
+
+    const requestType: JobRequestType =
+      manifest.requestType || manifest.annotation.type || null;
+
+    if (!requestType) {
+      throw new Error(ErrorManifest.UnsupportedManifestType);
+    }
+
+    const { calculateResults } = this.createPayoutSpecificActions[requestType];
+
+    const results = await calculateResults(manifest, chainId, escrowAddress);
 
     await escrowClient.bulkPayOut(
       escrowAddress,
@@ -69,54 +89,32 @@ export class PayoutService {
     };
   }
 
-  /**
-   * Calculates processing results based on the manifest type.
-   * It retrieves the signer, builds an escrow client, retrieves the manifest URL,
-   * downloads the manifest data, and processes it accordingly.
-   * @param chainId The ID of the blockchain chain.
-   * @param escrowAddress The address of the escrow contract.
-   * @returns {Promise<ProcessingResultDto>} An object containing processing results including recipients, amounts, and storage data.
-   */
-  public async calculateResults(
-    chainId: ChainId,
-    escrowAddress: string,
-  ): Promise<ProcessingResultDto> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-    if (!manifestUrl) {
-      this.logger.log(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        PayoutService.name,
-      );
-      throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
-    }
-
-    const manifest: FortuneManifestDto | CvatManifestDto =
-      await this.storageService.download(manifestUrl);
-
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
-      return this.processFortune(
-        manifest as FortuneManifestDto,
-        chainId,
-        escrowAddress,
-      );
-    } else if (
-      CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)
-    ) {
-      return this.processCvat(
-        manifest as CvatManifestDto,
-        chainId,
-        escrowAddress,
-      );
-    }
-
-    this.logger.log(ErrorManifest.UnsupportedManifestType, PayoutService.name);
-    throw new Error(ErrorManifest.UnsupportedManifestType);
-  }
+  public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
+    [JobRequestType.FORTUNE]: {
+      calculateResults: async (
+        manifest: FortuneManifestDto,
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<ProcessingResultDto> =>
+        this.processFortune(manifest, chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      calculateResults: async (
+        manifest: CvatManifestDto,
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<ProcessingResultDto> =>
+        this.processCvat(manifest, chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      calculateResults: async (
+        manifest: CvatManifestDto,
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<ProcessingResultDto> =>
+        this.processCvat(manifest, chainId, escrowAddress),
+    },
+  };
 
   /**
    * Processes a FORTUNE manifest type. It validates the intermediate results, finalizes them,

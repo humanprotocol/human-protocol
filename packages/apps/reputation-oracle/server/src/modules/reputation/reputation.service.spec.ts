@@ -6,8 +6,6 @@ import { ReputationEntity } from './reputation.entity';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_URL,
-  MOCK_REQUESTER_DESCRIPTION,
-  MOCK_REQUESTER_TITLE,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
