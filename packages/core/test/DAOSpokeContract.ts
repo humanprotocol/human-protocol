@@ -147,7 +147,7 @@ describe.only("DAOSpokeContract", function () {
     expect(hasVoted).to.be.true;
   });
 
-  it("should hasVoted return false when hasn't voted", async () => {
+  it("should hasVoted return false when hasnt voted", async () => {
     const proposalId = await createProposalOnSpoke(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -167,7 +167,7 @@ describe.only("DAOSpokeContract", function () {
     expect(hasVoted).to.be.false;
   });
 
-  it("should isProposal return false when proposal doesn't exist", async () => {
+  it("should isProposal return false when proposal doesnt exist", async () => {
     const isProposal = await daoSpoke.isProposal(1);
     expect(isProposal).to.be.false;
   });

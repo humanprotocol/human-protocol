@@ -883,10 +883,6 @@ describe.only("MetaHumanGovernor", function () {
     expect(state).to.equal(expectedState);
   });
 
-  it("Should get proposal state when spokes are updated after proposal creation", async function () {});
-
-  it("Should receive message when votes already counted", async function () {});
-
   it("Should get proposal threshold", async function () {
     const threshold = await governor.proposalThreshold();
     expect(threshold).to.equal(0);
@@ -1283,11 +1279,31 @@ describe.only("MetaHumanGovernor", function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it("Should fail to vote on proposal by signature when not active", async function () {});
+  it("Should fail to vote on proposal by signature when not active", async function () {
+    await createMockUserWithVotingPower(voteToken, user1);
 
-  it("Should vote on proposal with reason and params by signature", async function () {});
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner,
+    );
 
-  it("Should fail to vote on proposal with reason and params by signature when no active", async function () {});
+    // create signature
+    const support = 1;
+    const { v, r, s } = await signProposal(
+      proposalId,
+      governor,
+      support,
+      user1,
+    );
+
+    // cast vote with sig
+    expect(
+      await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s),
+    ).to.be.revertedWith("Governor: vote not currently active");
+  });
 
   it("Should revert when creating proposal with propose", async function () {
     const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
@@ -1316,7 +1332,7 @@ describe.only("MetaHumanGovernor", function () {
     expect(magistrate).to.equal(newMagistrate);
   });
 
-  it("Should reverts when to transfer magistrate when it's address zero", async function () {
+  it("Should reverts when to transfer magistrate when its address zero", async function () {
     await expect(
       governor.transferMagistrate(ethers.ZeroAddress),
     ).to.be.revertedWith("Magistrate: new magistrate is the zero address");

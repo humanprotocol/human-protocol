@@ -20,3 +20,9 @@ export interface IWormholeVM {
   signatures: IWormholeSignature[];
   hash: string;
 }
+
+export interface SignatureComponents {
+  v: number;
+  r: string;
+  s: string;
+}

@@ -7,7 +7,11 @@ import {
   DAOSpokeContract,
   WormholeMock,
 } from "../typechain-types";
-import { IWormholeVM, IWormholeSignature } from "./GovernanceTypes";
+import {
+  IWormholeVM,
+  IWormholeSignature,
+  SignatureComponents,
+} from "./GovernanceTypes";
 
 let owner: Signer;
 
@@ -242,10 +246,55 @@ export async function collectVotesFromSpoke(
   await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
 }
 
-interface SignatureComponents {
-  v: number;
-  r: string;
-  s: string;
+export async function signProposalWithReasonAndParams(
+  proposalId: string,
+  governor: MetaHumanGovernor,
+  support: number,
+  reason: string,
+  params: string,
+  signer: Signer,
+): Promise<SignatureComponents> {
+  const signature = await signer.signTypedData(
+    {
+      name: "MetaHumanGovernor",
+      version: "1",
+      chainId: (await ethers.provider.getNetwork()).chainId,
+      verifyingContract: await governor.getAddress(),
+    },
+    {
+      Ballot: [
+        {
+          name: "proposalId",
+          type: "uint256",
+        },
+        {
+          name: "support",
+          type: "uint8",
+        },
+        {
+          name: "reason",
+          type: "bytes32",
+        },
+        {
+          name: "params",
+          type: "bytes32",
+        },
+      ],
+    },
+    {
+      proposalId,
+      support,
+      reason,
+      params,
+    },
+  );
+
+  // Extract the signature components
+  const r = signature.slice(0, 66);
+  const s = "0x" + signature.slice(66, 130);
+  const v = parseInt(signature.slice(130, 132), 16);
+
+  return { v, r, s };
 }
 
 export async function signProposal(
