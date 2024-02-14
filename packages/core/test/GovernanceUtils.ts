@@ -1,17 +1,17 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { Signer } from "ethers";
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { Signer } from 'ethers';
 import {
   MetaHumanGovernor,
   VHMToken,
   DAOSpokeContract,
   WormholeMock,
-} from "../typechain-types";
+} from '../typechain-types';
 import {
   IWormholeVM,
   IWormholeSignature,
   SignatureComponents,
-} from "./GovernanceTypes";
+} from './GovernanceTypes';
 
 let owner: Signer;
 
@@ -20,20 +20,20 @@ export const mineNBlocks = async (n: number) => {
     Array(n)
       .fill(0)
       .map(async () => {
-        await ethers.provider.send("evm_mine", []);
-      }),
+        await ethers.provider.send('evm_mine', []);
+      })
   );
 };
 
 export async function createMockUserWithVotingPower(
   voteToken: VHMToken,
-  user: Signer,
+  user: Signer
 ): Promise<Signer> {
   [owner] = await ethers.getSigners();
 
   await voteToken
     .connect(owner)
-    .transfer(await user.getAddress(), ethers.parseEther("1"));
+    .transfer(await user.getAddress(), ethers.parseEther('1'));
 
   const voteTokenWithUser = voteToken.connect(user);
   await voteTokenWithUser.delegate(await user.getAddress());
@@ -43,7 +43,7 @@ export async function createMockUserWithVotingPower(
 export async function createMessageWithPayload(
   payload: string,
   emitterChainId: number,
-  emitterAddress: string,
+  emitterAddress: string
 ): Promise<IWormholeVM> {
   const signatures: IWormholeSignature[] = [];
   const mockVM: IWormholeVM = {
@@ -65,7 +65,7 @@ export async function createMessageWithPayload(
 
 export async function callReceiveMessageWithWormholeMock(
   wormholeMock: WormholeMock,
-  result: IWormholeVM,
+  result: IWormholeVM
 ): Promise<void> {
   const vaas: string[] = [];
 
@@ -77,21 +77,21 @@ export async function callReceiveMessageWithWormholeMock(
     result.hash,
     {
       value: 100,
-    },
+    }
   );
 }
 
 export async function createProposalMessage(
   contractAddress: string,
   proposalId: number,
-  emitterAddress: string,
+  emitterAddress: string
 ): Promise<IWormholeVM> {
   const spokeChainId = 6;
   const hubChainId = 5;
 
-  const latestBlock = await ethers.provider.getBlock("latest");
+  const latestBlock = await ethers.provider.getBlock('latest');
   if (!latestBlock) {
-    throw new Error("Failed to fetch the latest block");
+    throw new Error('Failed to fetch the latest block');
   }
   const currentBlockTimestamp = latestBlock.timestamp;
   const futureTimestamp = currentBlockTimestamp + 1000;
@@ -99,19 +99,19 @@ export async function createProposalMessage(
   const defaultAbiCoder = new ethers.AbiCoder();
 
   const message = defaultAbiCoder.encode(
-    ["uint16", "uint256", "uint256", "uint256", "uint256"],
+    ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
     [
       0,
       proposalId,
       currentBlockTimestamp,
       currentBlockTimestamp,
       futureTimestamp,
-    ],
+    ]
   );
 
   const payload = defaultAbiCoder.encode(
-    ["address", "uint256", "address", "bytes"],
-    [contractAddress, spokeChainId, emitterAddress, message],
+    ['address', 'uint256', 'address', 'bytes'],
+    [contractAddress, spokeChainId, emitterAddress, message]
   );
 
   return await createMessageWithPayload(payload, hubChainId, emitterAddress);
@@ -121,12 +121,12 @@ export async function createProposalOnSpoke(
   daoSpoke: DAOSpokeContract,
   wormholeMock: WormholeMock,
   proposalId: number,
-  governorAddress: string,
+  governorAddress: string
 ): Promise<number> {
   const mockResult = await createProposalMessage(
     await daoSpoke.getAddress(),
     proposalId,
-    governorAddress,
+    governorAddress
   );
 
   await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
@@ -138,11 +138,11 @@ export async function createBasicProposal(
   wormholeMock: WormholeMock,
   voteToken: VHMToken,
   governor: MetaHumanGovernor,
-  owner: Signer,
+  owner: Signer
 ): Promise<string> {
-  const encodedCall = voteToken.interface.encodeFunctionData("transfer", [
+  const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
     await owner.getAddress(),
-    ethers.parseEther("1"),
+    ethers.parseEther('1'),
   ]);
   const targets = [await voteToken.getAddress()];
   const values = [0];
@@ -152,24 +152,24 @@ export async function createBasicProposal(
     targets,
     values,
     calldatas,
-    "",
+    '',
     {
       value: 100,
-    },
+    }
   );
   const receipt = await txResponse.wait();
   const eventSignature = ethers.id(
-    "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
+    'ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)'
   );
 
   const event = receipt?.logs?.find((log) => log.topics[0] === eventSignature);
 
-  if (!event) throw new Error("ProposalCreated event not found");
+  if (!event) throw new Error('ProposalCreated event not found');
 
   const decodedData = governor.interface.decodeEventLog(
-    "ProposalCreated",
+    'ProposalCreated',
     event.data,
-    event.topics,
+    event.topics
   );
 
   const proposalId = decodedData[0];
@@ -178,7 +178,7 @@ export async function createBasicProposal(
     daoSpoke,
     wormholeMock,
     proposalId,
-    await governor.getAddress(),
+    await governor.getAddress()
   );
   return proposalId;
 }
@@ -187,26 +187,26 @@ export async function finishProposal(
   daoSpoke: DAOSpokeContract,
   wormholeMock: WormholeMock,
   proposalId: number,
-  governorAddress: string,
+  governorAddress: string
 ): Promise<void> {
   const spokeChainId = 6;
   const hubChainId = 5;
   const defaultAbiCoder = new ethers.AbiCoder();
 
   const message = defaultAbiCoder.encode(
-    ["uint16", "uint256"],
-    [1, proposalId],
+    ['uint16', 'uint256'],
+    [1, proposalId]
   );
 
   const payload = defaultAbiCoder.encode(
-    ["address", "uint256", "address", "bytes"],
-    [await daoSpoke.getAddress(), spokeChainId, governorAddress, message],
+    ['address', 'uint256', 'address', 'bytes'],
+    [await daoSpoke.getAddress(), spokeChainId, governorAddress, message]
   );
 
   const mockResult = await createMessageWithPayload(
     payload,
     hubChainId,
-    governorAddress,
+    governorAddress
   );
 
   await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
@@ -216,31 +216,31 @@ export async function collectVotesFromSpoke(
   daoSpoke: DAOSpokeContract,
   wormholeMock: WormholeMock,
   proposalId: string,
-  governor: MetaHumanGovernor,
+  governor: MetaHumanGovernor
 ): Promise<void> {
   const spokeChainId = 6;
   const hubChainId = 5;
   const defaultAbiCoder = new ethers.AbiCoder();
 
   const message = defaultAbiCoder.encode(
-    ["uint16", "uint256", "uint256", "uint256", "uint256"],
-    [0, proposalId, ethers.parseEther("1"), 0, 0],
+    ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+    [0, proposalId, ethers.parseEther('1'), 0, 0]
   );
 
   const payload = defaultAbiCoder.encode(
-    ["address", "uint256", "address", "bytes"],
+    ['address', 'uint256', 'address', 'bytes'],
     [
       await governor.getAddress(),
       hubChainId,
       await daoSpoke.getAddress(),
       message,
-    ],
+    ]
   );
 
   const mockResult = await createMessageWithPayload(
     payload,
     spokeChainId,
-    await daoSpoke.getAddress(),
+    await daoSpoke.getAddress()
   );
 
   await callReceiveMessageWithWormholeMock(wormholeMock, mockResult);
@@ -252,32 +252,32 @@ export async function signProposalWithReasonAndParams(
   support: number,
   reason: string,
   params: string,
-  signer: Signer,
+  signer: Signer
 ): Promise<SignatureComponents> {
   const signature = await signer.signTypedData(
     {
-      name: "MetaHumanGovernor",
-      version: "1",
+      name: 'MetaHumanGovernor',
+      version: '1',
       chainId: (await ethers.provider.getNetwork()).chainId,
       verifyingContract: await governor.getAddress(),
     },
     {
       Ballot: [
         {
-          name: "proposalId",
-          type: "uint256",
+          name: 'proposalId',
+          type: 'uint256',
         },
         {
-          name: "support",
-          type: "uint8",
+          name: 'support',
+          type: 'uint8',
         },
         {
-          name: "reason",
-          type: "bytes32",
+          name: 'reason',
+          type: 'bytes32',
         },
         {
-          name: "params",
-          type: "bytes32",
+          name: 'params',
+          type: 'bytes32',
         },
       ],
     },
@@ -286,12 +286,12 @@ export async function signProposalWithReasonAndParams(
       support,
       reason,
       params,
-    },
+    }
   );
 
   // Extract the signature components
   const r = signature.slice(0, 66);
-  const s = "0x" + signature.slice(66, 130);
+  const s = '0x' + signature.slice(66, 130);
   const v = parseInt(signature.slice(130, 132), 16);
 
   return { v, r, s };
@@ -301,36 +301,36 @@ export async function signProposal(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
-  signer: Signer,
+  signer: Signer
 ): Promise<SignatureComponents> {
   const signature = await signer.signTypedData(
     {
-      name: "MetaHumanGovernor",
-      version: "1",
+      name: 'MetaHumanGovernor',
+      version: '1',
       chainId: (await ethers.provider.getNetwork()).chainId,
       verifyingContract: await governor.getAddress(),
     },
     {
       Ballot: [
         {
-          name: "proposalId",
-          type: "uint256",
+          name: 'proposalId',
+          type: 'uint256',
         },
         {
-          name: "support",
-          type: "uint8",
+          name: 'support',
+          type: 'uint8',
         },
       ],
     },
     {
       proposalId,
       support,
-    },
+    }
   );
 
   // Extract the signature components
   const r = signature.slice(0, 66);
-  const s = "0x" + signature.slice(66, 130);
+  const s = '0x' + signature.slice(66, 130);
   const v = parseInt(signature.slice(130, 132), 16);
 
   return { v, r, s };
@@ -342,13 +342,13 @@ export async function updateVotingDelay(
   governor: MetaHumanGovernor,
   wormholeMockForGovernor: WormholeMock,
   newDelay: number,
-  executer: Signer,
+  executer: Signer
 ): Promise<void> {
   // mock account with voting power
-  await voteToken.transfer(await executer.getAddress(), ethers.parseEther("5"));
+  await voteToken.transfer(await executer.getAddress(), ethers.parseEther('5'));
   await voteToken.connect(executer).delegate(await executer.getAddress());
 
-  const encodedCall = governor.interface.encodeFunctionData("setVotingDelay", [
+  const encodedCall = governor.interface.encodeFunctionData('setVotingDelay', [
     newDelay,
   ]);
   const targets = [await governor.getAddress()];
@@ -359,24 +359,24 @@ export async function updateVotingDelay(
     targets,
     values,
     calldatas,
-    "setVotingDelay",
+    'setVotingDelay',
     {
       value: 100,
-    },
+    }
   );
   const receipt = await txResponse.wait();
   const eventSignature = ethers.id(
-    "ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)",
+    'ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)'
   );
 
   const event = receipt?.logs?.find((log) => log.topics[0] === eventSignature);
 
-  if (!event) throw new Error("ProposalCreated event not found");
+  if (!event) throw new Error('ProposalCreated event not found');
 
   const decodedData = governor.interface.decodeEventLog(
-    "ProposalCreated",
+    'ProposalCreated',
     event.data,
-    event.topics,
+    event.topics
   );
 
   const proposalId = decodedData[0];
@@ -393,18 +393,18 @@ export async function updateVotingDelay(
     daoSpoke,
     wormholeMockForGovernor,
     proposalId,
-    governor,
+    governor
   );
 
-  await governor.queue(targets, values, calldatas, ethers.id("setVotingDelay"));
+  await governor.queue(targets, values, calldatas, ethers.id('setVotingDelay'));
   await governor.execute(
     targets,
     values,
     calldatas,
-    ethers.id("setVotingDelay"),
+    ethers.id('setVotingDelay')
   );
 
   expect((await governor.votingDelay()).toString()).to.equal(
-    newDelay.toString(),
+    newDelay.toString()
   );
 }

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { EventLog, Signer } from "ethers";
-import { Escrow, HMToken } from "../typechain-types";
+import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { EventLog, Signer } from 'ethers';
+import { Escrow, HMToken } from '../typechain-types';
 
-const MOCK_URL = "http://google.com/fake";
-const MOCK_HASH = "kGKmnj9BRf";
+const MOCK_URL = 'http://google.com/fake';
+const MOCK_HASH = 'kGKmnj9BRf';
 const BULK_MAX_COUNT = 100;
 
 enum Status {
@@ -31,15 +31,15 @@ let token: HMToken, escrow: Escrow;
 
 async function deployEscrow() {
   // Deploy Escrow Contract
-  const Escrow = await ethers.getContractFactory("contracts/Escrow.sol:Escrow");
+  const Escrow = await ethers.getContractFactory('contracts/Escrow.sol:Escrow');
   escrow = (await Escrow.deploy(
     await token.getAddress(),
     await launcher.getAddress(),
     await owner.getAddress(),
     100,
     await Promise.all(
-      trustedHandlers.map(async (handler) => await handler.getAddress()),
-    ),
+      trustedHandlers.map(async (handler) => await handler.getAddress())
+    )
   )) as Escrow;
 }
 
@@ -54,7 +54,7 @@ async function setupEscrow() {
       10,
       10,
       MOCK_URL,
-      MOCK_HASH,
+      MOCK_HASH
     );
 }
 
@@ -63,7 +63,7 @@ async function fundEscrow() {
   await token.connect(owner).transfer(escrow.getAddress(), amount);
 }
 
-describe("Escrow", function () {
+describe('Escrow', function () {
   this.beforeAll(async () => {
     [
       owner,
@@ -79,47 +79,47 @@ describe("Escrow", function () {
 
     // Deploy HMTToken Contract
     const HMToken = await ethers.getContractFactory(
-      "contracts/HMToken.sol:HMToken",
+      'contracts/HMToken.sol:HMToken'
     );
     token = (await HMToken.deploy(
       1000000000,
-      "Human Token",
+      'Human Token',
       18,
-      "HMT",
+      'HMT'
     )) as HMToken;
   });
 
-  describe("deployment", () => {
+  describe('deployment', () => {
     before(async () => {
       await deployEscrow();
     });
 
-    it("Should set the right token address", async () => {
+    it('Should set the right token address', async () => {
       const result = await escrow.token();
       expect(result).to.equal(await token.getAddress());
     });
 
-    it("Should set the right launched status", async () => {
+    it('Should set the right launched status', async () => {
       const result = await escrow.status();
       expect(result).to.equal(Status.Launched);
     });
 
-    it("Should set the right escrow balance", async () => {
+    it('Should set the right escrow balance', async () => {
       const result = await escrow.connect(launcher).getBalance();
-      expect(result.toString()).to.equal("0");
+      expect(result.toString()).to.equal('0');
     });
 
-    it("Should set the right contract creator", async () => {
+    it('Should set the right contract creator', async () => {
       const result = await escrow.launcher();
       expect(result).to.equal(await launcher.getAddress());
     });
 
-    it("Should set the right escrow factory contract", async () => {
+    it('Should set the right escrow factory contract', async () => {
       const result = await escrow.escrowFactory();
       expect(result).to.equal(await owner.getAddress());
     });
 
-    it("Should topup and return the right escrow balance", async () => {
+    it('Should topup and return the right escrow balance', async () => {
       const amount = 1000;
       await token.connect(owner).transfer(escrow.getAddress(), amount);
 
@@ -128,100 +128,96 @@ describe("Escrow", function () {
     });
   });
 
-  describe("abort", () => {
-    describe("Validations", function () {
+  describe('abort', () => {
+    describe('Validations', function () {
       before(async () => {
         await deployEscrow();
         await setupEscrow();
       });
 
-      it("Should revert when aborting with not trusted address", async function () {
+      it('Should revert when aborting with not trusted address', async function () {
         await expect(
-          escrow.connect(externalAddress).abort(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(externalAddress).abort()
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert when aborting from reputation oracle", async function () {
+      it('Should revert when aborting from reputation oracle', async function () {
         await expect(
-          escrow.connect(reputationOracle).abort(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(reputationOracle).abort()
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert when aborting from recording oracle", async function () {
+      it('Should revert when aborting from recording oracle', async function () {
         await expect(
-          escrow.connect(recordingOracle).abort(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(recordingOracle).abort()
+        ).to.be.revertedWith('Address calling not trusted');
       });
     });
 
-    describe("Calling abort", function () {
+    describe('Calling abort', function () {
       beforeEach(async () => {
         await deployEscrow();
         await setupEscrow();
       });
 
-      it("Should transfer tokens to owner if contract funded when abort is called", async function () {
+      it('Should transfer tokens to owner if contract funded when abort is called', async function () {
         const amount = 100;
         await token.connect(owner).transfer(escrow.getAddress(), amount);
 
         await escrow.connect(owner).abort();
 
         expect(
-          (
-            await token.connect(owner).balanceOf(escrow.getAddress())
-          ).toString(),
-        ).to.equal("0", "Escrow has not been properly aborted");
+          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
+        ).to.equal('0', 'Escrow has not been properly aborted');
       });
 
-      it("Should transfer tokens to owner if contract funded when abort is called from trusted handler", async function () {
+      it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
         const amount = 100;
         await token.connect(owner).transfer(escrow.getAddress(), amount);
 
         await escrow.connect(trustedHandlers[0]).abort();
 
         expect(
-          (
-            await token.connect(owner).balanceOf(escrow.getAddress())
-          ).toString(),
-        ).to.equal("0", "Escrow has not been properly aborted");
+          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
+        ).to.equal('0', 'Escrow has not been properly aborted');
       });
     });
   });
 
-  describe("addTrustedHandlers", async () => {
+  describe('addTrustedHandlers', async () => {
     before(async () => {
       await deployEscrow();
       await setupEscrow();
     });
 
-    describe("Validations", function () {
-      it("Should revert with the right error if caller cannot add trusted handlers", async function () {
+    describe('Validations', function () {
+      it('Should revert with the right error if caller cannot add trusted handlers', async function () {
         await expect(
           escrow
             .connect(externalAddress)
-            .addTrustedHandlers([await reputationOracle.getAddress()]),
-        ).to.be.revertedWith("Address calling not trusted");
+            .addTrustedHandlers([await reputationOracle.getAddress()])
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert when aborting from reputation oracle", async function () {
+      it('Should revert when aborting from reputation oracle', async function () {
         await expect(
           escrow
             .connect(reputationOracle)
-            .addTrustedHandlers([await externalAddress.getAddress()]),
-        ).to.be.revertedWith("Address calling not trusted");
+            .addTrustedHandlers([await externalAddress.getAddress()])
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert when aborting from recording oracle", async function () {
+      it('Should revert when aborting from recording oracle', async function () {
         await expect(
           escrow
             .connect(recordingOracle)
-            .addTrustedHandlers([await externalAddress.getAddress()]),
-        ).to.be.revertedWith("Address calling not trusted");
+            .addTrustedHandlers([await externalAddress.getAddress()])
+        ).to.be.revertedWith('Address calling not trusted');
       });
     });
 
-    describe("Add trusted handlers", async function () {
-      it("Should succeed when the contract launcher address trusted handlers and a trusted handler stores results", async () => {
+    describe('Add trusted handlers', async function () {
+      it('Should succeed when the contract launcher address trusted handlers and a trusted handler stores results', async () => {
         await escrow
           .connect(owner)
           .addTrustedHandlers([await restAccounts[2].getAddress()]);
@@ -236,7 +232,7 @@ describe("Escrow", function () {
         expect((result?.logs[0] as EventLog).args).to.contain(MOCK_HASH);
       });
 
-      it("Should succeed when add a new trusted handler from trusted handler and a trusted handler stores results", async () => {
+      it('Should succeed when add a new trusted handler from trusted handler and a trusted handler stores results', async () => {
         await escrow
           .connect(trustedHandlers[0])
           .addTrustedHandlers([await restAccounts[3].getAddress()]);
@@ -253,55 +249,55 @@ describe("Escrow", function () {
     });
   });
 
-  describe("storeResults", async () => {
-    describe("Validations", function () {
+  describe('storeResults', async () => {
+    describe('Validations', function () {
       before(async () => {
         await deployEscrow();
       });
-      it("Should revert with the right error if address calling not trusted", async function () {
+      it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
-          escrow.connect(externalAddress).storeResults(MOCK_URL, MOCK_HASH),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(externalAddress).storeResults(MOCK_URL, MOCK_HASH)
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if address calling is reputation oracle", async function () {
+      it('Should revert with the right error if address calling is reputation oracle', async function () {
         await expect(
-          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH)
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if escrow not in Pending or Partial status state", async function () {
+      it('Should revert with the right error if escrow not in Pending or Partial status state', async function () {
         await escrow
           .connect(owner)
           .addTrustedHandlers([await reputationOracle.getAddress()]);
         await expect(
-          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH),
-        ).to.be.revertedWith("Escrow not in Pending or Partial status state");
+          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH)
+        ).to.be.revertedWith('Escrow not in Pending or Partial status state');
       });
     });
 
-    describe("Events", function () {
+    describe('Events', function () {
       before(async () => {
         await deployEscrow();
         await setupEscrow();
       });
 
-      it("Should emit an event on intermediate storage", async function () {
+      it('Should emit an event on intermediate storage', async function () {
         await expect(
-          await escrow.connect(owner).storeResults(MOCK_URL, MOCK_HASH),
+          await escrow.connect(owner).storeResults(MOCK_URL, MOCK_HASH)
         )
-          .to.emit(escrow, "IntermediateStorage")
+          .to.emit(escrow, 'IntermediateStorage')
           .withArgs(MOCK_URL, MOCK_HASH);
       });
     });
 
-    describe("Store results", async function () {
+    describe('Store results', async function () {
       before(async () => {
         await deployEscrow();
         await setupEscrow();
       });
 
-      it("Should succeed when recording oracle stores results", async () => {
+      it('Should succeed when recording oracle stores results', async () => {
         const result = await (
           await escrow
             .connect(recordingOracle)
@@ -312,7 +308,7 @@ describe("Escrow", function () {
         expect((result?.logs[0] as EventLog).args).to.contain(MOCK_HASH);
       });
 
-      it("Should succeed when a trusted handler stores results", async () => {
+      it('Should succeed when a trusted handler stores results', async () => {
         const result = await (
           await escrow
             .connect(trustedHandlers[0])
@@ -325,13 +321,13 @@ describe("Escrow", function () {
     });
   });
 
-  describe("setup", () => {
-    describe("Validations", function () {
+  describe('setup', () => {
+    describe('Validations', function () {
       before(async () => {
         await deployEscrow();
       });
 
-      it("Should revert with the right error if address calling not trusted", async function () {
+      it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
           escrow
             .connect(externalAddress)
@@ -343,12 +339,12 @@ describe("Escrow", function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-            ),
-        ).to.be.revertedWith("Address calling not trusted");
+              MOCK_HASH
+            )
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if set invalid or missing reputation oracle address", async function () {
+      it('Should revert with the right error if set invalid or missing reputation oracle address', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -360,12 +356,12 @@ describe("Escrow", function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-            ),
-        ).to.be.revertedWith("Invalid reputation oracle address");
+              MOCK_HASH
+            )
+        ).to.be.revertedWith('Invalid reputation oracle address');
       });
 
-      it("Should revert with the right error if set invalid or missing recording oracle address", async function () {
+      it('Should revert with the right error if set invalid or missing recording oracle address', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -377,12 +373,12 @@ describe("Escrow", function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-            ),
-        ).to.be.revertedWith("Invalid recording oracle address");
+              MOCK_HASH
+            )
+        ).to.be.revertedWith('Invalid recording oracle address');
       });
 
-      it("Should revert with the right error if set invalid or missing exchange oracle address", async function () {
+      it('Should revert with the right error if set invalid or missing exchange oracle address', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -394,12 +390,12 @@ describe("Escrow", function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-            ),
-        ).to.be.revertedWith("Invalid exchange oracle address");
+              MOCK_HASH
+            )
+        ).to.be.revertedWith('Invalid exchange oracle address');
       });
 
-      it("Should revert with the right error if fee percentage out of bounds and too high", async function () {
+      it('Should revert with the right error if fee percentage out of bounds and too high', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -411,18 +407,18 @@ describe("Escrow", function () {
               40,
               40,
               MOCK_URL,
-              MOCK_HASH,
-            ),
-        ).to.be.revertedWith("Percentage out of bounds");
+              MOCK_HASH
+            )
+        ).to.be.revertedWith('Percentage out of bounds');
       });
     });
 
-    describe("Events", function () {
+    describe('Events', function () {
       before(async () => {
         await deployEscrow();
       });
 
-      it("Should emit an event on pending", async function () {
+      it('Should emit an event on pending', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -434,21 +430,21 @@ describe("Escrow", function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-            ),
+              MOCK_HASH
+            )
         )
-          .to.emit(escrow, "Pending")
+          .to.emit(escrow, 'Pending')
           .withArgs(MOCK_URL, MOCK_HASH);
       });
     });
 
-    describe("Setup escrow", async function () {
+    describe('Setup escrow', async function () {
       beforeEach(async () => {
         await deployEscrow();
         await fundEscrow();
       });
 
-      it("Should set correct escrow with params", async () => {
+      it('Should set correct escrow with params', async () => {
         await escrow
           .connect(owner)
           .setup(
@@ -459,24 +455,24 @@ describe("Escrow", function () {
             10,
             10,
             MOCK_URL,
-            MOCK_HASH,
+            MOCK_HASH
           );
 
         expect(await escrow.reputationOracle()).to.equal(
-          await reputationOracle.getAddress(),
+          await reputationOracle.getAddress()
         );
         expect(await escrow.recordingOracle()).to.equal(
-          await recordingOracle.getAddress(),
+          await recordingOracle.getAddress()
         );
         expect(await escrow.exchangeOracle()).to.equal(
-          await exchangeOracle.getAddress(),
+          await exchangeOracle.getAddress()
         );
         expect(await escrow.manifestUrl()).to.equal(MOCK_URL);
         expect(await escrow.manifestHash()).to.equal(MOCK_HASH);
         expect(await escrow.status()).to.equal(Status.Pending);
       });
 
-      it("Should set correct escrow with params by trusted handler", async () => {
+      it('Should set correct escrow with params by trusted handler', async () => {
         await escrow
           .connect(trustedHandlers[0])
           .setup(
@@ -487,17 +483,17 @@ describe("Escrow", function () {
             10,
             10,
             MOCK_URL,
-            MOCK_HASH,
+            MOCK_HASH
           );
 
         expect(await escrow.reputationOracle()).to.equal(
-          await reputationOracle.getAddress(),
+          await reputationOracle.getAddress()
         );
         expect(await escrow.recordingOracle()).to.equal(
-          await recordingOracle.getAddress(),
+          await recordingOracle.getAddress()
         );
         expect(await escrow.exchangeOracle()).to.equal(
-          await exchangeOracle.getAddress(),
+          await exchangeOracle.getAddress()
         );
         expect(await escrow.manifestUrl()).to.equal(MOCK_URL);
         expect(await escrow.manifestHash()).to.equal(MOCK_HASH);
@@ -506,8 +502,8 @@ describe("Escrow", function () {
     });
   });
 
-  describe("cancel", () => {
-    describe("Validations", function () {
+  describe('cancel', () => {
+    describe('Validations', function () {
       before(async () => {
         await deployEscrow();
         await fundEscrow();
@@ -520,89 +516,89 @@ describe("Escrow", function () {
             [100],
             MOCK_URL,
             MOCK_HASH,
-            "000",
+            '000'
           );
       });
 
-      it("Should revert with the right error if address calling not trusted", async function () {
+      it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
-          escrow.connect(externalAddress).cancel(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(externalAddress).cancel()
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if address calling is reputation oracle", async function () {
+      it('Should revert with the right error if address calling is reputation oracle', async function () {
         await expect(
-          escrow.connect(reputationOracle).cancel(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(reputationOracle).cancel()
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if address calling is recording oracle", async function () {
+      it('Should revert with the right error if address calling is recording oracle', async function () {
         await expect(
-          escrow.connect(recordingOracle).cancel(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(recordingOracle).cancel()
+        ).to.be.revertedWith('Address calling not trusted');
       });
     });
 
-    describe("Cancel escrow", async function () {
+    describe('Cancel escrow', async function () {
       beforeEach(async () => {
         await deployEscrow();
         await fundEscrow();
         await setupEscrow();
       });
 
-      it("Should succeed when the contract was canceled", async () => {
+      it('Should succeed when the contract was canceled', async () => {
         await escrow.connect(owner).cancel();
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
         expect(
-          await token.connect(owner).balanceOf(escrow.getAddress()),
-        ).to.equal("0", "Escrow has not been properly canceled");
+          await token.connect(owner).balanceOf(escrow.getAddress())
+        ).to.equal('0', 'Escrow has not been properly canceled');
       });
 
-      it("Should succeed when the contract was canceled by trusted handler", async () => {
+      it('Should succeed when the contract was canceled by trusted handler', async () => {
         await escrow.connect(trustedHandlers[0]).cancel();
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
         expect(
-          await token.connect(owner).balanceOf(escrow.getAddress()),
-        ).to.equal("0", "Escrow has not been properly canceled");
+          await token.connect(owner).balanceOf(escrow.getAddress())
+        ).to.equal('0', 'Escrow has not been properly canceled');
       });
     });
   });
 
-  describe("bulkPayOut", () => {
-    describe("Validations", function () {
+  describe('bulkPayOut', () => {
+    describe('Validations', function () {
       before(async () => {
         await deployEscrow();
         await fundEscrow();
         await setupEscrow();
       });
 
-      it("Should revert with the right error if address calling is not trusted", async function () {
+      it('Should revert with the right error if address calling is not trusted', async function () {
         const recepients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         await expect(
           escrow
             .connect(externalAddress)
-            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000"),
-        ).to.be.revertedWith("Address calling not trusted");
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if address calling is recording oracle", async function () {
+      it('Should revert with the right error if address calling is recording oracle', async function () {
         const recepients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         await expect(
           escrow
             .connect(recordingOracle)
-            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000"),
-        ).to.be.revertedWith("Address calling not trusted");
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if amount of recipients more then amount of values", async function () {
+      it('Should revert with the right error if amount of recipients more then amount of values', async function () {
         const recepients = [
           await restAccounts[0].getAddress(),
           await restAccounts[1].getAddress(),
@@ -613,11 +609,11 @@ describe("Escrow", function () {
         await expect(
           escrow
             .connect(reputationOracle)
-            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000"),
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith("Amount of recipients and values don't match");
       });
 
-      it("Should revert with the right error if amount of recipients less then amount of values", async function () {
+      it('Should revert with the right error if amount of recipients less then amount of values', async function () {
         const recepients = [
           await restAccounts[0].getAddress(),
           await restAccounts[1].getAddress(),
@@ -627,54 +623,54 @@ describe("Escrow", function () {
         await expect(
           escrow
             .connect(reputationOracle)
-            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000"),
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith("Amount of recipients and values don't match");
       });
 
-      it("Should revert with the right error if too many recipients", async function () {
+      it('Should revert with the right error if too many recipients', async function () {
         const recepients = Array.from(
           new Array(BULK_MAX_COUNT + 1),
-          () => ethers.ZeroAddress,
+          () => ethers.ZeroAddress
         );
         const amounts = Array.from({ length: BULK_MAX_COUNT + 1 }, () => 1);
 
         await expect(
           escrow
             .connect(reputationOracle)
-            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000"),
-        ).to.be.revertedWith("Too many recipients");
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+        ).to.be.revertedWith('Too many recipients');
       });
     });
 
-    describe("Events", function () {
+    describe('Events', function () {
       before(async () => {
         await deployEscrow();
         await fundEscrow();
         await setupEscrow();
       });
 
-      it("Should emit an event on bulk transfer", async function () {
+      it('Should emit an event on bulk transfer', async function () {
         const recepients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         await expect(
           escrow
             .connect(owner)
-            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000"),
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
-          .to.emit(escrow, "BulkTransfer")
+          .to.emit(escrow, 'BulkTransfer')
           .withArgs(anyValue, recepients, [7], true);
       });
     });
 
-    describe("Bulk payout for recipients", async function () {
+    describe('Bulk payout for recipients', async function () {
       beforeEach(async () => {
         await deployEscrow();
         await fundEscrow();
         await setupEscrow();
       });
 
-      it("Should pays each recipient their corresponding amount", async () => {
+      it('Should pays each recipient their corresponding amount', async () => {
         const account1 = await restAccounts[0].getAddress();
         const account2 = await restAccounts[1].getAddress();
         const account3 = await restAccounts[2].getAddress();
@@ -703,7 +699,7 @@ describe("Escrow", function () {
 
         await escrow
           .connect(reputationOracle)
-          .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000");
+          .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000');
 
         const finalBalanceAccount1 = await token
           .connect(owner)
@@ -725,33 +721,31 @@ describe("Escrow", function () {
           .balanceOf(await exchangeOracle.getAddress());
 
         expect(
-          (finalBalanceAccount1 - initialBalanceAccount1).toString(),
-        ).to.equal("7");
+          (finalBalanceAccount1 - initialBalanceAccount1).toString()
+        ).to.equal('7');
         expect(
-          (finalBalanceAccount2 - initialBalanceAccount2).toString(),
-        ).to.equal("14");
+          (finalBalanceAccount2 - initialBalanceAccount2).toString()
+        ).to.equal('14');
         expect(
-          (finalBalanceAccount3 - initialBalanceAccount3).toString(),
-        ).to.equal("21");
+          (finalBalanceAccount3 - initialBalanceAccount3).toString()
+        ).to.equal('21');
         expect(
           (
             finalBalanceRecordingOracle - initialBalanceRecordingOracle
-          ).toString(),
-        ).to.equal("6");
+          ).toString()
+        ).to.equal('6');
         expect(
           (
             finalBalanceReputationOracle - initialBalanceReputationOracle
-          ).toString(),
-        ).to.equal("6");
+          ).toString()
+        ).to.equal('6');
 
         expect(
-          (
-            finalBalanceExchangeOracle - initialBalanceExchangeOracle
-          ).toString(),
-        ).to.equal("6");
+          (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
+        ).to.equal('6');
       });
 
-      it("Should runs from setup to bulkPayOut to complete correctly", async () => {
+      it('Should runs from setup to bulkPayOut to complete correctly', async () => {
         const recepients = [await restAccounts[3].getAddress()];
         const amounts = [100];
 
@@ -759,14 +753,14 @@ describe("Escrow", function () {
 
         await escrow
           .connect(reputationOracle)
-          .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000");
+          .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000');
         expect(await escrow.status()).to.equal(Status.Paid);
 
         await escrow.connect(reputationOracle).complete();
         expect(await escrow.status()).to.equal(Status.Complete);
       });
 
-      it("Should runs from setup to bulkPayOut to complete correctly with multiple addresses", async () => {
+      it('Should runs from setup to bulkPayOut to complete correctly with multiple addresses', async () => {
         const recepients = [
           await restAccounts[3].getAddress(),
           await restAccounts[4].getAddress(),
@@ -778,7 +772,7 @@ describe("Escrow", function () {
 
         await escrow
           .connect(reputationOracle)
-          .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, "000");
+          .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000');
         expect(await escrow.status()).to.equal(Status.Paid);
 
         await escrow.connect(reputationOracle).complete();
@@ -787,34 +781,34 @@ describe("Escrow", function () {
     });
   });
 
-  describe("complete", () => {
-    describe("Validations", function () {
+  describe('complete', () => {
+    describe('Validations', function () {
       before(async () => {
         await deployEscrow();
         await fundEscrow();
         await setupEscrow();
       });
 
-      it("Should revert with the right error if address calling is not trusted", async function () {
+      it('Should revert with the right error if address calling is not trusted', async function () {
         await expect(
-          escrow.connect(externalAddress).complete(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(externalAddress).complete()
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if address calling is recording oracle", async function () {
+      it('Should revert with the right error if address calling is recording oracle', async function () {
         await expect(
-          escrow.connect(recordingOracle).complete(),
-        ).to.be.revertedWith("Address calling not trusted");
+          escrow.connect(recordingOracle).complete()
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it("Should revert with the right error if escrow not in Paid status state", async function () {
+      it('Should revert with the right error if escrow not in Paid status state', async function () {
         await expect(escrow.connect(owner).complete()).to.be.revertedWith(
-          "Escrow not in Paid state",
+          'Escrow not in Paid state'
         );
       });
     });
 
-    describe("Complete escrow", async function () {
+    describe('Complete escrow', async function () {
       beforeEach(async () => {
         await deployEscrow();
         await fundEscrow();
@@ -827,16 +821,16 @@ describe("Escrow", function () {
             [100],
             MOCK_URL,
             MOCK_HASH,
-            "000",
+            '000'
           );
       });
 
-      it("Should succeed when the launcher completes", async () => {
+      it('Should succeed when the launcher completes', async () => {
         await escrow.connect(owner).complete();
         expect(await escrow.status()).to.equal(Status.Complete);
       });
 
-      it("Should succeed when the trusted handler completes", async () => {
+      it('Should succeed when the trusted handler completes', async () => {
         await escrow.connect(trustedHandlers[0]).complete();
         expect(await escrow.status()).to.equal(Status.Complete);
       });

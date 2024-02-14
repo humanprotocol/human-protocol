@@ -1,69 +1,69 @@
 /* eslint-disable no-console */
-import { ethers, upgrades } from "hardhat";
+import { ethers, upgrades } from 'hardhat';
 
 async function main() {
   const hmtAddress = process.env.HMT_ADDRESS;
   if (!hmtAddress) {
-    console.error("HMT_ADDRESS env variable missing");
+    console.error('HMT_ADDRESS env variable missing');
     return;
   }
 
-  const Staking = await ethers.getContractFactory("Staking");
+  const Staking = await ethers.getContractFactory('Staking');
   const stakingContract = await upgrades.deployProxy(
     Staking,
     [hmtAddress, 1, 1],
-    { initializer: "initialize", kind: "uups" },
+    { initializer: 'initialize', kind: 'uups' }
   );
   await stakingContract.deployed();
-  console.log("Staking Proxy Address: ", await stakingContract.getAddress());
+  console.log('Staking Proxy Address: ', await stakingContract.getAddress());
   console.log(
-    "Staking Implementation Address: ",
+    'Staking Implementation Address: ',
     await upgrades.erc1967.getImplementationAddress(
-      await stakingContract.getAddress(),
-    ),
+      await stakingContract.getAddress()
+    )
   );
 
   const EscrowFactory = await ethers.getContractFactory(
-    "contracts/EscrowFactory.sol:EscrowFactory",
+    'contracts/EscrowFactory.sol:EscrowFactory'
   );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
     [await stakingContract.getAddress()],
-    { initializer: "initialize", kind: "uups" },
+    { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();
   console.log(
-    "Escrow Factory Proxy Address: ",
-    await escrowFactoryContract.getAddress(),
+    'Escrow Factory Proxy Address: ',
+    await escrowFactoryContract.getAddress()
   );
   console.log(
-    "Escrow Factory Implementation Address: ",
+    'Escrow Factory Implementation Address: ',
     await upgrades.erc1967.getImplementationAddress(
-      await escrowFactoryContract.getAddress(),
-    ),
+      await escrowFactoryContract.getAddress()
+    )
   );
 
-  const KVStore = await ethers.getContractFactory("KVStore");
+  const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();
 
-  console.log("KVStore Address: ", await kvStoreContract.getAddress());
+  console.log('KVStore Address: ', await kvStoreContract.getAddress());
 
-  const RewardPool = await ethers.getContractFactory("RewardPool");
+  const RewardPool = await ethers.getContractFactory('RewardPool');
   const rewardPoolContract = await upgrades.deployProxy(
     RewardPool,
     [hmtAddress, await stakingContract.getAddress(), 1],
-    { initializer: "initialize", kind: "uups" },
+    { initializer: 'initialize', kind: 'uups' }
   );
   await rewardPoolContract.deployed();
   console.log(
-    "Reward Pool Proxy Address: ",
-    await rewardPoolContract.getAddress(),
+    'Reward Pool Proxy Address: ',
+    await rewardPoolContract.getAddress()
   );
   console.log(
-    "Reward Pool Implementation Address: ",
+    'Reward Pool Implementation Address: ',
     await upgrades.erc1967.getImplementationAddress(
-      await rewardPoolContract.getAddress(),
-    ),
+      await rewardPoolContract.getAddress()
+    )
   );
 
   // Configure RewardPool in Staking
