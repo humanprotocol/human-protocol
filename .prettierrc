@@ -3,5 +3,15 @@
   "trailingComma": "es5",
   "singleQuote": true,
   "printWidth": 80,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "overrides": [
+    {
+      "files": "*.sol",
+      "options": {
+        "semi": true,
+        "printWidth": 80,
+        "explicitTypes": "always"
+      }
+    }
+  ]
 }
