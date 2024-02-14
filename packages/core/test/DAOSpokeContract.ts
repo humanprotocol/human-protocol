@@ -167,7 +167,7 @@ describe.only("DAOSpokeContract", function () {
     expect(hasVoted).to.be.false;
   });
 
-  it("should isProposal return false when proposal doesnt exist", async () => {
+  it("should isProposal return false when proposal does not exist", async () => {
     const isProposal = await daoSpoke.isProposal(1);
     expect(isProposal).to.be.false;
   });
