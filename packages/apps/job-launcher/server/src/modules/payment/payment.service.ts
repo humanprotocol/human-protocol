@@ -33,7 +33,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
-import { add, div, mul } from '../../common/utils/decimal';
+import { add, div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 
@@ -143,7 +143,7 @@ export class PaymentService {
       !paymentEntity ||
       paymentEntity.userId !== userId ||
       paymentEntity.status !== PaymentStatus.PENDING ||
-      paymentEntity.amount !== div(paymentData.amount_received, 100) ||
+      !eq(paymentEntity.amount, div(paymentData.amount_received, 100)) ||
       paymentEntity.currency !== paymentData.currency
     ) {
       this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);

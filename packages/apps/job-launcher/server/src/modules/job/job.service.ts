@@ -693,7 +693,7 @@ export class JobService {
     data: any,
   ): Promise<any> {
     let manifestFile = data;
-    if (this.configService.get(ConfigNames.PGP_ENCRYPT)) {
+    if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
       const publicKeys: string[] = [
