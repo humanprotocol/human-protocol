@@ -20,7 +20,8 @@ import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
 import { createMock } from '@golevelup/ts-jest';
-import { CvatManifestDto } from 'src/common/dto/manifest';
+import { CvatManifestDto } from '../../common/dto/manifest';
+import { ErrorResults } from '../../common/constants/errors';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),

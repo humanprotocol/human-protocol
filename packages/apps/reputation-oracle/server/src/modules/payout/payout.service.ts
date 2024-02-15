@@ -20,6 +20,7 @@ import {
   ProcessingResultDto,
 } from '../../common/dto/result';
 import { RequestAction } from './payout.interface';
+import { getRequestType } from '../../common/utils';
 
 @Injectable()
 export class PayoutService {
@@ -59,12 +60,7 @@ export class PayoutService {
 
     const manifest = await this.storageService.download(manifestUrl);
 
-    const requestType: JobRequestType =
-      manifest.requestType || manifest.annotation.type || null;
-
-    if (!requestType) {
-      throw new Error(ErrorManifest.UnsupportedManifestType);
-    }
+    const requestType = getRequestType(manifest);
 
     const { calculateResults } = this.createPayoutSpecificActions[requestType];
 

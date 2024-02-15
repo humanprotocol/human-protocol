@@ -177,6 +177,12 @@ describe('ReputationService', () => {
 
       expect(reputationService.increaseReputation).toHaveBeenCalledWith(
         chainId,
+        MOCK_ADDRESS,
+        ReputationEntityType.JOB_LAUNCHER,
+      );
+
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        chainId,
         'worker1',
         ReputationEntityType.WORKER,
       );
@@ -188,12 +194,6 @@ describe('ReputationService', () => {
       );
 
       expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-        chainId,
-        MOCK_ADDRESS,
-        ReputationEntityType.JOB_LAUNCHER,
-      );
-
-      expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
         chainId,
         MOCK_ADDRESS,
         ReputationEntityType.EXCHANGE_ORACLE,

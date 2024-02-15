@@ -21,6 +21,7 @@ import { Web3Service } from '../web3/web3.service';
 import { EscrowClient } from '@human-protocol/sdk';
 import { FortuneFinalResult } from '../../common/dto/result';
 import { RequestAction } from './reputation.interface';
+import { getRequestType } from '../../common/utils';
 
 @Injectable()
 export class ReputationService {
@@ -62,14 +63,9 @@ export class ReputationService {
 
     const manifest = await this.storageService.download(manifestUrl);
 
-    const requestType: JobRequestType =
-      manifest.requestType || manifest.annotation.type || null;
+    const requestType = getRequestType(manifest);
 
-    if (!requestType) {
-      throw new Error(ErrorManifest.UnsupportedManifestType);
-    }
-
-    const { doAssessWorkerReputationScores } =
+    const { assessWorkerReputationScores } =
       this.createReputationSpecificActions[requestType];
 
     // Assess reputation scores for the job launcher entity.
@@ -82,29 +78,17 @@ export class ReputationService {
       ReputationEntityType.JOB_LAUNCHER,
     );
 
+    await assessWorkerReputationScores(chainId, escrowAddress);
+
     // Assess reputation scores for the exchange oracle entity.
     // Decreases or increases the reputation score for the exchange oracle based on job completion.
     const exchangeOracleAddress =
       await escrowClient.getExchangeOracleAddress(escrowAddress);
-
-    const isDecreased = await doAssessWorkerReputationScores(
+    await this.increaseReputation(
       chainId,
-      escrowAddress,
+      exchangeOracleAddress,
+      ReputationEntityType.EXCHANGE_ORACLE,
     );
-
-    if (isDecreased) {
-      await this.decreaseReputation(
-        chainId,
-        exchangeOracleAddress,
-        ReputationEntityType.EXCHANGE_ORACLE,
-      );
-    } else {
-      await this.increaseReputation(
-        chainId,
-        exchangeOracleAddress,
-        ReputationEntityType.EXCHANGE_ORACLE,
-      );
-    }
 
     // Assess reputation scores for the recording oracle entity.
     // Decreases or increases the reputation score for the recording oracle based on job completion status.
@@ -125,61 +109,66 @@ export class ReputationService {
     }
   }
 
+  private async doAssessWorkerReputationScores(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<void> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const finalResultsUrl = await escrowClient.getResultsUrl(escrowAddress);
+    const finalResults = await this.storageService.download(finalResultsUrl);
+
+    if (finalResults.length === 0) {
+      this.logger.log(
+        ErrorResults.NoResultsHaveBeenVerified,
+        ReputationService.name,
+      );
+      throw new Error(ErrorResults.NoResultsHaveBeenVerified);
+    }
+
+    // Assess reputation scores for workers based on the final results of a job.
+    // Decreases or increases worker reputation based on the success or failure of their contributions.
+    await Promise.all(
+      finalResults.map(async (result: FortuneFinalResult) => {
+        if (result.error) {
+          if (result.error === SolutionError.Duplicated)
+            await this.decreaseReputation(
+              chainId,
+              result.workerAddress,
+              ReputationEntityType.WORKER,
+            );
+        } else {
+          await this.increaseReputation(
+            chainId,
+            result.workerAddress,
+            ReputationEntityType.WORKER,
+          );
+        }
+      }),
+    );
+  }
+
   private createReputationSpecificActions: Record<
     JobRequestType,
     RequestAction
   > = {
     [JobRequestType.FORTUNE]: {
-      doAssessWorkerReputationScores: async (
+      assessWorkerReputationScores: async (
         chainId: ChainId,
         escrowAddress: string,
-      ): Promise<boolean> => {
-        const signer = this.web3Service.getSigner(chainId);
-        const escrowClient = await EscrowClient.build(signer);
-
-        const finalResultsUrl = await escrowClient.getResultsUrl(escrowAddress);
-        const finalResults =
-          await this.storageService.download(finalResultsUrl);
-
-        if (finalResults.length === 0) {
-          this.logger.log(
-            ErrorResults.NoResultsHaveBeenVerified,
-            ReputationService.name,
-          );
-          throw new Error(ErrorResults.NoResultsHaveBeenVerified);
-        }
-
-        // Assess reputation scores for workers based on the final results of a job.
-        // Decreases or increases worker reputation based on the success or failure of their contributions.
-        await Promise.all(
-          finalResults.map(async (result: FortuneFinalResult) => {
-            if (result.error) {
-              if (result.error === SolutionError.Duplicated)
-                await this.decreaseReputation(
-                  chainId,
-                  result.workerAddress,
-                  ReputationEntityType.WORKER,
-                );
-            } else {
-              await this.increaseReputation(
-                chainId,
-                result.workerAddress,
-                ReputationEntityType.WORKER,
-              );
-            }
-          }),
-        );
-
-        return finalResults.some(
-          (result: any) => result.error === SolutionError.Duplicated,
-        );
-      },
+      ): Promise<void> =>
+        this.doAssessWorkerReputationScores(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      doAssessWorkerReputationScores: async (): Promise<boolean> => true,
+      assessWorkerReputationScores: async (): Promise<void> => {
+        console.warn('Assessment for IMAGE_BOXES not implemented.');
+      },
     },
     [JobRequestType.IMAGE_POINTS]: {
-      doAssessWorkerReputationScores: async (): Promise<boolean> => true,
+      assessWorkerReputationScores: async (): Promise<void> => {
+        console.warn('Assessment for IMAGE_POINTS not implemented.');
+      },
     },
   };
 
