@@ -64,6 +64,7 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       chainId: 1338,
+      initialBaseFeePerGas: 0,
     },
     mainnet: {
       chainId: 1,

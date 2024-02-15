@@ -18,6 +18,7 @@
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
     "local": "concurrently --hide 0 \"hardhat node\" \"yarn deploy:local\"",
+    "local:subgraph": "concurrently --hide 0 \"hardhat node --hostname 0.0.0.0\" \"yarn deploy:local && yarn workspace @human-protocol/subgraph local:node:up\"",
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
     "deploy:proxy": "hardhat run scripts/deploy-proxies.ts",

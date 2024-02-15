@@ -34,6 +34,10 @@ export const networkMap: NetworkMapDto = {
     chainId: 97,
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
+  localhost: {
+    chainId: 1338,
+    rpcUrl: 'http://localhost:8545/',
+  },
 };
 
 export const networks = Object.values(networkMap).map((network) => network);
