@@ -30,6 +30,7 @@ import { v4 } from 'uuid';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import {
+  BadRequestException,
   ConflictException,
   NotFoundException,
   UnauthorizedException,
@@ -41,8 +42,17 @@ import {
 } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
+import { KVStoreClient, Role } from '@human-protocol/sdk';
 
-jest.mock('@human-protocol/sdk');
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      set: jest.fn(),
+      get: jest.fn(),
+    })),
+  },
+}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
@@ -64,6 +74,11 @@ describe('AuthService', () => {
             return MOCK_EXPIRES_IN;
         }
       }),
+    };
+
+    const signerMock = {
+      address: MOCK_ADDRESS,
+      getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
     };
 
     const moduleRef = await Test.createTestingModule({
@@ -89,6 +104,7 @@ describe('AuthService', () => {
         {
           provide: Web3Service,
           useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
           },
         },
@@ -678,6 +694,11 @@ describe('AuthService', () => {
       });
 
       it('should create a new web3 user and return the token', async () => {
+        (KVStoreClient.build as any).mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(Role.JobLauncher),
+          set: jest.fn(),
+        }));
+
         const signature = await signMessage(
           WEB3_SIGNUP_MESSAGE,
           MOCK_PRIVATE_KEY,
@@ -712,6 +733,19 @@ describe('AuthService', () => {
             signature: invalidSignature,
           }),
         ).rejects.toThrow(ConflictException);
+      });
+      it('should throw BadRequestException if role is not in KVStore', async () => {
+        const signature = await signMessage(
+          WEB3_SIGNUP_MESSAGE,
+          MOCK_PRIVATE_KEY,
+        );
+
+        await expect(
+          authService.web3Signup({
+            ...web3UserCreateDto,
+            signature: signature,
+          }),
+        ).rejects.toThrow(BadRequestException);
       });
     });
   });
