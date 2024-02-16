@@ -6,7 +6,8 @@ const encryptionProvider: Provider = {
   provide: Encryption,
   useFactory: async (configService: ConfigService) => {
     const privateKey = configService.get<string>('PGP_PRIVATE_KEY')!;
-    return await Encryption.build(privateKey);
+    const passPhrase = configService.get<string>('PGP_PASSPHRASE')!;
+    return await Encryption.build(privateKey, passPhrase);
   },
   inject: [ConfigService],
 };
