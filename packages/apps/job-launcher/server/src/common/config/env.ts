@@ -120,7 +120,7 @@ export const envValidator = Joi.object({
   //PGP
   PGP_PRIVATE_KEY: Joi.string().default(null),
   PGP_PASSPHRASE: Joi.string().optional(),
-  PGP_ENCRYPT: Joi.string().default(false),
+  PGP_ENCRYPT: Joi.boolean().default(false),
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),
