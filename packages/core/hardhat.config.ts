@@ -157,7 +157,7 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     x1testnet: {
-      chainId: 65,
+      chainId: 195,
       timeout: 2000000,
       url: process.env.ETH_OKT_URL || '',
       accounts:
@@ -225,7 +225,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: 'x1testnet',
-        chainId: 65,
+        chainId: 195,
         urls: {
           apiURL: process.env.OKT_API_URL || '',
           browserURL: process.env.OKT_BROWSER_URL || '',
