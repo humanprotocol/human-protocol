@@ -27,7 +27,9 @@ class StorageClient(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    def list_files(self, path: Optional[str] = None, *, bucket: Optional[str] = None) -> List[str]:
+    def list_files(
+        self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
+    ) -> List[str]:
         ...
 
     @staticmethod

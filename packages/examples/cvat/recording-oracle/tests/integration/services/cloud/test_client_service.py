@@ -25,7 +25,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.client.delete_bucket(Bucket=self.bucket_name)
 
     def test_file_operations(self):
-        client = S3Client(self.url, bucket=self.bucket_name, access_key=self.access_key, secret_key=self.secret)
+        client = S3Client(endpoint_url=self.url, bucket=self.bucket_name, access_key=self.access_key, secret_key=self.secret)
 
         assert len(client.list_files()) == 0
 
@@ -44,7 +44,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert not client.file_exists(file_name)
 
     def test_degenerate_file_operations(self):
-        client = S3Client(self.url, access_key=self.access_key, secret_key=self.secret)
+        client = S3Client(endpoint_url=self.url, access_key=self.access_key, secret_key=self.secret)
         invalid_bucket = "non-existent-bucket"
         invalid_file = "non-existent-file"
 
@@ -65,9 +65,9 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_degenerate_client(self):
         with pytest.raises(EndpointConnectionError):
             invalid_client = S3Client(
-                "http://not.an.url:1234", access_key=self.access_key, secret_key=self.secret
+                endpoint_url="http://not.an.url:1234", access_key=self.access_key, secret_key=self.secret
             )
             invalid_client.create_file("test.txt", bucket=self.bucket_name)
 
         with pytest.raises(ValueError):
-            S3Client("nonsense-stuff")
+            S3Client(endpoint_url="nonsense-stuff")

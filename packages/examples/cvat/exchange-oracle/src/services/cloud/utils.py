@@ -25,18 +25,19 @@ def make_client(
 
     match bucket_info.provider:
         case CloudProvider.aws:
-            client_kwargs = {}
+            ClientClass = S3Client
+
             if bucket_info.credentials:
                 client_kwargs["access_key"] = bucket_info.credentials.access_key
                 client_kwargs["secret_key"] = bucket_info.credentials.secret_key
-
-            client = S3Client(bucket_info.host_url, **client_kwargs)
+            if bucket_info.host_url:
+                client_kwargs["endpoint_url"] = bucket_info.host_url
         case CloudProvider.gcs:
+            ClientClass = GCSClient
+
             if bucket_info.credentials:
-                client_kwargs["service_account_json"] = bucket_info.credentials.service_account_key
-
-            client = GCSClient(**client_kwargs)
+                client_kwargs["service_account_key"] = bucket_info.credentials.service_account_key
         case _:
-            raise Exception("Unsupported cloud provider")
+            raise ValueError(f"Unsupported cloud provider ({bucket_info.provider}) was provided")
 
-    return client
+    return ClientClass(**client_kwargs)

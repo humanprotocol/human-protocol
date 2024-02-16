@@ -151,11 +151,7 @@ class BoxesFromPointsTaskBuilder:
         self.max_embedded_point_radius_percent = 0.01
         self.embedded_point_color = (0, 255, 255)
 
-        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config.bucket_url())
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
-
+        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
         self.min_class_samples_for_roi_estimation = 50
 
         self.max_discarded_threshold = 0.5

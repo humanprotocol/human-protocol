@@ -200,11 +200,8 @@ class _BoxesFromPointsValidator(_TaskValidator):
         serializer = boxes_from_points_task.TaskMetaSerializer()
 
         oracle_data_bucket = BucketAccessInfo.parse_obj(
-            Config.exchange_oracle_storage_config.bucket_url()
+            Config.exchange_oracle_storage_config
         )
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
 
         storage_client = make_cloud_client(oracle_data_bucket)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2022 CVAT.ai Corporation
+# Copyright (C) 2023-2024 CVAT.ai Corporation
 #
 # SPDX-License-Identifier: MIT
 
@@ -18,20 +18,20 @@ DEFAULT_S3_HOST = "s3.amazonaws.com"
 class S3Client(StorageClient):
     def __init__(
         self,
-        endpoint_url: str,
         *,
         bucket: Optional[str] = None,
         access_key: Optional[str] = None,
         secret_key: Optional[str] = None,
+        endpoint_url: Optional[str] = None,
     ) -> None:
         super().__init__(bucket)
-        s3 = boto3.resource(
-            "s3",
+        session = boto3.Session(
             **(dict(aws_access_key_id=access_key) if access_key else {}),
             **(dict(aws_secret_access_key=secret_key) if secret_key else {}),
-            endpoint_url=unquote(endpoint_url),
         )
-
+        s3 = session.resource(
+            "s3", **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {})
+        )
         self.resource = s3
         self.client = s3.meta.client
 
@@ -67,7 +67,6 @@ class S3Client(StorageClient):
         self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
     ) -> List[str]:
         bucket = unquote(bucket) if bucket else self._bucket
-        # TODO: performance?
         objects = self.resource.Bucket(bucket).objects
         if prefix:
             objects = objects.filter(Prefix=self.normalize_prefix(prefix))

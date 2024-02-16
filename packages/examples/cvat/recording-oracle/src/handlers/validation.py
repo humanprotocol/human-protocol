@@ -47,7 +47,7 @@ class _TaskValidator:
         self.logger: Logger = NullLogger()
 
         self.data_bucket = BucketAccessInfo.parse_obj(
-            Config.exchange_oracle_storage_config.bucket_url()
+            Config.exchange_oracle_storage_config
         )
 
         self.annotation_meta: Optional[annotation.AnnotationMeta] = None
@@ -157,20 +157,14 @@ class _TaskValidator:
             )
             validation_metafile = serialize_validation_meta(validation_result.validation_meta)
 
-            storage_client = s3.S3Client(
-                Config.storage_config.provider_endpoint_url(),
-                access_key=Config.storage_config.access_key,
-                secret_key=Config.storage_config.secret_key,
-            )
+            storage_client = make_cloud_client(BucketAccessInfo.parse_obj(Config.storage_config))
 
             # TODO: add encryption
             storage_client.create_file(
-                Config.storage_config.data_bucket_name,
                 recor_merged_annotations_path,
                 validation_result.resulting_annotations,
             )
             storage_client.create_file(
-                Config.storage_config.data_bucket_name,
                 recor_validation_meta_path,
                 validation_metafile,
             )

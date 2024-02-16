@@ -2,33 +2,25 @@
 #
 # SPDX-License-Identifier: MIT
 
-import json
-import os
-
-# from google.cloud.exceptions import Forbidden as GoogleCloudForbidden
-# from google.cloud.exceptions import NotFound as GoogleCloudNotFound
 from io import BytesIO
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional
 from urllib.parse import unquote
 
 from google.cloud import storage
 
 from src.services.cloud.client import StorageClient
 
-# TODO: handle cases when bucket/file does not exist
 
 class GCSClient(StorageClient):
     def __init__(
         self,
         *,
         bucket: Optional[str] = None,
-        service_account_json: Optional[Union[str, Dict]] = None,
+        service_account_key: Optional[Dict] = None,
     ) -> None:
         super().__init__(bucket)
-        if service_account_json:
-            if isinstance(service_account_json, str):
-                service_account_json = json.loads(service_account_json)
-            self.client = storage.Client.from_service_account_info(service_account_json)
+        if service_account_key:
+            self.client = storage.Client.from_service_account_info(service_account_key)
         else:
             self.client = storage.Client.create_anonymous_client()
 
@@ -60,7 +52,6 @@ class GCSClient(StorageClient):
         self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
     ) -> List[str]:
         bucket = unquote(bucket) if bucket else self._bucket
-        # TODO: performance?
         prefix = self.normalize_prefix(prefix)
 
         return [

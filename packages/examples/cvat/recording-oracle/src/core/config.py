@@ -1,9 +1,10 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
 """ Project configuration from env vars """
 import os
+from typing import ClassVar, Optional
 
-from dotenv import load_dotenv
 from attrs.converters import to_bool
+from dotenv import load_dotenv
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
@@ -45,7 +46,9 @@ class LocalhostConfig:
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get("LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = os.environ.get(
+        "LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    )
 
     exchange_oracle_url = os.environ.get("LOCALHOST_EXCHANGE_ORACLE_URL")
     reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
@@ -66,55 +69,65 @@ class CronConfig:
     )
 
 
-class StorageConfig:
-    endpoint_url = os.environ.get("STORAGE_ENDPOINT_URL", "storage.googleapis.com")
-    region = os.environ.get("STORAGE_REGION", "")
-    access_key = os.environ.get("STORAGE_ACCESS_KEY", "")
-    secret_key = os.environ.get("STORAGE_SECRET_KEY", "")
-    data_bucket_name = os.environ.get("STORAGE_RESULTS_BUCKET_NAME", "")
-    secure = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
-    # TODO: GCS key file
+class IStorageConfig:
+    provider: ClassVar[str]
+    data_bucket_name: ClassVar[str]
+    secure: ClassVar[bool]
+    endpoint_url: ClassVar[str]  # TODO: probably should be optional
+    region: ClassVar[Optional[str]]
+    # AWS S3 specific attributes
+    access_key: ClassVar[Optional[str]]
+    secret_key: ClassVar[Optional[str]]
+    # GCS specific attributes
+    key_file_path: ClassVar[Optional[str]]
 
     @classmethod
     def get_scheme(cls) -> str:
         return "https://" if cls.secure else "http://"
 
     @classmethod
-    def provider_endpoint_url(cls):
+    def provider_endpoint_url(cls) -> str:
         return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
-    def bucket_url(cls):
+    def bucket_url(cls) -> str:
         if is_ipv4(cls.endpoint_url):
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
             return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
-class ExchangeOracleStorageConfig:
-    endpoint_url = os.environ.get("EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL", "storage.googleapis.com")
-    region = os.environ.get("EXCHANGE_ORACLE_STORAGE_REGION", "")
-    access_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY", "")
-    secret_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_SECRET_KEY", "")
-    data_bucket_name = os.environ.get("EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME", "")
+class StorageConfig(IStorageConfig):
+    # common attributes
+    provider = os.environ["STORAGE_PROVIDER"].lower()
+    endpoint_url = os.environ[
+        "STORAGE_ENDPOINT_URL"
+    ]  # TODO: probably should be optional
+    region = os.environ.get("STORAGE_REGION")
+    data_bucket_name = os.environ["STORAGE_RESULTS_BUCKET_NAME"]
+    secure = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    # AWS S3 specific attributes
+    access_key = os.environ.get("STORAGE_ACCESS_KEY")
+    secret_key = os.environ.get("STORAGE_SECRET_KEY")
+    # GCS specific attributes
+    key_file_path = os.environ.get("STORAGE_KEY_FILE_PATH")
+
+
+class ExchangeOracleStorageConfig(IStorageConfig):
+    # common attributes
+    provider = os.environ["EXCHANGE_ORACLE_STORAGE_PROVIDER"].lower()
+    endpoint_url = os.environ[
+        "EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL"
+    ]  # TODO: probably should be optional
+    region = os.environ.get("EXCHANGE_ORACLE_STORAGE_REGION")
+    data_bucket_name = os.environ["EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME"]
     results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure = to_bool(os.environ.get("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
-    # TODO: GCS key file
-
-    @classmethod
-    def get_scheme(cls) -> str:
-        return "https://" if cls.secure else "http://"
-
-    @classmethod
-    def provider_endpoint_url(cls):
-        return f"{cls.get_scheme()}{cls.endpoint_url}"
-
-    @classmethod
-    def bucket_url(cls):
-        if is_ipv4(cls.endpoint_url):
-            return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
-        else:
-            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
+    # AWS S3 specific attributes
+    access_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY")
+    secret_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_SECRET_KEY")
+    # GCS specific attributes
+    key_file_path = os.environ.get("EXCHANGE_ORACLE_STORAGE_KEY_FILE_PATH")
 
 
 class FeaturesConfig:
