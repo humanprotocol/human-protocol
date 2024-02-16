@@ -12,6 +12,9 @@ import { AuthEntity } from '../modules/auth/auth.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
 import { KycEntity } from '../modules/kyc/kyc.entity';
+import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
+import { LoggerOptions } from 'typeorm';
+import { ConfigNames } from '../common/config';
 
 @Module({
   imports: [
@@ -22,7 +25,14 @@ import { KycEntity } from '../modules/kyc/kyc.entity';
         typeOrmLoggerService: TypeOrmLoggerService,
         configService: ConfigService,
       ) => {
-        typeOrmLoggerService.setOptions('all');
+        const loggerOptions = configService
+          .get<string>(ConfigNames.POSTGRES_LOGGING)
+          ?.split(', ');
+        typeOrmLoggerService.setOptions(
+          loggerOptions && loggerOptions[0] === 'all'
+            ? 'all'
+            : (loggerOptions as LoggerOptions) ?? false,
+        );
         return {
           name: 'default',
           type: 'postgres',
@@ -33,6 +43,7 @@ import { KycEntity } from '../modules/kyc/kyc.entity';
             TokenEntity,
             UserEntity,
             KycEntity,
+            CronJobEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
@@ -41,28 +52,37 @@ import { KycEntity } from '../modules/kyc/kyc.entity';
           migrationsTableName: NS,
           migrationsTransactionMode: 'each',
           namingStrategy: new SnakeNamingStrategy(),
-          logging:
-            process.env.NODE_ENV === 'development' ||
-            process.env.NODE_ENV === 'staging',
+          logging: true,
           // Allow both start:prod and start:dev to use migrations
           // __dirname is either dist or server folder, meaning either
           // the compiled js in prod or the ts in dev.
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
-          host: configService.get<string>('POSTGRES_HOST', 'localhost'),
-          port: configService.get<number>('POSTGRES_PORT', 5432),
-          username: configService.get<string>('POSTGRES_USER', 'operator'),
-          password: configService.get<string>('POSTGRES_PASSWORD', 'qwerty'),
+          host: configService.get<string>(
+            ConfigNames.POSTGRES_HOST,
+            'localhost',
+          ),
+          port: configService.get<number>(ConfigNames.POSTGRES_PORT, 5432),
+          username: configService.get<string>(
+            ConfigNames.POSTGRES_USER,
+            'operator',
+          ),
+          password: configService.get<string>(
+            ConfigNames.POSTGRES_PASSWORD,
+            'qwerty',
+          ),
           database: configService.get<string>(
-            'POSTGRES_DATABASE',
+            ConfigNames.POSTGRES_DATABASE,
             'reputation-oracle',
           ),
-          keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
+          keepConnectionAlive:
+            configService.get<string>(ConfigNames.NODE_ENV) === 'test',
           migrationsRun: false,
           ssl:
-            configService.get<string>('POSTGRES_SSL', '').toLowerCase() ===
-            'true',
+            configService
+              .get<string>(ConfigNames.POSTGRES_SSL)
+              ?.toLowerCase() === 'true',
         };
       },
     }),
