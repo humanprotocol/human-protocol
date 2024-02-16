@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
@@ -19,12 +19,4 @@ export class CronJobEntity extends BaseEntity implements ICronJob {
 
   @Column({ type: 'timestamptz', nullable: true })
   public completedAt?: Date | null;
-
-  @BeforeInsert()
-  public beforeInsert(): void {
-    const date = new Date();
-    this.startedAt = date;
-    this.createdAt = date;
-    this.updatedAt = date;
-  }
 }

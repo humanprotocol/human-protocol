@@ -193,9 +193,9 @@ describe('AuthService', () => {
       const result = await authService.signup(userCreateDto);
 
       expect(userService.create).toHaveBeenCalledWith(userCreateDto);
-      expect(tokenRepository.create).toHaveBeenCalledWith({
+      expect(tokenRepository.createUnique).toHaveBeenCalledWith({
         tokenType: TokenType.EMAIL,
-        user: userEntity,
+        userId: 1,
       });
       expect(result).toBe(userEntity);
     });
@@ -333,7 +333,7 @@ describe('AuthService', () => {
     let createTokenMock: any;
 
     beforeEach(() => {
-      createTokenMock = jest.spyOn(tokenRepository, 'create');
+      createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
 
       createTokenMock.mockResolvedValue(tokenEntity);
     });
@@ -517,7 +517,7 @@ describe('AuthService', () => {
     let createTokenMock: any;
 
     beforeEach(() => {
-      createTokenMock = jest.spyOn(tokenRepository, 'create');
+      createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
     });
 
     afterEach(() => {
