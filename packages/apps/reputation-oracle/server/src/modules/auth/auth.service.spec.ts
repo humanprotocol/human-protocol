@@ -41,6 +41,8 @@ import {
 } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
+import { Web3PreSignUpPayloadDto, Web3PreSignUpDto } from './auth.dto';
+import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('@human-protocol/sdk');
 
@@ -55,6 +57,10 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
+
+  const signerMock = {
+    address: MOCK_ADDRESS,
+  };
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -89,6 +95,7 @@ describe('AuthService', () => {
         {
           provide: Web3Service,
           useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
           },
         },
@@ -646,17 +653,52 @@ describe('AuthService', () => {
       });
     });
 
-    describe('signup', () => {
-      const web3UserCreateDto = {
+    describe('presignup', () => {
+      const web3PreSignUpDto: Web3PreSignUpDto = {
         address: MOCK_ADDRESS,
-        type: UserType.WORKER,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should prepare web3 pre sign up payload and return typed structured data', async () => {
+        const preSignUpDataMock: Web3PreSignUpPayloadDto = {
+          from: MOCK_ADDRESS,
+          to: MOCK_ADDRESS,
+          contents: WEB3_SIGNUP_MESSAGE,
+        };
+
+        const web3PreSignUpDto: Web3PreSignUpDto = {
+          address: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+        };
+
+        jest
+          .spyOn(authService as any, 'prepareWeb3PreSignUpPayload')
+          .mockResolvedValue(preSignUpDataMock);
+
+        const result = await authService.web3PreSignup(web3PreSignUpDto);
+
+        expect(authService.prepareWeb3PreSignUpPayload).toHaveBeenCalledWith(
+          web3PreSignUpDto,
+        );
+        expect(result).toStrictEqual(preSignUpDataMock);
+      });
+    });
+
+    describe('signup', () => {
+      const web3PreSignUpDto: Web3PreSignUpDto = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
       };
 
       const nonce = getNonce();
 
       const userEntity: Partial<UserEntity> = {
         id: 1,
-        evmAddress: web3UserCreateDto.address,
+        evmAddress: web3PreSignUpDto.address,
         nonce,
       };
 
@@ -678,19 +720,26 @@ describe('AuthService', () => {
       });
 
       it('should create a new web3 user and return the token', async () => {
+        const preSignUpDataMock: Web3PreSignUpPayloadDto = {
+          from: MOCK_ADDRESS,
+          to: MOCK_ADDRESS,
+          contents: WEB3_SIGNUP_MESSAGE,
+        };
+
         const signature = await signMessage(
-          WEB3_SIGNUP_MESSAGE,
+          preSignUpDataMock,
           MOCK_PRIVATE_KEY,
         );
 
         const result = await authService.web3Signup({
-          ...web3UserCreateDto,
+          ...web3PreSignUpDto,
+          type: UserType.WORKER,
           signature,
         });
 
         expect(userService.createWeb3User).toHaveBeenCalledWith(
-          web3UserCreateDto.address,
-          web3UserCreateDto.type,
+          web3PreSignUpDto.address,
+          UserType.WORKER,
         );
 
         expect(authService.auth).toHaveBeenCalledWith(userEntity);
@@ -708,7 +757,8 @@ describe('AuthService', () => {
 
         await expect(
           authService.web3Signup({
-            ...web3UserCreateDto,
+            ...web3PreSignUpDto,
+            type: UserType.WORKER,
             signature: invalidSignature,
           }),
         ).rejects.toThrow(ConflictException);

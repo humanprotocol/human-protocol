@@ -19,6 +19,8 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
+  Web3PreSignUpPayloadDto,
+  Web3PreSignUpDto,
   Web3SignInDto,
   Web3SignUpDto,
 } from './auth.dto';
@@ -34,6 +36,7 @@ import {
   SENDGRID_TEMPLATES,
   SERVICE_NAME,
 } from '../../common/constants';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +52,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
+    private readonly web3Service: Web3Service,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -275,12 +279,30 @@ export class AuthService {
     return this.hashToken(token) === hashedToken;
   }
 
+  public prepareWeb3PreSignUpPayload(
+    data: Web3PreSignUpDto,
+  ): Web3PreSignUpPayloadDto {
+    const signer = this.web3Service.getSigner(data.chainId);
+
+    return {
+      from: data.address,
+      to: signer.address,
+      contents: WEB3_SIGNUP_MESSAGE,
+    };
+  }
+
+  public async web3PreSignup(
+    data: Web3PreSignUpDto,
+  ): Promise<Web3PreSignUpPayloadDto> {
+    return this.prepareWeb3PreSignUpPayload(data);
+  }
+
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const verified = await verifySignature(
-      WEB3_SIGNUP_MESSAGE,
-      data.signature,
-      [data.address],
-    );
+    const preSignUpData = this.prepareWeb3PreSignUpPayload(data);
+
+    const verified = await verifySignature(preSignUpData, data.signature, [
+      data.address,
+    ]);
 
     if (!verified) {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);
