@@ -70,6 +70,7 @@ services:
       STORAGE_SECRET_KEY: 'devdevdev'
       STORAGE_RESULTS_BUCKET_NAME: 'results'
       STORAGE_USE_SSL: False
+      STORAGE_PROVIDER: 'aws'
       ENABLE_CUSTOM_CLOUD_HOST: Yes
     depends_on:
       postgres:
