@@ -4,7 +4,7 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
-  StakingClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -99,8 +99,10 @@ export class JobService {
     const recordingOracleAddress =
       await escrowClient.getRecordingOracleAddress(escrowAddress);
 
-    const stakingClient = await StakingClient.build(signer);
-    const leader = await stakingClient.getLeader(recordingOracleAddress);
+    const leader = await OperatorUtils.getLeader(
+      chainId,
+      recordingOracleAddress,
+    );
 
     const recordingOracleWebhookUrl = leader?.webhookUrl;
     if (!recordingOracleWebhookUrl)
@@ -242,8 +244,10 @@ export class JobService {
       const escrowClient = await EscrowClient.build(signer);
       const jobLauncherAddress =
         await escrowClient.getJobLauncherAddress(escrowAddress);
-      const stakingClient = await StakingClient.build(signer);
-      const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
+      const jobLauncher = await OperatorUtils.getLeader(
+        chainId,
+        jobLauncherAddress,
+      );
       const jobLauncherWebhookUrl = jobLauncher?.webhookUrl;
 
       if (!jobLauncherWebhookUrl) {
