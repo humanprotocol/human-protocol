@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union
 from urllib.parse import urlparse
 
 from src.core.config import Config, StorageConfig
@@ -29,7 +29,7 @@ class CloudProvider(Enum, metaclass=BetterEnumMeta):
                 return CloudProvider.gcs
             case _:
                 raise ValueError(
-                    f"{provider} is not supported provider. List with supported providers: {cls.list()}"
+                    f"The '{provider}' is not supported provider. List with supported providers: {cls.list()}"
                 )
 
 
@@ -41,13 +41,13 @@ class BucketCredentials:
         credentials = None
 
         if config.access_key and config.secret_key and config.provider != "aws":
-            raise Exception(
+            raise ValueError(
                 "Wrong storage configuration. The access_key/secret_key pair"
                 f"cannot be specified with {config.provider} provider"
             )
 
         if config.key_file_path and config.provider != "gcs":
-            raise Exception(
+            raise ValueError(
                 "Wrong storage configuration. The key_file_path"
                 f"cannot be specified with {config.provider} provider"
             )
@@ -119,7 +119,7 @@ class BucketAccessInfo:
             )
         else:
             raise ValueError(
-                f"{parsed_url.netloc} cloud provider is not supported by CVAT"
+                f"{parsed_url.netloc} cloud provider is not supported by CVAT."
             )
 
     @classmethod
@@ -129,12 +129,11 @@ class BucketAccessInfo:
             "bucket_name",
         ):
             if required_field not in data:
-                assert False, f"Missed {required_field} param in bucket configuration"
+                raise ValueError(
+                    f"The {required_field} is required and is not specified in the bucket configuration"
+                )
 
-        data["provider"] = {
-            "aws": CloudProvider.aws,
-            "gcs": CloudProvider.gcs,
-        }[data["provider"].lower()]
+        data["provider"] = CloudProvider.from_str(data["provider"].lower())
 
         if (access_key := data.pop("access_key", None)) and (
             secret_key := data.pop("secret_key", None)
@@ -166,4 +165,4 @@ class BucketAccessInfo:
         elif issubclass(data, StorageConfig):
             return cls.from_storage_config(data)
 
-        raise ValueError(f"Unsupported data type ({type(data)}) was provided")
+        raise TypeError(f"Unsupported data type ({type(data)}) was provided")
