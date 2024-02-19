@@ -117,6 +117,7 @@ export class AuthService {
       email: userEntity.email,
       evmAddress: userEntity.evmAddress,
       userId: userEntity.id,
+      kycStatus: userEntity.kyc?.status,
     });
 
     const refreshToken = await this.jwtService.signAsync(
@@ -124,6 +125,7 @@ export class AuthService {
         email: userEntity.email,
         evmAddress: userEntity.evmAddress,
         userId: userEntity.id,
+        kycStatus: userEntity.kyc?.status,
       },
       {
         expiresIn: this.refreshTokenExpiresIn,

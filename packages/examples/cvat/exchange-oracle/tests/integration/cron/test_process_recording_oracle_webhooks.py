@@ -25,7 +25,7 @@ from src.models.cvat import Job, Project, Task
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTag
 
-from tests.utils.constants import DEFAULT_URL, RECORDING_ORACLE_ADDRESS
+from tests.utils.constants import DEFAULT_MANIFEST_URL, RECORDING_ORACLE_ADDRESS
 
 escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost.value
@@ -258,18 +258,16 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(webhook)
         self.session.commit()
         with (
-            patch("src.chain.kvstore.get_web3") as mock_web3,
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader,
+            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
             patch("httpx.Client.post") as mock_httpx_post,
         ):
             w3 = Mock()
             w3.eth.chain_id = ChainId.LOCALHOST.value
-            mock_web3.return_value = w3
             mock_escrow_data = Mock()
             mock_escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = mock_escrow_data
-            mock_leader.return_value = {"webhook_url": DEFAULT_URL}
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response

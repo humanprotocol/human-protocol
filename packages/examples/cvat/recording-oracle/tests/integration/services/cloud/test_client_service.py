@@ -4,7 +4,7 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 
-from src.services.cloud import S3Client
+from src.services.cloud.s3 import S3Client
 
 
 class ServiceIntegrationTest(unittest.TestCase):

@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 
 import { WebhookService } from './webhook.service';
 import { WebhookEntity } from './webhook.entity';
-import { WebhookController } from './webhook.controller';
 import { WebhookRepository } from './webhook.repository';
 import { Web3Module } from '../web3/web3.module';
 import { HttpModule } from '@nestjs/axios';
@@ -16,7 +15,6 @@ import { HttpModule } from '@nestjs/axios';
     Web3Module,
     HttpModule,
   ],
-  controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository],
   exports: [WebhookService],
 })

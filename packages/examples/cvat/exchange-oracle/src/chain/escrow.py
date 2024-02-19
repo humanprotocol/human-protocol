@@ -1,4 +1,3 @@
-import datetime
 import json
 from typing import List
 
@@ -10,26 +9,6 @@ from src.services.cloud.types import BucketAccessInfo
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
-    # TODO: remove mock
-    if escrow_address.startswith("test-"):
-        from human_protocol_sdk.constants import ChainId
-
-        return EscrowData(
-            chain_id=ChainId(chain_id),
-            id="test",
-            address=escrow_address,
-            amount_paid=10,
-            balance=10,
-            count=1,
-            factory_address="",
-            launcher="",
-            status="Pending",
-            token="HMT",
-            total_funded_amount=10,
-            created_at=datetime.datetime(2023, 1, 1),
-            manifest_url="http://127.0.0.1:9010/manifests/manifest_boxes_from_points_local.json",
-        )
-
     escrow = EscrowUtils.get_escrow(ChainId(chain_id), escrow_address)
     if not escrow:
         raise Exception(f"Can't find escrow {escrow_address}")
@@ -78,6 +57,7 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     manifest_content = StorageClient(endpoint_url=host, secure=secure).download_files(
         [bucket_info.path], bucket=bucket_info.bucket_name
     )[0]
+
     return json.loads(manifest_content.decode("utf-8"))
 
 

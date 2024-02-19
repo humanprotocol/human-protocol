@@ -10,6 +10,7 @@ import {
   UnprocessableEntityException,
   Logger,
   UsePipes,
+  Ip,
 } from '@nestjs/common';
 
 import {
@@ -35,13 +36,17 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
+import { AuthRepository } from './auth.repository';
 
 @ApiTags('Auth')
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly authRepository: AuthRepository,
+  ) {}
 
   @UsePipes(new PasswordValidationPipe())
   @Public()
@@ -60,8 +65,15 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
-  public async signup(@Body() data: UserCreateDto): Promise<void> {
-    await this.authService.signup(data);
+  @ApiResponse({
+    status: 422,
+    description: 'Unprocessable entity.',
+  })
+  public async signup(
+    @Body() data: UserCreateDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    await this.authService.signup(data, ip);
     return;
   }
 
@@ -85,8 +97,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public signin(@Body() data: SignInDto): Promise<AuthDto> {
-    return this.authService.signin(data);
+  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
+    return this.authService.signin(data, ip);
   }
 
   @ApiBearerAuth()
@@ -117,7 +129,7 @@ export class AuthJwtController {
     description: 'User logged out successfully',
   })
   public async logout(@Req() request: RequestWithUser): Promise<void> {
-    await this.authService.logout(request.user);
+    await this.authRepository.deleteByUserId(request.user.id);
   }
 
   @Public()
@@ -160,8 +172,9 @@ export class AuthJwtController {
   })
   public async restorePassword(
     @Body() data: RestorePasswordDto,
+    @Ip() ip: string,
   ): Promise<void> {
-    await this.authService.restorePassword(data);
+    await this.authService.restorePassword(data, ip);
     return;
   }
 

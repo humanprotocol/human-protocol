@@ -280,8 +280,6 @@ def postprocess_annotations(
         TaskType.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
     }
 
-    # TODO: restore original filenames and merge skeletons from RoIs (skeletons from boxes task)
-
     task_type = manifest.annotation.type
     processor = processor_classes[task_type](
         escrow_address=escrow_address,

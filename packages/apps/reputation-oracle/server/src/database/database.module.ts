@@ -11,6 +11,7 @@ import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { AuthEntity } from '../modules/auth/auth.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
+import { KycEntity } from '../modules/kyc/kyc.entity';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UserEntity } from '../modules/user/user.entity';
             AuthEntity,
             TokenEntity,
             UserEntity,
+            KycEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,

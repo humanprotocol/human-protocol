@@ -12,7 +12,7 @@ import { LaunchJobProgress } from './LaunchJobProgress';
 export const PayJob = () => {
   const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
   const [isPaying, setIsPaying] = useState(false);
-  const { openSnackbar } = useSnackbar();
+  const { showError } = useSnackbar();
 
   const handleStart = () => {
     setIsPaying(true);
@@ -25,19 +25,11 @@ export const PayJob = () => {
 
   const handleError = (err: any) => {
     if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
-      openSnackbar(
-        'Insufficient token amount or the gas limit is too low',
-        'error',
-      );
+      showError('Insufficient token amount or the gas limit is too low');
     } else if (err.code === 'ACTION_REJECTED') {
-      openSnackbar('The transaction was rejected', 'error');
+      showError('The transaction was rejected');
     } else {
-      const message = err?.response?.data?.message;
-      if (message && typeof message === 'string') {
-        openSnackbar(err?.response?.data?.message, 'error');
-      } else {
-        openSnackbar('Something went wrong', 'error');
-      }
+      showError(err);
     }
   };
 

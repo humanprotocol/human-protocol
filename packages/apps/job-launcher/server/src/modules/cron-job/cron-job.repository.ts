@@ -1,34 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
-import { CronJobEntity } from './cron-job.entity';
+import { Injectable } from '@nestjs/common';
 import { CronJobType } from '../../common/enums/cron-job';
+import { BaseRepository } from '../../database/base.repository';
+import { DataSource } from 'typeorm';
+import { CronJobEntity } from './cron-job.entity';
 
 @Injectable()
-export class CronJobRepository {
-  private readonly logger = new Logger(CronJobRepository.name);
-
-  constructor(
-    @InjectRepository(CronJobEntity)
-    private readonly cronJobEntityRepository: Repository<CronJobEntity>,
-  ) {}
-
-  public async create(cronJobType: CronJobType): Promise<CronJobEntity> {
-    return this.cronJobEntityRepository
-      .create({
-        cronJobType,
-        startedAt: new Date(),
-      })
-      .save();
+export class CronJobRepository extends BaseRepository<CronJobEntity> {
+  constructor(private dataSource: DataSource) {
+    super(CronJobEntity, dataSource);
   }
 
-  public async findOne(
-    where: FindOptionsWhere<CronJobEntity>,
-    options?: FindOneOptions<CronJobEntity>,
-  ): Promise<CronJobEntity | null> {
-    return this.cronJobEntityRepository.findOne({
-      where,
-      ...options,
-    });
+  public async findOneByType(type: CronJobType): Promise<CronJobEntity | null> {
+    return this.findOne({ where: { cronJobType: type } });
   }
 }

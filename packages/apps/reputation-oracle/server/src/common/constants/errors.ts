@@ -49,6 +49,8 @@ export enum ErrorUser {
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
+  IncorrectAddress = 'Incorrect address',
+  KycNotApproved = 'KYC not approved',
 }
 
 /**
@@ -75,4 +77,13 @@ export enum ErrorToken {
 export enum ErrorSendGrid {
   EmailNotSent = 'Email was not sent',
   InvalidApiKey = 'Invalid SendGrid API key',
+}
+
+export enum ErrorKyc {
+  NotFound = 'KYC session not found',
+  AlreadyApproved = 'KYC session already approved',
+  VerificationInProgress = 'KYC session verification in progress',
+  Rejected = 'KYC session rejected',
+  InvalidSynapsAPIResponse = 'Invalid Synaps API response',
+  InvalidWebhookSecret = 'Invalid webhook secret',
 }

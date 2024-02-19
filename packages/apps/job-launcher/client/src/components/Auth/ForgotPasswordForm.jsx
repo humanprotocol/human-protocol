@@ -1,8 +1,6 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
 import {
-  Alert,
-  AlertTitle,
   Box,
   Button,
   FormHelperText,
@@ -14,14 +12,15 @@ import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckFilledIcon } from '../../components/Icons/CheckFilledIcon';
+import { useSnackbar } from '../../providers/SnackProvider';
 import * as authService from '../../services/auth';
 import { ForgotPasswordValidationSchema } from './schema';
 
 export const ForgotPasswordForm = () => {
   const captchaRef = useRef(null);
-  const [alertMsg, setAlertMsg] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { showError } = useSnackbar();
   const navigate = useNavigate();
 
   const handleForgotPassword = async ({ email }) => {
@@ -30,7 +29,7 @@ export const ForgotPasswordForm = () => {
       await authService.forgotPassword(email);
       setIsSuccess(true);
     } catch (err) {
-      setAlertMsg(err?.response?.data?.message ?? err?.message);
+      showError(err);
     }
     setIsLoading(false);
   };
@@ -78,12 +77,6 @@ export const ForgotPasswordForm = () => {
     </Box>
   ) : (
     <Box sx={{ maxWidth: '303px', mx: 'auto', py: 8 }}>
-      {alertMsg && alertMsg.length && (
-        <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ my: 2 }}>
-          <AlertTitle>Send email failed!</AlertTitle>
-          {alertMsg}
-        </Alert>
-      )}
       <Typography fontSize={20} fontWeight={600} mb={4} lineHeight={1.5}>
         Reset Password
       </Typography>

@@ -682,9 +682,6 @@ class BoxesFromPointsTaskBuilder:
         self.label_configuration = make_label_configuration(self.manifest)
 
     def _upload_task_meta(self):
-        # TODO: maybe extract into a separate function / class / library,
-        # extract constants, serialization methods return TaskConfig from build()
-
         layout = boxes_from_points_task.TaskMetaLayout()
         serializer = boxes_from_points_task.TaskMetaSerializer()
 
@@ -824,11 +821,7 @@ class BoxesFromPointsTaskBuilder:
         cloud_storage = cvat_api.create_cloudstorage(
             CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[oracle_bucket.provider],
             oracle_bucket.bucket_name,
-            bucket_host=oracle_bucket.host_url.replace(
-                # TODO: remove mock
-                "127.0.0.1",
-                "172.22.0.1",
-            ),
+            bucket_host=oracle_bucket.host_url,
             **({ "credentials": oracle_bucket.credentials.to_dict() } if oracle_bucket.credentials else {})
         )
 

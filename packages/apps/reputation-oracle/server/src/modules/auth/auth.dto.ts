@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsString, Matches } from 'class-validator';
-import { IsConfirm, IsPassword } from '../../common/validators';
+import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserType } from '../../common/enums/user';
@@ -32,10 +32,6 @@ export class ValidatePasswordDto {
   @ApiProperty()
   @IsPassword()
   public password: string;
-
-  @ApiProperty()
-  @IsConfirm()
-  public confirm: string;
 }
 
 export class ResendEmailVerificationDto {

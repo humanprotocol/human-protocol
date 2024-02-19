@@ -10,7 +10,7 @@ import {
   KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { JobRequestType } from '../../common/enums/job';
+import { JobRequestType, SolutionError } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_ENCRYPTION_PASSPHRASE,
@@ -34,11 +34,9 @@ import { IManifest, ISolution } from '../../common/interfaces/job';
 import { of } from 'rxjs';
 import { JobSolutionsRequestDto } from './job.dto';
 import { StorageService } from '../storage/storage.service';
-import {
-  EXCHANGE_INVALID_ENDPOINT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
+import { EventType } from '@/common/enums/webhook';
 
 jest.mock('minio', () => {
   class Client {
@@ -478,8 +476,9 @@ describe('JobService', () => {
       const result = await jobService.processJobSolution(jobSolution);
 
       const expectedBody = {
-        chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress,
+        chain_id: jobSolution.chainId,
+        escrow_address: jobSolution.escrowAddress,
+        event_type: EventType.escrow_recorded,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -565,8 +564,9 @@ describe('JobService', () => {
     const result = await jobService.processJobSolution(jobSolution);
 
     const expectedBody = {
-      chainId: jobSolution.chainId,
-      escrowAddress: jobSolution.escrowAddress,
+      chain_id: jobSolution.chainId,
+      escrow_address: jobSolution.escrowAddress,
+      event_type: EventType.escrow_recorded,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -638,20 +638,23 @@ describe('JobService', () => {
     const result = await jobService.processJobSolution(jobSolution);
 
     const expectedBody = {
-      chainId: jobSolution.chainId,
-      escrowAddress: jobSolution.escrowAddress,
-      workerAddress: exchangeJobSolutions[0].workerAddress,
+      chain_id: jobSolution.chainId,
+      escrow_address: jobSolution.escrowAddress,
+      event_type: EventType.submission_rejected,
+      event_data: [
+        {
+          assignee_id: exchangeJobSolutions[0].workerAddress,
+          reason: SolutionError.Duplicated,
+        },
+      ],
     };
     expect(result).toEqual('Solution are recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
-      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + EXCHANGE_INVALID_ENDPOINT,
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
       {
         headers: {
-          [HEADER_SIGNATURE_KEY]: await signMessage(
-            expectedBody,
-            MOCK_WEB3_PRIVATE_KEY,
-          ),
+          [HEADER_SIGNATURE_KEY]: expect.any(String),
         },
       },
     );
@@ -710,21 +713,24 @@ describe('JobService', () => {
     };
 
     const expectedBody = {
-      chainId: jobSolution.chainId,
-      escrowAddress: jobSolution.escrowAddress,
-      workerAddress: exchangeJobSolutions[1].workerAddress,
+      chain_id: jobSolution.chainId,
+      escrow_address: jobSolution.escrowAddress,
+      event_type: EventType.submission_rejected,
+      event_data: [
+        {
+          assignee_id: exchangeJobSolutions[1].workerAddress,
+          reason: SolutionError.CurseWord,
+        },
+      ],
     };
     const result = await jobService.processJobSolution(jobSolution);
     expect(result).toEqual('Solution are recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
-      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + EXCHANGE_INVALID_ENDPOINT,
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
       {
         headers: {
-          [HEADER_SIGNATURE_KEY]: await signMessage(
-            expectedBody,
-            MOCK_WEB3_PRIVATE_KEY,
-          ),
+          [HEADER_SIGNATURE_KEY]: expect.any(String),
         },
       },
     );

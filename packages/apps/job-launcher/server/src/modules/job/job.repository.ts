@@ -1,66 +1,67 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindOptionsWhere,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-  In,
-} from 'typeorm';
-import { JobEntity } from './job.entity';
-import { JobCreateDto, JobUpdateDataDto } from './job.dto';
-import { ErrorJob } from '../../common/constants/errors';
-import { JobStatus, JobStatusFilter } from '../../common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ConfigNames } from '../../common/config';
+import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
+import { SortDirection } from '../../common/enums/collection';
+import { DataSource, In, LessThanOrEqual } from 'typeorm';
+import { JobStatus, JobStatusFilter } from '../../common/enums/job';
+import { JobEntity } from './job.entity';
+import { BaseRepository } from '../../database/base.repository';
 
 @Injectable()
-export class JobRepository {
-  private readonly logger = new Logger(JobRepository.name);
-
+export class JobRepository extends BaseRepository<JobEntity> {
   constructor(
-    @InjectRepository(JobEntity)
-    private readonly jobEntityRepository: Repository<JobEntity>,
-  ) {}
-
-  public async updateOne(
-    where: FindOptionsWhere<JobEntity>,
-    dto: Partial<JobUpdateDataDto>,
-  ): Promise<JobEntity> {
-    const jobEntity = await this.jobEntityRepository.findOneBy(where);
-
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotFound, JobRepository.name);
-      throw new NotFoundException(ErrorJob.NotFound);
-    }
-
-    Object.assign(jobEntity, dto);
-    return jobEntity.save();
+    private dataSource: DataSource,
+    public readonly configService: ConfigService,
+  ) {
+    super(JobEntity, dataSource);
   }
 
-  public async findOne(
-    where: FindOptionsWhere<JobEntity>,
-    options?: FindOneOptions<JobEntity>,
+  public async findOneByIdAndUserId(
+    id: number,
+    userId: number,
   ): Promise<JobEntity | null> {
-    return this.jobEntityRepository.findOne({
-      where,
-      ...options,
-    });
-  }
-
-  public find(
-    where: FindOptionsWhere<JobEntity>,
-    options?: FindManyOptions<JobEntity>,
-  ): Promise<JobEntity[]> {
-    return this.jobEntityRepository.find({
-      where,
-      order: {
-        createdAt: 'DESC',
+    return this.findOne({
+      where: {
+        id,
+        userId,
       },
-      ...options,
     });
   }
 
-  public async findJobsByStatusFilter(
+  public async findOneByChainIdAndEscrowAddress(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<JobEntity | null> {
+    return this.findOne({
+      where: {
+        chainId,
+        escrowAddress,
+      },
+    });
+  }
+
+  public async findByStatus(status: JobStatus): Promise<JobEntity[]> {
+    return this.find({
+      where: {
+        status: status,
+        retriesCount: LessThanOrEqual(
+          this.configService.get(
+            ConfigNames.MAX_RETRY_COUNT,
+            DEFAULT_MAX_RETRY_COUNT,
+          ),
+        ),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
+      order: {
+        createdAt: SortDirection.DESC,
+        waitUntil: SortDirection.ASC,
+      },
+    });
+  }
+
+  public async findByStatusFilter(
     chainIds: ChainId[],
     userId: number,
     status: JobStatusFilter,
@@ -69,26 +70,30 @@ export class JobRepository {
   ): Promise<JobEntity[]> {
     const statusFilter =
       status === JobStatusFilter.PENDING
-        ? In([JobStatus.PENDING, JobStatus.PAID])
+        ? In([
+            JobStatus.PENDING,
+            JobStatus.PAID,
+            JobStatus.CREATED,
+            JobStatus.SET_UP,
+          ])
         : In([status]);
 
-    return this.find(
-      { userId, status: statusFilter, chainId: In(chainIds) },
-      { skip, take: limit },
-    );
+    return this.find({
+      where: { userId, status: statusFilter, chainId: In(chainIds) },
+      skip,
+      take: limit,
+    });
   }
 
-  public async findJobsByEscrowAddresses(
+  public async findByEscrowAddresses(
     userId: number,
     escrowAddresses: string[],
   ): Promise<JobEntity[]> {
     return this.find({
-      userId,
-      escrowAddress: In(escrowAddresses),
+      where: {
+        userId,
+        escrowAddress: In(escrowAddresses),
+      },
     });
-  }
-
-  public async create(dto: JobCreateDto): Promise<JobEntity> {
-    return this.jobEntityRepository.create(dto).save();
   }
 }

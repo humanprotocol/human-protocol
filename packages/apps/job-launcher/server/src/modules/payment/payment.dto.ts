@@ -1,11 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
-import {
-  Currency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-} from '../../common/enums/payment';
+import { Currency } from '../../common/enums/payment';
 import { ChainId } from '@human-protocol/sdk';
 
 export class PaymentFiatConfirmDto {
@@ -38,19 +33,6 @@ export class PaymentCryptoCreateDto {
   @ApiProperty({ name: 'transaction_hash' })
   @IsString()
   public transactionHash: string;
-}
-
-export class PaymentCreateDto {
-  public transaction?: string;
-  public amount?: number;
-  public currency?: string;
-  public source?: PaymentSource;
-  public userId?: number;
-  public rate?: number;
-  public type?: PaymentType;
-  public chainId?: number;
-  public status?: PaymentStatus;
-  public jobId?: number;
 }
 
 export class GetRateDto {
