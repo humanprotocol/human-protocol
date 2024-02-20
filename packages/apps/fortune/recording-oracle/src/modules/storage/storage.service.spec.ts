@@ -2,7 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  StakingClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
@@ -28,8 +28,8 @@ jest.mock('@human-protocol/sdk', () => ({
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
   },
-  StakingClient: {
-    build: jest.fn(),
+  OperatorUtils: {
+    getLeader: jest.fn(),
   },
   Encryption: {
     build: jest.fn(),
@@ -108,11 +108,9 @@ describe('StorageService', () => {
         .mockResolvedValue(true);
 
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      StakingClient.build = jest.fn().mockResolvedValue({
-        getLeader: jest.fn().mockResolvedValue({
-          publicKey: 'publicKey',
-        }),
-      });
+      OperatorUtils.getLeader = jest
+        .fn()
+        .mockResolvedValue({ publicKey: 'publicKey' });
 
       const jobSolution = {
         workerAddress,
@@ -194,9 +192,7 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      StakingClient.build = jest.fn().mockResolvedValue({
-        getLeader: jest.fn().mockResolvedValue({}),
-      });
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({});
 
       const jobSolution = {
         workerAddress,

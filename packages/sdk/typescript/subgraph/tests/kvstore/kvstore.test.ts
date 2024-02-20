@@ -4,14 +4,14 @@ import {
   test,
   assert,
   clearStore,
-  afterAll,
+  afterEach,
 } from 'matchstick-as/assembly';
 
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { createDataSavedEvent } from './fixtures';
 
 describe('KVStore', () => {
-  afterAll(() => {
+  afterEach(() => {
     clearStore();
   });
 
@@ -318,6 +318,49 @@ describe('KVStore', () => {
       `${data2.params.sender.toHexString()}-url`,
       'url',
       'https://validator.example.com'
+    );
+  });
+
+  test('Should properly update reputation network', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Reputation Oracle',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'role',
+      'Job Launcher',
+      BigInt.fromI32(11)
+    );
+    const data3 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'ACTIVE',
+      BigInt.fromI32(12)
+    );
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+    handleDataSaved(data3);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHexString(),
+      'role',
+      'Reputation Oracle'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.sender.toHexString(),
+      'role',
+      'Job Launcher'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.sender.toHexString(),
+      'reputationNetwork',
+      data1.params.sender.toHexString()
     );
   });
 });

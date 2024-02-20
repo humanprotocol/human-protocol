@@ -30,6 +30,7 @@ import { v4 } from 'uuid';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import {
+  BadRequestException,
   ConflictException,
   NotFoundException,
   UnauthorizedException,
@@ -41,9 +42,18 @@ import {
 } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { Web3PreSignUpPayloadDto, Web3PreSignUpDto } from './auth.dto';
+import { KVStoreClient, Role } from '@human-protocol/sdk';
+import { Web3PreSignUpDto, Web3PreSignUpPayloadDto } from './auth.dto';
 
-jest.mock('@human-protocol/sdk');
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      set: jest.fn(),
+      get: jest.fn(),
+    })),
+  },
+}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
@@ -71,6 +81,11 @@ describe('AuthService', () => {
       }),
     };
 
+    const signerMock = {
+      address: MOCK_ADDRESS,
+      getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -96,7 +111,7 @@ describe('AuthService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
-            getOracleAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
       ],
@@ -696,8 +711,15 @@ describe('AuthService', () => {
       };
 
       let createUserMock: any;
+      let preSignUpDataMock: Web3PreSignUpPayloadDto;
 
       beforeEach(() => {
+        preSignUpDataMock = {
+          from: MOCK_ADDRESS,
+          to: MOCK_ADDRESS,
+          contents: WEB3_SIGNUP_MESSAGE,
+        };
+
         createUserMock = jest.spyOn(userService, 'createWeb3User');
 
         createUserMock.mockResolvedValue(userEntity);
@@ -713,11 +735,10 @@ describe('AuthService', () => {
       });
 
       it('should create a new web3 user and return the token', async () => {
-        const preSignUpDataMock: Web3PreSignUpPayloadDto = {
-          from: MOCK_ADDRESS,
-          to: MOCK_ADDRESS,
-          contents: WEB3_SIGNUP_MESSAGE,
-        };
+        (KVStoreClient.build as any).mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(Role.JobLauncher),
+          set: jest.fn(),
+        }));
 
         const signature = await signMessage(
           preSignUpDataMock,
@@ -755,6 +776,20 @@ describe('AuthService', () => {
             signature: invalidSignature,
           }),
         ).rejects.toThrow(ConflictException);
+      });
+      it('should throw BadRequestException if role is not in KVStore', async () => {
+        const signature = await signMessage(
+          preSignUpDataMock,
+          MOCK_PRIVATE_KEY,
+        );
+
+        await expect(
+          authService.web3Signup({
+            ...web3PreSignUpDto,
+            type: UserType.WORKER,
+            signature: signature,
+          }),
+        ).rejects.toThrow(BadRequestException);
       });
     });
   });

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -37,6 +38,8 @@ import {
   SERVICE_NAME,
 } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
+import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
+import { Web3Env } from '../../common/enums/web3';
 
 @Injectable()
 export class AuthService {
@@ -284,7 +287,7 @@ export class AuthService {
   ): Web3PreSignUpPayloadDto {
     return {
       from: data.address,
-      to: this.web3Service.getOracleAddress(),
+      to: this.web3Service.getOperatorAddress(),
       contents: WEB3_SIGNUP_MESSAGE,
     };
   }
@@ -306,10 +309,32 @@ export class AuthService {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);
     }
 
+    let kvstore: KVStoreClient;
+    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      kvstore = await KVStoreClient.build(
+        await this.web3Service.getSigner(ChainId.POLYGON),
+      );
+    } else {
+      kvstore = await KVStoreClient.build(
+        await this.web3Service.getSigner(ChainId.POLYGON_MUMBAI),
+      );
+    }
+
+    if (
+      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
+        await kvstore.get(data.address, KVStoreKeys.role),
+      )
+    ) {
+      throw new BadRequestException(ErrorAuth.InvalidRole);
+    }
+
     const userEntity = await this.userService.createWeb3User(
       data.address,
       data.type,
     );
+
+    await kvstore.set(data.address, 'ACTIVE');
 
     return this.auth(userEntity);
   }

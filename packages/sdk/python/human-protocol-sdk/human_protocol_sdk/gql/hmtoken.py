@@ -12,4 +12,6 @@ query GetHolders {{
     }}
 }}
 {holder_fragment}
-""".format(holder_fragment=holder_fragment)
+""".format(
+    holder_fragment=holder_fragment
+)
