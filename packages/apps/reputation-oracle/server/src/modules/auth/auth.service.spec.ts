@@ -43,6 +43,7 @@ import {
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
+import { Web3PreSignUpDto, Web3PreSignUpPayloadDto } from './auth.dto';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -65,6 +66,10 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
+
+  const signerMock = {
+    address: MOCK_ADDRESS,
+  };
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -106,6 +111,7 @@ describe('AuthService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
       ],
@@ -662,23 +668,58 @@ describe('AuthService', () => {
       });
     });
 
+    describe('presignup', () => {
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should prepare web3 pre sign up payload and return typed structured data', async () => {
+        const preSignUpDataMock: Web3PreSignUpPayloadDto = {
+          from: MOCK_ADDRESS,
+          to: MOCK_ADDRESS,
+          contents: WEB3_SIGNUP_MESSAGE,
+        };
+
+        const web3PreSignUpDto: Web3PreSignUpDto = {
+          address: MOCK_ADDRESS,
+        };
+
+        jest
+          .spyOn(authService as any, 'prepareWeb3PreSignUpPayload')
+          .mockResolvedValue(preSignUpDataMock);
+
+        const result = await authService.web3PreSignup(web3PreSignUpDto);
+
+        expect(authService.prepareWeb3PreSignUpPayload).toHaveBeenCalledWith(
+          web3PreSignUpDto,
+        );
+        expect(result).toStrictEqual(preSignUpDataMock);
+      });
+    });
+
     describe('signup', () => {
-      const web3UserCreateDto = {
+      const web3PreSignUpDto: Web3PreSignUpDto = {
         address: MOCK_ADDRESS,
-        type: UserType.WORKER,
       };
 
       const nonce = getNonce();
 
       const userEntity: Partial<UserEntity> = {
         id: 1,
-        evmAddress: web3UserCreateDto.address,
+        evmAddress: web3PreSignUpDto.address,
         nonce,
       };
 
       let createUserMock: any;
+      let preSignUpDataMock: Web3PreSignUpPayloadDto;
 
       beforeEach(() => {
+        preSignUpDataMock = {
+          from: MOCK_ADDRESS,
+          to: MOCK_ADDRESS,
+          contents: WEB3_SIGNUP_MESSAGE,
+        };
+
         createUserMock = jest.spyOn(userService, 'createWeb3User');
 
         createUserMock.mockResolvedValue(userEntity);
@@ -700,18 +741,19 @@ describe('AuthService', () => {
         }));
 
         const signature = await signMessage(
-          WEB3_SIGNUP_MESSAGE,
+          preSignUpDataMock,
           MOCK_PRIVATE_KEY,
         );
 
         const result = await authService.web3Signup({
-          ...web3UserCreateDto,
+          ...web3PreSignUpDto,
+          type: UserType.WORKER,
           signature,
         });
 
         expect(userService.createWeb3User).toHaveBeenCalledWith(
-          web3UserCreateDto.address,
-          web3UserCreateDto.type,
+          web3PreSignUpDto.address,
+          UserType.WORKER,
         );
 
         expect(authService.auth).toHaveBeenCalledWith(userEntity);
@@ -729,20 +771,22 @@ describe('AuthService', () => {
 
         await expect(
           authService.web3Signup({
-            ...web3UserCreateDto,
+            ...web3PreSignUpDto,
+            type: UserType.WORKER,
             signature: invalidSignature,
           }),
         ).rejects.toThrow(ConflictException);
       });
       it('should throw BadRequestException if role is not in KVStore', async () => {
         const signature = await signMessage(
-          WEB3_SIGNUP_MESSAGE,
+          preSignUpDataMock,
           MOCK_PRIVATE_KEY,
         );
 
         await expect(
           authService.web3Signup({
-            ...web3UserCreateDto,
+            ...web3PreSignUpDto,
+            type: UserType.WORKER,
             signature: signature,
           }),
         ).rejects.toThrow(BadRequestException);

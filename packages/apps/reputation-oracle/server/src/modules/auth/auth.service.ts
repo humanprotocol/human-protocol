@@ -20,6 +20,8 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
+  Web3PreSignUpPayloadDto,
+  Web3PreSignUpDto,
   Web3SignInDto,
   Web3SignUpDto,
 } from './auth.dto';
@@ -280,12 +282,28 @@ export class AuthService {
     return this.hashToken(token) === hashedToken;
   }
 
+  public prepareWeb3PreSignUpPayload(
+    data: Web3PreSignUpDto,
+  ): Web3PreSignUpPayloadDto {
+    return {
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: WEB3_SIGNUP_MESSAGE,
+    };
+  }
+
+  public async web3PreSignup(
+    data: Web3PreSignUpDto,
+  ): Promise<Web3PreSignUpPayloadDto> {
+    return this.prepareWeb3PreSignUpPayload(data);
+  }
+
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const verified = await verifySignature(
-      WEB3_SIGNUP_MESSAGE,
-      data.signature,
-      [data.address],
-    );
+    const preSignUpData = this.prepareWeb3PreSignUpPayload(data);
+
+    const verified = await verifySignature(preSignUpData, data.signature, [
+      data.address,
+    ]);
 
     if (!verified) {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);

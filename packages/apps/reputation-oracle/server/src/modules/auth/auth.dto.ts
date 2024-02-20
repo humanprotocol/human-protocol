@@ -1,10 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, IsString, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsEthereumAddress,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserType } from '../../common/enums/user';
+import { ChainId } from '@human-protocol/sdk';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -79,11 +86,30 @@ export class TokenCreateDto {
   public user: UserEntity;
 }
 
-export class Web3SignUpDto {
+export class Web3PreSignUpPayloadDto {
   @ApiProperty()
   @IsString()
-  public address: string;
+  @IsEthereumAddress()
+  public from: string;
 
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public to: string;
+
+  @ApiProperty()
+  @IsString()
+  public contents: string;
+}
+
+export class Web3PreSignUpDto {
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public address: string;
+}
+
+export class Web3SignUpDto extends Web3PreSignUpDto {
   @ApiProperty()
   @IsString()
   public signature: string;
@@ -98,6 +124,7 @@ export class Web3SignUpDto {
 export class Web3SignInDto {
   @ApiProperty()
   @IsString()
+  @IsEthereumAddress()
   public address: string;
 
   @ApiProperty()
