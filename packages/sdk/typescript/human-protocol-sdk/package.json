@@ -62,6 +62,7 @@
       "./src/encryption.ts",
       "./src/escrow.ts",
       "./src/kvstore.ts",
+      "./src/operator.ts",
       "./src/staking.ts",
       "./src/storage.ts",
       "./src/statistics.ts"

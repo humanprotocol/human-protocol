@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StakingClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -51,13 +51,18 @@ export class StorageService {
 
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const stakingClient = await StakingClient.build(signer);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const reputationOracle = await stakingClient.getLeader(signer.address);
-    const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
+    const reputationOracle = await OperatorUtils.getLeader(
+      chainId,
+      signer.address,
+    );
+    const jobLauncher = await OperatorUtils.getLeader(
+      chainId,
+      jobLauncherAddress,
+    );
 
     if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
       throw new BadRequestException('Missing public key');

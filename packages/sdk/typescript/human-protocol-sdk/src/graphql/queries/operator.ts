@@ -47,6 +47,30 @@ export const GET_LEADERS_QUERY = (filter: ILeadersFilter) => {
   `;
 };
 
+export const GET_REPUTATION_NETWORK_QUERY = (role?: string) => {
+  const WHERE_CLAUSE = `
+    where: {
+      ${role ? `role: $role` : ''}
+    }
+  `;
+
+  return gql`
+    query getReputationNetwork(
+      $address: String,
+      $role: String
+    ) {
+      reputationNetwork(id: $address) {
+        operators(
+          ${WHERE_CLAUSE}
+        ) {
+          address,
+          role
+        }
+      }
+    }
+  `;
+};
+
 export const GET_LEADER_QUERY = gql`
   query getLeader($address: String!) {
     leader(id: $address) {

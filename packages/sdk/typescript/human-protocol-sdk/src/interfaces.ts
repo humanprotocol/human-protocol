@@ -16,6 +16,7 @@ export interface IReward {
 
 export interface ILeader {
   id: string;
+  chainId: ChainId;
   address: string;
   amountStaked: bigint;
   amountAllocated: bigint;
@@ -34,6 +35,18 @@ export interface ILeader {
 }
 
 export interface ILeadersFilter {
+  networks: ChainId[];
+  role?: string;
+}
+
+export interface IReputationNetwork {
+  id: string;
+  address: string;
+  operators: IOperator[];
+}
+
+export interface IOperator {
+  address: string;
   role?: string;
 }
 
