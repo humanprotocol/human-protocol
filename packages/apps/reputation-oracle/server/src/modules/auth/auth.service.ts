@@ -289,8 +289,10 @@ export class AuthService {
     };
   }
 
-  public async web3PreSignup(data: Web3PreSignUpDto): Promise<string> {
-    return JSON.stringify(this.prepareWeb3PreSignUpPayload(data));
+  public async web3PreSignup(
+    data: Web3PreSignUpDto,
+  ): Promise<Web3PreSignUpPayloadDto> {
+    return this.prepareWeb3PreSignUpPayload(data);
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {

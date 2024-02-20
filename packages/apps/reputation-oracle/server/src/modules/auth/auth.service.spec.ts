@@ -670,9 +670,6 @@ describe('AuthService', () => {
         };
 
         jest
-          .spyOn(JSON, 'stringify')
-          .mockReturnValueOnce(JSON.stringify(preSignUpDataMock));
-        jest
           .spyOn(authService as any, 'prepareWeb3PreSignUpPayload')
           .mockResolvedValue(preSignUpDataMock);
 
@@ -681,7 +678,7 @@ describe('AuthService', () => {
         expect(authService.prepareWeb3PreSignUpPayload).toHaveBeenCalledWith(
           web3PreSignUpDto,
         );
-        expect(result).toStrictEqual(JSON.stringify(preSignUpDataMock));
+        expect(result).toStrictEqual(preSignUpDataMock);
       });
     });
 

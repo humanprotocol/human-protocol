@@ -111,7 +111,8 @@ export class AuthJwtController {
   @Post('/web3/pre-signup')
   @ApiOperation({
     summary: 'Web3 User Pre-signup',
-    description: 'Endpoint for typed structured data object generation.',
+    description:
+      'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms.',
   })
   @ApiBody({ type: Web3PreSignUpDto })
   @ApiResponse({
@@ -123,7 +124,9 @@ export class AuthJwtController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async web3PreSignUp(@Body() data: Web3PreSignUpDto): Promise<string> {
+  public async web3PreSignUp(
+    @Body() data: Web3PreSignUpDto,
+  ): Promise<Web3PreSignUpPayloadDto> {
     return this.authService.web3PreSignup(data);
   }
 
