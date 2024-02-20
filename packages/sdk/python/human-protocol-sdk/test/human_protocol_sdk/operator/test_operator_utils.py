@@ -132,7 +132,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
 
-    def test_get_reputation_network(self):
+    def test_get_reputation_network_operators(self):
         reputation_address = "0x1234567890123456789012345678901234567891"
         operator_address = "0x1234567890123456789012345678901234567891"
         role = "Job Launcher"
@@ -154,7 +154,7 @@ class TestOperatorUtils(unittest.TestCase):
                 }
             ]
 
-            operators = OperatorUtils.get_reputation_network(
+            operators = OperatorUtils.get_reputation_network_operators(
                 ChainId.POLYGON, reputation_address
             )
 

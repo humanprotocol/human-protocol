@@ -123,7 +123,7 @@ describe('OperatorUtils', () => {
     });
   });
 
-  describe('getReputationNetwork', () => {
+  describe('getReputationNetworkOperators', () => {
     const stakerAddress = ethers.ZeroAddress;
     const mockOperator: IOperator = {
       address: '0x0000000000000000000000000000000000000001',
@@ -140,7 +140,7 @@ describe('OperatorUtils', () => {
         reputationNetwork: mockReputationNetwork,
       });
 
-      const result = await OperatorUtils.getReputationNetwork(
+      const result = await OperatorUtils.getReputationNetworkOperators(
         ChainId.LOCALHOST,
         stakerAddress
       );
@@ -162,7 +162,10 @@ describe('OperatorUtils', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        OperatorUtils.getReputationNetwork(ChainId.LOCALHOST, stakerAddress)
+        OperatorUtils.getReputationNetworkOperators(
+          ChainId.LOCALHOST,
+          stakerAddress
+        )
       ).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });

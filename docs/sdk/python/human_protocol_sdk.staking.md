@@ -22,4 +22,3 @@ obtain staking information from both the contracts and subgraph.
     * [`StakingClient.unstake()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.unstake)
     * [`StakingClient.withdraw()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.withdraw)
   * [`StakingClientError`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClientError)
-* [human_protocol_sdk.staking.staking_utils module](human_protocol_sdk.staking.staking_utils.md)

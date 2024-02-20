@@ -107,7 +107,7 @@ export class OperatorUtils {
   }
 
   /**
-   * Retrieves the reputation network of the specified address.
+   * Retrieves the reputation network operators of the specified address.
    *
    * @param {string} address - Address of the reputation oracle.
    * @param {string} [role] - (Optional) Role of the operator.
@@ -117,10 +117,10 @@ export class OperatorUtils {
    * ```typescript
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const operators = await OperatorUtils.getReputationNetwork(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
-  public static async getReputationNetwork(
+  public static async getReputationNetworkOperators(
     chainId: ChainId,
     address: string,
     role?: string

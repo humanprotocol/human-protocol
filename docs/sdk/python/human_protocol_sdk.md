@@ -60,7 +60,6 @@
       * [`AllocationData`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.AllocationData)
       * [`StakingClient`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient)
       * [`StakingClientError`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClientError)
-    * [human_protocol_sdk.staking.staking_utils module](human_protocol_sdk.staking.staking_utils.md)
 * [human_protocol_sdk.statistics package](human_protocol_sdk.statistics.md)
   * [Submodules](human_protocol_sdk.statistics.md#submodules)
     * [human_protocol_sdk.statistics.statistics_client module](human_protocol_sdk.statistics.statistics_client.md)

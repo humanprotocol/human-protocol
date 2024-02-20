@@ -299,12 +299,12 @@ class OperatorUtils:
         )
 
     @staticmethod
-    def get_reputation_network(
+    def get_reputation_network_operators(
         chain_id: ChainId,
         address: str,
         role: Optional[str] = None,
     ) -> List[Operator]:
-        """Get the reputation network of the specified address.
+        """Get the reputation network operators of the specified address.
 
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
@@ -318,7 +318,7 @@ class OperatorUtils:
                 from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.operator import OperatorUtils
 
-                leader = OperatorUtils.get_reputation_network(
+                leader = OperatorUtils.get_reputation_network_operators(
                     ChainId.POLYGON_MUMBAI,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
