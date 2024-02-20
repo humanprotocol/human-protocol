@@ -67,8 +67,6 @@ describe('AuthService', () => {
         switch (key) {
           case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
             return MOCK_EXPIRES_IN;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
         }
       }),
     };
@@ -98,7 +96,7 @@ describe('AuthService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
-            address: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getOracleAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
       ],

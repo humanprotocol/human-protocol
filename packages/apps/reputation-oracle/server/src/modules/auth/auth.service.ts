@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ethers } from 'ethers';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
@@ -53,6 +52,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
+    private readonly web3Service: Web3Service,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -282,12 +282,9 @@ export class AuthService {
   public prepareWeb3PreSignUpPayload(
     data: Web3PreSignUpDto,
   ): Web3PreSignUpPayloadDto {
-    const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
-    const wallet = new ethers.Wallet(privateKey);
-
     return {
       from: data.address,
-      to: wallet.address,
+      to: this.web3Service.getOracleAddress(),
       contents: WEB3_SIGNUP_MESSAGE,
     };
   }
