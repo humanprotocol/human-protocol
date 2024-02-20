@@ -1,0 +1,26 @@
+---
+source: src/graphql/staking_leader_query.rs
+expression: query.query
+---
+query GetLeaderQuery($id: String!) {
+  leader(id: $id) {
+    id
+    address
+    amountStaked
+    amountAllocated
+    amountLocked
+    lockedUntilTimestamp
+    amountWithdrawn
+    amountSlashed
+    reputation
+    reward
+    amountJobsLaunched
+    role
+    fee
+    publicKey
+    webhookUrl
+    url
+  }
+}
+
+

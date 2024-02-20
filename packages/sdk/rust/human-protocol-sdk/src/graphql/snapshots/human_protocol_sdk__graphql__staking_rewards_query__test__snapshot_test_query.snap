@@ -1,0 +1,14 @@
+---
+source: src/graphql/staking_rewards_query.rs
+expression: query.query
+---
+query GetRewardsQuery($slasher: String!) {
+  rewardAddedEvents(where: {slasher_contains: $slasher, }) {
+    escrowAddress
+    staker
+    slasher
+    amount
+  }
+}
+
+

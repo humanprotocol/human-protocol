@@ -1,0 +1,68 @@
+schema {
+  query: Root
+}
+
+interface Node {
+  id: String!
+}
+
+# Directs the executor to query only when the field exists.
+directive @ifdef on FIELD
+
+scalar I64
+
+type EscrowData implements Node {
+  address: String!
+  amountPaid: ID!
+  balance: ID!
+  count: ID!
+  factoryAddress: String!
+  finalResultsUrl: String
+  id: String!
+  intermediateResultsUrl: String
+  jobRequesterId: String
+  launcher: String!
+  manifestHash: String
+  manifestUrl: String
+  recordingOracle: String
+  recordingOracleFee: ID
+  reputationOracle: String
+  reputationOracleFee: ID
+  exchangeOracle: String
+  exchangeOracleFee: ID
+  status: String
+  token: String!
+  totalFundedAmount: ID!
+  createdAt: String!
+}
+
+type Root {
+  escrow(id: String!): EscrowData
+  escrows(where: EscrowWhereInput): [EscrowData!]
+}
+
+input EscrowWhereInput {
+  launcher: String
+  launcher_in: [String!]
+  launcher_contains: String
+  exchangeOracle: String
+  exchangeOracle_in: [String!]
+  exchangeOracle_starts_with: String
+  exchangeOracle_contains: String
+  recordingOracle: String
+  recordingOracle_in: [String!]
+  recordingOracle_starts_with: String
+  recordingOracle_contains: String
+  reputationOracle: String
+  reputationOracle_in: [String!]
+  reputationOracle_starts_with: String
+  reputationOracle_contains: String
+  jobRequesterId: String
+  jobRequesterId_in: [String!]
+  jobRequesterId_starts_with: String
+  jobRequesterId_contains: String
+  status: String
+  status_in: [String!]
+  createdAt_gte: String
+  createdAt_lte: String
+}

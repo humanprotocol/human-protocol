@@ -1,0 +1,172 @@
+---
+source: src/graphql/staking_leaders_query.rs
+expression: result.data
+---
+Some(
+    GetLeadersQuery {
+        leaders: Some(
+            [
+                Leader {
+                    id: "0x34088ae324297aeb23ef6f6dddbf03c53f019b3d",
+                    address: "0x34088ae324297aeb23ef6f6dddbf03c53f019b3d",
+                    amount_staked: Id(
+                        "0",
+                    ),
+                    amount_allocated: Id(
+                        "0",
+                    ),
+                    amount_locked: Id(
+                        "0",
+                    ),
+                    locked_until_timestamp: Id(
+                        "0",
+                    ),
+                    amount_withdrawn: Id(
+                        "1",
+                    ),
+                    amount_slashed: Id(
+                        "0",
+                    ),
+                    reputation: Id(
+                        "0",
+                    ),
+                    reward: Id(
+                        "0",
+                    ),
+                    amount_jobs_launched: Id(
+                        "0",
+                    ),
+                    role: Some(
+                        "Recording Oracle",
+                    ),
+                    fee: None,
+                    public_key: None,
+                    webhook_url: None,
+                    url: None,
+                },
+                Leader {
+                    id: "0x5178da4e13304ae15a67457f157533c7bb99904c",
+                    address: "0x5178da4e13304ae15a67457f157533c7bb99904c",
+                    amount_staked: Id(
+                        "3",
+                    ),
+                    amount_allocated: Id(
+                        "0",
+                    ),
+                    amount_locked: Id(
+                        "0",
+                    ),
+                    locked_until_timestamp: Id(
+                        "0",
+                    ),
+                    amount_withdrawn: Id(
+                        "0",
+                    ),
+                    amount_slashed: Id(
+                        "0",
+                    ),
+                    reputation: Id(
+                        "0",
+                    ),
+                    reward: Id(
+                        "0",
+                    ),
+                    amount_jobs_launched: Id(
+                        "0",
+                    ),
+                    role: Some(
+                        "Reputation Oracle",
+                    ),
+                    fee: None,
+                    public_key: None,
+                    webhook_url: None,
+                    url: None,
+                },
+                Leader {
+                    id: "0x9d1f5d4c4aa1764bf63583c3392f626e2ffbe5f7",
+                    address: "0x9d1f5d4c4aa1764bf63583c3392f626e2ffbe5f7",
+                    amount_staked: Id(
+                        "2",
+                    ),
+                    amount_allocated: Id(
+                        "0",
+                    ),
+                    amount_locked: Id(
+                        "0",
+                    ),
+                    locked_until_timestamp: Id(
+                        "0",
+                    ),
+                    amount_withdrawn: Id(
+                        "0",
+                    ),
+                    amount_slashed: Id(
+                        "4",
+                    ),
+                    reputation: Id(
+                        "0",
+                    ),
+                    reward: Id(
+                        "0",
+                    ),
+                    amount_jobs_launched: Id(
+                        "569",
+                    ),
+                    role: Some(
+                        "Job Launcher",
+                    ),
+                    fee: None,
+                    public_key: None,
+                    webhook_url: None,
+                    url: None,
+                },
+                Leader {
+                    id: "0x9d6cbf466e97fe6440e3b00242f0040f791c6763",
+                    address: "0x9d6cbf466e97fe6440e3b00242f0040f791c6763",
+                    amount_staked: Id(
+                        "0",
+                    ),
+                    amount_allocated: Id(
+                        "0",
+                    ),
+                    amount_locked: Id(
+                        "0",
+                    ),
+                    locked_until_timestamp: Id(
+                        "0",
+                    ),
+                    amount_withdrawn: Id(
+                        "0",
+                    ),
+                    amount_slashed: Id(
+                        "0",
+                    ),
+                    reputation: Id(
+                        "0",
+                    ),
+                    reward: Id(
+                        "0",
+                    ),
+                    amount_jobs_launched: Id(
+                        "0",
+                    ),
+                    role: Some(
+                        "Reputation Oracle",
+                    ),
+                    fee: Some(
+                        Id(
+                            "10",
+                        ),
+                    ),
+                    public_key: Some(
+                        "-----BEGIN PGP PUBLIC KEY BLOCK-----\nxjMEZT+z+hYJKwYBBAHaRw8BAQdApJYnHLHrm9B7PqeqIbvHS/A7oB9qXQDd\nsmyE4wI4G0/NIFJlcHV0YXRpb24gT3JhY2xlIDxhZG1pbkBobXQuYWk+wowE\nEBYKAD4FgmU/s/oECwkHCAmQn3V/zZlmeGQDFQgKBBYAAgECGQECmwMCHgEW\nIQTtDzYn++viVmrUQFufdX/NmWZ4ZAAA7QYBAPP8khFGxLrNGFfZwR5X5E1+\nRQkPja9hhinnBlntMp3RAP9SpQ04mXQ+62P+rO5JJgo9sj4emdPqx+ty1TqY\nqY7dDc44BGU/s/oSCisGAQQBl1UBBQEBB0C6d0rDL3bJfb5kLzTnQzNz/oT5\njRrTHNg2e5JYXmdVLAMBCAfCeAQYFggAKgWCZT+z+gmQn3V/zZlmeGQCmwwW\nIQTtDzYn++viVmrUQFufdX/NmWZ4ZAAAQwIA/iYAZz3vtJK7GPOrt4cDm80z\nY6CcG9rND0QMga9iPYlqAQCbCzzHNs3ptjhDxmgnMJMMDlRF217ZqwjAwS2e\nHBRJDA==\n=5Mkq\n-----END PGP PUBLIC KEY BLOCK-----",
+                    ),
+                    webhook_url: Some(
+                        "https://reputation-oracle-zeta.vercel.app/webhook",
+                    ),
+                    url: None,
+                },
+            ],
+        ),
+    },
+)
