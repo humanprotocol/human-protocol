@@ -8,13 +8,16 @@ from web3 import Web3
 from tests.utils.constants import (
     DEFAULT_HASH,
     DEFAULT_URL,
+    EXCHANGE_ORACLE_ADDRESS,
+    EXCHANGE_ORACLE_FEE,
+    JOB_REQUESTER_ID,
     RECORDING_ORACLE_ADDRESS,
     RECORDING_ORACLE_FEE,
     REPUTATION_ORACLE_ADDRESS,
     REPUTATION_ORACLE_FEE,
 )
 
-amount = Web3.toWei(1, "ether")
+amount = Web3.to_wei(1, "ether")
 
 
 def create_escrow(web3: Web3):
@@ -23,15 +26,18 @@ def create_escrow(web3: Web3):
     staking_client.approve_stake(amount)
     staking_client.stake(amount)
     escrow_address = escrow_client.create_and_setup_escrow(
-        NETWORKS[ChainId.LOCALHOST]["hmt_address"],
-        [web3.eth.default_account],
-        EscrowConfig(
-            RECORDING_ORACLE_ADDRESS,
-            REPUTATION_ORACLE_ADDRESS,
-            RECORDING_ORACLE_FEE,
-            REPUTATION_ORACLE_FEE,
-            DEFAULT_URL,
-            DEFAULT_HASH,
+        token_address=NETWORKS[ChainId.LOCALHOST]["hmt_address"],
+        trusted_handlers=[web3.eth.default_account],
+        job_requester_id=JOB_REQUESTER_ID,
+        escrow_config=EscrowConfig(
+            exchange_oracle_address=EXCHANGE_ORACLE_ADDRESS,
+            exchange_oracle_fee=EXCHANGE_ORACLE_FEE,
+            recording_oracle_address=RECORDING_ORACLE_ADDRESS,
+            recording_oracle_fee=RECORDING_ORACLE_FEE,
+            reputation_oracle_address=REPUTATION_ORACLE_ADDRESS,
+            reputation_oracle_fee=REPUTATION_ORACLE_FEE,
+            manifest_url=DEFAULT_URL,
+            hash=DEFAULT_HASH,
         ),
     )
     return escrow_address

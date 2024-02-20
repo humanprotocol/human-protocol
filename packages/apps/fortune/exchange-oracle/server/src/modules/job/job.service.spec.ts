@@ -8,7 +8,7 @@ import {
   EscrowClient,
   StorageClient,
   EscrowUtils,
-  StakingClient,
+  OperatorUtils,
   Encryption,
 } from '@human-protocol/sdk';
 import {
@@ -37,8 +37,8 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn(),
   },
-  StakingClient: {
-    build: jest.fn(),
+  OperatorUtils: {
+    getLeader: jest.fn(),
   },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
@@ -197,11 +197,9 @@ describe('JobService', () => {
     it('should call job launcher webhook if manifest is empty', async () => {
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValueOnce(null);
 
-      (StakingClient.build as any).mockImplementation(() => ({
-        getLeader: jest.fn().mockResolvedValue({
-          webhookUrl: JOB_LAUNCHER_WEBHOOK_URL,
-        }),
-      }));
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+        webhookUrl: JOB_LAUNCHER_WEBHOOK_URL,
+      });
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(null),
@@ -219,7 +217,7 @@ describe('JobService', () => {
         escrow_address: escrowAddress,
         chain_id: chainId,
         event_type: EventType.TASK_CREATION_FAILED,
-        reason: 'Unable to get manifest',
+        event_data: [{ reason: 'Unable to get manifest' }],
       };
       expect(httpServicePostMock).toHaveBeenCalledWith(
         JOB_LAUNCHER_WEBHOOK_URL + ESCROW_FAILED_ENDPOINT,
@@ -369,11 +367,9 @@ describe('JobService', () => {
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
 
-      (StakingClient.build as any).mockImplementation(() => ({
-        getLeader: jest.fn().mockResolvedValue({
-          webhookUrl: recordingOracleURLMock,
-        }),
-      }));
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+        webhookUrl: recordingOracleURLMock,
+      });
       storageService.uploadJobSolutions = jest
         .fn()
         .mockResolvedValue(solutionsUrl);
@@ -385,9 +381,9 @@ describe('JobService', () => {
         'solution',
       );
       const expectedBody = {
-        escrowAddress,
-        chainId,
-        solutionsUrl,
+        escrow_address: escrowAddress,
+        chain_id: chainId,
+        solutions_url: solutionsUrl,
       };
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -430,11 +426,9 @@ describe('JobService', () => {
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
 
-      (StakingClient.build as any).mockImplementation(() => ({
-        getLeader: jest.fn().mockResolvedValue({
-          webhookUrl: recordingOracleURLMock,
-        }),
-      }));
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+        webhookUrl: recordingOracleURLMock,
+      });
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
@@ -465,11 +459,9 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (StakingClient.build as any).mockImplementation(() => ({
-        getLeader: jest.fn().mockResolvedValue({
-          webhookUrl: '',
-        }),
-      }));
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+        webhookUrl: '',
+      });
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
@@ -485,11 +477,9 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (StakingClient.build as any).mockImplementation(() => ({
-        getLeader: jest.fn().mockResolvedValue({
-          webhookUrl: 'https://example.com/recordingoracle',
-        }),
-      }));
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+        webhookUrl: 'https://example.com/recordingoracle',
+      });
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValue([
         {
@@ -526,7 +516,8 @@ describe('JobService', () => {
       await jobService.processInvalidJobSolution({
         chainId,
         escrowAddress,
-        workerAddress,
+        eventType: EventType.SUBMISSION_REJECTED,
+        eventData: [{ assigneeId: workerAddress }],
       });
 
       expect(storageService.uploadJobSolutions).toHaveBeenCalledWith(
@@ -561,7 +552,8 @@ describe('JobService', () => {
         jobService.processInvalidJobSolution({
           chainId,
           escrowAddress,
-          workerAddress,
+          eventType: EventType.SUBMISSION_REJECTED,
+          eventData: [{ assigneeId: workerAddress }],
         }),
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });

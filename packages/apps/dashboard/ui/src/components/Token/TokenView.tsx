@@ -102,7 +102,7 @@ export const TokenView: FC = () => {
 
   const transferCount = useMemo(() => {
     if (data) {
-      return data.data[0].attributes.dailyHMTData
+      return data[0].data[0].attributes.dailyHMTData
         .slice(0, days)
         .reverse()
         .reduce(
@@ -125,7 +125,7 @@ export const TokenView: FC = () => {
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Holders"
-            value={data?.data?.[0]?.attributes?.totalHolders}
+            value={data?.[0].data?.[0]?.attributes?.totalHolders}
             tooltipTitle={TOOLTIPS.HOLDERS}
           />
         </Grid>
@@ -135,7 +135,7 @@ export const TokenView: FC = () => {
             value={
               chainId === ChainId.ALL
                 ? 1_000_000_000
-                : data?.data?.[0]?.attributes?.totalSupply
+                : data?.[0].data?.[0]?.attributes?.totalSupply
             }
             component={TotalSupplyComponent}
             tooltipTitle={TOOLTIPS.TOTAL_SUPPLY}

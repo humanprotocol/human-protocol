@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { ethers } from 'ethers';
-import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
+import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
   PaymentCryptoCreateDto,
@@ -33,9 +33,9 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
-import { add, div, mul } from '../../common/utils/decimal';
-import { QueryFailedError } from 'typeorm';
+import { add, div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
+import { PaymentEntity } from './payment.entity';
 
 @Injectable()
 export class PaymentService {
@@ -93,9 +93,9 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
     }
 
-    const paymentEntity = await this.paymentRepository.findOne({
-      transaction: paymentIntent.id,
-    });
+    const paymentEntity = await this.paymentRepository.findOneByTransaction(
+      paymentIntent.id,
+    );
 
     if (paymentEntity) {
       this.logger.log(
@@ -107,7 +107,8 @@ export class PaymentService {
 
     const rate = await getRate(currency, Currency.USD);
 
-    await this.paymentRepository.create({
+    const newPaymentEntity = new PaymentEntity();
+    Object.assign(newPaymentEntity, {
       userId,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
@@ -117,6 +118,7 @@ export class PaymentService {
       transaction: paymentIntent.id,
       status: PaymentStatus.PENDING,
     });
+    await this.paymentRepository.createUnique(newPaymentEntity);
 
     return paymentIntent.client_secret;
   }
@@ -134,15 +136,16 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.NotFound);
     }
 
-    const paymentEntity = await this.paymentRepository.findOne({
-      userId,
-      transaction: data.paymentId,
-      status: PaymentStatus.PENDING,
-      amount: div(paymentData.amount_received, 100),
-      currency: paymentData.currency,
-    });
-
-    if (!paymentEntity) {
+    const paymentEntity = await this.paymentRepository.findOneByTransaction(
+      data.paymentId,
+    );
+    if (
+      !paymentEntity ||
+      paymentEntity.userId !== userId ||
+      paymentEntity.status !== PaymentStatus.PENDING ||
+      !eq(paymentEntity.amount, div(paymentData.amount_received, 100)) ||
+      paymentEntity.currency !== paymentData.currency
+    ) {
       this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
       throw new NotFoundException(ErrorPayment.NotFound);
     }
@@ -152,7 +155,7 @@ export class PaymentService {
       paymentData?.status === StripePaymentStatus.REQUIRES_PAYMENT_METHOD
     ) {
       paymentEntity.status = PaymentStatus.FAILED;
-      await paymentEntity.save();
+      await this.paymentRepository.updateOne(paymentEntity);
       this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
       throw new BadRequestException(ErrorPayment.NotSuccess);
     } else if (paymentData?.status !== StripePaymentStatus.SUCCEEDED) {
@@ -160,7 +163,7 @@ export class PaymentService {
     }
 
     paymentEntity.status = PaymentStatus.SUCCEEDED;
-    await paymentEntity.save();
+    await this.paymentRepository.updateOne(paymentEntity);
 
     return true;
   }
@@ -232,10 +235,10 @@ export class PaymentService {
       throw new ConflictException(ErrorPayment.UnsupportedToken);
     }
 
-    const paymentEntity = await this.paymentRepository.findOne({
-      transaction: transaction.hash,
-      chainId: dto.chainId,
-    });
+    const paymentEntity = await this.paymentRepository.findOneByTransaction(
+      transaction.hash,
+      dto.chainId,
+    );
 
     if (paymentEntity) {
       this.logger.log(
@@ -247,7 +250,8 @@ export class PaymentService {
 
     const rate = await getRate(tokenId, Currency.USD);
 
-    await this.paymentRepository.create({
+    const newPaymentEntity = new PaymentEntity();
+    Object.assign(newPaymentEntity, {
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
@@ -258,15 +262,16 @@ export class PaymentService {
       transaction: dto.transactionHash,
       status: PaymentStatus.SUCCEEDED,
     });
+    await this.paymentRepository.createUnique(newPaymentEntity);
 
     return true;
   }
 
   public async getUserBalance(userId: number): Promise<number> {
-    const paymentEntities = await this.paymentRepository.find({
+    const paymentEntities = await this.paymentRepository.findByUserAndStatus(
       userId,
-      status: PaymentStatus.SUCCEEDED,
-    });
+      PaymentStatus.SUCCEEDED,
+    );
 
     const totalAmount = paymentEntities.reduce((total, payment) => {
       return add(total, mul(payment.amount, payment.rate));
@@ -278,31 +283,17 @@ export class PaymentService {
   public async createRefundPayment(dto: PaymentRefundCreateDto) {
     const rate = await getRate(TokenId.HMT, Currency.USD);
 
-    try {
-      await this.paymentRepository.create({
-        userId: dto.userId,
-        jobId: dto.jobId,
-        source: PaymentSource.BALANCE,
-        type: PaymentType.REFUND,
-        amount: dto.refundAmount,
-        currency: TokenId.HMT,
-        rate,
-        status: PaymentStatus.SUCCEEDED,
-      });
-    } catch (error) {
-      if (
-        error instanceof QueryFailedError &&
-        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
-      ) {
-        this.logger.log(
-          ErrorPostgres.NumericFieldOverflow,
-          PaymentService.name,
-        );
-        throw new ConflictException(ErrorPayment.IncorrectAmount);
-      } else {
-        this.logger.log(error, PaymentService.name);
-        throw new ConflictException(ErrorPayment.NotSuccess);
-      }
-    }
+    const paymentEntity = new PaymentEntity();
+    Object.assign(paymentEntity, {
+      userId: dto.userId,
+      jobId: dto.jobId,
+      source: PaymentSource.BALANCE,
+      type: PaymentType.REFUND,
+      amount: dto.refundAmount,
+      currency: TokenId.HMT,
+      rate,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    await this.paymentRepository.createUnique(paymentEntity);
   }
 }

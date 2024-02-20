@@ -6,9 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../../user/user.entity';
 import { UserStatus } from '../../../common/enums/user';
 import { ConfigNames } from '../../../common/config';
-import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
 import { JWT_PREFIX } from '../../../common/constants';
+import { AuthRepository } from '../auth.repository';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -32,14 +32,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     @Req() request: any,
     payload: { email: string; userId: number },
   ): Promise<UserEntity> {
-    const auth = await this.authRepository.findOne(
-      {
-        userId: payload.userId,
-      },
-      {
-        relations: ['user'],
-      },
-    );
+    const auth = await this.authRepository.findOneByUserId(payload.userId);
 
     if (!auth?.user) {
       throw new UnauthorizedException('User not found');

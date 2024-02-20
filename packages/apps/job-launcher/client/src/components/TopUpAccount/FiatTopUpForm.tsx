@@ -29,7 +29,7 @@ export const FiatTopUpForm = () => {
   const [amount, setAmount] = useState<string>();
   const [name, setName] = useState<string>();
   const dispatch = useAppDispatch();
-  const { openSnackbar } = useSnackbar();
+  const { showError } = useSnackbar();
 
   const handleTopUpAccount = async () => {
     if (!stripe || !elements) {
@@ -88,7 +88,7 @@ export const FiatTopUpForm = () => {
 
       setIsSuccess(true);
     } catch (err: any) {
-      openSnackbar(err?.response?.data?.message ?? err?.message, 'error');
+      showError(err);
       setIsSuccess(false);
     }
     setIsLoading(false);

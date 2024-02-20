@@ -2,7 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  StakingClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
@@ -20,8 +20,8 @@ import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
-  StakingClient: {
-    build: jest.fn(),
+  OperatorUtils: {
+    getLeader: jest.fn(),
   },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
@@ -95,10 +95,8 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      StakingClient.build = jest.fn().mockResolvedValue({
-        getLeader: jest.fn().mockResolvedValue({
-          publicKey: 'publicKey',
-        }),
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+        publicKey: 'publicKey',
       });
 
       const jobSolution = {
@@ -180,9 +178,7 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      StakingClient.build = jest.fn().mockResolvedValue({
-        getLeader: jest.fn().mockResolvedValue({}),
-      });
+      OperatorUtils.getLeader = jest.fn().mockResolvedValue({});
 
       const jobSolution = {
         workerAddress,

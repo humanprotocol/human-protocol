@@ -27,7 +27,6 @@ import {
   JobCvatDto,
   JobListDto,
   JobCancelDto,
-  EscrowFailedWebhookDto,
   JobDetailsDto,
   JobIdDto,
   FortuneFinalResultDto,
@@ -39,6 +38,7 @@ import { Public, ApiKey } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { Role } from '../../common/enums/role';
+import { WebhookDataDto } from '../webhook/webhook.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -180,66 +180,9 @@ export class JobController {
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
-    @Query('jobId') jobId: number,
+    @Query('job_id') jobId: number,
   ): Promise<FortuneFinalResultDto[] | string> {
     return this.jobService.getResult(req.user.id, jobId);
-  }
-
-  @ApiOperation({
-    summary: 'Launch the cron job to create escrows',
-    description: 'Endpoint to launch the cron job to create escrows.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job to create escrows launched successfully.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  @Post('/cron/create-escrow')
-  public async launchCreateEscrowCronJob(): Promise<void> {
-    await this.jobService.createEscrowCronJob();
-    return;
-  }
-
-  @ApiOperation({
-    summary: 'Launch the cron job to setup escrows',
-    description: 'Endpoint to launch the cron job to setup escrows.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job to setup escrows launched successfully.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  @Post('/cron/setup-escrow')
-  public async launchSetupEscrowCronJob(): Promise<void> {
-    await this.jobService.setupEscrowCronJob();
-    return;
-  }
-
-  @ApiOperation({
-    summary: 'Launch the cron job to fund escrows',
-    description: 'Endpoint to launch the cron job to fund escrows.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job to fund escrows launched successfully.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  @Post('/cron/fund-escrow')
-  public async launchFundEscrowCronJob(): Promise<void> {
-    await this.jobService.fundEscrowCronJob();
-    return;
   }
 
   @ApiOperation({
@@ -268,21 +211,6 @@ export class JobController {
   }
 
   @ApiOperation({
-    summary: 'Cancel a cron job',
-    description: 'Endpoint to cancel a cron job.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job launched successfully.',
-  })
-  @Get('/cron/cancel')
-  public async cancelCronJob(): Promise<void> {
-    await this.jobService.cancelCronJob();
-    return;
-  }
-
-  @ApiOperation({
     summary: 'Handle escrow failed webhook',
     description: 'Endpoint to handle an escrow failed webhook.',
   })
@@ -303,7 +231,7 @@ export class JobController {
   @Post('/escrow-failed-webhook')
   public async handleEscrowFailedWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: EscrowFailedWebhookDto,
+    @Body() data: WebhookDataDto,
   ): Promise<void> {
     await this.jobService.escrowFailedWebhook(data);
     return;
@@ -327,6 +255,7 @@ export class JobController {
     description: 'Not Found. Could not find the requested content.',
   })
   @Get('/details/:id')
+  @ApiKey()
   public async getDetails(
     @Request() req: RequestWithUser,
     @Param() params: JobIdDto,

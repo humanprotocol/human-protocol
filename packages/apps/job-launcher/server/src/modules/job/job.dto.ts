@@ -31,7 +31,6 @@ import {
   WorkerLanguage,
   WorkerLocation,
 } from '../../common/enums/job';
-import { EventType } from '../../common/enums/webhook';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 export class JobCreateDto {
   @ApiProperty({ enum: ChainId })
@@ -75,27 +74,27 @@ export class JobCreateDto {
 }
 
 export class JobDto {
-  @ApiProperty({ enum: ChainId, required: false })
+  @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
   @IsEnum(ChainId)
   @IsOptional()
   public chainId?: ChainId;
 }
 
 export class JobFortuneDto extends JobDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'requester_title' })
   @IsString()
   public requesterTitle: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'requester_description' })
   @IsString()
   public requesterDescription: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'submissions_required' })
   @IsNumber()
   @IsPositive()
   public submissionsRequired: number;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'fund_amount' })
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
@@ -105,12 +104,15 @@ export class StorageDataDto {
   @ApiProperty({ enum: StorageProviders })
   @IsEnum(StorageProviders)
   public provider: StorageProviders;
+
   @ApiProperty({ enum: AWSRegions })
   @IsEnum(AWSRegions)
   public region: AWSRegions | null;
-  @ApiProperty()
+
+  @ApiProperty({ name: 'bucket_name' })
   @IsString()
   public bucketName: string;
+
   @ApiProperty()
   @IsOptional()
   @IsString()
@@ -118,7 +120,7 @@ export class StorageDataDto {
 }
 
 export class JobCvatDto extends JobDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'requester_description' })
   @IsString()
   public requesterDescription: string;
 
@@ -131,24 +133,24 @@ export class JobCvatDto extends JobDto {
   @ArrayMinSize(1)
   public labels: string[];
 
-  @ApiProperty()
+  @ApiProperty({ name: 'min_quality' })
   @IsNumber()
   @IsPositive()
   public minQuality: number;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'ground_truth' })
   @IsObject()
   public groundTruth: StorageDataDto;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'user_guide' })
   @IsUrl()
   public userGuide: string;
 
   @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
-  type: JobRequestType;
+  public type: JobRequestType;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'fund_amount' })
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
@@ -197,7 +199,7 @@ export class StakingDetails {
 }
 
 export class ManifestDetails {
-  @ApiProperty({ description: 'Chain ID' })
+  @ApiProperty({ description: 'Chain ID', name: 'chain_id' })
   @IsNumber()
   @Min(1)
   public chainId: number;
@@ -212,39 +214,57 @@ export class ManifestDetails {
   @IsString()
   public description?: string;
 
-  @ApiProperty({ description: 'Submissions required' })
+  @ApiProperty({
+    description: 'Submissions required',
+    name: 'submissions_required',
+  })
   @IsNumber()
   public submissionsRequired: number;
 
-  @ApiProperty({ description: 'Ethereum address of the token' })
+  @ApiProperty({
+    description: 'Ethereum address of the token',
+    name: 'token_address',
+  })
   @IsEthereumAddress()
   public tokenAddress: string;
 
-  @ApiProperty({ description: 'Amount of funds' })
+  @ApiProperty({ description: 'Amount of funds', name: 'fund_amount' })
   @IsNumber()
   public fundAmount: number;
 
-  @ApiProperty({ description: 'Ethereum address of the requester' })
+  @ApiProperty({
+    description: 'Ethereum address of the requester',
+    name: 'requester_address',
+  })
   @IsEthereumAddress()
   public requesterAddress: string;
 
-  @ApiProperty({ description: 'Request type' })
+  @ApiProperty({ description: 'Request type', name: 'request_type' })
   @IsEnum(JobRequestType)
   public requestType: JobRequestType;
 
-  @ApiProperty({ description: 'Address of the exchange oracle (optional)' })
+  @ApiProperty({
+    description: 'Address of the exchange oracle (optional)',
+    name: 'exchange_oracle_address',
+  })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   public exchangeOracleAddress?: string;
 
-  @ApiProperty({ description: 'Address of the recording oracle (optional)' })
+  @ApiProperty({
+    description: 'Address of the recording oracle (optional)',
+    name: 'recording_oracle_address',
+  })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   public recordingOracleAddress?: string;
 
-  @ApiProperty({ description: 'Address of the reputation oracle (optional)' })
+  @ApiProperty({
+    description: 'Address of the reputation oracle (optional)',
+    name: 'reputation_oracle_address',
+  })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
@@ -252,15 +272,24 @@ export class ManifestDetails {
 }
 
 export class CommonDetails {
-  @ApiProperty({ description: 'Ethereum address of the escrow' })
+  @ApiProperty({
+    description: 'Ethereum address of the escrow',
+    name: 'escrow_address',
+  })
   @IsEthereumAddress()
   public escrowAddress: string;
 
-  @ApiProperty({ description: 'URL of the manifest' })
+  @ApiProperty({
+    description: 'URL of the manifest',
+    name: 'manifest_url',
+  })
   @IsUrl()
   public manifestUrl: string;
 
-  @ApiProperty({ description: 'Hash of the manifest' })
+  @ApiProperty({
+    description: 'Hash of the manifest',
+    name: 'manifest_hash',
+  })
   @IsString()
   public manifestHash: string;
 
@@ -269,12 +298,18 @@ export class CommonDetails {
   @Min(0)
   public balance: number;
 
-  @ApiProperty({ description: 'Amount paid out' })
+  @ApiProperty({
+    description: 'Amount paid out',
+    name: 'paid_out',
+  })
   @IsNumber()
   @Min(0)
   public paidOut: number;
 
-  @ApiProperty({ description: 'Number of tasks (optional)' })
+  @ApiProperty({
+    description: 'Number of tasks (optional)',
+    name: 'amount_of_tasks',
+  })
   @IsNumber()
   public amountOfTasks?: number;
 
@@ -297,60 +332,26 @@ export class JobDetailsDto {
   public staking: StakingDetails;
 }
 
-export class SaveManifestDto {
-  @ApiProperty()
-  public manifestUrl: string;
-
-  @ApiProperty()
-  public manifestHash: string;
-}
-
-export class FortuneWebhookDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @ApiProperty()
-  public escrowAddress: string;
-
-  @ApiProperty({ enum: EventType })
-  @IsEnum(EventType)
-  public eventType: EventType;
-}
-
-export class CVATWebhookDto {
-  @ApiProperty()
-  public escrow_address: string;
-
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  public chain_id: number;
-
-  @ApiProperty({ enum: EventType })
-  @IsEnum(EventType)
-  public event_type: EventType;
-}
-
 export class FortuneManifestDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'submissions_required' })
   @IsNumber()
   @IsPositive()
   public submissionsRequired: number;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'requester_title' })
   @IsString()
   public requesterTitle: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'requester_description' })
   @IsString()
   public requesterDescription: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'fund_amount' })
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
 
-  @ApiProperty({ enum: JobRequestType })
+  @ApiProperty({ enum: JobRequestType, name: 'request_type' })
   @IsEnum(JobRequestType)
   public requestType: JobRequestType;
 }
@@ -430,7 +431,7 @@ export class CvatManifestDto {
 }
 
 export class FortuneFinalResultDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'worker_address' })
   @IsNotEmpty()
   @IsString()
   public workerAddress: string;
@@ -465,38 +466,20 @@ export class CvatFinalResultDto {
 }
 
 export class JobListDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'job_id' })
   public jobId: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, name: 'escrow_address' })
   public escrowAddress?: string;
 
   @ApiProperty()
   public network: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'fund_amount' })
   public fundAmount: number;
 
   @ApiProperty()
   public status: JobStatus;
-}
-
-export class EscrowFailedWebhookDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @ApiProperty()
-  @IsString()
-  public escrowAddress: string;
-
-  @ApiProperty({ enum: EventType })
-  @IsEnum(EventType)
-  public eventType: EventType;
-
-  @ApiProperty()
-  @IsString()
-  public reason: string;
 }
 
 export class EscrowCancelDto {
@@ -510,6 +493,7 @@ export class EscrowCancelDto {
 export class JobCaptchaAdvancedDto {
   @ApiProperty({
     enum: WorkerLanguage,
+    name: 'worker_language',
   })
   @IsEnum(WorkerLanguage)
   @IsOptional()
@@ -517,6 +501,7 @@ export class JobCaptchaAdvancedDto {
 
   @ApiProperty({
     enum: WorkerLocation,
+    name: 'workerocation',
   })
   @IsEnum(WorkerLocation)
   @IsOptional()
@@ -524,6 +509,7 @@ export class JobCaptchaAdvancedDto {
 
   @ApiProperty({
     enum: WorkerBrowser,
+    name: 'target_browser',
   })
   @IsEnum(WorkerBrowser)
   @IsOptional()
@@ -533,11 +519,12 @@ export class JobCaptchaAdvancedDto {
 export class JobCaptchaAnnotationsDto {
   @ApiProperty({
     enum: JobCaptchaShapeType,
+    name: 'type_of_job',
   })
   @IsEnum(JobCaptchaShapeType)
   typeOfJob: JobCaptchaShapeType;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'task_bid_price' })
   @IsNumber()
   @IsPositive()
   taskBidPrice: number;
@@ -547,15 +534,15 @@ export class JobCaptchaAnnotationsDto {
   @IsString()
   label?: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'labeling_prompt' })
   @IsString()
   labelingPrompt: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'ground_truths' })
   @IsString()
   groundTruths: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'example_images' })
   @IsOptional()
   @IsArray()
   exampleImages?: string[];
@@ -566,24 +553,24 @@ export class JobCaptchaDto extends JobDto {
   @IsUrl()
   data: StorageDataDto;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'accuracy_target' })
   @IsNumber()
   @IsPositive()
   @Max(1)
   accuracyTarget: number;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'completion_date' })
   @IsDateString()
   @IsOptional()
   completionDate: Date;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'min_requests' })
   @IsNumber()
   @IsPositive()
   @Max(100)
   minRequests: number;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'max_requests' })
   @IsNumber()
   @IsPositive()
   @Max(100)
@@ -759,3 +746,5 @@ class TaskData {
   @IsOptional()
   datapoint_text?: DatapointText;
 }
+
+export type CreateJob = JobFortuneDto | JobCvatDto | JobCaptchaDto;

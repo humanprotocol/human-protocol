@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as gqlFetch from 'graphql-request';
 import { Overrides, Signer, ethers } from 'ethers';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { ChainId } from '../src/enums';
@@ -12,25 +11,13 @@ import {
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
 } from '../src/error';
-import { IAllocation, IReward, ILeader } from '../src/interfaces';
+import { IAllocation } from '../src/interfaces';
 import { StakingClient } from '../src/staking';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   FAKE_AMOUNT,
   FAKE_NEGATIVE_AMOUNT,
 } from './utils/constants';
-import {
-  GET_LEADERS_QUERY,
-  GET_LEADER_QUERY,
-} from '../src/graphql/queries/staking';
-
-vi.mock('graphql-request', () => {
-  return {
-    default: vi.fn(),
-  };
-});
-
-vi.mock('../src/init');
 
 describe('StakingClient', () => {
   let stakingClient: any,
@@ -703,97 +690,6 @@ describe('StakingClient', () => {
     });
   });
 
-  describe('getLeader', () => {
-    const stakerAddress = ethers.ZeroAddress;
-    const invalidAddress = 'InvalidAddress';
-
-    const mockLeader: ILeader = {
-      id: stakerAddress,
-      address: stakerAddress,
-      amountStaked: ethers.parseEther('100'),
-      amountAllocated: ethers.parseEther('50'),
-      amountLocked: ethers.parseEther('25'),
-      lockedUntilTimestamp: ethers.toBigInt(0),
-      amountWithdrawn: ethers.parseEther('25'),
-      amountSlashed: ethers.parseEther('25'),
-      reputation: ethers.parseEther('25'),
-      reward: ethers.parseEther('25'),
-      amountJobsLaunched: ethers.parseEther('25'),
-    };
-
-    test('should return staker information', async () => {
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        leader: mockLeader,
-      });
-
-      const result = await stakingClient.getLeader(stakerAddress);
-
-      expect(gqlFetchSpy).toHaveBeenCalledWith('', GET_LEADER_QUERY, {
-        address: stakerAddress,
-      });
-      expect(result).toEqual(mockLeader);
-    });
-
-    test('should throw an error for an invalid staker address', async () => {
-      await expect(stakingClient.getLeader(invalidAddress)).rejects.toThrow(
-        ErrorInvalidStakerAddressProvided
-      );
-      expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(0);
-    });
-
-    test('should throw an error if the gql fetch fails', async () => {
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockRejectedValueOnce(new Error('Error'));
-
-      await expect(stakingClient.getLeader(stakerAddress)).rejects.toThrow();
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getLeaders', () => {
-    const stakerAddress = ethers.ZeroAddress;
-
-    const mockLeader: ILeader = {
-      id: stakerAddress,
-      address: stakerAddress,
-      amountStaked: ethers.parseEther('100'),
-      amountAllocated: ethers.parseEther('50'),
-      amountLocked: ethers.parseEther('25'),
-      lockedUntilTimestamp: ethers.toBigInt(0),
-      amountWithdrawn: ethers.parseEther('25'),
-      amountSlashed: ethers.parseEther('25'),
-      reputation: ethers.parseEther('25'),
-      reward: ethers.parseEther('25'),
-      amountJobsLaunched: ethers.parseEther('25'),
-    };
-
-    test('should return an array of stakers', async () => {
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        leaders: [mockLeader, mockLeader],
-      });
-      const filter = { role: 'role' };
-
-      const result = await stakingClient.getLeaders(filter);
-
-      expect(gqlFetchSpy).toHaveBeenCalledWith(
-        '',
-        GET_LEADERS_QUERY(filter),
-        filter
-      );
-      expect(result).toEqual([mockLeader, mockLeader]);
-    });
-
-    test('should throw an error if gql fetch fails', async () => {
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockRejectedValueOnce(new Error('Error'));
-
-      await expect(stakingClient.getLeaders()).rejects.toThrow();
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('getAllocation', () => {
     const invalidAddress = 'InvalidAddress';
 
@@ -838,32 +734,6 @@ describe('StakingClient', () => {
       await expect(
         stakingClient.getAllocation(ethers.ZeroAddress)
       ).rejects.toThrow();
-    });
-  });
-
-  describe('getRewards', () => {
-    const invalidAddress = 'InvalidAddress';
-
-    const mockReward: IReward = {
-      escrowAddress: ethers.ZeroAddress,
-      amount: ethers.parseEther('100'),
-    };
-
-    test('should throw an error if an invalid escrow address is provided', async () => {
-      await expect(stakingClient.getRewards(invalidAddress)).rejects.toThrow(
-        ErrorInvalidSlasherAddressProvided
-      );
-      expect(mockStakingContract.getRewards).toHaveBeenCalledTimes(0);
-    });
-
-    test('should return an array of rewards', async () => {
-      vi.spyOn(stakingClient, 'getRewards').mockImplementation(() =>
-        Promise.resolve([mockReward, mockReward])
-      );
-
-      const results = await stakingClient.getRewards(ethers.ZeroAddress);
-
-      expect(results).toEqual([mockReward, mockReward]);
     });
   });
 });
