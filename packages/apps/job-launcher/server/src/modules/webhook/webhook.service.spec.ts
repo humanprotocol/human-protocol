@@ -17,7 +17,6 @@ import {
   WebhookStatus,
 } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
-import { WebhookDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
@@ -89,64 +88,6 @@ describe('WebhookService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createWebhook', () => {
-    const dto: WebhookDto = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      eventType: EventType.ESCROW_CREATED,
-      oracleType: OracleType.FORTUNE,
-      hasSignature: false,
-    };
-
-    it('should create a webhook entity', async () => {
-      const webhookEntity: Partial<WebhookEntity> = {
-        id: 1,
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        status: WebhookStatus.PENDING,
-        eventType: dto.eventType,
-        oracleType: dto.oracleType,
-        waitUntil: new Date(),
-      };
-
-      jest
-        .spyOn(webhookRepository, 'create')
-        .mockResolvedValueOnce(webhookEntity as WebhookEntity);
-
-      const result = await webhookService.createWebhook(dto);
-
-      expect(webhookRepository.create).toHaveBeenCalledWith({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        eventType: EventType.ESCROW_CREATED,
-        hasSignature: false,
-        oracleType: OracleType.FORTUNE,
-        retriesCount: 0,
-        status: WebhookStatus.PENDING,
-        waitUntil: expect.any(Date),
-      });
-      expect(result).toBe(undefined);
-    });
-
-    it('should throw an error if incoming webhook entity is not created', async () => {
-      jest
-        .spyOn(webhookRepository, 'create')
-        .mockResolvedValueOnce(undefined as any);
-
-      await expect(webhookService.createWebhook(dto)).rejects.toThrowError(
-        ErrorWebhook.NotCreated,
-      );
-    });
-
-    it('should throw an error if an error occurs', async () => {
-      jest
-        .spyOn(webhookRepository, 'create')
-        .mockRejectedValueOnce(new Error());
-
-      await expect(webhookService.createWebhook(dto)).rejects.toThrowError();
-    });
-  });
-
   describe('sendWebhook', () => {
     const webhookEntity: Partial<WebhookEntity> = {
       id: 1,
@@ -198,9 +139,9 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrowAddress: webhookEntity.escrowAddress,
-          chainId: webhookEntity.chainId,
-          eventType: webhookEntity.eventType,
+          escrow_address: webhookEntity.escrowAddress,
+          chain_id: webhookEntity.chainId,
+          event_type: webhookEntity.eventType,
         },
         {},
       );
@@ -249,9 +190,9 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrowAddress: webhookEntity.escrowAddress,
-          chainId: webhookEntity.chainId,
-          eventType: webhookEntity.eventType,
+          escrow_address: webhookEntity.escrowAddress,
+          chain_id: webhookEntity.chainId,
+          event_type: webhookEntity.eventType,
         },
         { headers: { [HEADER_SIGNATURE_KEY]: expect.any(String) } },
       );
@@ -280,55 +221,6 @@ describe('WebhookService', () => {
           event_type: webhookEntity.eventType,
         },
         { headers: { [HEADER_SIGNATURE_KEY]: expect.any(String) } },
-      );
-    });
-  });
-
-  describe('processPendingCronJob', () => {
-    const webhookEntity: Partial<WebhookEntity> = {
-      id: 1,
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      status: WebhookStatus.PENDING,
-      waitUntil: new Date(),
-    };
-
-    it('should not execute anything if no pending webhook is found', async () => {
-      webhookRepository.findOne = jest.fn().mockReturnValue(null);
-      jest.spyOn(webhookService as any, 'sendWebhook');
-      expect(await webhookService.processPendingCronJob()).toBe(undefined);
-      expect((webhookService as any).sendWebhook).not.toBeCalled();
-    });
-
-    it('should handle error if any exception is thrown', async () => {
-      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
-
-      jest.spyOn(webhookService as any, 'handleWebhookError');
-
-      jest
-        .spyOn(webhookService as any, 'sendWebhook')
-        .mockImplementation(() => {
-          throw new Error();
-        });
-
-      expect(await webhookService.processPendingCronJob()).toBe(undefined);
-      expect((webhookService as any).handleWebhookError).toBeCalled();
-    });
-
-    it('should successfully process a webhook', async () => {
-      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
-      jest
-        .spyOn(webhookService as any, 'sendWebhook')
-        .mockResolvedValue(undefined);
-
-      expect(await webhookService.processPendingCronJob()).toBe(undefined);
-      expect((webhookService as any).sendWebhook).toBeCalled();
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: 1 },
-        {
-          status: WebhookStatus.COMPLETED,
-          retriesCount: 0,
-        },
       );
     });
   });
@@ -364,28 +256,33 @@ describe('WebhookService', () => {
 
   describe('handleWebhookError', () => {
     it('should set webhook status to FAILED if retries exceed threshold', async () => {
+      const webhookEntity: Partial<WebhookEntity> = {
+        id: 1,
+        status: WebhookStatus.PENDING,
+        retriesCount: MOCK_MAX_RETRY_COUNT,
+      };
       await (webhookService as any).handleWebhookError(
-        { id: 1, retriesCount: MOCK_MAX_RETRY_COUNT } as any,
+        webhookEntity,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: 1 },
-        { status: WebhookStatus.FAILED },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity.status).toBe(WebhookStatus.FAILED);
     });
 
     it('should increment retries count if below threshold', async () => {
+      const webhookEntity: Partial<WebhookEntity> = {
+        id: 1,
+        status: WebhookStatus.PENDING,
+        retriesCount: 0,
+      };
       await (webhookService as any).handleWebhookError(
-        { id: 1, retriesCount: 0 } as any,
+        webhookEntity,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: 1 },
-        {
-          retriesCount: 1,
-          waitUntil: expect.any(Date),
-        },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
+      expect(webhookEntity.retriesCount).toBe(1);
+      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
     });
   });
 });

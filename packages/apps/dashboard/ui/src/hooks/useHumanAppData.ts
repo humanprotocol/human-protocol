@@ -6,11 +6,15 @@ export function useHumanAppData(chainId: ChainId) {
     `human-protocol-dashboard-human-app-data-${chainId}`,
     async () => {
       const apiURL = import.meta.env.VITE_APP_ADMIN_API_URL;
-      const response = await fetch(
-        `${apiURL}/network-data-items?filters[chainId][$eq]=${chainId}`
-      );
-      const json = await response.json();
-      return json;
+      const responses = await Promise.all([
+        fetch(
+          `${apiURL}/network-data-items?filters[chainId][$eq]=${chainId}`
+        ).then((res) => res.json()),
+        fetch(`${apiURL}/daily-task-summaries?pagination[limit]=-1`).then(
+          (res) => res.json()
+        ),
+      ]);
+      return responses;
     }
   );
 }

@@ -1,5 +1,3 @@
-import { BigNumber } from 'ethers';
-
 export type EscrowData = {
   id: string;
   address: string;
@@ -108,9 +106,9 @@ export type WorkerStatistics = {
 
 export type DailyPaymentData = {
   timestamp: Date;
-  totalAmountPaid: BigNumber;
+  totalAmountPaid: bigint;
   totalCount: number;
-  averageAmountPerWorker: BigNumber;
+  averageAmountPerWorker: bigint;
 };
 
 export type PaymentStatistics = {
@@ -124,17 +122,17 @@ export type HMTHolderData = {
 
 export type HMTHolder = {
   address: string;
-  balance: BigNumber;
+  balance: bigint;
 };
 
 export type DailyHMTData = {
   timestamp: Date;
-  totalTransactionAmount: BigNumber;
+  totalTransactionAmount: bigint;
   totalTransactionCount: number;
 };
 
 export type HMTStatistics = {
-  totalTransferAmount: BigNumber;
+  totalTransferAmount: bigint;
   totalTransferCount: number;
   totalHolders: number;
   holders: HMTHolder[];

@@ -7,12 +7,18 @@ from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
-from src.core.types import Networks, OracleWebhookStatuses, OracleWebhookTypes
-from src.crons.process_reputation_oracle_webhooks import process_reputation_oracle_webhooks
+from src.core.types import (
+    Networks,
+    OracleWebhookStatuses,
+    OracleWebhookTypes,
+    RecordingOracleEventType,
+)
+from src.crons.process_reputation_oracle_webhooks import process_outgoing_reputation_oracle_webhooks
 from src.db import SessionLocal
 from src.models.webhook import Webhook
+from src.services.webhook import OracleWebhookDirectionTag
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, SIGNATURE
 from tests.utils.setup_escrow import create_escrow
 from tests.utils.setup_kvstore import store_kvstore_value
 
@@ -32,154 +38,98 @@ class ServiceIntegrationTest(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    @patch("src.crons.process_reputation_oracle_webhooks.httpx.Client.post")
-    def test_process_reputation_oracle_webhooks(self, mock_httpx_post):
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_httpx_post.return_value = mock_response
-        expected_url = "expected_url"
-
-        chain_id = Networks.localhost.value
-        escrow_address = create_escrow(self.w3)
-        store_kvstore_value("webhook_url", expected_url)
-
-        webhok_id = str(uuid.uuid4())
-        webhook = Webhook(
-            id=webhok_id,
-            signature="signature",
+    def get_webhook(self, escrow_address, chain_id, event_data):
+        return Webhook(
+            id=str(uuid.uuid4()),
+            direction=OracleWebhookDirectionTag.outgoing.value,
+            signature=SIGNATURE,
             escrow_address=escrow_address,
             chain_id=chain_id,
-            s3_url="s3_url",
             type=OracleWebhookTypes.reputation_oracle.value,
             status=OracleWebhookStatuses.pending.value,
+            event_type=RecordingOracleEventType.task_completed,
+            event_data=event_data,
         )
 
-        self.session.add(webhook)
-        self.session.commit()
+    def test_process_reputation_oracle_webhooks(self):
+        expected_url = "expected_url"
+        with patch(
+            "src.crons.process_reputation_oracle_webhooks.httpx.Client.post"
+        ) as mock_httpx, patch(
+            "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"
+        ) as mock_get_repo_url, patch(
+            "src.crons.process_reputation_oracle_webhooks.prepare_signed_message"
+        ) as mock_signature:
+            mock_response = MagicMock()
+            mock_response.raise_for_status.return_value = None
+            mock_httpx.return_value = mock_response
+            mock_get_repo_url.return_value = expected_url
 
-        process_reputation_oracle_webhooks()
+            chain_id = Networks.localhost.value
+            escrow_address = create_escrow(self.w3)
+            store_kvstore_value("webhook_url", expected_url)
+            event_data = dict()
+            mock_signature.return_value = (None, SIGNATURE)
 
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
+            webhook = self.get_webhook(escrow_address, chain_id, event_data)
+            self.session.add(webhook)
+            self.session.commit()
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
-        mock_httpx_post.assert_called_once_with(
-            expected_url,
-            headers={"human-signature": "signature"},
-            json={
-                "escrow_address": escrow_address,
-                "chain_id": chain_id,
-            },
-        )
+            process_outgoing_reputation_oracle_webhooks()
+
+            updated_webhook = (
+                self.session.execute(select(Webhook).where(Webhook.id == webhook.id))
+                .scalars()
+                .first()
+            )
+
+            mock_signature.assert_called_once()
+            mock_get_repo_url.assert_called_once_with(webhook.chain_id, webhook.escrow_address)
+            mock_httpx.assert_called_once_with(
+                expected_url,
+                headers={"human-signature": SIGNATURE},
+                json={
+                    "escrowAddress": escrow_address,
+                    "chainId": chain_id,
+                    "eventType": RecordingOracleEventType.task_completed.value,
+                },
+            )
+            self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
+            self.assertEqual(updated_webhook.attempts, 1)
 
     def test_process_reputation_oracle_webhooks_invalid_escrow_address(self):
         chain_id = Networks.localhost.value
         escrow_address = "invalid_address"
-
-        webhok_id = str(uuid.uuid4())
-        webhook = Webhook(
-            id=webhok_id,
-            signature="signature",
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.reputation_oracle.value,
-            status=OracleWebhookStatuses.pending.value,
-        )
+        event_data = {}
+        webhook = self.get_webhook(escrow_address, chain_id, event_data)
 
         self.session.add(webhook)
         self.session.commit()
 
-        with self.assertLogs(level="ERROR") as cm:
-            process_reputation_oracle_webhooks()
+        process_outgoing_reputation_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
         self.assertEqual(updated_webhook.attempts, 1)
-        self.assertEqual(
-            cm.output,
-            [
-                f"ERROR:app:[cron][webhook][process_reputation_oracle_webhooks] Webhook: {webhok_id} failed during execution. Error Invalid escrow address: invalid_address"
-            ],
-        )
 
-    def test_process_reputation_oracle_webhooks_invalid_recording_oracle_url(self):
-        chain_id = Networks.localhost.value
-        escrow_address = create_escrow(self.w3)
+    def test_process_reputation_oracle_webhooks_invalid_reputation_oracle_url(self):
+        with patch(
+            "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"
+        ) as mock_get_repo_url:
+            mock_get_repo_url.return_value = "https://not.a.real/url/existing.somewhere"
 
-        webhok_id = str(uuid.uuid4())
-        webhook = Webhook(
-            id=webhok_id,
-            signature="signature",
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.reputation_oracle.value,
-            status=OracleWebhookStatuses.pending.value,
-        )
+            webhook = self.get_webhook(create_escrow(self.w3), Networks.localhost.value, {})
+            self.session.add(webhook)
+            self.session.commit()
+            process_outgoing_reputation_oracle_webhooks()
 
-        self.session.add(webhook)
-        self.session.commit()
-
-        with self.assertLogs(level="ERROR") as cm:
-            process_reputation_oracle_webhooks()
-
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
-
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
-        self.assertEqual(
-            cm.output,
-            [
-                f"ERROR:app:[cron][webhook][process_reputation_oracle_webhooks] Webhook: {webhok_id} failed during execution. Error Request URL is missing an 'http://' or 'https://' protocol."
-            ],
-        )
-
-    @patch("src.crons.process_reputation_oracle_webhooks.httpx.Client.post")
-    def test_process_reputation_oracle_webhooks_invalid_request(self, mock_httpx_post):
-        mock_response = MagicMock()
-        mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = Exception("The requested URL was not found.")
-        mock_httpx_post.return_value = mock_response
-        expected_url = "expected_url"
-
-        chain_id = Networks.localhost.value
-        escrow_address = create_escrow(self.w3)
-        store_kvstore_value("webhook_url", expected_url)
-
-        webhok_id = str(uuid.uuid4())
-        webhook = Webhook(
-            id=webhok_id,
-            signature="signature",
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.reputation_oracle.value,
-            status=OracleWebhookStatuses.pending.value,
-        )
-
-        self.session.add(webhook)
-        self.session.commit()
-
-        with self.assertLogs(level="ERROR") as cm:
-            process_reputation_oracle_webhooks()
-
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
-
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
-        self.assertEqual(
-            cm.output,
-            [
-                f"ERROR:app:[cron][webhook][process_reputation_oracle_webhooks] Webhook: {webhok_id} failed during execution. Error The requested URL was not found."
-            ],
-        )
+            updated_webhook = (
+                self.session.execute(select(Webhook).where(Webhook.id == webhook.id))
+                .scalars()
+                .first()
+            )
+            self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
+            self.assertEqual(updated_webhook.attempts, 1)

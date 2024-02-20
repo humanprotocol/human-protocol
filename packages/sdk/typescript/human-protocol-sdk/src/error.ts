@@ -283,18 +283,6 @@ export class InvalidArgumentError extends EthereumError {
   }
 }
 
-export class OutOfGasError extends EthereumError {
-  constructor(message: string) {
-    super(`Out of gas: ${message}`);
-  }
-}
-
-export class UnpredictableGasLimit extends EthereumError {
-  constructor(message: string) {
-    super(`Unpredictable gas limit: ${message}`);
-  }
-}
-
 export class ReplacementUnderpriced extends EthereumError {
   constructor(message: string) {
     super(`Replacement underpriced: ${message}`);

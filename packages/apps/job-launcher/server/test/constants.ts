@@ -1,5 +1,6 @@
+import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
 import { JobRequestType } from '../src/common/enums/job';
-import { FortuneManifestDto } from '../src/modules/job/job.dto';
+import { FortuneManifestDto, StorageDataDto } from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -63,4 +64,54 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   fundAmount: 10,
   requestType: JobRequestType.FORTUNE,
 };
+
+export const MOCK_ENCRYPTED_MANIFEST = 'encryptedManifest';
+export const MOCK_PGP_PRIVATE_KEY = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+xVgEZS6w6BYJKwYBBAHaRw8BAQdAXRzFR1ROwdb4Bu7RKYXcBvJsH6JmBxiT
+Zwbnk3KUBiUAAP9N8d16MWV/M+yggH6cTODDCNCDV/Ic012RP0fTI4VEjhFF
+zRtKb2IgTGF1bmNoZXIgPGFkbWluQGhtdC5haT7CjAQQFgoAPgWCZS6w6AQL
+CQcICZBAfiPaLRaJeAMVCAoEFgACAQIZAQKbAwIeARYhBNvDQnyGS7m0aAs+
+BUB+I9otFol4AACYcAEA/c1peyz3aWsB9NkvOfy/erdqkNAAHfikCKzGRKtD
+sKcA/Rk9IHYRBzrvXyXXpFYkeFR1H6dXTUYzoZy8xoFleSIOx10EZS6w6BIK
+KwYBBAGXVQEFAQEHQPOpvDe3nptX0ZqcFsUz/K7HHnSSOIn/aGYfrZfKAwQ1
+AwEIBwAA/3fQjUAKIaoDAQTB2Jufw9g1JBybjMXSb3YCWunTB6ZgD5vCeAQY
+FggAKgWCZS6w6AmQQH4j2i0WiXgCmwwWIQTbw0J8hku5tGgLPgVAfiPaLRaJ
+eAAAYHMBAPI7LdZ8k4lQBvlXjVMV3hlkQGtKp+EXHd3BaT1hpniVAP4wecxi
+7jxPB0Thko1w1Ro6ZYsFtlOB52qocYtduLJkCA==
+=qV+I
+-----END PGP PRIVATE KEY BLOCK-----`;
+
+export const MOCK_PGP_PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+xjMEZS6w6BYJKwYBBAHaRw8BAQdAXRzFR1ROwdb4Bu7RKYXcBvJsH6JmBxiT
+Zwbnk3KUBiXNG0pvYiBMYXVuY2hlciA8YWRtaW5AaG10LmFpPsKMBBAWCgA+
+BYJlLrDoBAsJBwgJkEB+I9otFol4AxUICgQWAAIBAhkBApsDAh4BFiEE28NC
+fIZLubRoCz4FQH4j2i0WiXgAAJhwAQD9zWl7LPdpawH02S85/L96t2qQ0AAd
++KQIrMZEq0OwpwD9GT0gdhEHOu9fJdekViR4VHUfp1dNRjOhnLzGgWV5Ig7O
+OARlLrDoEgorBgEEAZdVAQUBAQdA86m8N7eem1fRmpwWxTP8rscedJI4if9o
+Zh+tl8oDBDUDAQgHwngEGBYIACoFgmUusOgJkEB+I9otFol4ApsMFiEE28NC
+fIZLubRoCz4FQH4j2i0WiXgAAGBzAQDyOy3WfJOJUAb5V41TFd4ZZEBrSqfh
+Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
+=IMAe
+-----END PGP PUBLIC KEY BLOCK-----`;
+export const MOCK_HCAPTCHA_ORACLE_ADDRESS =
+  '0xa62a1c18571b869e43eeabd217e233e7f0275af3';
+export const MOCK_CVAT_JOB_SIZE = '10';
+export const MOCK_CVAT_MAX_TIME = '300';
+export const MOCK_CVAT_VAL_SIZE = '2';
+export const MOCK_HCAPTCHA_SITE_KEY = '1234';
+export const MOCK_HCAPTCHA_IMAGE_URL =
+  'http://mockedFileUrl.test/bucket/img_1.jpg';
+export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';
+export const MOCK_HCAPTCHA_REPO_URI = 'http://recoracle:3000';
+export const MOCK_HCAPTCHA_RO_URI = 'http://recoracle:3000';
 export const MOCK_MAX_RETRY_COUNT = 5;
+export const MOCK_STORAGE_DATA: StorageDataDto = {
+  provider: StorageProviders.AWS,
+  region: AWSRegions.EU_CENTRAL_1,
+  bucketName: 'bucket',
+  path: 'folder/test',
+};
+export const MOCK_BUCKET_FILE =
+  'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Signer } from 'ethers';
 import { ErrorSigner } from './error';
 
 export function requiresSigner(
@@ -10,7 +9,9 @@ export function requiresSigner(
   const originalMethod = descriptor.value;
 
   descriptor.value = async function (this: any, ...args: any[]) {
-    if (!Signer.isSigner(this.signerOrProvider)) {
+    try {
+      !this.runner.getAddress();
+    } catch {
       throw ErrorSigner;
     }
 

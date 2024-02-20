@@ -11,7 +11,7 @@ import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { Transform } from 'class-transformer';
 
 export class ReputationCreateDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'chain_id' })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
@@ -19,7 +19,7 @@ export class ReputationCreateDto {
   @IsString()
   public address: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'reputation_points' })
   @IsNumber()
   public reputationPoints: number;
 
@@ -29,7 +29,7 @@ export class ReputationCreateDto {
 }
 
 export class ReputationUpdateDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'reputation_points' })
   @IsNumber()
   public reputationPoints: number;
 }
@@ -37,6 +37,7 @@ export class ReputationUpdateDto {
 export class ReputationGetAllQueryDto {
   @ApiPropertyOptional({
     enum: ChainId,
+    name: 'chain_id',
   })
   @IsEnum(ChainId)
   @IsOptional()
@@ -52,14 +53,14 @@ export class ReputationGetParamsDto {
 }
 
 export class ReputationGetQueryDto {
-  @ApiProperty({ enum: ChainId })
+  @ApiProperty({ enum: ChainId, name: 'chain_id' })
   @IsEnum(ChainId)
   @Transform(({ value }) => Number(value))
   public chainId: ChainId;
 }
 
 export class ReputationDto {
-  @ApiProperty({ enum: ChainId })
+  @ApiProperty({ enum: ChainId, name: 'chain_id' })
   @IsEnum(ChainId)
   @Transform(({ value }) => Number(value))
   chainId: ChainId;

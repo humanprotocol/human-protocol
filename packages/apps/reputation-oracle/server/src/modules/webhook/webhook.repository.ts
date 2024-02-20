@@ -1,81 +1,35 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Logger } from '@nestjs/common';
 
+import { ConfigService } from '@nestjs/config';
+import { BaseRepository } from '../../database/base.repository';
+import { DataSource, LessThanOrEqual } from 'typeorm';
+import { ConfigNames } from '../../common/config';
+import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import {
-  FindOptionsWhere,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-} from 'typeorm';
-import { ErrorWebhook } from '../../common/constants/errors';
-import {
-  WebhookIncomingCreateDto,
-  WebhookIncomingUpdateDto,
-} from './webhook.dto';
 
 @Injectable()
-export class WebhookRepository {
+export class WebhookRepository extends BaseRepository<WebhookIncomingEntity> {
   private readonly logger = new Logger(WebhookRepository.name);
-
   constructor(
-    @InjectRepository(WebhookIncomingEntity)
-    private readonly webhookIncomingEntityRepository: Repository<WebhookIncomingEntity>,
-  ) {}
-
-  public async updateOne(
-    where: FindOptionsWhere<WebhookIncomingEntity>,
-    dto: Partial<WebhookIncomingUpdateDto>,
-  ): Promise<WebhookIncomingEntity> {
-    const webhookIncomingEntity =
-      await this.webhookIncomingEntityRepository.findOneBy(where);
-
-    if (!webhookIncomingEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
-      throw new NotFoundException(ErrorWebhook.NotFound);
-    }
-
-    Object.assign(webhookIncomingEntity, dto);
-    return webhookIncomingEntity.save();
+    private dataSource: DataSource,
+    public readonly configService: ConfigService,
+  ) {
+    super(WebhookIncomingEntity, dataSource);
   }
 
-  public async findOne(
-    where: FindOptionsWhere<WebhookIncomingEntity>,
-    options?: FindOneOptions<WebhookIncomingEntity>,
-  ): Promise<WebhookIncomingEntity> {
-    const webhookEntity = await this.webhookIncomingEntityRepository.findOne({
-      where,
-      ...options,
-    });
+  public findByStatus(status: WebhookStatus): Promise<WebhookIncomingEntity[]> {
+    return this.find({
+      where: {
+        status: status,
+        retriesCount: LessThanOrEqual(
+          this.configService.get(ConfigNames.MAX_RETRY_COUNT)!,
+        ),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
 
-    if (!webhookEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookIncomingEntity.name);
-      throw new NotFoundException(ErrorWebhook.NotFound);
-    }
-
-    return webhookEntity;
-  }
-
-  public find(
-    where: FindOptionsWhere<WebhookIncomingEntity>,
-    options?: FindManyOptions<WebhookIncomingEntity>,
-  ): Promise<WebhookIncomingEntity[]> {
-    return this.webhookIncomingEntityRepository.find({
-      where,
       order: {
         createdAt: 'DESC',
       },
-      ...options,
     });
-  }
-
-  public async create(
-    dto: WebhookIncomingCreateDto,
-  ): Promise<WebhookIncomingEntity | undefined> {
-    try {
-      return this.webhookIncomingEntityRepository.create(dto).save();
-    } catch (e) {
-      return;
-    }
   }
 }

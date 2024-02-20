@@ -17,15 +17,5 @@
       }
     }
   ],
-  "crons": [
-    {
-      "path": "/job/cron/launch",
-      "schedule": "*/1 * * * *"
-    },
-    {
-      "path": "/job/cron/cancel",
-      "schedule": "*/1 * * * *"
-    }
-  ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
 }

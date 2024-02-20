@@ -11,7 +11,6 @@ import {
   ErrorPostgres,
   ErrorSignature,
 } from '../../common/constants/errors';
-import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
   PaymentSource,
@@ -31,9 +30,9 @@ import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
-import { QueryFailedError } from 'typeorm';
 import { verifySignature } from '../../common/utils/signature';
 import { ConflictException } from '@nestjs/common';
+import { DatabaseError } from '../../database/database.error';
 
 jest.mock('@human-protocol/sdk');
 
@@ -128,7 +127,7 @@ describe('PaymentService', () => {
     let createPaymentIntentMock: any, findOneMock: any;
 
     beforeEach(() => {
-      findOneMock = jest.spyOn(paymentRepository, 'findOne');
+      findOneMock = jest.spyOn(paymentRepository, 'findOneByTransaction');
       createPaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'create');
     });
 
@@ -202,9 +201,10 @@ describe('PaymentService', () => {
   });
 
   describe('confirmFiatPayment', () => {
-    let retrievePaymentIntentMock: any;
+    let retrievePaymentIntentMock: any, findOneMock: any;
 
     beforeEach(() => {
+      findOneMock = jest.spyOn(paymentRepository, 'findOneByTransaction');
       retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
     });
 
@@ -227,6 +227,14 @@ describe('PaymentService', () => {
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
 
+      const paymentEntity: Partial<PaymentEntity> = {
+        userId: userId,
+        status: PaymentStatus.PENDING,
+        amount: 1,
+        currency: Currency.USD,
+      };
+      findOneMock.mockResolvedValue(paymentEntity);
+
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
       expect(result).toBe(true);
@@ -246,6 +254,14 @@ describe('PaymentService', () => {
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
+
+      const paymentEntity: Partial<PaymentEntity> = {
+        userId: userId,
+        status: PaymentStatus.PENDING,
+        amount: 0,
+        currency: Currency.USD,
+      };
+      findOneMock.mockResolvedValue(paymentEntity);
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
@@ -267,6 +283,14 @@ describe('PaymentService', () => {
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
 
+      const paymentEntity: Partial<PaymentEntity> = {
+        userId: userId,
+        status: PaymentStatus.PENDING,
+        amount: 0,
+        currency: Currency.USD,
+      };
+      findOneMock.mockResolvedValue(paymentEntity);
+
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.NotSuccess);
@@ -286,6 +310,14 @@ describe('PaymentService', () => {
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
+
+      const paymentEntity: Partial<PaymentEntity> = {
+        userId: userId,
+        status: PaymentStatus.PENDING,
+        amount: 0,
+        currency: Currency.USD,
+      };
+      findOneMock.mockResolvedValue(paymentEntity);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
@@ -322,15 +354,15 @@ describe('PaymentService', () => {
       };
 
       jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
+        .spyOn(ethers, 'JsonRpcProvider')
         .mockReturnValue(jsonRpcProviderMock as any);
 
       jest
         .spyOn(HMToken__factory, 'connect')
         .mockReturnValue(mockTokenContract);
       jest.spyOn(mockTokenContract, 'symbol');
-      findOneMock = jest.spyOn(paymentRepository, 'findOne');
-      createPaymentMock = jest.spyOn(paymentRepository, 'create');
+      findOneMock = jest.spyOn(paymentRepository, 'findOneByTransaction');
+      createPaymentMock = jest.spyOn(paymentRepository, 'createUnique');
     });
 
     afterEach(() => {
@@ -347,11 +379,11 @@ describe('PaymentService', () => {
 
       const token = 'hmt';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -362,8 +394,8 @@ describe('PaymentService', () => {
             logIndex: 123,
           },
         ],
-        transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        hash: MOCK_TRANSACTION_HASH,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -380,11 +412,11 @@ describe('PaymentService', () => {
         MOCK_SIGNATURE,
       );
 
-      expect(paymentRepository.findOne).toHaveBeenCalledWith({
-        transaction: dto.transactionHash,
-        chainId: dto.chainId,
-      });
-      expect(paymentRepository.create).toHaveBeenCalledWith({
+      expect(paymentRepository.findOneByTransaction).toHaveBeenCalledWith(
+        dto.transactionHash,
+        dto.chainId,
+      );
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         source: PaymentSource.CRYPTO,
         type: PaymentType.DEPOSIT,
@@ -407,11 +439,11 @@ describe('PaymentService', () => {
 
       const token = 'hmt';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -423,7 +455,7 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -446,11 +478,11 @@ describe('PaymentService', () => {
 
       const unsupportedToken = 'doge';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -462,7 +494,7 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -486,10 +518,10 @@ describe('PaymentService', () => {
         throw new ConflictException(ErrorSignature.SignatureNotVerified);
       });
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [],
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -522,10 +554,10 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [],
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -544,11 +576,11 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -560,7 +592,9 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD - 1,
+        confirmations: jest
+          .fn()
+          .mockResolvedValue(TX_CONFIRMATION_TRESHOLD - 1),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -583,11 +617,11 @@ describe('PaymentService', () => {
 
       const token = 'hmt';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -599,7 +633,7 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -621,7 +655,7 @@ describe('PaymentService', () => {
       const userId = 1;
       const expectedBalance = 20;
 
-      paymentRepository.find = jest.fn().mockResolvedValue([
+      paymentRepository.findByUserAndStatus = jest.fn().mockResolvedValue([
         {
           amount: 50,
           rate: 1,
@@ -645,23 +679,23 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.find).toHaveBeenCalledWith({
+      expect(paymentRepository.findByUserAndStatus).toHaveBeenCalledWith(
         userId,
-        status: PaymentStatus.SUCCEEDED,
-      });
+        PaymentStatus.SUCCEEDED,
+      );
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
       const userId = 1;
-      paymentRepository.find = jest.fn().mockResolvedValue([]);
+      paymentRepository.findByUserAndStatus = jest.fn().mockResolvedValue([]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(0);
-      expect(paymentRepository.find).toHaveBeenCalledWith({
+      expect(paymentRepository.findByUserAndStatus).toHaveBeenCalledWith(
         userId,
-        status: PaymentStatus.SUCCEEDED,
-      });
+        PaymentStatus.SUCCEEDED,
+      );
     });
   });
 
@@ -674,7 +708,7 @@ describe('PaymentService', () => {
 
     it('should successfully create a refund payment', async () => {
       jest
-        .spyOn(paymentRepository, 'create')
+        .spyOn(paymentRepository, 'createUnique')
         .mockResolvedValueOnce(undefined as any);
 
       await expect(
@@ -683,23 +717,27 @@ describe('PaymentService', () => {
     });
 
     it('should throw IncorrectAmount error when overflow occurs', async () => {
-      const mockError = new QueryFailedError('', [], '');
-      mockError.message = ErrorPostgres.NumericFieldOverflow.toLowerCase();
-      jest.spyOn(paymentRepository, 'create').mockRejectedValueOnce(mockError);
+      const mockError = new DatabaseError(
+        ErrorPostgres.NumericFieldOverflow.toLowerCase(),
+        '',
+      );
+      jest
+        .spyOn(paymentRepository, 'createUnique')
+        .mockRejectedValueOnce(mockError);
 
       await expect(
         paymentService.createRefundPayment(mockPaymentRefundCreateDto),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(DatabaseError);
     });
 
     it('should throw NotSuccess error on other database errors', async () => {
       jest
-        .spyOn(paymentRepository, 'create')
-        .mockRejectedValueOnce(new Error());
+        .spyOn(paymentRepository, 'createUnique')
+        .mockRejectedValueOnce(new DatabaseError('', ''));
 
       await expect(
         paymentService.createRefundPayment(mockPaymentRefundCreateDto),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(DatabaseError);
     });
   });
 });

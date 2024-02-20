@@ -1,4 +1,9 @@
-import { EscrowClient, EscrowStatus, KVStoreClient } from '@human-protocol/sdk';
+import {
+  EscrowClient,
+  EscrowStatus,
+  KVStoreClient,
+  KVStoreKeys,
+} from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
@@ -22,8 +27,8 @@ import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { JobSolutionsRequestDto } from './job.dto';
-import { EXCHANGE_INVALID_ENDPOINT } from '../../common/constants';
+import { EventData, JobSolutionsRequestDto, WebhookBody } from './job.dto';
+import { EventType } from '@/common/enums/webhook';
 
 @Injectable()
 export class JobService {
@@ -104,8 +109,7 @@ export class JobService {
       jobSolution.escrowAddress,
     );
     if (
-      ethers.utils.getAddress(recordingOracleAddress) !==
-      (await signer.getAddress())
+      ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
     ) {
       this.logger.log(ErrorJob.AddressMismatches, JobService.name);
       throw new BadRequestException(ErrorJob.AddressMismatches);
@@ -201,6 +205,7 @@ export class JobService {
         {
           chainId: jobSolution.chainId,
           escrowAddress: jobSolution.escrowAddress,
+          eventType: EventType.escrow_recorded,
         },
         this.web3Config.web3PrivateKey,
       );
@@ -210,21 +215,28 @@ export class JobService {
     if (errorSolutions.length) {
       const exchangeOracleURL = (await kvstoreClient.get(
         await escrowClient.getExchangeOracleAddress(jobSolution.escrowAddress),
-        'webhookUrl',
+        KVStoreKeys.webhookUrl,
       )) as string;
-      for (const solution of errorSolutions) {
-        await sendWebhook(
-          this.httpService,
-          this.logger,
-          exchangeOracleURL + EXCHANGE_INVALID_ENDPOINT,
-          {
-            chainId: jobSolution.chainId,
-            escrowAddress: jobSolution.escrowAddress,
-            workerAddress: solution.workerAddress,
-          },
-          this.web3Config.web3PrivateKey,
-        );
-      }
+      const eventData: EventData[] = errorSolutions.map((solution) => ({
+        assigneeId: solution.workerAddress,
+        reason: solution.error as SolutionError,
+      }));
+
+      const webhookBody: WebhookBody = {
+        escrowAddress: jobSolution.escrowAddress,
+        chainId: jobSolution.chainId,
+        eventType: EventType.submission_rejected,
+        eventData: eventData,
+      };
+
+      // Enviar la llamada al webhook una vez con todos los errores
+      await sendWebhook(
+        this.httpService,
+        this.logger,
+        exchangeOracleURL,
+        webhookBody,
+        this.web3Config.web3PrivateKey,
+      );
     }
 
     return 'Solution are recorded.';

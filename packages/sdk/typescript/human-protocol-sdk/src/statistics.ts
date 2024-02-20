@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 
 import {
@@ -296,14 +296,13 @@ export class StatisticsClient {
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalAmountPaid: BigNumber.from(eventDayData.dailyPayoutAmount),
+          totalAmountPaid: ethers.toBigInt(eventDayData.dailyPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
           averageAmountPerWorker:
             eventDayData.dailyWorkerCount === '0'
-              ? BigNumber.from(0)
-              : BigNumber.from(eventDayData.dailyPayoutAmount).div(
-                  eventDayData.dailyWorkerCount
-                ),
+              ? ethers.toBigInt(0)
+              : ethers.toBigInt(eventDayData.dailyPayoutAmount) /
+                ethers.toBigInt(eventDayData.dailyWorkerCount),
         })),
       };
     } catch (e: any) {
@@ -412,18 +411,18 @@ export class StatisticsClient {
       });
 
       return {
-        totalTransferAmount: BigNumber.from(
+        totalTransferAmount: ethers.toBigInt(
           hmtokenStatistics.totalValueTransfered
         ),
         totalTransferCount: Number(hmtokenStatistics.totalTransferEventCount),
         totalHolders: +hmtokenStatistics.holders,
         holders: holders.map((holder) => ({
           address: holder.address,
-          balance: BigNumber.from(holder.balance),
+          balance: ethers.toBigInt(holder.balance),
         })),
         dailyHMTData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalTransactionAmount: BigNumber.from(
+          totalTransactionAmount: ethers.toBigInt(
             eventDayData.dailyHMTTransferAmount
           ),
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,

@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/fortune-v3-recording-oracle",
+  "name": "@human-protocol/fortune-recording-oracle",
   "version": "1.0.0",
   "description": "Fortune Recording Oracle",
   "author": "Human Protocol",
@@ -30,16 +30,15 @@
     "@nestjs/platform-express": "^10.2.6",
     "@nestjs/swagger": "^7.1.13",
     "body-parser": "^1.20.2",
-    "class-validator": "^0.14.0",
+    "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.6",
-    "ethers": "^5.7.2",
     "helmet": "^7.1.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.4.3",
     "@nestjs/schematics": "^9.2.0",
-    "@nestjs/testing": "^9.4.3",
+    "@nestjs/testing": "^10.3.1",
     "@types/express": "^4.17.13"
   }
 }

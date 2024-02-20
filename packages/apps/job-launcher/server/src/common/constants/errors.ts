@@ -14,6 +14,9 @@ export enum ErrorJob {
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
+  TaskDataNotFound = 'Task data not found',
+  HCaptchaInvalidJobType = 'hCaptcha invalid job type',
+  GroundThuthValidationFailed = 'Ground thuth validation failed',
 }
 
 /**
@@ -54,9 +57,11 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
+  InvalidCaptchaToken = 'Invalid hcaptcha token',
   UserNotActive = 'User not active',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
   ApiKeyNotFound = 'API key not found',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
 }
 
 /**
@@ -100,6 +105,11 @@ export enum ErrorBucket {
   NotExist = 'Bucket does not exist',
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
+  InvalidProvider = 'Invalid storage provider',
+  EmptyRegion = 'Region cannot be empty for this storage provider',
+  InvalidRegion = 'Invalid region for the storage provider',
+  EmptyBucket = 'bucketName cannot be empty',
+  FailedToFetchBucketContents = 'Failed to fetch bucket contents',
 }
 
 /**
@@ -131,4 +141,13 @@ export enum ErrorSignature {
  */
 export enum ErrorPostgres {
   NumericFieldOverflow = 'Numeric field overflow',
+}
+
+/**
+ * Represents error messages associated with a cron job.
+ */
+export enum ErrorCronJob {
+  NotCreated = 'Cron job has not been created',
+  NotCompleted = 'Cron job is not completed',
+  Completed = 'Cron job is completed',
 }

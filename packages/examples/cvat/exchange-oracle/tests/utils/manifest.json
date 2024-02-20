@@ -1,11 +1,19 @@
 {
-  "dataUrl": "https://test.storage.googleapis.com/",
-  "submissionsRequired": 1,
-  "labels": ["dummy_label"],
-  "requesterDescription": "string",
-  "requesterAccuracyTarget": 10,
-  "fee": "250000000000",
-  "fundAmount": "1250000000000",
-  "mode": "BATCH",
-  "requestType": "IMAGE_LABEL_BINARY"
+  "data": {
+    "data_url": "https://test.storage.googleapis.com/"
+  },
+  "annotation": {
+    "labels": [{ "name": "dummy_label" }],
+    "description": "Dummy description",
+    "user_guide": "https://test.storage.googleapis.com",
+    "type": "IMAGE_BOXES",
+    "job_size": 10,
+    "max_time": 300
+  },
+  "validation": {
+    "min_quality": 0.8,
+    "val_size": 2,
+    "gt_url": "https://test.storage.googleapis.com"
+  },
+  "job_bounty": "5.001123929619726"
 }

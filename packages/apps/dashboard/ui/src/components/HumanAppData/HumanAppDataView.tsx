@@ -38,7 +38,7 @@ export const HumanAppDataView: FC = () => {
 
   const transactionsSeries = useMemo(() => {
     if (data) {
-      const cumulativeData = [...data.data[0].attributes.dailyHMTData]
+      const cumulativeData = [...data[0].data[0].attributes.dailyHMTData]
         .map((d: any) => ({
           date: d.timestamp,
           value: Number(d.totalTransactionCount),
@@ -59,7 +59,7 @@ export const HumanAppDataView: FC = () => {
 
   const paymentsSeries = useMemo(() => {
     if (data) {
-      const cumulativeData = [...data.data[0].attributes.dailyPaymentsData]
+      const cumulativeData = [...data[0].data[0].attributes.dailyPaymentsData]
         .map((d: any) => ({
           date: d.timestamp,
           value: Number(d.totalAmountPaid),
@@ -78,10 +78,33 @@ export const HumanAppDataView: FC = () => {
     return [];
   }, [data, days]);
 
+  const taskSeries = useMemo(() => {
+    if (data) {
+      const cumulativeData = data[1].data
+        .map((d: any) => {
+          const multiplier = d.attributes.date <= '2022-11-30' ? 18 : 9;
+          return {
+            date: d.attributes.date,
+            value: d.attributes.solved_count * multiplier,
+          };
+        })
+        .reduce((acc: any, d: any) => {
+          acc.push({
+            date: d.date,
+            value: acc.length ? acc[acc.length - 1].value + d.value : d.value,
+          });
+          return acc;
+        }, [] as any[]);
+
+      return cumulativeData.reverse().slice(0, days).reverse();
+    }
+    return [];
+  }, [data, days]);
+
   const getTooltipTitle = (button: ViewButton) => {
     switch (button) {
       case ViewButton.Tasks:
-        return TOOLTIPS.TASKS;
+        return TOOLTIPS.SOLVED_TASKS;
       case ViewButton.Payments:
         return TOOLTIPS.PAYMENTS;
       case ViewButton.Transactions:
@@ -93,7 +116,7 @@ export const HumanAppDataView: FC = () => {
     return (
       <Stack spacing={4}>
         <TransactionsView isLoading={isLoading} data={transactionsSeries} />
-        <TasksView />
+        <TasksView isLoading={isLoading} data={taskSeries} />
         <PaymentsView isLoading={isLoading} data={paymentsSeries} />
       </Stack>
     );
@@ -136,11 +159,13 @@ export const HumanAppDataView: FC = () => {
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Box mt={3} sx={{ overflow: 'auto' }}>
+      <Box mt={3} mb={3} sx={{ overflow: 'auto' }}>
         {viewButton === ViewButton.Transactions && (
           <TransactionsView isLoading={isLoading} data={transactionsSeries} />
         )}
-        {viewButton === ViewButton.Tasks && <TasksView />}
+        {viewButton === ViewButton.Tasks && (
+          <TasksView isLoading={isLoading} data={taskSeries} />
+        )}
         {viewButton === ViewButton.Payments && (
           <PaymentsView isLoading={isLoading} data={paymentsSeries} />
         )}

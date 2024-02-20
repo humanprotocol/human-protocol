@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
@@ -13,12 +13,20 @@ import { envValidator } from './common/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { KycModule } from './modules/kyc/kyc.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
+import { PayoutModule } from './modules/payout/payout.module';
 
 @Module({
   providers: [
     {
       provide: APP_PIPE,
       useClass: HttpValidationPipe,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SnakeCaseInterceptor,
     },
   ],
   imports: [
@@ -35,6 +43,7 @@ import { join } from 'path';
     WebhookModule,
     Web3Module,
     AuthModule,
+    KycModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
@@ -42,6 +51,8 @@ import { join } from 'path';
         'node_modules/swagger-ui-dist',
       ),
     }),
+    CronJobModule,
+    PayoutModule,
   ],
   controllers: [AppController],
 })

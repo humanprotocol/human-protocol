@@ -2,6 +2,8 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  EscrowClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -9,12 +11,10 @@ import * as Minio from 'minio';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
-import { FortuneFinalResult } from '../webhook/webhook.dto';
-import { PassThrough } from 'stream';
-import axios from 'axios';
 import { Logger } from '@nestjs/common';
-import { hashStream } from '../../common/utils';
 import { ConfigService } from '@nestjs/config';
+import { Web3Service } from '../web3/web3.service';
+import { FortuneFinalResult } from '../../common/dto/result';
 
 @Injectable()
 export class StorageService {
@@ -24,6 +24,7 @@ export class StorageService {
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
     public readonly configService: ConfigService,
+    private readonly web3Service: Web3Service,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -39,26 +40,63 @@ export class StorageService {
     }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
   }
 
+  private async encryptFile(
+    escrowAddress: string,
+    chainId: ChainId,
+    content: any,
+  ) {
+    if (!this.configService.get<boolean>(ConfigNames.PGP_ENCRYPT)) {
+      return content;
+    }
+
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
+
+    const reputationOracle = await OperatorUtils.getLeader(
+      chainId,
+      signer.address,
+    );
+    const jobLauncher = await OperatorUtils.getLeader(
+      chainId,
+      jobLauncherAddress,
+    );
+
+    if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
+      throw new BadRequestException('Missing public key');
+    }
+
+    return await EncryptionUtils.encrypt(content, [
+      reputationOracle.publicKey,
+      jobLauncher.publicKey,
+    ]);
+  }
+
+  private async decryptFile(fileContent: any): Promise<any> {
+    if (
+      typeof fileContent === 'string' &&
+      EncryptionUtils.isEncrypted(fileContent)
+    ) {
+      const encryption = await Encryption.build(
+        this.configService.get<string>(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
+        this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
+      );
+
+      return await encryption.decrypt(fileContent);
+    } else {
+      return fileContent;
+    }
+  }
+
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
-      if (
-        typeof fileContent === 'string' &&
-        EncryptionUtils.isEncrypted(fileContent)
-      ) {
-        const encryption = await Encryption.build(
-          this.configService.get<string>(
-            ConfigNames.ENCRYPTION_PRIVATE_KEY,
-            '',
-          ),
-          this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
-        );
 
-        return JSON.parse(await encryption.decrypt(fileContent));
-      } else {
-        return fileContent;
-      }
-    } catch {
+      return await this.decryptFile(fileContent);
+    } catch (error) {
+      Logger.error(`Error downloading ${url}:`, error);
       return [];
     }
   }
@@ -72,9 +110,14 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const content = JSON.stringify(solutions);
-    const key = `${escrowAddress}-${chainId}.json`;
     try {
+      const content = await this.encryptFile(
+        escrowAddress,
+        chainId,
+        JSON.stringify(solutions),
+      );
+
+      const key = `${escrowAddress}-${chainId}.json`;
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       await this.minioClient.putObject(this.s3Config.bucket, key, content, {
         'Content-Type': 'application/json',
@@ -82,7 +125,8 @@ export class StorageService {
       });
 
       return { url: this.getUrl(key), hash };
-    } catch (e) {
+    } catch (error) {
+      Logger.error('Error uploading job solution:', error);
       throw new BadRequestException('File not uploaded');
     }
   }
@@ -93,20 +137,31 @@ export class StorageService {
    * @param {string} url - URL of the source file
    * @returns {Promise<UploadedFile>} - Uploaded file with key/hash
    */
-  public async copyFileFromURLToBucket(url: string): Promise<UploadedFile> {
+  public async copyFileFromURLToBucket(
+    escrowAddress: string,
+    chainId: ChainId,
+    url: string,
+  ): Promise<UploadedFile> {
     try {
-      const { data } = await axios.get(url, { responseType: 'stream' });
-      const stream = new PassThrough();
-      data.pipe(stream);
+      // Download the content of the file from the bucket
+      let fileContent = await StorageClient.downloadFileFromUrl(url);
+      fileContent = await this.decryptFile(fileContent);
 
-      const hash = await hashStream(stream);
+      // Encrypt for job launcher
+      const content = await this.encryptFile(
+        escrowAddress,
+        chainId,
+        fileContent,
+      );
+
+      // Upload the encrypted file to the bucket
+      const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
 
-      await this.minioClient.putObject(this.s3Config.bucket, key, stream, {
+      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
+        'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
       });
-
-      Logger.log(`File from ${url} copied to ${this.s3Config.bucket}/${key}`);
 
       return {
         url: this.getUrl(key),
