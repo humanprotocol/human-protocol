@@ -93,14 +93,13 @@ class BucketAccessInfo:
                 path=parsed_url.path.lstrip("/"),
             )
         elif parsed_url.netloc.endswith("storage.googleapis.com"):
-            # TODO
             # Google Cloud Storage (GCS) bucket
-            bucket_name, path = parsed_url.path.lstrip("/").split("/", maxsplit=1)
+            # NOTE: virtual hosted-style is expected (https://BUCKET_NAME.storage.googleapis.com/OBJECT_NAME)
             return BucketAccessInfo(
                 provider=CloudProvider.gcs,
-                bucket_name=bucket_name,
-                host_url=f"{parsed_url.scheme}://{parsed_url.netloc}",
-                path=path,
+                bucket_name=parsed_url.netloc[: -len(".storage.googleapis.com")],
+                host_url=f"{parsed_url.scheme}://storage.googleapis.com",
+                path=parsed_url.path.lstrip("/"),
             )
         elif Config.features.enable_custom_cloud_host:
             if is_ipv4(parsed_url.netloc):
