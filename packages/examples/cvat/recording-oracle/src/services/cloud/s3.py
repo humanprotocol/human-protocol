@@ -1,3 +1,4 @@
+
 # Copyright (C) 2023-2024 CVAT.ai Corporation
 #
 # SPDX-License-Identifier: MIT
