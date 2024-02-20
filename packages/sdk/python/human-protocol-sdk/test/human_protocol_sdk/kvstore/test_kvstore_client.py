@@ -241,9 +241,12 @@ class TestKVStoreClient(unittest.TestCase):
         content = "example"
         content_hash = self.w3.keccak(text=content).hex()
 
-        with patch(
-            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-        ) as mock_handle_transaction, patch("requests.get") as mock_get:
+        with (
+            patch(
+                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
+            ) as mock_handle_transaction,
+            patch("requests.get") as mock_get,
+        ):
             mock_response = mock_get.return_value
             mock_response.text = content
 

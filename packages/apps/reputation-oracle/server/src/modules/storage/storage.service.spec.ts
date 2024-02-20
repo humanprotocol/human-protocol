@@ -1,11 +1,17 @@
-import { ChainId, EncryptionUtils, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  Encryption,
+  EncryptionUtils,
+  EscrowClient,
+  OperatorUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_ENCRYPTION_PUBLIC_KEY,
   MOCK_FILE_URL,
-  MOCK_MANIFEST,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
@@ -15,13 +21,25 @@ import {
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import crypto from 'crypto';
-import axios from 'axios';
-import stream from 'stream';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
+  },
+  EscrowClient: {
+    build: jest.fn(),
+  },
+  OperatorUtils: {
+    getLeader: jest.fn(),
+  },
+  Encryption: {
+    build: jest.fn(),
+  },
+  EncryptionUtils: {
+    encrypt: jest.fn(),
+    isEncrypted: jest.fn(),
   },
 }));
 
@@ -44,12 +62,21 @@ jest.mock('axios');
 describe('StorageService', () => {
   let storageService: StorageService;
 
+  let encrypt = true;
+
+  const signerMock = {
+    address: '0x1234567890123456789012345678901234567892',
+    getNetwork: jest.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
+  };
+
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
           case 'ENCRYPTION_PRIVATE_KEY':
             return MOCK_ENCRYPTION_PRIVATE_KEY;
+          case 'PGP_ENCRYPT':
+            return encrypt;
         }
       }),
     };
@@ -70,10 +97,24 @@ describe('StorageService', () => {
       providers: [
         StorageService,
         { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+          },
+        },
       ],
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
+
+    const jobLauncherAddress = '0x1234567890123456789012345678901234567893';
+    EscrowClient.build = jest.fn().mockResolvedValue({
+      getJobLauncherAddress: jest.fn().mockResolvedValue(jobLauncherAddress),
+    });
+    OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+      publicKey: MOCK_ENCRYPTION_PUBLIC_KEY,
+    });
   });
 
   describe('uploadJobSolutions', () => {
@@ -87,6 +128,8 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValueOnce(true);
 
+      EncryptionUtils.encrypt = jest.fn().mockResolvedValueOnce('encrypted');
+
       const jobSolution = {
         workerAddress,
         solution,
@@ -96,22 +139,72 @@ describe('StorageService', () => {
         chainId,
         [jobSolution],
       );
+
       expect(fileData).toEqual({
         url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-        hash: crypto
-          .createHash('sha1')
-          .update(JSON.stringify([jobSolution]))
-          .digest('hex'),
+        hash: crypto.createHash('sha1').update('encrypted').digest('hex'),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
         `${escrowAddress}-${chainId}.json`,
-        expect.stringContaining(solution),
+        expect.stringContaining('encrypted'),
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
         },
       );
+    });
+
+    describe('without encryption', () => {
+      beforeAll(() => {
+        encrypt = false;
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      afterAll(() => {
+        encrypt = true;
+      });
+
+      it('should upload the solutions', async () => {
+        const workerAddress = '0x1234567890123456789012345678901234567891';
+        const escrowAddress = '0x1234567890123456789012345678901234567890';
+        const chainId = ChainId.LOCALHOST;
+        const solution = 'test';
+
+        storageService.minioClient.bucketExists = jest
+          .fn()
+          .mockResolvedValueOnce(true);
+
+        EncryptionUtils.encrypt = jest.fn().mockResolvedValueOnce('encrypted');
+
+        const jobSolution = {
+          workerAddress,
+          solution,
+        };
+        const fileData = await storageService.uploadJobSolutions(
+          escrowAddress,
+          chainId,
+          [jobSolution],
+        );
+        const content = JSON.stringify([jobSolution]);
+
+        expect(fileData).toEqual({
+          url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
+          hash: crypto.createHash('sha1').update(content).digest('hex'),
+        });
+        expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
+          MOCK_S3_BUCKET,
+          `${escrowAddress}-${chainId}.json`,
+          expect.stringContaining(content),
+          {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          },
+        );
+      });
     });
 
     it('should fail if the bucket does not exist', async () => {
@@ -134,6 +227,7 @@ describe('StorageService', () => {
         ]),
       ).rejects.toThrow('Bucket not found');
     });
+
     it('should fail if the file cannot be uploaded', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -198,13 +292,13 @@ describe('StorageService', () => {
         ],
       };
 
-      const encryptedMessage = await EncryptionUtils.encrypt(
-        JSON.stringify(expectedJobFile),
-        [MOCK_ENCRYPTION_PUBLIC_KEY],
-      );
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(encryptedMessage);
+        .mockResolvedValueOnce('encrypted');
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+      Encryption.build = jest.fn().mockResolvedValue({
+        decrypt: jest.fn().mockResolvedValue(expectedJobFile),
+      });
 
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
@@ -221,14 +315,28 @@ describe('StorageService', () => {
   });
 
   describe('copyFileFromURLToBucket', () => {
-    it('should copy a file from a valid URL to a bucket', async () => {
-      const streamResponseData = new stream.Readable();
-      streamResponseData.push(JSON.stringify(MOCK_MANIFEST));
-      streamResponseData.push(null);
-      (axios.get as any).mockResolvedValueOnce({ data: streamResponseData });
+    const escrowAddress = '0x1234567890123456789012345678901234567890';
+    const chainId = ChainId.LOCALHOST;
 
-      const uploadedFile =
-        await storageService.copyFileFromURLToBucket(MOCK_FILE_URL);
+    it('should copy a file from a valid URL to a bucket', async () => {
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce('some-file-content');
+
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
+      EncryptionUtils.encrypt = jest
+        .fn()
+        .mockResolvedValueOnce('encrypted-file-content');
+
+      storageService.minioClient.putObject = jest
+        .fn()
+        .mockResolvedValueOnce(true);
+
+      const uploadedFile = await storageService.copyFileFromURLToBucket(
+        escrowAddress,
+        chainId,
+        MOCK_FILE_URL,
+      );
 
       expect(
         uploadedFile.url.includes(
@@ -238,32 +346,148 @@ describe('StorageService', () => {
       expect(uploadedFile.hash).toBeDefined();
       expect(storageService.minioClient.putObject).toBeCalledWith(
         MOCK_S3_BUCKET,
-        expect.any(String),
-        expect.any(stream),
-        { 'Cache-Control': 'no-store' },
+        `s3${crypto
+          .createHash('sha1')
+          .update('encrypted-file-content')
+          .digest('hex')}.zip`,
+        'encrypted-file-content',
+        { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
       );
     });
 
-    it('should handle an invalid URL', async () => {
-      (axios.get as any).mockRejectedValue('Network error');
+    it('should copy an encrypted file from a valid URL to a bucket', async () => {
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce('some-file-content');
+      Encryption.build = jest.fn().mockResolvedValue({
+        decrypt: jest.fn().mockResolvedValue('decrypted-file-content'),
+      });
 
-      await expect(
-        storageService.copyFileFromURLToBucket(MOCK_FILE_URL),
-      ).rejects.toThrow('File not uploaded');
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+      EncryptionUtils.encrypt = jest
+        .fn()
+        .mockResolvedValueOnce('encrypted-file-content');
+
+      const uploadedFile = await storageService.copyFileFromURLToBucket(
+        escrowAddress,
+        chainId,
+        MOCK_FILE_URL,
+      );
+
+      expect(
+        uploadedFile.url.includes(
+          `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/`,
+        ),
+      ).toBeTruthy();
+      expect(uploadedFile.hash).toBeDefined();
+      expect(storageService.minioClient.putObject).toBeCalledWith(
+        MOCK_S3_BUCKET,
+        `s3${crypto
+          .createHash('sha1')
+          .update('encrypted-file-content')
+          .digest('hex')}.zip`,
+        'encrypted-file-content',
+        { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+      );
     });
 
-    it('should handle errors when copying the file', async () => {
-      const streamResponseData = new stream.Readable();
-      streamResponseData.push(JSON.stringify(MOCK_MANIFEST));
-      streamResponseData.push(null);
-      (axios.get as any).mockResolvedValueOnce({ data: streamResponseData });
-      storageService.minioClient.putObject = jest
+    describe('without encryption', () => {
+      beforeAll(() => {
+        encrypt = false;
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      afterAll(() => {
+        encrypt = true;
+      });
+
+      it('should copy a file from a valid URL to a bucket', async () => {
+        StorageClient.downloadFileFromUrl = jest
+          .fn()
+          .mockResolvedValueOnce('some-file-content');
+
+        EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
+        EncryptionUtils.encrypt = jest
+          .fn()
+          .mockResolvedValueOnce('encrypted-file-content');
+
+        storageService.minioClient.putObject = jest
+          .fn()
+          .mockResolvedValueOnce(true);
+
+        const uploadedFile = await storageService.copyFileFromURLToBucket(
+          escrowAddress,
+          chainId,
+          MOCK_FILE_URL,
+        );
+
+        expect(
+          uploadedFile.url.includes(
+            `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/`,
+          ),
+        ).toBeTruthy();
+        expect(uploadedFile.hash).toBeDefined();
+        expect(storageService.minioClient.putObject).toBeCalledWith(
+          MOCK_S3_BUCKET,
+          `s3${crypto
+            .createHash('sha1')
+            .update('some-file-content')
+            .digest('hex')}.zip`,
+          'some-file-content',
+          { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+        );
+      });
+
+      it('should copy an encrypted file from a valid URL to a bucket', async () => {
+        StorageClient.downloadFileFromUrl = jest
+          .fn()
+          .mockResolvedValueOnce('some-file-content');
+        Encryption.build = jest.fn().mockResolvedValue({
+          decrypt: jest.fn().mockResolvedValue('decrypted-file-content'),
+        });
+
+        EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+        EncryptionUtils.encrypt = jest
+          .fn()
+          .mockResolvedValueOnce('encrypted-file-content');
+
+        const uploadedFile = await storageService.copyFileFromURLToBucket(
+          escrowAddress,
+          chainId,
+          MOCK_FILE_URL,
+        );
+
+        expect(
+          uploadedFile.url.includes(
+            `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/`,
+          ),
+        ).toBeTruthy();
+        expect(uploadedFile.hash).toBeDefined();
+        expect(storageService.minioClient.putObject).toBeCalledWith(
+          MOCK_S3_BUCKET,
+          `s3${crypto
+            .createHash('sha1')
+            .update('some-file-content')
+            .digest('hex')}.zip`,
+          'some-file-content',
+          { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+        );
+      });
+    });
+
+    it('should handle an invalid URL', async () => {
+      StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockRejectedValue('Network error');
+        .mockRejectedValueOnce('Invalid URL');
 
       await expect(
         storageService.copyFileFromURLToBucket(
-          'https://example.com/archivo.zip',
+          escrowAddress,
+          chainId,
+          MOCK_FILE_URL,
         ),
       ).rejects.toThrow('File not uploaded');
     });

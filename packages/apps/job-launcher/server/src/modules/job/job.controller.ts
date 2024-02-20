@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Request,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -26,10 +27,10 @@ import {
   JobCvatDto,
   JobListDto,
   JobCancelDto,
-  EscrowFailedWebhookDto,
   JobDetailsDto,
   JobIdDto,
   FortuneFinalResultDto,
+  JobCaptchaDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
@@ -37,6 +38,7 @@ import { Public, ApiKey } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { Role } from '../../common/enums/role';
+import { WebhookDataDto } from '../webhook/webhook.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -102,6 +104,19 @@ export class JobController {
     return this.jobService.createJob(req.user.id, data.type, data);
   }
 
+  @Post('/hCaptcha')
+  public async createCaptchaJob(
+    @Request() req: RequestWithUser,
+    @Body() data: JobCaptchaDto,
+  ): Promise<number> {
+    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    return this.jobService.createJob(
+      req.user.id,
+      JobRequestType.HCAPTCHA,
+      data,
+    );
+  }
+
   @ApiOperation({
     summary: 'Get a list of jobs',
     description:
@@ -165,28 +180,9 @@ export class JobController {
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
-    @Query('jobId') jobId: number,
+    @Query('job_id') jobId: number,
   ): Promise<FortuneFinalResultDto[] | string> {
     return this.jobService.getResult(req.user.id, jobId);
-  }
-
-  @ApiOperation({
-    summary: 'Launch a cron job',
-    description: 'Endpoint to launch a cron job.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job launched successfully.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  @Get('/cron/launch')
-  public async launchCronJob(): Promise<void> {
-    await this.jobService.launchCronJob();
-    return;
   }
 
   @ApiOperation({
@@ -215,21 +211,6 @@ export class JobController {
   }
 
   @ApiOperation({
-    summary: 'Cancel a cron job',
-    description: 'Endpoint to cancel a cron job.',
-  })
-  @Public()
-  @ApiResponse({
-    status: 200,
-    description: 'Cron job launched successfully.',
-  })
-  @Get('/cron/cancel')
-  public async cancelCronJob(): Promise<void> {
-    await this.jobService.cancelCronJob();
-    return;
-  }
-
-  @ApiOperation({
     summary: 'Handle escrow failed webhook',
     description: 'Endpoint to handle an escrow failed webhook.',
   })
@@ -250,7 +231,7 @@ export class JobController {
   @Post('/escrow-failed-webhook')
   public async handleEscrowFailedWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: EscrowFailedWebhookDto,
+    @Body() data: WebhookDataDto,
   ): Promise<void> {
     await this.jobService.escrowFailedWebhook(data);
     return;
@@ -274,6 +255,7 @@ export class JobController {
     description: 'Not Found. Could not find the requested content.',
   })
   @Get('/details/:id')
+  @ApiKey()
   public async getDetails(
     @Request() req: RequestWithUser,
     @Param() params: JobIdDto,

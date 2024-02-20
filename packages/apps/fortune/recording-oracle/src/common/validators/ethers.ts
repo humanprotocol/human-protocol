@@ -11,7 +11,7 @@ import { ethers } from 'ethers';
 @Injectable()
 class ValidateEthereumAddress implements ValidatorConstraintInterface {
   public validate(value: string): boolean {
-    return ethers.utils.isAddress(value);
+    return ethers.isAddress(value);
   }
 
   public defaultMessage(): string {

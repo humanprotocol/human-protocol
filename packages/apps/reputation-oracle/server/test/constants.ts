@@ -1,6 +1,6 @@
+import { ImageLabelBinaryJobResults } from 'src/common/dto/result';
 import { JobRequestType } from '../src/common/enums';
 import { IFortuneManifest } from '../src/common/interfaces/manifest';
-import { ImageLabelBinaryJobResults } from '../src/modules/webhook/webhook.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -228,3 +228,7 @@ fIZLubRoCz4FQH4j2i0WiXgAAGBzAQDyOy3WfJOJUAb5V41TFd4ZZEBrSqfh
 Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
 =IMAe
 -----END PGP PUBLIC KEY BLOCK-----`;
+
+export const MOCK_MAX_RETRY_COUNT = 5;
+export const MOCK_BUCKET_FILE =
+  'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';

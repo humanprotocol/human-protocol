@@ -15,10 +15,12 @@ async function main() {
     { initializer: 'initialize', kind: 'uups' }
   );
   await stakingContract.deployed();
-  console.log('Staking Proxy Address: ', stakingContract.address);
+  console.log('Staking Proxy Address: ', await stakingContract.getAddress());
   console.log(
     'Staking Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(stakingContract.address)
+    await upgrades.erc1967.getImplementationAddress(
+      await stakingContract.getAddress()
+    )
   );
 
   const EscrowFactory = await ethers.getContractFactory(
@@ -26,39 +28,46 @@ async function main() {
   );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
-    [stakingContract.address],
+    [await stakingContract.getAddress()],
     { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();
-  console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);
+  console.log(
+    'Escrow Factory Proxy Address: ',
+    await escrowFactoryContract.getAddress()
+  );
   console.log(
     'Escrow Factory Implementation Address: ',
     await upgrades.erc1967.getImplementationAddress(
-      escrowFactoryContract.address
+      await escrowFactoryContract.getAddress()
     )
   );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();
-  await kvStoreContract.deployed();
 
-  console.log('KVStore Address: ', kvStoreContract.address);
+  console.log('KVStore Address: ', await kvStoreContract.getAddress());
 
   const RewardPool = await ethers.getContractFactory('RewardPool');
   const rewardPoolContract = await upgrades.deployProxy(
     RewardPool,
-    [hmtAddress, stakingContract.address, 1],
+    [hmtAddress, await stakingContract.getAddress(), 1],
     { initializer: 'initialize', kind: 'uups' }
   );
   await rewardPoolContract.deployed();
-  console.log('Reward Pool Proxy Address: ', rewardPoolContract.address);
+  console.log(
+    'Reward Pool Proxy Address: ',
+    await rewardPoolContract.getAddress()
+  );
   console.log(
     'Reward Pool Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(rewardPoolContract.address)
+    await upgrades.erc1967.getImplementationAddress(
+      await rewardPoolContract.getAddress()
+    )
   );
 
   // Configure RewardPool in Staking
-  await stakingContract.setRewardPool(rewardPoolContract.address);
+  await stakingContract.setRewardPool(await rewardPoolContract.getAddress());
 }
 
 main().catch((error) => {

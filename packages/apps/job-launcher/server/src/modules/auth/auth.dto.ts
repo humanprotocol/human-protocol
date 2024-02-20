@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, Matches } from 'class-validator';
-import { IsConfirm, IsPassword } from '../../common/validators';
+import { IsEmail, IsString } from 'class-validator';
+import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
 
@@ -21,20 +21,16 @@ export class SignInDto {
   @ApiProperty()
   @IsString()
   public password: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class ValidatePasswordDto {
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*+])(?=.{8,})/, {
-    message:
-      'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character.',
-  })
   @ApiProperty()
   @IsPassword()
   public password: string;
-
-  @ApiProperty()
-  @IsConfirm()
-  public confirm: string;
 }
 
 export class ResendEmailVerificationDto {
@@ -48,6 +44,10 @@ export class RestorePasswordDto extends ValidatePasswordDto {
   @ApiProperty()
   @IsString()
   public token: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class VerifyEmailDto {
@@ -78,7 +78,7 @@ export class TokenCreateDto {
 }
 
 export class ApiKeyDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'api_key' })
   @IsString()
   public apiKey: string;
 }

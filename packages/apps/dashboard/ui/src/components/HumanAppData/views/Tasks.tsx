@@ -1,46 +1,30 @@
 import { ChainId } from '@human-protocol/sdk';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useWorkerStats } from 'src/hooks/useWorkerStats';
-import { useChainId, useDays } from 'src/state/humanAppData/hooks';
+import { TOOLTIPS } from 'src/constants/tooltips';
+import { useChainId } from 'src/state/humanAppData/hooks';
 
-export const TasksView = () => {
-  const days = useDays();
+export const TasksView = ({
+  isLoading,
+  data,
+}: {
+  isLoading: boolean;
+  data: any[];
+}) => {
   const chainId = useChainId();
-  const { data, isLoading } = useWorkerStats();
-
-  const seriesData = useMemo(() => {
-    if (data) {
-      const cumulativeDailyWorkersData = [...data.dailyWorkersData]
-        .map((d) => ({
-          date: d.timestamp,
-          value: Number(d.averageJobsSolved),
-        }))
-        .reduce((acc, d) => {
-          acc.push({
-            date: d.date,
-            value: acc.length ? acc[acc.length - 1].value + d.value : d.value,
-          });
-          return acc;
-        }, [] as any[]);
-
-      return cumulativeDailyWorkersData.slice(-days);
-    }
-    return [];
-  }, [data, days]);
 
   return (
     <ChartContainer
       isLoading={isLoading}
-      data={seriesData}
+      data={data}
+      title="Tasks"
       isNotSupportedChain={
         chainId !== ChainId.POLYGON && chainId !== ChainId.ALL
       }
-      title="Tasks"
     >
-      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+      <TooltipIcon title={TOOLTIPS.SOLVED_TASKS} />
     </ChartContainer>
   );
 };

@@ -1,12 +1,7 @@
-import { ConfigService } from '@nestjs/config';
-import { Test } from '@nestjs/testing';
-import { JobController } from './job.controller';
-import { JobService } from './job.service';
-import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
-import { Web3Service } from '../web3/web3.service';
 import { HttpService } from '@nestjs/axios';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { ConfigModule, registerAs } from '@nestjs/config';
 import {
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
@@ -15,10 +10,12 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
-  MOCK_SIGNATURE,
 } from '../../../test/constants';
 import { StorageService } from '../storage/storage.service';
-import { verifySignature } from '../../common/utils/signature';
+import { Web3Service } from '../web3/web3.service';
+import { JobController } from './job.controller';
+import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { JobService } from './job.service';
 
 jest.mock('../../common/utils/signature');
 
@@ -147,26 +144,6 @@ describe('JobController', () => {
         solveJobDto.escrowAddress,
         solveJobDto.workerAddress,
         solveJobDto.solution,
-      );
-    });
-  });
-
-  describe('invalidJobSolution-solution', () => {
-    it('should mark a job solution as invalid', async () => {
-      const solveJobDto: InvalidJobDto = {
-        chainId,
-        escrowAddress,
-        workerAddress,
-      };
-
-      jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
-
-      (verifySignature as jest.Mock).mockReturnValue(true);
-
-      await jobController.invalidJobSolution(MOCK_SIGNATURE, solveJobDto);
-
-      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
-        solveJobDto,
       );
     });
   });

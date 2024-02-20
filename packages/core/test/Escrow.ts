@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { Signer } from 'ethers';
+import { EventLog, Signer } from 'ethers';
 import { Escrow, HMToken } from '../typechain-types';
 
 const MOCK_URL = 'http://google.com/fake';
@@ -32,7 +33,7 @@ async function deployEscrow() {
   // Deploy Escrow Contract
   const Escrow = await ethers.getContractFactory('contracts/Escrow.sol:Escrow');
   escrow = (await Escrow.deploy(
-    token.address,
+    await token.getAddress(),
     await launcher.getAddress(),
     await owner.getAddress(),
     100,
@@ -59,7 +60,7 @@ async function setupEscrow() {
 
 async function fundEscrow() {
   const amount = 100;
-  await token.connect(owner).transfer(escrow.address, amount);
+  await token.connect(owner).transfer(escrow.getAddress(), amount);
 }
 
 describe('Escrow', function () {
@@ -95,7 +96,7 @@ describe('Escrow', function () {
 
     it('Should set the right token address', async () => {
       const result = await escrow.token();
-      expect(result).to.equal(token.address);
+      expect(result).to.equal(await token.getAddress());
     });
 
     it('Should set the right launched status', async () => {
@@ -120,7 +121,7 @@ describe('Escrow', function () {
 
     it('Should topup and return the right escrow balance', async () => {
       const amount = 1000;
-      await token.connect(owner).transfer(escrow.address, amount);
+      await token.connect(owner).transfer(escrow.getAddress(), amount);
 
       const result = await escrow.connect(launcher).getBalance();
       expect(result).to.equal(amount.toString());
@@ -161,23 +162,23 @@ describe('Escrow', function () {
 
       it('Should transfer tokens to owner if contract funded when abort is called', async function () {
         const amount = 100;
-        await token.connect(owner).transfer(escrow.address, amount);
+        await token.connect(owner).transfer(escrow.getAddress(), amount);
 
         await escrow.connect(owner).abort();
 
         expect(
-          (await token.connect(owner).balanceOf(escrow.address)).toString()
+          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
         ).to.equal('0', 'Escrow has not been properly aborted');
       });
 
       it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
         const amount = 100;
-        await token.connect(owner).transfer(escrow.address, amount);
+        await token.connect(owner).transfer(escrow.getAddress(), amount);
 
         await escrow.connect(trustedHandlers[0]).abort();
 
         expect(
-          (await token.connect(owner).balanceOf(escrow.address)).toString()
+          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
         ).to.equal('0', 'Escrow has not been properly aborted');
       });
     });
@@ -227,10 +228,8 @@ describe('Escrow', function () {
             .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
-        expect(result.events?.[0].event).to.equal(
-          'IntermediateStorage',
-          'IntermediateStorage event was not emitted'
-        );
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_URL);
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_HASH);
       });
 
       it('Should succeed when add a new trusted handler from trusted handler and a trusted handler stores results', async () => {
@@ -244,10 +243,8 @@ describe('Escrow', function () {
             .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
-        expect(result.events?.[0].event).to.equal(
-          'IntermediateStorage',
-          'IntermediateStorage event was not emitted'
-        );
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_URL);
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_HASH);
       });
     });
   });
@@ -307,10 +304,8 @@ describe('Escrow', function () {
             .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
-        expect(result.events?.[0].event).to.equal(
-          'IntermediateStorage',
-          'IntermediateStorage event was not emitted'
-        );
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_URL);
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_HASH);
       });
 
       it('Should succeed when a trusted handler stores results', async () => {
@@ -320,10 +315,8 @@ describe('Escrow', function () {
             .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
-        expect(result.events?.[0].event).to.equal(
-          'IntermediateStorage',
-          'IntermediateStorage event was not emitted'
-        );
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_URL);
+        expect((result?.logs[0] as EventLog).args).to.contain(MOCK_HASH);
       });
     });
   });
@@ -356,7 +349,7 @@ describe('Escrow', function () {
           escrow
             .connect(owner)
             .setup(
-              ethers.constants.AddressZero,
+              ethers.ZeroAddress,
               await recordingOracle.getAddress(),
               await exchangeOracle.getAddress(),
               10,
@@ -374,7 +367,7 @@ describe('Escrow', function () {
             .connect(owner)
             .setup(
               await reputationOracle.getAddress(),
-              ethers.constants.AddressZero,
+              ethers.ZeroAddress,
               await exchangeOracle.getAddress(),
               10,
               10,
@@ -392,7 +385,7 @@ describe('Escrow', function () {
             .setup(
               await reputationOracle.getAddress(),
               await reputationOracle.getAddress(),
-              ethers.constants.AddressZero,
+              ethers.ZeroAddress,
               10,
               10,
               10,
@@ -558,10 +551,9 @@ describe('Escrow', function () {
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
-        expect(await token.connect(owner).balanceOf(escrow.address)).to.equal(
-          '0',
-          'Escrow has not been properly canceled'
-        );
+        expect(
+          await token.connect(owner).balanceOf(escrow.getAddress())
+        ).to.equal('0', 'Escrow has not been properly canceled');
       });
 
       it('Should succeed when the contract was canceled by trusted handler', async () => {
@@ -569,10 +561,9 @@ describe('Escrow', function () {
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
-        expect(await token.connect(owner).balanceOf(escrow.address)).to.equal(
-          '0',
-          'Escrow has not been properly canceled'
-        );
+        expect(
+          await token.connect(owner).balanceOf(escrow.getAddress())
+        ).to.equal('0', 'Escrow has not been properly canceled');
       });
     });
   });
@@ -639,7 +630,7 @@ describe('Escrow', function () {
       it('Should revert with the right error if too many recipients', async function () {
         const recepients = Array.from(
           new Array(BULK_MAX_COUNT + 1),
-          () => ethers.constants.AddressZero
+          () => ethers.ZeroAddress
         );
         const amounts = Array.from({ length: BULK_MAX_COUNT + 1 }, () => 1);
 
@@ -730,38 +721,27 @@ describe('Escrow', function () {
           .balanceOf(await exchangeOracle.getAddress());
 
         expect(
-          (
-            finalBalanceAccount1.toNumber() - initialBalanceAccount1.toNumber()
-          ).toString()
+          (finalBalanceAccount1 - initialBalanceAccount1).toString()
         ).to.equal('7');
         expect(
-          (
-            finalBalanceAccount2.toNumber() - initialBalanceAccount2.toNumber()
-          ).toString()
+          (finalBalanceAccount2 - initialBalanceAccount2).toString()
         ).to.equal('14');
         expect(
-          (
-            finalBalanceAccount3.toNumber() - initialBalanceAccount3.toNumber()
-          ).toString()
+          (finalBalanceAccount3 - initialBalanceAccount3).toString()
         ).to.equal('21');
         expect(
           (
-            finalBalanceRecordingOracle.toNumber() -
-            initialBalanceRecordingOracle.toNumber()
+            finalBalanceRecordingOracle - initialBalanceRecordingOracle
           ).toString()
         ).to.equal('6');
         expect(
           (
-            finalBalanceReputationOracle.toNumber() -
-            initialBalanceReputationOracle.toNumber()
+            finalBalanceReputationOracle - initialBalanceReputationOracle
           ).toString()
         ).to.equal('6');
 
         expect(
-          (
-            finalBalanceExchangeOracle.toNumber() -
-            initialBalanceExchangeOracle.toNumber()
-          ).toString()
+          (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
         ).to.equal('6');
       });
 
