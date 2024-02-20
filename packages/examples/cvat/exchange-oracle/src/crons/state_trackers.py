@@ -208,7 +208,7 @@ def retrieve_annotations() -> None:
                 # Check if all jobs within the project are completed
                 if not cvat_service.is_project_completed(session, project.id):
                     cvat_service.update_project_status(
-                        session, project.id, ProjectStatuses.annotation.value
+                        session, project.id, ProjectStatuses.annotation
                     )
                     continue
 

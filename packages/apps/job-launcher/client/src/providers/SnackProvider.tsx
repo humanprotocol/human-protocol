@@ -1,11 +1,13 @@
 import { Alert, Snackbar } from '@mui/material';
 import React, { createContext, useContext, useState } from 'react';
+import { parseErrorMessage } from '../utils/string';
 
 export const SnackbarContext = createContext({
   openSnackbar: (
     message: string,
     severity: 'success' | 'error' | 'warning' | 'info',
   ) => {},
+  showError: (error: any) => {},
 });
 
 const SnackbarProvider = ({ children }: { children: React.ReactElement }) => {
@@ -24,12 +26,16 @@ const SnackbarProvider = ({ children }: { children: React.ReactElement }) => {
     setSnackbarOpen(true);
   };
 
+  const showError = (error: any) => {
+    openSnackbar(parseErrorMessage(error), 'error');
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
 
   return (
-    <SnackbarContext.Provider value={{ openSnackbar }}>
+    <SnackbarContext.Provider value={{ openSnackbar, showError }}>
       {children}
       <Snackbar
         open={snackbarOpen}

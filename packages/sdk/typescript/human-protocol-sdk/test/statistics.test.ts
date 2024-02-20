@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
@@ -192,9 +192,9 @@ describe('StatisticsClient', () => {
         dailyPaymentsData: [
           {
             timestamp: new Date(1000),
-            totalAmountPaid: BigNumber.from(100),
+            totalAmountPaid: ethers.toBigInt(100),
             totalCount: 4,
-            averageAmountPerWorker: BigNumber.from(25),
+            averageAmountPerWorker: ethers.toBigInt(25),
           },
         ],
       });
@@ -263,19 +263,19 @@ describe('StatisticsClient', () => {
       );
 
       expect(result).toEqual({
-        totalTransferAmount: BigNumber.from(100),
+        totalTransferAmount: ethers.toBigInt(100),
         totalTransferCount: 4,
         totalHolders: 2,
         holders: [
           {
             address: '0x123',
-            balance: BigNumber.from(10),
+            balance: ethers.toBigInt(10),
           },
         ],
         dailyHMTData: [
           {
             timestamp: new Date(1000),
-            totalTransactionAmount: BigNumber.from(100),
+            totalTransactionAmount: ethers.toBigInt(100),
             totalTransactionCount: 4,
           },
         ],

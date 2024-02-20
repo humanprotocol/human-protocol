@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { ethers, upgrades } from 'hardhat';
+import { HMToken } from 'typechain-types';
 
 async function main() {
   const [, ...accounts] = await ethers.getSigners();
@@ -12,20 +13,23 @@ async function main() {
     18,
     'HMT'
   );
-  await HMTokenContract.deployed();
-  console.log('HMToken Address: ', HMTokenContract.address);
+  await HMTokenContract.waitForDeployment();
+  console.log('HMToken Address: ', await HMTokenContract.getAddress());
 
   const Staking = await ethers.getContractFactory('Staking');
   const stakingContract = await upgrades.deployProxy(
     Staking,
-    [HMTokenContract.address, 1, 10],
+    [await HMTokenContract.getAddress(), 1, 10],
     { initializer: 'initialize', kind: 'uups' }
   );
-  await stakingContract.deployed();
-  console.log('Staking Proxy Address: ', stakingContract.address);
+
+  await stakingContract.waitForDeployment();
+  console.log('Staking Proxy Address: ', await stakingContract.getAddress());
   console.log(
     'Staking Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(stakingContract.address)
+    await upgrades.erc1967.getImplementationAddress(
+      await stakingContract.getAddress()
+    )
   );
 
   const EscrowFactory = await ethers.getContractFactory(
@@ -33,44 +37,52 @@ async function main() {
   );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
-    [stakingContract.address],
+    [await stakingContract.getAddress()],
     { initializer: 'initialize', kind: 'uups' }
   );
-  await escrowFactoryContract.deployed();
-  console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);
+  await escrowFactoryContract.waitForDeployment();
+  console.log(
+    'Escrow Factory Proxy Address: ',
+    await escrowFactoryContract.getAddress()
+  );
   console.log(
     'Escrow Factory Implementation Address: ',
     await upgrades.erc1967.getImplementationAddress(
-      escrowFactoryContract.address
+      await escrowFactoryContract.getAddress()
     )
   );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();
-  await kvStoreContract.deployed();
+  await kvStoreContract.waitForDeployment();
 
-  console.log('KVStore Address: ', kvStoreContract.address);
+  console.log('KVStore Address: ', await kvStoreContract.getAddress());
 
   const RewardPool = await ethers.getContractFactory('RewardPool');
   const rewardPoolContract = await upgrades.deployProxy(
     RewardPool,
-    [HMTokenContract.address, stakingContract.address, 1],
+    [await HMTokenContract.getAddress(), await stakingContract.getAddress(), 1],
     { initializer: 'initialize', kind: 'uups' }
   );
-  await rewardPoolContract.deployed();
-  console.log('Reward Pool Proxy Address: ', rewardPoolContract.address);
+  await rewardPoolContract.waitForDeployment();
+  console.log(
+    'Reward Pool Proxy Address: ',
+    await rewardPoolContract.getAddress()
+  );
   console.log(
     'Reward Pool Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(rewardPoolContract.address)
+    await upgrades.erc1967.getImplementationAddress(
+      await rewardPoolContract.getAddress()
+    )
   );
 
   // Configure RewardPool in Staking
-  await stakingContract.setRewardPool(rewardPoolContract.address);
+  await stakingContract.setRewardPool(await rewardPoolContract.getAddress());
 
   for (const account of accounts) {
-    await HMTokenContract.transfer(
+    await (HMTokenContract as HMToken).transfer(
       account.address,
-      ethers.utils.parseEther('1000')
+      ethers.parseEther('1000')
     );
   }
 }

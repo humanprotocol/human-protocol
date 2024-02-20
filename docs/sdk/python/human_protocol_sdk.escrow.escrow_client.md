@@ -48,6 +48,18 @@ escrow_client = EscrowClient(w3)
 
 ## Module
 
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowCancel(tx_hash, amount_refunded)
+
+Bases: `object`
+
+#### \_\_init_\_(tx_hash, amount_refunded)
+
+Represents the result of an escrow cancellation transaction.
+Args:
+
+> tx_hash (str): The hash of the transaction that cancelled the escrow.
+> amount_refunded (Any): The amount refunded during the escrow cancellation.
+
 ### *class* human_protocol_sdk.escrow.escrow_client.EscrowClient(web3)
 
 Bases: `object`
@@ -215,11 +227,15 @@ Cancels the specified escrow and sends the balance to the canceler.
   * **escrow_address** (`str`) – Address of the escrow to cancel
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
-  `None`
+  [`EscrowCancel`](#human_protocol_sdk.escrow.escrow_client.EscrowCancel)
 * **Returns:**
-  None
+  EscrowCancel:
+  An instance of the EscrowCancel class containing details of the cancellation transaction,
+  including the transaction hash and the amount refunded.
 * **Raises:**
-  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+  * [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+  * [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If the transfer event associated with the cancellation
+    is not found in the transaction logs
 * **Example:**
   ```python
   from eth_typing import URI
@@ -242,7 +258,7 @@ Cancels the specified escrow and sends the balance to the canceler.
   (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
   escrow_client = EscrowClient(w3)
 
-  transaction_hash = escrow_client.cancel(
+  escrow_cancel_data = escrow_client.cancel(
       "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
   )
   ```

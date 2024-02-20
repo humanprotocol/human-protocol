@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
+import { TOOLTIPS } from 'src/constants/tooltips';
 import { useWorkerStats } from 'src/hooks/useWorkerStats';
 import { useChainId, useDays } from 'src/state/humanAppData/hooks';
 
@@ -28,7 +29,7 @@ export const WorkersView = () => {
       title="Workers"
       isNotSupportedChain={chainId !== ChainId.POLYGON}
     >
-      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+      <TooltipIcon title={TOOLTIPS.WORKERS} />
     </ChartContainer>
   );
 };

@@ -1,7 +1,7 @@
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { ethers, upgrades } from 'hardhat';
-import { Signer } from 'ethers';
+import { EventLog, Signer } from 'ethers';
 import {
   Escrow,
   EscrowFactory,
@@ -94,9 +94,9 @@ describe('Staking', function () {
     const Staking = await ethers.getContractFactory('Staking');
     staking = (await upgrades.deployProxy(
       Staking,
-      [token.address, minimumStake, lockPeriod],
+      [await token.getAddress(), minimumStake, lockPeriod],
       { kind: 'uups', initializer: 'initialize' }
-    )) as Staking;
+    )) as unknown as Staking;
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory(
@@ -105,20 +105,20 @@ describe('Staking', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [staking.address],
+      [await staking.getAddress()],
       { kind: 'uups', initializer: 'initialize' }
-    )) as EscrowFactory;
+    )) as unknown as EscrowFactory;
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
     rewardPool = (await upgrades.deployProxy(
       RewardPool,
-      [token.address, staking.address, rewardFee],
+      [await token.getAddress(), await staking.getAddress(), rewardFee],
       { kind: 'uups', initializer: 'initialize' }
-    )) as RewardPool;
+    )) as unknown as RewardPool;
 
     // Topup staking address
-    await token.connect(owner).transfer(staking.address, 1000);
+    await token.connect(owner).transfer(await staking.getAddress(), 1000);
 
     // Approve spend HMT tokens staking contract
     [
@@ -130,14 +130,14 @@ describe('Staking', function () {
       reputationOracle,
       recordingOracle,
     ].map(async (account) => {
-      await token.connect(account).approve(staking.address, 1000);
+      await token.connect(account).approve(await staking.getAddress(), 1000);
     });
   });
 
   describe('deployment', () => {
     it('Should set the right token address', async () => {
       const result = await staking.token();
-      expect(result).to.equal(token.address);
+      expect(result).to.equal(await token.getAddress());
     });
 
     it('Should set the minimum stake', async () => {
@@ -168,7 +168,7 @@ describe('Staking', function () {
 
     describe('Events', function () {
       it('Should emit an event on stake deposited', async function () {
-        await token.connect(operator).approve(staking.address, 100); //!
+        await token.connect(operator).approve(await staking.getAddress(), 100); //!
 
         await expect(await staking.connect(operator).stake(2))
           .to.emit(staking, 'StakeDeposited')
@@ -254,16 +254,21 @@ describe('Staking', function () {
         await escrowFactory
           .connect(operator)
           .createEscrow(
-            token.address,
+            await token.getAddress(),
             [await validator.getAddress()],
             jobRequesterId
           )
       ).wait();
-      const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+      const event = (
+        result?.logs?.find(({ topics }) =>
+          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+        ) as EventLog
       )?.args;
 
-      expect(event?.token).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(
+        await token.getAddress(),
+        'token address is correct'
+      );
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -274,9 +279,7 @@ describe('Staking', function () {
         const amount = 5;
 
         await expect(
-          staking
-            .connect(operator)
-            .allocate(ethers.constants.AddressZero, amount)
+          staking.connect(operator).allocate(ethers.ZeroAddress, amount)
         ).to.be.revertedWith('Must be a valid address');
       });
 
@@ -356,16 +359,21 @@ describe('Staking', function () {
         await escrowFactory
           .connect(operator)
           .createEscrow(
-            token.address,
+            await token.getAddress(),
             [await validator.getAddress()],
             jobRequesterId
           )
       ).wait();
-      const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+      const event = (
+        result?.logs?.find(({ topics }) =>
+          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+        ) as EventLog
       )?.args;
 
-      expect(event?.token).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(
+        await token.getAddress(),
+        'token address is correct'
+      );
       expect(event?.escrow).to.not.be.null;
     });
 
@@ -511,13 +519,13 @@ describe('Staking', function () {
     describe('Validations', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         await expect(
-          staking.connect(operator).setRewardPool(rewardPool.address)
+          staking.connect(operator).setRewardPool(await rewardPool.getAddress())
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
       it('Should revert with the right error if not a positive number', async function () {
         await expect(
-          staking.connect(owner).setRewardPool(ethers.constants.AddressZero)
+          staking.connect(owner).setRewardPool(ethers.ZeroAddress)
         ).to.be.revertedWith('Must be a valid address');
       });
     });
@@ -525,17 +533,23 @@ describe('Staking', function () {
     describe('Events', function () {
       it('Should emit an event on set reward pool', async function () {
         await expect(
-          await staking.connect(owner).setRewardPool(rewardPool.address)
+          await staking
+            .connect(owner)
+            .setRewardPool(await rewardPool.getAddress())
         )
           .to.emit(staking, 'SetRewardPool')
-          .withArgs(rewardPool.address);
+          .withArgs(await rewardPool.getAddress());
       });
     });
 
     describe('Set minimum stake', function () {
       it('Should assign a value to minimum stake variable', async function () {
-        await staking.connect(owner).setRewardPool(rewardPool.address);
-        await expect(await staking.rewardPool()).to.equal(rewardPool.address);
+        await staking
+          .connect(owner)
+          .setRewardPool(await rewardPool.getAddress());
+        await expect(await staking.rewardPool()).to.equal(
+          await rewardPool.getAddress()
+        );
       });
     });
   });
@@ -552,17 +566,19 @@ describe('Staking', function () {
           await escrowFactory
             .connect(operator)
             .createEscrow(
-              token.address,
+              await token.getAddress(),
               [await validator.getAddress()],
               jobRequesterId
             )
         ).wait();
-        const event = result.events?.find(({ topics }) =>
-          topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+        const event = (
+          result?.logs?.find(({ topics }) =>
+            topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+          ) as EventLog
         )?.args;
 
         expect(event?.token).to.equal(
-          token.address,
+          await token.getAddress(),
           'token address is correct'
         );
         expect(event?.escrow).to.not.be.null;
@@ -622,17 +638,19 @@ describe('Staking', function () {
           await escrowFactory
             .connect(operator)
             .createEscrow(
-              token.address,
+              await token.getAddress(),
               [await validator.getAddress()],
               jobRequesterId
             )
         ).wait();
-        const event = result.events?.find(({ topics }) =>
-          topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+        const event = (
+          result?.logs?.find(({ topics }) =>
+            topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+          ) as EventLog
         )?.args;
 
         expect(event?.token).to.equal(
-          token.address,
+          await token.getAddress(),
           'token address is correct'
         );
         expect(event?.escrow).to.not.be.null;
@@ -647,10 +665,10 @@ describe('Staking', function () {
       it('Should return a null allocation by escrow address', async function () {
         const allocation = await staking
           .connect(operator)
-          .getAllocation(ethers.constants.AddressZero);
+          .getAllocation(ethers.ZeroAddress);
 
-        expect(allocation.escrowAddress).to.equal(ethers.constants.AddressZero);
-        expect(allocation.staker).to.equal(ethers.constants.AddressZero);
+        expect(allocation.escrowAddress).to.equal(ethers.ZeroAddress);
+        expect(allocation.staker).to.equal(ethers.ZeroAddress);
         expect(allocation.tokens).to.equal(0); // Tokens allocated to a escrowAddress
         expect(allocation.createdAt).to.equal(0); // Time when allocation was created
         expect(allocation.closedAt).to.equal(0); // Time when allocation was closed
@@ -675,7 +693,7 @@ describe('Staking', function () {
     const slashedTokens = 2;
 
     this.beforeEach(async () => {
-      await staking.connect(owner).setRewardPool(rewardPool.address);
+      await staking.connect(owner).setRewardPool(await rewardPool.getAddress());
 
       await staking.connect(validator).stake(stakedTokens);
 
@@ -685,16 +703,21 @@ describe('Staking', function () {
         await escrowFactory
           .connect(operator)
           .createEscrow(
-            token.address,
+            await token.getAddress(),
             [await validator.getAddress()],
             jobRequesterId
           )
       ).wait();
-      const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+      const event = (
+        result?.logs?.find(({ topics }) =>
+          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+        ) as EventLog
       )?.args;
 
-      expect(event?.token).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(
+        await token.getAddress(),
+        'token address is correct'
+      );
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -723,7 +746,7 @@ describe('Staking', function () {
             .slash(
               await validator.getAddress(),
               await operator.getAddress(),
-              ethers.constants.AddressZero,
+              ethers.ZeroAddress,
               slashedTokens
             )
         ).to.be.revertedWith('Must be a valid address');
@@ -816,9 +839,9 @@ describe('Staking', function () {
           stakedTokens - slashedTokens
         );
 
-        await expect(await token.balanceOf(rewardPool.address)).to.equal(
-          slashedTokens
-        );
+        await expect(
+          await token.balanceOf(await rewardPool.getAddress())
+        ).to.equal(slashedTokens);
       });
     });
   });
@@ -879,7 +902,7 @@ describe('Staking', function () {
         await escrowFactory
           .connect(operator)
           .createEscrow(
-            token.address,
+            await token.getAddress(),
             [
               await validator.getAddress(),
               await reputationOracle.getAddress(),
@@ -888,11 +911,16 @@ describe('Staking', function () {
             jobRequesterId
           )
       ).wait();
-      const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+      const event = (
+        result?.logs?.find(({ topics }) =>
+          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+        ) as EventLog
       )?.args;
 
-      expect(event?.token).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(
+        await token.getAddress(),
+        'token address is correct'
+      );
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -927,9 +955,7 @@ describe('Staking', function () {
     describe('Validations', function () {
       it('Should revert with the right error if not a valid address', async function () {
         await expect(
-          staking
-            .connect(operator)
-            .closeAllocation(ethers.constants.AddressZero)
+          staking.connect(operator).closeAllocation(ethers.ZeroAddress)
         ).to.be.revertedWith('Must be a valid address');
       });
 

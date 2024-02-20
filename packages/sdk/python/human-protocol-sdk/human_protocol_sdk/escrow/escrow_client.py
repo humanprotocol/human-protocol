@@ -63,12 +63,26 @@ from human_protocol_sdk.utils import (
     handle_transaction,
 )
 from web3 import Web3, contract
+from web3 import eth
 from web3.middleware import geth_poa_middleware
 from web3.types import TxParams
+from eth_utils import abi
 
 from human_protocol_sdk.utils import validate_url
 
 LOG = logging.getLogger("human_protocol_sdk.escrow")
+
+
+class EscrowCancel:
+    def __init__(self, tx_hash: str, amount_refunded: any):
+        """
+        Represents the result of an escrow cancellation transaction.
+        Args:
+            tx_hash (str): The hash of the transaction that cancelled the escrow.
+            amount_refunded (Any): The amount refunded during the escrow cancellation.
+        """
+        self.txHash = tx_hash
+        self.amountRefunded = amount_refunded
 
 
 class EscrowClientError(Exception):
@@ -681,15 +695,20 @@ class EscrowClient:
 
     def cancel(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
-    ) -> None:
+    ) -> EscrowCancel:
         """Cancels the specified escrow and sends the balance to the canceler.
 
         :param escrow_address: Address of the escrow to cancel
         :param tx_options: (Optional) Additional transaction parameters
 
-        :return: None
+        :return: EscrowCancel:
+            An instance of the EscrowCancel class containing details of the cancellation transaction,
+            including the transaction hash and the amount refunded.
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If the transfer event associated with the cancellation
+                                is not found in the transaction logs
+
 
         :example:
             .. code-block:: python
@@ -714,7 +733,7 @@ class EscrowClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 escrow_client = EscrowClient(w3)
 
-                transaction_hash = escrow_client.cancel(
+                escrow_cancel_data = escrow_client.cancel(
                     "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
                 )
         """
@@ -722,13 +741,40 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        handle_transaction(
+        transaction_receipt = handle_transaction(
             self.w3,
             "Cancel",
             self._get_escrow_contract(escrow_address).functions.cancel(),
             EscrowClientError,
             tx_options,
         )
+
+        amount_transferred = None
+        token_address = self.get_token_address(escrow_address)
+
+        erc20_interface = get_erc20_interface()
+        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
+
+        for log in transaction_receipt["logs"]:
+            if log["address"] == token_address:
+                processed_log = token_contract.events.Transfer().process_log(log)
+
+                if (
+                    processed_log["event"] == "Transfer"
+                    and processed_log["args"]["from"] == escrow_address
+                ):
+                    amount_transferred = processed_log["args"]["value"]
+                    break
+
+        if amount_transferred is None:
+            raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
+
+        escrow_cancel_data = EscrowCancel(
+            tx_hash=transaction_receipt["transactionHash"].hex(),
+            amount_refunded=amount_transferred,
+        )
+
+        return escrow_cancel_data
 
     def abort(self, escrow_address: str, tx_options: Optional[TxParams] = None) -> None:
         """Cancels the specified escrow,

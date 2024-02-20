@@ -1,30 +1,41 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
-import { TokenEntity } from './token.entity';
-import { TokenCreateDto } from './auth.dto';
+import { Injectable } from '@nestjs/common';
+import { BaseRepository } from '../../database/base.repository';
+import { DataSource, DeleteResult } from 'typeorm';
+import { TokenEntity, TokenType } from './token.entity';
 
 @Injectable()
-export class TokenRepository {
-  private readonly logger = new Logger(TokenRepository.name);
-
-  constructor(
-    @InjectRepository(TokenEntity)
-    private readonly tokenEntityRepository: Repository<TokenEntity>,
-  ) {}
-
-  public async findOne(
-    where: FindOptionsWhere<TokenEntity>,
-  ): Promise<TokenEntity | null> {
-    const tokenEntity = await this.tokenEntityRepository.findOne({
-      where,
-      relations: ['user'],
-    });
-
-    return tokenEntity;
+export class TokenRepository extends BaseRepository<TokenEntity> {
+  constructor(private dataSource: DataSource) {
+    super(TokenEntity, dataSource);
   }
 
-  public async create(dto: TokenCreateDto): Promise<TokenEntity> {
-    return this.tokenEntityRepository.create(dto).save();
+  public async findOneByUuidAndTokenType(
+    uuid: string,
+    tokenType: TokenType,
+  ): Promise<TokenEntity | null> {
+    return this.findOne({
+      where: {
+        uuid,
+        tokenType,
+      },
+      relations: ['user'],
+    });
+  }
+
+  public async findOneByUserIdAndTokenType(
+    userId: number,
+    tokenType: TokenType,
+  ): Promise<TokenEntity | null> {
+    return this.findOne({
+      where: {
+        userId,
+        tokenType,
+      },
+      relations: ['user'],
+    });
+  }
+
+  public async deleteOne(token: TokenEntity): Promise<DeleteResult> {
+    return this.delete({ id: token.id });
   }
 }

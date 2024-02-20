@@ -4,7 +4,7 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 
 from tests.utils.constants import REPUTATION_ORACLE_PRIV
 
-amount = Web3.toWei(1, "ether")
+amount = Web3.to_wei(1, "ether")
 
 
 def store_kvstore_value(key: str, value: str):

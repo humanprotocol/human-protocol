@@ -1,31 +1,46 @@
 import { Test } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
 import { ErrorUser } from '../../common/constants/errors';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserEntity } from './user.entity';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { KycStatus, UserStatus, UserType } from '../../common/enums/user';
 import { getNonce } from '../../common/utils/signature';
 import { MOCK_ADDRESS } from '../../../test/constants';
+import { Web3Service } from '../web3/web3.service';
+import { DeepPartial } from 'typeorm';
+import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('@human-protocol/sdk');
 
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: UserRepository;
+  let web3Service: Web3Service;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         UserService,
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: Web3Service,
+          useValue: {
+            signMessage: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get(UserRepository);
+    web3Service = moduleRef.get(Web3Service);
   });
 
   describe('update', () => {
@@ -61,7 +76,6 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123',
         type: UserType.WORKER,
       };
       const hashedPassword =
@@ -94,7 +108,6 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123',
         type: UserType.WORKER,
       };
 
@@ -224,6 +237,70 @@ describe('UserService', () => {
       expect(userRepository.findOne).toHaveBeenCalledWith({
         evmAddress: address,
       });
+    });
+  });
+
+  describe('registerAddress', () => {
+    it('should update evm address and sign the address', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      const address = '0x123';
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        signMessage: jest.fn().mockResolvedValue('signature'),
+      });
+
+      const result = await userService.registerAddress(
+        userEntity as UserEntity,
+        { chainId: ChainId.POLYGON_MUMBAI, address },
+      );
+
+      expect(userEntity.save).toHaveBeenCalledWith();
+      expect(result).toBe('signature');
+    });
+
+    it("should fail if address is different from user's evm address", async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        email: '',
+        evmAddress: '0x123',
+      };
+
+      const address = '0x456';
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          chainId: ChainId.POLYGON_MUMBAI,
+          address,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("should fail if user's kyc is not approved", async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        evmAddress: '0x123',
+        kyc: {
+          status: KycStatus.PENDING_VERIFICATION,
+        },
+      };
+
+      const address = '0x123';
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          chainId: ChainId.POLYGON_MUMBAI,
+          address,
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

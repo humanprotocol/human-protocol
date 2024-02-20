@@ -33,9 +33,9 @@ query GetPayouts(
 {payout_fragment}
 """.format(
         payout_fragment=payout_fragment,
-        escrow_address_clause="escrowAddress: $escrowAddress"
-        if filter.escrow_address
-        else "",
+        escrow_address_clause=(
+            "escrowAddress: $escrowAddress" if filter.escrow_address else ""
+        ),
         recipient_clause="recipient: $recipient" if filter.recipient else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",
         to_clause="createdAt_lte: $to" if filter.date_from else "",

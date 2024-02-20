@@ -31,17 +31,14 @@ describe('KVStoreClient', () => {
     mockKVStoreContract: any;
 
   beforeAll(async () => {
-    const provider = new ethers.providers.JsonRpcProvider();
     mockProvider = {
-      ...provider,
-      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+      provider: {
+        getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+      },
     };
     mockSigner = {
-      ...provider.getSigner(),
-      provider: {
-        ...mockProvider,
-      },
-      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+      provider: mockProvider.provider,
+      getAddress: vi.fn().mockReturnValue(ethers.ZeroAddress),
     };
     network = NETWORKS[ChainId.LOCALHOST];
   });
@@ -66,9 +63,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should create a new instance of KVStoreClient with a Provider', async () => {
-      const provider = ethers.getDefaultProvider();
-
-      const kvStoreClient = await KVStoreClient.build(provider);
+      const kvStoreClient = await KVStoreClient.build(mockProvider);
 
       expect(kvStoreClient).toBeInstanceOf(KVStoreClient);
     });
@@ -82,7 +77,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error if the chain ID is unsupported', async () => {
-      const provider = ethers.getDefaultProvider();
+      const provider = new ethers.JsonRpcProvider();
 
       vi.spyOn(provider, 'getNetwork').mockResolvedValue({
         chainId: 1337,
@@ -168,7 +163,7 @@ describe('KVStoreClient', () => {
         ['url', 'urlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         {}
       );
@@ -190,7 +185,7 @@ describe('KVStoreClient', () => {
         ['linkedinUrl', 'linkedinUrlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         {}
       );
@@ -223,7 +218,7 @@ describe('KVStoreClient', () => {
         ['url', 'urlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         {}
       );
@@ -251,7 +246,7 @@ describe('KVStoreClient', () => {
         ['linkedinUrl', 'linkedinUrlHash'],
         [
           'https://example.com',
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+          ethers.keccak256(ethers.toUtf8Bytes('example')),
         ],
         txOptions
       );
@@ -424,9 +419,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should return URL if the content is valid', async () => {
-      const validHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes('example')
-      );
+      const validHash = ethers.keccak256(ethers.toUtf8Bytes('example'));
 
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
@@ -447,9 +440,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should return URL for the given URL key if the content is valid', async () => {
-      const validHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes('example')
-      );
+      const validHash = ethers.keccak256(ethers.toUtf8Bytes('example'));
 
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
@@ -471,8 +462,8 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error if the content is not valid', async () => {
-      const invalidHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes('invalid-example')
+      const invalidHash = ethers.keccak256(
+        ethers.toUtf8Bytes('invalid-example')
       );
 
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');

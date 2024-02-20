@@ -113,6 +113,7 @@ exports
 dist
 build
 .strapi-updater.json
+.strapi
 
 # docker
 db-data
