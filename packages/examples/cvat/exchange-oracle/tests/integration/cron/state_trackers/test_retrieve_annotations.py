@@ -102,7 +102,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
             patch("src.crons.state_trackers.cvat_api") as mock_cvat_api,
             patch("src.crons.state_trackers.validate_escrow"),
-            patch("src.crons.state_trackers.cloud_client") as mock_cloud_client,
+            patch("src.crons.state_trackers.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -129,8 +129,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client = Mock()
             mock_storage_client.create_file = Mock()
             mock_storage_client.list_files = Mock(return_value=[])
-            mock_cloud_client.make_client = Mock(return_value=mock_storage_client)
-            mock_cloud_client.S3Client = Mock(return_value=mock_storage_client)
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
+            mock_cloud_service.S3Client = Mock(return_value=mock_storage_client)
 
             retrieve_annotations()
 
@@ -251,7 +251,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.crons.state_trackers.cvat_api"),
             patch("src.crons.state_trackers.cvat_api.get_job_annotations") as mock_annotations,
             patch("src.crons.state_trackers.validate_escrow"),
-            patch("src.crons.state_trackers.cloud_client.S3Client") as mock_S3Client,
+            patch("src.crons.state_trackers.cloud_service.S3Client") as mock_S3Client,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
