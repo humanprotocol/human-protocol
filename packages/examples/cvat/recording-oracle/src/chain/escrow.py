@@ -6,7 +6,7 @@ from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageClient
 
 from src.chain.web3 import get_web3
-from src.utils.cloud_storage import parse_bucket_url
+from src.services.cloud.utils import parse_bucket_url
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:

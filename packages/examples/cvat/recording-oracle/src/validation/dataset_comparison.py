@@ -1,9 +1,10 @@
 import itertools
+from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, Tuple
 
 import datumaro as dm
 import numpy as np
-from attrs import define, field
+from attrs import define
 
 from .annotation_matching import Bbox, Point, bbox_iou, match_annotations, point_to_bbox_cmp
 
@@ -31,9 +32,10 @@ class CachedSimilarityFunction:
 
 
 @define
-class DatasetComparator:
+class DatasetComparator(metaclass=ABCMeta):
     min_similarity_threshold: float
 
+    @abstractmethod
     def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
         ...
 

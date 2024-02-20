@@ -4,7 +4,7 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 
-from src.services.cloud import S3Client
+from src.services.cloud.s3 import S3Client
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert client.file_exists(self.bucket_name, file_name)
         assert len(client.list_files(self.bucket_name)) == 1
 
-        file_content = client.download_fileobj(bucket=self.bucket_name, key=file_name)
+        file_content = client.download_file(bucket=self.bucket_name, key=file_name)
         assert file_content == data
 
         client.remove_file(self.bucket_name, file_name)
@@ -49,10 +49,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         invalid_file = "non-existent-file"
 
         with pytest.raises(ClientError):
-            client.download_fileobj(bucket=invalid_bucket, key=invalid_file)
+            client.download_file(bucket=invalid_bucket, key=invalid_file)
 
         with pytest.raises(ClientError):
-            client.download_fileobj(bucket=self.bucket_name, key=invalid_file)
+            client.download_file(bucket=self.bucket_name, key=invalid_file)
 
         with pytest.raises(ClientError):
             client.create_file(bucket=invalid_bucket, filename=invalid_file)

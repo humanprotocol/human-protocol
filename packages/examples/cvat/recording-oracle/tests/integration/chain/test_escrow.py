@@ -19,7 +19,7 @@ from src.core.config import Config
 from tests.utils.constants import (
     DEFAULT_GAS_PAYER_PRIV,
     DEFAULT_HASH,
-    DEFAULT_URL,
+    DEFAULT_MANIFEST_URL,
     REPUTATION_ORACLE_ADDRESS,
 )
 from tests.utils.setup_escrow import (
@@ -108,13 +108,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             results = store_results(
-                self.w3.eth.chain_id, escrow_address, DEFAULT_URL, DEFAULT_HASH
+                self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, DEFAULT_HASH
             )
             self.assertIsNone(results)
             intermediate_results_url = get_intermediate_results_url(
                 self.w3, escrow_address
             )
-            self.assertEqual(intermediate_results_url, DEFAULT_URL)
+            self.assertEqual(intermediate_results_url, DEFAULT_MANIFEST_URL)
 
     def test_store_results_invalid_url(self):
         escrow_address = create_escrow(self.w3)
@@ -131,7 +131,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             with self.assertRaises(EscrowClientError) as error:
-                store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_URL, "")
+                store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, "")
         self.assertEqual(f"Invalid empty hash", str(error.exception))
 
     def test_get_reputation_oracle_address(self):
