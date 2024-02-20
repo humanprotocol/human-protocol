@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Dict, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence, Set, Tuple, Union
 
 import datumaro as dm
 import numpy as np
@@ -54,9 +54,9 @@ class CachedSimilarityFunction(SimilarityFunction):
 class DatasetComparator(metaclass=ABCMeta):
     min_similarity_threshold: float
 
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
-        all_similarities = []
-        total_anns_to_compare = 0
+    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> Tuple[float, Set[str]]:
+        dataset_similarities = []
+        dataset_total_anns_to_compare = 0
 
         for ds_sample in ds_dataset:
             gt_sample = gt_dataset.get(ds_sample.id)
@@ -66,6 +66,8 @@ class DatasetComparator(metaclass=ABCMeta):
 
             matching_result, similarity_fn = self.compare_sample_annotations(gt_sample, ds_sample)
 
+            sample_similarities = []
+            sample_total_anns_to_compare = []
             for gt_ann, ds_ann in itertools.chain(
                 matching_result.matches,
                 matching_result.mispred,
@@ -73,15 +75,23 @@ class DatasetComparator(metaclass=ABCMeta):
                 zip(itertools.repeat(None), matching_result.b_extra),
             ):
                 sim = similarity_fn(gt_ann, ds_ann) if gt_ann and ds_ann else 0
+                sample_total_anns_to_compare += (gt_ann is not None) + (ds_ann is not None)
+
+            dataset_similarities.extend(sample_similarities)
+            dataset_total_anns_to_compare += sample_total_anns_to_compare
+
+            sample_accuracy = 0
+            if sample_total_anns_to_compare:
+                sample_accuracy = 2 * np.sum(sample_similarities) / sample_total_anns_to_compare
                 all_similarities.append(sim)
 
                 total_anns_to_compare += (gt_ann is not None) + (ds_ann is not None)
 
-        accuracy = 0
-        if total_anns_to_compare:
-            accuracy = 2 * np.sum(all_similarities) / total_anns_to_compare
+        dataset_accuracy = 0
+        if dataset_total_anns_to_compare:
+            dataset_accuracy = 2 * np.sum(dataset_similarities) / dataset_total_anns_to_compare
 
-        return accuracy
+        return dataset_accuracy
 
     @abstractmethod
     def compare_sample_annotations(
@@ -155,13 +165,13 @@ class SkeletonDatasetComparator(DatasetComparator):
         super().__init__(*args, **kwargs)
 
         self._skeleton_info: Dict[int, self._SkeletonInfo] = {}
-        self.categories: Optional[dm.CategoriesInfo] = None
+        self._categories: Optional[dm.CategoriesInfo] = None
 
         # TODO: find better strategy for sigma estimation
         self.oks_sigma = 0.1  # average value for COCO points
 
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
-        self.categories = gt_dataset.categories()
+    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> Tuple[float, Set[str]]:
+        self._categories = gt_dataset.categories()
         return super().compare(gt_dataset, ds_dataset)
 
     def compare_sample_annotations(
@@ -170,7 +180,7 @@ class SkeletonDatasetComparator(DatasetComparator):
         return self._match_skeletons(gt_sample, ds_sample)
 
     def _get_skeleton_info(self, skeleton_label_id: int) -> _SkeletonInfo:
-        label_cat: dm.LabelCategories = self.categories[dm.AnnotationType.label]
+        label_cat: dm.LabelCategories = self._categories[dm.AnnotationType.label]
         skeleton_info = self._skeleton_info.get(skeleton_label_id)
 
         if skeleton_info is None:
