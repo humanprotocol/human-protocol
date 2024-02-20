@@ -13,7 +13,7 @@
 - [Staking](typescript/modules/staking.md)
   - [StakingClient](typescript/classes/staking.StakingClient.md)
 - [Operator](typescript/modules/operator.md)
-  - [OperatorUtils](typescript/classes/staoperatorking.OperatorUtils.md)
+  - [OperatorUtils](typescript/classes/operator.OperatorUtils.md)
 - [Storage](typescript/modules/storage.md)
   - [StorageClient](typescript/classes/storage.StorageClient.md)
 - [Statistics](typescript/modules/statistics.md)
