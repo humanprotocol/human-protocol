@@ -123,9 +123,7 @@ export class AuthJwtController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async web3PreSignUp(
-    @Body() data: Web3PreSignUpDto,
-  ): Promise<Web3PreSignUpPayloadDto> {
+  public async web3PreSignUp(@Body() data: Web3PreSignUpDto): Promise<string> {
     return this.authService.web3PreSignup(data);
   }
 

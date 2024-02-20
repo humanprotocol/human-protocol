@@ -104,10 +104,6 @@ export class Web3PreSignUpPayloadDto {
 
 export class Web3PreSignUpDto {
   @ApiProperty()
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @ApiProperty()
   @IsString()
   @IsEthereumAddress()
   public address: string;

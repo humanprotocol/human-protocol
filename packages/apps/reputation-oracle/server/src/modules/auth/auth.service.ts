@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ethers } from 'ethers';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
@@ -52,7 +53,6 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
-    private readonly web3Service: Web3Service,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -282,19 +282,18 @@ export class AuthService {
   public prepareWeb3PreSignUpPayload(
     data: Web3PreSignUpDto,
   ): Web3PreSignUpPayloadDto {
-    const signer = this.web3Service.getSigner(data.chainId);
+    const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
+    const wallet = new ethers.Wallet(privateKey);
 
     return {
       from: data.address,
-      to: signer.address,
+      to: wallet.address,
       contents: WEB3_SIGNUP_MESSAGE,
     };
   }
 
-  public async web3PreSignup(
-    data: Web3PreSignUpDto,
-  ): Promise<Web3PreSignUpPayloadDto> {
-    return this.prepareWeb3PreSignUpPayload(data);
+  public async web3PreSignup(data: Web3PreSignUpDto): Promise<string> {
+    return JSON.stringify(this.prepareWeb3PreSignUpPayload(data));
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {

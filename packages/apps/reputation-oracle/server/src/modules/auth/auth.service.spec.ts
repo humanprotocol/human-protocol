@@ -42,7 +42,6 @@ import {
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { Web3PreSignUpPayloadDto, Web3PreSignUpDto } from './auth.dto';
-import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('@human-protocol/sdk');
 
@@ -68,6 +67,8 @@ describe('AuthService', () => {
         switch (key) {
           case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
             return MOCK_EXPIRES_IN;
+          case 'WEB3_PRIVATE_KEY':
+            return MOCK_PRIVATE_KEY;
         }
       }),
     };
@@ -97,6 +98,7 @@ describe('AuthService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
+            address: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
       ],
@@ -654,11 +656,6 @@ describe('AuthService', () => {
     });
 
     describe('presignup', () => {
-      const web3PreSignUpDto: Web3PreSignUpDto = {
-        address: MOCK_ADDRESS,
-        chainId: ChainId.LOCALHOST,
-      };
-
       afterEach(() => {
         jest.clearAllMocks();
       });
@@ -672,9 +669,11 @@ describe('AuthService', () => {
 
         const web3PreSignUpDto: Web3PreSignUpDto = {
           address: MOCK_ADDRESS,
-          chainId: ChainId.LOCALHOST,
         };
 
+        jest
+          .spyOn(JSON, 'stringify')
+          .mockReturnValueOnce(JSON.stringify(preSignUpDataMock));
         jest
           .spyOn(authService as any, 'prepareWeb3PreSignUpPayload')
           .mockResolvedValue(preSignUpDataMock);
@@ -684,14 +683,13 @@ describe('AuthService', () => {
         expect(authService.prepareWeb3PreSignUpPayload).toHaveBeenCalledWith(
           web3PreSignUpDto,
         );
-        expect(result).toStrictEqual(preSignUpDataMock);
+        expect(result).toStrictEqual(JSON.stringify(preSignUpDataMock));
       });
     });
 
     describe('signup', () => {
       const web3PreSignUpDto: Web3PreSignUpDto = {
         address: MOCK_ADDRESS,
-        chainId: ChainId.LOCALHOST,
       };
 
       const nonce = getNonce();
