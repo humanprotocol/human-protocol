@@ -2,7 +2,7 @@
 
 ### Added
 
-- **Added new operator module:** new module including old methods and a new one to return operators of a reputation network.
+- **Added OperatorUtils module:** new module for fetching leaders and operators information.
 
 ### Changed
 
