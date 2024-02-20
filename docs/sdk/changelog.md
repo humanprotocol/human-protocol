@@ -13,7 +13,7 @@
 
 ### Removed
 
-- **Remove staking utils module:** moved to a new module with a more descriptive name
+- **Remove staking utils module:** the methods from this module have been moved  into the new OperatorUtils module.
 
 ### Fixed
 
