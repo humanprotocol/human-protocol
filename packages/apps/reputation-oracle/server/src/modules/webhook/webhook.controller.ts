@@ -61,34 +61,4 @@ export class WebhookController {
     await this.webhookService.createIncomingWebhook(data);
     return;
   }
-
-  @Public()
-  @Get('/cron/pending')
-  @ApiOperation({
-    summary: 'Process Pending Cron Job',
-    description: 'Endpoint to process pending cron jobs.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Pending cron jobs processed successfully',
-  })
-  public async processPendingCronJob(): Promise<void> {
-    await this.webhookService.processPendingCronJob();
-    return;
-  }
-
-  @Public()
-  @Get('/cron/paid')
-  @ApiOperation({
-    summary: 'Process Paid Cron Job',
-    description: 'Endpoint to process paid cron jobs.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Paid cron jobs processed successfully',
-  })
-  public async processPaidCronJob(): Promise<void> {
-    await this.webhookService.processPaidCronJob();
-    return;
-  }
 }

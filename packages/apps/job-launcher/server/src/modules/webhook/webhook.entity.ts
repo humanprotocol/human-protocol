@@ -34,14 +34,14 @@ export class WebhookEntity extends BaseEntity {
   public hasSignature: boolean;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  public retriesCount = 0;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  public waitUntil: Date = new Date();
 
   @Column({
     type: 'enum',
     enum: WebhookStatus,
   })
-  public status: WebhookStatus;
+  public status: WebhookStatus = WebhookStatus.PENDING;
 }

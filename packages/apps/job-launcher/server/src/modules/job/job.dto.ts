@@ -746,3 +746,5 @@ class TaskData {
   @IsOptional()
   datapoint_text?: DatapointText;
 }
+
+export type CreateJob = JobFortuneDto | JobCvatDto | JobCaptchaDto;

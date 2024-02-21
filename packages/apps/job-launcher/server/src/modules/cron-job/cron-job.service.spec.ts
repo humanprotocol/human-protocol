@@ -61,7 +61,8 @@ describe('CronJobService', () => {
     webhookService: WebhookService,
     webhookRepository: WebhookRepository,
     storageService: StorageService,
-    jobService: JobService;
+    jobService: JobService,
+    jobRepository: JobRepository;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -116,6 +117,7 @@ describe('CronJobService', () => {
 
     service = module.get<CronJobService>(CronJobService);
     jobService = module.get<JobService>(JobService);
+    jobRepository = module.get<JobRepository>(JobRepository);
     repository = module.get<CronJobRepository>(CronJobRepository);
     webhookService = module.get<WebhookService>(WebhookService);
     webhookRepository = module.get<WebhookRepository>(WebhookRepository);
@@ -130,43 +132,44 @@ describe('CronJobService', () => {
       cronJobEntity.cronJobType = cronJobType;
       cronJobEntity.startedAt = new Date();
 
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
 
-      const createSpy = jest
-        .spyOn(repository, 'create')
+      const createUniqueSpy = jest
+        .spyOn(repository, 'createUnique')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.startCronJob(cronJobType);
 
-      expect(createSpy).toHaveBeenCalledWith(cronJobType);
+      expect(createUniqueSpy).toHaveBeenCalledWith({
+        cronJobType: CronJobType.CreateEscrow,
+      });
       expect(result).toEqual(cronJobEntity);
     });
 
     it('should start a cron job if exists', async () => {
       const cronJobType = CronJobType.CreateEscrow;
-      const cronJobEntity = new CronJobEntity();
-      cronJobEntity.cronJobType = cronJobType;
-      cronJobEntity.startedAt = new Date();
-      cronJobEntity.completedAt = new Date();
+      const cronJobEntity: Partial<CronJobEntity> = {
+        cronJobType: cronJobType,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      };
 
       const mockDate = new Date(2023, 12, 23);
       jest.useFakeTimers();
       jest.setSystemTime(mockDate);
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
-        .mockResolvedValue(cronJobEntity);
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValue(cronJobEntity as any);
 
-      const saveSpy = jest
-        .spyOn(cronJobEntity, 'save')
-        .mockResolvedValue(cronJobEntity);
+      const updateOneSpy = jest
+        .spyOn(repository, 'updateOne')
+        .mockResolvedValue(cronJobEntity as any);
 
       const result = await service.startCronJob(cronJobType);
 
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
-      expect(saveSpy).toHaveBeenCalled();
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
+      expect(updateOneSpy).toHaveBeenCalled();
       cronJobEntity.startedAt = mockDate;
       expect(result).toEqual(cronJobEntity);
 
@@ -180,15 +183,13 @@ describe('CronJobService', () => {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
         .mockResolvedValue(null);
 
       const result = await service.isCronJobRunning(cronJobType);
 
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(false);
     });
 
@@ -198,15 +199,13 @@ describe('CronJobService', () => {
       cronJobEntity.cronJobType = cronJobType;
       cronJobEntity.completedAt = new Date();
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.isCronJobRunning(cronJobType);
 
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(false);
     });
 
@@ -215,14 +214,12 @@ describe('CronJobService', () => {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
 
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
+      const findOneByTypeSpy = jest
+        .spyOn(repository, 'findOneByType')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.isCronJobRunning(cronJobType);
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
+      expect(findOneByTypeSpy).toHaveBeenCalledWith(cronJobType);
       expect(result).toEqual(true);
     });
   });
@@ -238,13 +235,13 @@ describe('CronJobService', () => {
       jest.useFakeTimers();
       jest.setSystemTime(mockDate);
 
-      const saveSpy = jest
-        .spyOn(cronJobEntity, 'save')
+      const updateOneSpy = jest
+        .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
       const result = await service.completeCronJob(cronJobEntity);
 
-      expect(saveSpy).toHaveBeenCalled();
+      expect(updateOneSpy).toHaveBeenCalled();
       expect(cronJobEntity.completedAt).toEqual(mockDate);
       expect(result).toEqual(cronJobEntity);
 
@@ -257,12 +254,12 @@ describe('CronJobService', () => {
       cronJobEntity.cronJobType = cronJobType;
       cronJobEntity.completedAt = new Date();
 
-      const saveSpy = jest
-        .spyOn(cronJobEntity, 'save')
+      const updateOneSpy = jest
+        .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
       await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow();
-      expect(saveSpy).not.toHaveBeenCalled();
+      expect(updateOneSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -275,7 +272,6 @@ describe('CronJobService', () => {
       cronJobEntityMock = {
         cronJobType: CronJobType.CreateEscrow,
         startedAt: new Date(),
-        save: jest.fn(),
       };
 
       jobEntityMock1 = {
@@ -288,7 +284,6 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 1,
-        save: jest.fn(),
       };
 
       jobEntityMock2 = {
@@ -301,12 +296,16 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 1,
-        save: jest.fn(),
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
 
       createEscrowMock = jest.spyOn(jobService, 'createEscrow');
       createEscrowMock.mockResolvedValue(true);
@@ -372,9 +371,10 @@ describe('CronJobService', () => {
 
       await service.createEscrowCronJob();
 
-      expect(service.completeCronJob).toHaveBeenCalledWith(
-        CronJobType.CreateEscrow,
-      );
+      expect(service.completeCronJob).toHaveBeenCalledWith({
+        cronJobType: CronJobType.CreateEscrow,
+        startedAt: expect.any(Date),
+      });
     });
   });
 
@@ -387,7 +387,6 @@ describe('CronJobService', () => {
       cronJobEntityMock = {
         cronJobType: CronJobType.SetupEscrow,
         createdAt: new Date(),
-        save: jest.fn(),
       };
 
       jobEntityMock1 = {
@@ -400,7 +399,6 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 1,
-        save: jest.fn(),
       };
 
       jobEntityMock2 = {
@@ -413,17 +411,21 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 1,
-        save: jest.fn(),
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       setupEscrowMock = jest.spyOn(jobService, 'setupEscrow');
       setupEscrowMock.mockResolvedValue(true);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
     });
 
     afterEach(() => {
@@ -484,9 +486,10 @@ describe('CronJobService', () => {
 
       await service.setupEscrowCronJob();
 
-      expect(service.completeCronJob).toHaveBeenCalledWith(
-        CronJobType.SetupEscrow,
-      );
+      expect(service.completeCronJob).toHaveBeenCalledWith({
+        cronJobType: CronJobType.SetupEscrow,
+        createdAt: expect.any(Date),
+      });
     });
   });
 
@@ -500,7 +503,6 @@ describe('CronJobService', () => {
       cronJobEntityMock = {
         cronJobType: CronJobType.FundEscrow,
         createdAt: new Date(),
-        save: jest.fn(),
       };
 
       jobEntityMock1 = {
@@ -513,7 +515,6 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 1,
-        save: jest.fn(),
       };
 
       jobEntityMock2 = {
@@ -526,11 +527,10 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 1,
-        save: jest.fn(),
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       fundEscrowMock = jest.spyOn(jobService, 'fundEscrow');
@@ -538,7 +538,7 @@ describe('CronJobService', () => {
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
 
-      createWebhookMock = jest.spyOn(webhookService, 'createWebhook');
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
 
       const cvatManifestMock: DeepPartial<CvatManifestDto> = {
         data: {
@@ -551,6 +551,11 @@ describe('CronJobService', () => {
       jest
         .spyOn(storageService, 'download')
         .mockResolvedValue(cvatManifestMock);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
     });
 
     afterEach(() => {
@@ -614,9 +619,10 @@ describe('CronJobService', () => {
 
       await service.fundEscrowCronJob();
 
-      expect(service.completeCronJob).toHaveBeenCalledWith(
-        CronJobType.FundEscrow,
-      );
+      expect(service.completeCronJob).toHaveBeenCalledWith({
+        cronJobType: CronJobType.FundEscrow,
+        createdAt: expect.any(Date),
+      });
     });
   });
 
@@ -630,7 +636,6 @@ describe('CronJobService', () => {
       cronJobEntityMock = {
         cronJobType: CronJobType.CancelEscrow,
         createdAt: new Date(),
-        save: jest.fn(),
       };
 
       jobEntityMock1 = {
@@ -641,7 +646,6 @@ describe('CronJobService', () => {
         manifestUrl: MOCK_FILE_URL,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        save: jest.fn(),
         retriesCount: 0,
       };
 
@@ -653,12 +657,11 @@ describe('CronJobService', () => {
         manifestUrl: MOCK_FILE_URL,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        save: jest.fn(),
         retriesCount: 0,
       };
 
       findJobMock = jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
@@ -682,6 +685,11 @@ describe('CronJobService', () => {
         requestType: JobRequestType.FORTUNE,
       };
       storageService.download = jest.fn().mockResolvedValue(manifestMock);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
     });
 
     afterEach(() => {
@@ -709,19 +717,18 @@ describe('CronJobService', () => {
     });
 
     it('should cancel all of the jobs with status TO_CANCEL', async () => {
-      jest.spyOn(webhookService, 'createWebhook');
+      jest.spyOn(webhookRepository, 'createUnique');
       const result = await service.cancelCronJob();
 
       expect(result).toBeTruthy();
       expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(
         jobEntityMock1,
       );
-      expect(jobEntityMock1.save).toHaveBeenCalled();
+      expect(jobRepository.updateOne).toHaveBeenCalledTimes(2);
       expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(
         jobEntityMock2,
       );
-      expect(jobEntityMock2.save).toHaveBeenCalled();
-      expect(webhookService.createWebhook).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.createUnique).toHaveBeenCalledTimes(2);
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {
@@ -731,7 +738,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(jobService, 'findJobByStatus')
+        .spyOn(jobRepository, 'findByStatus')
         .mockResolvedValueOnce([jobEntityWithoutEscrow as any]);
       jest
         .spyOn(jobService, 'processEscrowCancellation')
@@ -773,9 +780,10 @@ describe('CronJobService', () => {
 
       await service.cancelCronJob();
 
-      expect(service.completeCronJob).toHaveBeenCalledWith(
-        CronJobType.CancelEscrow,
-      );
+      expect(service.completeCronJob).toHaveBeenCalledWith({
+        cronJobType: CronJobType.CancelEscrow,
+        createdAt: expect.any(Date),
+      });
     });
   });
 
@@ -789,7 +797,6 @@ describe('CronJobService', () => {
       cronJobEntityMock = {
         cronJobType: CronJobType.ProcessPendingWebhook,
         startedAt: new Date(),
-        save: jest.fn(),
       };
 
       webhookEntity1 = {
@@ -811,13 +818,18 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(webhookRepository, 'find')
+        .spyOn(webhookRepository, 'findByStatus')
         .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
       sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');
       sendWebhookMock.mockResolvedValue(true);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
     });
 
     afterEach(() => {
@@ -854,27 +866,18 @@ describe('CronJobService', () => {
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity2);
 
       expect(webhookRepository.updateOne).toHaveBeenCalledTimes(2);
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
-        { status: WebhookStatus.COMPLETED },
-      );
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity2.id },
-        { status: WebhookStatus.COMPLETED },
-      );
+      expect(webhookEntity1.status).toBe(WebhookStatus.COMPLETED);
+      expect(webhookEntity2.status).toBe(WebhookStatus.COMPLETED);
     });
 
     it('should increase retriesCount by 1 if sending webhook fails', async () => {
       sendWebhookMock.mockRejectedValueOnce(new Error());
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
-        {
-          retriesCount: 1,
-          waitUntil: expect.any(Date),
-        },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity1.status).toBe(WebhookStatus.PENDING);
+      expect(webhookEntity1.retriesCount).toBe(1);
+      expect(webhookEntity1.waitUntil).toBeInstanceOf(Date);
     });
 
     it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
@@ -884,10 +887,8 @@ describe('CronJobService', () => {
 
       await service.processPendingWebhooks();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: webhookEntity1.id },
-        { status: WebhookStatus.FAILED },
-      );
+      expect(webhookRepository.updateOne).toHaveBeenCalled();
+      expect(webhookEntity1.status).toBe(WebhookStatus.FAILED);
     });
 
     it('should complete the cron job entity to unlock', async () => {

@@ -22,6 +22,7 @@ export const ConfigNames = {
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   PGP_PRIVATE_KEY: 'PGP_PRIVATE_KEY',
+  PGP_PASSPHRASE: 'PGP_PASSPHRASE',
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   REPUTATION_ORACLE_ADDRESS: 'REPUTATION_ORACLE_ADDRESS',
@@ -33,6 +34,8 @@ export const ConfigNames = {
   HCAPTCHA_REPUTATION_ORACLE_URI: 'HCAPTCHA_REPUTATION_ORACLE_URI',
   HCAPTCHA_ORACLE_ADDRESS: 'HCAPTCHA_ORACLE_ADDRESS',
   HCAPTCHA_SITE_KEY: 'HCAPTCHA_SITE_KEY',
+  // HCAPTCHA_SECRET: 'HCAPTCHA_SECRET',
+  HCAPTCHA_EXCHANGE_URL: 'HCAPTCHA_EXCHANGE_URL',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -89,6 +92,10 @@ export const envValidator = Joi.object({
   HCAPTCHA_REPUTATION_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
+  // HCAPTCHA_SECRET: Joi.string().required(),
+  HCAPTCHA_EXCHANGE_URL: Joi.string()
+    .default('https://foundation-exchange.hmt.ai')
+    .description('hcaptcha exchange url'),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),
@@ -112,7 +119,8 @@ export const envValidator = Joi.object({
   CVAT_VAL_SIZE: Joi.string().default('2'),
   //PGP
   PGP_PRIVATE_KEY: Joi.string().default(null),
-  PGP_ENCRYPT: Joi.string().default(false),
+  PGP_PASSPHRASE: Joi.string().optional(),
+  PGP_ENCRYPT: Joi.boolean().default(false),
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),

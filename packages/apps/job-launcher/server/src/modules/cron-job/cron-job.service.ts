@@ -18,6 +18,9 @@ import {
 import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
+import { WebhookRepository } from '../webhook/webhook.repository';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { JobRepository } from '../job/job.repository';
 
 @Injectable()
 export class CronJobService {
@@ -26,31 +29,28 @@ export class CronJobService {
   constructor(
     private readonly cronJobRepository: CronJobRepository,
     private readonly jobService: JobService,
+    private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
     private readonly storageService: StorageService,
     private readonly paymentService: PaymentService,
+    private readonly webhookRepository: WebhookRepository,
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
-    let cronJob = await this.cronJobRepository.findOne({
-      cronJobType,
-    });
+    const cronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!cronJob) {
-      cronJob = await this.cronJobRepository.create(cronJobType);
-    } else {
-      cronJob.startedAt = new Date();
-      cronJob.completedAt = null;
-      await cronJob.save();
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+      return this.cronJobRepository.createUnique(cronJobEntity);
     }
-
-    return cronJob;
+    cronJob.startedAt = new Date();
+    cronJob.completedAt = null;
+    return this.cronJobRepository.updateOne(cronJob);
   }
 
   public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
-    const lastCronJob = await this.cronJobRepository.findOne({
-      cronJobType,
-    });
+    const lastCronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!lastCronJob || lastCronJob.completedAt) {
       return false;
@@ -69,7 +69,7 @@ export class CronJobService {
     }
 
     cronJobEntity.completedAt = new Date();
-    return cronJobEntity.save();
+    return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
@@ -86,7 +86,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(JobStatus.PAID);
+      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
@@ -117,7 +117,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(
+      const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.CREATED,
       );
 
@@ -151,7 +151,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.FundEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(
+      const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.SET_UP,
       );
 
@@ -164,13 +164,15 @@ export class CronJobService {
           );
 
           if ((manifest as CvatManifestDto)?.annotation?.type) {
-            await this.webhookService.createWebhook({
+            const webhookEntity = new WebhookEntity();
+            Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CREATED,
               oracleType: OracleType.CVAT,
               hasSignature: false,
             });
+            await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
           this.logger.error(`Error funding escrow: ${err.message}`);
@@ -199,7 +201,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CancelEscrow);
 
     try {
-      const jobEntities = await this.jobService.findJobByStatus(
+      const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.TO_CANCEL,
       );
 
@@ -221,7 +223,7 @@ export class CronJobService {
             });
           }
           jobEntity.status = JobStatus.CANCELED;
-          await jobEntity.save();
+          await this.jobRepository.updateOne(jobEntity);
 
           const manifest = await this.storageService.download(
             jobEntity.manifestUrl,
@@ -229,7 +231,8 @@ export class CronJobService {
 
           const oracleType = this.jobService.getOracleType(manifest);
           if (oracleType !== OracleType.HCAPTCHA) {
-            await this.webhookService.createWebhook({
+            const webhookEntity = new WebhookEntity();
+            Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CANCELED,
@@ -238,6 +241,7 @@ export class CronJobService {
                 (manifest as FortuneManifestDto).requestType ===
                 JobRequestType.FORTUNE,
             });
+            await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
           this.logger.error(`Error canceling escrow: ${err.message}`);
@@ -270,21 +274,20 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
-      const webhookEntities = await this.webhookService.findWebhookByStatus(
+      const webhookEntities = await this.webhookRepository.findByStatus(
         WebhookStatus.PENDING,
       );
 
       for (const webhookEntity of webhookEntities) {
         try {
           await this.webhookService.sendWebhook(webhookEntity);
-          await this.webhookService.updateWebhookStatus(
-            webhookEntity.id,
-            WebhookStatus.COMPLETED,
-          );
         } catch (err) {
           this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.webhookService.handleWebhookError(webhookEntity, err);
+          await this.webhookService.handleWebhookError(webhookEntity);
+          continue;
         }
+        webhookEntity.status = WebhookStatus.COMPLETED;
+        await this.webhookRepository.updateOne(webhookEntity);
       }
     } catch (e) {
       this.logger.error(e);
