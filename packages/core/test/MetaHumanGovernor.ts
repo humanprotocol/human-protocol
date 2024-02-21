@@ -97,7 +97,7 @@ describe.only('MetaHumanGovernor', function () {
       owner.getAddress(),
       12,
       1,
-      20,
+      20 * 15,
       0,
       4
     )) as MetaHumanGovernor;
