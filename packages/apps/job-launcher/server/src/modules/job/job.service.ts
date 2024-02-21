@@ -184,12 +184,13 @@ export class JobService {
       ),
       public_results: true,
       oracle_stake: HCAPTCHA_ORACLE_STAKE,
-      repo_uri: this.configService.get<string>(
+      // TODO: Remove
+      /*repo_uri: this.configService.get<string>(
         ConfigNames.HCAPTCHA_REPUTATION_ORACLE_URI,
       )!,
       ro_uri: this.configService.get<string>(
         ConfigNames.HCAPTCHA_RECORDING_ORACLE_URI,
-      )!,
+      )!,*/
     };
 
     let groundTruthsData;

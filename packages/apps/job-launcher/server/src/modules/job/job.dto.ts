@@ -706,11 +706,13 @@ export class HCaptchaManifestDto {
   @IsNumber()
   oracle_stake: number;
 
+  // TODO: Remove
+  /*
   @IsString()
   repo_uri: string;
 
   @IsString()
-  ro_uri: string;
+  ro_uri: string;*/
 
   @IsObject()
   @ValidateNested()

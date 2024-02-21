@@ -104,8 +104,6 @@ export const MOCK_HCAPTCHA_SITE_KEY = '1234';
 export const MOCK_HCAPTCHA_IMAGE_URL =
   'http://mockedFileUrl.test/bucket/img_1.jpg';
 export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';
-export const MOCK_HCAPTCHA_REPO_URI = 'http://recoracle:3000';
-export const MOCK_HCAPTCHA_RO_URI = 'http://recoracle:3000';
 export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_STORAGE_DATA: StorageDataDto = {
   provider: StorageProviders.AWS,
