@@ -94,7 +94,11 @@ describe.only('DAOSpokeContract', function () {
       0,
       await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
-      12
+      12,
+      1,
+      20 * 15,
+      0,
+      4
     )) as MetaHumanGovernor;
 
     // Set Governor on worm hole mock
