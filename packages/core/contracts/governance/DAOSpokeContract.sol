@@ -8,7 +8,6 @@ import './MetaHumanGovernor.sol';
 import './wormhole/IWormholeRelayer.sol';
 import './wormhole/IWormholeReceiver.sol';
 import './magistrate/Magistrate.sol';
-import 'hardhat/console.sol';
 
 /**
  * @title DAOSpokeContract
