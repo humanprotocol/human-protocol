@@ -11,7 +11,6 @@ import './DAOSpokeContract.sol';
 import './wormhole/IWormholeRelayer.sol';
 import './wormhole/IWormholeReceiver.sol';
 import './magistrate/Magistrate.sol';
-import 'hardhat/console.sol';
 
 /**
  * @title MetaHumanGovernor
@@ -46,7 +45,7 @@ contract MetaHumanGovernor is
      *  @param _timelock The address of the timelock contract used for delayed execution.
      *  @param _spokeContracts An array of CrossChainAddress structs representing the spoke contracts.
      *  @param _chainId The chain ID of the current contract.
-     *  @param _wormholeRelayerAddress The address of the wormhole automatic relayer contract used for cross-chain communication.
+     *  @param _wormholeRelayerAddress The address of the wormhole automatic relayer contract used for cross-chain communication
      */
     constructor(
         IVotes _token,
@@ -55,16 +54,16 @@ contract MetaHumanGovernor is
         uint16 _chainId,
         address _wormholeRelayerAddress,
         address _magistrateAddress,
-        uint256 _secondsPerBlock
+        uint256 _secondsPerBlock,
+        uint48 _votingDelay,
+        uint32 _votingPeriod,
+        uint256 _proposalThreshold,
+        uint256 _quorumFraction
     )
         Governor('MetaHumanGovernor')
-        GovernorSettings(
-            1,
-            /* 1 block */ 20 * 15,
-            /* 20 blocks per minute * 15 minutes (polygon mumbai) */ 0
-        ) //TODO:prod in production voting delay, voting period, proposal threshold needs to be changed to value of choice. Depending on block time on selected hub chain and desired period
+        GovernorSettings(_votingDelay, _votingPeriod, _proposalThreshold)
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(4) //TODO:prod change quorum fraction to value of choice
+        GovernorVotesQuorumFraction(_quorumFraction)
         GovernorTimelockControl(_timelock)
         CrossChainGovernorCountingSimple(_spokeContracts)
         Magistrate(_magistrateAddress)
