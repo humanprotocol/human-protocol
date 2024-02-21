@@ -4,6 +4,7 @@ import {
   IsDate,
   IsEnum,
   IsNumber,
+  IsObject,
   IsString,
   IsUrl,
 } from 'class-validator';
@@ -22,6 +23,10 @@ export class WebhookIncomingDto {
   @ApiProperty({ name: 'escrow_address' })
   @IsString()
   public escrowAddress: string;
+
+  @ApiPropertyOptional({ name: 'event_data' })
+  @IsObject()
+  public eventData?: any;
 }
 
 export class WebhookIncomingCreateDto {
