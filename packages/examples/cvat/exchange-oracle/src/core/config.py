@@ -46,18 +46,14 @@ class LocalhostConfig:
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get(
-        "LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-    )
+    addr = os.environ.get("LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     job_launcher_url = os.environ.get("LOCALHOST_JOB_LAUNCHER_URL")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
 
 
 class CronConfig:
-    process_job_launcher_webhooks_int = int(
-        os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30)
-    )
+    process_job_launcher_webhooks_int = int(os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
     process_job_launcher_webhooks_chunk_size = os.environ.get(
         "PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5
     )
@@ -67,24 +63,16 @@ class CronConfig:
     process_recording_oracle_webhooks_chunk_size = os.environ.get(
         "PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
     )
-    track_completed_projects_int = int(
-        os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30)
-    )
-    track_completed_projects_chunk_size = os.environ.get(
-        "TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5
-    )
+    track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
+    track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
     track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 30))
-    track_creating_tasks_chunk_size = os.environ.get(
-        "TRACK_CREATING_TASKS_CHUNK_SIZE", 5
-    )
+    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
     track_creating_tasks_int = int(os.environ.get("TRACK_CREATING_TASKS_INT", 300))
     track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
     retrieve_annotations_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60))
-    retrieve_annotations_chunk_size = os.environ.get(
-        "RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5
-    )
+    retrieve_annotations_chunk_size = os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5)
 
 
 class CvatConfig:
@@ -102,20 +90,22 @@ class CvatConfig:
 
 
 class StorageConfig:
-    # common attributes
     provider: ClassVar[str] = os.environ["STORAGE_PROVIDER"].lower()
-    data_bucket_name: ClassVar[str] = os.environ["STORAGE_RESULTS_BUCKET_NAME"]
+    data_bucket_name: ClassVar[str] = (
+        os.environ.get("STORAGE_RESULTS_BUCKET_NAME")  # backward compatibility
+        or os.environ["STORAGE_BUCKET_NAME"]
+    )
     endpoint_url: ClassVar[str] = os.environ[
         "STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
     region: ClassVar[Optional[str]] = os.environ.get("STORAGE_REGION")
-    results_dir_suffix: ClassVar[str] = os.environ.get(
-        "STORAGE_RESULTS_DIR_SUFFIX", "-results"
-    )
-    secure: ClassVar[str] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
+    secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+
     # S3 specific attributes
     access_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_ACCESS_KEY")
     secret_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_SECRET_KEY")
+
     # GCS specific attributes
     key_file_path: ClassVar[Optional[str]] = os.environ.get("STORAGE_KEY_FILE_PATH")
 

@@ -1,8 +1,3 @@
-
-# Copyright (C) 2023-2024 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from io import BytesIO
 from typing import List, Optional
 from urllib.parse import unquote
@@ -58,7 +53,7 @@ class S3Client(StorageClient):
             else:
                 raise
 
-    def download_fileobj(self, key: str, *, bucket: Optional[str] = None) -> bytes:
+    def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
         bucket = unquote(bucket) if bucket else self._bucket
         with BytesIO() as data:
             self.client.download_fileobj(Bucket=bucket, Key=unquote(key), Fileobj=data)

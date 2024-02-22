@@ -1,7 +1,3 @@
-# Copyright (C) 2024 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
 from io import BytesIO
 from typing import Dict, List, Optional
 from urllib.parse import unquote
@@ -10,8 +6,10 @@ from google.cloud import storage
 
 from src.services.cloud.client import StorageClient
 
+DEFAULT_GCS_HOST = "storage.googleapis.com"
 
-class GCSClient(StorageClient):
+
+class GcsClient(StorageClient):
     def __init__(
         self,
         *,
@@ -19,6 +17,7 @@ class GCSClient(StorageClient):
         service_account_key: Optional[Dict] = None,
     ) -> None:
         super().__init__(bucket)
+
         if service_account_key:
             self.client = storage.Client.from_service_account_info(service_account_key)
         else:
@@ -39,7 +38,7 @@ class GCSClient(StorageClient):
         bucket_client = self.client.get_bucket(bucket)
         return bucket_client.blob(unquote(key)).exists()
 
-    def download_fileobj(self, key: str, *, bucket: Optional[str] = None) -> bytes:
+    def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)
         blob = bucket_client.blob(unquote(key))

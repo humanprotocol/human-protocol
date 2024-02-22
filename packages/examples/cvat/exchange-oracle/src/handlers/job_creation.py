@@ -27,7 +27,7 @@ from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelType, TaskStatus, TaskType
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
-from src.services.cloud import CloudProvider, StorageClient
+from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
@@ -54,11 +54,6 @@ DM_GT_DATASET_FORMAT_MAPPING = {
     TaskType.image_points: "coco_instances",
     TaskType.image_boxes: "coco_instances",
     TaskType.image_boxes_from_points: "coco_instances",
-}
-
-CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
-    CloudProvider.aws: "AWS_S3_BUCKET",
-    CloudProvider.gcs: "GOOGLE_CLOUD_STORAGE",
 }
 
 
@@ -186,9 +181,9 @@ class BoxesFromPointsTaskBuilder:
         data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
         self.input_filenames = filter_image_files(data_filenames)
 
-        self.input_gt_data = gt_storage_client.download_fileobj(gt_bucket.path)
+        self.input_gt_data = gt_storage_client.download_file(gt_bucket.path)
 
-        self.input_points_data = points_storage_client.download_fileobj(points_bucket.path)
+        self.input_points_data = points_storage_client.download_file(points_bucket.path)
 
     def _parse_dataset(self, annotation_file_data: bytes, dataset_format: str) -> dm.Dataset:
         temp_dir = self.exit_stack.enter_context(TemporaryDirectory())
@@ -777,7 +772,7 @@ class BoxesFromPointsTaskBuilder:
             if not image_roi_infos:
                 continue
 
-            image_bytes = src_client.download_fileobj(os.path.join(src_prefix, filename))
+            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
             image_pixels = decode_image(image_bytes)
 
             sample = filename_to_sample[filename]
@@ -819,10 +814,7 @@ class BoxesFromPointsTaskBuilder:
 
         # Register cloud storage on CVAT to pass user dataset
         cloud_storage = cvat_api.create_cloudstorage(
-            CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[oracle_bucket.provider],
-            oracle_bucket.bucket_name,
-            bucket_host=oracle_bucket.host_url,
-            **({ "credentials": oracle_bucket.credentials.to_dict() } if oracle_bucket.credentials else {})
+            **_make_cvat_cloud_storage_params(oracle_bucket)
         )
 
         # Create a project
@@ -984,6 +976,24 @@ def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     ]
 
 
+def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> Dict:
+    CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
+        CloudProviders.aws: "AWS_S3_BUCKET",
+        CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
+    }
+
+    params = {
+        "provider": CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[bucket_info.provider],
+        "bucket_name": bucket_info.bucket_name,
+        "bucket_host": bucket_info.host_url,
+    }
+
+    if bucket_info.credentials:
+        params["credentials"] = bucket_info.credentials.to_dict()
+
+    return params
+
+
 def create_task(escrow_address: str, chain_id: int) -> None:
     logger = get_function_logger(module_logger)
 
@@ -1006,7 +1016,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         )
         data_filenames = filter_image_files(data_filenames)
 
-        gt_file_data = gt_bucket_client.download_fileobj(
+        gt_file_data = gt_bucket_client.download_file(
             gt_bucket.path,
         )
 
@@ -1017,12 +1027,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         label_configuration = make_label_configuration(manifest)
 
         # Register cloud storage on CVAT to pass user dataset
-        cloud_storage = cvat_api.create_cloudstorage(
-            CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[data_bucket.provider],
-            data_bucket.bucket_name,
-            bucket_host=data_bucket.host_url,
-            **({ "credentials": data_bucket.credentials.to_dict() } if data_bucket.credentials else {})
-        )
+        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
 
         # Create a project
         project = cvat_api.create_project(

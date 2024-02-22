@@ -112,25 +112,27 @@ def create_cloudstorage(
 ) -> models.CloudStorageRead:
     # credentials: access_key | secret_key | service_account_key
     # CVAT credentials: key | secret_key | key_file
-    def to_cvat_credentials() -> Dict:
-        credentials_ = dict()
-        for cvat_field, field in zip(
-            ("key", "secret_key", "key_file"), ("access_key", "secret_key", "service_account_key")
-        ):
+    def _to_cvat_credentials(credentials: Dict[str, Any]) -> Dict:
+        cvat_credentials = dict()
+        for cvat_field, field in {
+            "key": "access_key",
+            "secret_key": "secret_key",
+            "key_file": "service_account_key",
+        }.items():
             if value := credentials.get(field):
                 if cvat_field == "key_file":
                     key_file = BytesIO(json.dumps(value).encode("utf-8"))
                     key_file.name = "key_file.json"
                     key_file.seek(0)
-                    credentials_[cvat_field] = key_file
+                    cvat_credentials[cvat_field] = key_file
                 else:
-                    credentials_[cvat_field] = value
-        return credentials_
+                    cvat_credentials[cvat_field] = value
+        return cvat_credentials
 
     request_kwargs = dict()
 
     if credentials:
-        request_kwargs.update(to_cvat_credentials())
+        request_kwargs.update(_to_cvat_credentials(credentials))
         credentials_type = (
             models.CredentialsTypeEnum("KEY_SECRET_KEY_PAIR")
             if provider == "AWS_S3_BUCKET"

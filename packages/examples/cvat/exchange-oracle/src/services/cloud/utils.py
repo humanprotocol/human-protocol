@@ -1,19 +1,19 @@
 from typing import Optional
 
 from src.services.cloud.client import StorageClient
-from src.services.cloud.gcs import GCSClient
-from src.services.cloud.s3 import S3Client
-from src.services.cloud.types import BucketAccessInfo, CloudProvider
+from src.services.cloud.gcs import DEFAULT_GCS_HOST, GcsClient
+from src.services.cloud.s3 import DEFAULT_S3_HOST, S3Client
+from src.services.cloud.types import BucketAccessInfo, CloudProviders
 
 
 def compose_bucket_url(
-    bucket_name: str, provider: CloudProvider, *, bucket_host: Optional[str] = None
+    bucket_name: str, provider: CloudProviders, *, bucket_host: Optional[str] = None
 ) -> str:
     match provider:
-        case CloudProvider.aws:
-            return f"https://{bucket_name}.{bucket_host or 's3.amazonaws.com'}/"
-        case CloudProvider.gcs:
-            return f"https://{bucket_name}.{bucket_host or 'storage.googleapis.com'}/"
+        case CloudProviders.aws:
+            return f"https://{bucket_name}.{bucket_host or DEFAULT_S3_HOST}/"
+        case CloudProviders.gcs:
+            return f"https://{bucket_name}.{bucket_host or DEFAULT_GCS_HOST}/"
 
 
 def make_client(
@@ -24,20 +24,21 @@ def make_client(
     }
 
     match bucket_info.provider:
-        case CloudProvider.aws:
-            ClientClass = S3Client
+        case CloudProviders.aws:
+            client_type = S3Client
 
             if bucket_info.credentials:
                 client_kwargs["access_key"] = bucket_info.credentials.access_key
                 client_kwargs["secret_key"] = bucket_info.credentials.secret_key
+
             if bucket_info.host_url:
                 client_kwargs["endpoint_url"] = bucket_info.host_url
-        case CloudProvider.gcs:
-            ClientClass = GCSClient
+        case CloudProviders.gcs:
+            client_type = GcsClient
 
             if bucket_info.credentials:
                 client_kwargs["service_account_key"] = bucket_info.credentials.service_account_key
         case _:
             raise ValueError(f"Unsupported cloud provider ({bucket_info.provider}) was provided")
 
-    return ClientClass(**client_kwargs)
+    return client_type(**client_kwargs)

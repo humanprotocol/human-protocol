@@ -23,7 +23,7 @@ class StorageClient(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    def download_fileobj(self, key: str, *, bucket: Optional[str] = None) -> bytes:
+    def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
         ...
 
     @abstractmethod

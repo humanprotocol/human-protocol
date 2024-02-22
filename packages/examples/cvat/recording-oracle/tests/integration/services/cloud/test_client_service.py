@@ -37,7 +37,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert client.file_exists(file_name)
         assert len(client.list_files()) == 1
 
-        file_content = client.download_fileobj(key=file_name)
+        file_content = client.download_file(key=file_name)
         assert file_content == data
 
         client.remove_file(file_name)
@@ -49,10 +49,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         invalid_file = "non-existent-file"
 
         with pytest.raises(ClientError):
-            client.download_fileobj(invalid_file, bucket=invalid_bucket)
+            client.download_file(invalid_file, bucket=invalid_bucket)
 
         with pytest.raises(ClientError):
-            client.download_fileobj(invalid_file, bucket=self.bucket_name)
+            client.download_file(invalid_file, bucket=self.bucket_name)
 
         with pytest.raises(ClientError):
             client.create_file(invalid_file, bucket=invalid_bucket)

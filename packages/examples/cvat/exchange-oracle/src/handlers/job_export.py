@@ -190,7 +190,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         storage_client = make_cloud_client(oracle_data_bucket)
 
         roi_filenames = serializer.parse_roi_filenames(
-            storage_client.download_fileobj(
+            storage_client.download_file(
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_FILENAMES_FILENAME
                 ),
@@ -198,7 +198,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         )
 
         rois = serializer.parse_roi_info(
-            storage_client.download_fileobj(
+            storage_client.download_file(
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_INFO_FILENAME
                 ),
@@ -206,7 +206,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         )
 
         points_dataset = serializer.parse_points_annotations(
-            storage_client.download_fileobj(
+            storage_client.download_file(
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.POINTS_FILENAME
                 ),
