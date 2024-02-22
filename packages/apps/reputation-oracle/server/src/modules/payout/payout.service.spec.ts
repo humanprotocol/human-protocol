@@ -22,6 +22,7 @@ import { PayoutService } from './payout.service';
 import { createMock } from '@golevelup/ts-jest';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ErrorResults } from '../../common/constants/errors';
+import { ReputationService } from '../reputation/reputation.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -36,6 +37,7 @@ jest.mock('@human-protocol/sdk', () => ({
 
 describe('PayoutService', () => {
   let payoutService: PayoutService, storageService: StorageService;
+  let reputationService: ReputationService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -82,11 +84,16 @@ describe('PayoutService', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        {
+          provide: ReputationService,
+          useValue: createMock<ReputationService>(),
+        },
       ],
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
     payoutService = moduleRef.get<PayoutService>(PayoutService);
+    reputationService = moduleRef.get<ReputationService>(ReputationService);
     payoutService.createPayoutSpecificActions = {
       [JobRequestType.FORTUNE]: {
         calculateResults: jest.fn(),
@@ -299,6 +306,8 @@ describe('PayoutService', () => {
         hash: expect.any(String),
         checkPassed: true,
       });
+
+      expect(reputationService.increaseReputation).toHaveBeenCalledTimes(1);
     });
   });
 });

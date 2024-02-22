@@ -10,7 +10,7 @@ import {
 } from '../../common/constants';
 import { ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
-import { JobRequestType } from '../../common/enums';
+import { JobRequestType, ReputationEntityType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import { ConfigService } from '@nestjs/config';
 import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
@@ -21,6 +21,7 @@ import {
 } from '../../common/dto/result';
 import { RequestAction } from './payout.interface';
 import { getRequestType } from '../../common/utils';
+import { ReputationService } from '../reputation/reputation.service';
 
 @Injectable()
 export class PayoutService {
@@ -30,6 +31,7 @@ export class PayoutService {
     private readonly storageService: StorageService,
     private readonly web3Service: Web3Service,
     public readonly configService: ConfigService,
+    private readonly reputationService: ReputationService,
   ) {}
 
   /**
@@ -212,6 +214,23 @@ export class PayoutService {
       }
       return accMap;
     }, new Map<string, typeof bountyValue>());
+
+    // Update reputation for each result
+    for (const result of annotations.results) {
+      if (result.annotation_quality < manifest.validation.min_quality) {
+        await this.reputationService.decreaseReputation(
+          chainId,
+          result.annotator_wallet_address,
+          ReputationEntityType.WORKER,
+        );
+      } else {
+        await this.reputationService.increaseReputation(
+          chainId,
+          result.annotator_wallet_address,
+          ReputationEntityType.WORKER,
+        );
+      }
+    }
 
     const recipients = [...accumulatedBounties.keys()];
     const amounts = [...accumulatedBounties.values()];
