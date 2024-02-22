@@ -24,8 +24,10 @@ import { UserRepository } from '../user/user.repository';
       inject: [ConfigService],
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>(ConfigNames.JWT_SECRET, 'secretkey'),
+        privateKey: configService.get<string>(ConfigNames.JWT_PRIVATE_KEY),
+        publicKey: configService.get<string>(ConfigNames.JWT_PUBLIC_KEY),
         signOptions: {
+          algorithm: 'ES256',
           expiresIn: configService.get<number>(
             ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
             3600,
