@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as authService from '../../services/auth';
 import { useAppDispatch } from '../../state';
-import { fetchUserBalanceAsync, signIn } from '../../state/auth/reducer';
+import { signIn } from '../../state/auth/reducer';
 import { Password } from './Password';
 import { LoginValidationSchema } from './schema';
 
@@ -37,7 +37,6 @@ export const SignInForm = () => {
         hCaptchaToken,
       });
       dispatch(signIn(data));
-      dispatch(fetchUserBalanceAsync());
     } catch (err) {
       showError(err);
     }
