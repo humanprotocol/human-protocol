@@ -106,3 +106,10 @@ export enum ErrorWeb3 {
   InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
   InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
 }
+
+/**
+ * Represents error messages related to operator.
+ */
+export enum ErrorOperator {
+  OperatorNotActive = 'Operator not active',
+}
