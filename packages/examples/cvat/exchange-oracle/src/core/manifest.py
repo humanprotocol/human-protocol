@@ -1,6 +1,6 @@
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, List, Literal, Optional, Tuple, Union
+from typing import Annotated, Any, List, Literal, Optional, Tuple, Union
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
@@ -28,18 +28,18 @@ class LabelType(str, Enum, metaclass=BetterEnumMeta):
     skeleton = "skeleton"
 
 
-class LabelInfo(BaseModel):
+class LabelInfoBase(BaseModel):
     name: str = Field(min_length=1)
     # https://opencv.github.io/cvat/docs/api_sdk/sdk/reference/models/label/
 
     type: LabelType = LabelType.plain
 
 
-class PlainLabelInfo(LabelInfo):
+class PlainLabelInfo(LabelInfoBase):
     type: Literal[LabelType.plain]
 
 
-class SkeletonLabelInfo(LabelInfo):
+class SkeletonLabelInfo(LabelInfoBase):
     type: Literal[LabelType.skeleton]
 
     nodes: List[str] = Field(min_items=1)
@@ -89,13 +89,13 @@ class SkeletonLabelInfo(LabelInfo):
         return values
 
 
-_Label = Annotated[Union[PlainLabelInfo, SkeletonLabelInfo], Field(discriminator="type")]
+LabelInfo = Annotated[Union[PlainLabelInfo, SkeletonLabelInfo], Field(discriminator="type")]
 
 
 class AnnotationInfo(BaseModel):
     type: TaskType
 
-    labels: list[_Label]
+    labels: list[LabelInfo] = Field(min_items=1)
     "Label declarations with accepted annotation types"
 
     description: str = ""
@@ -131,15 +131,16 @@ class TaskManifest(BaseModel):
     "Assignment bounty, a decimal value in HMT"
 
 
-def parse_manifest(manifest: dict) -> TaskManifest:
+def parse_manifest(manifest: Any) -> TaskManifest:
     # Add default value for labels, if none provided.
     # pydantic can't do this for tagged unions
 
-    try:
-        labels = manifest["annotation"]["labels"]
-        for label_info in labels:
-            label_info["type"] = label_info.get("type", LabelType.plain)
-    except KeyError:
-        pass
+    if isinstance(manifest, dict):
+        try:
+            labels = manifest["annotation"]["labels"]
+            for label_info in labels:
+                label_info["type"] = label_info.get("type", LabelType.plain)
+        except KeyError:
+            pass
 
     return TaskManifest.parse_obj(manifest)

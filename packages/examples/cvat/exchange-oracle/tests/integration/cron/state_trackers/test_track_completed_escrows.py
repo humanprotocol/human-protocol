@@ -99,10 +99,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.crons.state_trackers.cvat_api") as mock_cvat_api,
-            patch("src.crons.state_trackers.validate_escrow"),
-            patch("src.crons.state_trackers.cloud_client") as mock_cloud_client,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
+            patch("src.handlers.completed_escrows.cloud_client") as mock_cloud_client,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -247,11 +247,11 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.crons.state_trackers.cvat_api"),
-            patch("src.crons.state_trackers.cvat_api.get_job_annotations") as mock_annotations,
-            patch("src.crons.state_trackers.validate_escrow"),
-            patch("src.crons.state_trackers.cloud_client.S3Client") as mock_S3Client,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api"),
+            patch("src.handlers.completed_escrows.cvat_api.get_job_annotations") as mock_annotations,
+            patch("src.handlers.completed_escrows.cloud_client.S3Client") as mock_S3Client,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -331,9 +331,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.crons.state_trackers.cvat_api"),
-            patch("src.crons.state_trackers.validate_escrow"),
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
