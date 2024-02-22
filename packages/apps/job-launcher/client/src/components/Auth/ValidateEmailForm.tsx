@@ -14,7 +14,6 @@ export default function VerifyEmailForm() {
     setIsLoading(true);
     try {
       await authService.resendEmailVerification(user?.email!);
-      //TODO: LOGOUT
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log(err);
