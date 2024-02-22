@@ -23,7 +23,7 @@ class DataInfo(BaseModel):
     "which provides information about all objects on images"
 
 
-class LabelType(str, Enum, metaclass=BetterEnumMeta):
+class LabelTypes(str, Enum, metaclass=BetterEnumMeta):
     plain = "plain"
     skeleton = "skeleton"
 
@@ -32,15 +32,15 @@ class LabelInfoBase(BaseModel):
     name: str = Field(min_length=1)
     # https://opencv.github.io/cvat/docs/api_sdk/sdk/reference/models/label/
 
-    type: LabelType = LabelType.plain
+    type: LabelTypes = LabelTypes.plain
 
 
 class PlainLabelInfo(LabelInfoBase):
-    type: Literal[LabelType.plain]
+    type: Literal[LabelTypes.plain]
 
 
 class SkeletonLabelInfo(LabelInfoBase):
-    type: Literal[LabelType.skeleton]
+    type: Literal[LabelTypes.skeleton]
 
     nodes: List[str] = Field(min_items=1)
     """
@@ -57,8 +57,8 @@ class SkeletonLabelInfo(LabelInfoBase):
     @root_validator
     @classmethod
     def validate_type(cls, values: dict) -> dict:
-        if values["type"] != LabelType.skeleton:
-            raise ValueError(f"Label type must be {LabelType.skeleton}")
+        if values["type"] != LabelTypes.skeleton:
+            raise ValueError(f"Label type must be {LabelTypes.skeleton}")
 
         skeleton_name = values["name"]
 
@@ -139,7 +139,7 @@ def parse_manifest(manifest: Any) -> TaskManifest:
         try:
             labels = manifest["annotation"]["labels"]
             for label_info in labels:
-                label_info["type"] = label_info.get("type", LabelType.plain)
+                label_info["type"] = label_info.get("type", LabelTypes.plain)
         except KeyError:
             pass
 
