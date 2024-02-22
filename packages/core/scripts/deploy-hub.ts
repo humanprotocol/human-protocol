@@ -20,15 +20,10 @@ async function main() {
   console.log('HMToken Address: ', await HMTokenContract.getAddress());
 
   //vHMT Deployment
-  const hmTokenAddress = HMTokenContract.getAddress();
-  if (!hmTokenAddress) {
-    throw new Error('HM_TOKEN_ADDRESS environment variable is not set');
-  }
-
   const VHMToken = await ethers.getContractFactory(
     'contracts/governance/vhm-token/VHMToken.sol:VHMToken'
   );
-  const VHMTokenContract = await VHMToken.deploy(hmTokenAddress);
+  const VHMTokenContract = await VHMToken.deploy(HMTokenContract.getAddress());
   await VHMTokenContract.waitForDeployment();
   console.log('VHMToken deployed to:', await VHMTokenContract.getAddress());
 
@@ -39,6 +34,18 @@ async function main() {
   const magistrateAddress = process.env.MAGISTRATE_ADDRESS ?? '';
   const hubSecondsPerBlock = process.env.HUB_SECONDS_PER_BLOCK
     ? parseInt(process.env.HUB_SECONDS_PER_BLOCK)
+    : 0;
+  const votingDelay = process.env.VOTING_DELAY
+    ? parseInt(process.env.VOTING_DELAY)
+    : 0;
+  const votingPeriod = process.env.VOTING_PERIOD
+    ? parseInt(process.env.VOTING_PERIOD)
+    : 0;
+  const proposalThreshold = process.env.PROPOSAL_THRESHOLD
+    ? parseInt(process.env.PROPOSAL_THRESHOLD)
+    : 0;
+  const quorumFraction = process.env.QUORUM_FRACTION
+    ? parseInt(process.env.QUORUM_FRACTION)
     : 0;
   const TimelockController =
     await ethers.getContractFactory('TimelockController');
@@ -63,7 +70,11 @@ async function main() {
     chainId,
     hubAutomaticRelayerAddress,
     magistrateAddress,
-    hubSecondsPerBlock
+    hubSecondsPerBlock,
+    votingDelay,
+    votingPeriod,
+    proposalThreshold,
+    quorumFraction
   );
 
   await metaHumanGovernorContract.waitForDeployment();
