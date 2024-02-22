@@ -44,7 +44,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         signed_message, _ = sign_message(chain_id, message)
 
         response = self.client.post(
-            "/oracle-webhook", json=message, headers={"human-signature": signed_message}
+            "/webhook", json=message, headers={"human-signature": signed_message}
         )
 
         assert response.status_code == 200

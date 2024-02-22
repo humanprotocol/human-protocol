@@ -27,7 +27,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         mock_get_escrow.return_value = mock_escrow
 
         response = client.post(
-            "/oracle-webhook",
+            "/webhook",
             headers={"human-signature": WEBHOOK_MESSAGE_SIGNED},
             json=WEBHOOK_MESSAGE,
         )
@@ -58,7 +58,7 @@ def test_incoming_webhook_400_missing_field(client: TestClient) -> None:
     }
 
     response = client.post(
-        "/oracle-webhook",
+        "/webhook",
         headers={"human-signature": WEBHOOK_MESSAGE_SIGNED},
         json=data,
     )
@@ -82,7 +82,7 @@ def test_incoming_webhook_400_invalid_address(client: TestClient) -> None:
     }
 
     response = client.post(
-        "/oracle-webhook",
+        "/webhook",
         headers={"human-signature": WEBHOOK_MESSAGE_SIGNED},
         json=data,
     )
@@ -106,7 +106,7 @@ def test_incoming_webhook_400_invalid_chain_id(client: TestClient) -> None:
     }
 
     response = client.post(
-        "/oracle-webhook",
+        "/webhook",
         headers={"human-signature": WEBHOOK_MESSAGE_SIGNED},
         json=data,
     )
@@ -133,7 +133,7 @@ def test_incoming_webhook_401(client: TestClient) -> None:
         mock_escrow.recording_oracle = RECORDING_ORACLE_ADDRESS
         mock_get_escrow.return_value = mock_escrow
         response = client.post(
-            "/oracle-webhook",
+            "/webhook",
             headers={"human-signature": WEBHOOK_MESSAGE_SIGNED},
             json=WEBHOOK_MESSAGE,
         )
