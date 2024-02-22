@@ -48,20 +48,23 @@ export enum ErrorUser {
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
+  UserNotActive = 'User not active',
 }
 
 /**
  * Represents error messages related to auth.
  */
 export enum ErrorAuth {
-  NotFound = 'Auth not found',
+  NotFound = 'Token not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
   InvalidCaptchaToken = 'Invalid hcaptcha token',
   UserNotActive = 'User not active',
+  TokenExpired = 'Token has expired',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
   ApiKeyNotFound = 'API key not found',
   PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  InvalidToken = 'Invalid token',
 }
 
 /**

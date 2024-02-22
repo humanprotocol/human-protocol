@@ -11,6 +11,7 @@ import {
   Logger,
   UsePipes,
   Ip,
+  UseFilters,
 } from '@nestjs/common';
 
 import {
@@ -30,22 +31,26 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
+  RefreshDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
-import { AuthRepository } from './auth.repository';
+import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
+import { TokenRepository } from './token.repository';
+import { TokenType } from './token.entity';
 
 @ApiTags('Auth')
+@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
 
   constructor(
     private readonly authService: AuthService,
-    private readonly authRepository: AuthRepository,
+    private readonly tokenRepository: TokenRepository,
   ) {}
 
   @UsePipes(new PasswordValidationPipe())
@@ -101,9 +106,9 @@ export class AuthJwtController {
     return this.authService.signin(data, ip);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Post('/refresh')
+  @ApiBody({ type: RefreshDto })
   @ApiOperation({
     summary: 'Refresh Token',
     description: 'Endpoint to refresh the authentication token.',
@@ -113,8 +118,8 @@ export class AuthJwtController {
     description: 'Token refreshed successfully',
     type: AuthDto,
   })
-  async refreshToken(@Req() request: RequestWithUser): Promise<AuthDto> {
-    return this.authService.auth(request.user);
+  async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
+    return this.authService.refresh(data);
   }
 
   @ApiBearerAuth()
@@ -129,7 +134,10 @@ export class AuthJwtController {
     description: 'User logged out successfully',
   })
   public async logout(@Req() request: RequestWithUser): Promise<void> {
-    await this.authRepository.deleteByUserId(request.user.id);
+    await this.tokenRepository.deleteOneByTypeAndUserId(
+      TokenType.REFRESH,
+      request.user.id,
+    );
   }
 
   @Public()
@@ -197,7 +205,8 @@ export class AuthJwtController {
     await this.authService.emailVerification(data);
   }
 
-  @Public()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Resend Email Verification',
