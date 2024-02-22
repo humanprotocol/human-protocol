@@ -18,14 +18,11 @@ export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
 
 export const CVAT_JOB_TYPES = [
-  JobRequestType.IMAGE_LABEL_BINARY,
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
 ];
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
-
-export const WEB3_SIGNUP_MESSAGE = 'signup';
 
 export const CURSE_WORDS = [
   '4r5e',

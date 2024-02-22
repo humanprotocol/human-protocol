@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -29,11 +30,10 @@ import { ConfigNames } from '../../common/config';
 import { verifySignature } from '../../common/utils/signature';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import {
-  WEB3_SIGNUP_MESSAGE,
-  SENDGRID_TEMPLATES,
-  SERVICE_NAME,
-} from '../../common/constants';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { Web3Service } from '../web3/web3.service';
+import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
+import { SignatureType, Web3Env } from '../../common/enums/web3';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +49,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
+    private readonly web3Service: Web3Service,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -276,20 +277,45 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const verified = await verifySignature(
-      WEB3_SIGNUP_MESSAGE,
-      data.signature,
-      [data.address],
+    const preSignUpData = this.web3Service.prepareSignatureBody(
+      SignatureType.SIGNUP,
+      data.address,
     );
+
+    const verified = verifySignature(preSignUpData, data.signature, [
+      data.address,
+    ]);
 
     if (!verified) {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+    }
+
+    let kvstore: KVStoreClient;
+    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.POLYGON),
+      );
+    } else {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.POLYGON_MUMBAI),
+      );
+    }
+
+    if (
+      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
+        await kvstore.get(data.address, KVStoreKeys.role),
+      )
+    ) {
+      throw new BadRequestException(ErrorAuth.InvalidRole);
     }
 
     const userEntity = await this.userService.createWeb3User(
       data.address,
       data.type,
     );
+
+    await kvstore.set(data.address, 'ACTIVE');
 
     return this.auth(userEntity);
   }
@@ -303,7 +329,7 @@ export class AuthService {
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByAddress(data.address);
 
-    const verified = await verifySignature(userEntity.nonce, data.signature, [
+    const verified = verifySignature(userEntity.nonce, data.signature, [
       data.address,
     ]);
 

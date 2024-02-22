@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StakingClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
@@ -31,8 +31,8 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn(),
   },
-  StakingClient: {
-    build: jest.fn(),
+  OperatorUtils: {
+    getLeader: jest.fn(),
   },
   Encryption: {
     build: jest.fn(),
@@ -112,10 +112,8 @@ describe('StorageService', () => {
     EscrowClient.build = jest.fn().mockResolvedValue({
       getJobLauncherAddress: jest.fn().mockResolvedValue(jobLauncherAddress),
     });
-    StakingClient.build = jest.fn().mockResolvedValue({
-      getLeader: jest.fn().mockResolvedValue({
-        publicKey: MOCK_ENCRYPTION_PUBLIC_KEY,
-      }),
+    OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+      publicKey: MOCK_ENCRYPTION_PUBLIC_KEY,
     });
   });
 

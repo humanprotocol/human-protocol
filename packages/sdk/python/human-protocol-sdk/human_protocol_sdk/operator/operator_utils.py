@@ -1,5 +1,5 @@
 """
-Utility class for staking-related operations.
+Utility class for operator-related operations.
 
 Code Example
 ------------
@@ -7,10 +7,10 @@ Code Example
 .. code-block:: python
 
     from human_protocol_sdk.constants import ChainId
-    from human_protocol_sdk.staking import StakingUtils, LeaderFilter
+    from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 
     print(
-        StakingUtils.get_leaders(
+        OperatorUtils.get_leaders(
             LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
         )
     )
@@ -21,21 +21,24 @@ Module
 
 import logging
 import os
-
 from typing import List, Optional
 
-from web3 import Web3
-
-from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
-from human_protocol_sdk.staking.staking_client import StakingClientError
-from human_protocol_sdk.utils import (
-    get_data_from_subgraph,
-)
+from human_protocol_sdk.utils import get_data_from_subgraph
+from web3 import Web3
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
-LOG = logging.getLogger("human_protocol_sdk.staking")
+LOG = logging.getLogger("human_protocol_sdk.operator")
+
+
+class OperatorUtilsError(Exception):
+    """
+    Raises when some error happens when interacting with operator.
+    """
+
+    pass
 
 
 class LeaderFilter:
@@ -59,7 +62,7 @@ class LeaderFilter:
             network.value not in set(chain_id.value for chain_id in ChainId)
             for network in networks
         ):
-            raise StakingClientError(f"Invalid ChainId")
+            raise OperatorUtilsError(f"Invalid ChainId")
 
         self.networks = networks
         self.role = role
@@ -134,7 +137,7 @@ class RewardData:
         amount: int,
     ):
         """
-        Initializes an RewardData instance.
+        Initializes a RewardData instance.
 
         :param escrow_address: Escrow address
         :param amount: Amount
@@ -144,9 +147,26 @@ class RewardData:
         self.amount = amount
 
 
-class StakingUtils:
+class Operator:
+    def __init__(
+        self,
+        address: str,
+        role: str,
+    ):
+        """
+        Initializes an Operator instance.
+
+        :param address: Operator address
+        :param role: Role of the operator
+        """
+
+        self.address = address
+        self.role = role
+
+
+class OperatorUtils:
     """
-    A utility class that provides additional staking-related functionalities.
+    A utility class that provides additional operator-related functionalities.
     """
 
     @staticmethod
@@ -163,16 +183,16 @@ class StakingUtils:
             .. code-block:: python
 
                 from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.staking import StakingUtils, LeaderFilter
+                from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 
                 print(
-                    StakingUtils.get_leaders(
+                    OperatorUtils.get_leaders(
                         LeaderFilter(networks=[ChainId.POLYGON_MUMBAI])
                     )
                 )
         """
 
-        from human_protocol_sdk.gql.staking import get_leaders_query
+        from human_protocol_sdk.gql.operator import get_leaders_query
 
         leaders = []
         for chain_id in filter.networks:
@@ -230,21 +250,21 @@ class StakingUtils:
             .. code-block:: python
 
                 from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.staking import StakingUtils
+                from human_protocol_sdk.operator import OperatorUtils
 
-                leader = StakingUtils.get_leader(
+                leader = OperatorUtils.get_leader(
                     ChainId.POLYGON_MUMBAI,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
 
-        from human_protocol_sdk.gql.staking import get_leader_query
+        from human_protocol_sdk.gql.operator import get_leader_query
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
-            raise StakingClientError(f"Invalid ChainId")
+            raise OperatorUtilsError(f"Invalid ChainId")
 
         if not Web3.is_address(leader_address):
-            raise StakingClientError(f"Invalid leader address: {leader_address}")
+            raise OperatorUtilsError(f"Invalid leader address: {leader_address}")
 
         network = NETWORKS[chain_id]
 
@@ -279,6 +299,57 @@ class StakingUtils:
         )
 
     @staticmethod
+    def get_reputation_network_operators(
+        chain_id: ChainId,
+        address: str,
+        role: Optional[str] = None,
+    ) -> List[Operator]:
+        """Get the reputation network operators of the specified address.
+
+        :param chain_id: Network in which the reputation network exists
+        :param address: Address of the reputation oracle
+        :param role: (Optional) Role of the operator
+
+        :return: Returns an array of operator details
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.constants import ChainId
+                from human_protocol_sdk.operator import OperatorUtils
+
+                leader = OperatorUtils.get_reputation_network_operators(
+                    ChainId.POLYGON_MUMBAI,
+                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+                )
+        """
+
+        from human_protocol_sdk.gql.operator import get_reputation_network_query
+
+        if chain_id.value not in set(chain_id.value for chain_id in ChainId):
+            raise OperatorUtilsError(f"Invalid ChainId")
+
+        if not Web3.is_address(address):
+            raise OperatorUtilsError(f"Invalid reputation address: {address}")
+
+        network = NETWORKS[chain_id]
+
+        reputation_network_data = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_reputation_network_query(role),
+            params={"address": address, "role": role},
+        )
+        operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
+
+        return [
+            Operator(
+                address=operator.get("address", ""),
+                role=operator.get("role", ""),
+            )
+            for operator in operators
+        ]
+
+    @staticmethod
     def get_rewards_info(chain_id: ChainId, slasher: str) -> List[RewardData]:
         """Get rewards of the given slasher
 
@@ -291,19 +362,19 @@ class StakingUtils:
             .. code-block:: python
 
                 from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.staking import StakingUtils
+                from human_protocol_sdk.operator import OperatorUtils
 
-                rewards_info = StakingUtils.get_rewards_info(
+                rewards_info = OperatorUtils.get_rewards_info(
                     ChainId.POLYGON_MUMBAI,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
-            raise StakingClientError(f"Invalid ChainId")
+            raise OperatorUtilsError(f"Invalid ChainId")
 
         if not Web3.is_address(slasher):
-            raise StakingClientError(f"Invalid slasher address: {slasher}")
+            raise OperatorUtilsError(f"Invalid slasher address: {slasher}")
 
         network = NETWORKS[chain_id]
 

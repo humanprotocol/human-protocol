@@ -1,4 +1,6 @@
-from human_protocol_sdk.staking import LeaderFilter
+from typing import Optional
+
+from human_protocol_sdk.operator import LeaderFilter
 
 leader_fragment = """
 fragment LeaderFields on Leader {
@@ -52,3 +54,25 @@ query getLeader($address: String!) {{
 """.format(
     leader_fragment=leader_fragment,
 )
+
+
+def get_reputation_network_query(role: Optional[str]):
+    return """
+query getReputationNetwork(
+  $address: String,
+  $role: String
+) {{
+  reputationNetwork(id: $address) {{
+    operators(
+      where: {{
+        {role_clause}
+      }} 
+    ) {{
+      address,
+      role
+    }}
+  }}
+}}
+""".format(
+        role_clause="role: $role" if role else "",
+    )

@@ -1,15 +1,15 @@
-# human_protocol_sdk.staking.staking_utils module
+# human_protocol_sdk.operator.operator_utils module
 
-Utility class for staking-related operations.
+Utility class for operator-related operations.
 
 ## Code Example
 
 ```python
 from human_protocol_sdk.constants import ChainId
-from human_protocol_sdk.staking import StakingUtils, LeaderFilter
+from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 
 print(
-    StakingUtils.get_leaders(
+    OperatorUtils.get_leaders(
         LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
     )
 )
@@ -17,7 +17,7 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.staking.staking_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None)
 
 Bases: `object`
 
@@ -44,7 +44,7 @@ Initializes an LeaderData instance.
   * **webhook_url** (`Optional`[`str`]) – Webhook url
   * **url** (`Optional`[`str`]) – Url
 
-### *class* human_protocol_sdk.staking.staking_utils.LeaderFilter(networks, role=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(networks, role=None)
 
 Bases: `object`
 
@@ -58,23 +58,23 @@ Initializes a LeaderFilter instance.
   * **networks** (`List`[[`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)]) – Networks to request data
   * **role** (`Optional`[`str`]) – Leader role
 
-### *class* human_protocol_sdk.staking.staking_utils.RewardData(escrow_address, amount)
+### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role)
 
 Bases: `object`
 
-#### \_\_init_\_(escrow_address, amount)
+#### \_\_init_\_(address, role)
 
-Initializes an RewardData instance.
+Initializes an Operator instance.
 
 * **Parameters:**
-  * **escrow_address** (`str`) – Escrow address
-  * **amount** (`int`) – Amount
+  * **address** (`str`) – Operator address
+  * **role** (`str`) – Role of the operator
 
-### *class* human_protocol_sdk.staking.staking_utils.StakingUtils
+### *class* human_protocol_sdk.operator.operator_utils.OperatorUtils
 
 Bases: `object`
 
-A utility class that provides additional staking-related functionalities.
+A utility class that provides additional operator-related functionalities.
 
 #### *static* get_leader(chain_id, leader_address)
 
@@ -84,39 +84,62 @@ Get the leader details.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the leader exists
   * **leader_address** (`str`) – Address of the leader
 * **Return type:**
-  `Optional`[[`LeaderData`](#human_protocol_sdk.staking.staking_utils.LeaderData)]
+  `Optional`[[`LeaderData`](#human_protocol_sdk.operator.operator_utils.LeaderData)]
 * **Returns:**
   Leader data if exists, otherwise None
 * **Example:**
   ```python
   from human_protocol_sdk.constants import ChainId
-  from human_protocol_sdk.staking import StakingUtils
+  from human_protocol_sdk.operator import OperatorUtils
 
-  leader = StakingUtils.get_leader(
+  leader = OperatorUtils.get_leader(
       ChainId.POLYGON_MUMBAI,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
 
-#### *static* get_leaders(filter=<human_protocol_sdk.staking.staking_utils.LeaderFilter object>)
+#### *static* get_leaders(filter=<human_protocol_sdk.operator.operator_utils.LeaderFilter object>)
 
 Get leaders data of the protocol
 
 * **Parameters:**
-  **filter** ([`LeaderFilter`](#human_protocol_sdk.staking.staking_utils.LeaderFilter)) – Leader filter
+  **filter** ([`LeaderFilter`](#human_protocol_sdk.operator.operator_utils.LeaderFilter)) – Leader filter
 * **Return type:**
-  `List`[[`LeaderData`](#human_protocol_sdk.staking.staking_utils.LeaderData)]
+  `List`[[`LeaderData`](#human_protocol_sdk.operator.operator_utils.LeaderData)]
 * **Returns:**
   List of leaders data
 * **Example:**
   ```python
   from human_protocol_sdk.constants import ChainId
-  from human_protocol_sdk.staking import StakingUtils, LeaderFilter
+  from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 
   print(
-      StakingUtils.get_leaders(
+      OperatorUtils.get_leaders(
           LeaderFilter(networks=[ChainId.POLYGON_MUMBAI])
       )
+  )
+  ```
+
+#### *static* get_reputation_network_operators(chain_id, address, role=None)
+
+Get the reputation network operators of the specified address.
+
+* **Parameters:**
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the reputation network exists
+  * **address** (`str`) – Address of the reputation oracle
+  * **role** (`Optional`[`str`]) – (Optional) Role of the operator
+* **Return type:**
+  `List`[[`Operator`](#human_protocol_sdk.operator.operator_utils.Operator)]
+* **Returns:**
+  Returns an array of operator details
+* **Example:**
+  ```python
+  from human_protocol_sdk.constants import ChainId
+  from human_protocol_sdk.operator import OperatorUtils
+
+  leader = OperatorUtils.get_reputation_network_operators(
+      ChainId.POLYGON_MUMBAI,
+      '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
 
@@ -128,16 +151,34 @@ Get rewards of the given slasher
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the slasher exists
   * **slasher** (`str`) – Address of the slasher
 * **Return type:**
-  `List`[[`RewardData`](#human_protocol_sdk.staking.staking_utils.RewardData)]
+  `List`[[`RewardData`](#human_protocol_sdk.operator.operator_utils.RewardData)]
 * **Returns:**
   List of rewards info
 * **Example:**
   ```python
   from human_protocol_sdk.constants import ChainId
-  from human_protocol_sdk.staking import StakingUtils
+  from human_protocol_sdk.operator import OperatorUtils
 
-  rewards_info = StakingUtils.get_rewards_info(
+  rewards_info = OperatorUtils.get_rewards_info(
       ChainId.POLYGON_MUMBAI,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
+
+### *exception* human_protocol_sdk.operator.operator_utils.OperatorUtilsError
+
+Bases: `Exception`
+
+Raises when some error happens when interacting with operator.
+
+### *class* human_protocol_sdk.operator.operator_utils.RewardData(escrow_address, amount)
+
+Bases: `object`
+
+#### \_\_init_\_(escrow_address, amount)
+
+Initializes a RewardData instance.
+
+* **Parameters:**
+  * **escrow_address** (`str`) – Escrow address
+  * **amount** (`int`) – Amount

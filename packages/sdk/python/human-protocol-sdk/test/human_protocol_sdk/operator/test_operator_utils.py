@@ -1,25 +1,24 @@
 import unittest
+from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER
 from unittest.mock import MagicMock, patch
 
-from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.gql.operator import (
+    get_leader_query,
+    get_leaders_query,
+    get_reputation_network_query,
+)
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
-from human_protocol_sdk.gql.staking import get_leader_query, get_leaders_query
-from human_protocol_sdk.staking import (
-    LeaderFilter,
-    StakingUtils,
-)
-from test.human_protocol_sdk.utils import (
-    DEFAULT_GAS_PAYER,
-)
+from human_protocol_sdk.operator import LeaderFilter, OperatorUtils
 
 
-class TestStakingUtils(unittest.TestCase):
+class TestOperatorUtils(unittest.TestCase):
     def test_get_leaders(self):
         filter = LeaderFilter(networks=[ChainId.POLYGON], role="role")
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -48,7 +47,7 @@ class TestStakingUtils(unittest.TestCase):
                 }
             ]
 
-            leaders = StakingUtils.get_leaders(filter)
+            leaders = OperatorUtils.get_leaders(filter)
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON]["subgraph_url"],
@@ -80,7 +79,7 @@ class TestStakingUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -107,7 +106,7 @@ class TestStakingUtils(unittest.TestCase):
                 }
             ]
 
-            leader = StakingUtils.get_leader(ChainId.POLYGON, staker_address)
+            leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON]["subgraph_url"],
@@ -133,12 +132,48 @@ class TestStakingUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
 
+    def test_get_reputation_network_operators(self):
+        reputation_address = "0x1234567890123456789012345678901234567891"
+        operator_address = "0x1234567890123456789012345678901234567891"
+        role = "Job Launcher"
+
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [
+                {
+                    "data": {
+                        "reputationNetwork": {
+                            "id": reputation_address,
+                            "address": reputation_address,
+                            "operators": [{"address": operator_address, "role": role}],
+                        }
+                    }
+                }
+            ]
+
+            operators = OperatorUtils.get_reputation_network_operators(
+                ChainId.POLYGON, reputation_address
+            )
+
+        mock_function.assert_any_call(
+            NETWORKS[ChainId.POLYGON]["subgraph_url"],
+            query=get_reputation_network_query(None),
+            params={"address": reputation_address, "role": None},
+        )
+
+        self.assertNotEqual(operators, [])
+        self.assertEqual(operators[0].address, operator_address)
+        self.assertEqual(operators[0].role, role)
+
     def test_get_rewards_info(self):
         slasher = "0x1234567890123456789012345678901234567891"
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
         ) as mock_function:
             mock_function.return_value = {
                 "data": {
@@ -154,7 +189,7 @@ class TestStakingUtils(unittest.TestCase):
                     ]
                 }
             }
-            rewards_info = StakingUtils.get_rewards_info(ChainId.POLYGON, slasher)
+            rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)
 
             mock_function.assert_called_once_with(
                 NETWORKS[ChainId.POLYGON]["subgraph_url"],
