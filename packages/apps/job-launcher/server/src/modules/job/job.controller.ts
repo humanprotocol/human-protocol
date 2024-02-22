@@ -109,7 +109,7 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
   ): Promise<number> {
-    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    //throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
     return this.jobService.createJob(
       req.user.id,
       JobRequestType.HCAPTCHA,

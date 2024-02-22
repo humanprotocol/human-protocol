@@ -159,6 +159,7 @@ export class JobService {
   public async createHCaptchaManifest(
     jobDto: JobCaptchaDto,
   ): Promise<HCaptchaManifestDto> {
+    console.log(jobDto);
     const jobType = jobDto.annotations.typeOfJob;
     const dataUrl = generateBucketUrl(jobDto.data, JobRequestType.HCAPTCHA);
     const objectsInBucket = await listObjectsInBucket(
@@ -449,6 +450,7 @@ export class JobService {
     dto: CreateJob,
   ): Promise<number> {
     let { chainId } = dto;
+    console.log(dto);
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);

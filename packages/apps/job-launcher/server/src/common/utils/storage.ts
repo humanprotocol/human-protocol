@@ -11,6 +11,7 @@ export function generateBucketUrl(
   jobType: JobRequestType,
   addPath = true,
 ): string {
+  console.log(1111, storageData);
   if (
     (jobType === JobRequestType.IMAGE_BOXES ||
       jobType === JobRequestType.IMAGE_POINTS) &&
@@ -19,6 +20,7 @@ export function generateBucketUrl(
     throw new BadRequestException(ErrorBucket.InvalidProvider);
   }
   if (!storageData.bucketName) {
+    console.log(33333, storageData.bucketName);
     throw new BadRequestException(ErrorBucket.EmptyBucket);
   }
   switch (storageData.provider) {
