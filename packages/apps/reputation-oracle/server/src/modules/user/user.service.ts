@@ -4,12 +4,22 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Not } from 'typeorm';
-import { ErrorUser } from '../../common/constants/errors';
-import { KycStatus, UserStatus, UserType } from '../../common/enums/user';
-import { getNonce } from '../../common/utils/signature';
+import {
+  ErrorAuth,
+  ErrorOperator,
+  ErrorUser,
+} from '../../common/constants/errors';
+import {
+  KycStatus,
+  OperatorStatus,
+  UserStatus,
+  UserType,
+} from '../../common/enums/user';
+import { getNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
@@ -19,6 +29,11 @@ import {
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
+import { Wallet } from 'ethers';
+import { ConfigNames } from '../../common/config';
+import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { ChainId, KVStoreClient } from '@human-protocol/sdk';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -27,6 +42,7 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private readonly web3Service: Web3Service,
+    private readonly configService: ConfigService,
   ) {}
 
   public async update(userId: number, dto: UserUpdateDto): Promise<UserEntity> {
@@ -154,5 +170,38 @@ export class UserService {
     return await this.web3Service
       .getSigner(data.chainId)
       .signMessage(data.address);
+  }
+
+  public async disableOperator(
+    user: UserEntity,
+    signature: string,
+  ): Promise<void> {
+    const signedData = this.web3Service.prepareSignatureBody(
+      SignatureType.DISABLE_OPERATOR,
+      user.evmAddress,
+    );
+
+    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+    if (!verified) {
+      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+    }
+
+    let signer: Wallet;
+    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      signer = this.web3Service.getSigner(ChainId.POLYGON);
+    } else {
+      signer = this.web3Service.getSigner(ChainId.POLYGON_MUMBAI);
+    }
+
+    const kvstore = await KVStoreClient.build(signer);
+
+    const status = await kvstore.get(signer.address, user.evmAddress);
+
+    if (status === OperatorStatus.INACTIVE) {
+      throw new BadRequestException(ErrorOperator.OperatorNotActive);
+    }
+
+    await kvstore.set(user.evmAddress, 'ACTIVE');
   }
 }

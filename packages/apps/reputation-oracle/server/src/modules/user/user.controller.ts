@@ -12,6 +12,7 @@ import {
   Post,
   Req,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import {
@@ -63,5 +64,27 @@ export class UserController {
     );
 
     return { signedAddress };
+  }
+
+  @Post('/disable-operator')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Disable an operator',
+    description: 'Endpoint to disable an operator.',
+  })
+  @ApiBody({ type: String })
+  @ApiResponse({
+    status: 204,
+    description: 'Operator disabled succesfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public disableOperator(
+    @Body() signature: string,
+    @Request() req: RequestWithUser,
+  ): Promise<void> {
+    return this.userService.disableOperator(req.user, signature);
   }
 }
