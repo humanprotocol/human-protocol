@@ -11,7 +11,6 @@ from datumaro.util import dump_json, parse_json
 SkeletonBboxMapping = Dict[int, int]
 
 
-# TODO: migrate to pydantic
 @frozen(kw_only=True)
 class RoiInfo:
     original_image_key: int
