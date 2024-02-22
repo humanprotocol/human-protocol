@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 import { UserEntity } from './user.entity';
@@ -6,7 +6,6 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { UserBalanceDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { ErrorUser } from '../../common/constants/errors';
 import { PaymentService } from '../payment/payment.service';
 import { Currency } from '../../common/enums/payment';
 

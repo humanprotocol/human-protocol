@@ -12,7 +12,7 @@ export enum TokenType {
 
 export interface IToken extends IBase {
   uuid: string;
-  tokenType: TokenType;
+  type: TokenType;
 }
 
 @Entity({ schema: NS, name: 'tokens' })
@@ -25,10 +25,10 @@ export class TokenEntity extends BaseEntity implements IToken {
     type: 'enum',
     enum: TokenType,
   })
-  public tokenType: TokenType;
+  public type: TokenType;
 
   @JoinColumn()
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
   public user: UserEntity;
 
   @Column({ type: 'int' })

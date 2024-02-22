@@ -15,14 +15,14 @@ export class AuthEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({ type: 'varchar' })
-  public accessToken: string;
+  @Column({ type: 'varchar', unique: true })
+  public accessJwtId: string;
 
-  @Column({ type: 'varchar' })
-  public refreshToken: string;
+  @Column({ type: 'varchar', unique: true })
+  public refreshJwtId: string;
 
   @JoinColumn()
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
   public user: UserEntity;
 
   @Column({ type: 'int' })
