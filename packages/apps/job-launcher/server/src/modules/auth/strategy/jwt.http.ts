@@ -9,12 +9,12 @@ import { ConfigNames } from '../../../common/config';
 import { AuthService } from '../auth.service';
 import { JWT_PREFIX } from '../../../common/constants';
 import { AuthRepository } from '../auth.repository';
+import { compareToken } from '../token.utils';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   constructor(
     private readonly authRepository: AuthRepository,
-    private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {
     super({
@@ -48,11 +48,11 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       jwt = jwt.substring(JWT_PREFIX.length);
     }
     if (request.url === '/auth/refresh') {
-      if (!this.authService.compareToken(jwt, auth?.refreshToken)) {
+      if (!compareToken(jwt, auth?.refreshToken)) {
         throw new UnauthorizedException('Token expired');
       }
     } else {
-      if (!this.authService.compareToken(jwt, auth?.accessToken)) {
+      if (!compareToken(jwt, auth?.accessToken)) {
         throw new UnauthorizedException('Token expired');
       }
     }

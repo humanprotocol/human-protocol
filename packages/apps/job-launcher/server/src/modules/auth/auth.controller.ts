@@ -11,6 +11,7 @@ import {
   Logger,
   UsePipes,
   Ip,
+  UseFilters,
 } from '@nestjs/common';
 
 import {
@@ -37,8 +38,10 @@ import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
 import { AuthRepository } from './auth.repository';
+import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
 
 @ApiTags('Auth')
+@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);

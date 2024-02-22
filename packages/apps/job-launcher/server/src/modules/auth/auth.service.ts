@@ -1,10 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -25,7 +20,7 @@ import { TokenRepository } from './token.repository';
 
 import { ConfigNames } from '../../common/config';
 import { ConfigService } from '@nestjs/config';
-import { createHash } from 'crypto';
+
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateHash } from '../../common/utils/crypto';
@@ -36,12 +31,13 @@ import { AuthRepository } from './auth.repository';
 import { AuthEntity } from './auth.entity';
 import { UserRepository } from '../user/user.repository';
 import { ApiKeyEntity } from './apikey.entity';
+import { AuthError } from './auth.error';
+import { hashToken } from './token.utils';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly refreshTokenExpiresIn: string;
-  private readonly salt: string;
   private readonly feURL: string;
   private readonly iterations: number;
   private readonly keyLength: number;
@@ -61,10 +57,6 @@ export class AuthService {
       '100000000',
     );
 
-    this.salt = this.configService.get<string>(
-      ConfigNames.HASH_SECRET,
-      'a328af3fc1dad15342cc3d68936008fa',
-    );
     this.feURL = this.configService.get<string>(
       ConfigNames.FE_URL,
       'http://localhost:3005',
@@ -99,11 +91,7 @@ export class AuthService {
     );
 
     if (!userEntity) {
-      throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
-    }
-
-    if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
+      throw new AuthError(ErrorAuth.InvalidEmailOrPassword);
     }
 
     return this.auth(userEntity);
@@ -152,20 +140,22 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync({
       email: userEntity.email,
       userId: userEntity.id,
+      status: userEntity.status,
     });
 
     const refreshToken = await this.jwtService.signAsync(
       {
         email: userEntity.email,
         userId: userEntity.id,
+        status: userEntity.status,
       },
       {
         expiresIn: this.refreshTokenExpiresIn,
       },
     );
 
-    const accessTokenHashed = this.hashToken(accessToken);
-    const refreshTokenHashed = this.hashToken(refreshToken);
+    const accessTokenHashed = hashToken(accessToken);
+    const refreshTokenHashed = hashToken(refreshToken);
 
     if (auth) {
       await this.authRepository.deleteByUserId(userEntity.id);
@@ -182,14 +172,11 @@ export class AuthService {
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-    const userEntity = await this.userService.getByEmail(data.email);
+    const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
-      throw new NotFoundException(ErrorUser.NotFound);
+      throw new AuthError(ErrorUser.NotFound);
     }
-
-    if (userEntity.status !== UserStatus.ACTIVE)
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
 
     const existingToken =
       await this.tokenRepository.findOneByUserIdAndTokenType(
@@ -244,7 +231,7 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new NotFoundException('Token not found');
+      throw new AuthError(ErrorAuth.InvalidToken);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -281,7 +268,7 @@ export class AuthService {
   public async resendEmailVerification(
     data: ResendEmailVerificationDto,
   ): Promise<void> {
-    const userEntity = await this.userService.getByEmail(data.email);
+    const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new NotFoundException(ErrorUser.NotFound);
@@ -314,16 +301,6 @@ export class AuthService {
       ],
       templateId: SENDGRID_TEMPLATES.signup,
     });
-  }
-
-  public hashToken(token: string): string {
-    const hash = createHash('sha256');
-    hash.update(token + this.salt);
-    return hash.digest('hex');
-  }
-
-  public compareToken(token: string, hashedToken: string): boolean {
-    return this.hashToken(token) === hashedToken;
   }
 
   async createOrUpdateAPIKey(userId: number): Promise<string> {
