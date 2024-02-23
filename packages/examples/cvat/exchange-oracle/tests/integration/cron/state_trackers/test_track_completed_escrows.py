@@ -139,7 +139,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished)
+        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.job_finished)
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
         self.assertEqual(db_project.status, ProjectStatuses.validation)

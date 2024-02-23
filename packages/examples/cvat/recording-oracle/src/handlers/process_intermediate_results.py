@@ -1,13 +1,13 @@
 import io
 import logging
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Dict, List, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
-from attrs import define
 from sqlalchemy.orm import Session
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
@@ -30,17 +30,25 @@ from src.validation.dataset_comparison import (
     SkeletonDatasetComparator,
 )
 
+JobResults = Dict[int, float]
+RejectedJobs = Sequence[int]
 
-@define
-class ValidationSuccess:
+
+@dataclass
+class ValidationResult:
+    job_results: JobResults
+
+
+@dataclass
+class ValidationSuccess(ValidationResult):
     validation_meta: ValidationMeta
     resulting_annotations: bytes
     average_quality: float
 
 
-@define
-class ValidationFailure:
-    rejected_job_ids: List[int]
+@dataclass
+class ValidationFailure(ValidationResult):
+    rejected_jobs: RejectedJobs
 
 
 DM_DATASET_FORMAT_MAPPING = {
@@ -358,7 +366,7 @@ class _BoxesFromPointsValidator(_TaskValidator):
 
         return job_gt_dataset
 
-    def validate(self) -> Tuple[_JobResults, _RejectedJobs, io.BytesIO]:
+    def validate(self) -> Tuple[JobResults, RejectedJobs, io.BytesIO]:
         assert self.job_annotations is not None
         assert self.merged_annotations is not None
 
@@ -613,7 +621,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
 
         return job_gt_dataset
 
-    def validate(self) -> Tuple[_JobResults, _RejectedJobs, io.BytesIO]:
+    def validate(self) -> Tuple[JobResults, RejectedJobs, io.BytesIO]:
         assert self.job_annotations is not None
         assert self.merged_annotations is not None
 
@@ -741,7 +749,7 @@ def process_intermediate_results(
         job_final_result_ids[job.id] = validation_result_id
 
     if rejected_job_ids:
-        return ValidationFailure(rejected_job_ids)
+        return ValidationFailure(job_results=job_results, rejected_jobs=rejected_job_ids)
 
     task_jobs = task.jobs
     task_validation_results = db_service.get_task_validation_results(session, task.id)
@@ -770,6 +778,7 @@ def process_intermediate_results(
     )
 
     return ValidationSuccess(
+        job_results=job_results,
         validation_meta=validation_meta,
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
         average_quality=np.mean(list(job_results.values())) if job_results else 0,

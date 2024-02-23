@@ -1,5 +1,6 @@
 import unittest
 import uuid
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, Mock, patch
 
 from human_protocol_sdk.constants import ChainId
@@ -21,7 +22,7 @@ from src.crons.process_recording_oracle_webhooks import (
     process_outgoing_recording_oracle_webhooks,
 )
 from src.db import SessionLocal
-from src.models.cvat import Job, Project, Task
+from src.models.cvat import Assignment, Job, Project, Task, User
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
 
@@ -38,7 +39,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    def test_process_incoming_recording_oracle_webhooks_task_completed_type(self):
+    def test_process_incoming_recording_oracle_webhooks_job_completed_type(self):
         project_id = str(uuid.uuid4())
         cvat_project = Project(
             id=project_id,
@@ -60,7 +61,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed.value,
+            event_type=RecordingOracleEventTypes.job_completed.value,
             direction=OracleWebhookDirectionTags.incoming,
         )
 
@@ -79,7 +80,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.recorded.value)
 
-    def test_process_incoming_recording_oracle_webhooks_task_completed_type_invalid_project_status(
+    def test_process_incoming_recording_oracle_webhooks_job_completed_type_invalid_project_status(
         self,
     ):
         project_id = str(uuid.uuid4())
@@ -103,7 +104,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed.value,
+            event_type=RecordingOracleEventTypes.job_completed.value,
             direction=OracleWebhookDirectionTags.incoming,
         )
 
@@ -123,7 +124,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.completed.value)
 
-    def test_process_incoming_recording_oracle_webhooks_task_task_rejected_type(self):
+    def test_process_incoming_recording_oracle_webhooks_submission_rejected_type(self):
         cvat_id = 1
 
         project_id = str(uuid.uuid4())
@@ -157,6 +158,26 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(cvat_job)
 
+        user_wallet = "sample wallet"
+        user = User(
+            wallet_address=user_wallet,
+            cvat_email="example@example.com",
+            cvat_id=42,
+        )
+        self.session.add(user)
+
+        assignment_id = str(uuid.uuid4())
+        assignment = Assignment(
+            id=assignment_id,
+            created_at=datetime.utcnow() - timedelta(minutes=10),
+            completed_at=datetime.utcnow() - timedelta(minutes=2),
+            expires_at=datetime.utcnow() + timedelta(minutes=5),
+            user_wallet_address="sample wallet",
+            cvat_job_id=cvat_id,
+            status=AssignmentStatus.completed.value,
+        )
+        self.session.add(assignment)
+
         webhok_id = str(uuid.uuid4())
         webhook = Webhook(
             id=webhok_id,
@@ -165,12 +186,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_rejected.value,
-            event_data={"rejected_job_ids": [cvat_id]},
+            event_type=RecordingOracleEventTypes.submission_rejected.value,
+            event_data={"rejected_tasks": [{"task_id": assignment_id, "reason": "sample reason"}]},
             direction=OracleWebhookDirectionTags.incoming,
         )
-
         self.session.add(webhook)
+
         self.session.commit()
 
         process_incoming_recording_oracle_webhooks()
@@ -193,7 +214,11 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_job.status, JobStatuses.new.value)
 
-    def test_process_incoming_recording_oracle_webhooks_task_task_rejected_type_invalid_project_status(
+        db_assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
+
+        self.assertEqual(db_assignment.status, AssignmentStatus.rejected)
+
+    def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_project_status(
         self,
     ):
         cvat_id = 1
@@ -219,12 +244,14 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_rejected.value,
-            event_data={"rejected_job_ids": [cvat_id]},
+            event_type=RecordingOracleEventTypes.submission_rejected.value,
+            event_data={
+                "rejected_tasks": [{"task_id": "sample assignment id", "reason": "sample reason"}]
+            },
             direction=OracleWebhookDirectionTags.incoming,
         )
-
         self.session.add(webhook)
+
         self.session.commit()
 
         process_incoming_recording_oracle_webhooks()
@@ -251,7 +278,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=ExchangeOracleEventTypes.task_finished.value,
+            event_type=ExchangeOracleEventTypes.job_finished.value,
             direction=OracleWebhookDirectionTags.outgoing,
         )
 
@@ -293,7 +320,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed.value,
+            event_type=RecordingOracleEventTypes.job_completed.value,
             direction=OracleWebhookDirectionTags.outgoing,
         )
 

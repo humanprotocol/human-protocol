@@ -32,7 +32,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         escrow_address = "0x" + "".join([str(random.randint(0, 9)) for _ in range(40)])
         chain_id = Networks.localhost
-        event_type = ExchangeOracleEventTypes.task_finished.value
+        event_type = ExchangeOracleEventTypes.job_finished.value
 
         message = {
             "escrow_address": escrow_address,

@@ -62,7 +62,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
     assert webhook.type == OracleWebhookTypes.exchange_oracle
 
     match webhook.event_type:
-        case ExchangeOracleEventTypes.task_finished:
+        case ExchangeOracleEventTypes.job_finished:
             logger.debug(
                 f"Received a task finish event for escrow_address={webhook.escrow_address}. "
                 "Validating the results"

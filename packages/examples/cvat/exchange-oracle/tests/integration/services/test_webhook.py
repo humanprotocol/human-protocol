@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 
 import src.services.webhook as webhook_service
-from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
+from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobLauncherEventTypes,
@@ -118,7 +118,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=escrow_address,
             chain_id=chain_id,
             type=OracleWebhookTypes.exchange_oracle,
-            event=ExchangeOracleEvent_TaskFinished(),
+            event=ExchangeOracleEvent_JobFinished(),
         )
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
@@ -127,7 +127,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.attempts, 0)
         self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished.value)
+        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.job_finished.value)
         self.assertEqual(webhook.event_data, {})
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
@@ -138,7 +138,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=None,
             chain_id=chain_id,
             type=OracleWebhookTypes.exchange_oracle,
-            event=ExchangeOracleEvent_TaskFinished(),
+            event=ExchangeOracleEvent_JobFinished(),
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
@@ -150,7 +150,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=escrow_address,
             chain_id=None,
             type=OracleWebhookTypes.exchange_oracle,
-            event=ExchangeOracleEvent_TaskFinished(),
+            event=ExchangeOracleEvent_JobFinished(),
         )
         with self.assertRaises(IntegrityError) as error:
             self.session.commit()
@@ -180,7 +180,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 escrow_address=escrow_address,
                 chain_id=chain_id,
                 type=OracleWebhookTypes.exchange_oracle,
-                event=ExchangeOracleEvent_TaskFinished(),
+                event=ExchangeOracleEvent_JobFinished(),
                 signature=signature,
             )
         self.assertEqual(
@@ -232,7 +232,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed.value,
+            event_type=RecordingOracleEventTypes.job_completed.value,
             direction=webhook_service.OracleWebhookDirectionTags.incoming,
         )
         webhook5_id = str(uuid.uuid4())
