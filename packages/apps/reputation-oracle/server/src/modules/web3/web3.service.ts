@@ -7,9 +7,10 @@ import {
   TESTNET_CHAIN_IDS,
   networks,
 } from '../../common/config';
-import { Web3Env } from '../../common/enums/web3';
+import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
+import { SignatureBodyDto } from './web3.dto';
 
 @Injectable()
 export class Web3Service {
@@ -74,5 +75,28 @@ export class Web3Service {
 
   public getOperatorAddress(): string {
     return Object.values(this.signers)[0].address;
+  }
+
+  public prepareSignatureBody(
+    type: SignatureType,
+    address: string,
+  ): SignatureBodyDto {
+    let content: string;
+    switch (type) {
+      case SignatureType.SIGNUP:
+        content = 'signup';
+        break;
+      case SignatureType.DISABLE_OPERATOR:
+        content = 'disable-operator';
+        break;
+      default:
+        throw new BadRequestException('Type not allowed');
+    }
+
+    return {
+      from: address,
+      to: this.getOperatorAddress(),
+      contents: content,
+    };
   }
 }
