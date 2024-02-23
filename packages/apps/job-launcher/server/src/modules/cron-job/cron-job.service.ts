@@ -72,7 +72,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -91,6 +91,7 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (err) {
+          console.log(111, err);
           this.logger.error(`Error creating escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
         }

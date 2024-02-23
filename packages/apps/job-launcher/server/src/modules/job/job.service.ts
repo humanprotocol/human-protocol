@@ -544,6 +544,15 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
+    console.log(
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      [],
+      jobEntity.userId.toString(),
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+      },
+    );
+
     const escrowAddress = await escrowClient.createEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
