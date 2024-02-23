@@ -163,7 +163,7 @@ def test_list_tasks_401(client: TestClient) -> None:
 
     # Send a request without a signature
     assert response.status_code == 400
-    assert response.json() == {"errors": [{"field": "signature", "message": "field required"}]}
+    assert response.json() == {"errors": [{"field": "signature", "message": "Field required"}]}
 
 
 def test_register_200(client: TestClient) -> None:
@@ -279,7 +279,7 @@ def test_register_401_without_signature(client: TestClient) -> None:
     )
 
     assert response.status_code == 400
-    assert response.json() == {"errors": [{"field": "signature", "message": "field required"}]}
+    assert response.json() == {"errors": [{"field": "signature", "message": "Field required"}]}
 
 
 def test_create_assignment_200(client: TestClient) -> None:
@@ -337,4 +337,4 @@ def test_create_assignment_401_without_signature(client: TestClient) -> None:
         "/tasks/1/assignment", json={"wallet_address": user_address, "cvat_email": cvat_email}
     )
     assert response.status_code == 400
-    assert response.json() == {"errors": [{"field": "signature", "message": "field required"}]}
+    assert response.json() == {"errors": [{"field": "signature", "message": "Field required"}]}

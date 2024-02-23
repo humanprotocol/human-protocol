@@ -46,7 +46,7 @@ def serialize_task(
             escrow_address=project.escrow_address,
             title=f"Task {project.escrow_address[:10]}",
             description=manifest.annotation.description,
-            job_bounty=manifest.job_bounty,
+            job_bounty=str(manifest.job_bounty),
             job_time_limit=get_default_assignment_timeout(manifest.annotation.type),
             job_size=get_default_assignment_size(manifest),
             job_type=project.job_type,

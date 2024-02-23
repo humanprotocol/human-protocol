@@ -180,5 +180,5 @@ def test_incoming_webhook_401_without_signature(client: TestClient) -> None:
     # Send a request without a signature
     assert response.status_code == 400
     assert response.json() == {
-        "errors": [{"field": "x-signature-256", "message": "field required"}]
+        "errors": [{"field": "x-signature-256", "message": "Field required"}]
     }

@@ -226,7 +226,7 @@ class _TaskValidator:
                     item = item.wrap(id=item.id[len(self._prefix) :])
                 return item
 
-        prefix = self.manifest.data.data_url.path.lstrip("/\\") + "/"
+        prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.lstrip("/\\") + "/"
         if all(sample.id.startswith(prefix) for sample in merged_dataset):
             merged_dataset.transform(RemoveCommonPrefix, prefix=prefix)
 
