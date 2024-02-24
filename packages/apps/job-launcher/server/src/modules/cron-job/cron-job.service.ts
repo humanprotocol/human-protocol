@@ -104,7 +104,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,

@@ -168,6 +168,9 @@ export class JobService {
     );
 
     const commonManifestProperties = {
+      job_api_key: this.configService.get<string>(
+        ConfigNames.HCAPTHCHA_JOB_API_KEY,
+      )!,
       job_mode: JobCaptchaMode.BATCH,
       requester_accuracy_target: jobDto.accuracyTarget,
       request_config: {},
@@ -186,12 +189,12 @@ export class JobService {
       public_results: true,
       oracle_stake: HCAPTCHA_ORACLE_STAKE,
       // TODO: Remove
-      /*repo_uri: this.configService.get<string>(
+      repo_uri: this.configService.get<string>(
         ConfigNames.HCAPTCHA_REPUTATION_ORACLE_URI,
       )!,
       ro_uri: this.configService.get<string>(
         ConfigNames.HCAPTCHA_RECORDING_ORACLE_URI,
-      )!,*/
+      )!,
     };
 
     let groundTruthsData;
@@ -487,6 +490,7 @@ export class JobService {
       requestType,
       tokenFundAmount,
     );
+    console.log(123, manifestOrigin);
     const { url, hash } = await this.uploadManifest(
       requestType,
       chainId,

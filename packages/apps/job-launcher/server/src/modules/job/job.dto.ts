@@ -657,6 +657,9 @@ class RequestConfig {
 
 export class HCaptchaManifestDto {
   @IsString()
+  job_api_key: string;
+
+  @IsString()
   job_mode: string;
 
   @IsEnum(JobCaptchaRequestType)
