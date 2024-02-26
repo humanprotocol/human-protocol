@@ -2,17 +2,20 @@ import { Test } from '@nestjs/testing';
 import { EventType } from '../../common/enums/webhook';
 import { WebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
-import { ConfigService } from '@nestjs/config';
 import { JobService } from '../job/job.service';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import {
-  MOCK_PRIVATE_KEY,
+  MOCK_ENCRYPTION_PASSPHRASE,
+  MOCK_ENCRYPTION_PRIVATE_KEY,
+  MOCK_FILE_URL,
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { of } from 'rxjs';
@@ -24,20 +27,10 @@ describe('WebhookService', () => {
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
-  const workerAddress = '0x1234567890123456789012345678901234567891';
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-  };
-
-  const configServiceMock: Partial<ConfigService> = {
-    get: jest.fn((key: string) => {
-      switch (key) {
-        case 'WEB3_PRIVATE_KEY':
-          return MOCK_PRIVATE_KEY;
-      }
-    }),
   };
 
   const httpServicePostMock = jest
@@ -57,15 +50,23 @@ describe('WebhookService', () => {
             bucket: MOCK_S3_BUCKET,
           })),
         ),
+        ConfigModule.forFeature(
+          registerAs('web3', () => ({
+            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('server', () => ({
+            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+            encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
+            encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
+          })),
+        ),
       ],
       providers: [
         WebhookService,
         JobService,
         StorageService,
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
         {
           provide: Web3Service,
           useValue: {
@@ -96,52 +97,44 @@ describe('WebhookService', () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    it('should handle an incoming escrow created webhook', async () => {
+    it('should handle an incoming escrow completed webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CREATED,
+        eventType: EventType.ESCROW_COMPLETED,
       };
 
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
     });
 
-    it('should handle an incoming escrow canceled webhook', async () => {
+    it('should handle an incoming solution in review webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CANCELED,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
-    });
+      jest
+        .spyOn(jobService, 'processJobSolution')
+        .mockResolvedValue('Solution are recorded.');
 
-    it('should mark a job solution as invalid', async () => {
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.SUBMISSION_REJECTED,
-        eventData: { assignments: [{ assigneeId: workerAddress }] },
-      };
-
-      jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
+      jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();
 
       await webhookService.handleWebhook(webhook);
 
-      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
-        webhook,
-      );
+      expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
 
     it('should return an error when the event type is invalid', async () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_RECORDED,
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: task_creation_failed',
+        'Invalid webhook event type: escrow_recorded',
       );
     });
   });
