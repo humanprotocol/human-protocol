@@ -991,20 +991,12 @@ class SkeletonsFromBoxesTaskBuilder:
         gt_storage_client = self._make_cloud_storage_client(gt_bucket)
         boxes_storage_client = self._make_cloud_storage_client(boxes_bucket)
 
-        data_filenames = data_storage_client.list_files(
-            prefix=data_bucket.path,
-        )
+        data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
         self.input_filenames = filter_image_files(data_filenames)
 
-        self.input_gt_data = gt_storage_client.download_file(
-            gt_bucket.bucket_name,
-            gt_bucket.path,
-        )
+        self.input_gt_data = gt_storage_client.download_file(gt_bucket.path)
 
-        self.input_boxes_data = boxes_storage_client.download_file(
-            boxes_bucket.bucket_name,
-            boxes_bucket.path,
-        )
+        self.input_boxes_data = boxes_storage_client.download_file(boxes_bucket.path)
 
     def _parse_dataset(self, annotation_file_data: bytes, dataset_format: str) -> dm.Dataset:
         temp_dir = self.exit_stack.enter_context(TemporaryDirectory())
@@ -1474,7 +1466,6 @@ class SkeletonsFromBoxesTaskBuilder:
         bucket_name = self.oracle_data_bucket.bucket_name
         for file_data, filename in file_list:
             storage_client.create_file(
-                bucket_name,
                 compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                 file_data,
             )
@@ -1527,7 +1518,6 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self.roi_filenames is not _unset
         assert self.roi_infos is not _unset
 
-        # TODO: optimize downloading, this implementation won't work for big datasets
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = ""
         dst_bucket = self.oracle_data_bucket
@@ -1559,9 +1549,7 @@ class SkeletonsFromBoxesTaskBuilder:
             if not image_roi_infos:
                 continue
 
-            image_bytes = src_client.download_file(
-                src_bucket.bucket_name, os.path.join(src_prefix, filename)
-            )
+            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
             image_pixels = decode_image(image_bytes)
 
             sample = filename_to_sample[filename]
@@ -1583,10 +1571,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 roi_bytes = encode_image(roi_pixels, os.path.splitext(filename)[-1])
 
                 dst_client.create_file(
-                    dst_bucket.bucket_name,
-                    filename=compose_data_bucket_filename(
-                        self.escrow_address, self.chain_id, filename
-                    ),
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                     data=roi_bytes,
                 )
 
