@@ -249,7 +249,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api"),
-            patch("src.handlers.completed_escrows.cvat_api.get_job_annotations") as mock_annotations,
+            patch(
+                "src.handlers.completed_escrows.cvat_api.get_job_annotations"
+            ) as mock_annotations,
             patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
