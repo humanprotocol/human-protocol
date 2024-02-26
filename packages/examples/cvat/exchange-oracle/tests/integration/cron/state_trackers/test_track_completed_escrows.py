@@ -250,12 +250,16 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api"),
             patch("src.handlers.completed_escrows.cvat_api.get_job_annotations") as mock_annotations,
-            patch("src.handlers.completed_escrows.cloud_client") as mock_make_client,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
+
             mock_create_file = Mock()
-            mock_make_client.return_value.create_file = mock_create_file
+            mock_storage_client = Mock()
+            mock_storage_client.create_file = mock_create_file
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
+
             mock_annotations.side_effect = Exception("Connection error")
 
             track_completed_escrows()
