@@ -26,7 +26,9 @@ class Project(Base):
     cvat_cloudstorage_id = Column(Integer, index=True, nullable=False)
     status = Column(String, Enum(ProjectStatuses), nullable=False)
     job_type = Column(String, Enum(TaskType), nullable=False)
-    escrow_address = Column(String(42), unique=True, nullable=False)
+    escrow_address = Column(
+        String(42), unique=False, nullable=False
+    )  # TODO: extract into a separate model
     chain_id = Column(Integer, Enum(Networks), nullable=False)
     bucket_url = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

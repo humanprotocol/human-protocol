@@ -1,11 +1,12 @@
+import itertools
 import uuid
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 
 from sqlalchemy import delete, insert, update
 from sqlalchemy.orm import Session
 
-from src.core.types import AssignmentStatus, JobStatuses, ProjectStatuses, TaskStatus
+from src.core.types import AssignmentStatus, JobStatuses, ProjectStatuses, TaskStatus, TaskType
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
@@ -63,6 +64,27 @@ def get_project_by_id(
     )
 
 
+def get_projects_by_cvat_ids(
+    session: Session,
+    project_cvat_ids: Sequence[int],
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+    status_in: Optional[List[ProjectStatuses]] = None,
+    limit: int = 5,
+) -> List[Project]:
+    if status_in:
+        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
+    else:
+        status_filter_arg = []
+
+    return (
+        _maybe_for_update(session.query(Project), enable=for_update)
+        .where(Project.cvat_id.in_(project_cvat_ids), *status_filter_arg)
+        .limit(limit)
+        .all()
+    )
+
+
 def get_project_by_escrow_address(
     session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
 ) -> Optional[Project]:
@@ -73,19 +95,49 @@ def get_project_by_escrow_address(
     )
 
 
+def get_projects_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+    limit: Optional[int] = 5,
+) -> List[Project]:
+    projects = _maybe_for_update(session.query(Project), enable=for_update).where(
+        Project.escrow_address == escrow_address
+    )
+
+    if limit is not None:
+        projects = projects.limit(limit)
+
+    return projects.all()
+
+
+def get_project_cvat_ids_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+) -> List[int]:
+    projects = session.query(Project).where(Project.escrow_address == escrow_address)
+
+    return list(itertools.chain.from_iterable(projects.values(Project.cvat_id)))
+
+
 def get_projects_by_status(
     session: Session,
     status: ProjectStatuses,
     *,
+    included_types: Optional[Sequence[TaskType]] = None,
     limit: int = 5,
     for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
-    projects = (
-        _maybe_for_update(session.query(Project), enable=for_update)
-        .where(Project.status == status.value)
-        .limit(limit)
-        .all()
+    projects = _maybe_for_update(session.query(Project), enable=for_update).where(
+        Project.status == status.value
     )
+
+    if included_types is not None:
+        projects = projects.where(Project.job_type.in_([t.value for t in included_types]))
+
+    projects = projects.limit(limit).all()
+
     return projects
 
 

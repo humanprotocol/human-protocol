@@ -1,11 +1,12 @@
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, Any, Dict, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
 from src.core.config import Config
 from src.core.types import TaskType
+from src.utils.enums import BetterEnumMeta
 
 
 class BucketProviders(str, Enum):
@@ -43,16 +44,84 @@ class DataInfo(BaseModel):
     "A path to an archive with a set of points in COCO Keypoints format, "
     "which provides information about all objects on images"
 
+    boxes_url: Optional[Union[AnyUrl, BucketUrl]] = None
+    "A path to an archive with a set of boxes in COCO Instances format, "
+    "which provides information about all objects on images"
 
-class LabelInfo(BaseModel):
-    name: str
+
+class LabelTypes(str, Enum, metaclass=BetterEnumMeta):
+    plain = "plain"
+    skeleton = "skeleton"
+
+
+class LabelInfoBase(BaseModel):
+    name: str = Field(min_length=1)
     # https://opencv.github.io/cvat/docs/api_sdk/sdk/reference/models/label/
+
+    type: LabelTypes = LabelTypes.plain
+
+
+class PlainLabelInfo(LabelInfoBase):
+    type: Literal[LabelTypes.plain]
+
+
+class SkeletonLabelInfo(LabelInfoBase):
+    type: Literal[LabelTypes.skeleton]
+
+    nodes: List[str] = Field(min_items=1)
+    """
+    A list of node label names (only points are supposed to be nodes).
+    Example:
+    [
+        "left hand", "torso", "right hand", "head"
+    ]
+    """
+
+    joints: List[Tuple[int, int]]
+    "A list of node adjacency, e.g. [[0, 1], [1, 2], [1, 3]]"
+
+    @root_validator
+    @classmethod
+    def validate_type(cls, values: dict) -> dict:
+        if values["type"] != LabelTypes.skeleton:
+            raise ValueError(f"Label type must be {LabelTypes.skeleton}")
+
+        skeleton_name = values["name"]
+
+        existing_names = set()
+        for node_name in values["nodes"]:
+            node_name = node_name.strip()
+
+            if not node_name:
+                raise ValueError(f"Skeleton '{skeleton_name}': point name is empty")
+
+            if node_name.lower() in existing_names:
+                raise ValueError(
+                    f"Skeleton '{skeleton_name}' point {node_name}: label is duplicated"
+                )
+
+            existing_names.add(node_name.lower())
+
+        nodes_count = len(values["nodes"])
+        joints = values["joints"]
+        for joint_idx, joint in enumerate(joints):
+            for v in joint:
+                if not (0 <= v < nodes_count):
+                    raise ValueError(
+                        f"Skeleton '{skeleton_name}' joint #{joint_idx}: invalid value. "
+                        f"Expected a number in the range [0; {nodes_count - 1}]"
+                    )
+
+        return values
+
+
+LabelInfo = Annotated[Union[PlainLabelInfo, SkeletonLabelInfo], Field(discriminator="type")]
 
 
 class AnnotationInfo(BaseModel):
     type: TaskType
 
-    labels: list[LabelInfo]
+    labels: list[LabelInfo] = Field(min_items=1)
     "Label declarations with accepted annotation types"
 
     description: str = ""
@@ -66,15 +135,6 @@ class AnnotationInfo(BaseModel):
 
     max_time: int = Field(default_factory=lambda: Config.core_config.default_assignment_time)
     "Maximum time per job (assignment) for an annotator, in seconds"
-
-    @root_validator
-    @classmethod
-    def validate_type(cls, values: dict) -> dict:
-        if values["type"] == TaskType.image_label_binary:
-            if len(values["labels"]) != 2:
-                raise ValueError("Binary classification requires 2 labels")
-
-        return values
 
 
 class ValidationInfo(BaseModel):
@@ -95,3 +155,18 @@ class TaskManifest(BaseModel):
 
     job_bounty: Decimal = Field(ge=0)
     "Assignment bounty, a decimal value in HMT"
+
+
+def parse_manifest(manifest: Any) -> TaskManifest:
+    # Add default value for labels, if none provided.
+    # pydantic can't do this for tagged unions
+
+    if isinstance(manifest, dict):
+        try:
+            labels = manifest["annotation"]["labels"]
+            for label_info in labels:
+                label_info["type"] = label_info.get("type", LabelTypes.plain)
+        except KeyError:
+            pass
+
+    return TaskManifest.parse_obj(manifest)

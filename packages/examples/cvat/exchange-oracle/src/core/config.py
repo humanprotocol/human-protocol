@@ -49,6 +49,8 @@ class LocalhostConfig:
     addr = os.environ.get("LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     job_launcher_url = os.environ.get("LOCALHOST_JOB_LAUNCHER_URL")
+
+    recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
 
 
@@ -71,8 +73,20 @@ class CronConfig:
     track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
-    retrieve_annotations_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60))
-    retrieve_annotations_chunk_size = os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5)
+    track_completed_escrows_int = int(
+        # backward compatibility
+        os.environ.get(
+            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
+        )
+    )
+    track_completed_escrows_chunk_size = os.environ.get(
+        # backward compatibility
+        "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
+        os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
+    )
+
+    rejected_projects_chunk_size = os.environ.get("REJECTED_PROJECTS_CHUNK_SIZE", 20)
+    accepted_projects_chunk_size = os.environ.get("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
 
 
 class CvatConfig:

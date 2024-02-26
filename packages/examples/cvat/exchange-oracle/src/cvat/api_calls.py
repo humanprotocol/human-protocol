@@ -168,16 +168,18 @@ def create_cloudstorage(
 
 
 def create_project(
-    escrow_address: str, labels: list, *, user_guide: str = ""
+    name: str, *, labels: Optional[list] = None, user_guide: str = ""
 ) -> models.ProjectRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        kwargs = {}
+
+        if labels is not None:
+            kwargs["labels"] = labels
+
         try:
             (project, response) = api_client.projects_api.create(
-                models.ProjectWriteRequest(
-                    name=escrow_address,
-                    labels=labels,
-                )
+                models.ProjectWriteRequest(name=name, **kwargs)
             )
             if user_guide:
                 api_client.guides_api.create(
@@ -276,11 +278,11 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             raise
 
 
-def create_task(project_id: int, escrow_address: str) -> models.TaskRead:
+def create_task(project_id: int, name: str) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         task_write_request = models.TaskWriteRequest(
-            name=escrow_address,
+            name=name,
             project_id=project_id,
             overlap=0,
             segment_size=Config.cvat_config.cvat_job_segment_size,

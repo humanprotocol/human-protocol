@@ -19,7 +19,7 @@ from src.core.types import (
     TaskStatus,
     TaskType,
 )
-from src.crons.state_trackers import retrieve_annotations
+from src.crons.state_trackers import track_completed_escrows
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Image, Job, Project, Task, User
 from src.models.webhook import Webhook
@@ -99,10 +99,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.crons.state_trackers.cvat_api") as mock_cvat_api,
-            patch("src.crons.state_trackers.validate_escrow"),
-            patch("src.crons.state_trackers.cloud_service") as mock_cloud_service,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -131,7 +131,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.list_files = Mock(return_value=[])
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            retrieve_annotations()
+            track_completed_escrows()
 
         webhook = (
             self.session.query(Webhook)
@@ -179,7 +179,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(cvat_job)
         self.session.commit()
 
-        retrieve_annotations()
+        track_completed_escrows()
 
         self.session.commit()
         db_project = self.session.query(Project).filter_by(id=project_id).first()
@@ -246,19 +246,25 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.crons.state_trackers.cvat_api"),
-            patch("src.crons.state_trackers.cvat_api.get_job_annotations") as mock_annotations,
-            patch("src.crons.state_trackers.validate_escrow"),
-            patch("src.crons.state_trackers.cloud_service.make_client") as mock_make_client,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api"),
+            patch(
+                "src.handlers.completed_escrows.cvat_api.get_job_annotations"
+            ) as mock_annotations,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
+
             mock_create_file = Mock()
-            mock_make_client.return_value.create_file = mock_create_file
+            mock_storage_client = Mock()
+            mock_storage_client.create_file = mock_create_file
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
+
             mock_annotations.side_effect = Exception("Connection error")
 
-            retrieve_annotations()
+            track_completed_escrows()
 
         webhook = (
             self.session.query(Webhook)
@@ -330,14 +336,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.crons.state_trackers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.crons.state_trackers.cvat_api"),
-            patch("src.crons.state_trackers.validate_escrow"),
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
 
-            retrieve_annotations()
+            track_completed_escrows()
 
         webhook = (
             self.session.query(Webhook)
