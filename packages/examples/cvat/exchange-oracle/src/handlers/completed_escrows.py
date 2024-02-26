@@ -311,8 +311,8 @@ class _CompletedEscrowsHandler:
                 existing_storage_files = set(
                     storage_client.list_files(
                         prefix=compose_results_bucket_filename(
-                            project.escrow_address,
-                            project.chain_id,
+                            escrow_address,
+                            chain_id,
                             "",
                         ),
                     )
