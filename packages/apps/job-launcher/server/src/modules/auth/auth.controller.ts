@@ -12,6 +12,7 @@ import {
   UsePipes,
   Ip,
   UseFilters,
+  HttpCode,
 } from '@nestjs/common';
 
 import {
@@ -63,7 +64,7 @@ export class AuthJwtController {
   })
   @ApiBody({ type: UserCreateDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'User registered successfully',
   })
   @ApiResponse({
@@ -79,10 +80,10 @@ export class AuthJwtController {
     @Ip() ip: string,
   ): Promise<void> {
     await this.authService.signup(data, ip);
-    return;
   }
 
   @Public()
+  @HttpCode(200)
   @Post('/signin')
   @ApiOperation({
     summary: 'User Signin',
@@ -107,6 +108,7 @@ export class AuthJwtController {
   }
 
   @Public()
+  @HttpCode(200)
   @Post('/refresh')
   @ApiBody({ type: RefreshDto })
   @ApiOperation({
@@ -118,12 +120,13 @@ export class AuthJwtController {
     description: 'Token refreshed successfully',
     type: AuthDto,
   })
-  async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
+  public async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
     return this.authService.refresh(data);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
   @Post('/logout')
   @ApiOperation({
     summary: 'User Logout',
@@ -141,6 +144,7 @@ export class AuthJwtController {
   }
 
   @Public()
+  @HttpCode(204)
   @Post('/forgot-password')
   @ApiOperation({
     summary: 'Forgot Password',
@@ -159,11 +163,12 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
-    return this.authService.forgotPassword(data);
+  public async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
+    await this.authService.forgotPassword(data);
   }
 
   @Public()
+  @HttpCode(204)
   @Post('/restore-password')
   @ApiOperation({
     summary: 'Restore Password',
@@ -183,10 +188,10 @@ export class AuthJwtController {
     @Ip() ip: string,
   ): Promise<void> {
     await this.authService.restorePassword(data, ip);
-    return;
   }
 
   @Public()
+  @HttpCode(200)
   @Post('/email-verification')
   @ApiOperation({
     summary: 'Email Verification',
@@ -207,6 +212,7 @@ export class AuthJwtController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
   @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Resend Email Verification',
@@ -221,10 +227,10 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public resendEmailVerification(
+  public async resendEmailVerification(
     @Body() data: ResendEmailVerificationDto,
   ): Promise<void> {
-    return this.authService.resendEmailVerification(data);
+    await this.authService.resendEmailVerification(data);
   }
 
   @ApiBearerAuth()
