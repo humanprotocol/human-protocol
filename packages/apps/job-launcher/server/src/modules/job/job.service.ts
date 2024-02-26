@@ -996,7 +996,7 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
-    if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
+    if (dto.eventType !== EventType.SUBMISSION_REJECTED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }

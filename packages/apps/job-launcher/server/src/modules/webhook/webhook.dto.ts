@@ -9,6 +9,16 @@ import {
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
 
+export class EventData {
+  @ApiProperty({ name: 'assignee_id' })
+  @IsString()
+  public assigneeId?: string;
+
+  @ApiProperty()
+  @IsString()
+  public reason?: string;
+}
+
 export class WebhookDto {
   @ApiProperty()
   @IsEnum(ChainId)
