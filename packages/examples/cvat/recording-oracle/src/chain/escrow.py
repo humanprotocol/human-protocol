@@ -6,7 +6,7 @@ from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageClient
 
 from src.chain.web3 import get_web3
-from src.services.cloud.utils import parse_bucket_url
+from src.services.cloud.types import BucketAccessInfo
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -44,19 +44,19 @@ def validate_escrow(
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    parsed_url = parse_bucket_url(escrow.manifest_url)
+    bucket_access_info = BucketAccessInfo.parse_obj(escrow.manifest_url)
 
     secure = False
-    if parsed_url.host_url.startswith("https://"):
-        host = parsed_url.host_url[len("https://") :]
+    if bucket_access_info.host_url.startswith("https://"):
+        host = bucket_access_info.host_url[len("https://") :]
         secure = True
-    elif parsed_url.host_url.startswith("http://"):
-        host = parsed_url.host_url[len("http://") :]
+    elif bucket_access_info.host_url.startswith("http://"):
+        host = bucket_access_info.host_url[len("http://") :]
     else:
-        host = parsed_url.host_url
+        host = bucket_access_info.host_url
 
     manifest_content = StorageClient(endpoint_url=host, secure=secure).download_files(
-        [parsed_url.path], bucket=parsed_url.bucket_name
+        [bucket_access_info.path], bucket=bucket_access_info.bucket_name
     )[0]
 
     return json.loads(manifest_content.decode("utf-8"))

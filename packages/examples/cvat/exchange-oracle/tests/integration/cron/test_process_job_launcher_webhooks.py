@@ -79,7 +79,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_gt_filenames.return_value = filenames
 
             mock_cloud_client = Mock()
-            mock_cloud_client.list_filenames.return_value = filenames
+            mock_cloud_client.list_files.return_value = filenames
             mock_make_cloud_client.return_value = mock_cloud_client
 
             process_incoming_job_launcher_webhooks()

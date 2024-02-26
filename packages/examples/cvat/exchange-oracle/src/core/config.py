@@ -1,19 +1,15 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
 """ Project configuration from env vars """
 import os
+from typing import ClassVar, Optional
 
+from attrs.converters import to_bool
 from dotenv import load_dotenv
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
 load_dotenv()
-
-
-def str_to_bool(val: str) -> bool:
-    from distutils.util import strtobool
-
-    return val is True or strtobool(val)
 
 
 class PostgresConfig:
@@ -108,32 +104,43 @@ class CvatConfig:
 
 
 class StorageConfig:
-    endpoint_url = os.environ.get("STORAGE_ENDPOINT_URL", "storage.googleapis.com")
-    region = os.environ.get("STORAGE_REGION", "")
-    access_key = os.environ.get("STORAGE_ACCESS_KEY", "")
-    secret_key = os.environ.get("STORAGE_SECRET_KEY", "")
-    data_bucket_name = os.environ.get("STORAGE_DATA_BUCKET_NAME", "")
-    results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
-    secure = str_to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    provider: ClassVar[str] = os.environ["STORAGE_PROVIDER"].lower()
+    data_bucket_name: ClassVar[str] = (
+        os.environ.get("STORAGE_RESULTS_BUCKET_NAME")  # backward compatibility
+        or os.environ["STORAGE_BUCKET_NAME"]
+    )
+    endpoint_url: ClassVar[str] = os.environ[
+        "STORAGE_ENDPOINT_URL"
+    ]  # TODO: probably should be optional
+    region: ClassVar[Optional[str]] = os.environ.get("STORAGE_REGION")
+    results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
+    secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+
+    # S3 specific attributes
+    access_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_ACCESS_KEY")
+    secret_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_SECRET_KEY")
+
+    # GCS specific attributes
+    key_file_path: ClassVar[Optional[str]] = os.environ.get("STORAGE_KEY_FILE_PATH")
+
+    @classmethod
+    def get_scheme(cls) -> str:
+        return "https://" if cls.secure else "http://"
 
     @classmethod
     def provider_endpoint_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
-        return f"{scheme}{cls.endpoint_url}"
+        return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
     def bucket_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
         if is_ipv4(cls.endpoint_url):
-            return f"{scheme}{cls.endpoint_url}/{cls.data_bucket_name}/"
+            return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
-            return f"{scheme}{cls.data_bucket_name}.{cls.endpoint_url}/"
+            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = str_to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))

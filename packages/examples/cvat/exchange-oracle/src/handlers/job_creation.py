@@ -31,7 +31,7 @@ from src.core.types import CvatLabelType, TaskStatus, TaskType
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import CloudProviders, StorageClient
-from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url, parse_bucket_url
+from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
@@ -61,11 +61,6 @@ DM_GT_DATASET_FORMAT_MAPPING = {
     TaskType.image_boxes: "coco_instances",
     TaskType.image_boxes_from_points: "coco_instances",
     TaskType.image_skeletons_from_boxes: "coco_person_keypoints",
-}
-
-CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
-    CloudProviders.aws: "AWS_S3_BUCKET",
-    CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
 }
 
 
@@ -184,11 +179,7 @@ class BoxesFromPointsTaskBuilder:
         self.max_embedded_point_radius_percent = 0.01
         self.embedded_point_color = (0, 255, 255)
 
-        self.oracle_data_bucket = BucketAccessInfo.from_raw_url(Config.storage_config.bucket_url())
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
-
+        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
         self.min_class_samples_for_roi_estimation = 50
 
         self.max_discarded_threshold = 0.05
@@ -212,29 +203,20 @@ class BoxesFromPointsTaskBuilder:
         return self
 
     def _download_input_data(self):
-        data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
-        gt_bucket = BucketAccessInfo.from_raw_url(self.manifest.validation.gt_url)
-        points_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.points_url)
+        data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        points_bucket = BucketAccessInfo.parse_obj(self.manifest.data.points_url)
 
         data_storage_client = self._make_cloud_storage_client(data_bucket)
         gt_storage_client = self._make_cloud_storage_client(gt_bucket)
         points_storage_client = self._make_cloud_storage_client(points_bucket)
 
-        data_filenames = data_storage_client.list_filenames(
-            data_bucket.url.bucket_name,
-            prefix=data_bucket.url.path,
-        )
+        data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
         self._data_filenames = filter_image_files(data_filenames)
 
-        self._input_gt_data = gt_storage_client.download_file(
-            gt_bucket.url.bucket_name,
-            gt_bucket.url.path,
-        )
+        self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
 
-        self._input_points_data = points_storage_client.download_file(
-            points_bucket.url.bucket_name,
-            points_bucket.url.path,
-        )
+        self._input_points_data = points_storage_client.download_file(points_bucket.path)
 
     def _parse_dataset(self, annotation_file_data: bytes, dataset_format: str) -> dm.Dataset:
         temp_dir = self.exit_stack.enter_context(TemporaryDirectory())
@@ -838,7 +820,7 @@ class BoxesFromPointsTaskBuilder:
         )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
-        bucket_name = self.oracle_data_bucket.url.bucket_name
+        bucket_name = self.oracle_data_bucket.bucket_name
         for file_data, filename in file_list:
             storage_client.create_file(
                 bucket_name,
@@ -886,7 +868,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._data_filenames is not _unset
         assert self._roi_filenames is not _unset
 
-        src_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
+        src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = ""
         dst_bucket = self.oracle_data_bucket
 
@@ -910,9 +892,7 @@ class BoxesFromPointsTaskBuilder:
             if not image_roi_infos:
                 continue
 
-            image_bytes = src_client.download_file(
-                src_bucket.url.bucket_name, os.path.join(src_prefix, filename)
-            )
+            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
             image_pixels = decode_image(image_bytes)
 
             sample = filename_to_sample[filename]
@@ -941,7 +921,6 @@ class BoxesFromPointsTaskBuilder:
 
             for roi_filename, roi_bytes in image_rois.items():
                 dst_client.create_file(
-                    dst_bucket.url.bucket_name,
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, roi_filename),
                     roi_bytes,
                 )
@@ -950,16 +929,12 @@ class BoxesFromPointsTaskBuilder:
         assert self._job_layout is not _unset
         assert self._label_configuration is not _unset
 
-        input_data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
+        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
         cloud_storage = cvat_api.create_cloudstorage(
-            CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[oracle_bucket.provider],
-            oracle_bucket.url.host_url,
-            oracle_bucket.url.bucket_name,
-            # TODO: add
-            # credentials=...
+            **_make_cvat_cloud_storage_params(oracle_bucket)
         )
 
         # Create a project
@@ -972,7 +947,6 @@ class BoxesFromPointsTaskBuilder:
         # Setup webhooks for a project (update:task, update:job)
         webhook = cvat_api.create_cvat_webhook(project.id)
 
-        input_data_bucket = parse_bucket_url(self.manifest.data.data_url)
         with SessionLocal.begin() as session:
             db_service.create_project(
                 session,
@@ -1099,7 +1073,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self.roi_embedded_bbox_color = (0, 255, 255)  # BGR
         self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
 
-        self.oracle_data_bucket = BucketAccessInfo.from_raw_url(Config.storage_config.bucket_url())
+        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
         # TODO: add
         # credentials=BucketCredentials()
         "Exchange Oracle's private bucket info"
@@ -1127,29 +1101,20 @@ class SkeletonsFromBoxesTaskBuilder:
         return self
 
     def _download_input_data(self):
-        data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
-        gt_bucket = BucketAccessInfo.from_raw_url(self.manifest.validation.gt_url)
-        boxes_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.boxes_url)
+        data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        boxes_bucket = BucketAccessInfo.parse_obj(self.manifest.data.boxes_url)
 
         data_storage_client = self._make_cloud_storage_client(data_bucket)
         gt_storage_client = self._make_cloud_storage_client(gt_bucket)
         boxes_storage_client = self._make_cloud_storage_client(boxes_bucket)
 
-        data_filenames = data_storage_client.list_filenames(
-            data_bucket.url.bucket_name,
-            prefix=data_bucket.url.path,
-        )
+        data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
         self._data_filenames = filter_image_files(data_filenames)
 
-        self._input_gt_data = gt_storage_client.download_file(
-            gt_bucket.url.bucket_name,
-            gt_bucket.url.path,
-        )
+        self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
 
-        self._input_boxes_data = boxes_storage_client.download_file(
-            boxes_bucket.url.bucket_name,
-            boxes_bucket.url.path,
-        )
+        self._input_boxes_data = boxes_storage_client.download_file(boxes_bucket.path)
 
     def _parse_dataset(self, annotation_file_data: bytes, dataset_format: str) -> dm.Dataset:
         temp_dir = self.exit_stack.enter_context(TemporaryDirectory())
@@ -1731,10 +1696,8 @@ class SkeletonsFromBoxesTaskBuilder:
         )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
-        bucket_name = self.oracle_data_bucket.url.bucket_name
         for file_data, filename in file_list:
             storage_client.create_file(
-                bucket_name,
                 compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                 file_data,
             )
@@ -1787,7 +1750,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._roi_filenames is not _unset
         assert self._roi_infos is not _unset
 
-        src_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
+        src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = ""
         dst_bucket = self.oracle_data_bucket
 
@@ -1820,9 +1783,7 @@ class SkeletonsFromBoxesTaskBuilder:
             if not image_roi_infos:
                 continue
 
-            image_bytes = src_client.download_file(
-                src_bucket.url.bucket_name, os.path.join(src_prefix, filename)
-            )
+            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
             image_pixels = decode_image(image_bytes)
 
             sample = filename_to_sample[filename]
@@ -1844,10 +1805,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 roi_bytes = encode_image(roi_pixels, os.path.splitext(filename)[-1])
 
                 dst_client.create_file(
-                    dst_bucket.url.bucket_name,
-                    filename=compose_data_bucket_filename(
-                        self.escrow_address, self.chain_id, filename
-                    ),
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                     data=roi_bytes,
                 )
 
@@ -1874,20 +1832,12 @@ class SkeletonsFromBoxesTaskBuilder:
             for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
         }
 
-        input_data_bucket = BucketAccessInfo.from_raw_url(self.manifest.data.data_url)
+        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
         cloud_storage = cvat_api.create_cloudstorage(
-            CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[oracle_bucket.provider],
-            oracle_bucket.url.host_url.replace(
-                # TODO: remove mock
-                "127.0.0.1",
-                "172.22.0.1",
-            ),
-            oracle_bucket.url.bucket_name,
-            # TODO: add
-            # credentials=...
+            **_make_cvat_cloud_storage_params(oracle_bucket)
         )
 
         for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
@@ -1929,9 +1879,9 @@ class SkeletonsFromBoxesTaskBuilder:
                         self.escrow_address,
                         self.chain_id,
                         compose_bucket_url(
-                            input_data_bucket.url.bucket_name,
-                            bucket_host=input_data_bucket.url.host_url,
-                            provider=input_data_bucket.url.provider,
+                            input_data_bucket.bucket_name,
+                            bucket_host=input_data_bucket.host_url,
+                            provider=input_data_bucket.provider,
                         ),
                         cvat_webhook_id=webhook.id,
                     )
@@ -2064,6 +2014,24 @@ def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     ]
 
 
+def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> Dict:
+    CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
+        CloudProviders.aws: "AWS_S3_BUCKET",
+        CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
+    }
+
+    params = {
+        "provider": CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[bucket_info.provider],
+        "bucket_name": bucket_info.bucket_name,
+        "bucket_host": bucket_info.host_url,
+    }
+
+    if bucket_info.credentials:
+        params["credentials"] = bucket_info.credentials.to_dict()
+
+    return params
+
+
 def create_task(escrow_address: str, chain_id: int) -> None:
     logger = get_function_logger(module_logger)
 
@@ -2074,21 +2042,19 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         TaskType.image_points,
         TaskType.image_label_binary,
     ]:
-        data_bucket = parse_bucket_url(manifest.data.data_url)
-        gt_bucket = parse_bucket_url(manifest.validation.gt_url)
+        data_bucket = BucketAccessInfo.parse_obj(manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(manifest.validation.gt_url)
 
         data_bucket_client = cloud_service.make_client(data_bucket)
         gt_bucket_client = cloud_service.make_client(gt_bucket)
 
         # Task configuration creation
-        data_filenames = data_bucket_client.list_filenames(
-            data_bucket.bucket_name,
+        data_filenames = data_bucket_client.list_files(
             prefix=data_bucket.path,
         )
         data_filenames = filter_image_files(data_filenames)
 
         gt_file_data = gt_bucket_client.download_file(
-            gt_bucket.bucket_name,
             gt_bucket.path,
         )
 
@@ -2099,11 +2065,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         label_configuration = make_label_configuration(manifest)
 
         # Register cloud storage on CVAT to pass user dataset
-        cloud_storage = cvat_api.create_cloudstorage(
-            CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[data_bucket.provider],
-            data_bucket.host_url,
-            data_bucket.bucket_name,
-        )
+        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
 
         # Create a project
         project = cvat_api.create_project(
