@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   Patch,
   Post,
@@ -20,7 +19,7 @@ import {
   ApiBody,
   ApiResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
+import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import {
   JobFortuneDto,
@@ -34,11 +33,8 @@ import {
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
-import { Public, ApiKey } from '../../common/decorators';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
-import { Role } from '../../common/enums/role';
-import { WebhookDataDto } from '../webhook/webhook.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -207,33 +203,6 @@ export class JobController {
     @Param() params: JobCancelDto,
   ): Promise<void> {
     await this.jobService.requestToCancelJob(req.user.id, params.id);
-    return;
-  }
-
-  @ApiOperation({
-    summary: 'Handle escrow failed webhook',
-    description: 'Endpoint to handle an escrow failed webhook.',
-  })
-  @Public()
-  @UseGuards(new SignatureAuthGuard([Role.Exchange]))
-  @ApiResponse({
-    status: 200,
-    description: 'Escrow failed webhook handled successfully.',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @Post('/escrow-failed-webhook')
-  public async handleEscrowFailedWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: WebhookDataDto,
-  ): Promise<void> {
-    await this.jobService.escrowFailedWebhook(data);
     return;
   }
 
