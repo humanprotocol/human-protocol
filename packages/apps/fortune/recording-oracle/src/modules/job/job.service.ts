@@ -146,10 +146,7 @@ export class JobService {
       await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
 
     const existingJobSolutions = await this.storageService.download(
-      this.storageService.getJobUrl(
-        jobSolution.escrowAddress,
-        jobSolution.chainId,
-      ),
+      existingJobSolutionsURL,
     );
 
     if (existingJobSolutions.length >= submissionsRequired) {

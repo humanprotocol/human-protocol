@@ -185,7 +185,7 @@ const config: HardhatUserConfig = {
       runOnCompile: true,
       clear: true,
       flat: true,
-      only: ['legacy'],
+      only: ['contracts/legacy/[a-zA-Z]*.sol'],
       spacing: 2,
       format: 'json',
     },

@@ -2,6 +2,8 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  EscrowClient,
+  EscrowUtils,
   OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
@@ -45,16 +47,19 @@ export class StorageService {
   ): Promise<ISolution[]> {
     const url = this.getJobUrl(escrowAddress, chainId);
     try {
-      const encryption = await Encryption.build(
-        this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
-        this.configService.get(ConfigNames.PGP_PASSPHRASE),
-      );
+      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      if (EncryptionUtils.isEncrypted(fileContent)) {
+        const encryption = await Encryption.build(
+          this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
+          this.configService.get(ConfigNames.PGP_PASSPHRASE),
+        );
 
-      const encryptedSolution = await StorageClient.downloadFileFromUrl(url);
+        return JSON.parse(await encryption.decrypt(fileContent)) as ISolution[];
+      }
 
-      return JSON.parse(
-        await encryption.decrypt(encryptedSolution),
-      ) as ISolution[];
+      return typeof fileContent == 'string'
+        ? (JSON.parse(fileContent) as ISolution[])
+        : fileContent;
     } catch {
       return [];
     }
@@ -69,29 +74,36 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const signer = this.web3Service.getSigner(chainId);
-    const exchangeOracle = await OperatorUtils.getLeader(
-      chainId,
-      signer.address,
-    );
-    const recordingOracle = await OperatorUtils.getLeader(
-      chainId,
-      this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS, ''),
-    );
-    if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
-      throw new BadRequestException('Missing public key');
-    }
-
     try {
-      const solutionsEncrypted = await EncryptionUtils.encrypt(
-        JSON.stringify(solutions),
-        [exchangeOracle.publicKey, recordingOracle.publicKey],
-      );
+      let fileToUpload = JSON.stringify(solutions);
+      if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
+        const signer = this.web3Service.getSigner(chainId);
+        const exchangeOracle = await OperatorUtils.getLeader(
+          chainId,
+          signer.address,
+        );
+        const escrowClient = await EscrowClient.build(signer);
+        const recordingOracleAddress =
+          await escrowClient.getRecordingOracleAddress(escrowAddress);
+        const recordingOracle = await OperatorUtils.getLeader(
+          chainId,
+          recordingOracleAddress,
+        );
+
+        if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
+          throw new BadRequestException('Missing public key');
+        }
+
+        fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
+          exchangeOracle.publicKey,
+          recordingOracle.publicKey,
+        ]);
+      }
 
       await this.minioClient.putObject(
         this.s3Config.bucket,
         `${escrowAddress}-${chainId}.json`,
-        solutionsEncrypted,
+        fileToUpload,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

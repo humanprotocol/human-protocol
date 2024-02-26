@@ -13,7 +13,6 @@ export const ConfigNames = {
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   PGP_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
   PGP_PASSPHRASE: 'PGP_PASSPHRASE',
-  RECORDING_ORACLE_ADDRESS: 'RECORDING_ORACLE_ADDRESS',
 };
 
 export const envValidator = Joi.object({
@@ -28,7 +27,6 @@ export const envValidator = Joi.object({
   S3_BUCKET: Joi.string().default('solution'),
   S3_USE_SSL: Joi.string().default(false),
   PGP_ENCRYPT: Joi.boolean().default(false),
-  PGP_PRIVATE_KEY: Joi.string().default(''),
-  PGP_PASSPHRASE: Joi.string().default(''),
-  RECORDING_ORACLE_ADDRESS: Joi.string().required(),
+  PGP_PRIVATE_KEY: Joi.string().optional(),
+  PGP_PASSPHRASE: Joi.string().optional(),
 });

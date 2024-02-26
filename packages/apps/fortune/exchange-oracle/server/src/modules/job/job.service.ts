@@ -30,6 +30,7 @@ import { Web3Service } from '../web3/web3.service';
 import { JobDetailsDto, ManifestDto } from './job.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { WebhookDto } from '../webhook/webhook.dto';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class JobService {
@@ -95,6 +96,13 @@ export class JobService {
     workerAddress: string,
     solution: string,
   ): Promise<void> {
+    const solutionsUrl = await this.addSolution(
+      chainId,
+      escrowAddress,
+      workerAddress,
+      solution,
+    );
+
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const recordingOracleAddress =
@@ -108,13 +116,6 @@ export class JobService {
     const recordingOracleWebhookUrl = leader?.webhookUrl;
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
-
-    const solutionsUrl = await this.addSolution(
-      chainId,
-      escrowAddress,
-      workerAddress,
-      solution,
-    );
 
     await this.sendWebhook(recordingOracleWebhookUrl, {
       escrowAddress: escrowAddress,
@@ -204,9 +205,11 @@ export class JobService {
       snake_case_body,
       this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
     );
-    await this.httpService.post(url, snake_case_body, {
-      headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-    });
+    await firstValueFrom(
+      this.httpService.post(url, snake_case_body, {
+        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+      }),
+    );
   }
 
   private async getManifest(

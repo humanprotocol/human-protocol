@@ -35,7 +35,7 @@ import { JobSolutionsRequestDto } from './job.dto';
 import { StorageService } from '../storage/storage.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
-import { EventType } from '@/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 
 jest.mock('minio', () => {
   class Client {
@@ -114,7 +114,6 @@ describe('JobService', () => {
         ),
         ConfigModule.forFeature(
           registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
             encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
             encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
           })),

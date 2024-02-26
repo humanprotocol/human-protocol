@@ -11,7 +11,6 @@ import {
   MOCK_ENCRYPTION_PASSPHRASE,
   MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_FILE_URL,
-  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
@@ -76,7 +75,6 @@ describe('StorageService', () => {
         ),
         ConfigModule.forFeature(
           registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
             encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
             encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
           })),

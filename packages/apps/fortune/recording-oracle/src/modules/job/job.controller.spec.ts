@@ -7,7 +7,6 @@ import { ChainId } from '@human-protocol/sdk';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_URL,
-  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
@@ -60,11 +59,6 @@ describe('JobController', () => {
         ConfigModule.forFeature(
           registerAs('web3', () => ({
             web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
           })),
         ),
       ],

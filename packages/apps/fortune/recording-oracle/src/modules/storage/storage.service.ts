@@ -2,6 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  EscrowClient,
   OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
@@ -38,12 +39,10 @@ export class StorageService {
       useSSL: this.s3Config.useSSL,
     });
   }
-  public getJobUrl(escrowAddress: string, chainId: ChainId): string {
+  public getJobUrl(hash: string): string {
     return `${this.s3Config.useSSL ? 'https' : 'http'}://${
       this.s3Config.endPoint
-    }:${this.s3Config.port}/${
-      this.s3Config.bucket
-    }/${escrowAddress}-${chainId}.json`;
+    }:${this.s3Config.port}/${this.s3Config.bucket}/${hash}.json`;
   }
 
   public async download(url: string): Promise<any> {
@@ -87,37 +86,44 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const signer = this.web3Service.getSigner(chainId);
-    const recordingOracle = await OperatorUtils.getLeader(
-      chainId,
-      signer.address,
-    );
-    const reputationOracle = await OperatorUtils.getLeader(
-      chainId,
-      this.serverConfig.reputationOracleAddress,
-    );
-    if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
-      throw new BadRequestException('Missing public key');
-    }
-
     try {
-      const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
-        recordingOracle.publicKey,
-        reputationOracle.publicKey,
-      ]);
+      let fileToUpload = JSON.stringify(solutions);
+      if (this.serverConfig.pgpEncrypt as boolean) {
+        const signer = this.web3Service.getSigner(chainId);
+        const recordingOracle = await OperatorUtils.getLeader(
+          chainId,
+          signer.address,
+        );
+        const escrowClient = await EscrowClient.build(signer);
+        const reputationOracleAddress =
+          await escrowClient.getReputationOracleAddress(escrowAddress);
+        const reputationOracle = await OperatorUtils.getLeader(
+          chainId,
+          reputationOracleAddress,
+        );
 
-      const hash = crypto.createHash('sha1').update(content).digest('hex');
+        if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
+          throw new BadRequestException('Missing public key');
+        }
+
+        fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
+          recordingOracle.publicKey,
+          reputationOracle.publicKey,
+        ]);
+      }
+
+      const hash = crypto.createHash('sha1').update(fileToUpload).digest('hex');
       await this.minioClient.putObject(
         this.s3Config.bucket,
-        `${escrowAddress}-${chainId}.json`,
-        content,
+        `${hash}.json`,
+        fileToUpload,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
         },
       );
 
-      return { url: this.getJobUrl(escrowAddress, chainId), hash };
+      return { url: this.getJobUrl(hash), hash };
     } catch (e) {
       throw new BadRequestException('File not uploaded');
     }

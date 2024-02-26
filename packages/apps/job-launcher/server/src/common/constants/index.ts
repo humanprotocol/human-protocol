@@ -9,6 +9,9 @@ export const DEFAULT_MAX_RETRY_COUNT = 3;
 export const TX_CONFIRMATION_TRESHOLD = 1;
 
 export const JWT_PREFIX = 'bearer ';
+
+export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];
+
 export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,

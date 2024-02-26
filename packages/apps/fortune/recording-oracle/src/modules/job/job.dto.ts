@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnum, IsString, IsUrl } from 'class-validator';
 
-import { IsValidEthereumAddress } from '@/common/validators';
-import { SolutionError } from '@/common/enums/job';
-import { EventType } from '@/common/enums/webhook';
+import { IsValidEthereumAddress } from '../../common/validators';
+import { SolutionError } from '../../common/enums/job';
+import { EventType } from '../../common/enums/webhook';
 
 export class JobSolutionsRequestDto {
   @ApiProperty({ name: 'escrow_address' })

@@ -395,12 +395,12 @@ describe('JobService', () => {
 
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
-        throw new Error(ErrorWeb3.InvalidTestnetChainId);
+        throw new Error(ErrorWeb3.InvalidChainId);
       });
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
+      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -1128,7 +1128,7 @@ describe('JobService', () => {
 
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
-        throw new Error(ErrorWeb3.InvalidTestnetChainId);
+        throw new Error(ErrorWeb3.InvalidChainId);
       });
 
       await expect(
@@ -1137,7 +1137,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
+      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
