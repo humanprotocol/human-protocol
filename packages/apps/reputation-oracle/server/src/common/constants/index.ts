@@ -22,9 +22,7 @@ export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_POINTS,
 ];
 
-export const HEADER_SIGNATURE_KEY = 'human-signature';
-
-export const WEB3_SIGNUP_MESSAGE = 'signup';
+export const HEADER_SIGNATURE_KEY = 'Human-Signature';
 
 export const CURSE_WORDS = [
   '4r5e',
