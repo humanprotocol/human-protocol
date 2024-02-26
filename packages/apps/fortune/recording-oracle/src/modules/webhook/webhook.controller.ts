@@ -16,7 +16,7 @@ export class WebhookController {
   @UseGuards(
     new SignatureAuthGuard([Role.Exchange, Role.Reputation, Role.JobLaucher]),
   )
-  @Post('webhook')
+  @Post()
   processWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,
