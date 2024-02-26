@@ -31,8 +31,8 @@ from src.core.types import CvatLabelType, TaskStatus, TaskType
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import CloudProviders, StorageClient
-from src.utils.annotations import ProjectLabels
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
+from src.utils.annotations import ProjectLabels
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
 

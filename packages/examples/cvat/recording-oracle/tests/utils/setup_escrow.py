@@ -50,7 +50,9 @@ def fund_escrow(web3: Web3, escrow_address: str):
 
 def bulk_payout(web3: Web3, escrow_address: str, recipient: str, amount: Decimal):
     escrow_client = EscrowClient(web3)
-    escrow_client.bulk_payout(escrow_address, [recipient], [amount], DEFAULT_MANIFEST_URL, DEFAULT_HASH, 1)
+    escrow_client.bulk_payout(
+        escrow_address, [recipient], [amount], DEFAULT_MANIFEST_URL, DEFAULT_HASH, 1
+    )
 
 
 def get_intermediate_results_url(web3: Web3, escrow_address: str):

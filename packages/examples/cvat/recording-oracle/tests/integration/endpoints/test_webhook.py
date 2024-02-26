@@ -49,9 +49,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert response.status_code == 200
         response_body = response.json()
-        webhook = (
-            self.session.query(Webhook).where(Webhook.id == response_body["id"]).one()
-        )
+        webhook = self.session.query(Webhook).where(Webhook.id == response_body["id"]).one()
         assert webhook is not None
         assert webhook.escrow_address == escrow_address
         assert webhook.chain_id == chain_id

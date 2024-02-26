@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
-from src.services.cloud.types import BucketAccessInfo
 import src.services.cloud as cloud_service
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
@@ -25,6 +24,7 @@ from src.handlers.job_export import (
     postprocess_annotations,
     prepare_annotation_metafile,
 )
+from src.services.cloud.types import BucketAccessInfo
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger
 

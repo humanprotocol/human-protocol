@@ -25,7 +25,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.client.delete_bucket(Bucket=self.bucket_name)
 
     def test_file_operations(self):
-        client = S3Client(endpoint_url=self.url, bucket=self.bucket_name, access_key=self.access_key, secret_key=self.secret)
+        client = S3Client(
+            endpoint_url=self.url,
+            bucket=self.bucket_name,
+            access_key=self.access_key,
+            secret_key=self.secret,
+        )
 
         assert len(client.list_files()) == 0
 
@@ -65,7 +70,9 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_degenerate_client(self):
         with pytest.raises(EndpointConnectionError):
             invalid_client = S3Client(
-                endpoint_url="http://not.an.url:1234", access_key=self.access_key, secret_key=self.secret
+                endpoint_url="http://not.an.url:1234",
+                access_key=self.access_key,
+                secret_key=self.secret,
             )
             invalid_client.create_file("test.txt", bucket=self.bucket_name)
 
