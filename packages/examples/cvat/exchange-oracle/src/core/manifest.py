@@ -1,5 +1,6 @@
 from decimal import Decimal
-from typing import Optional
+from enum import Enum
+from typing import Annotated, Any, Dict, Literal, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
@@ -7,12 +8,38 @@ from src.core.config import Config
 from src.core.types import TaskType
 
 
+class BucketProviders(str, Enum):
+    aws = "AWS"
+    gcs = "GCS"
+
+
+class BucketUrlBase(BaseModel):
+    provider: BucketProviders
+    host_url: str
+    bucket_name: str
+    path: str = ""
+
+
+class AwsBucketUrl(BucketUrlBase, BaseModel):
+    provider: Literal[BucketProviders.aws]
+    access_key: str = ""  # (optional) AWS Access key
+    secret_key: str = ""  # (optional) AWS Secret key
+
+
+class GcsBucketUrl(BucketUrlBase, BaseModel):
+    provider: Literal[BucketProviders.gcs]
+    service_account_key: Dict[str, Any] = {}  # (optional) Contents of GCS key file
+
+
+BucketUrl = Annotated[Union[AwsBucketUrl, GcsBucketUrl], Field(discriminator="provider")]
+
+
 class DataInfo(BaseModel):
-    data_url: AnyUrl
-    "Bucket URL, s3 only, virtual-hosted-style access"
+    data_url: Union[AnyUrl, BucketUrl]
+    "Bucket URL, AWS S3 | GCS, virtual-hosted-style access"
     # https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-bucket-intro.html
 
-    points_url: Optional[AnyUrl] = None
+    points_url: Optional[Union[AnyUrl, BucketUrl]] = None
     "A path to an archive with a set of points in COCO Keypoints format, "
     "which provides information about all objects on images"
 
@@ -57,7 +84,7 @@ class ValidationInfo(BaseModel):
     val_size: int = Field(default=2, gt=0)
     "Validation frames per job"
 
-    gt_url: AnyUrl
+    gt_url: Union[AnyUrl, BucketUrl]
     "URL to the archive with Ground Truth annotations, the format is COCO keypoints"
 
 

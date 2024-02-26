@@ -27,7 +27,6 @@ from src.handlers.process_intermediate_results import (
 )
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import make_client as make_cloud_client
-from src.services.cloud import s3
 from src.services.cloud.utils import BucketAccessInfo
 from src.utils.assignments import compute_resulting_annotations_hash, parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
@@ -46,9 +45,7 @@ class _TaskValidator:
         self.db_session = db_session
         self.logger: Logger = NullLogger()
 
-        self.data_bucket = BucketAccessInfo.from_raw_url(
-            Config.exchange_oracle_storage_config.bucket_url()
-        )
+        self.data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
         self.annotation_meta: Optional[annotation.AnnotationMeta] = None
         self.job_annotations: Optional[Dict[int, bytes]] = None
@@ -66,9 +63,7 @@ class _TaskValidator:
             self.chain_id,
             annotation.ANNOTATION_RESULTS_METAFILE_NAME,
         )
-        annotation_metafile_data = data_bucket_client.download_file(
-            self.data_bucket.url.bucket_name, annotation_meta_path
-        )
+        annotation_metafile_data = data_bucket_client.download_file(annotation_meta_path)
         self.annotation_meta = parse_annotation_metafile(io.BytesIO(annotation_metafile_data))
 
     def _download_annotations(self):
@@ -83,26 +78,22 @@ class _TaskValidator:
                 self.chain_id,
                 job_meta.annotation_filename,
             )
-            job_annotations[job_meta.job_id] = data_bucket_client.download_file(
-                self.data_bucket.url.bucket_name, job_filename
-            )
+            job_annotations[job_meta.job_id] = data_bucket_client.download_file(job_filename)
 
         excor_merged_annotation_path = compose_annotation_results_bucket_filename(
             self.escrow_address,
             self.chain_id,
             annotation.RESULTING_ANNOTATIONS_FILE,
         )
-        merged_annotations = data_bucket_client.download_file(
-            self.data_bucket.url.bucket_name, excor_merged_annotation_path
-        )
+        merged_annotations = data_bucket_client.download_file(excor_merged_annotation_path)
 
         self.job_annotations = job_annotations
         self.merged_annotations = merged_annotations
 
     def _download_gt(self):
-        gt_bucket = BucketAccessInfo.from_raw_url(self.manifest.validation.gt_url)
+        gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
         gt_bucket_client = make_cloud_client(gt_bucket)
-        self.gt_data = gt_bucket_client.download_file(gt_bucket.url.bucket_name, gt_bucket.url.path)
+        self.gt_data = gt_bucket_client.download_file(gt_bucket.path)
 
     def _download_results(self):
         self._download_results_meta()
@@ -161,20 +152,14 @@ class _TaskValidator:
             )
             validation_metafile = serialize_validation_meta(validation_result.validation_meta)
 
-            storage_client = s3.S3Client(
-                Config.storage_config.provider_endpoint_url(),
-                access_key=Config.storage_config.access_key,
-                secret_key=Config.storage_config.secret_key,
-            )
+            storage_client = make_cloud_client(BucketAccessInfo.parse_obj(Config.storage_config))
 
             # TODO: add encryption
             storage_client.create_file(
-                Config.storage_config.data_bucket_name,
                 recor_merged_annotations_path,
                 validation_result.resulting_annotations,
             )
             storage_client.create_file(
-                Config.storage_config.data_bucket_name,
                 recor_validation_meta_path,
                 validation_metafile,
             )
