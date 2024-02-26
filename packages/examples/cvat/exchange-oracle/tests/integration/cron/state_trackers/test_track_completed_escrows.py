@@ -102,7 +102,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
-            patch("src.handlers.completed_escrows.cloud_client") as mock_cloud_client,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -129,8 +129,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client = Mock()
             mock_storage_client.create_file = Mock()
             mock_storage_client.list_files = Mock(return_value=[])
-            mock_cloud_client.make_client = Mock(return_value=mock_storage_client)
-            mock_cloud_client.S3Client = Mock(return_value=mock_storage_client)
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
             track_completed_escrows()
 
@@ -251,12 +250,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api"),
             patch("src.handlers.completed_escrows.cvat_api.get_job_annotations") as mock_annotations,
-            patch("src.handlers.completed_escrows.cloud_client.S3Client") as mock_S3Client,
+            patch("src.handlers.completed_escrows.cloud_client") as mock_make_client,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
             mock_create_file = Mock()
-            mock_S3Client.return_value.create_file = mock_create_file
+            mock_make_client.return_value.create_file = mock_create_file
             mock_annotations.side_effect = Exception("Connection error")
 
             track_completed_escrows()

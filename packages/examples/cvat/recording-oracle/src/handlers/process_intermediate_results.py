@@ -204,18 +204,12 @@ class _BoxesFromPointsValidator(_TaskValidator):
         layout = boxes_from_points_task.TaskMetaLayout()
         serializer = boxes_from_points_task.TaskMetaSerializer()
 
-        oracle_data_bucket = BucketAccessInfo.from_raw_url(
-            Config.exchange_oracle_storage_config.bucket_url()
-        )
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
+        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
         storage_client = make_cloud_client(oracle_data_bucket)
 
         boxes_to_points_mapping = serializer.parse_bbox_point_mapping(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.BBOX_POINT_MAPPING_FILENAME
                 ),
@@ -224,7 +218,6 @@ class _BoxesFromPointsValidator(_TaskValidator):
 
         roi_filenames = serializer.parse_roi_filenames(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_FILENAMES_FILENAME
                 ),
@@ -233,7 +226,6 @@ class _BoxesFromPointsValidator(_TaskValidator):
 
         rois = serializer.parse_roi_info(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_INFO_FILENAME
                 ),
@@ -242,7 +234,6 @@ class _BoxesFromPointsValidator(_TaskValidator):
 
         gt_dataset = serializer.parse_gt_annotations(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.GT_FILENAME
                 ),
@@ -251,7 +242,6 @@ class _BoxesFromPointsValidator(_TaskValidator):
 
         points_dataset = serializer.parse_points_annotations(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.POINTS_FILENAME
                 ),
@@ -406,18 +396,11 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
         layout = skeletons_from_boxes_task.TaskMetaLayout()
         serializer = skeletons_from_boxes_task.TaskMetaSerializer()
 
-        oracle_data_bucket = BucketAccessInfo.from_raw_url(
-            Config.exchange_oracle_storage_config.bucket_url()
-        )
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
-
+        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
         storage_client = make_cloud_client(oracle_data_bucket)
 
         roi_filenames = serializer.parse_roi_filenames(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_FILENAMES_FILENAME
                 ),
@@ -426,7 +409,6 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
 
         rois = serializer.parse_roi_info(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.ROI_INFO_FILENAME
                 ),
@@ -435,7 +417,6 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
 
         boxes_dataset = serializer.parse_bbox_annotations(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.BOXES_FILENAME
                 ),
@@ -444,7 +425,6 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
 
         job_label_mapping = serializer.parse_point_labels(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.POINT_LABELS_FILENAME
                 ),
@@ -453,7 +433,6 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
 
         gt_dataset = serializer.parse_gt_annotations(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.GT_FILENAME
                 ),
@@ -462,7 +441,6 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
 
         skeletons_to_boxes_mapping = serializer.parse_skeleton_bbox_mapping(
             storage_client.download_file(
-                oracle_data_bucket.url.bucket_name,
                 compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, layout.SKELETON_BBOX_MAPPING_FILENAME
                 ),
