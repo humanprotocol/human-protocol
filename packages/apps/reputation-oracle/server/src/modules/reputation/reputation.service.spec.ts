@@ -106,7 +106,7 @@ describe('ReputationService', () => {
     storageService = moduleRef.get<StorageService>(StorageService);
   });
 
-  describe('doAssessReputationScores', () => {
+  describe('assessReputationScores', () => {
     const chainId = ChainId.LOCALHOST;
     const escrowAddress = 'mockEscrowAddress';
     const checkPassed = true;
@@ -117,7 +117,7 @@ describe('ReputationService', () => {
       }));
 
       await expect(
-        reputationService.doAssessReputationScores(
+        reputationService.assessReputationScores(
           chainId,
           escrowAddress,
           checkPassed,
@@ -145,7 +145,7 @@ describe('ReputationService', () => {
           .mockResolvedValueOnce([]); // Mock final results
 
         await expect(
-          reputationService.doAssessReputationScores(
+          reputationService.assessReputationScores(
             chainId,
             escrowAddress,
             checkPassed,
@@ -170,7 +170,7 @@ describe('ReputationService', () => {
         jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
         jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
 
-        await reputationService.doAssessReputationScores(
+        await reputationService.assessReputationScores(
           chainId,
           escrowAddress,
           checkPassed,
@@ -245,7 +245,7 @@ describe('ReputationService', () => {
           .mockResolvedValueOnce([]); // Mock final results
 
         await expect(
-          reputationService.doAssessReputationScores(
+          reputationService.assessReputationScores(
             chainId,
             escrowAddress,
             checkPassed,
@@ -293,7 +293,7 @@ describe('ReputationService', () => {
         jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
         jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
 
-        await reputationService.doAssessReputationScores(
+        await reputationService.assessReputationScores(
           chainId,
           escrowAddress,
           checkPassed,
