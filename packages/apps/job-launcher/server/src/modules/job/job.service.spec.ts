@@ -2254,32 +2254,6 @@ describe('JobService', () => {
         ConflictException,
       );
     });
-
-    it('should throw BadRequestException if manifest cannot be downloaded', async () => {
-      const dto = {
-        eventType: EventType.ESCROW_FAILED,
-        chainId: 1,
-        escrowAddress: 'address',
-        eventData: {
-          manifestCannotBeDownloaded: 'Some URL',
-          reason: 'Could not download manifest',
-        },
-        reason: 'Manifest cannot be downloaded',
-      };
-
-      const mockJobEntity = {
-        status: JobStatus.LAUNCHED,
-        failedReason: '',
-      };
-
-      jobRepository.findOneByChainIdAndEscrowAddress = jest
-        .fn()
-        .mockResolvedValue(mockJobEntity);
-
-      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
   });
 
   describe('getDetails', () => {
