@@ -26,6 +26,8 @@ boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
 pyinstrument = "^4.6.2"
 pydantic = "^2.6.1"
+fastapi-pagination = "^0.12.17"
+fastapi-filter = "^1.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

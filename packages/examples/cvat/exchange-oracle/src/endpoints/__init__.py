@@ -1,5 +1,6 @@
 """ API endpoints """
 from fastapi import APIRouter, FastAPI
+from fastapi_pagination import add_pagination
 
 from src.core.config import Config
 from src.endpoints.cvat import router as cvat_router
@@ -41,6 +42,8 @@ def init_api(app: FastAPI) -> FastAPI:
         422: {"model": ResponseError},
         500: {"model": ResponseError},
     }
+
+    add_pagination(app)
 
     app.include_router(greet_router)
     app.include_router(cvat_router, responses=default_responses)
