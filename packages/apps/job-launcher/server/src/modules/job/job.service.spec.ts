@@ -2255,26 +2255,30 @@ describe('JobService', () => {
       );
     });
 
-    it('should update jobEntity status to FAILED and return true if all checks pass', async () => {
+    it('should throw BadRequestException if manifest cannot be downloaded', async () => {
       const dto = {
         eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
-        reason: 'invalid manifest',
+        eventData: {
+          manifestCannotBeDownloaded: 'Some URL',
+          reason: 'Could not download manifest',
+        },
+        reason: 'Manifest cannot be downloaded',
       };
+
       const mockJobEntity = {
         status: JobStatus.LAUNCHED,
-        failedReason: dto.reason,
+        failedReason: '',
       };
+
       jobRepository.findOneByChainIdAndEscrowAddress = jest
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.escrowFailedWebhook(dto);
-
-      expect(mockJobEntity.status).toBe(JobStatus.FAILED);
-      expect(mockJobEntity.failedReason).toBe(dto.reason);
-      expect(jobRepository.updateOne).toHaveBeenCalled();
+      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
