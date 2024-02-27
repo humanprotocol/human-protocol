@@ -52,7 +52,7 @@ export class ReputationService {
    * @param checkPassed A boolean indicating if the job completion check passed.
    * @returns {Promise<void>} A Promise indicating the completion of reputation assessment.
    */
-  public async doAssessReputationScores(
+  public async assessReputationScores(
     chainId: ChainId,
     escrowAddress: string,
     checkPassed: boolean,
@@ -117,7 +117,33 @@ export class ReputationService {
     }
   }
 
-  private async doAssessWorkerReputationScoresFortune(
+  private createReputationSpecificActions: Record<
+    JobRequestType,
+    RequestAction
+  > = {
+    [JobRequestType.FORTUNE]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<void> => this.processFortune(chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
+  };
+
+  private async processFortune(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<void> {
@@ -157,7 +183,7 @@ export class ReputationService {
     );
   }
 
-  private async doAssessWorkerReputationScoresCVAT(
+  private async processCvat(
     chainId: ChainId,
     escrowAddress: string,
     manifest: CvatManifestDto,
@@ -201,43 +227,6 @@ export class ReputationService {
       }),
     );
   }
-
-  private createReputationSpecificActions: Record<
-    JobRequestType,
-    RequestAction
-  > = {
-    [JobRequestType.FORTUNE]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-      ): Promise<void> =>
-        this.doAssessWorkerReputationScoresFortune(chainId, escrowAddress),
-    },
-    [JobRequestType.IMAGE_BOXES]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifestDto,
-      ): Promise<void> =>
-        this.doAssessWorkerReputationScoresCVAT(
-          chainId,
-          escrowAddress,
-          manifest,
-        ),
-    },
-    [JobRequestType.IMAGE_POINTS]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifestDto,
-      ): Promise<void> =>
-        this.doAssessWorkerReputationScoresCVAT(
-          chainId,
-          escrowAddress,
-          manifest,
-        ),
-    },
-  };
 
   /**
    * Increases the reputation points of a specified entity on a given blockchain chain.

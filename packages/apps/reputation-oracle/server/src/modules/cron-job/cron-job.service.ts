@@ -157,7 +157,7 @@ export class CronJobService {
         try {
           const { chainId, escrowAddress, checkPassed } = webhookEntity;
 
-          await this.reputationService.doAssessReputationScores(
+          await this.reputationService.assessReputationScores(
             chainId,
             escrowAddress,
             checkPassed,
