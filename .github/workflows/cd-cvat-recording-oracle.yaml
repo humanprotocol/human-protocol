@@ -2,11 +2,11 @@ name: Deploy CVAT Recording Oracle
 
 on:
   push:
-    branches: [ develop, main ]
+    branches: [ develop, main, cvat-milestone-2 ]
     paths:
       - 'packages/examples/cvat/recording-oracle/**'
   pull_request:
-    branches: [ develop, main ]
+    branches: [ develop, main, cvat-milestone-2 ]
     paths:
       - 'packages/examples/cvat/recording-oracle/**'
   workflow_dispatch:

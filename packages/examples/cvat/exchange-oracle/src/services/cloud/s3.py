@@ -1,8 +1,3 @@
-# Copyright (C) 2022 CVAT.ai Corporation
-#
-# SPDX-License-Identifier: MIT
-
-from dataclasses import dataclass
 from io import BytesIO
 from typing import List, Optional
 from urllib.parse import unquote
@@ -12,39 +7,45 @@ from botocore.exceptions import ClientError
 from botocore.handlers import disable_signing
 
 from src.services.cloud.client import StorageClient
-from src.services.cloud.types import BucketCredentials
+
+DEFAULT_S3_HOST = "s3.amazonaws.com"
 
 
 class S3Client(StorageClient):
     def __init__(
         self,
-        endpoint_url: str,
         *,
+        bucket: Optional[str] = None,
         access_key: Optional[str] = None,
         secret_key: Optional[str] = None,
+        endpoint_url: Optional[str] = None,
     ) -> None:
-        s3 = boto3.resource(
-            "s3",
+        super().__init__(bucket)
+        session = boto3.Session(
             **(dict(aws_access_key_id=access_key) if access_key else {}),
             **(dict(aws_secret_access_key=secret_key) if secret_key else {}),
-            endpoint_url=unquote(endpoint_url),
         )
-
+        s3 = session.resource(
+            "s3", **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {})
+        )
         self.resource = s3
         self.client = s3.meta.client
 
         if not access_key and not secret_key:
             self.client.meta.events.register("choose-signer.s3.*", disable_signing)
 
-    def create_file(self, bucket: str, filename: str, data: bytes = b""):
-        self.client.put_object(Body=data, Bucket=unquote(bucket), Key=unquote(filename))
+    def create_file(self, key: str, data: bytes = b"", *, bucket: Optional[str] = None):
+        bucket = unquote(bucket) if bucket else self._bucket
+        self.client.put_object(Body=data, Bucket=bucket, Key=unquote(key))
 
-    def remove_file(self, bucket: str, filename: str):
-        self.client.delete_object(Bucket=unquote(bucket), Key=unquote(filename))
+    def remove_file(self, key: str, *, bucket: Optional[str] = None):
+        bucket = unquote(bucket) if bucket else self._bucket
+        self.client.delete_object(Bucket=bucket, Key=unquote(key))
 
-    def file_exists(self, bucket: str, filename: str) -> bool:
+    def file_exists(self, key: str, *, bucket: Optional[str] = None) -> bool:
+        bucket = unquote(bucket) if bucket else self._bucket
         try:
-            self.client.head_object(Bucket=unquote(bucket), Key=unquote(filename))
+            self.client.head_object(Bucket=bucket, Key=unquote(key))
             return True
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
@@ -52,37 +53,19 @@ class S3Client(StorageClient):
             else:
                 raise
 
-    def download_file(self, bucket: str, key: str) -> bytes:
+    def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
+        bucket = unquote(bucket) if bucket else self._bucket
         with BytesIO() as data:
-            self.client.download_fileobj(Bucket=unquote(bucket), Key=unquote(key), Fileobj=data)
+            self.client.download_fileobj(Bucket=bucket, Key=unquote(key), Fileobj=data)
             return data.getvalue()
 
-    def list_files(self, bucket: str, *, prefix: Optional[str] = None) -> List:
-        objects = self.resource.Bucket(unquote(bucket)).objects
+    def list_files(
+        self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
+    ) -> List[str]:
+        bucket = unquote(bucket) if bucket else self._bucket
+        objects = self.resource.Bucket(bucket).objects
         if prefix:
-            objects = objects.filter(Prefix=unquote(prefix).strip("/\\") + "/")
+            objects = objects.filter(Prefix=self.normalize_prefix(prefix))
         else:
             objects = objects.all()
-        return list(objects)
-
-    def list_filenames(self, bucket: str, *, prefix: Optional[str] = None) -> List[str]:
-        return [file_info.key for file_info in self.list_files(bucket=bucket, prefix=prefix)]
-
-
-@dataclass
-class S3BucketCredentials(BucketCredentials):
-    access_key: str
-    secret_key: str
-
-
-DEFAULT_S3_HOST = "s3.amazonaws.com"
-
-
-def download_file(bucket_host: str, bucket_name: str, filename: str) -> bytes:
-    client = S3Client(bucket_host)
-    return client.download_file(bucket_name, filename)
-
-
-def list_files(bucket_host: str, bucket_name: str, *, prefix: Optional[str] = None) -> List[str]:
-    client = S3Client(bucket_host)
-    return client.list_filenames(bucket_name, prefix=prefix)
+        return [file_info.key for file_info in objects]

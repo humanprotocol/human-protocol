@@ -31,6 +31,7 @@ def serialize_task(
                 assignment_url=compose_assignment_url(
                     task_id=assignment.job.cvat_task_id,
                     job_id=assignment.cvat_job_id,
+                    project=project,
                 ),
                 started_at=assignment.created_at,
                 finishes_at=assignment.expires_at,

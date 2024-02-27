@@ -337,3 +337,7 @@ class ProjectLabels(dm.ItemTransform):
             annotations.append(ann)
 
         return item.wrap(annotations=annotations)
+
+
+def is_point_in_bbox(px: float, py: float, bbox: dm.Bbox) -> bool:
+    return (bbox.x <= px <= bbox.x + bbox.w) and (bbox.y <= py <= bbox.y + bbox.h)
