@@ -148,7 +148,7 @@ describe('KVStoreClient', () => {
     });
   });
 
-  describe('setURL', () => {
+  describe('setFileUrlAndHash', () => {
     test('should set the URL and hash', async () => {
       mockKVStoreContract.set.mockResolvedValue(null);
       const setBulkSpy = vi
@@ -157,7 +157,9 @@ describe('KVStoreClient', () => {
           wait: vi.fn().mockResolvedValue(true),
         }));
 
-      expect(await kvStoreClient.setURL('https://example.com')).toBeUndefined();
+      expect(
+        await kvStoreClient.setFileUrlAndHash('https://example.com')
+      ).toBeUndefined();
 
       expect(setBulkSpy).toHaveBeenCalledWith(
         ['url', 'urlHash'],
@@ -178,7 +180,10 @@ describe('KVStoreClient', () => {
         }));
 
       expect(
-        await kvStoreClient.setURL('https://example.com', 'linkedinUrl')
+        await kvStoreClient.setFileUrlAndHash(
+          'https://example.com',
+          'linkedinUrl'
+        )
       ).toBeUndefined();
 
       expect(setBulkSpy).toHaveBeenCalledWith(
@@ -194,15 +199,15 @@ describe('KVStoreClient', () => {
     test('should throw an error when attempting to set the URL without signer', async () => {
       kvStoreClient = await KVStoreClient.build(mockProvider);
 
-      await expect(kvStoreClient.setURL('example.com')).rejects.toThrow(
-        ErrorSigner
-      );
+      await expect(
+        kvStoreClient.setFileUrlAndHash('example.com')
+      ).rejects.toThrow(ErrorSigner);
     });
 
     test('should throw an error when attempting to set invalid URL', async () => {
-      await expect(kvStoreClient.setURL('invalid_url')).rejects.toThrow(
-        ErrorInvalidUrl
-      );
+      await expect(
+        kvStoreClient.setFileUrlAndHash('invalid_url')
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error when a network error occurs', async () => {
@@ -210,7 +215,9 @@ describe('KVStoreClient', () => {
         new Error('could not detect network')
       );
 
-      await expect(kvStoreClient.setURL('https://example.com')).rejects.toThrow(
+      await expect(
+        kvStoreClient.setFileUrlAndHash('https://example.com')
+      ).rejects.toThrow(
         Error('Failed to set URL and hash: could not detect network')
       );
 
@@ -235,7 +242,7 @@ describe('KVStoreClient', () => {
       const txOptions: Overrides = { gasLimit: 45000 };
 
       expect(
-        await kvStoreClient.setURL(
+        await kvStoreClient.setFileUrlAndHash(
           'https://example.com',
           'linkedinUrl',
           txOptions
@@ -398,17 +405,17 @@ describe('KVStoreClient', () => {
     });
   });
 
-  describe('getURL', () => {
+  describe('getFileUrlAndVerifyHash', () => {
     test('should throw an error if address is not valid', async () => {
-      await expect(kvStoreClient.getURL('invalid_address')).rejects.toThrow(
-        ErrorInvalidAddress
-      );
+      await expect(
+        kvStoreClient.getFileUrlAndVerifyHash('invalid_address')
+      ).rejects.toThrow(ErrorInvalidAddress);
     });
 
     test('should return empty string if the URL is not set', async () => {
       mockKVStoreContract.get.mockResolvedValueOnce('');
 
-      const result = await kvStoreClient.getURL(
+      const result = await kvStoreClient.getFileUrlAndVerifyHash(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
       expect(result).toBe('');
@@ -424,7 +431,7 @@ describe('KVStoreClient', () => {
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
 
-      const result = await kvStoreClient.getURL(
+      const result = await kvStoreClient.getFileUrlAndVerifyHash(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
       expect(result).toBe('example.com');
@@ -445,7 +452,7 @@ describe('KVStoreClient', () => {
       mockKVStoreContract.get.mockResolvedValueOnce('example.com');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
 
-      const result = await kvStoreClient.getURL(
+      const result = await kvStoreClient.getFileUrlAndVerifyHash(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'linkedinUrl'
       );
@@ -470,7 +477,9 @@ describe('KVStoreClient', () => {
       mockKVStoreContract.get.mockResolvedValueOnce(invalidHash);
 
       await expect(
-        kvStoreClient.getURL('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71')
+        kvStoreClient.getFileUrlAndVerifyHash(
+          '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
+        )
       ).rejects.toThrow(ErrorInvalidHash);
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
@@ -489,12 +498,95 @@ describe('KVStoreClient', () => {
       );
 
       await expect(
-        kvStoreClient.getURL('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71')
+        kvStoreClient.getFileUrlAndVerifyHash(
+          '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
+        )
       ).rejects.toThrow(Error('Failed to get URL: could not detect network'));
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url'
+      );
+    });
+  });
+
+  describe('getPublicKey', () => {
+    test('should throw an error if address is not valid', async () => {
+      await expect(
+        kvStoreClient.getPublicKey('invalid_address')
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should return empty string if the public key is not set', async () => {
+      mockKVStoreContract.get.mockResolvedValueOnce('');
+
+      const result = await kvStoreClient.getPublicKey(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
+      );
+      expect(result).toBe('');
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'publicKey'
+      );
+    });
+
+    test('should return public key if the content is valid', async () => {
+      const validHash = ethers.keccak256(ethers.toUtf8Bytes('PUBLIC_KEY'));
+
+      mockKVStoreContract.get.mockResolvedValueOnce('PUBLIC_KEY');
+      mockKVStoreContract.get.mockResolvedValueOnce(validHash);
+
+      const result = await kvStoreClient.getPublicKey(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
+      );
+      expect(result).toBe('PUBLIC_KEY');
+
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'publicKey'
+      );
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'publicKeyHash'
+      );
+    });
+
+    test('should throw an error if the content is not valid', async () => {
+      const invalidHash = ethers.keccak256(
+        ethers.toUtf8Bytes('INVALID_PUBLIC_KEY')
+      );
+
+      mockKVStoreContract.get.mockResolvedValueOnce('PUBLIC_KEY');
+      mockKVStoreContract.get.mockResolvedValueOnce(invalidHash);
+
+      await expect(
+        kvStoreClient.getPublicKey('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71')
+      ).rejects.toThrow(ErrorInvalidHash);
+
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'publicKey'
+      );
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'publicKeyHash'
+      );
+    });
+
+    test('should throw an error if a network error occurs', async () => {
+      mockKVStoreContract.get.mockRejectedValue(
+        new Error('could not detect network')
+      );
+
+      await expect(
+        kvStoreClient.getPublicKey('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71')
+      ).rejects.toThrow(
+        Error('Failed to get public key: could not detect network')
+      );
+
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'publicKey'
       );
     });
   });

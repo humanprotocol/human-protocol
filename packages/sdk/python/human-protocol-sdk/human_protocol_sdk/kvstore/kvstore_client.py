@@ -213,7 +213,7 @@ class KVStoreClient:
             tx_options,
         )
 
-    def set_url(
+    def set_file_url_and_hash(
         self,
         url: str,
         key: Optional[str] = "url",
@@ -253,8 +253,8 @@ class KVStoreClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 kvstore_client = KVStoreClient(w3)
 
-                kvstore_client.set_url('http://localhost')
-                kvstore_client.set_url('https://linkedin.com/me', 'linkedinUrl')
+                kvstore_client.set_file_url_and_hash('http://localhost')
+                kvstore_client.set_file_url_and_hash('https://linkedin.com/me', 'linkedinUrl')
         """
         if not validate_url(url):
             raise KVStoreClientError(f"Invalid URL: {url}")
@@ -302,7 +302,9 @@ class KVStoreClient:
         result = self.kvstore_contract.functions.get(address, key).call()
         return result
 
-    def get_url(self, address: str, key: Optional[str] = "url") -> str:
+    def get_file_url_and_verify_hash(
+        self, address: str, key: Optional[str] = "url"
+    ) -> str:
         """Gets the URL value of the given entity.
 
         :param address: Address from which to get the URL value.
@@ -322,10 +324,10 @@ class KVStoreClient:
                 w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                 kvstore_client = KVStoreClient(w3)
 
-                url = kvstore_client.get_url(
+                url = kvstore_client.get_file_url_and_verify_hash(
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
-                linkedin_url = kvstore_client.get_url(
+                linkedin_url = kvstore_client.get_file_url_and_verify_hash(
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
                     'linkedinUrl'
                 )
@@ -347,3 +349,43 @@ class KVStoreClient:
             raise KVStoreClientError(f"Invalid hash")
 
         return url
+
+    def get_public_key(self, address: str) -> str:
+        """Gets the public key of the given entity.
+
+        :param address: Address from which to get the public key.
+
+        :return public_key: The public key of the given address if exists, and the content is valid
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.kvstore import KVStoreClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                kvstore_client = KVStoreClient(w3)
+
+                public_key = kvstore_client.get_public_key(
+                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+                )
+        """
+
+        if not Web3.is_address(address):
+            raise KVStoreClientError(f"Invalid address: {address}")
+
+        public_key = self.kvstore_contract.functions.get(address, "publicKey").call()
+        hash = self.kvstore_contract.functions.get(address, "publicKeyHash").call()
+
+        if len(public_key) == 0:
+            return public_key
+
+        content_hash = self.w3.keccak(text=public_key).hex()
+
+        if hash != content_hash:
+            raise KVStoreClientError(f"Invalid hash")
+
+        return public_key
