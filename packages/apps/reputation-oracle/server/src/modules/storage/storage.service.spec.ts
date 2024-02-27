@@ -191,9 +191,10 @@ describe('StorageService', () => {
         );
         const content = JSON.stringify([jobSolution]);
 
+        const hash = crypto.createHash('sha1').update(content).digest('hex');
         expect(fileData).toEqual({
-          url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-          hash: crypto.createHash('sha1').update(content).digest('hex'),
+          url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${hash}.json`,
+          hash,
         });
         expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
           MOCK_S3_BUCKET,

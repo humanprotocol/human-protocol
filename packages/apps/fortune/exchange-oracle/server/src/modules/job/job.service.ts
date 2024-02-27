@@ -31,6 +31,7 @@ import { JobDetailsDto, ManifestDto } from './job.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { firstValueFrom } from 'rxjs';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class JobService {
@@ -96,6 +97,10 @@ export class JobService {
     workerAddress: string,
     solution: string,
   ): Promise<void> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw new Error('Invalid address');
+    }
+
     const solutionsUrl = await this.addSolution(
       chainId,
       escrowAddress,

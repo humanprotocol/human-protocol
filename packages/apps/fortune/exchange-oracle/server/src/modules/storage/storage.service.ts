@@ -7,7 +7,12 @@ import {
   OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
@@ -74,9 +79,9 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    try {
-      let fileToUpload = JSON.stringify(solutions);
-      if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
+    let fileToUpload = JSON.stringify(solutions);
+    if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
+      try {
         const signer = this.web3Service.getSigner(chainId);
         const exchangeOracle = await OperatorUtils.getLeader(
           chainId,
@@ -91,15 +96,20 @@ export class StorageService {
         );
 
         if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
-          throw new BadRequestException('Missing public key');
+          throw new Error();
         }
 
         fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
           exchangeOracle.publicKey,
           recordingOracle.publicKey,
         ]);
+      } catch (e) {
+        Logger.error(e);
+        throw new BadRequestException('Encryption error');
       }
+    }
 
+    try {
       await this.minioClient.putObject(
         this.s3Config.bucket,
         `${escrowAddress}-${chainId}.json`,
@@ -112,6 +122,7 @@ export class StorageService {
 
       return this.getJobUrl(escrowAddress, chainId);
     } catch (e) {
+      Logger.error(e);
       throw new BadRequestException('File not uploaded');
     }
   }
