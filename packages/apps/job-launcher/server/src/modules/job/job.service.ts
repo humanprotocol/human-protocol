@@ -1016,6 +1016,21 @@ export class JobService {
       throw new ConflictException(ErrorJob.NotLaunched);
     }
 
+    if (!dto.eventData) {
+      this.logger.log('Event data is undefined.', JobService.name);
+      throw new BadRequestException(
+        'Event data is required but was not provided.',
+      );
+    }
+
+    if ('invalidManifest' in dto.eventData) {
+      this.logger.log(
+        `Invalid manifest URL: ${dto.eventData.invalidManifest}`,
+        JobService.name,
+      );
+      throw new Error(`Invalid manifest URL: ${dto.eventData.invalidManifest}`);
+    }
+
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason!;
     await this.jobRepository.updateOne(jobEntity);

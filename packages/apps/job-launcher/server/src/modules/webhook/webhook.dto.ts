@@ -72,7 +72,7 @@ export class WebhookDataDto {
   @IsObject()
   public eventData?: EventData;
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
   @IsOptional()
   public reason?: string;
