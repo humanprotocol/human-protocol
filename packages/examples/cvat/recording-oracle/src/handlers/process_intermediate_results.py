@@ -90,7 +90,6 @@ class _TaskValidator:
         assert field is not None
         return field
 
-
     def _parse_gt(self):
         tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
@@ -132,9 +131,8 @@ class _TaskValidator:
                 format=DM_DATASET_FORMAT_MAPPING[manifest.annotation.type],
             )
 
-                job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
-                job_results[job_cvat_id] = job_mean_accuracy
-
+            job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
+            job_results[job_cvat_id] = job_mean_accuracy
 
             if job_mean_accuracy < manifest.validation.min_quality:
                 rejected_job_ids.append(job_cvat_id)

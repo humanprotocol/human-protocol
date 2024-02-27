@@ -54,7 +54,7 @@ class CachedSimilarityFunction(SimilarityFunction):
 class DatasetComparator(metaclass=ABCMeta):
     min_similarity_threshold: float
 
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> Tuple[float, Set[str]]:
+    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
         dataset_similarities = []
         dataset_total_anns_to_compare = 0
 
@@ -75,17 +75,11 @@ class DatasetComparator(metaclass=ABCMeta):
                 zip(itertools.repeat(None), matching_result.b_extra),
             ):
                 sim = similarity_fn(gt_ann, ds_ann) if gt_ann and ds_ann else 0
+                sample_similarities.append(sim)
                 sample_total_anns_to_compare += (gt_ann is not None) + (ds_ann is not None)
 
             dataset_similarities.extend(sample_similarities)
             dataset_total_anns_to_compare += sample_total_anns_to_compare
-
-            sample_accuracy = 0
-            if sample_total_anns_to_compare:
-                sample_accuracy = 2 * np.sum(sample_similarities) / sample_total_anns_to_compare
-                all_similarities.append(sim)
-
-                total_anns_to_compare += (gt_ann is not None) + (ds_ann is not None)
 
         dataset_accuracy = 0
         if dataset_total_anns_to_compare:
@@ -170,7 +164,7 @@ class SkeletonDatasetComparator(DatasetComparator):
         # TODO: find better strategy for sigma estimation
         self.oks_sigma = 0.1  # average value for COCO points
 
-    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> Tuple[float, Set[str]]:
+    def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
         self._categories = gt_dataset.categories()
         return super().compare(gt_dataset, ds_dataset)
 
