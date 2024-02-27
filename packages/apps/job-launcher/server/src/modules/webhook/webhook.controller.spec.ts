@@ -97,7 +97,7 @@ describe('WebhookController', () => {
         });
 
       await expect(
-        webhookController.handleEscrowFailedWebhook(mockSignature, invalidDto),
+        webhookController.processWebhook(mockSignature, invalidDto),
       ).rejects.toThrow(BadRequestException);
 
       expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(invalidDto);
@@ -125,7 +125,7 @@ describe('WebhookController', () => {
         });
 
       await expect(
-        webhookController.handleEscrowFailedWebhook(
+        webhookController.processWebhook(
           mockSignature,
           manifestCannotBeDownloadedDto,
         ),

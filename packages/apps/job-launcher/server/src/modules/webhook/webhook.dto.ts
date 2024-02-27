@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsValidEthereumAddress } from '../../common/validators/ethers';
+import { IsEthereumAddress } from 'class-validator';
 import {
   IsEnum,
   IsObject,
@@ -10,27 +10,25 @@ import {
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
 
-export class InvalidManifest {
-  @ApiProperty({ name: 'invalid_manifest' })
+export class EventData {
+  @ApiProperty({ name: 'invalid_manifest', required: false })
   @IsString()
-  invalidManifest: string;
+  @IsOptional()
+  invalidManifest?: string;
+
+  @ApiProperty({
+    name: 'manifest_cannot_be_downloaded',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  manifestCannotBeDownloaded?: string;
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   reason?: string;
 }
-
-export class ManifestCannotBeDownloaded {
-  @ApiProperty({ name: 'manifest_cannot_be_downloaded' })
-  @IsString()
-  manifestCannotBeDownloaded: string;
-
-  @ApiProperty()
-  @IsString()
-  reason?: string;
-}
-
-export type EventData = InvalidManifest | ManifestCannotBeDownloaded;
 
 export class WebhookDto {
   @ApiProperty()
@@ -61,7 +59,7 @@ export class WebhookDataDto {
 
   @ApiProperty({ name: 'escrow_address' })
   @IsString()
-  @IsValidEthereumAddress()
+  @IsEthereumAddress()
   public escrowAddress: string;
 
   @ApiProperty({ enum: EventType, name: 'event_type' })
