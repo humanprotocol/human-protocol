@@ -1023,8 +1023,17 @@ export class JobService {
       );
     }
 
+    const reason = dto.eventData.reason;
+
+    if (!reason) {
+      this.logger.log('Reason is undefined in event data.', JobService.name);
+      throw new BadRequestException(
+        'Reason is required in event data but was not provided.',
+      );
+    }
+
     jobEntity.status = JobStatus.FAILED;
-    jobEntity.failedReason = dto.reason!;
+    jobEntity.failedReason = reason!;
     await this.jobRepository.updateOne(jobEntity);
   }
 

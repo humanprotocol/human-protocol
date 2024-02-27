@@ -2212,7 +2212,9 @@ describe('JobService', () => {
         eventType: 'ANOTHER_EVENT' as EventType,
         chainId: 1,
         escrowAddress: 'address',
-        reason: 'invalid manifest',
+        eventData: {
+          reason: 'invalid manifest',
+        },
       };
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
@@ -2241,7 +2243,9 @@ describe('JobService', () => {
         eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
-        reason: 'invalid manifest',
+        eventData: {
+          reason: 'invalid manifest',
+        },
       };
       const mockJobEntity = {
         status: 'ANOTHER_STATUS' as JobStatus,
@@ -2253,6 +2257,30 @@ describe('JobService', () => {
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
         ConflictException,
       );
+    });
+
+    it('should update jobEntity status to FAILED and return true if all checks pass', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_FAILED,
+        chainId: 1,
+        escrowAddress: 'address',
+        eventData: {
+          reason: 'invalid manifest',
+        },
+      };
+      const mockJobEntity = {
+        status: JobStatus.LAUNCHED,
+        failedReason: dto.eventData.reason,
+      };
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.escrowFailedWebhook(dto);
+
+      expect(mockJobEntity.status).toBe(JobStatus.FAILED);
+      expect(mockJobEntity.failedReason).toBe(dto.eventData.reason);
+      expect(jobRepository.updateOne).toHaveBeenCalled();
     });
   });
 

@@ -56,9 +56,4 @@ export class WebhookDataDto {
   @ApiPropertyOptional({ name: 'event_data' })
   @IsObject()
   public eventData?: EventData;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  public reason?: string;
 }
