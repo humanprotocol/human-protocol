@@ -86,9 +86,9 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    try {
-      let fileToUpload = JSON.stringify(solutions);
-      if (this.serverConfig.pgpEncrypt as boolean) {
+    let fileToUpload = JSON.stringify(solutions);
+    if (this.serverConfig.pgpEncrypt as boolean) {
+      try {
         const signer = this.web3Service.getSigner(chainId);
         const recordingOracle = await OperatorUtils.getLeader(
           chainId,
@@ -103,15 +103,19 @@ export class StorageService {
         );
 
         if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
-          throw new BadRequestException('Missing public key');
+          throw new Error();
         }
 
         fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
           recordingOracle.publicKey,
           reputationOracle.publicKey,
         ]);
+      } catch (e) {
+        throw new BadRequestException('Encryption error');
       }
+    }
 
+    try {
       const hash = crypto.createHash('sha1').update(fileToUpload).digest('hex');
       await this.minioClient.putObject(
         this.s3Config.bucket,

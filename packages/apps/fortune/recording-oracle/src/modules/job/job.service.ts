@@ -234,6 +234,6 @@ export class JobService {
       );
     }
 
-    return 'Solutions are recorded.';
+    return 'Solutions recorded.';
   }
 }

@@ -267,7 +267,7 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue('encrypted-content');
 
-      EncryptionUtils.isEncrypted = jest.fn().mockResolvedValue(true);
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(expectedJobFile)),
@@ -297,7 +297,7 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(expectedJobFile);
 
-      EncryptionUtils.isEncrypted = jest.fn().mockResolvedValue(false);
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
 
       const solutionsFile = await storageService.downloadJobSolutions(
         escrowAddress,

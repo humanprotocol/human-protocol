@@ -153,7 +153,7 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
-      EncryptionUtils.isEncrypted = jest.fn().mockResolvedValue(true);
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValueOnce('encrypted string');
@@ -181,7 +181,7 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
-      EncryptionUtils.isEncrypted = jest.fn().mockResolvedValue(false);
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValueOnce(JSON.stringify(manifest));
@@ -273,7 +273,7 @@ describe('JobService', () => {
         fundAmount: 100,
       });
 
-      EncryptionUtils.isEncrypted = jest.fn().mockResolvedValue(true);
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValueOnce(manifest)

@@ -2,12 +2,14 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  EscrowClient,
   OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_ADDRESS,
   MOCK_ENCRYPTION_PASSPHRASE,
   MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_FILE_URL,
@@ -19,8 +21,8 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
-import crypto from 'crypto';
 import { Web3Service } from '../web3/web3.service';
+import { ServerConfigType, serverConfigKey } from '@/common/config';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -35,6 +37,9 @@ jest.mock('@human-protocol/sdk', () => ({
   },
   EncryptionUtils: {
     encrypt: jest.fn(),
+  },
+  EscrowClient: {
+    build: jest.fn(),
   },
 }));
 
@@ -54,6 +59,7 @@ jest.mock('minio', () => {
 
 describe('StorageService', () => {
   let storageService: StorageService;
+  let serverConfig: ServerConfigType;
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -92,14 +98,21 @@ describe('StorageService', () => {
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
+    serverConfig = moduleRef.get<ServerConfigType>(serverConfigKey);
   });
 
   describe('uploadJobSolutions', () => {
-    it('should upload the solutions correctly', async () => {
+    beforeAll(async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      }));
+    });
+    it('should upload the solutions with encryption correctly', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
       const solution = 'test';
+      const hash = 'd92342976d720ff38cf5dcb329be41959ab1ba6c';
 
       storageService.minioClient.bucketExists = jest
         .fn()
@@ -109,6 +122,7 @@ describe('StorageService', () => {
       OperatorUtils.getLeader = jest
         .fn()
         .mockResolvedValue({ publicKey: 'publicKey' });
+      serverConfig.pgpEncrypt = true;
 
       const jobSolution = {
         workerAddress,
@@ -119,13 +133,14 @@ describe('StorageService', () => {
         chainId,
         [jobSolution],
       );
+
       expect(fileData).toEqual({
-        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-        hash: crypto.createHash('sha1').update('encrypted').digest('hex'),
+        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${hash}.json`,
+        hash,
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
-        `${escrowAddress}-${chainId}.json`,
+        `${hash}.json`,
         'encrypted',
         {
           'Content-Type': 'application/json',
@@ -167,7 +182,7 @@ describe('StorageService', () => {
       storageService.minioClient.putObject = jest
         .fn()
         .mockRejectedValue('Network error');
-
+      serverConfig.pgpEncrypt = false;
       const jobSolution = {
         workerAddress,
         solution,
@@ -191,7 +206,7 @@ describe('StorageService', () => {
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
       OperatorUtils.getLeader = jest.fn().mockResolvedValue({});
-
+      serverConfig.pgpEncrypt = true;
       const jobSolution = {
         workerAddress,
         solution,
@@ -200,12 +215,12 @@ describe('StorageService', () => {
         storageService.uploadJobSolutions(escrowAddress, chainId, [
           jobSolution,
         ]),
-      ).rejects.toThrow('Missing public key');
+      ).rejects.toThrow('Encryption error');
     });
   });
 
   describe('download', () => {
-    it('should download the file correctly', async () => {
+    it('should download the non encrypted file correctly', async () => {
       const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'test';
@@ -222,7 +237,8 @@ describe('StorageService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValue(JSON.stringify(expectedJobFile));
+        .mockResolvedValue(expectedJobFile);
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
     });
@@ -249,7 +265,7 @@ describe('StorageService', () => {
       Encryption.build = jest.fn().mockResolvedValue({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(expectedJobFile)),
       });
-
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
     });
