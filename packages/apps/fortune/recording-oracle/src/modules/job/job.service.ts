@@ -36,8 +36,6 @@ export class JobService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    @Inject(serverConfigKey)
-    private serverConfig: ServerConfigType,
     @Inject(web3ConfigKey)
     private web3Config: Web3ConfigType,
     @Inject(Web3Service)

@@ -29,6 +29,9 @@ jest.mock('@human-protocol/sdk', () => ({
   StorageClient: jest.fn().mockImplementation(() => ({})),
 }));
 
+jest.mock('./job.service');
+jest.mock('../storage/storage.service');
+
 const signerMock = {
   address: MOCK_ADDRESS,
   getAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
