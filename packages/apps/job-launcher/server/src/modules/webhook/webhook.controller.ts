@@ -31,7 +31,7 @@ export class WebhookController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  @Post('/escrow-failed-webhook')
+  @Post()
   public async handleEscrowFailedWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: WebhookDataDto,

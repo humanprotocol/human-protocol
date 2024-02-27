@@ -2222,7 +2222,7 @@ describe('JobService', () => {
 
     it('should throw NotFoundException if jobEntity is not found', async () => {
       const dto = {
-        eventType: EventType.SUBMISSION_REJECTED,
+        eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
         reason: 'invalid manifest',
@@ -2238,7 +2238,7 @@ describe('JobService', () => {
 
     it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
       const dto = {
-        eventType: EventType.SUBMISSION_REJECTED,
+        eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
         reason: 'invalid manifest',
@@ -2257,7 +2257,7 @@ describe('JobService', () => {
 
     it('should update jobEntity status to FAILED and return true if all checks pass', async () => {
       const dto = {
-        eventType: EventType.SUBMISSION_REJECTED,
+        eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
         reason: 'invalid manifest',

@@ -1,7 +1,7 @@
 export enum EventType {
   ESCROW_CREATED = 'escrow_created',
   ESCROW_CANCELED = 'escrow_canceled',
-  SUBMISSION_REJECTED = 'submission_rejected',
+  ESCROW_FAILED = 'escrow_failed',
 }
 
 export enum OracleType {
