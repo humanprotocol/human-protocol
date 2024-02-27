@@ -1,29 +1,16 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEthereumAddress } from 'class-validator';
 import {
   IsEnum,
   IsObject,
   IsString,
   IsBoolean,
   IsOptional,
+  IsEthereumAddress,
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
 
 export class EventData {
-  @ApiProperty({ name: 'invalid_manifest', required: false })
-  @IsString()
-  @IsOptional()
-  invalidManifest?: string;
-
-  @ApiProperty({
-    name: 'manifest_cannot_be_downloaded',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  manifestCannotBeDownloaded?: string;
-
   @ApiProperty()
   @IsString()
   @IsOptional()

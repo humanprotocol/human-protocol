@@ -77,15 +77,15 @@ describe('WebhookController', () => {
     jobService = module.get<JobService>(JobService);
   });
 
-  describe('Handle Escrow Failure on Invalid Manifest URL', () => {
-    it('should throw an INVALID_MANIFEST_URL error for invalid manifest URL', async () => {
+  describe('Handle Escrow Failure', () => {
+    it('should throw an error for invalid manifest URL', async () => {
+      // Adjusted to use `reason` field for specifying the error
       const invalidDto: WebhookDataDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
         eventType: EventType.ESCROW_FAILED,
         eventData: {
-          invalidManifest: 'YourInvalidManifestStringHere',
-          reason: 'invalid_manifest',
+          reason: 'Invalid manifest URL',
         },
       };
       const mockSignature = 'Human-Signature';
@@ -102,18 +102,14 @@ describe('WebhookController', () => {
 
       expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(invalidDto);
     });
-  });
 
-  describe('Handle Escrow Failure on Manifest Cannot Be Downloaded', () => {
-    it('should throw a MANIFEST_CANNOT_BE_DOWNLOADED error when the manifest cannot be downloaded', async () => {
+    it('should throw an error when the manifest cannot be downloaded', async () => {
       const manifestCannotBeDownloadedDto: WebhookDataDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
         eventType: EventType.ESCROW_FAILED,
         eventData: {
-          manifestCannotBeDownloaded:
-            'http://example.com/non_existent_manifest.json',
-          reason: 'manifest_cannot_be_downloaded',
+          reason: 'Manifest cannot be downloaded',
         },
       };
       const mockSignature = 'Human-Signature';
