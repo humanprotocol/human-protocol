@@ -490,7 +490,7 @@ export class JobService {
       requestType,
       tokenFundAmount,
     );
-    console.log(123, manifestOrigin);
+    console.log(1, manifestOrigin);
     const { url, hash } = await this.uploadManifest(
       requestType,
       chainId,
