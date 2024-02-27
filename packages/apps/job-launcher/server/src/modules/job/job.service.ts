@@ -1031,6 +1031,16 @@ export class JobService {
       throw new Error(`Invalid manifest URL: ${dto.eventData.invalidManifest}`);
     }
 
+    if ('manifestCannotBeDownloaded' in dto.eventData) {
+      this.logger.log(
+        `Manifest cannot be downloaded: ${dto.eventData.manifestCannotBeDownloaded}`,
+        JobService.name,
+      );
+      throw new BadRequestException(
+        `Manifest cannot be downloaded: ${dto.eventData.manifestCannotBeDownloaded}`,
+      );
+    }
+
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason!;
     await this.jobRepository.updateOne(jobEntity);

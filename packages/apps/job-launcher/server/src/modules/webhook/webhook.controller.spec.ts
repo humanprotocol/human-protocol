@@ -104,6 +104,39 @@ describe('WebhookController', () => {
     });
   });
 
+  describe('Handle Escrow Failure on Manifest Cannot Be Downloaded', () => {
+    it('should throw a MANIFEST_CANNOT_BE_DOWNLOADED error when the manifest cannot be downloaded', async () => {
+      const manifestCannotBeDownloadedDto: WebhookDataDto = {
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        eventType: EventType.ESCROW_FAILED,
+        eventData: {
+          manifestCannotBeDownloaded:
+            'http://example.com/non_existent_manifest.json',
+          reason: 'manifest_cannot_be_downloaded',
+        },
+      };
+      const mockSignature = 'Human-Signature';
+
+      jest
+        .spyOn(jobService, 'escrowFailedWebhook')
+        .mockImplementation(async () => {
+          throw new BadRequestException('Manifest cannot be downloaded');
+        });
+
+      await expect(
+        webhookController.handleEscrowFailedWebhook(
+          mockSignature,
+          manifestCannotBeDownloadedDto,
+        ),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(
+        manifestCannotBeDownloadedDto,
+      );
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
