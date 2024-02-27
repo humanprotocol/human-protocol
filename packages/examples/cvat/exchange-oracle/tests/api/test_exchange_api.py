@@ -16,9 +16,9 @@ user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC60"
 cvat_email = "test@hmt.ai"
 
 
-def test_empty_list_tasks_200_with_address(client: TestClient) -> None:
+def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
     response = client.get(
-        "/tasks", headers={"signature": "sample"}, params={"wallet_address": user_address}
+        "/job", headers={"signature": "sample"}, params={"wallet_address": user_address}
     )
 
     assert response.status_code == 200
@@ -26,9 +26,9 @@ def test_empty_list_tasks_200_with_address(client: TestClient) -> None:
     assert len(response.json()) == 0
 
 
-def test_empty_list_tasks_200_without_address(client: TestClient) -> None:
+def test_empty_list_jobs_200_without_address(client: TestClient) -> None:
     response = client.get(
-        "/tasks",
+        "/job",
         headers={"signature": "sample"},
     )
 
@@ -37,7 +37,7 @@ def test_empty_list_tasks_200_without_address(client: TestClient) -> None:
     assert len(response.json()) == 0
 
 
-def test_list_tasks_200_with_address(client: TestClient) -> None:
+def test_list_jobs_200_with_address(client: TestClient) -> None:
     with (SessionLocal.begin() as session,):
         _, _, cvat_job_1 = create_project_task_and_job(
             session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -71,7 +71,7 @@ def test_list_tasks_200_with_address(client: TestClient) -> None:
 
             # With wallet address
             response = client.get(
-                "/tasks", headers={"signature": "sample"}, params={"wallet_address": user_address}
+                "/job", headers={"signature": "sample"}, params={"wallet_address": user_address}
             )
 
             assert response.status_code == 200
@@ -94,7 +94,7 @@ def test_list_tasks_200_with_address(client: TestClient) -> None:
                 }
 
 
-def test_list_tasks_200_without_address(client: TestClient) -> None:
+def test_list_jobs_200_without_address(client: TestClient) -> None:
     with (SessionLocal.begin() as session,):
         _, _, cvat_job_1 = create_project_task_and_job(
             session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -127,7 +127,7 @@ def test_list_tasks_200_without_address(client: TestClient) -> None:
             mock_get_manifest.return_value = manifest
 
             response = client.get(
-                "/tasks",
+                "/job",
                 headers={"signature": "sample"},
             )
 
@@ -151,14 +151,14 @@ def test_list_tasks_200_without_address(client: TestClient) -> None:
                 }
 
 
-def test_list_tasks_401(client: TestClient) -> None:
-    response = client.get("/tasks", headers={"signature": "test"})
+def test_list_jobs_401(client: TestClient) -> None:
+    response = client.get("/job", headers={"signature": "test"})
 
     assert response.status_code == 401
     assert response.json() == {"message": "Unauthorized"}
 
     response = client.get(
-        "/tasks",
+        "/job",
     )
 
     # Send a request without a signature
@@ -304,7 +304,7 @@ def test_create_assignment_200(client: TestClient) -> None:
         mock_get_manifest.return_value = manifest
 
         response = client.post(
-            "/tasks/" + cvat_project_1.id + "/assignment",
+            "/job/" + cvat_project_1.id + "/assignment",
             headers={"signature": "sample"},
             json={"wallet_address": user_address},
         )
@@ -323,7 +323,7 @@ def test_create_assignment_200(client: TestClient) -> None:
 
 def test_create_assignment_400_unauthorized(client: TestClient) -> None:
     response = client.post(
-        "/tasks/1/assignment",
+        "/job/1/assignment",
         headers={"signature": "test"},
         json={"wallet_address": user_address, "cvat_email": cvat_email},
     )
@@ -334,7 +334,7 @@ def test_create_assignment_400_unauthorized(client: TestClient) -> None:
 
 def test_create_assignment_401_without_signature(client: TestClient) -> None:
     response = client.post(
-        "/tasks/1/assignment", json={"wallet_address": user_address, "cvat_email": cvat_email}
+        "/job/1/assignment", json={"wallet_address": user_address, "cvat_email": cvat_email}
     )
     assert response.status_code == 400
     assert response.json() == {"errors": [{"field": "signature", "message": "Field required"}]}

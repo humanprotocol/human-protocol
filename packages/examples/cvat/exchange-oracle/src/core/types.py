@@ -78,10 +78,6 @@ class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
     failed = "failed"
 
 
-class PlatformTypes(str, Enum, metaclass=BetterEnumMeta):
-    CVAT = "cvat"
-
-
 class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
     """
     State changes:

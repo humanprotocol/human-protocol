@@ -1,36 +1,77 @@
 from contextlib import suppress
 from http import HTTPStatus
-from typing import Optional
+from typing import Optional, Sequence
 
 from fastapi import APIRouter, Header, HTTPException, Path, Query
+from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 import src.services.exchange as oracle_service
+from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
-from src.schemas.exchange import AssignmentRequest, TaskResponse, UserRequest, UserResponse
+from src.endpoints.filtering import Filter, FilterDepends
+from src.endpoints.pagination import Page, paginate
+from src.endpoints.serializers import serialize_assignment, serialize_job
+from src.schemas.exchange import (
+    AssignmentRequest,
+    AssignmentResponse,
+    JobResponse,
+    UserRequest,
+    UserResponse,
+)
 from src.validators.signature import validate_human_app_signature
 
 router = APIRouter()
 
 
-@router.get("/tasks", description="Lists available tasks")
-async def list_tasks(
+class JobsFilter(Filter):
+    id: Optional[str] = None
+    escrow_address: Optional[str] = None
+    job_type: Optional[TaskTypes] = None
+    status: Optional[ProjectStatuses] = None
+
+    class Constants(Filter.Constants):
+        model = cvat_service.Project
+
+
+@router.get("/job", description="Lists available jobs")
+async def list_jobs(
     wallet_address: Optional[str] = Query(default=None),
-    signature: str = Header(description="Calling service signature"),
-) -> list[TaskResponse]:
+    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
+    filter: JobsFilter = FilterDepends(JobsFilter),
+) -> Page[JobResponse]:
     await validate_human_app_signature(signature)
 
-    if not wallet_address:
-        return oracle_service.get_available_tasks()
-    else:
-        return oracle_service.get_tasks_by_assignee(wallet_address=wallet_address)
+    query = select(cvat_service.Project)
+
+    if wallet_address:
+        query = query.where(
+            cvat_service.Project.jobs.any(
+                cvat_service.Job.assignments.any(
+                    cvat_service.Assignment.user_wallet_address == wallet_address
+                )
+            )
+        )
+
+    query = query.order_by(cvat_service.Project.created_at)
+    query = filter.filter(query)
+    query = filter.sort(query)
+
+    with SessionLocal() as session:
+
+        def _response_transformer(
+            projects: Sequence[cvat_service.Project],
+        ) -> Sequence[JobResponse]:
+            return [serialize_job(p, session=session) for p in projects]
+
+        return paginate(session, query, transformer=_response_transformer)
 
 
-@router.put("/register", description="Binds a CVAT user a to HUMAN App user")
+@router.put("/register", description="Binds a CVAT user to a HUMAN App user")
 async def register(
     user: UserRequest,
-    signature: str = Header(description="Calling service signature"),
+    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
 ) -> UserResponse:
     await validate_human_app_signature(signature)
 
@@ -49,15 +90,6 @@ async def register(
                 cvat_id = cvat_api.get_user_id(user.cvat_email)
             except cvat_api.exceptions.ApiException as e:
                 if (
-                    # NOTE: CVAT < v2.8.0 compatibility
-                    e.status == HTTPStatus.BAD_REQUEST
-                    and "It is not a valid email in the system." in e.body
-                ):
-                    raise HTTPException(
-                        status_code=HTTPStatus.NOT_FOUND, detail="User with this email not found"
-                    ) from e
-
-                elif (
                     e.status == HTTPStatus.BAD_REQUEST
                     and "The user is a member of the organization already." in e.body
                 ):
@@ -93,15 +125,86 @@ async def register(
         )
 
 
+class AssignmentFilter(Filter):
+    user_wallet_address: Optional[str] = Query(default=None, alias="wallet_address")
+    id: Optional[str] = None
+    status: Optional[ProjectStatuses] = None
+
+    class Constants(Filter.Constants):
+        model = cvat_service.Assignment
+
+
+@router.get("/assignment", description="Lists assignments")
+async def list_assignments(
+    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
+    filter: AssignmentFilter = FilterDepends(AssignmentFilter),
+    escrow_address: Optional[str] = Query(default=None),
+    job_type: Optional[TaskTypes] = Query(default=None),
+) -> Page[AssignmentResponse]:
+    await validate_human_app_signature(signature)
+
+    query = select(cvat_service.Assignment)
+    query = query.order_by(cvat_service.Assignment.created_at)
+
+    if escrow_address:
+        query = query.filter(
+            cvat_service.Assignment.job.has(
+                cvat_service.Job.project.has(cvat_service.Project.escrow_address == escrow_address)
+            )
+        )
+
+    if job_type:
+        query = query.filter(
+            cvat_service.Assignment.job.has(
+                cvat_service.Job.project.has(cvat_service.Project.job_type == job_type)
+            )
+        )
+
+    query = filter.filter(query)
+    query = filter.sort(query)
+
+    with SessionLocal.begin() as session:
+
+        def _response_transformer(
+            assignments: Sequence[cvat_service.Assignment],
+        ) -> Sequence[AssignmentResponse]:
+            results = []
+
+            jobs_for_assignments = {
+                job.cvat_id: job
+                for job in cvat_service.get_jobs_by_cvat_id(
+                    session, [a.cvat_job_id for a in assignments]
+                )
+            }
+
+            projects_for_assignments = {
+                project.cvat_id: project
+                for project in cvat_service.get_projects_by_cvat_ids(
+                    session,
+                    set(job.cvat_project_id for job in jobs_for_assignments.values()),
+                    limit=len(jobs_for_assignments),
+                )
+            }
+
+            for assignment in assignments:
+                job = jobs_for_assignments[assignment.cvat_job_id]
+                project = projects_for_assignments[job.cvat_project_id]
+                results.append(serialize_assignment(assignment, session=session, project=project))
+
+            return results
+
+        return paginate(session, query, transformer=_response_transformer)
+
+
 @router.post(
-    "/tasks/{id}/assignment",
+    "/assignment",
     description="Start an assignment within the task for the annotator",
 )
 async def create_assignment(
     data: AssignmentRequest,
     project_id: str = Path(alias="id"),
-    signature: str = Header(description="Calling service signature"),
-) -> TaskResponse:
+    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
+) -> AssignmentResponse:
     await validate_human_app_signature(signature)
 
     try:
@@ -117,4 +220,4 @@ async def create_assignment(
             detail="No assignments available",
         )
 
-    return oracle_service.serialize_task(project_id, assignment_id=assignment_id)
+    return serialize_assignment(assignment_id, project=project_id)

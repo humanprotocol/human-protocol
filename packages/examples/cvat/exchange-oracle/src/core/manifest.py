@@ -81,7 +81,10 @@ class SkeletonLabelInfo(LabelInfoBase):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_type(cls, values: dict) -> dict:
+    def validate_type(cls, values):
+        if not isinstance(values, dict):
+            raise NotImplementedError
+
         if values["type"] != LabelTypes.skeleton:
             raise ValueError(f"Label type must be {LabelTypes.skeleton}")
 
@@ -135,9 +138,12 @@ class AnnotationInfo(BaseModel):
     max_time: Optional[int] = None  # deprecated, TODO: mark deprecated with pydantic 2.7+
     "Maximum time per job (assignment) for an annotator, in seconds"
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     @classmethod
-    def _validate_label_type(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def validate_label_type(cls, values):
+        if not isinstance(values, dict):
+            raise NotImplementedError
+
         default_label_type = LabelTypes.plain
         if values["type"] == TaskTypes.image_skeletons_from_boxes:
             default_label_type = LabelTypes.skeleton
@@ -175,4 +181,4 @@ class TaskManifest(BaseModel):
 
 
 def parse_manifest(manifest: Any) -> TaskManifest:
-    return TaskManifest.parse_obj(manifest)
+    return TaskManifest.model_validate(manifest)

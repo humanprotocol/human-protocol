@@ -1,28 +1,32 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel, Field
+from pydantic import BaseModel, Field
 
-from src.core.types import PlatformTypes, ProjectStatuses, TaskTypes
+from src.core.types import AssignmentStatuses, ProjectStatuses, TaskTypes
 
 
 class AssignmentResponse(BaseModel):
-    assignment_url: AnyUrl
+    id: str
+    escrow_address: str
+    size: Optional[int]
+    job_type: TaskTypes
+    status: AssignmentStatuses
+    bounty: Optional[str]
+    url: Optional[str]
     started_at: datetime
     finishes_at: datetime
+    finished_at: Optional[datetime]
 
 
-class TaskResponse(BaseModel):
+class JobResponse(BaseModel):
     id: str
     escrow_address: str
     title: str
-    description: str
-    platform: PlatformTypes
-    job_bounty: str
-    job_size: int
-    job_time_limit: int
+    description: Optional[str]
+    bounty: Optional[str]
     job_type: TaskTypes
-    assignment: Optional[AssignmentResponse] = None
+    size: Optional[int]
     status: ProjectStatuses
 
 

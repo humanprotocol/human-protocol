@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union
 
-from pydantic import AnyUrl, BaseModel, Field, root_validator
+from pydantic import AnyUrl, BaseModel, Field, model_validator
 
 from src.core.types import TaskTypes
 from src.utils.enums import BetterEnumMeta
@@ -67,7 +67,7 @@ class PlainLabelInfo(LabelInfoBase):
 class SkeletonLabelInfo(LabelInfoBase):
     type: Literal[LabelTypes.skeleton]
 
-    nodes: List[str] = Field(min_items=1)
+    nodes: List[str] = Field(min_length=1)
     """
     A list of node label names (only points are supposed to be nodes).
     Example:
@@ -79,9 +79,12 @@ class SkeletonLabelInfo(LabelInfoBase):
     joints: Optional[List[Tuple[int, int]]] = Field(default_factory=list)
     "A list of node adjacency, e.g. [[0, 1], [1, 2], [1, 3]]"
 
-    @root_validator
+    @model_validator(mode="before")
     @classmethod
-    def validate_type(cls, values: dict) -> dict:
+    def validate_type(cls, values):
+        if not isinstance(values, dict):
+            raise NotImplementedError
+
         if values["type"] != LabelTypes.skeleton:
             raise ValueError(f"Label type must be {LabelTypes.skeleton}")
 
@@ -120,7 +123,7 @@ LabelInfo = Annotated[Union[PlainLabelInfo, SkeletonLabelInfo], Field(discrimina
 class AnnotationInfo(BaseModel):
     type: TaskTypes
 
-    labels: list[LabelInfo] = Field(min_items=1)
+    labels: list[LabelInfo] = Field(min_length=1)
     "Label declarations with accepted annotation types"
 
     description: str = ""
@@ -135,9 +138,12 @@ class AnnotationInfo(BaseModel):
     max_time: Optional[int] = None  # deprecated, TODO: mark deprecated with pydantic 2.7+
     "Maximum time per job (assignment) for an annotator, in seconds"
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     @classmethod
-    def _validate_label_type(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def validate_label_type(cls, values):
+        if not isinstance(values, dict):
+            raise NotImplementedError
+
         default_label_type = LabelTypes.plain
         if values["type"] == TaskTypes.image_skeletons_from_boxes:
             default_label_type = LabelTypes.skeleton
@@ -175,4 +181,4 @@ class TaskManifest(BaseModel):
 
 
 def parse_manifest(manifest: Any) -> TaskManifest:
-    return TaskManifest.parse_obj(manifest)
+    return TaskManifest.model_validate(manifest)
