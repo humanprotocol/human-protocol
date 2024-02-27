@@ -67,7 +67,7 @@ class DatasetComparator(metaclass=ABCMeta):
             matching_result, similarity_fn = self.compare_sample_annotations(gt_sample, ds_sample)
 
             sample_similarities = []
-            sample_total_anns_to_compare = []
+            sample_total_anns_to_compare = 0
             for gt_ann, ds_ann in itertools.chain(
                 matching_result.matches,
                 matching_result.mispred,

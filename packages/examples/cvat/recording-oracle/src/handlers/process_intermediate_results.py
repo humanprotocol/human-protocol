@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Sequence, Set, Tuple, Type, TypeVar, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
@@ -75,13 +75,21 @@ T = TypeVar("T")
 
 
 class _TaskValidator:
-    def __init__(self, escrow_address: str, chain_id: int, manifest: TaskManifest):
+    def __init__(
+        self,
+        escrow_address: str,
+        chain_id: int,
+        manifest: TaskManifest,
+        *,
+        job_annotations: Dict[int, io.RawIOBase],
+        merged_annotations: Optional[io.RawIOBase] = None,
+    ):
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.manifest = manifest
 
-        self.job_annotations: Optional[Dict[int, io.IOBase]] = None
-        self.merged_annotations: Optional[io.IOBase] = None
+        self.job_annotations: Optional[Dict[int, io.IOBase]] = job_annotations
+        self.merged_annotations: Optional[io.IOBase] = merged_annotations
 
         self._temp_dir: Optional[Path] = None
         self._gt_dataset: Optional[dm.Dataset] = None
@@ -226,8 +234,8 @@ class _TaskValidator:
 
 
 class _BoxesFromPointsValidator(_TaskValidator):
-    def __init__(self, escrow_address: str, chain_id: int, manifest: TaskManifest):
-        super().__init__(escrow_address, chain_id, manifest)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         (
             boxes_to_points_mapping,
@@ -426,8 +434,8 @@ class _BoxesFromPointsValidator(_TaskValidator):
 
 
 class _SkeletonsFromBoxesValidator(_TaskValidator):
-    def __init__(self, escrow_address: str, chain_id: int, manifest: TaskManifest):
-        super().__init__(escrow_address, chain_id, manifest)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         (
             roi_filenames,
@@ -699,7 +707,6 @@ def process_intermediate_results(
     chain_id: int,
     meta: AnnotationMeta,
     job_annotations: Dict[int, io.RawIOBase],
-    gt_annotations: io.RawIOBase,
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
@@ -715,10 +722,13 @@ def process_intermediate_results(
     else:
         raise Exception(f"Unknown task type {task_type}")
 
-    validator = validator_type(escrow_address=escrow_address, chain_id=chain_id, manifest=manifest)
-    validator.gt_annotations = gt_annotations
-    validator.job_annotations = job_annotations
-    validator.merged_annotations = merged_annotations
+    validator = validator_type(
+        escrow_address=escrow_address,
+        chain_id=chain_id,
+        manifest=manifest,
+        job_annotations=job_annotations,
+        merged_annotations=merged_annotations,
+    )
     job_results, rejected_job_ids, updated_merged_dataset_archive = validator.validate()
 
     if logger.isEnabledFor(logging.DEBUG):
