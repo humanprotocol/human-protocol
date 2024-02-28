@@ -1,5 +1,11 @@
 import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import { Role } from '../../common/enums/role';
 import { SignatureAuthGuard } from '../../common/guards';
@@ -13,6 +19,33 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
+  @ApiOperation({
+    summary: 'Handle Webhook Events',
+    description:
+      'Receives webhook events related to escrow and task operations.',
+  })
+  @ApiHeader({
+    name: HEADER_SIGNATURE_KEY,
+    description: 'Signature header for authenticating the webhook request.',
+    required: true,
+  })
+  @ApiBody({
+    description:
+      'Details of the webhook event, including the type of event and associated data.',
+    type: WebhookDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Webhook event processed successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request.Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
   @UseGuards(
     new SignatureAuthGuard([Role.Exchange, Role.Reputation, Role.JobLaucher]),
   )
