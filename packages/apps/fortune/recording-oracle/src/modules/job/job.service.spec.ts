@@ -32,11 +32,11 @@ import {
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { IManifest, ISolution } from '../../common/interfaces/job';
 import { of } from 'rxjs';
-import { JobSolutionsRequestDto } from './job.dto';
 import { StorageService } from '../storage/storage.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
 import { EventType } from '../../common/enums/webhook';
+import { WebhookDto } from '../webhook/webhook.dto';
 
 jest.mock('minio', () => {
   class Client {
@@ -157,10 +157,11 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const jobSolution: JobSolutionsRequestDto = {
+      const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       await expect(
@@ -175,10 +176,11 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const jobSolution: JobSolutionsRequestDto = {
+      const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       await expect(
@@ -203,10 +205,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(JSON.stringify(invalidManifest));
 
-      const jobSolution: JobSolutionsRequestDto = {
+      const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       await expect(
@@ -233,10 +236,11 @@ describe('JobService', () => {
         .mockResolvedValue(JSON.stringify(invalidManifest));
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
 
-      const jobSolution: JobSolutionsRequestDto = {
+      const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       await expect(
@@ -297,10 +301,11 @@ describe('JobService', () => {
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-      const newSolution: JobSolutionsRequestDto = {
+      const newSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       await expect(
@@ -359,10 +364,11 @@ describe('JobService', () => {
         new Error(ErrorJob.WebhookWasNotSent),
       );
 
-      const newSolution: JobSolutionsRequestDto = {
+      const newSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       await expect(
@@ -414,10 +420,11 @@ describe('JobService', () => {
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-      const jobSolution: JobSolutionsRequestDto = {
+      const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       const result = await jobService.processJobSolution(jobSolution);
@@ -474,10 +481,11 @@ describe('JobService', () => {
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-      const jobSolution: JobSolutionsRequestDto = {
+      const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionsUrl: MOCK_FILE_URL,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
       const result = await jobService.processJobSolution(jobSolution);
@@ -485,7 +493,7 @@ describe('JobService', () => {
       const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
-        event_type: EventType.escrow_recorded,
+        event_type: EventType.ESCROW_RECORDED,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -563,10 +571,11 @@ describe('JobService', () => {
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-    const jobSolution: JobSolutionsRequestDto = {
+    const jobSolution: WebhookDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      solutionsUrl: MOCK_FILE_URL,
+      eventType: EventType.SUBMISSION_IN_REVIEW,
+      eventData: { solutionsUrl: MOCK_FILE_URL },
     };
 
     const result = await jobService.processJobSolution(jobSolution);
@@ -574,7 +583,7 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.escrow_recorded,
+      event_type: EventType.ESCROW_RECORDED,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -638,10 +647,11 @@ describe('JobService', () => {
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-    const jobSolution: JobSolutionsRequestDto = {
+    const jobSolution: WebhookDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      solutionsUrl: MOCK_FILE_URL,
+      eventType: EventType.SUBMISSION_IN_REVIEW,
+      eventData: { solutionsUrl: MOCK_FILE_URL },
     };
 
     const result = await jobService.processJobSolution(jobSolution);
@@ -649,13 +659,15 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.submission_rejected,
-      event_data: [
-        {
-          assignee_id: exchangeJobSolutions[0].workerAddress,
-          reason: SolutionError.Duplicated,
-        },
-      ],
+      event_type: EventType.SUBMISSION_REJECTED,
+      event_data: {
+        assignments: [
+          {
+            assignee_id: exchangeJobSolutions[0].workerAddress,
+            reason: SolutionError.Duplicated,
+          },
+        ],
+      },
     };
     expect(result).toEqual('Solutions recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -716,22 +728,25 @@ describe('JobService', () => {
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-    const jobSolution: JobSolutionsRequestDto = {
+    const jobSolution: WebhookDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      solutionsUrl: MOCK_FILE_URL,
+      eventType: EventType.SUBMISSION_IN_REVIEW,
+      eventData: { solutionsUrl: MOCK_FILE_URL },
     };
 
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.submission_rejected,
-      event_data: [
-        {
-          assignee_id: exchangeJobSolutions[1].workerAddress,
-          reason: SolutionError.CurseWord,
-        },
-      ],
+      event_type: EventType.SUBMISSION_REJECTED,
+      event_data: {
+        assignments: [
+          {
+            assignee_id: exchangeJobSolutions[1].workerAddress,
+            reason: SolutionError.CurseWord,
+          },
+        ],
+      },
     };
     const result = await jobService.processJobSolution(jobSolution);
     expect(result).toEqual('Solutions recorded.');

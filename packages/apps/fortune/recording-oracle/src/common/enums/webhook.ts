@@ -1,6 +1,6 @@
 export enum EventType {
-  escrow_created = 'escrow_created',
-  escrow_canceled = 'escrow_canceled',
-  escrow_recorded = 'escrow_recorded',
-  submission_rejected = 'submission_rejected',
+  ESCROW_COMPLETED = 'escrow_completed',
+  ESCROW_RECORDED = 'escrow_recorded',
+  SUBMISSION_REJECTED = 'submission_rejected',
+  SUBMISSION_IN_REVIEW = 'submission_in_review',
 }

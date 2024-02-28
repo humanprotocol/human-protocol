@@ -27,8 +27,12 @@ import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { EventData, JobSolutionsRequestDto, WebhookBody } from './job.dto';
 import { EventType } from '../../common/enums/webhook';
+import {
+  AssignmentRejection,
+  SolutionEventData,
+  WebhookDto,
+} from '../webhook/webhook.dto';
 
 @Injectable()
 export class JobService {
@@ -96,15 +100,13 @@ export class JobService {
     return { errorSolutions, uniqueSolutions };
   }
 
-  async processJobSolution(
-    jobSolution: JobSolutionsRequestDto,
-  ): Promise<string> {
-    const signer = this.web3Service.getSigner(jobSolution.chainId);
+  async processJobSolution(webhook: WebhookDto): Promise<string> {
+    const signer = this.web3Service.getSigner(webhook.chainId);
     const escrowClient = await EscrowClient.build(signer);
     const kvstoreClient = await KVStoreClient.build(signer);
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
-      jobSolution.escrowAddress,
+      webhook.escrowAddress,
     );
     if (
       ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
@@ -113,9 +115,7 @@ export class JobService {
       throw new BadRequestException(ErrorJob.AddressMismatches);
     }
 
-    const escrowStatus = await escrowClient.getStatus(
-      jobSolution.escrowAddress,
-    );
+    const escrowStatus = await escrowClient.getStatus(webhook.escrowAddress);
     if (
       escrowStatus !== EscrowStatus.Pending &&
       escrowStatus !== EscrowStatus.Partial
@@ -125,7 +125,7 @@ export class JobService {
     }
 
     const manifestUrl = await escrowClient.getManifestUrl(
-      jobSolution.escrowAddress,
+      webhook.escrowAddress,
     );
     const { submissionsRequired, requestType }: IManifest =
       await this.storageService.download(manifestUrl);
@@ -141,11 +141,14 @@ export class JobService {
     }
 
     const existingJobSolutionsURL =
-      await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
+      await escrowClient.getIntermediateResultsUrl(webhook.escrowAddress);
 
-    const existingJobSolutions = await this.storageService.download(
-      existingJobSolutionsURL,
-    );
+    let existingJobSolutions: ISolution[] = [];
+    if (existingJobSolutionsURL) {
+      existingJobSolutions = await this.storageService.download(
+        existingJobSolutionsURL,
+      );
+    }
 
     if (existingJobSolutions.length >= submissionsRequired) {
       this.logger.log(
@@ -156,7 +159,9 @@ export class JobService {
     }
 
     const exchangeJobSolutions: ISolution[] =
-      await this.storageService.download(jobSolution.solutionsUrl);
+      await this.storageService.download(
+        (webhook.eventData as SolutionEventData)?.solutionsUrl,
+      );
 
     const { errorSolutions, uniqueSolutions } = this.processSolutions(
       exchangeJobSolutions,
@@ -170,19 +175,19 @@ export class JobService {
     ];
 
     const jobSolutionUploaded = await this.storageService.uploadJobSolutions(
-      jobSolution.escrowAddress,
-      jobSolution.chainId,
+      webhook.escrowAddress,
+      webhook.chainId,
       recordingOracleSolutions,
     );
 
     await escrowClient.storeResults(
-      jobSolution.escrowAddress,
+      webhook.escrowAddress,
       jobSolutionUploaded.url,
       jobSolutionUploaded.hash,
     );
 
     const reputationOracleAddress =
-      await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
+      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
     const reputationOracleWebhook = (await kvstoreClient.get(
       reputationOracleAddress,
       KVStoreKeys.webhookUrl,
@@ -197,9 +202,9 @@ export class JobService {
         this.logger,
         reputationOracleWebhook,
         {
-          chainId: jobSolution.chainId,
-          escrowAddress: jobSolution.escrowAddress,
-          eventType: EventType.escrow_recorded,
+          chainId: webhook.chainId,
+          escrowAddress: webhook.escrowAddress,
+          eventType: EventType.ESCROW_RECORDED,
         },
         this.web3Config.web3PrivateKey,
       );
@@ -208,19 +213,22 @@ export class JobService {
     }
     if (errorSolutions.length) {
       const exchangeOracleURL = (await kvstoreClient.get(
-        await escrowClient.getExchangeOracleAddress(jobSolution.escrowAddress),
+        await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
         KVStoreKeys.webhookUrl,
       )) as string;
-      const eventData: EventData[] = errorSolutions.map((solution) => ({
-        assigneeId: solution.workerAddress,
-        reason: solution.error as SolutionError,
-      }));
 
-      const webhookBody: WebhookBody = {
-        escrowAddress: jobSolution.escrowAddress,
-        chainId: jobSolution.chainId,
-        eventType: EventType.submission_rejected,
-        eventData: eventData,
+      const eventData: AssignmentRejection[] = errorSolutions.map(
+        (solution) => ({
+          assigneeId: solution.workerAddress,
+          reason: solution.error as SolutionError,
+        }),
+      );
+
+      const webhookBody: WebhookDto = {
+        escrowAddress: webhook.escrowAddress,
+        chainId: webhook.chainId,
+        eventType: EventType.SUBMISSION_REJECTED,
+        eventData: { assignments: eventData },
       };
 
       await sendWebhook(

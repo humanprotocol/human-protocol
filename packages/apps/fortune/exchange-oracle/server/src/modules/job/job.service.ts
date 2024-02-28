@@ -29,9 +29,9 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { JobDetailsDto, ManifestDto } from './job.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
-import { WebhookDto } from '../webhook/webhook.dto';
 import { firstValueFrom } from 'rxjs';
 import { ethers } from 'ethers';
+import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
 
 @Injectable()
 export class JobService {
@@ -138,7 +138,9 @@ export class JobService {
           invalidJobSolution.escrowAddress,
           invalidJobSolution.chainId,
         );
-      for (const invalidSolution of invalidJobSolution.eventData) {
+      for (const invalidSolution of (
+        invalidJobSolution.eventData as RejectionEventData
+      )?.assignments) {
         const foundSolution = existingJobSolutions.find(
           (sol) => sol.workerAddress === invalidSolution.assigneeId,
         );
@@ -272,7 +274,7 @@ export class JobService {
         escrowAddress: escrowAddress,
         chainId: chainId,
         eventType: EventType.TASK_CREATION_FAILED,
-        eventData: [{ reason: 'Unable to get manifest' }],
+        eventData: { assignments: [{ reason: 'Unable to get manifest' }] },
       };
       await this.sendWebhook(
         jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
