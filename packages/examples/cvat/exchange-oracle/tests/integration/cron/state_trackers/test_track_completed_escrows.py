@@ -12,12 +12,12 @@ from unittest.mock import Mock, patch
 import datumaro as dm
 
 from src.core.types import (
-    ExchangeOracleEventType,
+    ExchangeOracleEventTypes,
     JobStatuses,
     Networks,
     ProjectStatuses,
-    TaskStatus,
-    TaskType,
+    TaskStatuses,
+    TaskTypes,
 )
 from src.crons.state_trackers import track_completed_escrows
 from src.db import SessionLocal
@@ -41,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=cvat_project_id,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -61,7 +61,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             cvat_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
-            status=TaskStatus.completed.value,
+            status=TaskStatuses.completed.value,
         )
         self.session.add(cvat_task)
 
@@ -139,7 +139,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventType.task_finished)
+        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished)
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
         self.assertEqual(db_project.status, ProjectStatuses.validation)
@@ -153,7 +153,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=cvat_project_id,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -165,7 +165,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             cvat_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
-            status=TaskStatus.completed.value,
+            status=TaskStatuses.completed.value,
         )
         self.session.add(cvat_task)
 
@@ -196,7 +196,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=cvat_project_id,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -208,7 +208,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             cvat_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
-            status=TaskStatus.completed.value,
+            status=TaskStatuses.completed.value,
         )
         self.session.add(cvat_task)
 
@@ -286,7 +286,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=cvat_project_id,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -298,7 +298,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             cvat_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
-            status=TaskStatus.completed.value,
+            status=TaskStatuses.completed.value,
         )
         self.session.add(cvat_task)
 

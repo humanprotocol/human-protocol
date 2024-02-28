@@ -11,7 +11,7 @@ from web3.providers.rpc import HTTPProvider
 
 from src.core.config import StorageConfig
 from src.core.types import (
-    ExchangeOracleEventType,
+    ExchangeOracleEventTypes,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
@@ -22,7 +22,7 @@ from src.crons.process_exchange_oracle_webhooks import (
 )
 from src.db import SessionLocal
 from src.models.webhook import Webhook
-from src.services.webhook import OracleWebhookDirectionTag
+from src.services.webhook import OracleWebhookDirectionTags
 from src.utils.logging import get_function_logger
 
 from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, RECORDING_ORACLE_FEE, SIGNATURE
@@ -47,13 +47,13 @@ class ServiceIntegrationTest(unittest.TestCase):
     def make_webhook(self, escrow_address):
         return Webhook(
             id=str(uuid.uuid4()),
-            direction=OracleWebhookDirectionTag.incoming.value,
+            direction=OracleWebhookDirectionTags.incoming.value,
             signature=SIGNATURE,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             type=OracleWebhookTypes.exchange_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=ExchangeOracleEventType.task_finished.value,
+            event_type=ExchangeOracleEventTypes.task_finished.value,
         )
 
     def test_process_exchange_oracle_webhook(self):

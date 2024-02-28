@@ -3,16 +3,16 @@ from typing import Optional, Type, Union
 from pydantic import BaseModel
 
 from src.core.types import (
-    ExchangeOracleEventType,
-    JobLauncherEventType,
+    ExchangeOracleEventTypes,
+    JobLauncherEventTypes,
     OracleWebhookTypes,
-    RecordingOracleEventType,
+    RecordingOracleEventTypes,
 )
 
 EventTypeTag = Union[
-    ExchangeOracleEventType,
-    JobLauncherEventType,
-    RecordingOracleEventType,
+    ExchangeOracleEventTypes,
+    JobLauncherEventTypes,
+    RecordingOracleEventTypes,
 ]
 
 
@@ -49,12 +49,12 @@ class ExchangeOracleEvent_TaskFinished(OracleEvent):
 
 
 _event_type_map = {
-    JobLauncherEventType.escrow_created: JobLauncherEvent_EscrowCreated,
-    JobLauncherEventType.escrow_canceled: JobLauncherEvent_EscrowCanceled,
-    RecordingOracleEventType.task_completed: RecordingOracleEvent_TaskCompleted,
-    RecordingOracleEventType.task_rejected: RecordingOracleEvent_TaskRejected,
-    ExchangeOracleEventType.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
-    ExchangeOracleEventType.task_finished: ExchangeOracleEvent_TaskFinished,
+    JobLauncherEventTypes.escrow_created: JobLauncherEvent_EscrowCreated,
+    JobLauncherEventTypes.escrow_canceled: JobLauncherEvent_EscrowCanceled,
+    RecordingOracleEventTypes.task_completed: RecordingOracleEvent_TaskCompleted,
+    RecordingOracleEventTypes.task_rejected: RecordingOracleEvent_TaskRejected,
+    ExchangeOracleEventTypes.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
+    ExchangeOracleEventTypes.task_finished: ExchangeOracleEvent_TaskFinished,
 }
 
 
@@ -84,9 +84,9 @@ def parse_event(
     event_data: Optional[dict] = None,
 ) -> OracleEvent:
     sender_events_mapping = {
-        OracleWebhookTypes.job_launcher: JobLauncherEventType,
-        OracleWebhookTypes.recording_oracle: RecordingOracleEventType,
-        OracleWebhookTypes.exchange_oracle: ExchangeOracleEventType,
+        OracleWebhookTypes.job_launcher: JobLauncherEventTypes,
+        OracleWebhookTypes.recording_oracle: RecordingOracleEventTypes,
+        OracleWebhookTypes.exchange_oracle: ExchangeOracleEventTypes,
     }
 
     sender_events = sender_events_mapping.get(sender)

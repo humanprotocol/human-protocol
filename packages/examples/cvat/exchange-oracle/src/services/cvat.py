@@ -6,7 +6,7 @@ from typing import List, Optional, Sequence, Union
 from sqlalchemy import delete, insert, update
 from sqlalchemy.orm import Session
 
-from src.core.types import AssignmentStatus, JobStatuses, ProjectStatuses, TaskStatus, TaskType
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
@@ -125,7 +125,7 @@ def get_projects_by_status(
     session: Session,
     status: ProjectStatuses,
     *,
-    included_types: Optional[Sequence[TaskType]] = None,
+    included_types: Optional[Sequence[TaskTypes]] = None,
     limit: int = 5,
     for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
@@ -150,7 +150,7 @@ def get_available_projects(
             (Project.status == ProjectStatuses.annotation.value)
             & Project.jobs.any(
                 (Job.status == JobStatuses.new)
-                & ~Job.assignments.any(Assignment.status == AssignmentStatus.created.value)
+                & ~Job.assignments.any(Assignment.status == AssignmentStatuses.created.value)
             )
         )
         .distinct()
@@ -174,9 +174,9 @@ def get_projects_by_assignee(
                     (Assignment.user_wallet_address == wallet_address)
                     & Assignment.status.in_(
                         [
-                            AssignmentStatus.created,
-                            AssignmentStatus.completed,
-                            AssignmentStatus.canceled,
+                            AssignmentStatuses.created,
+                            AssignmentStatuses.completed,
+                            AssignmentStatuses.canceled,
                         ]
                     )
                 )
@@ -208,7 +208,7 @@ def is_project_completed(session: Session, project_id: str) -> bool:
 
 
 # Task
-def create_task(session: Session, cvat_id: int, cvat_project_id: int, status: TaskStatus) -> str:
+def create_task(session: Session, cvat_id: int, cvat_project_id: int, status: TaskStatuses) -> str:
     """
     Create a task from CVAT.
     """
@@ -244,7 +244,7 @@ def get_tasks_by_cvat_id(
 
 
 def get_tasks_by_status(
-    session: Session, status: TaskStatus, *, for_update: Union[bool, ForUpdateParams] = False
+    session: Session, status: TaskStatuses, *, for_update: Union[bool, ForUpdateParams] = False
 ) -> List[Task]:
     return (
         _maybe_for_update(session.query(Task), enable=for_update)
@@ -253,7 +253,7 @@ def get_tasks_by_status(
     )
 
 
-def update_task_status(session: Session, task_id: int, status: TaskStatus) -> None:
+def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:
     upd = update(Task).where(Task.id == task_id).values(status=status.value)
     session.execute(upd)
 
@@ -457,7 +457,7 @@ def get_unprocessed_expired_assignments(
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
-            (Assignment.status == AssignmentStatus.created.value)
+            (Assignment.status == AssignmentStatuses.created.value)
             & (Assignment.completed_at == None)
             & (Assignment.expires_at <= utcnow())
         )
@@ -472,7 +472,7 @@ def get_active_assignments(
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
-            (Assignment.status == AssignmentStatus.created.value)
+            (Assignment.status == AssignmentStatuses.created.value)
             & (Assignment.completed_at == None)
             & (Assignment.expires_at <= utcnow())
         )
@@ -485,7 +485,7 @@ def update_assignment(
     session: Session,
     id: str,
     *,
-    status: AssignmentStatus,
+    status: AssignmentStatuses,
     completed_at: Optional[datetime] = None,
 ):
     statement = (
@@ -497,11 +497,11 @@ def update_assignment(
 
 
 def cancel_assignment(session: Session, assignment_id: str):
-    update_assignment(session, assignment_id, status=AssignmentStatus.canceled)
+    update_assignment(session, assignment_id, status=AssignmentStatuses.canceled)
 
 
 def expire_assignment(session: Session, assignment_id: str):
-    update_assignment(session, assignment_id, status=AssignmentStatus.expired)
+    update_assignment(session, assignment_id, status=AssignmentStatuses.expired)
 
 
 def complete_assignment(session: Session, assignment_id: str, completed_at: datetime):
@@ -509,7 +509,7 @@ def complete_assignment(session: Session, assignment_id: str, completed_at: date
         session,
         assignment_id,
         completed_at=completed_at,
-        status=AssignmentStatus.completed,
+        status=AssignmentStatuses.completed,
     )
 
 

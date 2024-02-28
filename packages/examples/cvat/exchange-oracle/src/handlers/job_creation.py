@@ -27,7 +27,7 @@ from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
 from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
-from src.core.types import CvatLabelType, TaskStatus, TaskType
+from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import CloudProviders, StorageClient
@@ -39,28 +39,28 @@ from src.utils.logging import NullLogger, get_function_logger
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
 LABEL_TYPE_MAPPING = {
-    TaskType.image_label_binary: CvatLabelType.tag,
-    TaskType.image_points: CvatLabelType.points,
-    TaskType.image_boxes: CvatLabelType.rectangle,
-    TaskType.image_boxes_from_points: CvatLabelType.rectangle,
-    TaskType.image_skeletons_from_boxes: CvatLabelType.points,
+    TaskTypes.image_label_binary: CvatLabelTypes.tag,
+    TaskTypes.image_points: CvatLabelTypes.points,
+    TaskTypes.image_boxes: CvatLabelTypes.rectangle,
+    TaskTypes.image_boxes_from_points: CvatLabelTypes.rectangle,
+    TaskTypes.image_skeletons_from_boxes: CvatLabelTypes.points,
 }
 
 DM_DATASET_FORMAT_MAPPING = {
-    TaskType.image_label_binary: "cvat_images",
-    TaskType.image_points: "coco_person_keypoints",
-    TaskType.image_boxes: "coco_instances",
-    TaskType.image_boxes_from_points: "coco_instances",
-    TaskType.image_skeletons_from_boxes: "coco_person_keypoints",
+    TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_points: "coco_person_keypoints",
+    TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_boxes_from_points: "coco_instances",
+    TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
 
 DM_GT_DATASET_FORMAT_MAPPING = {
     # GT uses the same format both for boxes and points
-    TaskType.image_label_binary: "cvat_images",
-    TaskType.image_points: "coco_instances",
-    TaskType.image_boxes: "coco_instances",
-    TaskType.image_boxes_from_points: "coco_instances",
-    TaskType.image_skeletons_from_boxes: "coco_person_keypoints",
+    TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_points: "coco_instances",
+    TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_boxes_from_points: "coco_instances",
+    TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
 
 
@@ -975,7 +975,7 @@ class BoxesFromPointsTaskBuilder:
             task = cvat_api.create_task(project.id, self.escrow_address)
 
             with SessionLocal.begin() as session:
-                db_service.create_task(session, task.id, project.id, TaskStatus[task.status])
+                db_service.create_task(session, task.id, project.id, TaskStatuses[task.status])
 
             # Actual task creation in CVAT takes some time, so it's done in an async process.
             # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
@@ -1896,7 +1896,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
                     with SessionLocal.begin() as session:
                         db_service.create_task(
-                            session, task.id, project.id, TaskStatus[task.status]
+                            session, task.id, project.id, TaskStatuses[task.status]
                         )
 
                     # Actual task creation in CVAT takes some time, so it's done in an async process.
@@ -2038,9 +2038,9 @@ def create_task(escrow_address: str, chain_id: int) -> None:
     manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
 
     if manifest.annotation.type in [
-        TaskType.image_boxes,
-        TaskType.image_points,
-        TaskType.image_label_binary,
+        TaskTypes.image_boxes,
+        TaskTypes.image_points,
+        TaskTypes.image_label_binary,
     ]:
         data_bucket = BucketAccessInfo.parse_obj(manifest.data.data_url)
         gt_bucket = BucketAccessInfo.parse_obj(manifest.validation.gt_url)
@@ -2098,7 +2098,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
             task = cvat_api.create_task(project.id, escrow_address)
 
             with SessionLocal.begin() as session:
-                db_service.create_task(session, task.id, project.id, TaskStatus[task.status])
+                db_service.create_task(session, task.id, project.id, TaskStatuses[task.status])
 
             # Actual task creation in CVAT takes some time, so it's done in an async process.
             # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
@@ -2112,12 +2112,12 @@ def create_task(escrow_address: str, chain_id: int) -> None:
             with SessionLocal.begin() as session:
                 db_service.create_data_upload(session, cvat_task_id=task.id)
 
-    elif manifest.annotation.type in [TaskType.image_boxes_from_points]:
+    elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
         with BoxesFromPointsTaskBuilder(manifest, escrow_address, chain_id) as task_builder:
             task_builder.set_logger(logger)
             task_builder.build()
 
-    elif manifest.annotation.type in [TaskType.image_skeletons_from_boxes]:
+    elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
         with SkeletonsFromBoxesTaskBuilder(manifest, escrow_address, chain_id) as task_builder:
             task_builder.set_logger(logger)
             task_builder.build()

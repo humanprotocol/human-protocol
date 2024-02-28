@@ -5,7 +5,7 @@ import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest
-from src.core.types import AssignmentStatus, JobStatuses, PlatformType, ProjectStatuses
+from src.core.types import AssignmentStatuses, JobStatuses, PlatformTypes, ProjectStatuses
 from src.db import SessionLocal
 from src.schemas import exchange as service_api
 from src.utils.assignments import compose_assignment_url, parse_manifest
@@ -46,7 +46,7 @@ def serialize_task(
             job_time_limit=manifest.annotation.max_time,
             job_size=manifest.annotation.job_size + manifest.validation.val_size,
             job_type=project.job_type,
-            platform=PlatformType.CVAT,
+            platform=PlatformTypes.CVAT,
             assignment=serialized_assignment,
             status=project.status,
         )
@@ -80,7 +80,7 @@ def get_tasks_by_assignee(
                 wallet_address=wallet_address,
                 cvat_projects=[p.cvat_id for p in cvat_projects],
             )
-            if assignment.status == AssignmentStatus.created
+            if assignment.status == AssignmentStatuses.created
         }
 
         for project in cvat_projects:

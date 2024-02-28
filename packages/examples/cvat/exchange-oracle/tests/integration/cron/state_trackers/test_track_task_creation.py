@@ -3,7 +3,7 @@ import uuid
 from unittest.mock import Mock, patch
 
 import src.cvat.api_calls as cvat_api
-from src.core.types import ExchangeOracleEventType, JobStatuses
+from src.core.types import ExchangeOracleEventTypes, JobStatuses
 from src.crons.state_trackers import track_task_creation
 from src.db import SessionLocal
 from src.models.cvat import DataUpload, Job

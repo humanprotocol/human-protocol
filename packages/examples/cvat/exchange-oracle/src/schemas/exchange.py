@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import AnyUrl, BaseModel, Field
 
-from src.core.types import PlatformType, ProjectStatuses, TaskType
+from src.core.types import PlatformTypes, ProjectStatuses, TaskTypes
 
 
 class AssignmentResponse(BaseModel):
@@ -17,11 +17,11 @@ class TaskResponse(BaseModel):
     escrow_address: str
     title: str
     description: str
-    platform: PlatformType
+    platform: PlatformTypes
     job_bounty: str
     job_size: int
     job_time_limit: int
-    job_type: TaskType
+    job_type: TaskTypes
     assignment: Optional[AssignmentResponse] = None
     status: ProjectStatuses
 
