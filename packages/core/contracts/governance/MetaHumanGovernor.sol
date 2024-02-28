@@ -6,6 +6,7 @@ import '@openzeppelin/contracts/governance/extensions/GovernorSettings.sol';
 import '@openzeppelin/contracts/governance/extensions/GovernorVotes.sol';
 import '@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol';
 import '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
 import './CrossChainGovernorCountingSimple.sol';
 import './DAOSpokeContract.sol';
 import './wormhole/IWormholeRelayer.sol';
@@ -30,6 +31,8 @@ contract MetaHumanGovernor is
     Magistrate,
     IWormholeReceiver
 {
+    using Address for address payable;
+
     IWormholeRelayer public immutable wormholeRelayer;
     uint256 internal constant GAS_LIMIT = 500_000;
     uint256 public immutable secondsPerBlock;
@@ -77,7 +80,7 @@ contract MetaHumanGovernor is
      * @dev Allows the magistrate address to withdraw all funds from the contract
      */
     function withdrawFunds() public onlyMagistrate {
-        payable(msg.sender).transfer(address(this).balance);
+        payable(msg.sender).sendValue(address(this).balance);
     }
 
     /**
