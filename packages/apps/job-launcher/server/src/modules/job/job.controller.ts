@@ -65,6 +65,10 @@ export class JobController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
   @Post('/fortune')
   @ApiKey()
   public async createFortuneJob(
@@ -93,8 +97,8 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/cvat')
   public async createCvatJob(
@@ -104,6 +108,28 @@ export class JobController {
     return this.jobService.createJob(req.user.id, data.type, data);
   }
 
+  @ApiOperation({
+    summary: 'Create a hCaptcha job',
+    description: 'Endpoint to create a new hCaptcha job.',
+  })
+  @ApiBody({ type: JobCaptchaDto })
+  @ApiResponse({
+    status: 200,
+    description: 'ID of the created hCaptcha job.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
   @Post('/hCaptcha')
   public async createCaptchaJob(
     @Request() req: RequestWithUser,
@@ -177,6 +203,10 @@ export class JobController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
@@ -200,6 +230,10 @@ export class JobController {
   @ApiResponse({
     status: 404,
     description: 'Not Found. Could not find the requested content.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
   })
   @Patch('/cancel/:id')
   public async cancelJob(
@@ -227,6 +261,14 @@ export class JobController {
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/escrow-failed-webhook')
   public async handleEscrowFailedWebhook(
