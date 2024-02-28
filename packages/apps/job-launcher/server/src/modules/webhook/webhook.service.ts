@@ -146,9 +146,8 @@ export class WebhookService {
         break;
 
       case EventType.ESCROW_CANCELED:
-        break;
-
       case EventType.TASK_CREATION_FAILED:
+        await this.jobService.escrowFailedWebhook(wehbook);
         break;
 
       case EventType.ESCROW_FAILED:
