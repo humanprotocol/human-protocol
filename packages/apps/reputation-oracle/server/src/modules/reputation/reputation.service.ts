@@ -1,7 +1,10 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChainId } from '@human-protocol/sdk';
-import { INITIAL_REPUTATION } from '../../common/constants';
+import {
+  CVAT_VALIDATION_META_FILENAME,
+  INITIAL_REPUTATION,
+} from '../../common/constants';
 import { ConfigNames } from '../../common/config';
 import {
   JobRequestType,
@@ -19,9 +22,14 @@ import { ReputationDto } from './reputation.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowClient } from '@human-protocol/sdk';
-import { FortuneFinalResult } from '../../common/dto/result';
+import {
+  CvatAnnotationMeta,
+  CvatAnnotationMetaResults,
+  FortuneFinalResult,
+} from '../../common/dto/result';
 import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../common/utils';
+import { CvatManifestDto } from 'src/common/dto/manifest';
 
 @Injectable()
 export class ReputationService {
@@ -78,7 +86,7 @@ export class ReputationService {
       ReputationEntityType.JOB_LAUNCHER,
     );
 
-    await assessWorkerReputationScores(chainId, escrowAddress);
+    await assessWorkerReputationScores(chainId, escrowAddress, manifest);
 
     // Assess reputation scores for the exchange oracle entity.
     // Decreases or increases the reputation score for the exchange oracle based on job completion.
@@ -109,7 +117,7 @@ export class ReputationService {
     }
   }
 
-  private async doAssessWorkerReputationScores(
+  private async doAssessWorkerReputationScoresFortune(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<void> {
@@ -149,6 +157,51 @@ export class ReputationService {
     );
   }
 
+  private async doAssessWorkerReputationScoresCVAT(
+    chainId: ChainId,
+    escrowAddress: string,
+    manifest: CvatManifestDto,
+  ): Promise<void> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const annotations: CvatAnnotationMeta = await this.storageService.download(
+      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
+    );
+
+    // If annotation meta does not exist
+    if (annotations && Array.isArray(annotations) && annotations.length === 0) {
+      this.logger.log(
+        ErrorResults.NoAnnotationsMetaFound,
+        ReputationService.name,
+      );
+      throw new Error(ErrorResults.NoAnnotationsMetaFound);
+    }
+
+    // Assess reputation scores for workers based on the annoation quality.
+    // Decreases or increases worker reputation based on comparison annoation quality to minimum threshold.
+    await Promise.all(
+      annotations.results.map(async (result: CvatAnnotationMetaResults) => {
+        if (result.annotation_quality < manifest.validation.min_quality) {
+          await this.decreaseReputation(
+            chainId,
+            result.annotator_wallet_address,
+            ReputationEntityType.WORKER,
+          );
+        } else {
+          await this.increaseReputation(
+            chainId,
+            result.annotator_wallet_address,
+            ReputationEntityType.WORKER,
+          );
+        }
+      }),
+    );
+  }
+
   private createReputationSpecificActions: Record<
     JobRequestType,
     RequestAction
@@ -158,17 +211,31 @@ export class ReputationService {
         chainId: ChainId,
         escrowAddress: string,
       ): Promise<void> =>
-        this.doAssessWorkerReputationScores(chainId, escrowAddress),
+        this.doAssessWorkerReputationScoresFortune(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      assessWorkerReputationScores: async (): Promise<void> => {
-        console.warn('Assessment for IMAGE_BOXES not implemented.');
-      },
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> =>
+        this.doAssessWorkerReputationScoresCVAT(
+          chainId,
+          escrowAddress,
+          manifest,
+        ),
     },
     [JobRequestType.IMAGE_POINTS]: {
-      assessWorkerReputationScores: async (): Promise<void> => {
-        console.warn('Assessment for IMAGE_POINTS not implemented.');
-      },
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> =>
+        this.doAssessWorkerReputationScoresCVAT(
+          chainId,
+          escrowAddress,
+          manifest,
+        ),
     },
   };
 
