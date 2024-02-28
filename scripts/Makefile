@@ -5,6 +5,15 @@ check-legacy-abis:
 		yarn workspace @human-protocol/core build; \
 	fi
 
+create-env-files:
+	@if [ ! -f "../packages/apps/job-launcher/server/.env.local" ]; then \
+		cp ./fortune/.env.jl-server ../packages/apps/job-launcher/server/.env.local ; \
+	fi
+	
+	@if [ ! -f "../packages/apps/job-launcher/client/.env.local" ]; then \
+		cp ./fortune/.env.jl-client ../packages/apps/job-launcher/client/.env.local ; \
+	fi
+
 hardhat-node:
 	yarn workspace @human-protocol/core local
 
