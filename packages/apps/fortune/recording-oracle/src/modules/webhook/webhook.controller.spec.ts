@@ -8,6 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import {
+  MOCK_FILE_URL,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
@@ -16,6 +17,7 @@ import {
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
   MOCK_SIGNATURE,
+  MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
 import { StorageService } from '../storage/storage.service';
 import { verifySignature } from '../../common/utils/signature';
@@ -27,15 +29,19 @@ jest.mock('../../common/utils/signature');
 describe('webhookController', () => {
   let webhookController: WebhookController;
   let webhookService: WebhookService;
+  let jobService: JobService;
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
-  const workerAddress = '0x1234567890123456789012345678901234567891';
 
   const reputationOracleURL = 'https://example.com/reputationoracle';
   const configServiceMock = {
     get: jest.fn().mockReturnValue(reputationOracleURL),
   };
+
+  const httpServicePostMock = jest
+    .fn()
+    .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -53,6 +59,11 @@ describe('webhookController', () => {
         ConfigModule.forFeature(
           registerAs('server', () => ({
             reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('web3', () => ({
+            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
           })),
         ),
       ],
@@ -80,22 +91,29 @@ describe('webhookController', () => {
             post: jest.fn().mockReturnValue(of({ status: 200, data: {} })),
           },
         },
+        {
+          provide: HttpService,
+          useValue: {
+            post: httpServicePostMock,
+          },
+        },
       ],
     }).compile();
 
     webhookController = moduleRef.get<WebhookController>(WebhookController);
     webhookService = moduleRef.get<WebhookService>(WebhookService);
+    jobService = moduleRef.get<JobService>(JobService);
   });
 
   describe('processWebhook', () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    it('should handle an incoming escrow created webhook', async () => {
+    it('should handle an incoming escrow completed webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CREATED,
+        eventType: EventType.ESCROW_COMPLETED,
       };
       jest.spyOn(webhookService, 'handleWebhook');
 
@@ -106,32 +124,21 @@ describe('webhookController', () => {
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
 
-    it('should handle an incoming escrow canceled webhook', async () => {
+    it('should handle an incoming solution in review webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CANCELED,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
       };
-      jest.spyOn(webhookService, 'handleWebhook');
+
+      jest
+        .spyOn(jobService, 'processJobSolution')
+        .mockImplementation(async () => 'OK');
 
       (verifySignature as jest.Mock).mockReturnValue(true);
-
-      await webhookController.processWebhook(MOCK_SIGNATURE, webhook);
-
-      expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
-    });
-
-    it('should mark a webhook solution as invalid', async () => {
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.SUBMISSION_REJECTED,
-        eventData: { assignments: [{ assigneeId: workerAddress }] },
-      };
 
       jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();
-
-      (verifySignature as jest.Mock).mockReturnValue(true);
 
       await webhookController.processWebhook(MOCK_SIGNATURE, webhook);
 
@@ -142,7 +149,7 @@ describe('webhookController', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_RECORDED,
       };
       jest.spyOn(webhookService, 'handleWebhook');
 
@@ -150,7 +157,7 @@ describe('webhookController', () => {
 
       await expect(
         webhookController.processWebhook(MOCK_SIGNATURE, webhook),
-      ).rejects.toThrow('Invalid webhook event type: task_creation_failed');
+      ).rejects.toThrow('Invalid webhook event type: escrow_recorded');
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
