@@ -3,25 +3,13 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from src.core.types import AssignmentStatuses, ProjectStatuses, TaskTypes
-
-
-class AssignmentResponse(BaseModel):
-    id: str
-    escrow_address: str
-    size: Optional[int]
-    job_type: TaskTypes
-    status: AssignmentStatuses
-    bounty: Optional[str]
-    url: Optional[str]
-    started_at: datetime
-    finishes_at: datetime
-    finished_at: Optional[datetime]
+from src.core.types import AssignmentStatuses, Networks, ProjectStatuses, TaskTypes
 
 
 class JobResponse(BaseModel):
     id: str
     escrow_address: str
+    chain_id: int  # not Networks, as existing DB entries can be different from the current enum
     title: str
     description: Optional[str]
     bounty: Optional[str]
@@ -41,3 +29,20 @@ class UserResponse(UserRequest):
 
 class AssignmentRequest(BaseModel):
     wallet_address: str
+    escrow_address: str
+    chain_id: Networks
+
+
+class AssignmentResponse(BaseModel):
+    id: str
+    escrow_address: str
+    chain_id: int  # not Networks, as existing DB entries can be different from the current enum
+    wallet_address: str
+    size: Optional[int]
+    job_type: TaskTypes
+    status: AssignmentStatuses
+    bounty: Optional[str]
+    url: Optional[str]
+    started_at: datetime
+    expires_at: datetime
+    finished_at: Optional[datetime]

@@ -2,7 +2,7 @@ from contextlib import suppress
 from http import HTTPStatus
 from typing import Optional, Sequence
 
-from fastapi import APIRouter, Header, HTTPException, Path, Query
+from fastapi import APIRouter, Header, HTTPException, Query
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
@@ -10,6 +10,7 @@ import src.services.cvat as cvat_service
 import src.services.exchange as oracle_service
 from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
+from src.db import engine as db_engine
 from src.endpoints.filtering import Filter, FilterDepends
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
@@ -33,6 +34,7 @@ class JobsFilter(Filter):
 
     class Constants(Filter.Constants):
         model = cvat_service.Project
+        sorting_field_name = "created_at"
 
 
 @router.get("/job", description="Lists available jobs")
@@ -45,6 +47,17 @@ async def list_jobs(
 
     query = select(cvat_service.Project)
 
+    # We need only high-level jobs (i.e. escrows) without project details
+    if db_engine.driver != "psycopg2":
+        # should be something like
+        # select(Project).where(id.in_(select(Project.id).group_by(Project.escrow_address)))
+        raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
+
+    query = query.order_by(
+        cvat_service.Project.escrow_address
+        # Required for DISTINCT ON in postgres
+    ).distinct(cvat_service.Project.escrow_address)
+
     if wallet_address:
         query = query.where(
             cvat_service.Project.jobs.any(
@@ -54,7 +67,6 @@ async def list_jobs(
             )
         )
 
-    query = query.order_by(cvat_service.Project.created_at)
     query = filter.filter(query)
     query = filter.sort(query)
 
@@ -132,6 +144,7 @@ class AssignmentFilter(Filter):
 
     class Constants(Filter.Constants):
         model = cvat_service.Assignment
+        sorting_field_name = "created_at"
 
 
 @router.get("/assignment", description="Lists assignments")
@@ -144,7 +157,6 @@ async def list_assignments(
     await validate_human_app_signature(signature)
 
     query = select(cvat_service.Assignment)
-    query = query.order_by(cvat_service.Assignment.created_at)
 
     if escrow_address:
         query = query.filter(
@@ -202,14 +214,15 @@ async def list_assignments(
 )
 async def create_assignment(
     data: AssignmentRequest,
-    project_id: str = Path(alias="id"),
     signature: str = Header(description="Calling service signature", alias="Human-Signature"),
 ) -> AssignmentResponse:
     await validate_human_app_signature(signature)
 
     try:
         assignment_id = oracle_service.create_assignment(
-            project_id=project_id, wallet_address=data.wallet_address
+            escrow_address=data.escrow_address,
+            chain_id=data.chain_id,
+            wallet_address=data.wallet_address,
         )
     except oracle_service.UserHasUnfinishedAssignmentError as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
@@ -220,4 +233,4 @@ async def create_assignment(
             detail="No assignments available",
         )
 
-    return serialize_assignment(assignment_id, project=project_id)
+    return serialize_assignment(assignment_id)

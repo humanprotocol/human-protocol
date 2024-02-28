@@ -3,48 +3,20 @@ from typing import Optional
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
-from src.core.types import ProjectStatuses, TaskTypes
+from src.core.types import ProjectStatuses, TaskTypes, Networks
 from src.db import SessionLocal
-from src.endpoints.serializers import serialize_job
-from src.schemas import exchange as service_api
 from src.utils.assignments import get_default_assignment_timeout
 from src.utils.requests import get_or_404
 from src.utils.time import utcnow
-
-
-def get_available_jobs() -> list[service_api.JobResponse]:
-    results = []
-
-    with SessionLocal.begin() as session:
-        cvat_projects = cvat_service.get_available_projects(session)
-
-        for project in cvat_projects:
-            results.append(serialize_job(project.id))
-
-    return results
-
-
-def get_jobs_by_assignee(
-    wallet_address: Optional[str] = None,
-) -> list[service_api.JobResponse]:
-    results = []
-
-    with SessionLocal.begin() as session:
-        cvat_projects = cvat_service.get_projects_by_assignee(
-            session, wallet_address=wallet_address
-        )
-
-        for project in cvat_projects:
-            results.append(serialize_job(project, session=session))
-
-    return results
 
 
 class UserHasUnfinishedAssignmentError(Exception):
     pass
 
 
-def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
+def create_assignment(
+    escrow_address: str, chain_id: Networks, wallet_address: str
+) -> Optional[str]:
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
@@ -52,9 +24,10 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             "user",
         )
 
-        project = cvat_service.get_project_by_id(
+        # There can be several projects with under one escrow, we need any
+        project = cvat_service.get_project_by_escrow_address(
             session,
-            project_id,
+            escrow_address,
             status_in=[
                 ProjectStatuses.annotation
             ],  # avoid unnecessary locking on completed projects
@@ -64,9 +37,11 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
         if not project:
             # Retry without a lock to check if the project doesn't exist
             get_or_404(
-                cvat_service.get_project_by_id(session, project_id),
-                project_id,
-                "task",
+                cvat_service.get_project_by_escrow_address(
+                    session, escrow_address, status_in=[ProjectStatuses.annotation]
+                ),
+                escrow_address,
+                "job",
             )
             return None
 
