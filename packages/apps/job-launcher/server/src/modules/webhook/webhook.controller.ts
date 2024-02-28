@@ -13,7 +13,9 @@ import { WebhookService } from './webhook.service';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
-  @UseGuards(new SignatureAuthGuard([Role.JobLauncher]))
+  @UseGuards(
+    new SignatureAuthGuard([Role.Exchange, Role.Recording, Role.Reputation]),
+  )
   @Post('webhook')
   public async processWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
