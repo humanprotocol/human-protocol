@@ -14,12 +14,7 @@ import {
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
 
-import {
-  ServerConfigType,
-  Web3ConfigType,
-  serverConfigKey,
-  web3ConfigKey,
-} from '../../common/config';
+import { Web3ConfigType, web3ConfigKey } from '../../common/config';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
 import { IManifest, ISolution } from '../../common/interfaces/job';

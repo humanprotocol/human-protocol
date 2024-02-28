@@ -440,7 +440,9 @@ describe('JobService', () => {
         getManifestUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+        getIntermediateResultsUrl: jest
+          .fn()
+          .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -519,7 +521,9 @@ describe('JobService', () => {
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -609,7 +613,9 @@ describe('JobService', () => {
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -690,7 +696,9 @@ describe('JobService', () => {
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
