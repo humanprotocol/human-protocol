@@ -15,7 +15,7 @@ from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
 from src.core.storage import compose_results_bucket_filename
-from src.core.types import OracleWebhookTypes, ProjectStatuses, TaskType
+from src.core.types import OracleWebhookTypes, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.job_export import (
@@ -44,7 +44,7 @@ class _CompletedEscrowsHandler:
     def _process_plain_escrows(self):
         logger = self.logger
 
-        plain_task_types = [t for t in TaskType if not t == TaskType.image_skeletons_from_boxes]
+        plain_task_types = [t for t in TaskTypes if not t == TaskTypes.image_skeletons_from_boxes]
         with SessionLocal.begin() as session:
             completed_projects = cvat_service.get_projects_by_status(
                 session,
@@ -189,7 +189,7 @@ class _CompletedEscrowsHandler:
             completed_projects = cvat_service.get_projects_by_status(
                 session,
                 ProjectStatuses.completed,
-                included_types=[TaskType.image_skeletons_from_boxes],
+                included_types=[TaskTypes.image_skeletons_from_boxes],
                 limit=CronConfig.track_completed_escrows_chunk_size,
             )
 

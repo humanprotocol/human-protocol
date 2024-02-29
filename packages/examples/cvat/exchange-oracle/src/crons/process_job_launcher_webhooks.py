@@ -10,7 +10,7 @@ from src.chain.escrow import validate_escrow
 from src.chain.kvstore import get_job_launcher_url
 from src.core.config import Config, CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
-from src.core.types import JobLauncherEventType, OracleWebhookTypes, ProjectStatuses
+from src.core.types import JobLauncherEventTypes, OracleWebhookTypes, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
@@ -67,7 +67,7 @@ def handle_job_launcher_event(
     assert webhook.type == OracleWebhookTypes.job_launcher
 
     match webhook.event_type:
-        case JobLauncherEventType.escrow_created:
+        case JobLauncherEventTypes.escrow_created:
             try:
                 validate_escrow(
                     webhook.chain_id,
@@ -109,7 +109,7 @@ def handle_job_launcher_event(
 
                 raise
 
-        case JobLauncherEventType.escrow_canceled:
+        case JobLauncherEventTypes.escrow_canceled:
             try:
                 validate_escrow(
                     webhook.chain_id,
