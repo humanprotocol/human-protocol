@@ -60,10 +60,6 @@ export class WebhookIncomingUpdateDto {
   public resultsUrl: string;
 
   @ApiPropertyOptional()
-  @IsBoolean()
-  public checkPassed: boolean;
-
-  @ApiPropertyOptional()
   @IsNumber()
   public retriesCount: number;
 
