@@ -103,7 +103,7 @@ def handle_job_launcher_event(
                         session=db_session,
                         escrow_address=webhook.escrow_address,
                         chain_id=webhook.chain_id,
-                        type=OracleWebhookTypes.exchange_oracle,
+                        type=OracleWebhookTypes.job_launcher,
                         event=ExchangeOracleEvent_TaskCreationFailed(reason=str(ex)),
                     )
 
