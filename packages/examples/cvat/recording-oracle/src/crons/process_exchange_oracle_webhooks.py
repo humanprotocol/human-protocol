@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 import src.services.webhook as oracle_db_service
 from src.chain.kvstore import get_exchange_oracle_url
 from src.core.config import Config
-from src.core.types import ExchangeOracleEventType, OracleWebhookTypes
+from src.core.types import ExchangeOracleEventTypes, OracleWebhookTypes
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.validation import validate_results
@@ -62,7 +62,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
     assert webhook.type == OracleWebhookTypes.exchange_oracle
 
     match webhook.event_type:
-        case ExchangeOracleEventType.task_finished:
+        case ExchangeOracleEventTypes.task_finished:
             logger.debug(
                 f"Received a task finish event for escrow_address={webhook.escrow_address}. "
                 "Validating the results"

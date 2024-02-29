@@ -6,7 +6,7 @@ import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
 from src.core.config import CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
-from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatus
+from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_completed_escrows
@@ -40,7 +40,7 @@ def track_completed_projects() -> None:
 
             for project in projects:
                 tasks = cvat_service.get_tasks_by_cvat_project_id(session, project.cvat_id)
-                if tasks and all(task.status == TaskStatus.completed for task in tasks):
+                if tasks and all(task.status == TaskStatuses.completed for task in tasks):
                     cvat_service.update_project_status(
                         session, project.id, ProjectStatuses.completed
                     )
@@ -72,7 +72,7 @@ def track_completed_tasks() -> None:
         logger.debug("Starting cron job")
         with SessionLocal.begin() as session:
             tasks = cvat_service.get_tasks_by_status(
-                session, TaskStatus.annotation, for_update=ForUpdateParams(skip_locked=True)
+                session, TaskStatuses.annotation, for_update=ForUpdateParams(skip_locked=True)
             )
 
             completed_task_ids = []
@@ -80,7 +80,7 @@ def track_completed_tasks() -> None:
             for task in tasks:
                 jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
                 if jobs and all(job.status == JobStatuses.completed for job in jobs):
-                    cvat_service.update_task_status(session, task.id, TaskStatus.completed)
+                    cvat_service.update_task_status(session, task.id, TaskStatuses.completed)
 
                     completed_task_ids.append(task.cvat_id)
 

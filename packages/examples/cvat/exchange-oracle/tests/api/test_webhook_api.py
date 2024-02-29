@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.sql import select
 from web3 import HTTPProvider, Web3
 
-from src.core.types import JobLauncherEventType, Networks
+from src.core.types import JobLauncherEventTypes, Networks
 from src.db import SessionLocal
 from src.models.webhook import Webhook
 
@@ -45,7 +45,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         )
         assert webhook.escrow_address == escrow_address
         assert webhook.chain_id == 80001
-        assert webhook.event_type == JobLauncherEventType.escrow_created.value
+        assert webhook.event_type == JobLauncherEventTypes.escrow_created.value
         assert webhook.event_data == {}
         assert webhook.direction == "incoming"
         assert webhook.signature == WEBHOOK_MESSAGE_SIGNED

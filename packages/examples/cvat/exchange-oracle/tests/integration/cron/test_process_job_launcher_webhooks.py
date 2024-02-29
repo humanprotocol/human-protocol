@@ -7,15 +7,15 @@ from human_protocol_sdk.constants import ChainId, Status
 from sqlalchemy.sql import select
 
 from src.core.types import (
-    ExchangeOracleEventType,
-    JobLauncherEventType,
+    ExchangeOracleEventTypes,
+    JobLauncherEventTypes,
     JobStatuses,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
     ProjectStatuses,
-    TaskStatus,
-    TaskType,
+    TaskStatuses,
+    TaskTypes,
 )
 from src.crons.process_job_launcher_webhooks import (
     process_incoming_job_launcher_webhooks,
@@ -24,7 +24,7 @@ from src.crons.process_job_launcher_webhooks import (
 from src.db import SessionLocal
 from src.models.cvat import Job, Project, Task
 from src.models.webhook import Webhook
-from src.services.webhook import OracleWebhookDirectionTag
+from src.services.webhook import OracleWebhookDirectionTags
 
 from tests.utils.constants import DEFAULT_MANIFEST_URL, JOB_LAUNCHER_ADDRESS
 
@@ -48,8 +48,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -109,8 +109,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -140,8 +140,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=OracleWebhookDirectionTags.incoming,
             attempts=5,
         )
 
@@ -185,8 +185,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -237,7 +237,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -252,8 +252,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_canceled.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_canceled.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -289,7 +289,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.annotation.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -304,8 +304,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_canceled.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_canceled.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -340,7 +340,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.annotation.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -355,8 +355,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_canceled.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_canceled.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -394,8 +394,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=ExchangeOracleEventType.task_finished.value,
-            direction=OracleWebhookDirectionTag.outgoing,
+            event_type=ExchangeOracleEventTypes.task_finished.value,
+            direction=OracleWebhookDirectionTags.outgoing,
         )
 
         self.session.add(webhook)
@@ -436,8 +436,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=OracleWebhookDirectionTag.outgoing,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=OracleWebhookDirectionTags.outgoing,
         )
 
         self.session.add(webhook)

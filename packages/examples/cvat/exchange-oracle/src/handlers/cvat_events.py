@@ -5,7 +5,7 @@ from dateutil.parser import parse as parse_aware_datetime
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
-from src.core.types import AssignmentStatus, CvatEventTypes, JobStatuses
+from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.utils.logging import get_function_logger
@@ -60,7 +60,7 @@ def handle_update_job_event(payload: dict) -> None:
                         "Can't find a matching assignment, ignoring the update"
                     )
                 elif matching_assignment.is_finished:
-                    if matching_assignment.status == AssignmentStatus.created:
+                    if matching_assignment.status == AssignmentStatuses.created:
                         logger.warning(
                             f"Received job #{job.cvat_id} status update: {new_status.value}. "
                             "Assignment is expired, rejecting the update"
@@ -78,7 +78,7 @@ def handle_update_job_event(payload: dict) -> None:
                 elif (
                     new_status == JobStatuses.completed
                     and matching_assignment.id == latest_assignment.id
-                    and matching_assignment.status == AssignmentStatus.created
+                    and matching_assignment.status == AssignmentStatuses.created
                 ):
                     logger.info(
                         f"Received job #{job.cvat_id} status update: {new_status.value}. "

@@ -1,6 +1,6 @@
 import uuid
 
-from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatus, TaskType
+from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.models.cvat import Job, Project, Task
 
@@ -11,7 +11,7 @@ def create_project(session: SessionLocal, escrow_address: str, cvat_id: int) -> 
         cvat_id=cvat_id,
         cvat_cloudstorage_id=1,
         status=ProjectStatuses.annotation.value,
-        job_type=TaskType.image_label_binary.value,
+        job_type=TaskTypes.image_label_binary.value,
         escrow_address=escrow_address,
         chain_id=Networks.localhost.value,
         bucket_url="https://test.storage.googleapis.com/",
@@ -27,7 +27,7 @@ def create_project_and_task(session: SessionLocal, escrow_address: str, cvat_id:
         id=str(uuid.uuid4()),
         cvat_id=cvat_id,
         cvat_project_id=cvat_id,
-        status=TaskStatus.annotation.value,
+        status=TaskStatuses.annotation.value,
     )
     session.add(cvat_task)
 

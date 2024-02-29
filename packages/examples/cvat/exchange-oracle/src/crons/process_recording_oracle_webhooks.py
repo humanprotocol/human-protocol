@@ -13,8 +13,8 @@ from src.core.types import (
     JobStatuses,
     OracleWebhookTypes,
     ProjectStatuses,
-    RecordingOracleEventType,
-    TaskStatus,
+    RecordingOracleEventTypes,
+    TaskStatuses,
 )
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
@@ -61,7 +61,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
     assert webhook.type == OracleWebhookTypes.recording_oracle
 
     match webhook.event_type:
-        case RecordingOracleEventType.task_completed:
+        case RecordingOracleEventTypes.task_completed:
             chunk_size = CronConfig.accepted_projects_chunk_size
             project_ids = cvat_db_service.get_project_cvat_ids_by_escrow_address(
                 db_session, webhook.escrow_address
@@ -102,7 +102,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
-        case RecordingOracleEventType.task_rejected:
+        case RecordingOracleEventTypes.task_rejected:
             event = RecordingOracleEvent_TaskRejected.parse_obj(webhook.event_data)
 
             rejected_jobs = cvat_db_service.get_jobs_by_cvat_id(db_session, event.rejected_job_ids)
@@ -137,7 +137,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
                     for task_id in tasks_to_update:
                         cvat_db_service.update_task_status(
-                            db_session, task_id, TaskStatus.annotation
+                            db_session, task_id, TaskStatuses.annotation
                         )
 
                     cvat_db_service.update_project_status(

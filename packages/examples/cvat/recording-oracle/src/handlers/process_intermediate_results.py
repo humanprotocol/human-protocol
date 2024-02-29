@@ -17,7 +17,7 @@ from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
 from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
-from src.core.types import TaskType
+from src.core.types import TaskTypes
 from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
@@ -44,28 +44,28 @@ class ValidationFailure:
 
 
 DM_DATASET_FORMAT_MAPPING = {
-    TaskType.image_label_binary: "cvat_images",
-    TaskType.image_points: "coco_person_keypoints",
-    TaskType.image_boxes: "coco_instances",
-    TaskType.image_boxes_from_points: "coco_instances",
-    TaskType.image_skeletons_from_boxes: "coco_person_keypoints",
+    TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_points: "coco_person_keypoints",
+    TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_boxes_from_points: "coco_instances",
+    TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
 
 DM_GT_DATASET_FORMAT_MAPPING = {
-    TaskType.image_label_binary: "cvat_images",
-    TaskType.image_points: "coco_instances",  # we compare points against boxes
-    TaskType.image_boxes: "coco_instances",
-    TaskType.image_boxes_from_points: "coco_instances",
-    TaskType.image_skeletons_from_boxes: "coco_person_keypoints",
+    TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_points: "coco_instances",  # we compare points against boxes
+    TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_boxes_from_points: "coco_instances",
+    TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
 
 
-DATASET_COMPARATOR_TYPE_MAP: Dict[TaskType, Type[DatasetComparator]] = {
+DATASET_COMPARATOR_TYPE_MAP: Dict[TaskTypes, Type[DatasetComparator]] = {
     # TaskType.image_label_binary: TagDatasetComparator, # TODO: implement if support is needed
-    TaskType.image_boxes: BboxDatasetComparator,
-    TaskType.image_points: PointsDatasetComparator,
-    TaskType.image_boxes_from_points: BboxDatasetComparator,
-    TaskType.image_skeletons_from_boxes: SkeletonDatasetComparator,
+    TaskTypes.image_boxes: BboxDatasetComparator,
+    TaskTypes.image_points: PointsDatasetComparator,
+    TaskTypes.image_boxes_from_points: BboxDatasetComparator,
+    TaskTypes.image_skeletons_from_boxes: SkeletonDatasetComparator,
 }
 
 _JobResults = Dict[int, float]
@@ -178,9 +178,9 @@ class _TaskValidator:
         """
 
         match manifest.annotation.type:
-            case TaskType.image_boxes.value:
+            case TaskTypes.image_boxes.value:
                 merged_dataset.update(gt_dataset)
-            case TaskType.image_points.value:
+            case TaskTypes.image_points.value:
                 for sample in gt_dataset:
                     annotations = [
                         # Put a point in the center of each GT bbox
@@ -194,11 +194,11 @@ class _TaskValidator:
                         if isinstance(bbox, dm.Bbox)
                     ]
                     merged_dataset.put(sample.wrap(annotations=annotations))
-            case TaskType.image_label_binary.value:
+            case TaskTypes.image_label_binary.value:
                 merged_dataset.update(gt_dataset)
-            case TaskType.image_boxes_from_points:
+            case TaskTypes.image_boxes_from_points:
                 merged_dataset.update(gt_dataset)
-            case TaskType.image_skeletons_from_boxes:
+            case TaskTypes.image_skeletons_from_boxes:
                 # The original behavior is broken for skeletons
                 gt_dataset = dm.Dataset(gt_dataset)
                 gt_dataset = gt_dataset.transform(
@@ -687,11 +687,11 @@ def process_intermediate_results(
 ) -> Union[ValidationSuccess, ValidationFailure]:
     # validate
     task_type = manifest.annotation.type
-    if task_type in [TaskType.image_label_binary, TaskType.image_boxes, TaskType.image_points]:
+    if task_type in [TaskTypes.image_label_binary, TaskTypes.image_boxes, TaskTypes.image_points]:
         validator_type = _TaskValidator
-    elif task_type == TaskType.image_boxes_from_points:
+    elif task_type == TaskTypes.image_boxes_from_points:
         validator_type = _BoxesFromPointsValidator
-    elif task_type == TaskType.image_skeletons_from_boxes:
+    elif task_type == TaskTypes.image_skeletons_from_boxes:
         validator_type = _SkeletonsFromBoxesValidator
     else:
         raise Exception(f"Unknown task type {task_type}")
@@ -774,7 +774,6 @@ def process_intermediate_results(
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
         average_quality=np.mean(list(job_results.values())) if job_results else 0,
     )
-
 
 def parse_annotation_metafile(metafile: io.RawIOBase) -> AnnotationMeta:
     return AnnotationMeta.parse_raw(metafile.read())

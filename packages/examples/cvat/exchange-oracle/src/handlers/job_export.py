@@ -15,7 +15,7 @@ from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, Annotatio
 from src.core.config import Config
 from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
-from src.core.types import TaskType
+from src.core.types import TaskTypes
 from src.handlers.job_creation import DM_DATASET_FORMAT_MAPPING
 from src.models.cvat import Image, Job
 from src.services.cloud import make_client as make_cloud_client
@@ -23,11 +23,11 @@ from src.services.cloud.utils import BucketAccessInfo
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
 
 CVAT_EXPORT_FORMAT_MAPPING = {
-    TaskType.image_label_binary: "CVAT for images 1.1",
-    TaskType.image_points: "CVAT for images 1.1",
-    TaskType.image_boxes: "COCO 1.0",
-    TaskType.image_boxes_from_points: "COCO 1.0",
-    TaskType.image_skeletons_from_boxes: "CVAT for images 1.1",
+    TaskTypes.image_label_binary: "CVAT for images 1.1",
+    TaskTypes.image_points: "CVAT for images 1.1",
+    TaskTypes.image_boxes: "COCO 1.0",
+    TaskTypes.image_boxes_from_points: "COCO 1.0",
+    TaskTypes.image_skeletons_from_boxes: "CVAT for images 1.1",
 }
 
 CVAT_EXPORT_FORMAT_TO_DM_MAPPING = {
@@ -581,12 +581,12 @@ def postprocess_annotations(
     """
     Processes annotations and updates the files list inplace
     """
-    processor_classes: Dict[TaskType, Type[_TaskProcessor]] = {
-        TaskType.image_label_binary: _LabelsTaskProcessor,
-        TaskType.image_boxes: _BoxesTaskProcessor,
-        TaskType.image_points: _PointsTaskProcessor,
-        TaskType.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
-        TaskType.image_skeletons_from_boxes: _SkeletonsFromBoxesTaskProcessor,
+    processor_classes: Dict[TaskTypes, Type[_TaskProcessor]] = {
+        TaskTypes.image_label_binary: _LabelsTaskProcessor,
+        TaskTypes.image_boxes: _BoxesTaskProcessor,
+        TaskTypes.image_points: _PointsTaskProcessor,
+        TaskTypes.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
+        TaskTypes.image_skeletons_from_boxes: _SkeletonsFromBoxesTaskProcessor,
     }
 
     task_type = manifest.annotation.type

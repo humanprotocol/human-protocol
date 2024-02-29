@@ -7,12 +7,12 @@ from sqlalchemy import update
 from sqlalchemy.sql import select
 
 from src.core.types import (
-    AssignmentStatus,
+    AssignmentStatuses,
     JobStatuses,
     Networks,
     ProjectStatuses,
-    TaskStatus,
-    TaskType,
+    TaskStatuses,
+    TaskTypes,
 )
 from src.crons.state_trackers import track_assignments
 from src.db import SessionLocal
@@ -67,8 +67,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignments = sorted(
             self.session.query(Assignment).all(), key=lambda assignment: assignment.user.cvat_id
         )
-        self.assertEqual(db_assignments[0].status, AssignmentStatus.created.value)
-        self.assertEqual(db_assignments[1].status, AssignmentStatus.created.value)
+        self.assertEqual(db_assignments[0].status, AssignmentStatuses.created.value)
+        self.assertEqual(db_assignments[1].status, AssignmentStatuses.created.value)
 
         with patch("src.crons.state_trackers.cvat_api.update_job_assignee") as mock_cvat_api:
             track_assignments()
@@ -79,8 +79,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignments = sorted(
             self.session.query(Assignment).all(), key=lambda assignment: assignment.user.cvat_id
         )
-        self.assertEqual(db_assignments[0].status, AssignmentStatus.created.value)
-        self.assertEqual(db_assignments[1].status, AssignmentStatus.expired.value)
+        self.assertEqual(db_assignments[0].status, AssignmentStatuses.created.value)
+        self.assertEqual(db_assignments[1].status, AssignmentStatuses.expired.value)
 
     # TODO:
     # Fix src/crons/state_trackers.py
