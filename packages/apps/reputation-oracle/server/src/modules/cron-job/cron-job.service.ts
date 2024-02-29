@@ -111,10 +111,10 @@ export class CronJobService {
       );
 
       for (const webhookEntity of webhookEntities) {
-        let results;
+        let resultsUrl;
         try {
           const { chainId, escrowAddress } = webhookEntity;
-          results = await this.payoutService.executePayouts(
+          resultsUrl = await this.payoutService.executePayouts(
             chainId,
             escrowAddress,
           );
@@ -124,8 +124,7 @@ export class CronJobService {
           continue;
         }
         webhookEntity.status = WebhookStatus.PAID;
-        webhookEntity.resultsUrl = results.url;
-        webhookEntity.checkPassed = results.checkPassed;
+        webhookEntity.resultsUrl = resultsUrl;
         webhookEntity.retriesCount = 0;
         await this.webhookRepository.updateOne(webhookEntity);
       }
@@ -161,12 +160,11 @@ export class CronJobService {
 
       for (const webhookEntity of webhookEntities) {
         try {
-          const { chainId, escrowAddress, checkPassed } = webhookEntity;
+          const { chainId, escrowAddress } = webhookEntity;
 
-          await this.reputationService.doAssessReputationScores(
+          await this.reputationService.assessReputationScores(
             chainId,
             escrowAddress,
-            checkPassed,
           );
 
           const signer = this.web3Service.getSigner(chainId);
