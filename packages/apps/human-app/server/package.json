@@ -23,7 +23,7 @@
     "@automapper/classes": "^8.8.1",
     "@automapper/core": "^8.8.1",
     "@automapper/nestjs": "^8.8.1",
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "^2.0.0",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/cache-manager": "^2.2.1",
     "@nestjs/common": "^10.2.7",
