@@ -60,3 +60,5 @@ export const HCAPTCHA_IMMO_MAX_LENGTH = 100;
 export const HCAPTCHA_ORACLE_STAKE = 0.05;
 
 export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';
+
+export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
