@@ -83,6 +83,65 @@ contract MetaHumanGovernor is
         payable(msg.sender).sendValue(address(this).balance);
     }
 
+    function cancel(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) public virtual override(Governor, IGovernor) returns (uint256) {
+        // First, perform the original cancellation logic.
+        uint256 proposalId = super.cancel(
+            targets,
+            values,
+            calldatas,
+            descriptionHash
+        );
+
+        //Notify all spoke chains about the cancellation
+        _notifySpokeChainsOfCancellation(proposalId);
+
+        return proposalId;
+    }
+
+    function _notifySpokeChainsOfCancellation(uint256 proposalId) internal {
+        uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
+            .length;
+        for (uint16 i = 0; i < spokeContractsLength; i++) {
+            bytes memory message = abi.encode(
+                2, // "2" is an inused function selector indicating cancellation
+                proposalId
+            );
+
+            bytes memory payload = abi.encode(
+                spokeContractsSnapshots[proposalId][i].contractAddress,
+                spokeContractsSnapshots[proposalId][i].chainId,
+                bytes32(uint256(uint160(address(this)))),
+                message
+            );
+
+            uint256 cost = quoteCrossChainMessage(
+                spokeContractsSnapshots[proposalId][i].chainId,
+                0
+            );
+
+            // Send cancellation message
+            wormholeRelayer.sendPayloadToEvm{value: cost}(
+                spokeContractsSnapshots[proposalId][i].chainId,
+                address(
+                    uint160(
+                        uint256(
+                            spokeContractsSnapshots[proposalId][i]
+                                .contractAddress
+                        )
+                    )
+                ),
+                payload,
+                0,
+                GAS_LIMIT
+            );
+        }
+    }
+
     /**
      * @dev Receives messages from the Wormhole protocol's relay mechanism and processes them accordingly.
      *  This function is intended to be called only by the designated Wormhole relayer.
