@@ -1247,4 +1247,28 @@ export class JobService {
     }
     return updatedJob;
   }
+
+  public async escrowCompletedWebhook(dto: WebhookDataDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      dto.chainId,
+      dto.escrowAddress,
+    );
+
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    // If job status already completed by getDetails do nothing
+    if (jobEntity.status === JobStatus.COMPLETED) {
+      return;
+    }
+    if (jobEntity.status !== JobStatus.LAUNCHED) {
+      this.logger.log(ErrorJob.NotLaunched, JobService.name);
+      throw new ConflictException(ErrorJob.NotLaunched);
+    }
+
+    jobEntity.status = JobStatus.COMPLETED;
+    await this.jobRepository.updateOne(jobEntity);
+  }
 }
