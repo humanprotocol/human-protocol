@@ -381,7 +381,6 @@ describe('CronJobService', () => {
         status: WebhookStatus.PAID,
         waitUntil: new Date(),
         retriesCount: 0,
-        checkPassed: true,
       };
 
       webhookEntity2 = {
@@ -391,7 +390,6 @@ describe('CronJobService', () => {
         status: WebhookStatus.PAID,
         waitUntil: new Date(),
         retriesCount: 0,
-        checkPassed: true,
       };
 
       jest
@@ -445,12 +443,10 @@ describe('CronJobService', () => {
       expect(assessReputationScoresMock).toHaveBeenCalledWith(
         webhookEntity1.chainId,
         webhookEntity1.escrowAddress,
-        webhookEntity1.checkPassed,
       );
       expect(assessReputationScoresMock).toHaveBeenCalledWith(
         webhookEntity2.chainId,
         webhookEntity2.escrowAddress,
-        webhookEntity2.checkPassed,
       );
 
       expect(webhookRepository.updateOne).toHaveBeenCalledTimes(2);

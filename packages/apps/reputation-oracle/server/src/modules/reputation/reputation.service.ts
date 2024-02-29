@@ -49,13 +49,11 @@ export class ReputationService {
    * and delegates reputation adjustments to specialized methods.
    * @param chainId The ID of the blockchain chain.
    * @param escrowAddress The address of the escrow contract.
-   * @param checkPassed A boolean indicating if the job completion check passed.
    * @returns {Promise<void>} A Promise indicating the completion of reputation assessment.
    */
   public async assessReputationScores(
     chainId: ChainId,
     escrowAddress: string,
-    checkPassed: boolean,
   ): Promise<void> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
@@ -102,19 +100,12 @@ export class ReputationService {
     // Decreases or increases the reputation score for the recording oracle based on job completion status.
     const recordingOracleAddress =
       await escrowClient.getRecordingOracleAddress(escrowAddress);
-    if (checkPassed) {
-      await this.increaseReputation(
-        chainId,
-        recordingOracleAddress,
-        ReputationEntityType.RECORDING_ORACLE,
-      );
-    } else {
-      await this.decreaseReputation(
-        chainId,
-        recordingOracleAddress,
-        ReputationEntityType.RECORDING_ORACLE,
-      );
-    }
+
+    await this.increaseReputation(
+      chainId,
+      recordingOracleAddress,
+      ReputationEntityType.RECORDING_ORACLE,
+    );
   }
 
   private createReputationSpecificActions: Record<

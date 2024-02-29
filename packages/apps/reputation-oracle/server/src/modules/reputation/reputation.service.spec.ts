@@ -109,7 +109,6 @@ describe('ReputationService', () => {
   describe('assessReputationScores', () => {
     const chainId = ChainId.LOCALHOST;
     const escrowAddress = 'mockEscrowAddress';
-    const checkPassed = true;
 
     it('should handle manifest URL not found', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
@@ -117,11 +116,7 @@ describe('ReputationService', () => {
       }));
 
       await expect(
-        reputationService.assessReputationScores(
-          chainId,
-          escrowAddress,
-          checkPassed,
-        ),
+        reputationService.assessReputationScores(chainId, escrowAddress),
       ).rejects.toThrow(ErrorManifest.ManifestUrlDoesNotExist);
     });
 
@@ -145,11 +140,7 @@ describe('ReputationService', () => {
           .mockResolvedValueOnce([]); // Mock final results
 
         await expect(
-          reputationService.assessReputationScores(
-            chainId,
-            escrowAddress,
-            checkPassed,
-          ),
+          reputationService.assessReputationScores(chainId, escrowAddress),
         ).rejects.toThrow(ErrorResults.NoResultsHaveBeenVerified);
       });
 
@@ -170,11 +161,7 @@ describe('ReputationService', () => {
         jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
         jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
 
-        await reputationService.assessReputationScores(
-          chainId,
-          escrowAddress,
-          checkPassed,
-        );
+        await reputationService.assessReputationScores(chainId, escrowAddress);
 
         expect(reputationService.increaseReputation).toHaveBeenCalledWith(
           chainId,
@@ -245,11 +232,7 @@ describe('ReputationService', () => {
           .mockResolvedValueOnce([]); // Mock final results
 
         await expect(
-          reputationService.assessReputationScores(
-            chainId,
-            escrowAddress,
-            checkPassed,
-          ),
+          reputationService.assessReputationScores(chainId, escrowAddress),
         ).rejects.toThrow(ErrorResults.NoAnnotationsMetaFound);
       });
 
@@ -293,11 +276,7 @@ describe('ReputationService', () => {
         jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
         jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
 
-        await reputationService.assessReputationScores(
-          chainId,
-          escrowAddress,
-          checkPassed,
-        );
+        await reputationService.assessReputationScores(chainId, escrowAddress);
 
         expect(reputationService.increaseReputation).toHaveBeenCalledWith(
           chainId,
