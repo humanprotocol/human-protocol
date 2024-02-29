@@ -10,6 +10,7 @@ import JobDetail from './pages/Job/JobDetail';
 import JobList from './pages/Job/JobList';
 import TopUpAccount from './pages/Profile/TopUpAccount';
 import ResetPassword from './pages/ResetPassword';
+import ValidateEmail from './pages/ValidateEmail';
 import VerifyEmail from './pages/VerifyEmail';
 
 import './index.css';
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/verify" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/validate" element={<ValidateEmail />} />
           <Route
             path="dashboard"
             element={
