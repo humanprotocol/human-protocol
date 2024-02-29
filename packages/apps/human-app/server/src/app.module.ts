@@ -11,6 +11,8 @@ import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
+import { CacheFactoryConfig } from './common/config/cache-factory.config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { CommonConfigModule } from './common/config/common-config.module';
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
+    CacheModule.registerAsync(CacheFactoryConfig),
     HttpModule,
     WorkerModule,
     OperatorModule,
