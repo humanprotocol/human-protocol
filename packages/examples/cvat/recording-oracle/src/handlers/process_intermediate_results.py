@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
@@ -71,86 +71,168 @@ DATASET_COMPARATOR_TYPE_MAP: Dict[TaskTypes, Type[DatasetComparator]] = {
 _JobResults = Dict[int, float]
 _RejectedJobs = Sequence[int]
 
+T = TypeVar("T")
+
 
 class _TaskValidator:
-    def __init__(self, escrow_address: str, chain_id: int, manifest: TaskManifest):
+    def __init__(
+        self,
+        escrow_address: str,
+        chain_id: int,
+        manifest: TaskManifest,
+        *,
+        job_annotations: Dict[int, io.RawIOBase],
+        merged_annotations: Optional[io.RawIOBase] = None,
+    ):
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.manifest = manifest
 
-        self.input_format = DM_DATASET_FORMAT_MAPPING[manifest.annotation.type]
+        self.job_annotations: Optional[Dict[int, io.IOBase]] = job_annotations
+        self.merged_annotations: Optional[io.IOBase] = merged_annotations
 
-        self.gt_annotations: Optional[io.IOBase] = None
-        self.job_annotations: Optional[Dict[int, io.IOBase]] = None
-        self.merged_annotations: Optional[io.IOBase] = None
+        self._temp_dir: Optional[Path] = None
+        self._gt_dataset: Optional[dm.Dataset] = None
 
-    def validate(self) -> Tuple[_JobResults, _RejectedJobs, io.BytesIO]:
-        assert self.gt_annotations is not None
-        assert self.job_annotations is not None
-        assert self.merged_annotations is not None
+    def _require_field(self, field: Optional[T]) -> T:
+        assert field is not None
+        return field
 
-        manifest = self.manifest
-        task_type = manifest.annotation.type
-        dataset_format = DM_DATASET_FORMAT_MAPPING[task_type]
+    def _parse_gt(self):
+        tempdir = self._require_field(self._temp_dir)
+        manifest = self._require_field(self.manifest)
 
-        gt_annotations = self.gt_annotations
-        job_annotations = self.job_annotations
-        merged_annotations = self.merged_annotations
+        bucket_info = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        bucket_client = make_cloud_client(bucket_info)
+
+        gt_annotations = io.BytesIO(bucket_client.download_file(bucket_info.path))
+
+        gt_dataset_path = tempdir / "gt.json"
+        gt_dataset_path.write_bytes(gt_annotations.read())
+        self._gt_dataset = dm.Dataset.import_from(
+            os.fspath(gt_dataset_path),
+            format=DM_GT_DATASET_FORMAT_MAPPING[manifest.annotation.type],
+        )
+
+    def _validate_jobs(self):
+        tempdir = self._require_field(self._temp_dir)
+        manifest = self._require_field(self.manifest)
+        gt_dataset = self._require_field(self._gt_dataset)
+        job_annotations = self._require_field(self.job_annotations)
 
         job_results: Dict[int, float] = {}
         rejected_job_ids: List[int] = []
 
-        with TemporaryDirectory() as tempdir:
-            tempdir = Path(tempdir)
+        comparator = DATASET_COMPARATOR_TYPE_MAP[manifest.annotation.type](
+            min_similarity_threshold=manifest.validation.min_quality,
+        )
 
-            gt_dataset_path = tempdir / "gt.json"
-            gt_dataset_path.write_bytes(gt_annotations.read())
-            gt_dataset = dm.Dataset.import_from(
-                os.fspath(gt_dataset_path), format=DM_GT_DATASET_FORMAT_MAPPING[task_type]
+        for job_cvat_id, job_annotations_file in job_annotations.items():
+            job_dataset_path = tempdir / str(job_cvat_id)
+            extract_zip_archive(job_annotations_file, job_dataset_path)
+
+            job_dataset = dm.Dataset.import_from(
+                os.fspath(job_dataset_path),
+                format=DM_DATASET_FORMAT_MAPPING[manifest.annotation.type],
             )
 
-            comparator = DATASET_COMPARATOR_TYPE_MAP[task_type](
-                min_similarity_threshold=manifest.validation.min_quality
-            )
+            job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
+            job_results[job_cvat_id] = job_mean_accuracy
 
-            for job_cvat_id, job_annotations_file in job_annotations.items():
-                job_dataset_path = tempdir / str(job_cvat_id)
-                extract_zip_archive(job_annotations_file, job_dataset_path)
+            if job_mean_accuracy < manifest.validation.min_quality:
+                rejected_job_ids.append(job_cvat_id)
 
-                job_dataset = dm.Dataset.import_from(
-                    os.fspath(job_dataset_path), format=dataset_format
+        self._job_results = job_results
+        self._rejected_job_ids = rejected_job_ids
+
+    def _prepare_merged_dataset(self):
+        tempdir = self._require_field(self._temp_dir)
+        manifest = self._require_field(self.manifest)
+        merged_annotations = self._require_field(self.merged_annotations)
+        gt_dataset = self._require_field(self._gt_dataset)
+
+        merged_dataset_path = tempdir / "merged"
+        merged_dataset_format = DM_DATASET_FORMAT_MAPPING[manifest.annotation.type]
+        extract_zip_archive(merged_annotations, merged_dataset_path)
+
+        merged_dataset = dm.Dataset.import_from(
+            os.fspath(merged_dataset_path), format=merged_dataset_format
+        )
+        self._put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
+
+        updated_merged_dataset_path = tempdir / "merged_updated"
+        merged_dataset.export(updated_merged_dataset_path, merged_dataset_format, save_media=False)
+
+        updated_merged_dataset_archive = io.BytesIO()
+        write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
+        updated_merged_dataset_archive.seek(0)
+
+        self._updated_merged_dataset_archive = updated_merged_dataset_archive
+
+    @classmethod
+    def _put_gt_into_merged_dataset(
+        cls, gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
+    ):
+        """
+        Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
+        """
+
+        match manifest.annotation.type:
+            case TaskTypes.image_boxes.value:
+                merged_dataset.update(gt_dataset)
+            case TaskTypes.image_points.value:
+                for sample in gt_dataset:
+                    annotations = [
+                        # Put a point in the center of each GT bbox
+                        # Not ideal, but it's the target for now
+                        dm.Points(
+                            [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
+                            label=bbox.label,
+                            attributes=bbox.attributes,
+                        )
+                        for bbox in sample.annotations
+                        if isinstance(bbox, dm.Bbox)
+                    ]
+                    merged_dataset.put(sample.wrap(annotations=annotations))
+            case TaskTypes.image_label_binary.value:
+                merged_dataset.update(gt_dataset)
+            case TaskTypes.image_boxes_from_points:
+                merged_dataset.update(gt_dataset)
+            case TaskTypes.image_skeletons_from_boxes:
+                # The original behavior is broken for skeletons
+                gt_dataset = dm.Dataset(gt_dataset)
+                gt_dataset = gt_dataset.transform(
+                    ProjectLabels, dst_labels=merged_dataset.categories()[dm.AnnotationType.label]
                 )
+                merged_dataset.update(gt_dataset)
+            case _:
+                assert False, f"Unknown task type {manifest.annotation.type}"
 
-                job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
-                job_results[job_cvat_id] = job_mean_accuracy
+    def validate(self) -> Tuple[_JobResults, _RejectedJobs, io.BytesIO]:
+        with TemporaryDirectory() as tempdir:
+            self._temp_dir = Path(tempdir)
 
-                if job_mean_accuracy < manifest.validation.min_quality:
-                    rejected_job_ids.append(job_cvat_id)
+            self._parse_gt()
 
-            merged_dataset_path = tempdir / "merged"
-            merged_dataset_format = DM_DATASET_FORMAT_MAPPING[task_type]
-            extract_zip_archive(merged_annotations, merged_dataset_path)
+            self._validate_jobs()
+            job_results = self._require_field(job_results)
+            rejected_job_ids = self._require_field(self._rejected_job_ids)
 
-            merged_dataset = dm.Dataset.import_from(
-                os.fspath(merged_dataset_path), format=merged_dataset_format
-            )
-            put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
-
-            updated_merged_dataset_path = tempdir / "merged_updated"
-            merged_dataset.export(
-                updated_merged_dataset_path, merged_dataset_format, save_media=False
+            self._prepare_merged_dataset()
+            updated_merged_dataset_archive = self._require_field(
+                self._updated_merged_dataset_archive
             )
 
-            updated_merged_dataset_archive = io.BytesIO()
-            write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
-            updated_merged_dataset_archive.seek(0)
-
-        return job_results, rejected_job_ids, updated_merged_dataset_archive
+        return (
+            job_results,
+            rejected_job_ids,
+            updated_merged_dataset_archive,
+        )
 
 
 class _BoxesFromPointsValidator(_TaskValidator):
-    def __init__(self, escrow_address: str, chain_id: int, manifest: TaskManifest):
-        super().__init__(escrow_address, chain_id, manifest)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         (
             boxes_to_points_mapping,
@@ -160,8 +242,8 @@ class _BoxesFromPointsValidator(_TaskValidator):
             points_dataset,
         ) = self._download_task_meta()
 
-        self.gt_dataset = gt_dataset
-        self.points_dataset = points_dataset
+        self._gt_dataset = gt_dataset
+        self._points_dataset = points_dataset
 
         point_key_to_sample = {
             skeleton.id: sample
@@ -205,7 +287,6 @@ class _BoxesFromPointsValidator(_TaskValidator):
         serializer = boxes_from_points_task.TaskMetaSerializer()
 
         oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
-
         storage_client = make_cloud_client(oracle_data_bucket)
 
         boxes_to_points_mapping = serializer.parse_bbox_point_mapping(
@@ -251,7 +332,7 @@ class _BoxesFromPointsValidator(_TaskValidator):
         return boxes_to_points_mapping, roi_filenames, rois, gt_dataset, points_dataset
 
     def _make_gt_dataset_for_job(self, job_dataset: dm.Dataset) -> dm.Dataset:
-        job_gt_dataset = dm.Dataset(categories=self.gt_dataset.categories(), media_type=dm.Image)
+        job_gt_dataset = dm.Dataset(categories=self._gt_dataset.categories(), media_type=dm.Image)
 
         for job_sample in job_dataset:
             roi_info = self.roi_name_to_roi_info[os.path.basename(job_sample.id)]
@@ -295,7 +376,7 @@ class _BoxesFromPointsValidator(_TaskValidator):
             tempdir = Path(tempdir)
 
             comparator = DATASET_COMPARATOR_TYPE_MAP[task_type](
-                min_similarity_threshold=manifest.validation.min_quality
+                min_similarity_threshold=manifest.validation.min_quality,
             )
 
             for job_cvat_id, job_annotations_file in job_annotations.items():
@@ -320,7 +401,7 @@ class _BoxesFromPointsValidator(_TaskValidator):
             merged_dataset = dm.Dataset.import_from(
                 os.fspath(merged_dataset_path), format=merged_dataset_format
             )
-            put_gt_into_merged_dataset(self.gt_dataset, merged_dataset, manifest=manifest)
+            self._put_gt_into_merged_dataset(self._gt_dataset, merged_dataset, manifest=manifest)
 
             updated_merged_dataset_path = tempdir / "merged_updated"
             merged_dataset.export(
@@ -331,12 +412,16 @@ class _BoxesFromPointsValidator(_TaskValidator):
             write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
             updated_merged_dataset_archive.seek(0)
 
-        return job_results, rejected_job_ids, updated_merged_dataset_archive
+        return (
+            job_results,
+            rejected_job_ids,
+            updated_merged_dataset_archive,
+        )
 
 
 class _SkeletonsFromBoxesValidator(_TaskValidator):
-    def __init__(self, escrow_address: str, chain_id: int, manifest: TaskManifest):
-        super().__init__(escrow_address, chain_id, manifest)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         (
             roi_filenames,
@@ -571,7 +656,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
             merged_dataset = dm.Dataset.import_from(
                 os.fspath(merged_dataset_path), format=merged_dataset_format
             )
-            put_gt_into_merged_dataset(self.gt_dataset, merged_dataset, manifest=manifest)
+            self._put_gt_into_merged_dataset(self.gt_dataset, merged_dataset, manifest=manifest)
 
             updated_merged_dataset_path = tempdir / "merged_updated"
             merged_dataset.export(
@@ -582,7 +667,11 @@ class _SkeletonsFromBoxesValidator(_TaskValidator):
             write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
             updated_merged_dataset_archive.seek(0)
 
-        return job_results, rejected_job_ids, updated_merged_dataset_archive
+        return (
+            job_results,
+            rejected_job_ids,
+            updated_merged_dataset_archive,
+        )
 
 
 def process_intermediate_results(
@@ -592,7 +681,6 @@ def process_intermediate_results(
     chain_id: int,
     meta: AnnotationMeta,
     job_annotations: Dict[int, io.RawIOBase],
-    gt_annotations: io.RawIOBase,
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
@@ -608,10 +696,13 @@ def process_intermediate_results(
     else:
         raise Exception(f"Unknown task type {task_type}")
 
-    validator = validator_type(escrow_address=escrow_address, chain_id=chain_id, manifest=manifest)
-    validator.gt_annotations = gt_annotations
-    validator.job_annotations = job_annotations
-    validator.merged_annotations = merged_annotations
+    validator = validator_type(
+        escrow_address=escrow_address,
+        chain_id=chain_id,
+        manifest=manifest,
+        job_annotations=job_annotations,
+        merged_annotations=merged_annotations,
+    )
     job_results, rejected_job_ids, updated_merged_dataset_archive = validator.validate()
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -683,46 +774,6 @@ def process_intermediate_results(
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
         average_quality=np.mean(list(job_results.values())) if job_results else 0,
     )
-
-
-def put_gt_into_merged_dataset(
-    gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
-):
-    """
-    Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
-    """
-
-    match manifest.annotation.type:
-        case TaskTypes.image_boxes.value:
-            merged_dataset.update(gt_dataset)
-        case TaskTypes.image_points.value:
-            for sample in gt_dataset:
-                annotations = [
-                    # Put a point in the center of each GT bbox
-                    # Not ideal, but it's the target for now
-                    dm.Points(
-                        [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
-                        label=bbox.label,
-                        attributes=bbox.attributes,
-                    )
-                    for bbox in sample.annotations
-                    if isinstance(bbox, dm.Bbox)
-                ]
-                merged_dataset.put(sample.wrap(annotations=annotations))
-        case TaskTypes.image_label_binary.value:
-            merged_dataset.update(gt_dataset)
-        case TaskTypes.image_boxes_from_points:
-            merged_dataset.update(gt_dataset)
-        case TaskTypes.image_skeletons_from_boxes:
-            # The original behavior is broken for skeletons
-            gt_dataset = dm.Dataset(gt_dataset)
-            gt_dataset = gt_dataset.transform(
-                ProjectLabels, dst_labels=merged_dataset.categories()[dm.AnnotationType.label]
-            )
-            merged_dataset.update(gt_dataset)
-        case _:
-            assert False, f"Unknown task type {manifest.annotation.type}"
-
 
 def parse_annotation_metafile(metafile: io.RawIOBase) -> AnnotationMeta:
     return AnnotationMeta.parse_raw(metafile.read())

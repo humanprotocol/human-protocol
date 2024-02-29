@@ -50,7 +50,6 @@ class _TaskValidator:
         self.annotation_meta: Optional[annotation.AnnotationMeta] = None
         self.job_annotations: Optional[Dict[int, bytes]] = None
         self.merged_annotations: Optional[bytes] = None
-        self.gt_data: Optional[bytes] = None
 
     def set_logger(self, logger: Logger):
         self.logger = logger
@@ -90,15 +89,9 @@ class _TaskValidator:
         self.job_annotations = job_annotations
         self.merged_annotations = merged_annotations
 
-    def _download_gt(self):
-        gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
-        gt_bucket_client = make_cloud_client(gt_bucket)
-        self.gt_data = gt_bucket_client.download_file(gt_bucket.path)
-
     def _download_results(self):
         self._download_results_meta()
         self._download_annotations()
-        self._download_gt()
 
     ValidationResult = Union[ValidationSuccess, ValidationFailure]
 
@@ -106,7 +99,6 @@ class _TaskValidator:
         assert self.annotation_meta is not None
         assert self.job_annotations is not None
         assert self.merged_annotations is not None
-        assert self.gt_data is not None
 
         # TODO: refactor further
         return process_intermediate_results(
@@ -116,7 +108,6 @@ class _TaskValidator:
             meta=self.annotation_meta,
             job_annotations={k: io.BytesIO(v) for k, v in self.job_annotations.items()},
             merged_annotations=io.BytesIO(self.merged_annotations),
-            gt_annotations=io.BytesIO(self.gt_data),
             manifest=self.manifest,
             logger=self.logger,
         )
