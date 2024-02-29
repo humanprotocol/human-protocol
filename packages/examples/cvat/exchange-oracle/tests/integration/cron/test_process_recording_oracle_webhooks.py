@@ -7,6 +7,7 @@ from human_protocol_sdk.constants import ChainId
 from sqlalchemy.sql import select
 
 from src.core.types import (
+    AssignmentStatuses,
     ExchangeOracleEventTypes,
     JobStatuses,
     Networks,
@@ -174,7 +175,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             expires_at=datetime.utcnow() + timedelta(minutes=5),
             user_wallet_address="sample wallet",
             cvat_job_id=cvat_id,
-            status=AssignmentStatus.completed.value,
+            status=AssignmentStatuses.completed.value,
         )
         self.session.add(assignment)
 
@@ -216,7 +217,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         db_assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
 
-        self.assertEqual(db_assignment.status, AssignmentStatus.rejected)
+        self.assertEqual(db_assignment.status, AssignmentStatuses.rejected)
 
     def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_project_status(
         self,

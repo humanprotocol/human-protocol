@@ -505,7 +505,7 @@ def expire_assignment(session: Session, assignment_id: str):
 
 
 def reject_assignment(session: Session, assignment_id: str):
-    update_assignment(session, assignment_id, status=AssignmentStatus.rejected)
+    update_assignment(session, assignment_id, status=AssignmentStatuses.rejected)
 
 
 def complete_assignment(session: Session, assignment_id: str, completed_at: datetime):

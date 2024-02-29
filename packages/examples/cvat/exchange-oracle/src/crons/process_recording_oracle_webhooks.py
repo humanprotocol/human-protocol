@@ -10,7 +10,6 @@ from src.chain.kvstore import get_recording_oracle_url
 from src.core.config import CronConfig
 from src.core.oracle_events import RecordingOracleEvent_SubmissionRejected
 from src.core.types import (
-    AssignmentStatus,
     JobStatuses,
     OracleWebhookTypes,
     ProjectStatuses,
