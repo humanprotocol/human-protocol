@@ -36,6 +36,14 @@ Enum for chain IDs.
 
 #### SKALE *= 1273227453*
 
+### *class* human_protocol_sdk.constants.KVStoreKeys(value)
+
+Bases: `Enum`
+
+Enum for KVStore keys
+
+#### public_key *= 'publicKey'*
+
 ### *class* human_protocol_sdk.constants.Role(value)
 
 Bases: `Enum`

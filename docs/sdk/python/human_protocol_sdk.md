@@ -108,6 +108,8 @@
     * [`ChainId.POLYGON_MUMBAI`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.POLYGON_MUMBAI)
     * [`ChainId.RINKEBY`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.RINKEBY)
     * [`ChainId.SKALE`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.SKALE)
+  * [`KVStoreKeys`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys)
+    * [`KVStoreKeys.public_key`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.public_key)
   * [`Role`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Role)
     * [`Role.exchange_oracle`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Role.exchange_oracle)
     * [`Role.job_launcher`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Role.job_launcher)

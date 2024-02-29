@@ -88,7 +88,7 @@ Gets the value of a key-value pair in the contract.
 
 #### get_file_url_and_verify_hash(address, key='url')
 
-Gets the URL value of the given entity.
+Gets the URL value of the given entity, and verify its hash.
 
 * **Parameters:**
   * **address** (`str`) – Address from which to get the URL value.
@@ -119,7 +119,7 @@ Gets the URL value of the given entity.
 
 #### get_public_key(address)
 
-Gets the public key of the given entity.
+Gets the public key of the given entity, and verify its hash.
 
 * **Parameters:**
   **address** (`str`) – Address from which to get the public key.
@@ -220,7 +220,7 @@ Sets multiple key-value pairs in the contract.
 
 #### set_file_url_and_hash(url, key='url', tx_options=None)
 
-Sets a URL value for the address that submits the transaction.
+Sets a URL value for the address that submits the transaction, and its hash.
 
 * **Parameters:**
   * **url** (`str`) – URL to set

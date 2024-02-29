@@ -56,7 +56,7 @@ from typing import List, Optional
 
 import requests
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, KVStoreKeys
 from human_protocol_sdk.utils import (
     get_kvstore_interface,
     handle_transaction,
@@ -220,7 +220,7 @@ class KVStoreClient:
         tx_options: Optional[TxParams] = None,
     ) -> None:
         """
-        Sets a URL value for the address that submits the transaction.
+        Sets a URL value for the address that submits the transaction, and its hash.
 
         :param url: URL to set
         :param key: Configurable URL key. `url` by default.
@@ -305,7 +305,7 @@ class KVStoreClient:
     def get_file_url_and_verify_hash(
         self, address: str, key: Optional[str] = "url"
     ) -> str:
-        """Gets the URL value of the given entity.
+        """Gets the URL value of the given entity, and verify its hash.
 
         :param address: Address from which to get the URL value.
         :param key: Configurable URL key. `url` by default.
@@ -351,7 +351,7 @@ class KVStoreClient:
         return url
 
     def get_public_key(self, address: str) -> str:
-        """Gets the public key of the given entity.
+        """Gets the public key of the given entity, and verify its hash.
 
         :param address: Address from which to get the public key.
 
@@ -374,18 +374,13 @@ class KVStoreClient:
                 )
         """
 
-        if not Web3.is_address(address):
-            raise KVStoreClientError(f"Invalid address: {address}")
+        public_key_url = self.get_file_url_and_verify_hash(
+            address, KVStoreKeys.public_key.value
+        )
 
-        public_key = self.kvstore_contract.functions.get(address, "publicKey").call()
-        hash = self.kvstore_contract.functions.get(address, "publicKeyHash").call()
+        if public_key_url == "":
+            return ""
 
-        if len(public_key) == 0:
-            return public_key
-
-        content_hash = self.w3.keccak(text=public_key).hex()
-
-        if hash != content_hash:
-            raise KVStoreClientError(f"Invalid hash")
+        public_key = requests.get(public_key_url).text
 
         return public_key

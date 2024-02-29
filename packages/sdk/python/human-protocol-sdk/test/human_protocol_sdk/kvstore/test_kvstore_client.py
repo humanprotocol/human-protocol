@@ -500,7 +500,7 @@ class TestKVStoreClient(unittest.TestCase):
     def test_get_public_key(self):
         mock_function = MagicMock(
             side_effect=[
-                MagicMock(call=MagicMock(return_value="PUBLIC_KEY")),
+                MagicMock(call=MagicMock(return_value="PUBLIC_KEY_URL")),
                 MagicMock(
                     call=MagicMock(return_value=self.w3.keccak(text="PUBLIC_KEY").hex())
                 ),
@@ -509,12 +509,16 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.kvstore_contract.functions.get = mock_function
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
 
-        result = self.kvstore.get_public_key(address)
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "PUBLIC_KEY"
 
-        mock_function.assert_any_call(address, "publicKey")
-        mock_function.assert_any_call(address, "publicKeyHash")
+            result = self.kvstore.get_public_key(address)
 
-        self.assertEqual(result, "PUBLIC_KEY")
+            mock_function.assert_any_call(address, "publicKey")
+            mock_function.assert_any_call(address, "publicKeyHash")
+
+            self.assertEqual(result, "PUBLIC_KEY")
 
     def test_get_public_key_invalid_address(self):
         address = "invalid_address"
@@ -544,7 +548,7 @@ class TestKVStoreClient(unittest.TestCase):
 
         mock_function = MagicMock(
             side_effect=[
-                MagicMock(call=MagicMock(return_value="PUBLIC_KEY")),
+                MagicMock(call=MagicMock(return_value="PUBLIC_KEY_URL")),
                 MagicMock(
                     call=MagicMock(return_value=self.w3.keccak(text="PUBLIC_KEY").hex())
                 ),
@@ -554,17 +558,21 @@ class TestKVStoreClient(unittest.TestCase):
 
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
 
-        result = kvstore.get_public_key(address)
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "PUBLIC_KEY"
 
-        mock_function.assert_any_call(address, "publicKey")
-        mock_function.assert_any_call(address, "publicKeyHash")
+            result = kvstore.get_public_key(address)
 
-        self.assertEqual(result, "PUBLIC_KEY")
+            mock_function.assert_any_call(address, "publicKey")
+            mock_function.assert_any_call(address, "publicKeyHash")
+
+            self.assertEqual(result, "PUBLIC_KEY")
 
     def test_get_public_key_invalid_hash(self):
         mock_function = MagicMock(
             side_effect=[
-                MagicMock(call=MagicMock(return_value="PUBLIC_KEY")),
+                MagicMock(call=MagicMock(return_value="PUBLIC_KEY_URL")),
                 MagicMock(
                     call=MagicMock(
                         return_value=self.w3.keccak(text="INVALID_PUBLIC_KEY").hex()
@@ -576,12 +584,16 @@ class TestKVStoreClient(unittest.TestCase):
 
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
 
-        with self.assertRaises(KVStoreClientError) as cm:
-            self.kvstore.get_public_key(address)
-        self.assertEqual("Invalid hash", str(cm.exception))
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "PUBLIC_KEY"
 
-        mock_function.assert_any_call(address, "publicKey")
-        mock_function.assert_any_call(address, "publicKeyHash")
+            with self.assertRaises(KVStoreClientError) as cm:
+                self.kvstore.get_public_key(address)
+            self.assertEqual("Invalid hash", str(cm.exception))
+
+            mock_function.assert_any_call(address, "publicKey")
+            mock_function.assert_any_call(address, "publicKeyHash")
 
 
 if __name__ == "__main__":

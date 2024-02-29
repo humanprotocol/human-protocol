@@ -531,15 +531,15 @@ describe('KVStoreClient', () => {
     });
 
     test('should return public key if the content is valid', async () => {
-      const validHash = ethers.keccak256(ethers.toUtf8Bytes('PUBLIC_KEY'));
+      const validHash = ethers.keccak256(ethers.toUtf8Bytes('example'));
 
-      mockKVStoreContract.get.mockResolvedValueOnce('PUBLIC_KEY');
+      mockKVStoreContract.get.mockResolvedValueOnce('PUBLIC_KEY_URL');
       mockKVStoreContract.get.mockResolvedValueOnce(validHash);
 
       const result = await kvStoreClient.getPublicKey(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
-      expect(result).toBe('PUBLIC_KEY');
+      expect(result).toBe('example');
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
@@ -553,10 +553,10 @@ describe('KVStoreClient', () => {
 
     test('should throw an error if the content is not valid', async () => {
       const invalidHash = ethers.keccak256(
-        ethers.toUtf8Bytes('INVALID_PUBLIC_KEY')
+        ethers.toUtf8Bytes('invalid-example')
       );
 
-      mockKVStoreContract.get.mockResolvedValueOnce('PUBLIC_KEY');
+      mockKVStoreContract.get.mockResolvedValueOnce('PUBLIC_KEY_URL');
       mockKVStoreContract.get.mockResolvedValueOnce(invalidHash);
 
       await expect(
@@ -580,9 +580,7 @@ describe('KVStoreClient', () => {
 
       await expect(
         kvStoreClient.getPublicKey('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71')
-      ).rejects.toThrow(
-        Error('Failed to get public key: could not detect network')
-      );
+      ).rejects.toThrow(Error('Failed to get URL: could not detect network'));
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',

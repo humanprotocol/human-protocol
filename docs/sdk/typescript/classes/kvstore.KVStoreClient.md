@@ -125,7 +125,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
+[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
 
 ## Properties
 
@@ -135,7 +135,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
+[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
 
 ___
 
@@ -149,7 +149,7 @@ ___
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -163,7 +163,7 @@ ___
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -171,7 +171,7 @@ ___
 
 ▸ **get**(`address`, `key`): `Promise`\<`string`\>
 
-This function returns the value for a specified key and address.
+Gets the value of a key-value pair in the contract.
 
 #### Parameters
 
@@ -204,7 +204,7 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
+[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
 
 ___
 
@@ -212,7 +212,7 @@ ___
 
 ▸ **getFileUrlAndVerifyHash**(`address`, `urlKey?`): `Promise`\<`string`\>
 
-This function returns the URL value for the given entity.
+Gets the URL value of the given entity, and verify its hash.
 
 #### Parameters
 
@@ -247,7 +247,7 @@ const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
 
 #### Defined in
 
-[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
+[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
 
 ___
 
@@ -255,7 +255,7 @@ ___
 
 ▸ **getPublicKey**(`address`): `Promise`\<`string`\>
 
-This function returns the public key for the given entity.
+Gets the public key of the given entity, and verify its hash.
 
 #### Parameters
 
@@ -285,7 +285,7 @@ const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB882
 
 #### Defined in
 
-[kvstore.ts:398](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L398)
+[kvstore.ts:398](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L398)
 
 ___
 
@@ -329,7 +329,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
+[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
 
 ___
 
@@ -375,7 +375,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
+[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
 
 ___
 
@@ -383,7 +383,7 @@ ___
 
 ▸ **setFileUrlAndHash**(`url`, `urlKey?`, `txOptions?`): `Promise`\<`void`\>
 
-This function sets a URL value for the address that submits the transaction.
+Sets a URL value for the address that submits the transaction, and its hash.
 
 #### Parameters
 
@@ -418,7 +418,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedinUrl);
 
 #### Defined in
 
-[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
+[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
 
 ___
 
@@ -450,4 +450,4 @@ Creates an instance of KVStoreClient from a runner.
 
 #### Defined in
 
-[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/60c84f51/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)
+[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/8f001678/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)

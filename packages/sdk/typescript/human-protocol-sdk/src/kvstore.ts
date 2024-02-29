@@ -220,7 +220,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function sets a URL value for the address that submits the transaction.
+   * Sets a URL value for the address that submits the transaction, and its hash.
    *
    * @param {string} url URL to set
    * @param {string | undefined} urlKey Configurable URL key. `url` by default.
@@ -275,7 +275,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the value for a specified key and address.
+   * Gets the value of a key-value pair in the contract.
    *
    * @param {string} address Address from which to get the key value.
    * @param {string} key Key to obtain the value.
@@ -312,7 +312,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the URL value for the given entity.
+   * Gets the URL value of the given entity, and verify its hash.
    *
    * @param {string} address Address from which to get the URL value.
    * @param {string} urlKey  Configurable URL key. `url` by default.
@@ -375,7 +375,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the public key for the given entity.
+   * Gets the public key of the given entity, and verify its hash.
    *
    * @param {string} address Address from which to get the public key.
    * @returns {string} Public key for the given address if exists, and the content is valid
@@ -396,35 +396,16 @@ export class KVStoreClient extends BaseEthersClient {
    * ```
    */
   public async getPublicKey(address: string): Promise<string> {
-    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-    const hashKey = KVStoreKeys.publicKey + 'Hash';
+    const publicKeyUrl = await this.getFileUrlAndVerifyHash(
+      address,
+      KVStoreKeys.publicKey
+    );
 
-    let publicKey = '',
-      hash = '';
-
-    try {
-      publicKey = await this.contract?.get(address, KVStoreKeys.publicKey);
-    } catch (e) {
-      if (e instanceof Error)
-        throw Error(`Failed to get public key: ${e.message}`);
-    }
-
-    // Return empty string
-    if (!publicKey?.length) {
+    if (publicKeyUrl === '') {
       return '';
     }
 
-    try {
-      hash = await this.contract?.get(address, hashKey);
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
-    }
-
-    const publicKeyHash = ethers.keccak256(ethers.toUtf8Bytes(publicKey));
-
-    if (hash !== publicKeyHash) {
-      throw ErrorInvalidHash;
-    }
+    const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
 
     return publicKey;
   }
