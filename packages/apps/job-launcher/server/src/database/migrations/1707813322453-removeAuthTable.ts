@@ -35,7 +35,7 @@ export class RemoveAuthTable1707813322453 implements MigrationInterface {
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."tokens"
-            ADD CONSTRAINT "FK_8769073e38c365f315426554ca5" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+            ADD CONSTRAINT "FK_8769073e38c365f315426554ca5" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
   }
 

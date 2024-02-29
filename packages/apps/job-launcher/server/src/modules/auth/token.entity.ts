@@ -40,7 +40,7 @@ export class TokenEntity extends BaseEntity implements IToken {
   public expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, { eager: true })
   public user: UserEntity;
 
   @Column({ type: 'int' })

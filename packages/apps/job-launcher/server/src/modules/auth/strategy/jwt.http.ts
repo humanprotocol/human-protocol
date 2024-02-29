@@ -4,9 +4,10 @@ import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../../user/user.entity';
+import { RESEND_EMAIL_VERIFICATION_PATH } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
 import { ConfigNames } from '../../../common/config';
-import { UserRepository } from 'src/modules/user/user.repository';
+import { UserRepository } from '../../user/user.repository';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -35,7 +36,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
 
     if (
       user.status !== UserStatus.ACTIVE &&
-      request.url !== '/auth/resend-email-verification'
+      request.url !== RESEND_EMAIL_VERIFICATION_PATH
     ) {
       throw new UnauthorizedException('User not active');
     }

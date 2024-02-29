@@ -27,7 +27,7 @@ export class SignInDto {
 }
 
 export class RefreshDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'refresh_token' })
   @IsUUID()
   public refreshToken: string;
 }
@@ -65,17 +65,6 @@ export class AuthDto {
   @ApiProperty({ name: 'refresh_token' })
   public refreshToken: string;
   @ApiProperty({ name: 'access_token' })
-  public accessToken: string;
-}
-
-export class AuthCreateDto {
-  public user: UserEntity;
-  public refreshToken: string;
-  public accessToken: string;
-}
-
-export class AuthUpdateDto {
-  public refreshToken: string;
   public accessToken: string;
 }
 
