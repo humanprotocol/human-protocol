@@ -1,6 +1,6 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
+import { createMap, Mapper } from '@automapper/core';
 import {
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
@@ -15,24 +15,8 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(
-        mapper,
-        JobsDiscoveryParamsDto,
-        JobsDiscoveryParamsCommand,
-        forMember(
-          (d) => d.fields,
-          mapFrom((s) => s.fields),
-        ),
-      );
-      createMap(
-        mapper,
-        JobsDiscoveryParamsCommand,
-        JobsDiscoveryParamsData,
-        forMember(
-          (d) => d.fields,
-          mapFrom((s) => s.fields),
-        ),
-      );
+      createMap(mapper, JobsDiscoveryParamsDto, JobsDiscoveryParamsCommand);
+      createMap(mapper, JobsDiscoveryParamsCommand, JobsDiscoveryParamsData);
     };
   }
 }

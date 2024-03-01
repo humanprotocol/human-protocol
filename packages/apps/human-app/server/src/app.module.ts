@@ -11,8 +11,8 @@ import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
-import { CacheFactoryConfig } from './common/config/cache-factory.config';
-import { CacheModule } from '@nestjs/cache-manager';
+import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
+import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 
 @Module({
   imports: [
@@ -24,14 +24,19 @@ import { CacheModule } from '@nestjs/cache-manager';
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
-    CacheModule.registerAsync(CacheFactoryConfig),
     HttpModule,
     WorkerModule,
     OperatorModule,
+    JobsDiscoveryModule,
     ReputationOracleModule,
     CommonConfigModule,
   ],
-  controllers: [AppController, OperatorController, WorkerController],
+  controllers: [
+    AppController,
+    OperatorController,
+    WorkerController,
+    JobsDiscoveryController,
+  ],
   providers: [],
   exports: [HttpModule],
 })
