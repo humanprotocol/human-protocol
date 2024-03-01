@@ -20,7 +20,7 @@ export class JobsDiscoveryController {
   @Get('/:url/jobs')
   @ApiOperation({
     summary:
-      'Retrieve a list of filtered available jobs for all Exchange Oracles',
+      'Retrieve a list of filtered available jobs for passed Exchange Oracle url',
   })
   public async discoverJobs(
     @Param('url') url: string,
