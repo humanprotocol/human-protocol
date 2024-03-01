@@ -1,18 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryData,
 } from './interface/oracle-discovery.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { IOperator, OperatorUtils } from '@human-protocol/sdk';
-
+import { OperatorUtils } from '@human-protocol/sdk/src';
 @Injectable()
-export class JobDiscoveryService {
+export class OracleDiscoveryService {
   static readonly TTL_1_DAY = 24 * 60 * 60;
   constructor(
-    private reputationOracleGateway: ReputationOracleGateway,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -24,7 +21,7 @@ export class JobDiscoveryService {
     if (cachedData) {
       return cachedData;
     }
-    const data: IOperator[] =
+    const data: OracleDiscoveryData[] =
       await this.getOperatorsForOracleDiscovery(command);
     await this.setOperatorsForAddress(command.address, data);
     return data;
@@ -45,7 +42,7 @@ export class JobDiscoveryService {
     return this.cacheManager.set(
       address,
       operators,
-      JobDiscoveryService.TTL_1_DAY,
+      OracleDiscoveryService.TTL_1_DAY,
     );
   };
 }

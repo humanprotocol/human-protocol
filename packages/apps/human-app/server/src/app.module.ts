@@ -13,6 +13,8 @@ import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CacheModule } from '@nestjs/cache-manager';
+import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
+import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
 
 @Module({
   imports: [
@@ -30,8 +32,14 @@ import { CacheModule } from '@nestjs/cache-manager';
     OperatorModule,
     ReputationOracleModule,
     CommonConfigModule,
+    OracleDiscoveryModule,
   ],
-  controllers: [AppController, OperatorController, WorkerController],
+  controllers: [
+    AppController,
+    OperatorController,
+    WorkerController,
+    OracleDiscoveryController,
+  ],
   providers: [],
   exports: [HttpModule],
 })
