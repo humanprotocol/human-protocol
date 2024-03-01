@@ -8,7 +8,7 @@ import {
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JobDiscoveryService } from './job-discovery.serivce';
+import { OracleDiscoveryService } from './oracle-discovery.serivce';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryData,
@@ -16,9 +16,9 @@ import {
 } from './interface/oracle-discovery.interface';
 
 @Controller()
-export class JobDiscoveryController {
+export class OracleDiscoveryController {
   constructor(
-    private readonly service: JobDiscoveryService,
+    private readonly service: OracleDiscoveryService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
   @ApiTags('Oracle-Discovery')
