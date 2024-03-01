@@ -2,23 +2,34 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
   JobsDiscoveryParamsCommand,
+  JobsDiscoveryParamsData,
   JobsDiscoveryResponse,
 } from './interfaces/jobs-discovery.interface';
 import { HttpService } from '@nestjs/axios';
+import { InjectMapper } from '@automapper/nestjs';
+import { Mapper } from '@automapper/core';
 
 @Injectable()
 export class JobsDiscoveryService {
-  constructor(private httpService: HttpService) {}
+  constructor(
+    public httpService: HttpService,
+    @InjectMapper() private readonly mapper: Mapper,
+  ) {}
 
   async processJobsDiscovery(
     url: string,
     jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
+    const jobsDiscoveryParamsData = this.mapper.map(
+      jobsDiscoveryParamsCommand,
+      JobsDiscoveryParamsCommand,
+      JobsDiscoveryParamsData,
+    );
     try {
       const options = {
         method: 'GET',
         url: `${url}/jobs`,
-        params: jobsDiscoveryParamsCommand,
+        params: jobsDiscoveryParamsData,
       };
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
