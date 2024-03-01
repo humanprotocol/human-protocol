@@ -128,7 +128,6 @@ describe('PayoutService', () => {
         amounts: [1n],
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
-        checkPassed: true,
       };
 
       payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
@@ -138,9 +137,11 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const result = await payoutService.executePayouts(chainId, escrowAddress);
-      expect(result.url).toEqual(processing_results.url);
-      expect(result.checkPassed).toEqual(processing_results.checkPassed);
+      const resultsUrl = await payoutService.executePayouts(
+        chainId,
+        escrowAddress,
+      );
+      expect(resultsUrl).toEqual(processing_results.url);
     });
 
     it('should successfully performs payouts for CVAT', async () => {
@@ -159,7 +160,6 @@ describe('PayoutService', () => {
         amounts: [1n],
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
-        checkPassed: true,
       };
 
       payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
@@ -169,9 +169,11 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const result = await payoutService.executePayouts(chainId, escrowAddress);
-      expect(result.url).toEqual(processing_results.url);
-      expect(result.checkPassed).toEqual(processing_results.checkPassed);
+      const resultsUrl = await payoutService.executePayouts(
+        chainId,
+        escrowAddress,
+      );
+      expect(resultsUrl).toEqual(processing_results.url);
     });
   });
 
@@ -206,7 +208,6 @@ describe('PayoutService', () => {
       );
       expect(result.recipients).toEqual(expect.any(Array));
       expect(result.amounts).toEqual(expect.any(Array));
-      expect(result.checkPassed).toEqual(expect.any(Boolean));
     });
 
     it('should throw an error if the number of solutions is less than solutions required', async () => {
@@ -297,7 +298,6 @@ describe('PayoutService', () => {
         amounts: expect.any(Array),
         url: expect.any(String),
         hash: expect.any(String),
-        checkPassed: true,
       });
     });
   });

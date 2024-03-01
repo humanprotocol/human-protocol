@@ -62,15 +62,13 @@ export class Web3Service {
     const signer = this.getSigner(chainId);
     const multiplier = this.configService.get<number>(
       ConfigNames.GAS_PRICE_MULTIPLIER,
+      1,
     );
-    if (multiplier && signer.provider) {
-      return (
-        ((await signer.provider.getFeeData())?.gasPrice || 1n) *
-        BigInt(multiplier)
-      );
+    const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
+    if (!gasPrice) {
+      throw new Error(ErrorWeb3.GasPriceError);
     }
-
-    return 1n;
+    return gasPrice * BigInt(multiplier);
   }
 
   public getOperatorAddress(): string {

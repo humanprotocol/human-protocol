@@ -16,7 +16,7 @@ import * as authService from '../../services/auth';
 import { Password } from './Password';
 import { RegisterValidationSchema } from './schema';
 
-export const SignUpForm = ({ onFinish }) => {
+export const SignUpForm = ({ onFinish, setMode, setTabValue }) => {
   const captchaRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -96,7 +96,16 @@ export const SignUpForm = ({ onFinish }) => {
             </Button>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Button size="large" variant="contained" color="primary" fullWidth>
+            <Button
+              size="large"
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => {
+                setMode('sign_in');
+                setTabValue(0);
+              }}
+            >
               Sign in
             </Button>
           </Grid>
