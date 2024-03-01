@@ -4,14 +4,14 @@ import { HttpService } from '@nestjs/axios';
 import { ErrorJob } from '../constants/errors';
 import { signMessage } from './signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
-import { WebhookBody } from '@/modules/job/job.dto';
 import { CaseConverter } from './case-converter';
+import { WebhookDto } from '../../modules/webhook/webhook.dto';
 
 export async function sendWebhook(
   httpService: HttpService,
   logger: Logger,
   webhookUrl: string,
-  webhookBody: WebhookBody,
+  webhookBody: WebhookDto,
   privateKey: string,
 ): Promise<boolean> {
   const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);

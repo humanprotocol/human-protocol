@@ -22,6 +22,7 @@ import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { JobService } from '../job/job.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -72,6 +73,10 @@ describe('WebhookService', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: JobService,
+          useValue: createMock<JobService>(),
         },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },

@@ -14,7 +14,6 @@ import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingDto } from './webhook.dto';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ErrorWebhook } from '../../common/constants/errors';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -28,10 +27,7 @@ jest.mock('@human-protocol/sdk', () => ({
 }));
 
 describe('WebhookService', () => {
-  let webhookService: WebhookService,
-    webhookRepository: WebhookRepository,
-    web3Service: Web3Service,
-    httpService: HttpService;
+  let webhookService: WebhookService, webhookRepository: WebhookRepository;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -74,8 +70,6 @@ describe('WebhookService', () => {
 
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
-    web3Service = moduleRef.get<Web3Service>(Web3Service);
-    httpService = moduleRef.get<HttpService>(HttpService);
   });
 
   afterEach(() => {

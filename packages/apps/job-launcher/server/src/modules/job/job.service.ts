@@ -1012,11 +1012,13 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
-    if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
+    if (
+      dto.eventType !==
+      (EventType.ESCROW_FAILED || EventType.TASK_CREATION_FAILED)
+    ) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }
-
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
       dto.escrowAddress,
@@ -1032,8 +1034,24 @@ export class JobService {
       throw new ConflictException(ErrorJob.NotLaunched);
     }
 
+    if (!dto.eventData) {
+      this.logger.log('Event data is undefined.', JobService.name);
+      throw new BadRequestException(
+        'Event data is required but was not provided.',
+      );
+    }
+
+    const reason = dto.eventData.reason;
+
+    if (!reason) {
+      this.logger.log('Reason is undefined in event data.', JobService.name);
+      throw new BadRequestException(
+        'Reason is required in event data but was not provided.',
+      );
+    }
+
     jobEntity.status = JobStatus.FAILED;
-    jobEntity.failedReason = dto.reason!;
+    jobEntity.failedReason = reason!;
     await this.jobRepository.updateOne(jobEntity);
   }
 

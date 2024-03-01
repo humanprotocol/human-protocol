@@ -35,7 +35,8 @@ export default createReducer(initialState, (builder) => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.refreshToken, accessToken);
 
     state.isAuthed = true;
-    state.user = { email: getJwtPayload(accessToken) };
+    const { email, status } = getJwtPayload(accessToken);
+    state.user = { email: email, status: status };
     state.accessToken = accessToken;
     state.refreshToken = refreshToken;
   });

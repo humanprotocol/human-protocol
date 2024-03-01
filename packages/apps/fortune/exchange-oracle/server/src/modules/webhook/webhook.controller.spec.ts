@@ -126,7 +126,7 @@ describe('webhookController', () => {
         chainId,
         escrowAddress,
         eventType: EventType.SUBMISSION_REJECTED,
-        eventData: [{ assigneeId: workerAddress }],
+        eventData: { assignments: [{ assigneeId: workerAddress }] },
       };
 
       jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();

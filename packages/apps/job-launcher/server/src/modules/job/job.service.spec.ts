@@ -2208,7 +2208,9 @@ describe('JobService', () => {
         eventType: 'ANOTHER_EVENT' as EventType,
         chainId: 1,
         escrowAddress: 'address',
-        reason: 'invalid manifest',
+        eventData: {
+          reason: 'invalid manifest',
+        },
       };
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
@@ -2218,7 +2220,7 @@ describe('JobService', () => {
 
     it('should throw NotFoundException if jobEntity is not found', async () => {
       const dto = {
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
         reason: 'invalid manifest',
@@ -2234,10 +2236,12 @@ describe('JobService', () => {
 
     it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
       const dto = {
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
-        reason: 'invalid manifest',
+        eventData: {
+          reason: 'invalid manifest',
+        },
       };
       const mockJobEntity = {
         status: 'ANOTHER_STATUS' as JobStatus,
@@ -2253,14 +2257,16 @@ describe('JobService', () => {
 
     it('should update jobEntity status to FAILED and return true if all checks pass', async () => {
       const dto = {
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_FAILED,
         chainId: 1,
         escrowAddress: 'address',
-        reason: 'invalid manifest',
+        eventData: {
+          reason: 'invalid manifest',
+        },
       };
       const mockJobEntity = {
         status: JobStatus.LAUNCHED,
-        failedReason: dto.reason,
+        failedReason: dto.eventData.reason,
       };
       jobRepository.findOneByChainIdAndEscrowAddress = jest
         .fn()
@@ -2269,7 +2275,7 @@ describe('JobService', () => {
       await jobService.escrowFailedWebhook(dto);
 
       expect(mockJobEntity.status).toBe(JobStatus.FAILED);
-      expect(mockJobEntity.failedReason).toBe(dto.reason);
+      expect(mockJobEntity.failedReason).toBe(dto.eventData.reason);
       expect(jobRepository.updateOne).toHaveBeenCalled();
     });
   });
