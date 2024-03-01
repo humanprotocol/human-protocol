@@ -254,7 +254,7 @@ class KVStoreClient:
                 kvstore_client = KVStoreClient(w3)
 
                 kvstore_client.set_file_url_and_hash('http://localhost')
-                kvstore_client.set_file_url_and_hash('https://linkedin.com/me', 'linkedinUrl')
+                kvstore_client.set_file_url_and_hash('https://linkedin.com/me', 'linkedin_url')
         """
         if not validate_url(url):
             raise KVStoreClientError(f"Invalid URL: {url}")
@@ -266,7 +266,7 @@ class KVStoreClient:
             self.w3,
             "Set Bulk",
             self.kvstore_contract.functions.setBulk(
-                [key, key + "Hash"], [url, content_hash]
+                [key, key + "_hash"], [url, content_hash]
             ),
             KVStoreClientError,
             tx_options,
@@ -329,7 +329,7 @@ class KVStoreClient:
                 )
                 linkedin_url = kvstore_client.get_file_url_and_verify_hash(
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-                    'linkedinUrl'
+                    'linkedin_url'
                 )
         """
 
@@ -337,7 +337,7 @@ class KVStoreClient:
             raise KVStoreClientError(f"Invalid address: {address}")
 
         url = self.kvstore_contract.functions.get(address, key).call()
-        hash = self.kvstore_contract.functions.get(address, key + "Hash").call()
+        hash = self.kvstore_contract.functions.get(address, key + "_hash").call()
 
         if len(url) == 0:
             return url

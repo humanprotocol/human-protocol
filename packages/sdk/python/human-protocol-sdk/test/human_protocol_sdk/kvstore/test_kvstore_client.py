@@ -222,7 +222,7 @@ class TestKVStoreClient(unittest.TestCase):
             self.kvstore.set_file_url_and_hash(url)
 
             mock_function.assert_called_once_with(
-                ["url", "urlHash"], [url, content_hash]
+                ["url", "url_hash"], [url, content_hash]
             )
 
             mock_handle_transaction.assert_called_once_with(
@@ -250,10 +250,10 @@ class TestKVStoreClient(unittest.TestCase):
             mock_response = mock_get.return_value
             mock_response.text = content
 
-            self.kvstore.set_file_url_and_hash(url, "linkedinUrl")
+            self.kvstore.set_file_url_and_hash(url, "linkedin_url")
 
             mock_function.assert_called_once_with(
-                ["linkedinUrl", "linkedinUrlHash"], [url, content_hash]
+                ["linkedin_url", "linkedin_url_hash"], [url, content_hash]
             )
 
             mock_handle_transaction.assert_called_once_with(
@@ -304,7 +304,7 @@ class TestKVStoreClient(unittest.TestCase):
             self.kvstore.set_file_url_and_hash(url, tx_options=tx_options)
 
             mock_function.assert_called_once_with(
-                ["url", "urlHash"], [url, content_hash]
+                ["url", "url_hash"], [url, content_hash]
             )
 
             mock_handle_transaction.assert_called_once_with(
@@ -395,7 +395,7 @@ class TestKVStoreClient(unittest.TestCase):
             result = self.kvstore.get_file_url_and_verify_hash(address)
 
             mock_function.assert_any_call(address, "url")
-            mock_function.assert_any_call(address, "urlHash")
+            mock_function.assert_any_call(address, "url_hash")
 
             self.assertEqual(result, "https://example.com")
 
@@ -415,10 +415,10 @@ class TestKVStoreClient(unittest.TestCase):
             mock_response = mock_get.return_value
             mock_response.text = "example"
 
-            result = self.kvstore.get_file_url_and_verify_hash(address, "linkedinUrl")
+            result = self.kvstore.get_file_url_and_verify_hash(address, "linkedin_url")
 
-            mock_function.assert_any_call(address, "linkedinUrl")
-            mock_function.assert_any_call(address, "linkedinUrlHash")
+            mock_function.assert_any_call(address, "linkedin_url")
+            mock_function.assert_any_call(address, "linkedin_url_hash")
 
             self.assertEqual(result, "https://example.com")
 
@@ -467,7 +467,7 @@ class TestKVStoreClient(unittest.TestCase):
             result = kvstore.get_file_url_and_verify_hash(address)
 
             mock_function.assert_any_call(address, "url")
-            mock_function.assert_any_call(address, "urlHash")
+            mock_function.assert_any_call(address, "url_hash")
 
             self.assertEqual(result, "https://example.com")
 
@@ -495,7 +495,7 @@ class TestKVStoreClient(unittest.TestCase):
             self.assertEqual("Invalid hash", str(cm.exception))
 
             mock_function.assert_any_call(address, "url")
-            mock_function.assert_any_call(address, "urlHash")
+            mock_function.assert_any_call(address, "url_hash")
 
     def test_get_public_key(self):
         mock_function = MagicMock(
@@ -515,8 +515,8 @@ class TestKVStoreClient(unittest.TestCase):
 
             result = self.kvstore.get_public_key(address)
 
-            mock_function.assert_any_call(address, "publicKey")
-            mock_function.assert_any_call(address, "publicKeyHash")
+            mock_function.assert_any_call(address, "public_key")
+            mock_function.assert_any_call(address, "public_key_hash")
 
             self.assertEqual(result, "PUBLIC_KEY")
 
@@ -534,7 +534,7 @@ class TestKVStoreClient(unittest.TestCase):
 
         result = self.kvstore.get_public_key(address)
 
-        mock_function.assert_any_call(address, "publicKey")
+        mock_function.assert_any_call(address, "public_key")
         mock_function.return_value.call.assert_any_call()
         self.assertEqual(result, "")
 
@@ -564,8 +564,8 @@ class TestKVStoreClient(unittest.TestCase):
 
             result = kvstore.get_public_key(address)
 
-            mock_function.assert_any_call(address, "publicKey")
-            mock_function.assert_any_call(address, "publicKeyHash")
+            mock_function.assert_any_call(address, "public_key")
+            mock_function.assert_any_call(address, "public_key_hash")
 
             self.assertEqual(result, "PUBLIC_KEY")
 
@@ -592,8 +592,8 @@ class TestKVStoreClient(unittest.TestCase):
                 self.kvstore.get_public_key(address)
             self.assertEqual("Invalid hash", str(cm.exception))
 
-            mock_function.assert_any_call(address, "publicKey")
-            mock_function.assert_any_call(address, "publicKeyHash")
+            mock_function.assert_any_call(address, "public_key")
+            mock_function.assert_any_call(address, "public_key_hash")
 
 
 if __name__ == "__main__":
