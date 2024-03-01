@@ -11,35 +11,27 @@ export class JobsDiscoveryParamsDto {
   chain_id: number;
 
   @AutoMap()
-  @ApiProperty({ example: 5, default: 5, maximum: 10 })
+  @ApiProperty({ example: 5 })
   page_size: number;
 
   @AutoMap()
-  @ApiProperty({ example: 0, default: 0 })
+  @ApiProperty({ example: 0 })
   page: number;
 
   @AutoMap()
-  @ApiProperty({ example: 'ASC', default: 'ASC' })
+  @ApiProperty({ example: 'ASC' })
   sort: 'ASC' | 'DESC';
 
   @AutoMap()
-  @ApiProperty({ example: 'created_at', default: 'created_at' })
+  @ApiProperty({ example: 'created_at' })
   sort_field: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
 
   @AutoMap()
-  @ApiProperty({ example: 'job type' })
+  @ApiProperty({ example: 'some_job_type' })
   job_type: string;
 
   @AutoMap()
-  @ApiProperty({
-    example: [
-      'job_title',
-      'job_description',
-      'reward_amount',
-      'reward_token',
-      'created_at',
-    ],
-  })
+  @ApiProperty({ example: ['field1', 'field2'] })
   fields: string[];
 }
 
