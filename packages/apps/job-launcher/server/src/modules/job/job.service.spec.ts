@@ -176,8 +176,6 @@ describe('JobService', () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case 'JOB_LAUNCHER_FEE':
-            return MOCK_JOB_LAUNCHER_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
