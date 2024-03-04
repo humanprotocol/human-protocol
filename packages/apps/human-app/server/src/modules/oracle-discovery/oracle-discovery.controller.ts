@@ -27,7 +27,7 @@ export class OracleDiscoveryController {
   @Get('/oracles')
   @ApiOperation({ summary: 'Operator signup' })
   @UsePipes(new ValidationPipe())
-  public signupOperator(
+  public oracleDiscovery(
     @Body() oracleDiscoveryDto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryData[]> {
     this.logger.log(
