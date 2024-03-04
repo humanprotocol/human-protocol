@@ -363,7 +363,7 @@ class BoxesFromPointsTaskBuilder:
         remainder_count = len(items) - max_items
         return "{}{}".format(
             separator.join(items[:max_items]),
-            f"(and {remainder_count} more)" if remainder_count > 0 else "",
+            f" (and {remainder_count} more)" if remainder_count > 0 else "",
         )
 
     def _validate_points_categories(self):
@@ -407,20 +407,14 @@ class BoxesFromPointsTaskBuilder:
         known_data_filenames = set(self._data_filenames)
         matched_points_filenames = points_filenames.intersection(known_data_filenames)
 
-        if len(known_data_filenames) != len(matched_points_filenames):
-            missing_point_samples = list(
-                map(os.path.basename, known_data_filenames - matched_points_filenames)
-            )
+        if len(matched_points_filenames) != len(points_filenames):
             extra_point_samples = list(
                 map(os.path.basename, points_filenames - matched_points_filenames)
             )
 
             raise MismatchingAnnotations(
-                "Mismatching points info and input files: {}".format(
-                    "; ".join(
-                        "{} missing points".format(self._format_list(missing_point_samples)),
-                        "{} extra points".format(self._format_list(extra_point_samples)),
-                    )
+                "Failed to find several samples in the dataset files: {}".format(
+                    self._format_list(extra_point_samples),
                 )
             )
 
@@ -870,7 +864,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._roi_filenames is not _unset
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
-        src_prefix = ""
+        src_prefix = src_bucket.path
         dst_bucket = self.oracle_data_bucket
 
         src_client = self._make_cloud_storage_client(src_bucket)
@@ -1312,20 +1306,14 @@ class SkeletonsFromBoxesTaskBuilder:
         known_data_filenames = set(self._data_filenames)
         matched_boxes_filenames = boxes_filenames.intersection(known_data_filenames)
 
-        if len(known_data_filenames) != len(matched_boxes_filenames):
-            missing_box_samples = list(
-                map(os.path.basename, known_data_filenames - matched_boxes_filenames)
-            )
-            extra_point_samples = list(
+        if len(matched_boxes_filenames) != len(boxes_filenames):
+            extra_bbox_samples = list(
                 map(os.path.basename, boxes_filenames - matched_boxes_filenames)
             )
 
             raise MismatchingAnnotations(
-                "Mismatching bbox info and input files: {}".format(
-                    "; ".join(
-                        "{} missing boxes".format(self._format_list(missing_box_samples)),
-                        "{} extra boxes".format(self._format_list(extra_point_samples)),
-                    )
+                "Failed to find several samples in the dataset files: {}".format(
+                    self._format_list(extra_bbox_samples),
                 )
             )
 
@@ -1405,7 +1393,7 @@ class SkeletonsFromBoxesTaskBuilder:
         remainder_count = len(items) - max_items
         return "{}{}".format(
             separator.join(items[:max_items]),
-            f"(and {remainder_count} more)" if remainder_count > 0 else "",
+            f" (and {remainder_count} more)" if remainder_count > 0 else "",
         )
 
     def _match_boxes(self, a: BboxCoords, b: BboxCoords):
@@ -1753,7 +1741,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._roi_infos is not _unset
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
-        src_prefix = ""
+        src_prefix = src_bucket.path
         dst_bucket = self.oracle_data_bucket
 
         src_client = self._make_cloud_storage_client(src_bucket)
