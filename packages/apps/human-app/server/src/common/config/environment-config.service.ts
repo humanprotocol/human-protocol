@@ -20,6 +20,13 @@ export class EnvironmentConfigService {
   get cacheHost(): string {
     return this.configService.get<string>('REDIS_HOST', 'localhost');
   }
+
+  get cacheTtlOracleDiscovery(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_ORACLE_DISCOVERY',
+      24 * 60 * 60,
+    );
+  }
 }
 
 export const envValidator = Joi.object({

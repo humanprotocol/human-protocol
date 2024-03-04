@@ -29,7 +29,7 @@ export class OracleDiscoveryCommand {
 
 export class OracleDiscoveryData implements IOperator {
   address: string;
-  role?: string;
+  role: string;
   constructor(address: string, role: string) {
     this.address = address;
     this.role = role;

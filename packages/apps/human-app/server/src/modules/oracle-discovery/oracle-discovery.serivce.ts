@@ -6,11 +6,14 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 @Injectable()
 export class OracleDiscoveryService {
-  static readonly TTL_1_DAY = 24 * 60 * 60;
   logger = new Logger(OracleDiscoveryService.name);
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: EnvironmentConfigService,
+  ) {}
 
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
@@ -41,7 +44,7 @@ export class OracleDiscoveryService {
     return this.cacheManager.set(
       address,
       operators,
-      OracleDiscoveryService.TTL_1_DAY,
+      this.configService.cacheTtlOracleDiscovery,
     );
   };
 }
