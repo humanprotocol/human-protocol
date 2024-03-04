@@ -212,6 +212,7 @@ class BoxesFromPointsTaskBuilder:
         points_storage_client = self._make_cloud_storage_client(points_bucket)
 
         data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
+        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
         self._data_filenames = filter_image_files(data_filenames)
 
         self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
@@ -1110,6 +1111,7 @@ class SkeletonsFromBoxesTaskBuilder:
         boxes_storage_client = self._make_cloud_storage_client(boxes_bucket)
 
         data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
+        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
         self._data_filenames = filter_image_files(data_filenames)
 
         self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
@@ -2004,6 +2006,10 @@ def filter_image_files(data_filenames: List[str]) -> List[str]:
     return list(fn for fn in data_filenames if is_image(fn))
 
 
+def strip_bucket_prefix(data_filenames: List[str], prefix: str) -> List[str]:
+    return list(os.path.relpath(fn, prefix) for fn in data_filenames)
+
+
 def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     return [
         {
@@ -2049,14 +2055,11 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         gt_bucket_client = cloud_service.make_client(gt_bucket)
 
         # Task configuration creation
-        data_filenames = data_bucket_client.list_files(
-            prefix=data_bucket.path,
-        )
+        data_filenames = data_bucket_client.list_files(prefix=data_bucket.path)
+        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
         data_filenames = filter_image_files(data_filenames)
 
-        gt_file_data = gt_bucket_client.download_file(
-            gt_bucket.path,
-        )
+        gt_file_data = gt_bucket_client.download_file(gt_bucket.path)
 
         # Validate and parse GT
         gt_filenames = get_gt_filenames(gt_file_data, data_filenames, manifest=manifest)
@@ -2105,7 +2108,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
             cvat_api.put_task_data(
                 task.id,
                 cloud_storage.id,
-                filenames=job_filenames,
+                filenames=[os.path.join(data_bucket.path, fn) for fn in job_filenames],
                 sort_images=False,
             )
 
