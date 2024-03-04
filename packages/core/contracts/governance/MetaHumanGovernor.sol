@@ -33,6 +33,15 @@ contract MetaHumanGovernor is
 {
     using Address for address payable;
 
+    error MessageAlreadyProcessed();
+    error OnlyRelayerAllowed();
+    error InvalidIntendedRecipient();
+    error ProposalAlreadyInitialized();
+    error CollectionPhaseUnfinished();
+    error RequestAfterVotePeriodOver();
+    error CollectionPhaseAlreadyStarted();
+    error OnlyMessagesFromSpokeReceived();
+
     IWormholeRelayer public immutable wormholeRelayer;
     uint256 internal constant GAS_LIMIT = 500_000;
     uint256 public immutable secondsPerBlock;
@@ -158,9 +167,13 @@ contract MetaHumanGovernor is
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) public payable override {
-        require(msg.sender == address(wormholeRelayer), 'Only relayer allowed');
+        if (msg.sender != address(wormholeRelayer)) {
+            revert OnlyRelayerAllowed();
+        }
 
-        require(!processedMessages[deliveryHash], 'Message already processed');
+        if (processedMessages[deliveryHash]) {
+            revert MessageAlreadyProcessed();
+        }
 
         (
             address intendedRecipient, //chainId
@@ -170,10 +183,14 @@ contract MetaHumanGovernor is
             bytes memory decodedMessage
         ) = abi.decode(payload, (address, uint16, address, bytes));
 
-        require(
-            intendedRecipient == address(this),
-            'Message is not addressed for this contract'
-        );
+        if (intendedRecipient != address(this)) {
+            revert InvalidIntendedRecipient();
+        }
+
+        // require(
+        //     intendedRecipient == address(this),
+        //     'Message is not addressed for this contract'
+        // );
 
         processedMessages[deliveryHash] = true;
         // Gets a function selector option
@@ -211,6 +228,14 @@ contract MetaHumanGovernor is
             uint256 _abstain
         ) = abi.decode(payload, (uint16, uint256, uint256, uint256, uint256));
 
+        if (
+            !spokeContractsMappingSnapshots[_proposalId][emitterAddress][
+                emitterChainId
+            ]
+        ) {
+            revert OnlyMessagesFromSpokeReceived();
+        }
+
         require(
             spokeContractsMappingSnapshots[_proposalId][emitterAddress][
                 emitterChainId
@@ -222,7 +247,7 @@ contract MetaHumanGovernor is
         if (
             spokeVotes[_proposalId][emitterAddress][emitterChainId].initialized
         ) {
-            revert('Already initialized!');
+            revert ProposalAlreadyInitialized();
         } else {
             // Add it to the map (while setting initialized true)
             spokeVotes[_proposalId][emitterAddress][
@@ -250,10 +275,9 @@ contract MetaHumanGovernor is
     ) internal override {
         _finishCollectionPhase(proposalId);
 
-        require(
-            collectionFinished[proposalId],
-            'Collection phase for this proposal is unfinished!'
-        );
+        if (!collectionFinished[proposalId]) {
+            revert CollectionPhaseUnfinished();
+        }
 
         super._beforeExecute(
             proposalId,
@@ -289,14 +313,13 @@ contract MetaHumanGovernor is
      *  @param proposalId The ID of the proposal.
      */
     function requestCollections(uint256 proposalId) public payable {
-        require(
-            block.number > proposalDeadline(proposalId),
-            'Cannot request for vote collection until after the vote period is over!'
-        );
-        require(
-            !collectionStarted[proposalId],
-            'Collection phase for this proposal has already started!'
-        );
+        if (block.number < proposalDeadline(proposalId)) {
+            revert RequestAfterVotePeriodOver();
+        }
+
+        if (collectionStarted[proposalId]) {
+            revert CollectionPhaseAlreadyStarted();
+        }
 
         collectionStarted[proposalId] = true;
 
@@ -335,6 +358,8 @@ contract MetaHumanGovernor is
                 payload,
                 sendMessageToHubCost, // send value to enable the spoke to send back vote result
                 GAS_LIMIT
+                // spokeContracts[i-1].chainId, // refund chain
+                // address(this) // target where the refund is sent
             );
         }
     }
@@ -410,6 +435,8 @@ contract MetaHumanGovernor is
                     payload,
                     0, // no receiver value needed
                     GAS_LIMIT
+                    // chainId, // refund chain
+                    // address(this) // target where the refund is sent
                 );
             }
         }
