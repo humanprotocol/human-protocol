@@ -20,11 +20,6 @@ export class ProcessingResultDto {
    * Hash of the stored results.
    */
   hash: string;
-
-  /**
-   * Boolean indicating if the checks passed.
-   */
-  checkPassed: boolean;
 }
 
 export class FortuneFinalResult {

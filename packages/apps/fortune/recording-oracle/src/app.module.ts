@@ -12,6 +12,7 @@ import {
   web3Config,
 } from './common/config';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { WebhookModule } from './modules/webhook/webhook.module';
 
 @Module({
   providers: [
@@ -33,6 +34,7 @@ import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
       load: [serverConfig, s3Config, web3Config],
     }),
     JobModule,
+    WebhookModule,
   ],
   controllers: [AppController],
 })

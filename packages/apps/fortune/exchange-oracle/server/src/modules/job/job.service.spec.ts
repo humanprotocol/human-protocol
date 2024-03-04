@@ -217,7 +217,7 @@ describe('JobService', () => {
         escrow_address: escrowAddress,
         chain_id: chainId,
         event_type: EventType.TASK_CREATION_FAILED,
-        event_data: [{ reason: 'Unable to get manifest' }],
+        event_data: { assignments: [{ reason: 'Unable to get manifest' }] },
       };
       expect(httpServicePostMock).toHaveBeenCalledWith(
         JOB_LAUNCHER_WEBHOOK_URL + ESCROW_FAILED_ENDPOINT,
@@ -517,7 +517,7 @@ describe('JobService', () => {
         chainId,
         escrowAddress,
         eventType: EventType.SUBMISSION_REJECTED,
-        eventData: [{ assigneeId: workerAddress }],
+        eventData: { assignments: [{ assigneeId: workerAddress }] },
       });
 
       expect(storageService.uploadJobSolutions).toHaveBeenCalledWith(
@@ -553,7 +553,7 @@ describe('JobService', () => {
           chainId,
           escrowAddress,
           eventType: EventType.SUBMISSION_REJECTED,
-          eventData: [{ assigneeId: workerAddress }],
+          eventData: { assignments: [{ assigneeId: workerAddress }] },
         }),
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });

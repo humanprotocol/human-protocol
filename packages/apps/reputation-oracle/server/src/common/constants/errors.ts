@@ -105,6 +105,7 @@ export enum ErrorCronJob {
 export enum ErrorWeb3 {
   InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
   InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+  GasPriceError = 'Error calculating gas price',
 }
 
 /**
