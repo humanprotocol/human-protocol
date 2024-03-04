@@ -1,7 +1,6 @@
-import { ChainId, IOperator } from '@human-protocol/sdk/src';
+import { ChainId, IOperator } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
 
 export class OracleDiscoveryDto {
   @AutoMap()
@@ -9,11 +8,15 @@ export class OracleDiscoveryDto {
   chainId: ChainId;
   @AutoMap()
   @ApiProperty({ example: '0x1a23b23432cf23f09f3f' })
-  @IsString()
   address: string;
   @AutoMap()
   @ApiProperty({ example: 'Exchange Oracle' })
   role: string;
+  constructor(chainId: ChainId, address: string, role: string) {
+    this.chainId = chainId;
+    this.address = address;
+    this.role = role;
+  }
 }
 export class OracleDiscoveryCommand {
   @AutoMap()

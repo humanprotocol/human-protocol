@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import {
 
 @Controller()
 export class OracleDiscoveryController {
+  logger = new Logger(OracleDiscoveryController.name);
   constructor(
     private readonly service: OracleDiscoveryService,
     @InjectMapper() private readonly mapper: Mapper,
@@ -28,6 +30,13 @@ export class OracleDiscoveryController {
   public signupOperator(
     @Body() oracleDiscoveryDto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryData[]> {
+    this.logger.log(
+      `Oracle Discovery request: { 
+        chainId: ${oracleDiscoveryDto.chainId}, 
+        address: ${oracleDiscoveryDto.address}, 
+        role: ${oracleDiscoveryDto.role}
+      }`,
+    );
     const oracleDiscoveryCommand = this.mapper.map(
       oracleDiscoveryDto,
       OracleDiscoveryDto,
