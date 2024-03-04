@@ -34,7 +34,7 @@ const httpServiceMock = {
   }),
 };
 
-describe('JobsDiscoveryController', () => {
+describe('JobAssignmentController', () => {
   let controller: JobAssignmentController;
   let jobAssignmentService: JobAssignmentService;
   let httpService: HttpService;

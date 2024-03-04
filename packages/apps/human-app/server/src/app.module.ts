@@ -11,6 +11,8 @@ import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
+import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
+import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
 
 @Module({
   imports: [
@@ -25,10 +27,16 @@ import { CommonConfigModule } from './common/config/common-config.module';
     HttpModule,
     WorkerModule,
     OperatorModule,
+    JobAssignmentModule,
     ReputationOracleModule,
     CommonConfigModule,
   ],
-  controllers: [AppController, OperatorController, WorkerController],
+  controllers: [
+    AppController,
+    OperatorController,
+    WorkerController,
+    JobAssignmentController,
+  ],
   providers: [],
   exports: [HttpModule],
 })
