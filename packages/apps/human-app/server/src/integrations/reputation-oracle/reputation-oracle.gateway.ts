@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
@@ -16,12 +16,11 @@ import { GatewayConfig } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';
 import { EndpointName } from '../../common/enums/endpoint-name';
 import { AxiosRequestConfig } from 'axios';
-import {
-  RequestDataType
-} from './reputation-oracle.interface';
+import { RequestDataType } from './reputation-oracle.interface';
 import {
   SigninWorkerCommand,
-  SigninWorkerData, SigninWorkerResponse,
+  SigninWorkerData,
+  SigninWorkerResponse,
 } from '../../modules/user-worker/interfaces/worker-signin.interface';
 
 @Injectable()
@@ -57,14 +56,7 @@ export class ReputationOracleGateway {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
     } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      } else {
-        throw new HttpException(
-          'Error occurred while redirecting request.',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      throw error;
     }
   }
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {

@@ -15,6 +15,8 @@ import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
 import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
+import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
+import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discove
     HttpModule,
     WorkerModule,
     OperatorModule,
+    JobsDiscoveryModule,
     ReputationOracleModule,
     CommonConfigModule,
     OracleDiscoveryModule,
@@ -38,6 +41,7 @@ import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discove
     AppController,
     OperatorController,
     WorkerController,
+    JobsDiscoveryController,
     OracleDiscoveryController,
   ],
   providers: [],
