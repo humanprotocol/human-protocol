@@ -11,6 +11,8 @@ import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
+import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
+import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 
 @Module({
   imports: [
@@ -25,10 +27,16 @@ import { CommonConfigModule } from './common/config/common-config.module';
     HttpModule,
     WorkerModule,
     OperatorModule,
+    JobsDiscoveryModule,
     ReputationOracleModule,
     CommonConfigModule,
   ],
-  controllers: [AppController, OperatorController, WorkerController],
+  controllers: [
+    AppController,
+    OperatorController,
+    WorkerController,
+    JobsDiscoveryController,
+  ],
   providers: [],
   exports: [HttpModule],
 })
