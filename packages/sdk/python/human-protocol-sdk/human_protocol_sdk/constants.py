@@ -19,6 +19,7 @@ class ChainId(Enum):
     SKALE = 1273227453
     CELO = 42220
     CELO_ALFAJORES = 44787
+    X1_TESTNET = 195
     LOCALHOST = 1338
 
 
@@ -196,6 +197,18 @@ NETWORKS = {
         "staking_address": "0x003548Df34be8836cF0F9673403a1E40ba449a0F",
         "reward_pool_address": "0xA9545C2530BD5bdb464d5E274F59ACceAa73eD86",
         "kvstore_address": "0x938335006ea6F9Eb0e8020969cFF94404425e298",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
+    ChainId.X1_TESTNET: {
+        "title": "X1 Testnet",
+        "scan_url": "https://www.oklink.com/oktc-test",
+        "subgraph_url": (""),
+        "hmt_address": "0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8",
+        "factory_address": "0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc",
+        "staking_address": "0x703936A24DFaDcD34008Db338FDB087c43C8c56a",
+        "reward_pool_address": "0x44FAd6e8d616AD460cf8eEf503FC101170E7De73",
+        "kvstore_address": "0xcCfF9646Abf988d9842d94b171A67d5F6c30dBe2",
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
