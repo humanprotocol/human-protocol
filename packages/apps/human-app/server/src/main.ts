@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
+import { GlobalExceptionsFilter } from './common/filter/global-exceptions.filter';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
@@ -23,6 +24,8 @@ async function bootstrap() {
 
   const host = envConfigService.host;
   const port = envConfigService.port;
+
+  app.useGlobalFilters(new GlobalExceptionsFilter());
 
   await app.listen(port, host, async () => {
     logger.log(`Human APP server is running on http://${host}:${port}`);
