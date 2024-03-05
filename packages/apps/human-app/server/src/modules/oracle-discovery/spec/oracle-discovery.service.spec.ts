@@ -5,8 +5,11 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryData,
+  OracleDiscoveryResponse,
 } from '../interface/oracle-discovery.interface';
+import { EnvironmentConfigService, envValidator } from '../../../common/config/environment-config.service';
+import { CommonConfigModule } from '../../../common/config/common-config.module';
+import { ConfigModule } from '@nestjs/config';
 
 jest.mock('@human-protocol/sdk', () => ({
   OperatorUtils: {
@@ -17,9 +20,18 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('OracleDiscoveryService', () => {
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
+  let configService: EnvironmentConfigService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        CommonConfigModule,
+        ConfigModule.forRoot({
+          envFilePath: '.env',
+          isGlobal: true,
+          validationSchema: envValidator,
+        }),
+      ],
       providers: [
         OracleDiscoveryService,
         {
@@ -31,15 +43,20 @@ describe('OracleDiscoveryService', () => {
         },
       ],
     }).compile();
-
+    configService = moduleRef.get<EnvironmentConfigService>(
+      EnvironmentConfigService,
+    );
     oracleDiscoveryService = moduleRef.get<OracleDiscoveryService>(
       OracleDiscoveryService,
     );
     cacheManager = moduleRef.get<Cache>(CACHE_MANAGER);
   });
+  it('should be defined', () => {
+    expect(oracleDiscoveryService).toBeDefined();
+  });
 
   it('should return cached data if available', async () => {
-    const mockData: OracleDiscoveryData[] = [
+    const mockData: OracleDiscoveryResponse[] = [
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
@@ -58,7 +75,7 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should fetch and cache data if not already cached', async () => {
-    const mockData: OracleDiscoveryData[] = [
+    const mockData: OracleDiscoveryResponse[] = [
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
@@ -79,7 +96,7 @@ describe('OracleDiscoveryService', () => {
     expect(cacheManager.set).toHaveBeenCalledWith(
       command.address,
       mockData,
-      OracleDiscoveryService.TTL_1_DAY,
+      configService.cacheTtlOracleDiscovery,
     );
     expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
       command.chainId,

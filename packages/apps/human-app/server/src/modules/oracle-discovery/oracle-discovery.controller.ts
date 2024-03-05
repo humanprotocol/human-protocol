@@ -12,7 +12,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OracleDiscoveryService } from './oracle-discovery.serivce';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryData,
+  OracleDiscoveryResponse,
   OracleDiscoveryDto,
 } from './interface/oracle-discovery.interface';
 
@@ -29,7 +29,7 @@ export class OracleDiscoveryController {
   @UsePipes(new ValidationPipe())
   public oracleDiscovery(
     @Body() oracleDiscoveryDto: OracleDiscoveryDto,
-  ): Promise<OracleDiscoveryData[]> {
+  ): Promise<OracleDiscoveryResponse[]> {
     this.logger.log(
       `Oracle Discovery request: { 
         chainId: ${oracleDiscoveryDto.chainId}, 

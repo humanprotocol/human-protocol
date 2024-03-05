@@ -7,7 +7,7 @@ import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryData,
+  OracleDiscoveryResponse,
   OracleDiscoveryDto,
 } from '../interface/oracle-discovery.interface';
 import { ChainId } from '@human-protocol/sdk';
@@ -48,7 +48,7 @@ describe('OracleDiscoveryController', () => {
         address: '0x4708354213453af0cdC33eb75d94fBC00045841E',
         role: 'Exchange Oracle',
       };
-      const result: OracleDiscoveryData[] =
+      const result: OracleDiscoveryResponse[] =
         await controller.oracleDiscovery(dto);
       const expectedCommand = {
         chainId: ChainId.POLYGON_MUMBAI,

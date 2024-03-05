@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryData,
+  OracleDiscoveryResponse,
 } from './interface/oracle-discovery.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -17,10 +17,9 @@ export class OracleDiscoveryService {
 
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryData[]> {
-    let data: OracleDiscoveryData[] | undefined = await this.cacheManager.get(
-      command.address,
-    );
+  ): Promise<OracleDiscoveryResponse[]> {
+    let data: OracleDiscoveryResponse[] | undefined =
+      await this.cacheManager.get(command.address);
     if (!data) {
       data = await this.getOperatorsForOracleDiscovery(command);
       await this.setOperatorsForAddress(command.address, data);
@@ -28,23 +27,24 @@ export class OracleDiscoveryService {
     this.logger.log(`Returning data: ${JSON.stringify(data)}`);
     return data;
   }
-  getOperatorsForOracleDiscovery = (
+
+  async getOperatorsForOracleDiscovery(
     cmd: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryData[]> => {
+  ): Promise<OracleDiscoveryResponse[]> {
     return OperatorUtils.getReputationNetworkOperators(
       cmd.chainId,
       cmd.address,
       cmd.role,
     );
-  };
-  setOperatorsForAddress = (
+  }
+  async setOperatorsForAddress(
     address: string,
-    operators: OracleDiscoveryData[],
-  ): Promise<void> => {
+    operators: OracleDiscoveryResponse[],
+  ): Promise<void> {
     return this.cacheManager.set(
       address,
       operators,
       this.configService.cacheTtlOracleDiscovery,
     );
-  };
+  }
 }
