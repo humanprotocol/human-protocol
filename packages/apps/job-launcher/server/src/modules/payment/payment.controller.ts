@@ -117,6 +117,10 @@ export class PaymentController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
   @Post('/crypto')
   public async createCryptoPayment(
     @Headers(HEADER_SIGNATURE_KEY) signature: string,
