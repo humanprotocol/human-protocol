@@ -17,6 +17,8 @@ import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-dis
 import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
 import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
+import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
+import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery
     WorkerModule,
     OperatorModule,
     JobsDiscoveryModule,
+    JobAssignmentModule,
     ReputationOracleModule,
     CommonConfigModule,
     OracleDiscoveryModule,
@@ -43,6 +46,7 @@ import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery
     WorkerController,
     JobsDiscoveryController,
     OracleDiscoveryController,
+    JobAssignmentController,
   ],
   providers: [],
   exports: [HttpModule],
