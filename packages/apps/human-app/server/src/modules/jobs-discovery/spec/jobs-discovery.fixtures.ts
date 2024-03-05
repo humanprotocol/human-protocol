@@ -10,6 +10,7 @@ import {
 } from '../../../common/enums/jobs-discovery';
 
 export const dtoFixture: JobsDiscoveryParamsDto = {
+  exchange_oracle_url: 'test_url',
   escrow_address: 'test_address',
   chain_id: 1,
   page_size: 10,

@@ -9,6 +9,10 @@ import {
 export class JobsDiscoveryParamsDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
+  exchange_oracle_url: string;
+
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
   escrow_address: string;
 
   @AutoMap()
@@ -42,6 +46,8 @@ export class JobsDiscoveryParamsDto {
 
 export class JobsDiscoveryParamsCommand {
   @AutoMap()
+  exchange_oracle_url: string;
+  @AutoMap()
   escrow_address: string;
   @AutoMap()
   chain_id: number;
@@ -60,6 +66,8 @@ export class JobsDiscoveryParamsCommand {
 }
 
 export class JobsDiscoveryParamsData {
+  @AutoMap()
+  exchange_oracle_url: string;
   @AutoMap()
   escrow_address: string;
   @AutoMap()

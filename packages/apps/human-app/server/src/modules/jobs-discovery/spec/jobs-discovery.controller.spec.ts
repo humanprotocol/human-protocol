@@ -19,7 +19,6 @@ import { HttpService } from '@nestjs/axios';
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
   let jobsDiscoveryService: JobsDiscoveryService;
-  let httpService: HttpService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -51,7 +50,6 @@ describe('JobsDiscoveryController', () => {
     controller = module.get<JobsDiscoveryController>(JobsDiscoveryController);
     jobsDiscoveryService =
       module.get<JobsDiscoveryService>(JobsDiscoveryService);
-    httpService = module.get<HttpService>(HttpService);
   });
 
   it('should be defined', () => {
@@ -60,23 +58,20 @@ describe('JobsDiscoveryController', () => {
 
   describe('processJobsDiscovery', () => {
     it('should call service processJobsDiscovery method with proper fields set', async () => {
-      const url = 'url';
       const dto: JobsDiscoveryParamsDto = dtoFixture;
       const command: JobsDiscoveryParamsCommand = commandFixture;
-      await controller.discoverJobs(url, dto);
+      await controller.discoverJobs(dto);
       expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
-        url,
         command,
       );
     });
 
     it('should return the result of service processJobsDiscovery method', async () => {
-      const url = 'url';
       const dto: JobsDiscoveryParamsDto = dtoFixture;
       const command: JobsDiscoveryParamsCommand = commandFixture;
-      const result = await controller.discoverJobs(url, dto);
+      const result = await controller.discoverJobs(dto);
       expect(result).toEqual(
-        jobsDiscoveryServiceMock.processJobsDiscovery(url, command),
+        jobsDiscoveryServiceMock.processJobsDiscovery(command),
       );
     });
   });

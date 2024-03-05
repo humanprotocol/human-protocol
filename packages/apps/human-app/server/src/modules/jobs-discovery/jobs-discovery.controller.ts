@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -17,13 +17,12 @@ export class JobsDiscoveryController {
   ) {}
 
   @ApiTags('Jobs-Discovery')
-  @Get('/:url/jobs')
+  @Get('/discovery/jobs')
   @ApiOperation({
     summary:
       'Retrieve a list of filtered available jobs for passed Exchange Oracle url',
   })
   public async discoverJobs(
-    @Param('url') url: string,
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
   ): Promise<JobsDiscoveryResponse> {
     const jobsDiscoveryParamsCommand = this.mapper.map(
@@ -32,7 +31,6 @@ export class JobsDiscoveryController {
       JobsDiscoveryParamsCommand,
     );
     return await this.jobsDiscoveryService.processJobsDiscovery(
-      url,
       jobsDiscoveryParamsCommand,
     );
   }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
   JobsDiscoveryParamsCommand,
@@ -17,7 +17,6 @@ export class JobsDiscoveryService {
   ) {}
 
   async processJobsDiscovery(
-    url: string,
     jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
     const jobsDiscoveryParamsData = this.mapper.map(
@@ -26,6 +25,7 @@ export class JobsDiscoveryService {
       JobsDiscoveryParamsData,
     );
     try {
+      const url = jobsDiscoveryParamsCommand.exchange_oracle_url;
       const options = {
         method: 'GET',
         url: `${url}/jobs`,
@@ -34,14 +34,7 @@ export class JobsDiscoveryService {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
     } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      } else {
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      throw error;
     }
   }
 }
