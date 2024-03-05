@@ -16,7 +16,7 @@ import {
 } from '../../../common/enums/job-assignment';
 
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
-  exchange_oracle_url: 'test_url',
+  exchange_oracle_url: 'https://www.example.com/api',
   escrow_address: 'test_address',
   chain_id: 1,
 };
@@ -42,7 +42,7 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
 };
 
 export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
-  exchange_oracle_url: 'test_url',
+  exchange_oracle_url: 'https://www.example.com/api',
   assignment_id: 'test_id',
   escrow_address: 'test_address',
   chain_id: 1,
