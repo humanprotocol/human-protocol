@@ -3,16 +3,21 @@ import {
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponseItem,
 } from '../interfaces/jobs-discovery.interface';
+import {
+  JobFields,
+  SortField,
+  SortOrder,
+} from '../../../common/enums/jobs-discovery';
 
 export const dtoFixture: JobsDiscoveryParamsDto = {
   escrow_address: 'test_address',
   chain_id: 1,
   page_size: 10,
   page: 1,
-  sort: 'ASC',
-  sort_field: 'job_type',
+  sort: SortOrder.ASC,
+  sort_field: SortField.CREATED_AT,
   job_type: 'type',
-  fields: ['field1', 'field2'],
+  fields: [JobFields.JOB_TITLE, JobFields.REWARD_AMOUNT],
 };
 
 export const commandFixture: JobsDiscoveryParamsCommand = dtoFixture;

@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import {
+  JobFields,
+  SortField,
+  SortOrder,
+} from '../../../common/enums/jobs-discovery';
 
 export class JobsDiscoveryParamsDto {
   @AutoMap()
@@ -20,27 +25,19 @@ export class JobsDiscoveryParamsDto {
 
   @AutoMap()
   @ApiProperty({ example: 'ASC', default: 'ASC' })
-  sort: 'ASC' | 'DESC';
+  sort: SortOrder;
 
   @AutoMap()
   @ApiProperty({ example: 'created_at', default: 'created_at' })
-  sort_field: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
+  sort_field: SortField;
 
   @AutoMap()
   @ApiProperty({ example: 'job type' })
   job_type: string;
 
   @AutoMap()
-  @ApiProperty({
-    example: [
-      'job_title',
-      'job_description',
-      'reward_amount',
-      'reward_token',
-      'created_at',
-    ],
-  })
-  fields: string[];
+  @ApiProperty({ example: ['job_title'] })
+  fields: JobFields[];
 }
 
 export class JobsDiscoveryParamsCommand {
@@ -53,13 +50,13 @@ export class JobsDiscoveryParamsCommand {
   @AutoMap()
   page: number;
   @AutoMap()
-  sort: string;
+  sort: SortOrder;
   @AutoMap()
-  sort_field: string;
+  sort_field: SortField;
   @AutoMap()
   job_type: string;
   @AutoMap()
-  fields: string[];
+  fields: JobFields[];
 }
 
 export class JobsDiscoveryParamsData {
@@ -72,13 +69,13 @@ export class JobsDiscoveryParamsData {
   @AutoMap()
   page: number;
   @AutoMap()
-  sort: string;
+  sort: SortOrder;
   @AutoMap()
-  sort_field: string;
+  sort_field: SortField;
   @AutoMap()
   job_type: string;
   @AutoMap()
-  fields: string[];
+  fields: JobFields[];
 }
 
 export class JobsDiscoveryResponseItem {
