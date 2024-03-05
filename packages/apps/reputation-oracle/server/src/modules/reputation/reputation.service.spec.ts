@@ -106,10 +106,9 @@ describe('ReputationService', () => {
     storageService = moduleRef.get<StorageService>(StorageService);
   });
 
-  describe('doAssessReputationScores', () => {
+  describe('assessReputationScores', () => {
     const chainId = ChainId.LOCALHOST;
     const escrowAddress = 'mockEscrowAddress';
-    const checkPassed = true;
 
     it('should handle manifest URL not found', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
@@ -117,93 +116,198 @@ describe('ReputationService', () => {
       }));
 
       await expect(
-        reputationService.doAssessReputationScores(
-          chainId,
-          escrowAddress,
-          checkPassed,
-        ),
+        reputationService.assessReputationScores(chainId, escrowAddress),
       ).rejects.toThrow(ErrorManifest.ManifestUrlDoesNotExist);
     });
 
-    it('should handle no verified results', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      }));
+    describe('fortune', () => {
+      it('should handle no verified results', async () => {
+        (EscrowClient.build as any).mockImplementation(() => ({
+          getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+          getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+          getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+          getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+          getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        }));
 
-      const manifest = {
-        requestType: JobRequestType.FORTUNE,
-      };
+        const manifest = {
+          requestType: JobRequestType.FORTUNE,
+        };
 
-      jest
-        .spyOn(storageService, 'download')
-        .mockResolvedValueOnce(manifest) // Mock manifest
-        .mockResolvedValueOnce([]); // Mock final results
+        jest
+          .spyOn(storageService, 'download')
+          .mockResolvedValueOnce(manifest) // Mock manifest
+          .mockResolvedValueOnce([]); // Mock final results
 
-      await expect(
-        reputationService.doAssessReputationScores(
+        await expect(
+          reputationService.assessReputationScores(chainId, escrowAddress),
+        ).rejects.toThrow(ErrorResults.NoResultsHaveBeenVerified);
+      });
+
+      it('should assess reputation scores', async () => {
+        const manifest = {
+          requestType: JobRequestType.FORTUNE,
+        };
+        const finalResults = [
+          { workerAddress: 'worker1', error: undefined },
+          { workerAddress: 'worker2', error: SolutionError.Duplicated },
+        ];
+
+        jest
+          .spyOn(storageService, 'download')
+          .mockResolvedValueOnce(manifest)
+          .mockResolvedValueOnce(finalResults);
+
+        jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
+        jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
+
+        await reputationService.assessReputationScores(chainId, escrowAddress);
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
           chainId,
-          escrowAddress,
-          checkPassed,
-        ),
-      ).rejects.toThrow(ErrorResults.NoResultsHaveBeenVerified);
+          MOCK_ADDRESS,
+          ReputationEntityType.JOB_LAUNCHER,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          'worker1',
+          ReputationEntityType.WORKER,
+        );
+
+        expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
+          chainId,
+          'worker2',
+          ReputationEntityType.WORKER,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.EXCHANGE_ORACLE,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.RECORDING_ORACLE,
+        );
+      });
     });
 
-    it('should assess reputation scores', async () => {
+    describe('cvat', () => {
       const manifest = {
-        requestType: JobRequestType.FORTUNE,
+        requestType: JobRequestType.IMAGE_BOXES,
+        data: {
+          data_url: MOCK_FILE_URL,
+        },
+        annotation: {
+          labels: [{ name: 'cat' }, { name: 'dog' }],
+          description: 'Description',
+          type: JobRequestType.IMAGE_BOXES,
+          job_size: 10,
+          max_time: 10,
+        },
+        validation: {
+          min_quality: 0.95,
+          val_size: 10,
+          gt_url: MOCK_FILE_URL,
+        },
+        job_bounty: '10',
       };
-      const finalResults = [
-        { workerAddress: 'worker1', error: undefined },
-        { workerAddress: 'worker2', error: SolutionError.Duplicated },
-      ];
 
-      jest
-        .spyOn(storageService, 'download')
-        .mockResolvedValueOnce(manifest)
-        .mockResolvedValueOnce(finalResults);
+      it('should handle annotation meta does not exist', async () => {
+        (EscrowClient.build as any).mockImplementation(() => ({
+          getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+          getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+          getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+          getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+          getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+          getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        }));
 
-      jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
-      jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
+        jest
+          .spyOn(storageService, 'download')
+          .mockResolvedValueOnce(manifest) // Mock manifest
+          .mockResolvedValueOnce([]); // Mock final results
 
-      await reputationService.doAssessReputationScores(
-        chainId,
-        escrowAddress,
-        checkPassed,
-      );
+        await expect(
+          reputationService.assessReputationScores(chainId, escrowAddress),
+        ).rejects.toThrow(ErrorResults.NoAnnotationsMetaFound);
+      });
 
-      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-        chainId,
-        MOCK_ADDRESS,
-        ReputationEntityType.JOB_LAUNCHER,
-      );
+      it('should assess reputation scores', async () => {
+        const annotationMeta = {
+          jobs: [
+            {
+              id: 1,
+              job_id: 1,
+              annotator_wallet_address: 'worker1',
+              annotation_quality: 0.96,
+            },
+            {
+              id: 2,
+              job_id: 2,
+              annotator_wallet_address: 'worker2',
+              annotation_quality: 0.94,
+            },
+          ],
+          results: [
+            {
+              id: 1,
+              job_id: 1,
+              annotator_wallet_address: 'worker1',
+              annotation_quality: 0.96,
+            },
+            {
+              id: 2,
+              job_id: 2,
+              annotator_wallet_address: 'worker2',
+              annotation_quality: 0.94,
+            },
+          ],
+        };
 
-      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-        chainId,
-        'worker1',
-        ReputationEntityType.WORKER,
-      );
+        jest
+          .spyOn(storageService, 'download')
+          .mockResolvedValueOnce(manifest)
+          .mockResolvedValueOnce(annotationMeta);
 
-      expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
-        chainId,
-        'worker2',
-        ReputationEntityType.WORKER,
-      );
+        jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
+        jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
 
-      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-        chainId,
-        MOCK_ADDRESS,
-        ReputationEntityType.EXCHANGE_ORACLE,
-      );
+        await reputationService.assessReputationScores(chainId, escrowAddress);
 
-      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-        chainId,
-        MOCK_ADDRESS,
-        ReputationEntityType.RECORDING_ORACLE,
-      );
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.JOB_LAUNCHER,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          'worker1',
+          ReputationEntityType.WORKER,
+        );
+
+        expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
+          chainId,
+          'worker2',
+          ReputationEntityType.WORKER,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.EXCHANGE_ORACLE,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.RECORDING_ORACLE,
+        );
+      });
     });
   });
 

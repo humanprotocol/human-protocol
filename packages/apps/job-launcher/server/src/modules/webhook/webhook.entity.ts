@@ -34,7 +34,7 @@ export class WebhookEntity extends BaseEntity {
   public hasSignature: boolean;
 
   @Column({ type: 'int' })
-  public retriesCount: number = 0;
+  public retriesCount = 0;
 
   @Column({ type: 'timestamptz' })
   public waitUntil: Date = new Date();

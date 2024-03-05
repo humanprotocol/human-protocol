@@ -2,7 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  StakingClient,
+  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -70,9 +70,12 @@ export class StorageService {
     }
 
     const signer = this.web3Service.getSigner(chainId);
-    const stakingClient = await StakingClient.build(signer);
-    const exchangeOracle = await stakingClient.getLeader(signer.address);
-    const recordingOracle = await stakingClient.getLeader(
+    const exchangeOracle = await OperatorUtils.getLeader(
+      chainId,
+      signer.address,
+    );
+    const recordingOracle = await OperatorUtils.getLeader(
+      chainId,
       this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS, ''),
     );
     if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {

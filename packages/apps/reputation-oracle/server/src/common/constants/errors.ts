@@ -63,6 +63,7 @@ export enum ErrorAuth {
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
   InvalidSignature = 'Invalid signature',
+  InvalidRole = 'Invalid role in KVStore',
 }
 
 /**
@@ -96,4 +97,20 @@ export enum ErrorCronJob {
   NotCreated = 'Cron job has not been created',
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
+}
+
+/**
+ * Represents error messages related to web3.
+ */
+export enum ErrorWeb3 {
+  InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
+  InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+  GasPriceError = 'Error calculating gas price',
+}
+
+/**
+ * Represents error messages related to operator.
+ */
+export enum ErrorOperator {
+  OperatorNotActive = 'Operator not active',
 }
