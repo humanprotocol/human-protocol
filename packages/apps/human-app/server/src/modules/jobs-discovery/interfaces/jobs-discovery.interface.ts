@@ -67,8 +67,6 @@ export class JobsDiscoveryParamsCommand {
 
 export class JobsDiscoveryParamsData {
   @AutoMap()
-  exchange_oracle_url: string;
-  @AutoMap()
   escrow_address: string;
   @AutoMap()
   chain_id: number;

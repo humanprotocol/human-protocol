@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
 import {
   JobsFetchParamsCommand,
   JobsFetchParamsData,
@@ -11,6 +10,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { callExternalHttpRequest } from '../../utils/http-request-hander';
 
 @Injectable()
 export class JobAssignmentService {
@@ -20,46 +20,36 @@ export class JobAssignmentService {
   ) {}
 
   async processJobAssignment(
-    jobAssignmentCommand: JobAssignmentCommand,
+    command: JobAssignmentCommand,
   ): Promise<JobAssignmentResponse> {
-    const jobAssignmentData = this.mapper.map(
-      jobAssignmentCommand,
+    const url = command.exchange_oracle_url;
+    const data = this.mapper.map(
+      command,
       JobAssignmentCommand,
       JobAssignmentData,
     );
-    try {
-      const url = jobAssignmentData.exchange_oracle_url;
-      const options = {
-        method: 'POST',
-        url: `${url}/assignment`,
-        data: jobAssignmentData,
-      };
-      const response = await lastValueFrom(this.httpService.request(options));
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const options = {
+      method: 'POST',
+      url: `${url}/assignment`,
+      data: data,
+    };
+    return await callExternalHttpRequest<JobAssignmentResponse>(options);
   }
 
   async processGetAssignedJobs(
-    jobsAssignmentParamsCommand: JobsFetchParamsCommand,
+    command: JobsFetchParamsCommand,
   ): Promise<JobsFetchResponse> {
-    const jobsAssignmentParamsData = this.mapper.map(
-      jobsAssignmentParamsCommand,
+    const url = command.exchange_oracle_url;
+    const data = this.mapper.map(
+      command,
       JobsFetchParamsCommand,
       JobsFetchParamsData,
     );
-    try {
-      const url = jobsAssignmentParamsData.exchange_oracle_url;
-      const options = {
-        method: 'GET',
-        url: `${url}/assignment`,
-        params: jobsAssignmentParamsData,
-      };
-      const response = await lastValueFrom(this.httpService.request(options));
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const options = {
+      method: 'GET',
+      url: `${url}/assignment`,
+      params: data,
+    };
+    return callExternalHttpRequest<JobsFetchResponse>(options);
   }
 }

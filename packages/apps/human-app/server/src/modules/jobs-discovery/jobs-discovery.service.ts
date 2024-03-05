@@ -8,33 +8,27 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { callExternalHttpRequest } from '../../utils/http-request-hander';
+import { AxiosRequestConfig } from 'axios';
 
 @Injectable()
 export class JobsDiscoveryService {
-  constructor(
-    public httpService: HttpService,
-    @InjectMapper() private readonly mapper: Mapper,
-  ) {}
+  constructor(@InjectMapper() private readonly mapper: Mapper) {}
 
   async processJobsDiscovery(
-    jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand,
+    command: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
-    const jobsDiscoveryParamsData = this.mapper.map(
-      jobsDiscoveryParamsCommand,
+    const url = command.exchange_oracle_url;
+    const data = this.mapper.map(
+      command,
       JobsDiscoveryParamsCommand,
       JobsDiscoveryParamsData,
     );
-    try {
-      const url = jobsDiscoveryParamsCommand.exchange_oracle_url;
-      const options = {
-        method: 'GET',
-        url: `${url}/jobs`,
-        params: jobsDiscoveryParamsData,
-      };
-      const response = await lastValueFrom(this.httpService.request(options));
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const options: AxiosRequestConfig = {
+      method: 'GET',
+      url: `${url}/jobs`,
+      params: data,
+    };
+    return callExternalHttpRequest<JobsDiscoveryResponse>(options)
   }
 }

@@ -31,8 +31,6 @@ export class JobAssignmentCommand {
 
 export class JobAssignmentData {
   @AutoMap()
-  exchange_oracle_url: string;
-  @AutoMap()
   escrow_address: string;
   @AutoMap()
   chain_id: number;
