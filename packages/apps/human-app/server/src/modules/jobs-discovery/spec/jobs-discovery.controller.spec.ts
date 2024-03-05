@@ -15,6 +15,8 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper';
 import { HttpService } from '@nestjs/axios';
+import { TokenMiddleware } from '../../../common/interceptors/auth-token.middleware';
+import { RequestContext } from '../../../common/utils/request-context.util';
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
@@ -41,6 +43,7 @@ describe('JobsDiscoveryController', () => {
               ),
           },
         },
+        RequestContext,
       ],
     })
       .overrideProvider(JobsDiscoveryService)
@@ -73,6 +76,29 @@ describe('JobsDiscoveryController', () => {
       expect(result).toEqual(
         jobsDiscoveryServiceMock.processJobsDiscovery(command),
       );
+    });
+  });
+  describe('TokenMiddleware', () => {
+    let middleware: TokenMiddleware;
+    let requestContext: RequestContext;
+
+    beforeEach(() => {
+      requestContext = new RequestContext();
+      middleware = new TokenMiddleware(requestContext);
+    });
+
+    it('should set token in requestContext', () => {
+      const mockReq = {
+        headers: {
+          authorization: 'Bearer token',
+        },
+      };
+
+      const next = jest.fn();
+      middleware.use(mockReq, {}, next);
+
+      expect(requestContext.token).toEqual('Bearer token');
+      expect(next).toHaveBeenCalled();
     });
   });
 });

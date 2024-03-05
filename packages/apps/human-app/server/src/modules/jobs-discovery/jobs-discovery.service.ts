@@ -8,12 +8,14 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { RequestContext } from '../../common/utils/request-context.util';
 
 @Injectable()
 export class JobsDiscoveryService {
   constructor(
     public httpService: HttpService,
     @InjectMapper() private readonly mapper: Mapper,
+    private readonly requestContext: RequestContext,
   ) {}
 
   async processJobsDiscovery(
@@ -26,10 +28,12 @@ export class JobsDiscoveryService {
     );
     try {
       const url = jobsDiscoveryParamsCommand.exchange_oracle_url;
+      const token = this.requestContext.token;
       const options = {
         method: 'GET',
         url: `${url}/jobs`,
         params: jobsDiscoveryParamsData,
+        headers: { Authorization: `Bearer ${token}` },
       };
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
