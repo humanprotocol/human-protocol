@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { JobsDiscoveryService } from './jobs-discovery.service';
 import { JobsDiscoveryProfile } from './jobs-discovery.mapper';
-import { HttpModule } from '@nestjs/axios';
+import { CommonUtilModule } from '../../common/utils/common-util.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [CommonUtilModule],
   providers: [JobsDiscoveryService, JobsDiscoveryProfile],
   exports: [JobsDiscoveryService],
 })

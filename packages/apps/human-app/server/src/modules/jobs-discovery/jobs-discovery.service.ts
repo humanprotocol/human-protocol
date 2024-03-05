@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
 import {
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
   JobsDiscoveryResponse,
 } from './interfaces/jobs-discovery.interface';
-import { HttpService } from '@nestjs/axios';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { callExternalHttpRequest } from '../../utils/http-request-hander';
+import { CommonHttpUtilService } from '../../common/utils/common-http-util.service';
 import { AxiosRequestConfig } from 'axios';
 
 @Injectable()
 export class JobsDiscoveryService {
-  constructor(@InjectMapper() private readonly mapper: Mapper) {}
+  constructor(
+    @InjectMapper() private readonly mapper: Mapper,
+    private readonly httpService: CommonHttpUtilService,
+  ) {}
 
   async processJobsDiscovery(
     command: JobsDiscoveryParamsCommand,
@@ -29,6 +30,8 @@ export class JobsDiscoveryService {
       url: `${url}/jobs`,
       params: data,
     };
-    return callExternalHttpRequest<JobsDiscoveryResponse>(options)
+    return this.httpService.callExternalHttpUtilRequest<JobsDiscoveryResponse>(
+      options,
+    );
   }
 }

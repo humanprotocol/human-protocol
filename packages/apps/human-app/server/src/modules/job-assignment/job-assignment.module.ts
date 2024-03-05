@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { JobAssignmentService } from './job-assignment.service';
 import { JobAssignmentProfile } from './job-assignment.mapper';
-import { HttpModule } from '@nestjs/axios';
+import { CommonUtilModule } from '../../common/utils/common-util.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [CommonUtilModule],
   providers: [JobAssignmentService, JobAssignmentProfile],
   exports: [JobAssignmentService],
 })

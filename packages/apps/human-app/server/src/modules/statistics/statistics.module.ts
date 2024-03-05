@@ -1,12 +1,10 @@
-import { Controller, Get, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Module } from '@nestjs/common';
+import { StatisticsService } from './statistics.service';
+import { CommonUtilModule } from '../../common/utils/common-util.module';
 
-@Controller()
-export class StatisticsController {
-  constructor(private readonly statisticsService: StatisticsService) {}
-  @ApiTags('Statistics')
-  @Get('/statistics')
-  @ApiOperation({ summary: 'Oracle statistics' })
-  @UsePipes(new ValidationPipe())
-  public getOracleStatistics(): Promise<void> {
-}
+@Module({
+  imports: [CommonUtilModule],
+  providers: [StatisticsService],
+  exports: [StatisticsService],
+})
+export class StatisticsModule {}

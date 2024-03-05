@@ -19,9 +19,13 @@ import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.mod
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
 import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
+import { CommonUtilModule } from './common/utils/common-util.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { StatisticsController } from './modules/statistics/statistics.controller';
 
 @Module({
   imports: [
+    CommonUtilModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
@@ -39,6 +43,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
     ReputationOracleModule,
     CommonConfigModule,
     OracleDiscoveryModule,
+    StatisticsModule,
   ],
   controllers: [
     AppController,
@@ -47,6 +52,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
     JobsDiscoveryController,
     OracleDiscoveryController,
     JobAssignmentController,
+    StatisticsController,
   ],
   providers: [],
   exports: [HttpModule],

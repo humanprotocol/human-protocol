@@ -7,15 +7,14 @@ import {
   JobAssignmentData,
   JobsFetchResponse,
 } from './interfaces/job-assignment.interface';
-import { HttpService } from '@nestjs/axios';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { callExternalHttpRequest } from '../../utils/http-request-hander';
+import { CommonHttpUtilService } from '../../common/utils/common-http-util.service';
 
 @Injectable()
 export class JobAssignmentService {
   constructor(
-    public httpService: HttpService,
+    private readonly httpService: CommonHttpUtilService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -33,7 +32,9 @@ export class JobAssignmentService {
       url: `${url}/assignment`,
       data: data,
     };
-    return await callExternalHttpRequest<JobAssignmentResponse>(options);
+    return await this.httpService.callExternalHttpUtilRequest<JobAssignmentResponse>(
+      options,
+    );
   }
 
   async processGetAssignedJobs(
@@ -50,6 +51,8 @@ export class JobAssignmentService {
       url: `${url}/assignment`,
       params: data,
     };
-    return callExternalHttpRequest<JobsFetchResponse>(options);
+    return await this.httpService.callExternalHttpUtilRequest<JobsFetchResponse>(
+      options,
+    );
   }
 }

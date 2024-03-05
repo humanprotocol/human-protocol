@@ -1,31 +1,48 @@
-import { Body, Controller, Get, Param, Post, UsePipes, ValidationPipe } from '@nestjs/common';
-import { OperatorService } from '../user-operator/operator.service';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
+import {
+  Controller,
+  Get,
+  Headers,
+  Param,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SignupOperatorCommand, SignupOperatorDto } from '../user-operator/interfaces/operator-registration.interface';
-import { string } from 'joi';
 import { StatisticsService } from './statistics.service';
-
+import {
+  OracleStatisticsCommand,
+  OracleStatisticsResponse,
+} from './interfaces/oracle-statistics.interface';
+import {
+  UserStatisticsCommand,
+  UserStatisticsResponse,
+} from './interfaces/user-statistics.interface';
 
 @Controller()
 export class StatisticsController {
-  constructor(
-    private readonly service: StatisticsService,
-    @InjectMapper() private readonly mapper: Mapper,
-  ) {}
+  constructor(private readonly service: StatisticsService) {}
   @ApiTags('Statistics')
   @Get('/stats')
   @ApiOperation({ summary: 'General Oracle Statistics' })
   @UsePipes(new ValidationPipe())
   public getOracleStatistics(
-    @Param('url') oracleUrl: string
-  ): Promise<void> {
-    const command: OracleStatisticsCommand = this.mapper.map(
-      oracleUrl,
-      string,
-      SignupOperatorCommand,
-    );
+    @Param('url') oracleUrl: string,
+  ): Promise<OracleStatisticsResponse> {
+    const command = { oracle_url: oracleUrl } as OracleStatisticsCommand;
     return this.service.getOracleStats(command);
+  }
+
+  @ApiTags('Statistics')
+  @Get('stats/assignment')
+  @ApiOperation({ summary: 'Statistics for requesting user' })
+  @UsePipes(new ValidationPipe())
+  public getUserStatistics(
+    @Param('url') oracleUrl: string,
+    @Headers('authorization') token: string,
+  ): Promise<UserStatisticsResponse> {
+    const command = {
+      oracle_url: oracleUrl,
+      token: token,
+    } as UserStatisticsCommand;
+    return this.service.getUserStats(command);
   }
 }

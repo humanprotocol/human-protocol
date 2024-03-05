@@ -1,24 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import { AxiosRequestConfig } from 'axios';
-import { callExternalHttpRequest } from '../../utils/http-request-hander';
+import { CommonHttpUtilService } from '../../common/utils/common-http-util.service';
+import {
+  UserStatisticsCommand,
+  UserStatisticsResponse,
+} from './interfaces/user-statistics.interface';
+import {
+  OracleStatisticsCommand,
+  OracleStatisticsResponse,
+} from './interfaces/oracle-statistics.interface';
 
 @Injectable()
 export class StatisticsService {
-  constructor(private httpService: HttpService) {}
-
+  constructor(private httpService: CommonHttpUtilService) {}
   async getOracleStats(
     command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: 'GET',
-      url: `${command.oralce_url}/stats`,
+      url: `${command.oracle_url}/stats`,
     };
-    return await callExternalHttpRequest<OracleStatisticsResponse>(options);
+    return await this.httpService.callExternalHttpUtilRequest<OracleStatisticsResponse>(
+      options,
+    );
   }
   async getUserStats(
     command: UserStatisticsCommand,
-  ): Promise<UserStatisticsCommand> {
+  ): Promise<UserStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: 'GET',
       url: `${command.oracle_url}/stats`,
@@ -26,6 +34,8 @@ export class StatisticsService {
         Authorization: `Bearer ${command.token}`,
       },
     };
-    return await callExternalHttpRequest<UserStatisticsResponse>(options);
+    return await this.httpService.callExternalHttpUtilRequest<UserStatisticsResponse>(
+      options,
+    );
   }
 }
