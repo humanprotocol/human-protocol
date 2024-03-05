@@ -162,7 +162,7 @@ describe('KVStoreClient', () => {
       ).toBeUndefined();
 
       expect(setBulkSpy).toHaveBeenCalledWith(
-        ['url', 'urlHash'],
+        ['url', 'url_hash'],
         [
           'https://example.com',
           ethers.keccak256(ethers.toUtf8Bytes('example')),
@@ -182,12 +182,12 @@ describe('KVStoreClient', () => {
       expect(
         await kvStoreClient.setFileUrlAndHash(
           'https://example.com',
-          'linkedinUrl'
+          'linkedin_url'
         )
       ).toBeUndefined();
 
       expect(setBulkSpy).toHaveBeenCalledWith(
-        ['linkedinUrl', 'linkedinUrlHash'],
+        ['linkedin_url', 'linkedin_url_hash'],
         [
           'https://example.com',
           ethers.keccak256(ethers.toUtf8Bytes('example')),
@@ -222,7 +222,7 @@ describe('KVStoreClient', () => {
       );
 
       expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['url', 'urlHash'],
+        ['url', 'url_hash'],
         [
           'https://example.com',
           ethers.keccak256(ethers.toUtf8Bytes('example')),
@@ -244,13 +244,13 @@ describe('KVStoreClient', () => {
       expect(
         await kvStoreClient.setFileUrlAndHash(
           'https://example.com',
-          'linkedinUrl',
+          'linkedin_url',
           txOptions
         )
       ).toBeUndefined();
 
       expect(setBulkSpy).toHaveBeenCalledWith(
-        ['linkedinUrl', 'linkedinUrlHash'],
+        ['linkedin_url', 'linkedin_url_hash'],
         [
           'https://example.com',
           ethers.keccak256(ethers.toUtf8Bytes('example')),
@@ -442,7 +442,7 @@ describe('KVStoreClient', () => {
       );
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'urlHash'
+        'url_hash'
       );
     });
 
@@ -454,17 +454,17 @@ describe('KVStoreClient', () => {
 
       const result = await kvStoreClient.getFileUrlAndVerifyHash(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'linkedinUrl'
+        'linkedin_url'
       );
       expect(result).toBe('example.com');
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'linkedinUrl'
+        'linkedin_url'
       );
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'linkedinUrlHash'
+        'linkedin_url_hash'
       );
     });
 
@@ -488,7 +488,7 @@ describe('KVStoreClient', () => {
       );
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'urlHash'
+        'url_hash'
       );
     });
 
@@ -526,7 +526,7 @@ describe('KVStoreClient', () => {
       expect(result).toBe('');
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'publicKey'
+        'public_key'
       );
     });
 
@@ -543,11 +543,11 @@ describe('KVStoreClient', () => {
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'publicKey'
+        'public_key'
       );
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'publicKeyHash'
+        'public_key_hash'
       );
     });
 
@@ -565,11 +565,11 @@ describe('KVStoreClient', () => {
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'publicKey'
+        'public_key'
       );
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'publicKeyHash'
+        'public_key_hash'
       );
     });
 
@@ -584,7 +584,7 @@ describe('KVStoreClient', () => {
 
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'publicKey'
+        'public_key'
       );
     });
   });

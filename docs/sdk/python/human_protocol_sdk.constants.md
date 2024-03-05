@@ -42,7 +42,15 @@ Bases: `Enum`
 
 Enum for KVStore keys
 
-#### public_key *= 'publicKey'*
+#### fee *= 'fee'*
+
+#### public_key *= 'public_key'*
+
+#### role *= 'role'*
+
+#### url *= 'url'*
+
+#### webhook_url *= 'webhook_url'*
 
 ### *class* human_protocol_sdk.constants.Role(value)
 

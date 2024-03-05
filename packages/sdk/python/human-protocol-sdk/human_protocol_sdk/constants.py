@@ -257,4 +257,8 @@ GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 class KVStoreKeys(Enum):
     """Enum for KVStore keys"""
 
-    public_key = "publicKey"
+    role = "role"
+    fee = "fee"
+    public_key = "public_key"
+    webhook_url = "webhook_url"
+    url = "url"

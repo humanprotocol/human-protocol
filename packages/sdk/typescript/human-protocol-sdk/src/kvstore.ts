@@ -197,7 +197,7 @@ export class KVStoreClient extends BaseEthersClient {
    * const signer = new Wallet(privateKey, provider);
    * const kvstoreClient = await KVStoreClient.build(signer);
    *
-   * const keys = ['role', 'webhookUrl'];
+   * const keys = ['role', 'webhook_url'];
    * const values = ['RecordingOracle', 'http://localhost'];
    * await kvstoreClient.set(keys, values);
    * ```
@@ -242,7 +242,7 @@ export class KVStoreClient extends BaseEthersClient {
    * const kvstoreClient = await KVStoreClient.build(signer);
    *
    * await kvstoreClient.setFileUrlAndHash('example.com');
-   * await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedinUrl);
+   * await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
    * ```
    */
   @requiresSigner
@@ -258,7 +258,7 @@ export class KVStoreClient extends BaseEthersClient {
     const content = await fetch(url).then((res) => res.text());
     const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
 
-    const hashKey = urlKey + 'Hash';
+    const hashKey = urlKey + '_hash';
 
     try {
       await (
@@ -333,7 +333,7 @@ export class KVStoreClient extends BaseEthersClient {
    * const url = await kvstoreClient.getFileUrlAndVerifyHash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
    * const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
    *    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    'linkedinUrl'
+   *    'linkedin_url'
    * );
    * ```
    */
@@ -342,7 +342,7 @@ export class KVStoreClient extends BaseEthersClient {
     urlKey = 'url'
   ): Promise<string> {
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-    const hashKey = urlKey + 'Hash';
+    const hashKey = urlKey + '_hash';
 
     let url = '',
       hash = '';
