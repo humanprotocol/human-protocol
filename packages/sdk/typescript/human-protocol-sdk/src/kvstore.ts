@@ -4,7 +4,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, Overrides, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
-import { NETWORKS } from './constants';
+import { KVStoreKeys, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
 import {
@@ -197,7 +197,7 @@ export class KVStoreClient extends BaseEthersClient {
    * const signer = new Wallet(privateKey, provider);
    * const kvstoreClient = await KVStoreClient.build(signer);
    *
-   * const keys = ['role', 'webhookUrl'];
+   * const keys = ['role', 'webhook_url'];
    * const values = ['RecordingOracle', 'http://localhost'];
    * await kvstoreClient.set(keys, values);
    * ```
@@ -220,7 +220,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function sets a URL value for the address that submits the transaction.
+   * Sets a URL value for the address that submits the transaction, and its hash.
    *
    * @param {string} url URL to set
    * @param {string | undefined} urlKey Configurable URL key. `url` by default.
@@ -241,12 +241,12 @@ export class KVStoreClient extends BaseEthersClient {
    * const signer = new Wallet(privateKey, provider);
    * const kvstoreClient = await KVStoreClient.build(signer);
    *
-   * await kvstoreClient.setURL('example.com');
-   * await kvstoreClient.setURL('linkedin.com/example', 'linkedinUrl);
+   * await kvstoreClient.setFileUrlAndHash('example.com');
+   * await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
    * ```
    */
   @requiresSigner
-  public async setURL(
+  public async setFileUrlAndHash(
     url: string,
     urlKey = 'url',
     txOptions: Overrides = {}
@@ -258,7 +258,7 @@ export class KVStoreClient extends BaseEthersClient {
     const content = await fetch(url).then((res) => res.text());
     const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
 
-    const hashKey = urlKey + 'Hash';
+    const hashKey = urlKey + '_hash';
 
     try {
       await (
@@ -275,7 +275,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the value for a specified key and address.
+   * Gets the value of a key-value pair in the contract.
    *
    * @param {string} address Address from which to get the key value.
    * @param {string} key Key to obtain the value.
@@ -312,7 +312,7 @@ export class KVStoreClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the URL value for the given entity.
+   * Gets the URL value of the given entity, and verify its hash.
    *
    * @param {string} address Address from which to get the URL value.
    * @param {string} urlKey  Configurable URL key. `url` by default.
@@ -330,16 +330,19 @@ export class KVStoreClient extends BaseEthersClient {
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const kvstoreClient = await KVStoreClient.build(provider);
    *
-   * const url = await kvstoreClient.getURL('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-   * const linkedinUrl = await kvstoreClient.getURL(
+   * const url = await kvstoreClient.getFileUrlAndVerifyHash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+   * const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
    *    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    'linkedinUrl'
+   *    'linkedin_url'
    * );
    * ```
    */
-  public async getURL(address: string, urlKey = 'url'): Promise<string> {
+  public async getFileUrlAndVerifyHash(
+    address: string,
+    urlKey = 'url'
+  ): Promise<string> {
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-    const hashKey = urlKey + 'Hash';
+    const hashKey = urlKey + '_hash';
 
     let url = '',
       hash = '';
@@ -369,5 +372,41 @@ export class KVStoreClient extends BaseEthersClient {
     }
 
     return url;
+  }
+
+  /**
+   * Gets the public key of the given entity, and verify its hash.
+   *
+   * @param {string} address Address from which to get the public key.
+   * @returns {string} Public key for the given address if exists, and the content is valid
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { providers } from 'ethers';
+   * import { KVStoreClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const kvstoreClient = await KVStoreClient.build(provider);
+   *
+   * const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+   * ```
+   */
+  public async getPublicKey(address: string): Promise<string> {
+    const publicKeyUrl = await this.getFileUrlAndVerifyHash(
+      address,
+      KVStoreKeys.publicKey
+    );
+
+    if (publicKeyUrl === '') {
+      return '';
+    }
+
+    const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
+
+    return publicKey;
   }
 }
