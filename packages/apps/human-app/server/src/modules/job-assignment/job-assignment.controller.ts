@@ -15,9 +15,9 @@ import {
   JobAssignmentDto,
   JobAssignmentCommand,
   JobAssignmentResponse,
-  JobsAssignmentParamsDto,
-  JobsAssignmentParamsCommand,
-  JobsAssignmentResponse,
+  JobsFetchParamsDto,
+  JobsFetchParamsCommand,
+  JobsFetchResponse,
 } from './interfaces/job-assignment.interface';
 
 @Controller()
@@ -50,12 +50,12 @@ export class JobAssignmentController {
     summary: 'Request to get a jobs assigned to a logged user',
   })
   public async getAssignedJobs(
-    @Query() jobsAssignmentParamsDto: JobsAssignmentParamsDto,
-  ): Promise<JobsAssignmentResponse> {
+    @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
+  ): Promise<JobsFetchResponse> {
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,
-      JobsAssignmentParamsDto,
-      JobsAssignmentParamsCommand,
+      JobsFetchParamsDto,
+      JobsFetchParamsCommand,
     );
     return this.jobAssignmentService.processGetAssignedJobs(
       jobsAssignmentParamsCommand,

@@ -52,7 +52,7 @@ export class JobAssignmentResponse {
   expires_at: string;
 }
 
-export class JobsAssignmentParamsDto {
+export class JobsFetchParamsDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
   exchange_oracle_url: string;
@@ -94,7 +94,7 @@ export class JobsAssignmentParamsDto {
   sort_field: SortField;
 }
 
-export class JobsAssignmentParamsCommand {
+export class JobsFetchParamsCommand {
   @AutoMap()
   exchange_oracle_url: string;
   @AutoMap()
@@ -117,7 +117,7 @@ export class JobsAssignmentParamsCommand {
   sort_field: SortField;
 }
 
-export class JobsAssignmentParamsData {
+export class JobsFetchParamsData {
   @AutoMap()
   exchange_oracle_url: string;
   @AutoMap()
@@ -140,7 +140,7 @@ export class JobsAssignmentParamsData {
   sort_field: SortField;
 }
 
-export class JobsAssignmentResponseItem {
+export class JobsFetchResponseItem {
   assignment_id: string;
   escrow_address: string;
   chain_id: number;
@@ -154,6 +154,6 @@ export class JobsAssignmentResponseItem {
   expires_at: string;
 }
 
-export class JobsAssignmentResponse {
-  data: JobsAssignmentResponseItem[];
+export class JobsFetchResponse {
+  data: JobsFetchResponseItem[];
 }

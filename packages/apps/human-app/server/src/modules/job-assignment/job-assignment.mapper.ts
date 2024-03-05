@@ -5,9 +5,9 @@ import {
   JobAssignmentCommand,
   JobAssignmentData,
   JobAssignmentDto,
-  JobsAssignmentParamsCommand,
-  JobsAssignmentParamsData,
-  JobsAssignmentParamsDto,
+  JobsFetchParamsCommand,
+  JobsFetchParamsData,
+  JobsFetchParamsDto,
 } from './interfaces/job-assignment.interface';
 
 @Injectable()
@@ -20,8 +20,8 @@ export class JobAssignmentProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(mapper, JobAssignmentDto, JobAssignmentCommand);
       createMap(mapper, JobAssignmentCommand, JobAssignmentData);
-      createMap(mapper, JobsAssignmentParamsDto, JobsAssignmentParamsCommand);
-      createMap(mapper, JobsAssignmentParamsCommand, JobsAssignmentParamsData);
+      createMap(mapper, JobsFetchParamsDto, JobsFetchParamsCommand);
+      createMap(mapper, JobsFetchParamsCommand, JobsFetchParamsData);
     };
   }
 }

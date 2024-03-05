@@ -3,11 +3,11 @@ import {
   JobAssignmentData,
   JobAssignmentDto,
   JobAssignmentResponse,
-  JobsAssignmentParamsCommand,
-  JobsAssignmentParamsData,
-  JobsAssignmentParamsDto,
-  JobsAssignmentResponse,
-  JobsAssignmentResponseItem,
+  JobsFetchParamsCommand,
+  JobsFetchParamsData,
+  JobsFetchParamsDto,
+  JobsFetchResponse,
+  JobsFetchResponseItem,
 } from '../interfaces/job-assignment.interface';
 import {
   SortField,
@@ -41,7 +41,7 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
   expires_at: 'test_date',
 };
 
-export const jobsAssignmentParamsDtoFixture: JobsAssignmentParamsDto = {
+export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
   exchange_oracle_url: 'test_url',
   assignment_id: 'test_id',
   escrow_address: 'test_address',
@@ -54,13 +54,13 @@ export const jobsAssignmentParamsDtoFixture: JobsAssignmentParamsDto = {
   sort_field: SortField.CREATED_AT,
 };
 
-export const jobsAssignmentParamsCommandFixture: JobsAssignmentParamsCommand =
-  jobsAssignmentParamsDtoFixture;
+export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand =
+  jobsFetchParamsDtoFixture;
 
-export const jobsAssignmentParamsDataFixture: JobsAssignmentParamsData =
-  jobsAssignmentParamsCommandFixture;
+export const jobsFetchParamsDataFixture: JobsFetchParamsData =
+  jobsFetchParamsCommandFixture;
 
-export const jobsAssignmentResponseItemFixture: JobsAssignmentResponseItem = {
+export const jobsFetchResponseItemFixture: JobsFetchResponseItem = {
   assignment_id: 'test_id',
   escrow_address: 'test_address',
   chain_id: 1,
@@ -74,6 +74,6 @@ export const jobsAssignmentResponseItemFixture: JobsAssignmentResponseItem = {
   expires_at: 'test_date',
 };
 
-export const jobsAssignmentResponseFixture: JobsAssignmentResponse = {
-  data: [jobsAssignmentResponseItemFixture],
+export const jobsFetchResponseFixture: JobsFetchResponse = {
+  data: [jobsFetchResponseItemFixture],
 };

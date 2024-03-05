@@ -5,16 +5,16 @@ import { jobAssignmentServiceMock } from './job-assignment.service.mock';
 import {
   JobAssignmentCommand,
   JobAssignmentDto,
-  JobsAssignmentParamsCommand,
-  JobsAssignmentParamsDto,
+  JobsFetchParamsCommand,
+  JobsFetchParamsDto,
 } from '../interfaces/job-assignment.interface';
 import {
   jobAssignmentDtoFixture,
   jobAssignmentCommandFixture,
   jobAssignmentResponseFixture,
-  jobsAssignmentParamsDtoFixture,
-  jobsAssignmentParamsCommandFixture,
-  jobsAssignmentResponseFixture,
+  jobsFetchParamsDtoFixture,
+  jobsFetchParamsCommandFixture,
+  jobsFetchResponseFixture,
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -24,7 +24,7 @@ import { HttpService } from '@nestjs/axios';
 const httpServiceMock = {
   request: jest.fn().mockImplementation((options) => {
     if (options.url.includes('processGetAssignedJobs')) {
-      return Promise.resolve({ data: jobsAssignmentResponseFixture });
+      return Promise.resolve({ data: jobsFetchResponseFixture });
     } else if (options.url.includes('processJobAssignment')) {
       return Promise.resolve({ data: jobAssignmentResponseFixture });
     }
@@ -85,9 +85,9 @@ describe('JobAssignmentController', () => {
     });
 
     it('should call service processGetAssignedJobs method with proper fields set', async () => {
-      const dto: JobsAssignmentParamsDto = jobsAssignmentParamsDtoFixture;
-      const command: JobsAssignmentParamsCommand =
-        jobsAssignmentParamsCommandFixture;
+      const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
+      const command: JobsFetchParamsCommand =
+        jobsFetchParamsCommandFixture;
       await controller.getAssignedJobs(dto);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,
@@ -95,9 +95,9 @@ describe('JobAssignmentController', () => {
     });
 
     it('should return the result of service processGetAssignedJobs method', async () => {
-      const dto: JobsAssignmentParamsDto = jobsAssignmentParamsDtoFixture;
-      const command: JobsAssignmentParamsCommand =
-        jobsAssignmentParamsCommandFixture;
+      const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
+      const command: JobsFetchParamsCommand =
+        jobsFetchParamsCommandFixture;
       const result = await controller.getAssignedJobs(dto);
       expect(result).toEqual(
         jobAssignmentServiceMock.processGetAssignedJobs(command),

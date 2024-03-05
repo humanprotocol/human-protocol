@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
-  JobsAssignmentParamsCommand,
-  JobsAssignmentParamsData,
+  JobsFetchParamsCommand,
+  JobsFetchParamsData,
   JobAssignmentResponse,
   JobAssignmentCommand,
   JobAssignmentData,
-  JobsAssignmentResponse,
+  JobsFetchResponse,
 } from './interfaces/job-assignment.interface';
 import { HttpService } from '@nestjs/axios';
 import { InjectMapper } from '@automapper/nestjs';
@@ -42,12 +42,12 @@ export class JobAssignmentService {
   }
 
   async processGetAssignedJobs(
-    jobsAssignmentParamsCommand: JobsAssignmentParamsCommand,
-  ): Promise<JobsAssignmentResponse> {
+    jobsAssignmentParamsCommand: JobsFetchParamsCommand,
+  ): Promise<JobsFetchResponse> {
     const jobsAssignmentParamsData = this.mapper.map(
       jobsAssignmentParamsCommand,
-      JobsAssignmentParamsCommand,
-      JobsAssignmentParamsData,
+      JobsFetchParamsCommand,
+      JobsFetchParamsData,
     );
     try {
       const url = jobsAssignmentParamsData.exchange_oracle_url;
