@@ -21,7 +21,7 @@ Cipher algorithm defintion.
 
 alias of `AES`
 
-#### ELLIPTIC_CURVE*: `EllipticCurve`* *= <cryptography.hazmat.primitives.asymmetric.ec.SECP256K1 object>*
+#### ELLIPTIC_CURVE *: `EllipticCurve`* *= <cryptography.hazmat.primitives.asymmetric.ec.SECP256K1 object>*
 
 Elliptic curve definition.
 
@@ -35,7 +35,7 @@ Cipher mode definition.
 
 alias of `CTR`
 
-#### PUBLIC_KEY_LEN*: `int`* *= 64*
+#### PUBLIC_KEY_LEN *: `int`* *= 64*
 
 Length of public keys: 512 bit keys in uncompressed form, without
 format byte

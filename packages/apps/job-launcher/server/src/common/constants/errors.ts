@@ -149,7 +149,6 @@ export enum ErrorPostgres {
  * Represents error messages associated with a cron job.
  */
 export enum ErrorCronJob {
-  NotCreated = 'Cron job has not been created',
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
 }
