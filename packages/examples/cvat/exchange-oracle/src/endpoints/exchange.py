@@ -1,4 +1,5 @@
 from contextlib import suppress
+from enum import auto
 from http import HTTPStatus
 from typing import Optional, Sequence
 
@@ -11,7 +12,7 @@ import src.services.exchange as oracle_service
 from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
-from src.endpoints.filtering import Filter, FilterDepends
+from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.schemas.exchange import (
@@ -21,20 +22,30 @@ from src.schemas.exchange import (
     UserRequest,
     UserResponse,
 )
+from src.utils.enums import BetterEnumMeta, StrEnum
 from src.validators.signature import validate_human_app_signature
 
 router = APIRouter()
 
 
 class JobsFilter(Filter):
-    id: Optional[str] = None
     escrow_address: Optional[str] = None
     job_type: Optional[TaskTypes] = None
-    status: Optional[ProjectStatuses] = None
+
+    class SortingFields(StrEnum, metaclass=BetterEnumMeta):
+        created_at = auto()
+        chain_id = auto()
+        job_type = auto()
+        reward_amount = auto()
+
+    sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
+    sort_field: Optional[SortingFields] = Query(default=SortingFields.created_at)
 
     class Constants(Filter.Constants):
         model = cvat_service.Project
-        sorting_field_name = "created_at"
+
+        sorting_direction_field_name = "sort"
+        sorting_field_name = "sort_field"
 
 
 @router.get("/job", description="Lists available jobs")
@@ -48,15 +59,16 @@ async def list_jobs(
     query = select(cvat_service.Project)
 
     # We need only high-level jobs (i.e. escrows) without project details
-    if db_engine.driver != "psycopg2":
+    if db_engine.driver == "psycopg2":
+        subquery = select(cvat_service.Project.id).distinct(
+            cvat_service.Project.escrow_address
+            # DISTINCT ON is a postgres feature
+        )
+        query = query.where(cvat_service.Project.id.in_(subquery))
+    else:
         # should be something like
         # select(Project).where(id.in_(select(Project.id).group_by(Project.escrow_address)))
         raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
-
-    query = query.order_by(
-        cvat_service.Project.escrow_address
-        # Required for DISTINCT ON in postgres
-    ).distinct(cvat_service.Project.escrow_address)
 
     if wallet_address:
         query = query.where(
@@ -67,8 +79,8 @@ async def list_jobs(
             )
         )
 
-    query = filter.filter(query)
-    query = filter.sort(query)
+    query = filter.filter_(query)
+    query = filter.sort_(query)
 
     with SessionLocal() as session:
 
@@ -142,9 +154,22 @@ class AssignmentFilter(Filter):
     id: Optional[str] = None
     status: Optional[ProjectStatuses] = None
 
+    class SortingFields(StrEnum, metaclass=BetterEnumMeta):
+        chain_id = auto()
+        job_type = auto()
+        status = auto()
+        reward_amount = auto()
+        created_at = auto()
+        expires_at = auto()
+
+    sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
+    sort_field: Optional[SortingFields] = Query(default=SortingFields.created_at)
+
     class Constants(Filter.Constants):
         model = cvat_service.Assignment
-        sorting_field_name = "created_at"
+
+        sorting_direction_field_name = "sort"
+        sorting_field_name = "sort_field"
 
 
 @router.get("/assignment", description="Lists assignments")
@@ -172,8 +197,8 @@ async def list_assignments(
             )
         )
 
-    query = filter.filter(query)
-    query = filter.sort(query)
+    query = filter.filter_(query)
+    query = filter.sort_(query)
 
     with SessionLocal.begin() as session:
 

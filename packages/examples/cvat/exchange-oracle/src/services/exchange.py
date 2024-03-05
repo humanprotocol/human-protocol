@@ -3,7 +3,7 @@ from typing import Optional
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
-from src.core.types import ProjectStatuses, TaskTypes, Networks
+from src.core.types import Networks, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.utils.assignments import get_default_assignment_timeout
 from src.utils.requests import get_or_404
