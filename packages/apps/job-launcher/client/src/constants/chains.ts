@@ -5,12 +5,18 @@ export const IS_TESTNET = !IS_MAINNET;
 
 export const SUPPORTED_CHAIN_IDS = IS_MAINNET
   ? [ChainId.POLYGON] // ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
-  : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
+  : [
+      ChainId.BSC_TESTNET,
+      ChainId.POLYGON_MUMBAI,
+      ChainId.GOERLI,
+      ChainId.X1_TESTNET,
+    ];
 
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
   'Polygon Mumbai': ChainId.POLYGON_MUMBAI,
   'Binance Smart Chain': ChainId.BSC_MAINNET,
   'Ethereum Goerli': ChainId.GOERLI,
+  'X1 Testnet': ChainId.X1_TESTNET,
 };
 
 export const RPC_URLS: {
