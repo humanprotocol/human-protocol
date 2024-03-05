@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
   JobsAssignmentParamsCommand,
@@ -20,7 +20,6 @@ export class JobAssignmentService {
   ) {}
 
   async processJobAssignment(
-    url: string,
     jobAssignmentCommand: JobAssignmentCommand,
   ): Promise<JobAssignmentResponse> {
     const jobAssignmentData = this.mapper.map(
@@ -29,6 +28,7 @@ export class JobAssignmentService {
       JobAssignmentData,
     );
     try {
+      const url = jobAssignmentData.exchange_oracle_url;
       const options = {
         method: 'POST',
         url: `${url}/assignment`,
@@ -37,19 +37,11 @@ export class JobAssignmentService {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
     } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      } else {
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      throw error;
     }
   }
 
-  async processGettingAssignedJobs(
-    url: string,
+  async processGetAssignedJobs(
     jobsAssignmentParamsCommand: JobsAssignmentParamsCommand,
   ): Promise<JobsAssignmentResponse> {
     const jobsAssignmentParamsData = this.mapper.map(
@@ -58,6 +50,7 @@ export class JobAssignmentService {
       JobsAssignmentParamsData,
     );
     try {
+      const url = jobsAssignmentParamsData.exchange_oracle_url;
       const options = {
         method: 'GET',
         url: `${url}/assignment`,
@@ -66,14 +59,7 @@ export class JobAssignmentService {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data;
     } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      } else {
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      throw error;
     }
   }
 }

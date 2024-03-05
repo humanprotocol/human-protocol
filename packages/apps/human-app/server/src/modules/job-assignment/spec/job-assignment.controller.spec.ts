@@ -11,12 +11,9 @@ import {
 import {
   jobAssignmentDtoFixture,
   jobAssignmentCommandFixture,
-  jobAssignmentDataFixture,
   jobAssignmentResponseFixture,
   jobsAssignmentParamsDtoFixture,
   jobsAssignmentParamsCommandFixture,
-  jobsAssignmentParamsDataFixture,
-  jobsAssignmentResponseItemFixture,
   jobsAssignmentResponseFixture,
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
@@ -26,7 +23,7 @@ import { HttpService } from '@nestjs/axios';
 
 const httpServiceMock = {
   request: jest.fn().mockImplementation((options) => {
-    if (options.url.includes('processGettingAssignedJobs')) {
+    if (options.url.includes('processGetAssignedJobs')) {
       return Promise.resolve({ data: jobsAssignmentResponseFixture });
     } else if (options.url.includes('processJobAssignment')) {
       return Promise.resolve({ data: jobAssignmentResponseFixture });
@@ -37,7 +34,6 @@ const httpServiceMock = {
 describe('JobAssignmentController', () => {
   let controller: JobAssignmentController;
   let jobAssignmentService: JobAssignmentService;
-  let httpService: HttpService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -63,7 +59,6 @@ describe('JobAssignmentController', () => {
     controller = module.get<JobAssignmentController>(JobAssignmentController);
     jobAssignmentService =
       module.get<JobAssignmentService>(JobAssignmentService);
-    httpService = module.get<HttpService>(HttpService);
   });
 
   it('should be defined', () => {
@@ -72,45 +67,40 @@ describe('JobAssignmentController', () => {
 
   describe('jobAssignmentDiscovery', () => {
     it('should call service processJobAssignment method with proper fields set', async () => {
-      const url = 'url';
       const dto: JobAssignmentDto = jobAssignmentDtoFixture;
       const command: JobAssignmentCommand = jobAssignmentCommandFixture;
-      await controller.assignJob(url, dto);
+      await controller.assignJob(dto);
       expect(jobAssignmentService.processJobAssignment).toHaveBeenCalledWith(
-        url,
         command,
       );
     });
 
     it('should return the result of service processJobAssignment method', async () => {
-      const url = 'url';
       const dto: JobAssignmentDto = jobAssignmentDtoFixture;
       const command: JobAssignmentCommand = jobAssignmentCommandFixture;
-      const result = await controller.assignJob(url, dto);
+      const result = await controller.assignJob(dto);
       expect(result).toEqual(
-        jobAssignmentServiceMock.processJobAssignment(url, command),
+        jobAssignmentServiceMock.processJobAssignment(command),
       );
     });
 
-    it('should call service processGettingAssignedJobs method with proper fields set', async () => {
-      const url = 'url';
+    it('should call service processGetAssignedJobs method with proper fields set', async () => {
       const dto: JobsAssignmentParamsDto = jobsAssignmentParamsDtoFixture;
       const command: JobsAssignmentParamsCommand =
         jobsAssignmentParamsCommandFixture;
-      await controller.getAssignedJobs(url, dto);
-      expect(
-        jobAssignmentService.processGettingAssignedJobs,
-      ).toHaveBeenCalledWith(url, command);
+      await controller.getAssignedJobs(dto);
+      expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
+        command,
+      );
     });
 
-    it('should return the result of service processGettingAssignedJobs method', async () => {
-      const url = 'url';
+    it('should return the result of service processGetAssignedJobs method', async () => {
       const dto: JobsAssignmentParamsDto = jobsAssignmentParamsDtoFixture;
       const command: JobsAssignmentParamsCommand =
         jobsAssignmentParamsCommandFixture;
-      const result = await controller.getAssignedJobs(url, dto);
+      const result = await controller.getAssignedJobs(dto);
       expect(result).toEqual(
-        jobAssignmentServiceMock.processGettingAssignedJobs(url, command),
+        jobAssignmentServiceMock.processGetAssignedJobs(command),
       );
     });
   });

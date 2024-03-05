@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import {
+  SortField,
+  SortOrder,
+  StatusEnum,
+} from '../../../common/enums/job-assignment';
 
 export class JobAssignmentDto {
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  exchange_oracle_url: string;
+
   @AutoMap()
   @ApiProperty({ example: 'string' })
   escrow_address: string;
@@ -13,6 +22,8 @@ export class JobAssignmentDto {
 
 export class JobAssignmentCommand {
   @AutoMap()
+  exchange_oracle_url: string;
+  @AutoMap()
   escrow_address: string;
   @AutoMap()
   chain_id: number;
@@ -20,45 +31,32 @@ export class JobAssignmentCommand {
 
 export class JobAssignmentData {
   @AutoMap()
+  exchange_oracle_url: string;
+  @AutoMap()
   escrow_address: string;
   @AutoMap()
   chain_id: number;
 }
 
 export class JobAssignmentResponse {
-  @AutoMap()
   assignment_id: string;
-  @AutoMap()
   escrow_address: string;
-  @AutoMap()
   chain_id: number;
-  @AutoMap()
   job_type: string;
-  @AutoMap()
-  url: string;
-  @AutoMap()
+  url?: string; //Only for ACTIVE status
   status: string;
-  @AutoMap()
   reward_amount: string;
-  @AutoMap()
   reward_token: string;
-  @AutoMap()
   created_at: string;
-  @AutoMap()
-  updated_at: string;
-  @AutoMap()
+  updated_at?: string; //Only for COMPLETED, EXPIRED, CANCELED and REJECTED status
   expires_at: string;
 }
 
-export enum StatusEnum {
-  ACTIVE = 'ACTIVE',
-  VALIDATION = 'VALIDATION',
-  COMPLETED = 'COMPLETED',
-  EXPIRED = 'EXPIRED',
-  CANCELED = 'CANCELED',
-  REJECTED = 'REJECTED',
-}
 export class JobsAssignmentParamsDto {
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  exchange_oracle_url: string;
+
   @AutoMap()
   @ApiProperty({ example: 'string' })
   assignment_id: string;
@@ -89,15 +87,17 @@ export class JobsAssignmentParamsDto {
 
   @AutoMap()
   @ApiProperty({ example: 'ASC', default: 'ASC' })
-  sort: 'ASC' | 'DESC';
+  sort: SortOrder;
 
   @AutoMap()
   @ApiProperty({ example: 'created_at', default: 'created_at' })
-  sort_field: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
+  sort_field: SortField;
 }
 
 export class JobsAssignmentParamsCommand {
   @AutoMap()
+  exchange_oracle_url: string;
+  @AutoMap()
   assignment_id: string;
   @AutoMap()
   escrow_address: string;
@@ -112,13 +112,15 @@ export class JobsAssignmentParamsCommand {
   @AutoMap()
   page: number;
   @AutoMap()
-  sort: 'ASC' | 'DESC';
+  sort: SortOrder;
   @AutoMap()
-  sort_field: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
+  sort_field: SortField;
 }
 
 export class JobsAssignmentParamsData {
   @AutoMap()
+  exchange_oracle_url: string;
+  @AutoMap()
   assignment_id: string;
   @AutoMap()
   escrow_address: string;
@@ -133,33 +135,22 @@ export class JobsAssignmentParamsData {
   @AutoMap()
   page: number;
   @AutoMap()
-  sort: 'ASC' | 'DESC';
+  sort: SortOrder;
   @AutoMap()
-  sort_field: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
+  sort_field: SortField;
 }
 
 export class JobsAssignmentResponseItem {
-  @AutoMap()
   assignment_id: string;
-  @AutoMap()
   escrow_address: string;
-  @AutoMap()
   chain_id: number;
-  @AutoMap()
   job_type: string;
-  @AutoMap()
-  url: string;
-  @AutoMap()
+  url?: string; //Only for ACTIVE status
   status: string;
-  @AutoMap()
   reward_amount: string;
-  @AutoMap()
   reward_token: string;
-  @AutoMap()
   created_at: string;
-  @AutoMap()
-  updated_at: string;
-  @AutoMap()
+  updated_at: string; //Only for VALIDATION, COMPLETED, EXPIRED, CANCELED and REJECTED status
   expires_at: string;
 }
 

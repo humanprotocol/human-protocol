@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Query,
   UsePipes,
@@ -13,10 +12,10 @@ import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { JobAssignmentService } from './job-assignment.service';
 import {
-  JobAssignmentCommand,
   JobAssignmentDto,
-  JobsAssignmentParamsDto,
+  JobAssignmentCommand,
   JobAssignmentResponse,
+  JobsAssignmentParamsDto,
   JobsAssignmentParamsCommand,
   JobsAssignmentResponse,
 } from './interfaces/job-assignment.interface';
@@ -29,13 +28,12 @@ export class JobAssignmentController {
   ) {}
 
   @ApiTags('Job-Assignment')
-  @Post('/:url/assignment')
+  @Post('/assignment/job')
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
   @UsePipes(new ValidationPipe())
   public async assignJob(
-    @Param('url') url: string,
     @Body() jobAssignmentDto: JobAssignmentDto,
   ): Promise<JobAssignmentResponse> {
     const jobAssignmentCommand = this.mapper.map(
@@ -43,19 +41,15 @@ export class JobAssignmentController {
       JobAssignmentDto,
       JobAssignmentCommand,
     );
-    return this.jobAssignmentService.processJobAssignment(
-      url,
-      jobAssignmentCommand,
-    );
+    return this.jobAssignmentService.processJobAssignment(jobAssignmentCommand);
   }
 
   @ApiTags('Job-Assignment')
-  @Get('/:url/assignment')
+  @Get('/assignment/job')
   @ApiOperation({
-    summary: 'Request to get a jobs assigned to a specific user',
+    summary: 'Request to get a jobs assigned to a logged user',
   })
   public async getAssignedJobs(
-    @Param('url') url: string,
     @Query() jobsAssignmentParamsDto: JobsAssignmentParamsDto,
   ): Promise<JobsAssignmentResponse> {
     const jobsAssignmentParamsCommand = this.mapper.map(
@@ -63,8 +57,7 @@ export class JobAssignmentController {
       JobsAssignmentParamsDto,
       JobsAssignmentParamsCommand,
     );
-    return this.jobAssignmentService.processGettingAssignedJobs(
-      url,
+    return this.jobAssignmentService.processGetAssignedJobs(
       jobsAssignmentParamsCommand,
     );
   }
