@@ -13,6 +13,8 @@ import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
 import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
+import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
+import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery
     WorkerModule,
     OperatorModule,
     JobsDiscoveryModule,
+    JobAssignmentModule,
     ReputationOracleModule,
     CommonConfigModule,
   ],
@@ -36,6 +39,7 @@ import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery
     OperatorController,
     WorkerController,
     JobsDiscoveryController,
+    JobAssignmentController,
   ],
   providers: [],
   exports: [HttpModule],

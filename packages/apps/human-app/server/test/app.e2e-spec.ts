@@ -32,6 +32,8 @@ describe('Human APP (e2e) tests', () => {
       E2E_TESTING_PASSWORD: envConfigService.e2eTestingPassword,
       E2E_TESTING_EXCHANGE_ORACLE_URL:
         envConfigService.e2eTestingExchangeOracleUrl,
+      E2E_TESTING_ESCROW_ADDRESS: envConfigService.e2eTestingEscrowAddress,
+      E2E_TESTING_ESCROW_CHAIN_ID: envConfigService.e2eTestingEscrowChainId,
     });
 
     if (error) {
@@ -100,6 +102,25 @@ describe('Human APP (e2e) tests', () => {
       const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
       return request(app.getHttpServer())
         .get(`${exchangeOracleUrl}/jobs`)
+        .expect(200);
+    });
+  });
+  describe('Job assignment', () => {
+    it('should successfully assign a job to a user', async () => {
+      const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
+      return request(app.getHttpServer())
+        .post(`${exchangeOracleUrl}/assignment`)
+        .send({
+          escrow_address: envConfigService.e2eTestingEscrowAddress,
+          chain_id: envConfigService.e2eTestingEscrowChainId,
+        })
+        .expect(201);
+    });
+    it('should successfully get jobs assigned to a user', async () => {
+      const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
+      return request(app.getHttpServer())
+        .get(`${exchangeOracleUrl}/assignment`)
+        .query({})
         .expect(200);
     });
   });
