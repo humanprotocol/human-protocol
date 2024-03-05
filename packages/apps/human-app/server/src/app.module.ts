@@ -11,6 +11,8 @@ import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
+import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
+import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
 import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
 
@@ -27,6 +29,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
     HttpModule,
     WorkerModule,
     OperatorModule,
+    JobsDiscoveryModule,
     JobAssignmentModule,
     ReputationOracleModule,
     CommonConfigModule,
@@ -35,6 +38,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
     AppController,
     OperatorController,
     WorkerController,
+    JobsDiscoveryController,
     JobAssignmentController,
   ],
   providers: [],

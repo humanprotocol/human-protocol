@@ -97,6 +97,14 @@ describe('Human APP (e2e) tests', () => {
         });
     });
   });
+  describe('Jobs discovery', () => {
+    it('should successfully process the jobs discovery request', async () => {
+      const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
+      return request(app.getHttpServer())
+        .get(`${exchangeOracleUrl}/jobs`)
+        .expect(200);
+    });
+  });
   describe('Job assignment', () => {
     it('should successfully assign a job to a user', async () => {
       const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
