@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  OperatorUtils,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -51,26 +51,24 @@ export class StorageService {
 
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
+    const kvstoreClient = await KVStoreClient.build(signer);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const reputationOracle = await OperatorUtils.getLeader(
-      chainId,
+    const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
       signer.address,
     );
-    const jobLauncher = await OperatorUtils.getLeader(
-      chainId,
-      jobLauncherAddress,
-    );
+    const jobLauncherPublicKey =
+      await kvstoreClient.getPublicKey(jobLauncherAddress);
 
-    if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
+    if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
       throw new BadRequestException('Missing public key');
     }
 
     return await EncryptionUtils.encrypt(content, [
-      reputationOracle.publicKey,
-      jobLauncher.publicKey,
+      reputationOraclePublicKey,
+      jobLauncherPublicKey,
     ]);
   }
 

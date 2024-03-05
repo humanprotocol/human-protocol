@@ -2,7 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  OperatorUtils,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -70,22 +70,22 @@ export class StorageService {
     }
 
     const signer = this.web3Service.getSigner(chainId);
-    const exchangeOracle = await OperatorUtils.getLeader(
-      chainId,
+    const kvstoreClient = await KVStoreClient.build(signer);
+
+    const exchangeOraclePublickKey = await kvstoreClient.getPublicKey(
       signer.address,
     );
-    const recordingOracle = await OperatorUtils.getLeader(
-      chainId,
+    const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
       this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS, ''),
     );
-    if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
+    if (!exchangeOraclePublickKey.length || !recordingOraclePublicKey.length) {
       throw new BadRequestException('Missing public key');
     }
 
     try {
       const solutionsEncrypted = await EncryptionUtils.encrypt(
         JSON.stringify(solutions),
-        [exchangeOracle.publicKey, recordingOracle.publicKey],
+        [exchangeOraclePublickKey, recordingOraclePublicKey],
       );
 
       await this.minioClient.putObject(

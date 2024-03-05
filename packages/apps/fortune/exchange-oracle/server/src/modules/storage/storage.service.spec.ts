@@ -2,7 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  OperatorUtils,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
@@ -20,9 +20,6 @@ import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
-  OperatorUtils: {
-    getLeader: jest.fn(),
-  },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
   },
@@ -31,6 +28,11 @@ jest.mock('@human-protocol/sdk', () => ({
   },
   EncryptionUtils: {
     encrypt: jest.fn(),
+  },
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getPublicKey: jest.fn(),
+    })),
   },
 }));
 
@@ -95,8 +97,8 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        publicKey: 'publicKey',
+      (KVStoreClient.build as jest.Mock).mockResolvedValue({
+        getPublicKey: jest.fn().mockResolvedValue('publicKey'),
       });
 
       const jobSolution = {
@@ -178,7 +180,9 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({});
+      (KVStoreClient.build as jest.Mock).mockResolvedValue({
+        getPublicKey: jest.fn().mockResolvedValue(''),
+      });
 
       const jobSolution = {
         workerAddress,

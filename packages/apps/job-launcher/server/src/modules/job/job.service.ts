@@ -696,12 +696,10 @@ export class JobService {
     if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
-      const publicKeys: string[] = [
-        await kvstore.get(signer.address, KVStoreKeys.publicKey),
-      ];
+      const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
       const oracleAddresses = this.getOracleAddresses(requestType);
       for (const address in Object.values(oracleAddresses)) {
-        const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
+        const publicKey = await kvstore.getPublicKey(address);
         if (publicKey) publicKeys.push(publicKey);
       }
 
