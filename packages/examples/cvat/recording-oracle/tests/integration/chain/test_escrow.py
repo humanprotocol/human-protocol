@@ -88,7 +88,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_escrow_manifest(self):
         with patch("src.chain.escrow.get_escrow") as mock_get_escrow, patch(
-            "src.chain.escrow.StorageClient.download_files"
+            "src.chain.escrow.StorageUtils.download_file_from_url"
         ) as mock_storage:
             mock_storage.return_value = [json.dumps({"title": "test"}).encode()]
 
