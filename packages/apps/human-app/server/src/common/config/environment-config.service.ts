@@ -14,6 +14,19 @@ export class EnvironmentConfigService {
   get reputationOracleUrl(): string {
     return this.configService.get<string>('REPUTATION_ORACLE_URL', '');
   }
+  get cachePort(): number {
+    return this.configService.get<number>('REDIS_PORT', 6379);
+  }
+  get cacheHost(): string {
+    return this.configService.get<string>('REDIS_HOST', 'localhost');
+  }
+
+  get cacheTtlOracleDiscovery(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_ORACLE_DISCOVERY',
+      24 * 60 * 60,
+    );
+  }
 }
 
 export const envValidator = Joi.object({

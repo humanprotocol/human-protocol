@@ -11,6 +11,10 @@ import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { CommonConfigModule } from './common/config/common-config.module';
+import { CacheFactoryConfig } from './common/config/cache-factory.config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
+import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
 import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
@@ -27,6 +31,7 @@ import { RequestContext } from './common/utils/request-context.util';
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
     }),
+    CacheModule.registerAsync(CacheFactoryConfig),
     HttpModule,
     WorkerModule,
     OperatorModule,
@@ -34,12 +39,14 @@ import { RequestContext } from './common/utils/request-context.util';
     JobAssignmentModule,
     ReputationOracleModule,
     CommonConfigModule,
+    OracleDiscoveryModule,
   ],
   controllers: [
     AppController,
     OperatorController,
     WorkerController,
     JobsDiscoveryController,
+    OracleDiscoveryController,
     JobAssignmentController,
   ],
   providers: [RequestContext],
