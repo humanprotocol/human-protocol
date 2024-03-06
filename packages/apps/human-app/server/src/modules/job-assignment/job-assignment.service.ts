@@ -9,6 +9,7 @@ import {
 } from './interfaces/job-assignment.interface';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { RequestContext } from '../../common/utils/request-context.util';
 import { CommonHttpUtilService } from '../../common/utils/common-http-util.service';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class JobAssignmentService {
   constructor(
     private readonly httpService: CommonHttpUtilService,
     @InjectMapper() private readonly mapper: Mapper,
+    private readonly requestContext: RequestContext,
   ) {}
 
   async processJobAssignment(
@@ -27,10 +29,12 @@ export class JobAssignmentService {
       JobAssignmentCommand,
       JobAssignmentData,
     );
+    const token = this.requestContext.token;
     const options = {
       method: 'POST',
       url: `${url}/assignment`,
       data: data,
+      headers: { Authorization: `Bearer ${token}`}
     };
     return await this.httpService.callExternalHttpUtilRequest<JobAssignmentResponse>(
       options,

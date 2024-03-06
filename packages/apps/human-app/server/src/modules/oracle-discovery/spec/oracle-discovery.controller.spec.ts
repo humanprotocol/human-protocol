@@ -11,7 +11,7 @@ import {
   OracleDiscoveryDto,
 } from '../interface/oracle-discovery.interface';
 import { ChainId } from '@human-protocol/sdk';
-import { generateOracleDiscoveryResponseBody } from '../../../../test/fixtures/oracle-discovery.fixture';
+import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;

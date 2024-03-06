@@ -22,6 +22,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
 import { CommonUtilModule } from './common/utils/common-util.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
+import { RequestContext } from './common/utils/request-context.util';
 
 @Module({
   imports: [
@@ -54,7 +55,7 @@ import { StatisticsController } from './modules/statistics/statistics.controller
     JobAssignmentController,
     StatisticsController,
   ],
-  providers: [],
+  providers: [RequestContext],
   exports: [HttpModule],
 })
 export class AppModule {}

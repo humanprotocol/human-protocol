@@ -1,4 +1,4 @@
-import { generateOracleDiscoveryResponseBody } from '../../../../test/fixtures/oracle-discovery.fixture';
+import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 
 export const oracleDiscoveryServiceMock = {
   processOracleDiscovery: jest

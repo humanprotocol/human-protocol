@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
@@ -9,7 +9,6 @@ import { OperatorUtils } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 @Injectable()
 export class OracleDiscoveryService {
-  logger = new Logger(OracleDiscoveryService.name);
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
@@ -24,7 +23,6 @@ export class OracleDiscoveryService {
       data = await this.getOperatorsForOracleDiscovery(command);
       await this.setOperatorsForAddress(command.address, data);
     }
-    this.logger.log(`Returning data: ${JSON.stringify(data)}`);
     return data;
   }
 

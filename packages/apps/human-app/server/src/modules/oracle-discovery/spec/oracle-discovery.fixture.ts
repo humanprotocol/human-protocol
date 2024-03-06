@@ -1,4 +1,4 @@
-import { OracleDiscoveryResponse } from '../../src/modules/oracle-discovery/interface/oracle-discovery.interface';
+import { OracleDiscoveryResponse } from '../interface/oracle-discovery.interface';
 
 export function generateOracleDiscoveryResponseBody() {
   const response1: OracleDiscoveryResponse = {
