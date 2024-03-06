@@ -12,11 +12,13 @@ import { ConfigModule } from '@nestjs/config';
 import { CommonUtilModule } from '../../../common/utils/common-util.module';
 import { mockCommonHttpUtilService } from '../../../common/utils/common-http-util.service.mock';
 import {
-  oracleStatsCommandFixture,
-  oracleStatsResponseFixture,
-  userStatsCommandFixture,
+  oracleStatsCommandFixture, oracleStatsOptionsFixture,
+  oracleStatsResponseFixture, requestContextFixture,
+  userStatsCommandFixture, userStatsOptionsFixture,
   userStatsResponseFixture,
 } from './statistics.fixtures';
+import { AxiosRequestConfig } from 'axios';
+import { RequestContext } from '../../../common/utils/request-context.util';
 
 describe('StatisticsService', () => {
   let service: StatisticsService;
@@ -50,6 +52,10 @@ describe('StatisticsService', () => {
             cacheTtlOracleStats: 43200,
             cacheTtlUserStats: 900,
           },
+        },
+        {
+          provide: RequestContext,
+          useValue: requestContextFixture,
         },
       ],
     })
@@ -97,9 +103,12 @@ describe('StatisticsService', () => {
 
       const command = oracleStatsCommandFixture;
       const result = await service.getOracleStats(command);
+      const options: AxiosRequestConfig = oracleStatsOptionsFixture;
 
       expect(cacheManager.get).toHaveBeenCalledWith(command.oracle_url);
-      expect(httpUtilService.callExternalHttpUtilRequest).toHaveBeenCalled();
+      expect(httpUtilService.callExternalHttpUtilRequest).toHaveBeenCalledWith(
+        options,
+      );
       expect(cacheManager.set).toHaveBeenCalledWith(
         command.oracle_url,
         newStats,
@@ -117,7 +126,7 @@ describe('StatisticsService', () => {
       const result = await service.getUserStats(command);
 
       expect(cacheManager.get).toHaveBeenCalledWith(
-        command.oracle_url + command.token,
+        command.oracle_url + requestContextFixture.token,
       );
       expect(
         httpUtilService.callExternalHttpUtilRequest,
@@ -133,14 +142,17 @@ describe('StatisticsService', () => {
         .mockResolvedValue(newStats);
 
       const command = userStatsCommandFixture;
-      const result = await service.getOracleStats(command);
+      const options = userStatsOptionsFixture;
+      const result = await service.getUserStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(command.oracle_url);
-      expect(httpUtilService.callExternalHttpUtilRequest).toHaveBeenCalled();
+      expect(cacheManager.get).toHaveBeenCalledWith(command.oracle_url + requestContextFixture.token);
+      expect(httpUtilService.callExternalHttpUtilRequest).toHaveBeenCalledWith(
+        options,
+      );
       expect(cacheManager.set).toHaveBeenCalledWith(
-        command.oracle_url,
+        command.oracle_url + requestContextFixture.token,
         newStats,
-        configService.cacheTtlOracleStats,
+        configService.cacheTtlUserStats,
       );
       expect(result).toEqual(newStats);
     });

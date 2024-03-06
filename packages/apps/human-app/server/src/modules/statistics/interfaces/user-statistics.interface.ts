@@ -7,5 +7,4 @@ export class UserStatisticsResponse {
 }
 export class UserStatisticsCommand {
   oracle_url: string;
-  token: string;
 }

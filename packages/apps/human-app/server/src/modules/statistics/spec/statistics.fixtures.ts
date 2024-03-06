@@ -6,6 +6,7 @@ import {
   OracleStatisticsCommand,
   OracleStatisticsResponse,
 } from '../interfaces/oracle-statistics.interface';
+import { AxiosRequestConfig } from 'axios';
 
 export const userStatsResponseFixture: UserStatisticsResponse = {
   assignments_amount: 2137,
@@ -27,9 +28,25 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
 
 export const userStatsCommandFixture: UserStatisticsCommand = {
   oracle_url: 'https://test.oracle.com',
-  token: 'testToken',
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {
   oracle_url: 'https://test.oracle.com',
 };
+const userTokenFixture = 'test-token';
+export const requestContextFixture = {
+  token: userTokenFixture,
+};
+export const oracleUrlFixture = 'https://test.oracle.com';
+export const userStatsOptionsFixture: AxiosRequestConfig = {
+  method: 'GET',
+  url: `${oracleUrlFixture}/stats/assignment`,
+  headers: {
+    Authorization: `Bearer ${userTokenFixture}`,
+  },
+}
+
+export const oracleStatsOptionsFixture: AxiosRequestConfig = {
+  method: 'GET',
+  url: `${oracleUrlFixture}/stats`,
+}

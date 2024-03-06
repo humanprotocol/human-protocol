@@ -44,12 +44,10 @@ describe('StatisticsController', () => {
   describe('getUserStatistics', () => {
     it('should call getUserStats service method with correct parameters', async () => {
       const oracleUrl = 'http://test-user.com';
-      const token = 'Bearer some-token';
-      const result = await controller.getUserStatistics(oracleUrl, token);
+      const result = await controller.getUserStatistics(oracleUrl);
 
       expect(statisticsServiceMock.getUserStats).toHaveBeenCalledWith({
         oracle_url: oracleUrl,
-        token: token,
       });
       expect(result).toEqual(userStatsResponseFixture);
     });

@@ -12,6 +12,7 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { RequestContext } from '../../common/utils/request-context.util';
 
 @Injectable()
 export class StatisticsService {
@@ -19,6 +20,7 @@ export class StatisticsService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private httpService: CommonHttpUtilService,
     private configService: EnvironmentConfigService,
+    private readonly requestContext: RequestContext,
   ) {}
   async getOracleStats(
     command: OracleStatisticsCommand,
@@ -48,7 +50,7 @@ export class StatisticsService {
     command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
     const url = command.oracle_url;
-    const bearerToken = command.token;
+    const bearerToken = this.requestContext.token
     const userCacheKey = url + bearerToken;
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
@@ -57,7 +59,7 @@ export class StatisticsService {
     }
     const options: AxiosRequestConfig = {
       method: 'GET',
-      url: `${url}/stats`,
+      url: `${url}/stats/assignment`,
       headers: {
         Authorization: `Bearer ${bearerToken}`,
       },
