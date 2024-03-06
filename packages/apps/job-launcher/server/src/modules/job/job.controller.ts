@@ -73,7 +73,7 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.FORTUNE, data);
+    return this.jobService.createJob(req.user.id, data.requestType, data);
   }
 
   @ApiOperation({
