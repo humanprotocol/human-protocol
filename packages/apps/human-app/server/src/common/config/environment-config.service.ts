@@ -20,6 +20,16 @@ export class EnvironmentConfigService {
   get cacheHost(): string {
     return this.configService.get<string>('REDIS_HOST', 'localhost');
   }
+  get cacheTtlOracleStats(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_ORACLE_STATS',
+      12 * 60 * 60,
+    );
+  }
+
+  get cacheTtlUserStats(): number {
+    return this.configService.get<number>('CACHE_TTL_USER_STATS', 15 * 60);
+  }
 
   get cacheTtlOracleDiscovery(): number {
     return this.configService.get<number>(
