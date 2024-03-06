@@ -1,9 +1,8 @@
 from contextlib import suppress
 from enum import auto
-from http import HTTPStatus
 from typing import List, Optional, Sequence
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
@@ -12,13 +11,13 @@ import src.services.exchange as oracle_service
 from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
+from src.endpoints.authentication import AuthData, authenticate_token
 from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.schemas.exchange import (
     AssignmentRequest,
     AssignmentResponse,
-    AuthorizationHeader,
     JobResponse,
     OracleStatsResponse,
     UserRequest,
@@ -65,11 +64,10 @@ class JobsFilter(Filter):
 
 @router.get("/job", description="Lists available jobs", response_model_exclude_unset=True)
 async def list_jobs(
-    wallet_address: Optional[str] = Query(default=None),
-    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
     filter: JobsFilter = FilterDepends(JobsFilter),
+    token: AuthData = Depends(authenticate_token),
 ) -> Page[JobResponse]:
-    await validate_human_app_signature(signature)
+    wallet_address = token.wallet_address
 
     query = select(cvat_service.Project)
 
@@ -130,20 +128,22 @@ async def register(
                 cvat_id = cvat_api.get_user_id(user.cvat_email)
             except cvat_api.exceptions.ApiException as e:
                 if (
-                    e.status == HTTPStatus.BAD_REQUEST
+                    e.status == status.HTTP_400_BAD_REQUEST
                     and "The user is a member of the organization already." in e.body
                 ):
                     # This error can indicate that we tried to add the user previously
                     # or he was added manually
                     raise HTTPException(
-                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="User already exists"
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="User already exists",
                     )
 
                 elif (
-                    e.status == HTTPStatus.BAD_REQUEST and "Enter a valid email address." in e.body
+                    e.status == status.HTTP_400_BAD_REQUEST
+                    and "Enter a valid email address." in e.body
                 ):
                     raise HTTPException(
-                        status_code=HTTPStatus.BAD_REQUEST, detail="Invalid email address"
+                        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email address"
                     )
 
                 raise
@@ -156,7 +156,9 @@ async def register(
             )
 
         elif email_db_user.wallet_address != user.wallet_address:
-            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="User already exists")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists"
+            )
 
         return UserResponse(
             wallet_address=email_db_user.wallet_address,
@@ -166,7 +168,6 @@ async def register(
 
 
 class AssignmentFilter(Filter):
-    user_wallet_address: Optional[str] = Query(default=None, alias="wallet_address")
     id: Optional[str] = None
     status: Optional[ProjectStatuses] = None
 
@@ -190,14 +191,14 @@ class AssignmentFilter(Filter):
 
 @router.get("/assignment", description="Lists assignments")
 async def list_assignments(
-    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
     filter: AssignmentFilter = FilterDepends(AssignmentFilter),
     escrow_address: Optional[str] = Query(default=None),
     job_type: Optional[TaskTypes] = Query(default=None),
+    token: AuthData = Depends(authenticate_token),
 ) -> Page[AssignmentResponse]:
-    await validate_human_app_signature(signature)
-
     query = select(cvat_service.Assignment)
+
+    query = query.where(cvat_service.Assignment.user_wallet_address == token.wallet_address)
 
     if escrow_address:
         query = query.filter(
@@ -255,22 +256,20 @@ async def list_assignments(
 )
 async def create_assignment(
     data: AssignmentRequest,
-    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
+    token: AuthData = Depends(authenticate_token),
 ) -> AssignmentResponse:
-    await validate_human_app_signature(signature)
-
     try:
         assignment_id = oracle_service.create_assignment(
             escrow_address=data.escrow_address,
             chain_id=data.chain_id,
-            wallet_address=data.wallet_address,
+            wallet_address=token.wallet_address,
         )
     except oracle_service.UserHasUnfinishedAssignmentError as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
     if not assignment_id:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="No assignments available",
         )
 
@@ -279,9 +278,9 @@ async def create_assignment(
 
 @router.get("/stats/assignment", description="Get oracle statistics for the user")
 async def get_user_stats(
-    authorization: AuthorizationHeader = Depends(AuthorizationHeader),
+    token: AuthData = Depends(authenticate_token),
 ) -> UserStatsResponse:
-    wallet_address = authorization.authorization  # TODO: replace with JWT
+    wallet_address = token.wallet_address
 
     with SessionLocal.begin() as session:
         stats = {}

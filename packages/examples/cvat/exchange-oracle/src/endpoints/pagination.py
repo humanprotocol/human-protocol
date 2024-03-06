@@ -4,7 +4,6 @@ from typing import Any, Optional, Sequence, TypeVar
 
 import fastapi_pagination.bases
 import fastapi_pagination.default
-import fastapi_pagination.links
 from fastapi_pagination.ext.sqlalchemy import paginate
 from pydantic import BaseModel
 
@@ -27,7 +26,7 @@ class PaginationParams(BaseModel, fastapi_pagination.bases.AbstractParams):
 T = TypeVar("T")
 
 
-class Page(fastapi_pagination.links.Page):
+class Page(fastapi_pagination.default.Page):
     __params_type__ = PaginationParams
 
     @classmethod

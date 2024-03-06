@@ -32,7 +32,6 @@ class UserResponse(UserRequest):
 
 
 class AssignmentRequest(BaseModel):
-    wallet_address: str
     escrow_address: str
     chain_id: Networks
 
@@ -61,7 +60,7 @@ class AssignmentResponse(BaseModel):
 
 
 class AuthorizationHeader(BaseModel):
-    authorization: str = Header()
+    authorization: str = Header(alias="Authorization", validation_alias="Authorization")
 
 
 class UserStatsResponse(BaseModel):
