@@ -64,6 +64,7 @@ import {
   JobCaptchaDto,
   RestrictedAudience,
   CreateJob,
+  JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -479,22 +480,33 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-    const manifestOrigin = await createManifest(
-      dto,
-      requestType,
-      tokenFundAmount,
-    );
-    const { url, hash } = await this.uploadManifest(
-      requestType,
-      chainId,
-      manifestOrigin,
-    );
-
     let jobEntity = new JobEntity();
+
+    if (
+      dto instanceof JobQuickLaunchDto &&
+      dto.manifestUrl &&
+      dto.manifestHash
+    ) {
+      jobEntity.manifestUrl = dto.manifestUrl;
+      jobEntity.manifestHash = dto.manifestHash;
+    } else {
+      const manifestOrigin = await createManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+      const { url, hash } = await this.uploadManifest(
+        requestType,
+        chainId,
+        manifestOrigin,
+      );
+
+      jobEntity.manifestUrl = url;
+      jobEntity.manifestHash = hash;
+    }
+
     jobEntity.chainId = chainId;
     jobEntity.userId = userId;
-    jobEntity.manifestUrl = url;
-    jobEntity.manifestHash = hash;
     jobEntity.fee = tokenFee;
     jobEntity.fundAmount = tokenFundAmount;
     jobEntity.status = JobStatus.PENDING;
