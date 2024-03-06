@@ -19,6 +19,7 @@ import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.mod
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
 import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
+import { RequestContext } from './common/utils/request-context.util';
 
 @Module({
   imports: [
@@ -48,7 +49,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
     OracleDiscoveryController,
     JobAssignmentController,
   ],
-  providers: [],
+  providers: [RequestContext],
   exports: [HttpModule],
 })
 export class AppModule {}
