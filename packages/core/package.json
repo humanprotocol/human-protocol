@@ -25,6 +25,8 @@
     "deploy:hub": "hardhat run scripts/deploy-hub.ts",
     "deploy:spokes": "hardhat run scripts/deploy-spokes.ts",
     "update-spokes": "hardhat run scripts/hub-update-spokes.ts",
+    "hub-selfdelegate-vote" : "hardhat run scripts/hub-selfdelegate-vote.ts",
+    "spoke-selfdelegate-vote" : "hardhat run scripts/spoke-selfdelegate-vote.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",
