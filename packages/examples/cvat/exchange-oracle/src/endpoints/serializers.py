@@ -18,7 +18,7 @@ def serialize_job(
     *,
     manifest: Union[None, TaskManifest, Literal[False]] = None,
     session: Optional[Session] = None,
-) -> Optional[service_api.JobResponse]:
+) -> service_api.JobResponse:
     with ExitStack() as es:
         if not session:
             session = es.enter_context(SessionLocal.begin())
@@ -42,6 +42,7 @@ def serialize_job(
             job_title=f"Job {project.escrow_address[:10]}",
             job_description=manifest.annotation.description if manifest else None,
             reward_amount=str(manifest.job_bounty) if manifest else None,
+            created_at=project.created_at,
         )
 
 

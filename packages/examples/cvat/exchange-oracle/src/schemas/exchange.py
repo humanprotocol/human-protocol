@@ -19,6 +19,7 @@ class JobResponse(BaseModel):
     job_description: Optional[str] = None
     reward_amount: Optional[str] = None
     reward_token: Optional[str] = DEFAULT_TOKEN
+    created_at: Optional[datetime] = None
 
 
 class UserRequest(BaseModel):

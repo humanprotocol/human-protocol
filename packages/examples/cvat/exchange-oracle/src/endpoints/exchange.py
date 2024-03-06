@@ -1,7 +1,7 @@
 from contextlib import suppress
 from enum import auto
 from http import HTTPStatus
-from typing import Optional, Sequence
+from typing import List, Optional, Sequence
 
 from fastapi import APIRouter, Header, HTTPException, Query
 from sqlalchemy import select
@@ -41,14 +41,26 @@ class JobsFilter(Filter):
     sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
     sort_field: Optional[SortingFields] = Query(default=SortingFields.created_at)
 
+    class SelectableFields(StrEnum, metaclass=BetterEnumMeta):
+        job_title = auto()
+        job_description = auto()
+        reward_amount = auto()
+        reward_token = auto()
+        created_at = auto()
+
+    fields: List[SelectableFields] = Query(default_factory=list)
+
     class Constants(Filter.Constants):
         model = cvat_service.Project
 
         sorting_direction_field_name = "sort"
         sorting_field_name = "sort_field"
 
+        selector_field_name = "fields"
+        selectable_fields_enum_name = "SelectableFields"
 
-@router.get("/job", description="Lists available jobs")
+
+@router.get("/job", description="Lists available jobs", response_model_exclude_unset=True)
 async def list_jobs(
     wallet_address: Optional[str] = Query(default=None),
     signature: str = Header(description="Calling service signature", alias="Human-Signature"),
@@ -84,12 +96,13 @@ async def list_jobs(
 
     with SessionLocal() as session:
 
-        def _response_transformer(
+        def _page_serializer(
             projects: Sequence[cvat_service.Project],
         ) -> Sequence[JobResponse]:
-            return [serialize_job(p, session=session) for p in projects]
+            page = [serialize_job(p, session=session) for p in projects]
+            return [filter.select_fields_(p) for p in page]
 
-        return paginate(session, query, transformer=_response_transformer)
+        return paginate(session, query, transformer=_page_serializer)
 
 
 @router.put("/register", description="Binds a CVAT user to a HUMAN App user")
@@ -202,7 +215,7 @@ async def list_assignments(
 
     with SessionLocal.begin() as session:
 
-        def _response_transformer(
+        def _page_serializer(
             assignments: Sequence[cvat_service.Assignment],
         ) -> Sequence[AssignmentResponse]:
             results = []
@@ -230,7 +243,7 @@ async def list_assignments(
 
             return results
 
-        return paginate(session, query, transformer=_response_transformer)
+        return paginate(session, query, transformer=_page_serializer)
 
 
 @router.post(
