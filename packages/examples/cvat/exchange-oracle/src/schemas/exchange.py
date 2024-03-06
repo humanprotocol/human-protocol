@@ -62,3 +62,21 @@ class AssignmentResponse(BaseModel):
 
 class AuthorizationHeader(BaseModel):
     authorization: str = Header()
+
+
+class UserStatsResponse(BaseModel):
+    assignments_amount: int
+    submissions_sent: int
+    assignments_completed: int
+    assignments_rejected: int
+    assignments_expired: int
+
+
+class OracleStatsResponse(BaseModel):
+    escrows_processed: int
+    escrows_active: int
+    escrows_cancelled: int
+    workers_amount: int
+    assignments_completed: int
+    assignments_rejected: int
+    assignments_expired: int

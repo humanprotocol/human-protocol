@@ -3,7 +3,7 @@ from enum import auto
 from http import HTTPStatus
 from typing import List, Optional, Sequence
 
-from fastapi import APIRouter, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
@@ -18,9 +18,12 @@ from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.schemas.exchange import (
     AssignmentRequest,
     AssignmentResponse,
+    AuthorizationHeader,
     JobResponse,
+    OracleStatsResponse,
     UserRequest,
     UserResponse,
+    UserStatsResponse,
 )
 from src.utils.enums import BetterEnumMeta, StrEnum
 from src.validators.signature import validate_human_app_signature
@@ -272,3 +275,112 @@ async def create_assignment(
         )
 
     return serialize_assignment(assignment_id)
+
+
+@router.get("/stats/assignment", description="Get oracle statistics for the user")
+async def get_user_stats(
+    authorization: AuthorizationHeader = Depends(AuthorizationHeader),
+) -> UserStatsResponse:
+    wallet_address = authorization.authorization  # TODO: replace with JWT
+
+    with SessionLocal.begin() as session:
+        stats = {}
+
+        stats["assignments_amount"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(cvat_service.Assignment.user_wallet_address == wallet_address)
+            .count()
+        )
+
+        stats["submissions_sent"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(
+                cvat_service.Assignment.user_wallet_address == wallet_address,
+                cvat_service.Assignment.status.in_(
+                    [
+                        cvat_service.AssignmentStatuses.completed,
+                        cvat_service.AssignmentStatuses.rejected,
+                    ]
+                ),
+            )
+            .count()
+        )
+
+        stats["assignments_completed"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(
+                cvat_service.Assignment.user_wallet_address == wallet_address,
+                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed,
+            )
+            .count()
+        )
+
+        stats["assignments_rejected"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(
+                cvat_service.Assignment.user_wallet_address == wallet_address,
+                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.rejected,
+            )
+            .count()
+        )
+
+        stats["assignments_expired"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(
+                cvat_service.Assignment.user_wallet_address == wallet_address,
+                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.expired,
+            )
+            .count()
+        )
+
+        return UserStatsResponse(**stats)
+
+
+@router.get("/stats", description="Get oracle statistics")
+async def get_stats() -> OracleStatsResponse:
+    with SessionLocal.begin() as session:
+        stats = {}
+
+        stats["escrows_processed"] = (
+            session.query(cvat_service.Project.escrow_address).distinct().count()
+        )
+
+        stats["escrows_active"] = (
+            session.query(cvat_service.Project.escrow_address)
+            .distinct()
+            .where(
+                cvat_service.Project.status.in_(
+                    [ProjectStatuses.annotation, ProjectStatuses.validation]
+                )
+            )
+            .count()
+        )
+
+        stats["escrows_cancelled"] = (
+            session.query(cvat_service.Project.escrow_address)
+            .distinct()
+            .where(cvat_service.Project.status == ProjectStatuses.canceled)
+            .count()
+        )
+
+        stats["workers_amount"] = session.query(cvat_service.User.wallet_address).count()
+
+        stats["assignments_completed"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed)
+            .count()
+        )
+
+        stats["assignments_rejected"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(cvat_service.Assignment.status == cvat_service.AssignmentStatuses.rejected)
+            .count()
+        )
+
+        stats["assignments_expired"] = (
+            session.query(cvat_service.Assignment.id)
+            .where(cvat_service.Assignment.status == cvat_service.AssignmentStatuses.expired)
+            .count()
+        )
+
+        return OracleStatsResponse(**stats)
