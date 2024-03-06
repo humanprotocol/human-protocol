@@ -1,10 +1,13 @@
 import pydantic
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
 from src.core.config import Config
-from src.schemas.exchange import AuthorizationHeader
+
+
+class AuthorizationHeader(BaseModel):
+    authorization: str = Header(alias="Authorization", validation_alias="Authorization")
 
 
 class AuthData(BaseModel):

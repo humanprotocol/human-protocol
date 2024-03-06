@@ -59,10 +59,6 @@ class AssignmentResponse(BaseModel):
     expires_at: datetime
 
 
-class AuthorizationHeader(BaseModel):
-    authorization: str = Header(alias="Authorization", validation_alias="Authorization")
-
-
 class UserStatsResponse(BaseModel):
     assignments_amount: int
     submissions_sent: int
