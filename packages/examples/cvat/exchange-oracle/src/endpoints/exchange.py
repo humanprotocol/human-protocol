@@ -62,7 +62,12 @@ class JobsFilter(Filter):
         selectable_fields_enum_name = "SelectableFields"
 
 
-@router.get("/job", description="Lists available jobs", response_model_exclude_unset=True)
+@router.get(
+    "/job",
+    description="Lists available jobs",
+    response_model_exclude_unset=True,  # required for field selection
+    response_model_by_alias=True,  # required for pagination
+)
 async def list_jobs(
     filter: JobsFilter = FilterDepends(JobsFilter),
     token: AuthData = Depends(authenticate_token),
@@ -189,7 +194,12 @@ class AssignmentFilter(Filter):
         sorting_field_name = "sort_field"
 
 
-@router.get("/assignment", description="Lists assignments")
+@router.get(
+    "/assignment",
+    description="Lists assignments",
+    response_model_exclude_unset=True,  # required for field selection
+    response_model_by_alias=True,  # required for pagination
+)
 async def list_assignments(
     filter: AssignmentFilter = FilterDepends(AssignmentFilter),
     escrow_address: Optional[str] = Query(default=None),
