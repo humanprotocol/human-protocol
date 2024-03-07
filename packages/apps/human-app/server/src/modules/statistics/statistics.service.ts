@@ -50,8 +50,8 @@ export class StatisticsService {
     command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
     const url = command.oracle_url;
-    const bearerToken = this.requestContext.token
-    const userCacheKey = url + bearerToken;
+    const token = this.requestContext.token;
+    const userCacheKey = url + token;
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
     if (cachedStatistics) {
@@ -61,7 +61,7 @@ export class StatisticsService {
       method: 'GET',
       url: `${url}/stats/assignment`,
       headers: {
-        Authorization: `Bearer ${bearerToken}`,
+        Authorization: `Bearer ${token}`,
       },
     };
     const statisticalData =

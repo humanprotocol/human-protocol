@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
 import { CommonUtilModule } from '../../common/utils/common-util.module';
 import { TokenMiddleware } from '../../common/interceptors/auth-token.middleware';
-import { JobsDiscoveryController } from '../jobs-discovery/jobs-discovery.controller';
+import { StatisticsController } from './statistics.controller';
 
 @Module({
   imports: [CommonUtilModule],
@@ -11,6 +11,6 @@ import { JobsDiscoveryController } from '../jobs-discovery/jobs-discovery.contro
 })
 export class StatisticsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TokenMiddleware).forRoutes(JobsDiscoveryController);
+    consumer.apply(TokenMiddleware).forRoutes(StatisticsController);
   }
 }
