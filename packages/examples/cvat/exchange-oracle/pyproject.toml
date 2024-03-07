@@ -29,6 +29,7 @@ pydantic = "^2.6.1"
 fastapi-pagination = "^0.12.17"
 fastapi-filter = "^1.1.0"
 strenum = "^0.4.15"
+python-jose = "^3.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
