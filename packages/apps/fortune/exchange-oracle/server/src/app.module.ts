@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { envValidator } from './common/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   providers: [
@@ -21,6 +22,7 @@ import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
         : '.env',
       validationSchema: envValidator,
     }),
+    DatabaseModule,
   ],
   controllers: [AppController],
 })
