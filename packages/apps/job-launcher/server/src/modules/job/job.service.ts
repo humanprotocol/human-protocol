@@ -1248,7 +1248,7 @@ export class JobService {
     return updatedJob;
   }
 
-  public async escrowCompletedWebhook(dto: WebhookDataDto): Promise<void> {
+  public async completeJob(dto: WebhookDataDto): Promise<void> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
       dto.escrowAddress,

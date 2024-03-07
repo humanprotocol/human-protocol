@@ -2537,7 +2537,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(null);
 
-      await expect(jobService.escrowCompletedWebhook(dto)).rejects.toThrow(
+      await expect(jobService.completeJob(dto)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -2555,7 +2555,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await expect(jobService.escrowCompletedWebhook(dto)).rejects.toThrow(
+      await expect(jobService.completeJob(dto)).rejects.toThrow(
         ConflictException,
       );
     });
@@ -2574,7 +2574,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.escrowCompletedWebhook(dto);
+      await jobService.completeJob(dto);
 
       expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
       expect(jobRepository.updateOne).toHaveBeenCalled();
@@ -2594,7 +2594,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.escrowCompletedWebhook(dto);
+      await jobService.completeJob(dto);
 
       expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
       expect(jobRepository.updateOne).not.toHaveBeenCalled();

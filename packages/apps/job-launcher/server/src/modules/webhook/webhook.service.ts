@@ -143,7 +143,7 @@ export class WebhookService {
   public async handleWebhook(wehbook: WebhookDataDto): Promise<void> {
     switch (wehbook.eventType) {
       case EventType.ESCROW_COMPLETED:
-        await this.jobService.escrowCompletedWebhook(wehbook);
+        await this.jobService.completeJob(wehbook);
         break;
 
       case EventType.TASK_CREATION_FAILED:

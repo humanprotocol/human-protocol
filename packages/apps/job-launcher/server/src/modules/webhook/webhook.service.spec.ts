@@ -309,11 +309,11 @@ describe('WebhookService', () => {
         eventType: EventType.ESCROW_COMPLETED,
       };
 
-      jest.spyOn(jobService, 'escrowCompletedWebhook');
+      jest.spyOn(jobService, 'completeJob');
 
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
 
-      expect(jobService.escrowCompletedWebhook).toHaveBeenCalledWith(webhook);
+      expect(jobService.completeJob).toHaveBeenCalledWith(webhook);
     });
 
     it('should handle an escrow failed webhook', async () => {
