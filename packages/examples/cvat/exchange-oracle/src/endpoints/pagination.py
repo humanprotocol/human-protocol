@@ -28,6 +28,15 @@ class Page(fastapi_pagination.default.Page[T]):
     __params_type__ = PaginationParams
 
     items: Sequence[T] = Field(alias="results", validation_alias="items")
+    total: Optional[fastapi_pagination.default.GreaterEqualZero] = Field(
+        alias="total_results", validation_alias="total"
+    )
+    pages: Optional[fastapi_pagination.default.GreaterEqualZero] = Field(
+        default=None, alias="total_pages", validation_alias="pages"
+    )
+    size: Optional[fastapi_pagination.default.GreaterEqualOne] = Field(
+        alias="page_size", validation_alias="size"
+    )
 
     @classmethod
     def create(
