@@ -1,5 +1,5 @@
 export enum Role {
-  JobLaucher = 'job_launcher',
+  JobLauncher = 'job_launcher',
   Exchange = 'exchange',
   Reputation = 'reputation',
 }
