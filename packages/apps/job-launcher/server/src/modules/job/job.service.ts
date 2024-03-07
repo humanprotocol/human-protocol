@@ -45,7 +45,12 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { isPGPMessage, getRate, isValidJSON } from '../../common/utils';
+import {
+  isPGPMessage,
+  getRate,
+  isValidJSON,
+  parseUrl,
+} from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -482,13 +487,16 @@ export class JobService {
 
     let jobEntity = new JobEntity();
 
-    if (
-      dto instanceof JobQuickLaunchDto &&
-      dto.manifestUrl &&
-      dto.manifestHash
-    ) {
+    if (dto instanceof JobQuickLaunchDto) {
+      const { filename } = parseUrl(dto.manifestUrl);
+
+      if (!filename) {
+        this.logger.log(ErrorJob.ManifestHashNotExist, JobService.name);
+        throw new ConflictException(ErrorJob.ManifestHashNotExist);
+      }
+
       jobEntity.manifestUrl = dto.manifestUrl;
-      jobEntity.manifestHash = dto.manifestHash;
+      jobEntity.manifestHash = filename;
     } else {
       const manifestOrigin = await createManifest(
         dto,
