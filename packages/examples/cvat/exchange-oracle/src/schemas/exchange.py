@@ -5,15 +5,22 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from src.core.types import Networks, TaskTypes
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 DEFAULT_TOKEN = "HMT"
+
+
+class JobStatuses(StrEnum, metaclass=BetterEnumMeta):
+    active = "ACTIVE"
+    completed = "COMPLETED"
+    canceled = "CANCELED"
 
 
 class JobResponse(BaseModel):
     escrow_address: str
     chain_id: int  # not Networks, as existing DB entries can be different from the current enum
     job_type: TaskTypes
+    status: JobStatuses
     job_title: Optional[str] = None
     job_description: Optional[str] = None
     reward_amount: Optional[str] = None

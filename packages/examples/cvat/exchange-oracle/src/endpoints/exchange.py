@@ -20,6 +20,7 @@ from src.schemas.exchange import (
     AssignmentResponse,
     AssignmentStatuses,
     JobResponse,
+    JobStatuses,
     OracleStatsResponse,
     UserRequest,
     UserResponse,
@@ -70,7 +71,9 @@ class JobsFilter(Filter):
     response_model_by_alias=True,  # required for pagination
 )
 async def list_jobs(
-    filter: JobsFilter = FilterDepends(JobsFilter), token: AuthorizationData = AuthorizationParam
+    filter: JobsFilter = FilterDepends(JobsFilter),
+    status: Optional[JobStatuses] = Query(default=None),
+    token: AuthorizationData = AuthorizationParam,
 ) -> Page[JobResponse]:
     wallet_address = token.wallet_address
 
@@ -89,13 +92,36 @@ async def list_jobs(
         raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
 
     if wallet_address:
-        query = query.where(
+        query = query.filter(
             cvat_service.Project.jobs.any(
                 cvat_service.Job.assignments.any(
                     cvat_service.Assignment.user_wallet_address == wallet_address
                 )
             )
         )
+
+    if status:
+        match status:
+            case JobStatuses.active:
+                query = query.filter(
+                    cvat_service.Project.status.in_(
+                        [
+                            cvat_service.ProjectStatuses.annotation,
+                            cvat_service.ProjectStatuses.completed,
+                            cvat_service.ProjectStatuses.validation,
+                        ]
+                    )
+                )
+            case JobStatuses.canceled:
+                query = query.filter(
+                    cvat_service.Project.status == cvat_service.ProjectStatuses.canceled
+                )
+            case JobStatuses.completed:
+                query = query.filter(
+                    cvat_service.Project.status == cvat_service.ProjectStatuses.recorded
+                )
+            case _:
+                raise NotImplementedError(f"Unsupported status {status}")
 
     query = filter.filter_(query)
     query = filter.sort_(query)

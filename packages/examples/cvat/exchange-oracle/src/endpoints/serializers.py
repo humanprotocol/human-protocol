@@ -35,10 +35,24 @@ def serialize_job(
                     get_escrow_manifest(project.chain_id, project.escrow_address)
                 )
 
+        if project.status == ProjectStatuses.canceled:
+            api_status = service_api.JobStatuses.canceled
+        elif project.status in [
+            ProjectStatuses.annotation,
+            ProjectStatuses.validation,
+            ProjectStatuses.completed,
+        ]:
+            api_status = service_api.JobStatuses.active
+        elif project.status == ProjectStatuses.recorded:
+            api_status = service_api.JobStatuses.completed
+        else:
+            raise NotImplementedError(f"Unknown status {project.status}")
+
         return service_api.JobResponse(
             escrow_address=project.escrow_address,
             chain_id=project.chain_id,
             job_type=project.job_type,
+            status=api_status,
             job_title=f"Job {project.escrow_address[:10]}",
             job_description=manifest.annotation.description if manifest else None,
             reward_amount=str(manifest.job_bounty) if manifest else None,
