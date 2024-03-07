@@ -2,12 +2,13 @@ from contextlib import suppress
 from enum import auto
 from typing import List, Optional, Sequence
 
-from fastapi import APIRouter, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 import src.services.exchange as oracle_service
+from src.core.config import Config
 from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
@@ -15,6 +16,7 @@ from src.endpoints.authentication import AuthorizationData, AuthorizationParam
 from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
+from src.endpoints.throttling import RateLimiter
 from src.schemas.exchange import (
     AssignmentRequest,
     AssignmentResponse,
@@ -397,7 +399,11 @@ async def get_user_stats(token: AuthorizationData = AuthorizationParam) -> UserS
         return UserStatsResponse(**stats)
 
 
-@router.get("/stats", description="Get oracle statistics")
+@router.get(
+    "/stats",
+    description="Get oracle statistics",
+    dependencies=[Depends(RateLimiter(seconds=1, times=Config.api_config.stats_rps_limit))],
+)
 async def get_stats() -> OracleStatsResponse:
     with SessionLocal.begin() as session:
         stats = {}

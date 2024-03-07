@@ -29,6 +29,15 @@ class PostgresConfig:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
+class RedisConfig:
+    port = os.environ.get("REDIS_PORT", "6379")
+    host = os.environ.get("REDIS_HOST", "0.0.0.0")
+
+    @classmethod
+    def connection_url(cls):
+        return f"redis://{cls.host}:{cls.port}/"
+
+
 class PolygonMainnetConfig:
     chain_id = 137
     rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
@@ -191,6 +200,8 @@ class HumanAppConfig:
 class ApiConfig:
     default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
 
+    stats_rps_limit = int(os.environ.get("STATS_RPS_LIMIT", 4))
+
 
 class Config:
     port = int(os.environ.get("PORT", 8000))
@@ -205,6 +216,7 @@ class Config:
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig
+    redis_config = RedisConfig
     api_config = ApiConfig
     human_app_config = HumanAppConfig
 
