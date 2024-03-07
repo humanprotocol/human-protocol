@@ -4,15 +4,23 @@ import { Navigate } from 'react-router-dom';
 import { SignInForm } from '../../components/Auth/SignInForm';
 import { SignUpForm } from '../../components/Auth/SignUpForm';
 import { HomeStyledTab, HomeStyledTabs } from '../../components/Tabs';
-import { useAppSelector } from '../../state';
+import { useAppDispatch, useAppSelector } from '../../state';
+import { fetchUserBalanceAsync } from '../../state/auth/reducer';
+import { UserStatus } from '../../state/auth/types';
 
 export default function Home() {
   const [tabValue, setTabValue] = useState(0);
   const [mode, setMode] = useState<string>();
-  const { isAuthed } = useAppSelector((state) => state.auth);
+  const { isAuthed, user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
 
   if (isAuthed) {
-    return <Navigate to="/dashboard" />;
+    if (user?.status === UserStatus.PENDING) {
+      return <Navigate to="/validate" />;
+    } else {
+      dispatch(fetchUserBalanceAsync());
+      return <Navigate to="/dashboard" />;
+    }
   }
 
   const handleSignUp = () => {
@@ -87,7 +95,11 @@ export default function Home() {
         {tabValue === 1 && (
           <>
             {mode === 'sign_up' ? (
-              <SignUpForm onFinish={handleSignUp} />
+              <SignUpForm
+                onFinish={handleSignUp}
+                setMode={setMode}
+                setTabValue={setTabValue}
+              />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button

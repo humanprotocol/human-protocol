@@ -18,8 +18,8 @@ export class CronJobController {
     description: 'Cron job to create escrows launched successfully.',
   })
   @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
   })
   @Get('/escrow/create')
   public async launchCreateEscrowCronJob(): Promise<void> {
@@ -36,8 +36,8 @@ export class CronJobController {
     description: 'Cron job to setup escrows launched successfully.',
   })
   @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
   })
   @Get('/escrow/setup')
   public async launchSetupEscrowCronJob(): Promise<void> {
@@ -54,8 +54,8 @@ export class CronJobController {
     description: 'Cron job to fund escrows launched successfully.',
   })
   @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
   })
   @Get('/escrow/fund')
   public async launchFundEscrowCronJob(): Promise<void> {
@@ -71,6 +71,10 @@ export class CronJobController {
     status: 200,
     description: 'Cron job launched successfully.',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
   @Get('/escrow/cancel')
   public async cancelCronJob(): Promise<void> {
     await this.cronJobService.cancelCronJob();
@@ -84,6 +88,10 @@ export class CronJobController {
   @ApiResponse({
     status: 200,
     description: 'Cron job launched successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
   })
   @Get('/wehbhook/process')
   public async processPendingWebhooks(): Promise<any> {

@@ -8,6 +8,7 @@ import { WebhookRepository } from './webhook.repository';
 import { Web3Module } from '../web3/web3.module';
 import { HttpModule } from '@nestjs/axios';
 import { JobModule } from '../job/job.module';
+import { WebhookController } from './webhook.controller';
 
 @Module({
   imports: [
@@ -16,7 +17,9 @@ import { JobModule } from '../job/job.module';
     JobModule,
     Web3Module,
     HttpModule,
+    JobModule,
   ],
+  controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository],
   exports: [WebhookService],
 })
