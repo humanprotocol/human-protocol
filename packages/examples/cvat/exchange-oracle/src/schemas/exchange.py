@@ -2,7 +2,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from fastapi import Header
 from pydantic import BaseModel, Field
 
 from src.core.types import Networks, TaskTypes

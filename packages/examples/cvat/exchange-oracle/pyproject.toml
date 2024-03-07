@@ -29,7 +29,8 @@ pydantic = "^2.6.1"
 fastapi-pagination = "^0.12.17"
 fastapi-filter = "^1.1.0"
 strenum = "^0.4.15"
-python-jose = "^3.3.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+cryptography = "^42.0.5"
 
 
 [tool.poetry.group.dev.dependencies]

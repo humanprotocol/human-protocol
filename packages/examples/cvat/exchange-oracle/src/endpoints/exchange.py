@@ -2,7 +2,7 @@ from contextlib import suppress
 from enum import auto
 from typing import List, Optional, Sequence
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Header, HTTPException, Query, status
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
@@ -11,7 +11,7 @@ import src.services.exchange as oracle_service
 from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
-from src.endpoints.authentication import AuthData, authenticate_token
+from src.endpoints.authentication import AuthorizationData, AuthorizationParam
 from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
@@ -69,8 +69,7 @@ class JobsFilter(Filter):
     response_model_by_alias=True,  # required for pagination
 )
 async def list_jobs(
-    filter: JobsFilter = FilterDepends(JobsFilter),
-    token: AuthData = Depends(authenticate_token),
+    filter: JobsFilter = FilterDepends(JobsFilter), token: AuthorizationData = AuthorizationParam
 ) -> Page[JobResponse]:
     wallet_address = token.wallet_address
 
@@ -204,7 +203,7 @@ async def list_assignments(
     filter: AssignmentFilter = FilterDepends(AssignmentFilter),
     escrow_address: Optional[str] = Query(default=None),
     job_type: Optional[TaskTypes] = Query(default=None),
-    token: AuthData = Depends(authenticate_token),
+    token: AuthorizationData = AuthorizationParam,
 ) -> Page[AssignmentResponse]:
     query = select(cvat_service.Assignment)
 
@@ -265,8 +264,7 @@ async def list_assignments(
     description="Start an assignment within the task for the annotator",
 )
 async def create_assignment(
-    data: AssignmentRequest,
-    token: AuthData = Depends(authenticate_token),
+    data: AssignmentRequest, token: AuthorizationData = AuthorizationParam
 ) -> AssignmentResponse:
     try:
         assignment_id = oracle_service.create_assignment(
@@ -287,9 +285,7 @@ async def create_assignment(
 
 
 @router.get("/stats/assignment", description="Get oracle statistics for the user")
-async def get_user_stats(
-    token: AuthData = Depends(authenticate_token),
-) -> UserStatsResponse:
+async def get_user_stats(token: AuthorizationData = AuthorizationParam) -> UserStatsResponse:
     wallet_address = token.wallet_address
 
     with SessionLocal.begin() as session:
