@@ -188,6 +188,10 @@ class HumanAppConfig:
     jwt_key = os.environ.get("HUMAN_APP_JWT_KEY", "sample")
 
 
+class ApiConfig:
+    default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
+
+
 class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
@@ -201,6 +205,7 @@ class Config:
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig
+    api_config = ApiConfig
     human_app_config = HumanAppConfig
 
     cron_config = CronConfig

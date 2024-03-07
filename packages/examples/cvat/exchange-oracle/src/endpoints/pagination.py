@@ -8,12 +8,12 @@ from fastapi import Query
 from fastapi_pagination.ext.sqlalchemy import paginate
 from pydantic import Field
 
-DEFAULT_PAGE_SIZE = 5
+from src.core.config import Config
 
 
 class PaginationParams(fastapi_pagination.default.Params):
     size: int = Query(
-        DEFAULT_PAGE_SIZE,
+        Config.api_config.default_page_size,
         ge=1,
         description="Page size",
         alias="page_size",
