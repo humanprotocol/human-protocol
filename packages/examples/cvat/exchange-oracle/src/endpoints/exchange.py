@@ -18,6 +18,7 @@ from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.schemas.exchange import (
     AssignmentRequest,
     AssignmentResponse,
+    AssignmentStatuses,
     JobResponse,
     OracleStatsResponse,
     UserRequest,
@@ -173,7 +174,6 @@ async def register(
 
 class AssignmentFilter(Filter):
     id: Optional[str] = None
-    status: Optional[ProjectStatuses] = None
 
     class SortingFields(StrEnum, metaclass=BetterEnumMeta):
         chain_id = auto()
@@ -203,6 +203,7 @@ async def list_assignments(
     filter: AssignmentFilter = FilterDepends(AssignmentFilter),
     escrow_address: Optional[str] = Query(default=None),
     job_type: Optional[TaskTypes] = Query(default=None),
+    status: Optional[AssignmentStatuses] = Query(default=None),
     token: AuthorizationData = AuthorizationParam,
 ) -> Page[AssignmentResponse]:
     query = select(cvat_service.Assignment)
@@ -222,6 +223,35 @@ async def list_assignments(
                 cvat_service.Job.project.has(cvat_service.Project.job_type == job_type)
             )
         )
+
+    if status:
+        assignment_status_mapping = {
+            AssignmentStatuses.active: cvat_service.AssignmentStatuses.created,
+            AssignmentStatuses.completed: cvat_service.AssignmentStatuses.completed,
+            AssignmentStatuses.expired: cvat_service.AssignmentStatuses.expired,
+            AssignmentStatuses.rejected: cvat_service.AssignmentStatuses.rejected,
+            AssignmentStatuses.canceled: cvat_service.AssignmentStatuses.canceled,
+        }
+        if status == AssignmentStatuses.validation:
+            query = query.filter(
+                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed,
+                cvat_service.Assignment.job.has(
+                    cvat_service.Job.project.has(
+                        cvat_service.Project.status.in_(
+                            [
+                                cvat_service.ProjectStatuses.annotation,
+                                cvat_service.ProjectStatuses.validation,
+                            ]
+                        )
+                    )
+                ),
+            )
+        elif status in assignment_status_mapping:
+            query = query.filter(
+                cvat_service.Assignment.status == assignment_status_mapping[status]
+            )
+        else:
+            raise NotImplementedError(f"Unsupported status {status}")
 
     query = filter.filter_(query)
     query = filter.sort_(query)

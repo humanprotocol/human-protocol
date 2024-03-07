@@ -88,9 +88,9 @@ def serialize_assignment(
             ProjectStatuses.completed,
             ProjectStatuses.annotation,
         ]:
-            status = service_api.AssignmentStatuses.validation
+            api_status = service_api.AssignmentStatuses.validation
         else:
-            status = assignment_status_mapping[assignment.status]
+            api_status = assignment_status_mapping[assignment.status]
 
         updated_at = None
         if assignment.status == AssignmentStatuses.completed:
@@ -107,7 +107,7 @@ def serialize_assignment(
             escrow_address=project.escrow_address,
             chain_id=project.chain_id,
             job_type=project.job_type,
-            status=status,
+            status=api_status,
             reward_amount=str(manifest.job_bounty) if manifest else None,
             url=compose_assignment_url(
                 task_id=assignment.job.cvat_task_id,
