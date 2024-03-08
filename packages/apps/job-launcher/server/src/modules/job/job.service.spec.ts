@@ -2525,4 +2525,79 @@ describe('JobService', () => {
       expect(typeof result).toBe('bigint');
     });
   });
+
+  describe('escrowCompletedWebhook', () => {
+    it('should throw NotFoundException if jobEntity is not found', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(null);
+
+      await expect(jobService.completeJob(dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      const mockJobEntity = {
+        status: JobStatus.CANCELED,
+      };
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await expect(jobService.completeJob(dto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+
+    it('should update jobEntity status to completed', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      const mockJobEntity = {
+        status: JobStatus.LAUNCHED,
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.completeJob(dto);
+
+      expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
+      expect(jobRepository.updateOne).toHaveBeenCalled();
+    });
+
+    it('should not execute anything if status is already completed', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      const mockJobEntity = {
+        status: JobStatus.COMPLETED,
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.completeJob(dto);
+
+      expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+  });
 });

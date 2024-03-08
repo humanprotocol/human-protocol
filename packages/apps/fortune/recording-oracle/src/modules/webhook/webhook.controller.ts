@@ -47,7 +47,7 @@ export class WebhookController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @UseGuards(
-    new SignatureAuthGuard([Role.Exchange, Role.Reputation, Role.JobLaucher]),
+    new SignatureAuthGuard([Role.Exchange, Role.Reputation, Role.JobLauncher]),
   )
   @Post()
   processWebhook(

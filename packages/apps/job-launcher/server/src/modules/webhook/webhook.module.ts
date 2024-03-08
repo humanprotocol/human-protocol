@@ -14,6 +14,7 @@ import { WebhookController } from './webhook.controller';
   imports: [
     TypeOrmModule.forFeature([WebhookEntity]),
     ConfigModule,
+    JobModule,
     Web3Module,
     HttpModule,
     JobModule,
