@@ -47,14 +47,14 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 │   │   ├── faucet-server                    # Faucet server
 │   │   ├── fortune                          # Fortune application
 │   │   ├── job-launcher                     # Job launcher server, and UI
+│   │   ├── human-app                        # Human App server
 │   │   ├── meta-code-verify                 # Browser extensions to verify code
 │   │   │                                      running in the browser against a
 │   │   │                                      published manifest
+│   │   ├── reputation-oracle                # Reputation Oracle server
 │   ├── core                                 # EVM compatible smart contracts for HUMAN
 │   ├── examples
 │   │   ├── cvat                             # An open source annotation tool for labeling video and images
-│   │   ├── fortune                          # An example application that combines all the core
-│   │   │                                      components of HUMAN
 │   ├── sdk
 │   │   ├── python
 │   │   │   ├── human-protocol-sdk           # Python SDK to interact with Human Protocol
