@@ -12,8 +12,10 @@ services:
     # volumes: 
     #   - ./db:/var/lib/postgresql/data
     env_file:
-      - path: ./.env.development
+      - path: .env
         required: true # default
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
   minio:
     container_name: minio
     image: minio/minio:RELEASE.2022-05-26T05-48-41Z
@@ -29,7 +31,7 @@ services:
       timeout: 5s
       retries: 3
     env_file:
-      - path: ./.env.development
+      - path: .env
         required: true # default
   minio-mc:
     container_name: minio-mc
@@ -44,7 +46,7 @@ services:
       /usr/bin/mc anonymous set public myminio/manifests;
       "
     env_file:
-      - path: ./.env.development
+      - path: .env
         required: true # default
   # job-launcher:
   #   container_name: job-launcher

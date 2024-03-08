@@ -56,6 +56,7 @@ export const ConfigNames = {
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
   APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -126,4 +127,6 @@ export const envValidator = Joi.object({
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),
+  // Cron Job Secret
+  CRON_SECRET: Joi.string().required(),
 });
