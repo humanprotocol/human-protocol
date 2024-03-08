@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 
 from sqlalchemy.orm import Session
 
-from db import engine as db_engine
+from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.validation import GtStats, Job, Task, ValidationResult
