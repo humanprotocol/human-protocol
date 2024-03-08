@@ -4,6 +4,7 @@ import {
   Controller,
   Post,
   Req,
+  Res,
   UseGuards,
   UseInterceptors,
   Request,
@@ -13,6 +14,7 @@ import {
   Ip,
   UseFilters,
   HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -42,6 +44,7 @@ import { PasswordValidationPipe } from '../../common/pipes';
 import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { Response } from 'express';
 
 @ApiTags('Auth')
 @UseFilters(AuthExceptionFilter)
@@ -103,8 +106,24 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
-    return this.authService.signin(data, ip);
+  public async signin(
+    @Body() data: SignInDto,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthDto> {
+    const authResult = await this.authService.signin(data, ip);
+
+    // Set refresh token as an HttpOnly cookie
+    response.cookie('refreshToken', authResult.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development', // Ensure secure cookies in production
+      sameSite: 'strict', // Recommended for CSRF protection
+      path: '/',
+    });
+
+    return {
+      accessToken: authResult.accessToken,
+    };
   }
 
   @Public()

@@ -62,10 +62,10 @@ export class VerifyEmailDto {
 }
 
 export class AuthDto {
-  @ApiProperty({ name: 'refresh_token' })
-  public refreshToken: string;
   @ApiProperty({ name: 'access_token' })
   public accessToken: string;
+  @ApiProperty({ name: 'refresh_token', required: false })
+  public refreshToken?: string;
 }
 
 export class ApiKeyDto {
