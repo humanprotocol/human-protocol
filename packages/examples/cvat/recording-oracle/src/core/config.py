@@ -131,9 +131,27 @@ class FeaturesConfig:
     enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
+
+class ValidationConfig:
     default_point_validity_relative_radius = float(
         os.environ.get("DEFAULT_POINT_VALIDITY_RELATIVE_RADIUS", 0.8)
     )
+
+    default_oks_sigma = float(
+        os.environ.get("DEFAULT_OKS_SIGMA", 0.1)  # average value for COCO points
+    )
+    "Default OKS sigma for GT skeleton points validation. Valid range is (0; 1]"
+
+    gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.5))
+    """
+    The number of allowed failed assignments per GT sample
+    before it's considered failed for the current validation iteration
+    """
+
+    gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
+    """
+    The number of allowed failures per GT sample before it's excluded from validation
+    """
 
 
 class Config:
@@ -154,3 +172,4 @@ class Config:
     exchange_oracle_storage_config = ExchangeOracleStorageConfig
 
     features = FeaturesConfig
+    validation = ValidationConfig

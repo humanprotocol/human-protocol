@@ -52,7 +52,7 @@ def point_to_bbox_cmp(
     bbox: Bbox,
     point: Point,
     *,
-    rel_sigma: float = Config.features.default_point_validity_relative_radius,
+    rel_sigma: float = Config.validation.default_point_validity_relative_radius,
 ) -> float:
     """
     Checks that the point is within the axis-aligned bbox,
