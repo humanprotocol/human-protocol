@@ -12,7 +12,7 @@ services:
     # volumes: 
     #   - ./db:/var/lib/postgresql/data
     env_file:
-      - path: ./.env.development
+      - path: .env
         required: true # default
   minio:
     container_name: minio
@@ -29,7 +29,7 @@ services:
       timeout: 5s
       retries: 3
     env_file:
-      - path: ./.env.development
+      - path: .env
         required: true # default
   minio-mc:
     container_name: minio-mc
@@ -44,7 +44,7 @@ services:
       /usr/bin/mc anonymous set public myminio/manifests;
       "
     env_file:
-      - path: ./.env.development
+      - path: .env
         required: true # default
   # job-launcher:
   #   container_name: job-launcher
