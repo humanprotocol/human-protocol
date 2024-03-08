@@ -132,6 +132,7 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
+      getPublicKey: jest.fn(),
     })),
   },
 }));
@@ -324,7 +325,8 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublickKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
@@ -370,7 +372,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, {
@@ -905,7 +907,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       await jobService.createJob(
@@ -1103,7 +1105,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
@@ -1195,7 +1197,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
     });
 
@@ -1688,7 +1690,7 @@ describe('JobService', () => {
 
     beforeAll(() => {
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
     });
 
@@ -1807,7 +1809,7 @@ describe('JobService', () => {
 
     beforeAll(() => {
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
     });
 
@@ -1913,7 +1915,7 @@ describe('JobService', () => {
 
     beforeAll(() => {
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
       encrypt = false;
     });

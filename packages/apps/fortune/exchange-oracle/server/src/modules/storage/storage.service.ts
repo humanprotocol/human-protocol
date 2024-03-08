@@ -2,9 +2,8 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  KVStoreClient,
   EscrowClient,
-  EscrowUtils,
-  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import {
@@ -83,25 +82,28 @@ export class StorageService {
     if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
       try {
         const signer = this.web3Service.getSigner(chainId);
-        const exchangeOracle = await OperatorUtils.getLeader(
-          chainId,
-          signer.address,
-        );
         const escrowClient = await EscrowClient.build(signer);
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
-        const recordingOracle = await OperatorUtils.getLeader(
-          chainId,
+
+        const kvstoreClient = await KVStoreClient.build(signer);
+
+        const exchangeOraclePublickKey = await kvstoreClient.getPublicKey(
+          signer.address,
+        );
+        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
           recordingOracleAddress,
         );
-
-        if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
-          throw new Error();
+        if (
+          !exchangeOraclePublickKey.length ||
+          !recordingOraclePublicKey.length
+        ) {
+          throw new BadRequestException('Missing public key');
         }
 
         fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
-          exchangeOracle.publicKey,
-          recordingOracle.publicKey,
+          exchangeOraclePublickKey,
+          recordingOraclePublicKey,
         ]);
       } catch (e) {
         Logger.error(e);

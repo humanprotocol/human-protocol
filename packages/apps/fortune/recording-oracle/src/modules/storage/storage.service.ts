@@ -2,8 +2,8 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  KVStoreClient,
   EscrowClient,
-  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -90,25 +90,32 @@ export class StorageService {
     if (this.serverConfig.pgpEncrypt as boolean) {
       try {
         const signer = this.web3Service.getSigner(chainId);
-        const recordingOracle = await OperatorUtils.getLeader(
-          chainId,
-          signer.address,
-        );
         const escrowClient = await EscrowClient.build(signer);
         const reputationOracleAddress =
           await escrowClient.getReputationOracleAddress(escrowAddress);
-        const reputationOracle = await OperatorUtils.getLeader(
-          chainId,
+
+        const kvstoreClient = await KVStoreClient.build(signer);
+
+        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+          signer.address,
+        );
+        const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
           reputationOracleAddress,
         );
+        if (
+          !recordingOraclePublicKey.length ||
+          !reputationOraclePublicKey.length
+        ) {
+          throw new BadRequestException('Missing public key');
+        }
 
-        if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
+        if (!recordingOraclePublicKey || !reputationOraclePublicKey) {
           throw new Error();
         }
 
         fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
-          recordingOracle.publicKey,
-          reputationOracle.publicKey,
+          recordingOraclePublicKey,
+          reputationOraclePublicKey,
         ]);
       } catch (e) {
         throw new BadRequestException('Encryption error');

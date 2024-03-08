@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  OperatorUtils,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
@@ -31,15 +31,17 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn(),
   },
-  OperatorUtils: {
-    getLeader: jest.fn(),
-  },
   Encryption: {
     build: jest.fn(),
   },
   EncryptionUtils: {
     encrypt: jest.fn(),
     isEncrypted: jest.fn(),
+  },
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getPublicKey: jest.fn(),
+    })),
   },
 }));
 
@@ -112,8 +114,8 @@ describe('StorageService', () => {
     EscrowClient.build = jest.fn().mockResolvedValue({
       getJobLauncherAddress: jest.fn().mockResolvedValue(jobLauncherAddress),
     });
-    OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-      publicKey: MOCK_ENCRYPTION_PUBLIC_KEY,
+    (KVStoreClient.build as jest.Mock).mockResolvedValue({
+      getPublicKey: jest.fn().mockResolvedValue(MOCK_ENCRYPTION_PUBLIC_KEY),
     });
   });
 

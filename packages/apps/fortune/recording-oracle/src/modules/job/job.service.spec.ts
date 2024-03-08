@@ -70,12 +70,8 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
+      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
     })),
-  },
-  OperatorUtils: {
-    getLeader: jest.fn().mockResolvedValue({
-      publicKey: 'public-key',
-    }),
   },
   EncryptionUtils: {
     encrypt: jest.fn().mockResolvedValue('encrypted'),
@@ -621,6 +617,7 @@ describe('JobService', () => {
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     (KVStoreClient.build as jest.Mock).mockResolvedValue({
       get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
     });
 
     const manifest: IManifest = {
@@ -704,6 +701,7 @@ describe('JobService', () => {
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     (KVStoreClient.build as jest.Mock).mockResolvedValue({
       get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
     });
 
     const manifest: IManifest = {
