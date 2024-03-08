@@ -1,0 +1,9 @@
+{
+  "http://127.0.0.1:9000/snickering-eric-fivepin/61d354424ce988f12d57994d2c91ef486eb740af92cc25f388b92ee43d458d3e.txt": [
+    {"span": [16, 34], "label": "1"},
+    {"span": [46, 89], "label": "0"}
+  ],
+  "http://127.0.0.1:9000/snickering-eric-fivepin/d202626245abac933ec9aad791615b908746a87b5dfeec3f4c1382590c47bcc9.txt": [
+    {"span": [131, 230], "label": "2"}
+  ]
+}
