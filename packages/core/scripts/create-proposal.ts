@@ -18,10 +18,7 @@ async function main() {
     throw new Error('One or more required environment variables are missing.');
   }
 
-  // Convert the private key to a Signer
   const deployerSigner = new ethers.Wallet(deployerPrivateKey, ethers.provider);
-
-  // Assuming MetaHumanGovernor and other contracts are already deployed and their ABIs are available
   const governanceContract = await ethers.getContractAt(
     'MetaHumanGovernor',
     governorAddress,
