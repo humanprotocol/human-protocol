@@ -38,6 +38,7 @@ export const ConfigNames = {
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   SYNAPS_API_KEY: 'SYNAPS_API_KEY',
   SYNAPS_WEBHOOK_SECRET: 'SYNAPS_WEBHOOK_SECRET',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -88,4 +89,6 @@ export const envValidator = Joi.object({
   // Synaps Kyc
   SYNAPS_API_KEY: Joi.string().required(),
   SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
+  // Cron Secret
+  CRON_SECRET: Joi.string().required(),
 });

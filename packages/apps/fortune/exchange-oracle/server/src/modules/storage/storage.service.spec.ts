@@ -4,10 +4,12 @@ import {
   EncryptionUtils,
   KVStoreClient,
   StorageClient,
+  EscrowClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_ADDRESS,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
@@ -17,6 +19,7 @@ import {
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import { Web3Service } from '../web3/web3.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -33,6 +36,9 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       getPublicKey: jest.fn(),
     })),
+  },
+  EscrowClient: {
+    build: jest.fn(),
   },
 }));
 
@@ -58,6 +64,10 @@ describe('StorageService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
+  const configServiceMock: Partial<ConfigService> = {
+    get: jest.fn(),
+  };
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -80,6 +90,10 @@ describe('StorageService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: configServiceMock,
+        },
       ],
     }).compile();
 
@@ -87,7 +101,13 @@ describe('StorageService', () => {
   });
 
   describe('uploadJobSolutions', () => {
-    it('should upload the solutions correctly', async () => {
+    beforeAll(async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      }));
+    });
+
+    it('should upload the solutions with encryption correctly', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
@@ -100,6 +120,41 @@ describe('StorageService', () => {
       (KVStoreClient.build as jest.Mock).mockResolvedValue({
         getPublicKey: jest.fn().mockResolvedValue('publicKey'),
       });
+      configServiceMock.get = jest.fn().mockReturnValueOnce(true);
+
+      const jobSolution = {
+        workerAddress,
+        solution,
+      };
+      const fileUrl = await storageService.uploadJobSolutions(
+        escrowAddress,
+        chainId,
+        [jobSolution],
+      );
+      expect(fileUrl).toBe(
+        `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
+      );
+      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
+        MOCK_S3_BUCKET,
+        `${escrowAddress}-${chainId}.json`,
+        'encrypted',
+        {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      );
+    });
+
+    it('should upload the solutions without encryption correctly', async () => {
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
+      const chainId = ChainId.LOCALHOST;
+      const solution = 'test';
+
+      storageService.minioClient.bucketExists = jest
+        .fn()
+        .mockResolvedValue(true);
+      configServiceMock.get = jest.fn().mockReturnValueOnce(true);
 
       const jobSolution = {
         workerAddress,
@@ -154,6 +209,7 @@ describe('StorageService', () => {
       storageService.minioClient.bucketExists = jest
         .fn()
         .mockResolvedValue(true);
+      configServiceMock.get = jest.fn().mockReturnValueOnce(false);
       storageService.minioClient.putObject = jest
         .fn()
         .mockRejectedValue('Network error');
@@ -179,6 +235,7 @@ describe('StorageService', () => {
       storageService.minioClient.bucketExists = jest
         .fn()
         .mockResolvedValue(true);
+      configServiceMock.get = jest.fn().mockReturnValueOnce(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
       (KVStoreClient.build as jest.Mock).mockResolvedValue({
         getPublicKey: jest.fn().mockResolvedValue(''),
@@ -192,12 +249,12 @@ describe('StorageService', () => {
         storageService.uploadJobSolutions(escrowAddress, chainId, [
           jobSolution,
         ]),
-      ).rejects.toThrow('Missing public key');
+      ).rejects.toThrow('Encryption error');
     });
   });
 
   describe('downloadJobSolutions', () => {
-    it('should download the file correctly', async () => {
+    it('should download the encrypted file correctly', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
@@ -214,9 +271,37 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue('encrypted-content');
 
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(expectedJobFile)),
       }));
+
+      const solutionsFile = await storageService.downloadJobSolutions(
+        escrowAddress,
+        chainId,
+      );
+      expect(solutionsFile).toStrictEqual(expectedJobFile);
+    });
+
+    it('should download the non encrypted file correctly', async () => {
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
+      const chainId = ChainId.LOCALHOST;
+      const solution = 'test';
+
+      const expectedJobFile = [
+        {
+          workerAddress,
+          solution,
+        },
+      ];
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValue(expectedJobFile);
+
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
 
       const solutionsFile = await storageService.downloadJobSolutions(
         escrowAddress,

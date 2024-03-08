@@ -14,7 +14,7 @@ export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @UseGuards(
-    new SignatureAuthGuard([Role.Recording, Role.Reputation, Role.JobLaucher]),
+    new SignatureAuthGuard([Role.Recording, Role.Reputation, Role.JobLauncher]),
   )
   @Post('webhook')
   processWebhook(

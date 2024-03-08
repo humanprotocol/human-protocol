@@ -115,8 +115,8 @@ export class StorageService {
         JSON.stringify(solutions),
       );
 
-      const key = `${escrowAddress}-${chainId}.json`;
       const hash = crypto.createHash('sha1').update(content).digest('hex');
+      const key = `${hash}.json`;
       await this.minioClient.putObject(this.s3Config.bucket, key, content, {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
