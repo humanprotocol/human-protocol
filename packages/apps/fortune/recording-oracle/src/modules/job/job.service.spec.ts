@@ -5,6 +5,7 @@ import { Web3Service } from '../web3/web3.service';
 import { ErrorJob } from '../../common/constants/errors';
 import {
   ChainId,
+  EncryptionUtils,
   EscrowClient,
   EscrowStatus,
   KVStoreClient,
@@ -34,7 +35,7 @@ import { of } from 'rxjs';
 import { StorageService } from '../storage/storage.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
-import { EventType } from '@/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 import { WebhookDto } from '../webhook/webhook.dto';
 
 jest.mock('minio', () => {
@@ -114,7 +115,6 @@ describe('JobService', () => {
         ),
         ConfigModule.forFeature(
           registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
             encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
             encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
           })),
@@ -234,6 +234,7 @@ describe('JobService', () => {
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValue(JSON.stringify(invalidManifest));
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
 
       const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -323,6 +324,7 @@ describe('JobService', () => {
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest
           .fn()
@@ -330,6 +332,7 @@ describe('JobService', () => {
         getIntermediateResultsUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/results'),
+        storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -376,6 +379,7 @@ describe('JobService', () => {
     it('should return solution are recorded when one solution is sent', async () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest
           .fn()
@@ -424,21 +428,29 @@ describe('JobService', () => {
       };
 
       const result = await jobService.processJobSolution(jobSolution);
-      expect(result).toEqual('Solution are recorded.');
+      expect(result).toEqual('Solutions recorded.');
       expect(httpServicePostMock).not.toHaveBeenCalled();
     });
 
     it('should call send webhook method when all solutions are recorded', async () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+        getIntermediateResultsUrl: jest
+          .fn()
+          .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+
+      const kvStoreClient = {
+        get: jest.fn().mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL),
+      };
+      (KVStoreClient.build as jest.Mock).mockResolvedValue(kvStoreClient);
 
       const manifest: IManifest = {
         submissionsRequired: 2,
@@ -504,11 +516,14 @@ describe('JobService', () => {
   it('should take one solution more when one is marked as invalid', async () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -593,11 +608,14 @@ describe('JobService', () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -657,7 +675,7 @@ describe('JobService', () => {
         ],
       },
     };
-    expect(result).toEqual('Solution are recorded.');
+    expect(result).toEqual('Solutions recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
       MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
@@ -673,11 +691,14 @@ describe('JobService', () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -736,7 +757,7 @@ describe('JobService', () => {
       },
     };
     const result = await jobService.processJobSolution(jobSolution);
-    expect(result).toEqual('Solution are recorded.');
+    expect(result).toEqual('Solutions recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
       MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,

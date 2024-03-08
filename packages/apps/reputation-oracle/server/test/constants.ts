@@ -11,7 +11,6 @@ export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_LABEL = 'contains burnt area';
 export const MOCK_LABEL_NEGATIVE = '';
-export const MOCK_JOB_LAUNCHER_FEE = 5;
 export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
 export const MOCK_JOB_LAUNCHER_ADDRESS =

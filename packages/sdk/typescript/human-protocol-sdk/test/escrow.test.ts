@@ -2382,7 +2382,7 @@ describe('EscrowUtils', () => {
 
       expect(result).toEqual(escrow);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        '',
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_ESCROW_BY_ADDRESS_QUERY(),
         { escrowAddress: escrow.address }
       );
