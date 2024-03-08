@@ -35,7 +35,7 @@
       "schedule": "*/10 * * * *"
     },
     {
-      "path": "/cron/escrow/process",
+      "path": "/cron/webhook/process",
       "schedule": "*/10 * * * *"
     }
   ],
