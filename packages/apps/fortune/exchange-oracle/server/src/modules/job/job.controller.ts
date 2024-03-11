@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JobDetailsDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 
 @ApiTags('Job')
 @Controller('job')
@@ -16,6 +17,8 @@ export class JobController {
     return this.jobService.getPendingJobs(chainId, workerAddress);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('details/:chain_id/:escrow_address')
   getDetails(
     @Param('chain_id') chainId: number,
