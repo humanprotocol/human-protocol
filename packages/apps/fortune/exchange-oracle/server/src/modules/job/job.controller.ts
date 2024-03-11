@@ -6,6 +6,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 
 @ApiTags('Job')
 @Controller('job')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
@@ -17,8 +19,6 @@ export class JobController {
     return this.jobService.getPendingJobs(chainId, workerAddress);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get('details/:chain_id/:escrow_address')
   getDetails(
     @Param('chain_id') chainId: number,
