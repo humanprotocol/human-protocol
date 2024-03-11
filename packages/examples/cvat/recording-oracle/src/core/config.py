@@ -142,10 +142,12 @@ class ValidationConfig:
     )
     "Default OKS sigma for GT skeleton points validation. Valid range is (0; 1]"
 
-    gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.5))
+    gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.9))
     """
-    The number of allowed failed assignments per GT sample
-    before it's considered failed for the current validation iteration
+    The fraction of allowed failed assignments per GT sample,
+    before it's considered failed for the current validation iteration.
+    v = 0 -> any GT failure leads to image failure
+    v = 1 -> any GT failures do not lead to image failure
     """
 
     gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
