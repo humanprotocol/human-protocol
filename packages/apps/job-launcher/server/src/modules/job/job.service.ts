@@ -417,6 +417,13 @@ export class JobService {
         );
       },
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
+      getTrustedHandlers: () => {
+        const trustedHandlers = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_TRUSTED_HANDLERS,
+        )!;
+
+        return trustedHandlers.split(',');
+      },
     },
     [JobRequestType.FORTUNE]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
@@ -429,6 +436,7 @@ export class JobService {
         requestType,
         fundAmount,
       }),
+      getTrustedHandlers: () => [],
     },
     [JobRequestType.IMAGE_BOXES]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
@@ -437,6 +445,7 @@ export class JobService {
         requestType: JobRequestType,
         fundAmount: number,
       ) => this.createCvatManifest(dto, requestType, fundAmount),
+      getTrustedHandlers: () => [],
     },
     [JobRequestType.IMAGE_POINTS]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
@@ -445,6 +454,7 @@ export class JobService {
         requestType: JobRequestType,
         fundAmount: number,
       ) => this.createCvatManifest(dto, requestType, fundAmount),
+      getTrustedHandlers: () => [],
     },
   };
 
@@ -576,6 +586,8 @@ export class JobService {
 
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const manifest = this.downloadManifest(jobEntity.manifestUrl);
+
+    const { getTrustedHandlers } = this.createJobSpecificActions[requestType];
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 

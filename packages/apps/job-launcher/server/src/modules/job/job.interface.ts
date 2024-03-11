@@ -8,4 +8,5 @@ export interface RequestAction {
     requestType: JobRequestType,
     fundAmount: number,
   ) => Promise<any>;
+  getTrustedHandlers: () => string[];
 }
