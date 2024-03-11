@@ -6,6 +6,7 @@ import { envValidator } from './common/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { DatabaseModule } from './database/database.module';
+import { WebhookModule } from './modules/webhook/webhook.module';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { DatabaseModule } from './database/database.module';
   ],
   imports: [
     JobModule,
+    WebhookModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`

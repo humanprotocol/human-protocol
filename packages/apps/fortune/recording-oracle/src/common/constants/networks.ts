@@ -1,31 +1,36 @@
+import { ChainId } from '@human-protocol/sdk';
 import { NetworkMapDto } from '../interfaces/network';
 
 export const networkMap: NetworkMapDto = {
   polygon: {
-    chainId: 137,
+    chainId: ChainId.POLYGON,
     rpcUrl:
       'https://polygon-mainnet.g.alchemy.com/v2/0Lorh5KRkGl5FsRwy2epTg8fEFFoqUfY',
   },
   bsc: {
-    chainId: 56,
+    chainId: ChainId.BSC_MAINNET,
     rpcUrl: 'https://bsc-dataseed1.binance.org/',
   },
   mumbai: {
-    chainId: 80001,
+    chainId: ChainId.POLYGON_MUMBAI,
     rpcUrl:
       'https://polygon-mumbai.g.alchemy.com/v2/vKNSJzJf6SW2sdW-05bgFwoyFxUrMzii',
   },
   goerli: {
-    chainId: 5,
+    chainId: ChainId.GOERLI,
     rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   },
   moonbeam: {
-    chainId: 1284,
+    chainId: ChainId.MOONBEAM,
     rpcUrl: 'https://rpc.api.moonbeam.network',
   },
   bsctest: {
-    chainId: 97,
-    rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+    chainId: ChainId.BSC_TESTNET,
+    rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+  },
+  localhost: {
+    chainId: ChainId.LOCALHOST,
+    rpcUrl: 'http://localhost:8545',
   },
 };
 

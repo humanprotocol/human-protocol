@@ -1,6 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
+import { CronAuthGuard } from '../../common/guards/cron.auth';
 import { CronJobService } from './cron-job.service';
 
 @Public()
@@ -21,6 +27,8 @@ export class CronJobController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   @Get('/escrow/create')
   public async launchCreateEscrowCronJob(): Promise<void> {
     await this.cronJobService.createEscrowCronJob();
@@ -39,6 +47,8 @@ export class CronJobController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   @Get('/escrow/setup')
   public async launchSetupEscrowCronJob(): Promise<void> {
     await this.cronJobService.setupEscrowCronJob();
@@ -57,6 +67,8 @@ export class CronJobController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   @Get('/escrow/fund')
   public async launchFundEscrowCronJob(): Promise<void> {
     await this.cronJobService.fundEscrowCronJob();
@@ -75,6 +87,8 @@ export class CronJobController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   @Get('/escrow/cancel')
   public async cancelCronJob(): Promise<void> {
     await this.cronJobService.cancelCronJob();
@@ -93,6 +107,8 @@ export class CronJobController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   @Get('/wehbhook/process')
   public async processPendingWebhooks(): Promise<any> {
     await this.cronJobService.processPendingWebhooks();

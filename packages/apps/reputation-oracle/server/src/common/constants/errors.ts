@@ -3,8 +3,10 @@
  */
 export enum ErrorWebhook {
   NotFound = 'Webhook not found',
+  UrlNotFound = 'Webhook url not found',
   NotCreated = 'Webhook has not been created',
   InvalidEventType = 'Invalid event type',
+  NotSent = 'Webhook was not sent',
 }
 
 /**

@@ -14,12 +14,7 @@ import {
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
 
-import {
-  ServerConfigType,
-  Web3ConfigType,
-  serverConfigKey,
-  web3ConfigKey,
-} from '../../common/config';
+import { Web3ConfigType, web3ConfigKey } from '../../common/config';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
 import { IManifest, ISolution } from '../../common/interfaces/job';
@@ -27,7 +22,7 @@ import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { EventType } from '@/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 import {
   AssignmentRejection,
   SolutionEventData,
@@ -40,8 +35,6 @@ export class JobService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    @Inject(serverConfigKey)
-    private serverConfig: ServerConfigType,
     @Inject(web3ConfigKey)
     private web3Config: Web3ConfigType,
     @Inject(Web3Service)
@@ -145,9 +138,12 @@ export class JobService {
     const existingJobSolutionsURL =
       await escrowClient.getIntermediateResultsUrl(webhook.escrowAddress);
 
-    const existingJobSolutions = await this.storageService.download(
-      this.storageService.getJobUrl(webhook.escrowAddress, webhook.chainId),
-    );
+    let existingJobSolutions: ISolution[] = [];
+    if (existingJobSolutionsURL) {
+      existingJobSolutions = await this.storageService.download(
+        existingJobSolutionsURL,
+      );
+    }
 
     if (existingJobSolutions.length >= submissionsRequired) {
       this.logger.log(
@@ -179,19 +175,18 @@ export class JobService {
       recordingOracleSolutions,
     );
 
-    if (!existingJobSolutionsURL) {
-      await escrowClient.storeResults(
-        webhook.escrowAddress,
-        jobSolutionUploaded.url,
-        jobSolutionUploaded.hash,
-      );
-    }
+    await escrowClient.storeResults(
+      webhook.escrowAddress,
+      jobSolutionUploaded.url,
+      jobSolutionUploaded.hash,
+    );
 
-    // TODO: Uncomment this to read reputation oracle URL from KVStore
-    // const reputationOracleAddress = await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
-    // const reputationOracleURL = (await kvstoreClient.get(reputationOracleAddress, "url")) as string;
-
-    // TODO: Remove this when KVStore is used
+    const reputationOracleAddress =
+      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+    const reputationOracleWebhook = (await kvstoreClient.get(
+      reputationOracleAddress,
+      KVStoreKeys.webhookUrl,
+    )) as string;
 
     if (
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
@@ -200,7 +195,7 @@ export class JobService {
       await sendWebhook(
         this.httpService,
         this.logger,
-        this.serverConfig.reputationOracleWebhookUrl,
+        reputationOracleWebhook,
         {
           chainId: webhook.chainId,
           escrowAddress: webhook.escrowAddress,
@@ -231,7 +226,6 @@ export class JobService {
         eventData: { assignments: eventData },
       };
 
-      // Enviar la llamada al webhook una vez con todos los errores
       await sendWebhook(
         this.httpService,
         this.logger,
@@ -241,6 +235,6 @@ export class JobService {
       );
     }
 
-    return 'Solution are recorded.';
+    return 'Solutions recorded.';
   }
 }
