@@ -27,11 +27,11 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
 };
 
 export const userStatsCommandFixture: UserStatisticsCommand = {
-  oracle_url: 'https://test.oracle.com',
+  oracleUrl: 'https://test.oracle.com',
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {
-  oracle_url: 'https://test.oracle.com',
+  oracleUrl: 'https://test.oracle.com',
 };
 const userTokenFixture = 'test-token';
 export const requestContextFixture = {
@@ -44,9 +44,9 @@ export const userStatsOptionsFixture: AxiosRequestConfig = {
   headers: {
     Authorization: `Bearer ${userTokenFixture}`,
   },
-}
+};
 
 export const oracleStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
   url: `${oracleUrlFixture}/stats`,
-}
+};

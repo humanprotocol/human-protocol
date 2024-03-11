@@ -46,25 +46,30 @@ export class JobsDiscoveryParamsDto {
 
 export class JobsDiscoveryParamsCommand {
   @AutoMap()
-  exchange_oracle_url: string;
+  exchangeOracleUrl: string;
+  token: string;
   @AutoMap()
-  escrow_address: string;
+  data: JobsDiscoveryParams;
+}
+
+export class JobsDiscoveryParams {
   @AutoMap()
-  chain_id: number;
+  escrowAddress: string;
   @AutoMap()
-  page_size: number;
+  chainId: number;
+  @AutoMap()
+  pageSize: number;
   @AutoMap()
   page: number;
   @AutoMap()
   sort: SortOrder;
   @AutoMap()
-  sort_field: SortField;
+  sortField: SortField;
   @AutoMap()
-  job_type: string;
+  jobType: string;
   @AutoMap()
   fields: JobFields[];
 }
-
 export class JobsDiscoveryParamsData {
   @AutoMap()
   escrow_address: string;

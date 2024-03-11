@@ -19,14 +19,12 @@ import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.mod
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
 import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
-import { CommonUtilModule } from './common/utils/common-util.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
-import { RequestContext } from './common/utils/request-context.util';
+import { ExternalApiModule } from './integrations/external-api/external-api.module';
 
 @Module({
   imports: [
-    CommonUtilModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
@@ -42,6 +40,7 @@ import { RequestContext } from './common/utils/request-context.util';
     JobsDiscoveryModule,
     JobAssignmentModule,
     ReputationOracleModule,
+    ExternalApiModule,
     CommonConfigModule,
     OracleDiscoveryModule,
     StatisticsModule,
@@ -55,7 +54,6 @@ import { RequestContext } from './common/utils/request-context.util';
     JobAssignmentController,
     StatisticsController,
   ],
-  providers: [RequestContext],
   exports: [HttpModule],
 })
 export class AppModule {}

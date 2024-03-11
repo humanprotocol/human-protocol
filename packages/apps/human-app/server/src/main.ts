@@ -28,7 +28,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionsFilter());
 
   await app.listen(port, host, async () => {
-    logger.log(`Human APP server is running on http://${host}:${port}`);
+    logger.log(`Human APP server is running on https://${host}:${port}`);
   });
 }
 bootstrap();

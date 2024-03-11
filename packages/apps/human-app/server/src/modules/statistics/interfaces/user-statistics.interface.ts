@@ -6,5 +6,6 @@ export class UserStatisticsResponse {
   assignments_expired: number;
 }
 export class UserStatisticsCommand {
-  oracle_url: string;
+  oracleUrl: string;
+  token: string;
 }

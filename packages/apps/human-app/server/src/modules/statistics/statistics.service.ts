@@ -1,6 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AxiosRequestConfig } from 'axios';
-import { CommonHttpUtilService } from '../../common/utils/common-http-util.service';
 import {
   UserStatisticsCommand,
   UserStatisticsResponse,
@@ -12,67 +10,48 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { RequestContext } from '../../common/utils/request-context.util';
+import { ExternalApiGateway } from '../../integrations/external-api/external-api.gateway';
 
 @Injectable()
 export class StatisticsService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private httpService: CommonHttpUtilService,
+    private externalApiGateway: ExternalApiGateway,
     private configService: EnvironmentConfigService,
-    private readonly requestContext: RequestContext,
   ) {}
   async getOracleStats(
     command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
-    const url = command.oracle_url;
+    const url = command.oracleUrl;
     const cachedStatistics: OracleStatisticsResponse | undefined =
       await this.cacheManager.get(url);
     if (cachedStatistics) {
       return cachedStatistics;
     }
-    const options: AxiosRequestConfig = {
-      method: 'GET',
-      url: `${url}/stats`,
-    };
-    const statisticalData: OracleStatisticsResponse =
-      await this.httpService.callExternalHttpUtilRequest<OracleStatisticsResponse>(
-        options,
-      );
+    const response: OracleStatisticsResponse =
+      await this.externalApiGateway.fetchOracleStatistics(command);
     await this.cacheManager.set(
       url,
-      statisticalData,
+      response,
       this.configService.cacheTtlOracleStats,
     );
-    return statisticalData;
+    return response;
   }
   async getUserStats(
     command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
-    const url = command.oracle_url;
-    const token = this.requestContext.token;
-    const userCacheKey = url + token;
+    const userCacheKey = command.oracleUrl + command.token;
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
     if (cachedStatistics) {
       return cachedStatistics;
     }
-    const options: AxiosRequestConfig = {
-      method: 'GET',
-      url: `${url}/stats/assignment`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const statisticalData =
-      await this.httpService.callExternalHttpUtilRequest<UserStatisticsResponse>(
-        options,
-      );
+    const response = this.externalApiGateway.fetchUserStatistics(command);
     await this.cacheManager.set(
       userCacheKey,
-      statisticalData,
+      response,
       this.configService.cacheTtlUserStats,
     );
-    return statisticalData;
+    return response;
   }
 }

@@ -1,9 +1,17 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
+  CamelCaseNamingConvention,
+  createMap,
+  forMember,
+  Mapper,
+  mapWith,
+  namingConventions,
+  SnakeCaseNamingConvention,
+} from '@automapper/core';
+import {
+  JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
-  JobsDiscoveryParamsData,
   JobsDiscoveryParamsDto,
 } from './interfaces/jobs-discovery.interface';
 
@@ -18,20 +26,28 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
       createMap(
         mapper,
         JobsDiscoveryParamsDto,
-        JobsDiscoveryParamsCommand,
-        forMember(
-          (d) => d.fields,
-          mapFrom((s) => s.fields),
-        ),
+        JobsDiscoveryParams,
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
       );
       createMap(
         mapper,
+        JobsDiscoveryParamsDto,
         JobsDiscoveryParamsCommand,
-        JobsDiscoveryParamsData,
         forMember(
-          (d) => d.fields,
-          mapFrom((s) => s.fields),
+          (destination) => destination.data,
+          mapWith(
+            JobsDiscoveryParams,
+            JobsDiscoveryParamsDto,
+            (source) => source,
+          ),
         ),
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
       );
     };
   }

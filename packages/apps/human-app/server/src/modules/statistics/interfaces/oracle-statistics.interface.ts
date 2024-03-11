@@ -8,5 +8,5 @@ export class OracleStatisticsResponse {
   assignments_expired: number;
 }
 export class OracleStatisticsCommand {
-  oracle_url: string;
+  oracleUrl: string;
 }

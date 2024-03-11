@@ -25,6 +25,8 @@ describe('StatisticsService', () => {
   let cacheManager: Cache;
   let httpUtilService: CommonHttpUtilService;
   let configService: EnvironmentConfigService;
+  const TTL_ORACLE = 43200;
+  const TTL_USER = 900;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -49,8 +51,8 @@ describe('StatisticsService', () => {
         {
           provide: EnvironmentConfigService,
           useValue: {
-            cacheTtlOracleStats: 43200,
-            cacheTtlUserStats: 900,
+            cacheTtlOracleStats: TTL_ORACLE,
+            cacheTtlUserStats: TTL_USER,
           },
         },
         {
