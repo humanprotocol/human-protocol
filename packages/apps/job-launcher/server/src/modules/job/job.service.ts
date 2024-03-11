@@ -587,7 +587,7 @@ export class JobService {
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const manifest = this.downloadManifest(jobEntity.manifestUrl);
 
-    const { getTrustedHandlers } = this.createJobSpecificActions[requestType];
+    //const { getTrustedHandlers } = this.createJobSpecificActions[requestType];
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
