@@ -488,15 +488,20 @@ export class JobService {
     let jobEntity = new JobEntity();
 
     if (dto instanceof JobQuickLaunchDto) {
-      const { filename } = parseUrl(dto.manifestUrl);
+      if (!dto.manifestHash) {
+        const { filename } = parseUrl(dto.manifestUrl);
 
-      if (!filename) {
-        this.logger.log(ErrorJob.ManifestHashNotExist, JobService.name);
-        throw new ConflictException(ErrorJob.ManifestHashNotExist);
+        if (!filename) {
+          this.logger.log(ErrorJob.ManifestHashNotExist, JobService.name);
+          throw new ConflictException(ErrorJob.ManifestHashNotExist);
+        }
+
+        jobEntity.manifestHash = filename;
+      } else {
+        jobEntity.manifestHash = dto.manifestHash;
       }
 
       jobEntity.manifestUrl = dto.manifestUrl;
-      jobEntity.manifestHash = filename;
     } else {
       const manifestOrigin = await createManifest(
         dto,
@@ -556,7 +561,22 @@ export class JobService {
     );
   }
 
+  public async downloadManifest(manifestUrl: string) {
+    let manifest = await this.storageService.download(manifestUrl);
+    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
+      manifest = await this.encryption.decrypt(manifest as any);
+    }
+
+    if (isValidJSON(manifest)) {
+      manifest = JSON.parse(manifest);
+    }
+
+    return manifest;
+  }
+
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const manifest = this.downloadManifest(jobEntity.manifestUrl);
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);

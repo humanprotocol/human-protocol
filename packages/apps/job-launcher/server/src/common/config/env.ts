@@ -38,6 +38,7 @@ export const ConfigNames = {
   HCAPTCHA_SITE_KEY: 'HCAPTCHA_SITE_KEY',
   // HCAPTCHA_SECRET: 'HCAPTCHA_SECRET',
   HCAPTCHA_EXCHANGE_URL: 'HCAPTCHA_EXCHANGE_URL',
+  HCAPTCHA_TRUSTED_HANDLERS: 'HCAPTCHA_TRUSTED_HANDLERS',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -100,6 +101,9 @@ export const envValidator = Joi.object({
   HCAPTCHA_EXCHANGE_URL: Joi.string()
     .default('https://foundation-exchange.hmt.ai')
     .description('hcaptcha exchange url'),
+  HCAPTCHA_TRUSTED_HANDLERS: Joi.string()
+    .required()
+    .description('hcaptcha trusted handlers'),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),

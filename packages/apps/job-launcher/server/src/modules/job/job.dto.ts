@@ -94,6 +94,11 @@ export class JobQuickLaunchDto extends JobDto {
   @IsNotEmpty()
   public manifestUrl: string;
 
+  @ApiProperty({ name: 'manifest_hash' })
+  @IsString()
+  @IsOptional()
+  public manifestHash: string;
+
   @ApiProperty({ name: 'fund_amount' })
   @IsNumber()
   @IsPositive()
