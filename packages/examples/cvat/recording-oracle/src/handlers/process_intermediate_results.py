@@ -161,6 +161,14 @@ class _TaskValidator:
             format=DM_GT_DATASET_FORMAT_MAPPING[manifest.annotation.type],
         )
 
+    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
+        manifest = self._require_field(self.manifest)
+
+        return dm.Dataset.import_from(
+            os.fspath(job_dataset_path),
+            format=DM_DATASET_FORMAT_MAPPING[manifest.annotation.type],
+        )
+
     def _validate_jobs(self):
         tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
@@ -180,10 +188,7 @@ class _TaskValidator:
             job_dataset_path = tempdir / str(job_cvat_id)
             extract_zip_archive(job_annotations_file, job_dataset_path)
 
-            job_dataset = dm.Dataset.import_from(
-                os.fspath(job_dataset_path),
-                format=DM_DATASET_FORMAT_MAPPING[manifest.annotation.type],
-            )
+            job_dataset = self._load_job_dataset(job_cvat_id, job_dataset_path)
 
             try:
                 job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
@@ -341,10 +346,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
             job_dataset_path = tempdir / str(job_cvat_id)
             extract_zip_archive(job_annotations_file, job_dataset_path)
 
-            job_dataset = dm.Dataset.import_from(
-                os.fspath(job_dataset_path),
-                format=DM_DATASET_FORMAT_MAPPING[manifest.annotation.type],
-            )
+            job_dataset = self._load_job_dataset(job_cvat_id, job_dataset_path)
             job_gt_dataset = self._make_gt_dataset_for_job(job_cvat_id, job_dataset)
 
             comparator = DATASET_COMPARATOR_TYPE_MAP[manifest.annotation.type](
@@ -633,6 +635,59 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
             gt_dataset,
             skeletons_to_boxes_mapping,
         )
+
+    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
+        job_dataset = super()._load_job_dataset(job_id=job_id, job_dataset_path=job_dataset_path)
+
+        cat = job_dataset.categories()
+        updated_dataset = dm.Dataset(categories=cat, media_type=job_dataset.media_type())
+
+        job_label_cat: dm.LabelCategories = cat[dm.AnnotationType.label]
+        assert len(job_label_cat) == 2
+        job_skeleton_label_id = next(i for i, c in enumerate(job_label_cat) if not c.parent)
+        job_point_label_id = next(i for i, c in enumerate(job_label_cat) if c.parent)
+
+        for job_sample in job_dataset:
+            updated_annotations = job_sample.annotations.copy()
+
+            if not job_sample.annotations:
+                skeleton = dm.Skeleton(
+                    label=job_skeleton_label_id,
+                    elements=[
+                        dm.Points(
+                            [0, 0],
+                            visibility=[dm.Points.Visibility.absent],
+                            label=job_point_label_id,
+                        )
+                    ],
+                )
+
+                roi_info = self._roi_name_to_roi_info[os.path.basename(job_sample.id)]
+                bbox_sample = self._bbox_key_to_sample[roi_info.bbox_id]
+                bbox = next(
+                    bbox
+                    for bbox in bbox_sample.annotations
+                    if bbox.id == roi_info.bbox_id
+                    if isinstance(bbox, dm.Bbox)
+                )
+
+                roi_shift_x, roi_shift_y = self._bbox_offset_by_roi_id[roi_info.bbox_id]
+                converted_bbox = shift_ann(
+                    bbox,
+                    offset_x=roi_shift_x,
+                    offset_y=roi_shift_y,
+                    img_w=roi_info.roi_w,
+                    img_h=roi_info.roi_h,
+                )
+
+                skeleton.group = 1
+                converted_bbox.group = skeleton.group
+
+                updated_annotations = [skeleton, converted_bbox]
+
+            updated_dataset.put(job_sample.wrap(annotations=updated_annotations))
+
+        return updated_dataset
 
     def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
         job_label_cat: dm.LabelCategories = job_dataset.categories()[dm.AnnotationType.label]
