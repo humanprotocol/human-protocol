@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { envValidator } from './common/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { DatabaseModule } from './database/database.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 
 @Module({
@@ -23,6 +24,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
         : '.env',
       validationSchema: envValidator,
     }),
+    DatabaseModule,
   ],
   controllers: [AppController],
 })
