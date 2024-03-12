@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 from glob import glob
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
@@ -139,9 +139,9 @@ def remove_duplicated_gt_frames(dataset: dm.Dataset, known_frames: Sequence[str]
     return dataset
 
 
-def shift_ann(
-    ann: dm.Annotation, offset_x: float, offset_y: float, *, img_w: int, img_h: int
-) -> dm.Annotation:
+T = TypeVar("T", bound=dm.Annotation)
+
+def shift_ann(ann: T, offset_x: float, offset_y: float, *, img_w: int, img_h: int) -> T:
     "Shift annotation coordinates with clipping to the image size"
 
     if isinstance(ann, dm.Bbox):
