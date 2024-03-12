@@ -20,6 +20,7 @@ from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
 )
 from src.core.types import OracleWebhookTypes
+from src.core.validation_errors import TooFewGtError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.handlers.process_intermediate_results import (
     parse_annotation_metafile,
@@ -130,7 +131,7 @@ class _TaskValidator:
 
         if isinstance(validation_result, ValidationSuccess):
             logger.info(
-                f"Validation for escrow_address={escrow_address} successful, "
+                f"Validation for escrow_address={escrow_address}: successful, "
                 f"average annotation quality is {validation_result.average_quality:.2f}"
             )
 
@@ -181,7 +182,7 @@ class _TaskValidator:
                 type(e).__name__ for e in validation_result.rejected_jobs.values()
             )
             logger.info(
-                f"Validation for escrow_address={escrow_address} failed, "
+                f"Validation for escrow_address={escrow_address}: failed, "
                 f"rejected {len(validation_result.rejected_jobs)} jobs. "
                 f"Problems: {dict(error_type_counts)}"
             )
@@ -192,8 +193,14 @@ class _TaskValidator:
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_TaskRejected(
-                    # TODO: update wrt. M2 API changes
-                    rejected_job_ids=list(validation_result.rejected_jobs)
+                    # TODO: update wrt. M2 API changes, send reason
+                    rejected_job_ids=list(
+                        jid
+                        for jid, reason in validation_result.rejected_jobs
+                        if not isinstance(
+                            reason, TooFewGtError
+                        )  # prevent such jobs from reannotation, can also be handled in ExcOr
+                    )
                 ),
             )
 

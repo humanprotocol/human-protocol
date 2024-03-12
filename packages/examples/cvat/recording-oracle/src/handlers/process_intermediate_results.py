@@ -947,10 +947,31 @@ def process_intermediate_results(
 
         job_final_result_ids[job.id] = assignment_validation_result_id
 
-    if rejected_jobs:
+    task_jobs = task.jobs
+
+    should_complete = False
+    total_jobs = len(task_jobs)
+    unverifiable_jobs_count = len(
+        [v for v in rejected_jobs.values() if isinstance(v, TooFewGtError)]
+    )
+    if total_jobs * Config.validation.unverifiable_assignments_threshold < unverifiable_jobs_count:
+        logger.info(
+            "Validation for escrow_address={}: "
+            "too many assignments have insufficient GT for validation ({} of {} ({:.2f}%)), "
+            "stopping annotation".format(
+                escrow_address,
+                unverifiable_jobs_count,
+                total_jobs,
+                unverifiable_jobs_count / total_jobs * 100,
+            )
+        )
+        should_complete = True
+    elif not rejected_jobs:
+        should_complete = True
+
+    if not should_complete:
         return ValidationFailure(rejected_jobs)
 
-    task_jobs = task.jobs
     task_validation_results = db_service.get_task_validation_results(session, task.id)
 
     job_id_to_meta_id = {job.id: i for i, job in enumerate(task_jobs)}

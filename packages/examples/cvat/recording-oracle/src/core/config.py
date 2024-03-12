@@ -144,7 +144,7 @@ class ValidationConfig:
 
     gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.9))
     """
-    The fraction of allowed failed assignments per GT sample,
+    The maximum allowed fraction of failed assignments per GT sample,
     before it's considered failed for the current validation iteration.
     v = 0 -> any GT failure leads to image failure
     v = 1 -> any GT failures do not lead to image failure
@@ -152,7 +152,15 @@ class ValidationConfig:
 
     gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
     """
-    The number of allowed failures per GT sample before it's excluded from validation
+    The maximum allowed number of failures per GT sample before it's excluded from validation
+    """
+
+    unverifiable_assignments_threshold = float(
+        os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1)
+    )
+    """
+    The maximum allowed fraction of jobs with insufficient GT available for validation.
+    Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
 
