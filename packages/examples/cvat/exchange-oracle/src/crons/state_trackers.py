@@ -5,7 +5,7 @@ import src.models.cvat as cvat_models
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
 from src.core.config import CronConfig
-from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
+from src.core.oracle_events import ExchangeOracleEvent_JobCreationFailed
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
@@ -223,7 +223,7 @@ def track_task_creation() -> None:
                         escrow_address=project.escrow_address,
                         chain_id=project.chain_id,
                         type=OracleWebhookTypes.job_launcher,
-                        event=ExchangeOracleEvent_TaskCreationFailed(reason=reason),
+                        event=ExchangeOracleEvent_JobCreationFailed(reason=reason),
                     )
                 elif status == cvat_api.UploadStatus.FINISHED:
                     try:
@@ -255,7 +255,7 @@ def track_task_creation() -> None:
                             escrow_address=project.escrow_address,
                             chain_id=project.chain_id,
                             type=OracleWebhookTypes.job_launcher,
-                            event=ExchangeOracleEvent_TaskCreationFailed(reason=str(e)),
+                            event=ExchangeOracleEvent_JobCreationFailed(reason=str(e)),
                         )
 
             cvat_service.finish_uploads(session, failed + completed)

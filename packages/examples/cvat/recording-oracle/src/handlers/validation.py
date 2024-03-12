@@ -1,7 +1,7 @@
 import io
 import os
 from logging import Logger
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from sqlalchemy.orm import Session
 
@@ -12,14 +12,16 @@ import src.services.webhook as oracle_db_service
 from src.core.config import Config
 from src.core.manifest import TaskManifest
 from src.core.oracle_events import (
-    RecordingOracleEvent_TaskCompleted,
-    RecordingOracleEvent_TaskRejected,
+    RecordingOracleEvent_JobCompleted,
+    RecordingOracleEvent_SubmissionRejected,
 )
 from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
 )
 from src.core.types import OracleWebhookTypes
 from src.handlers.process_intermediate_results import (
+    ValidationFailure,
+    ValidationResult,
     ValidationSuccess,
     parse_annotation_metafile,
     process_intermediate_results,
@@ -30,7 +32,6 @@ from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
 from src.utils.assignments import compute_resulting_annotations_hash, parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
-from validators import ValidationFailure
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
@@ -93,8 +94,6 @@ class _TaskValidator:
         self._download_results_meta()
         self._download_annotations()
 
-    ValidationResult = Union[ValidationSuccess, ValidationFailure]
-
     def _process_annotation_results(self) -> ValidationResult:
         assert self.annotation_meta is not None
         assert self.job_annotations is not None
@@ -121,6 +120,10 @@ class _TaskValidator:
 
     def _compose_validation_results_bucket_filename(self, filename: str) -> str:
         return f"{self.escrow_address}@{self.chain_id}/{filename}"
+
+    _LOW_QUALITY_REASON_MESSAGE_TEMPLATE = (
+        "Annotation quality ({}) is below the required threshold ({})"
+    )
 
     def _handle_validation_result(self, validation_result: ValidationResult):
         logger = self.logger
@@ -167,30 +170,45 @@ class _TaskValidator:
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.reputation_oracle,
-                event=RecordingOracleEvent_TaskCompleted(),
+                event=RecordingOracleEvent_JobCompleted(),
             )
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
-                event=RecordingOracleEvent_TaskCompleted(),
+                event=RecordingOracleEvent_JobCompleted(),
             )
-        else:
+        elif isinstance(validation_result, ValidationFailure):
             logger.info(
                 f"Validation for escrow_address={escrow_address} failed, "
-                f"rejected {len(validation_result.rejected_job_ids)} jobs"
+                f"rejected {len(validation_result.rejected_jobs)} jobs"
             )
+
+            job_id_to_assignment_id = {
+                job_meta.job_id: job_meta.assignment_id for job_meta in self.annotation_meta.jobs
+            }
 
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
-                event=RecordingOracleEvent_TaskRejected(
-                    rejected_job_ids=validation_result.rejected_job_ids
+                event=RecordingOracleEvent_SubmissionRejected(
+                    rejected_tasks=[
+                        RecordingOracleEvent_SubmissionRejected.RejectedTaskInfo(
+                            task_id=job_id_to_assignment_id[rejected_job_id],
+                            reason=self._LOW_QUALITY_REASON_MESSAGE_TEMPLATE.format(
+                                validation_result.job_results[rejected_job_id],
+                                self.manifest.validation.min_quality,
+                            ),
+                        )
+                        for rejected_job_id in validation_result.rejected_jobs
+                    ]
                 ),
             )
+        else:
+            assert False
 
 
 def validate_results(

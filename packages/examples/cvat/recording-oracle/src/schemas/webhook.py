@@ -24,7 +24,7 @@ class OracleWebhook(BaseModel):
             "example": {
                 "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
                 "chain_id": 80001,
-                "event_type": ExchangeOracleEventTypes.task_finished.value,
+                "event_type": ExchangeOracleEventTypes.job_finished.value,
                 "event_data": {},
             }
         }

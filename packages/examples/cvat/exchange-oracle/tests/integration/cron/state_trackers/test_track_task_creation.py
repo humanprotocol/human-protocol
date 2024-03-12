@@ -111,4 +111,4 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     #     webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
     #     self.assertIsNotNone(webhook)
-    #     self.assertEqual(webhook.event_type, ExchangeOracleEventType.task_creation_failed)
+    #     self.assertEqual(webhook.event_type, ExchangeOracleEventType.job_creation_failed)

@@ -394,7 +394,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=ExchangeOracleEventTypes.task_finished.value,
+            event_type=ExchangeOracleEventTypes.job_finished.value,
             direction=OracleWebhookDirectionTags.outgoing,
         )
 

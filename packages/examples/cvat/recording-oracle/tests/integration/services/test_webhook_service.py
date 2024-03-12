@@ -19,7 +19,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=Networks.polygon_mainnet.value,
             type=OracleWebhookTypes.exchange_oracle,
             signature="signature",
-            event_type="task_finished",
+            event_type="job_finished",
         )
         random.seed(42)
 
@@ -36,7 +36,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=Networks.polygon_mainnet.value,
             type=oracle_webhook_type.value,
             status=status.value,
-            event_type="task_finished",
+            event_type="job_finished",
         )
 
     def test_create_webhook(self):

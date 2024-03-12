@@ -57,8 +57,8 @@ class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
 
 
 class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    task_creation_failed = "task_creation_failed"
-    task_finished = "task_finished"
+    job_creation_failed = "job_creation_failed"
+    job_finished = "job_finished"
 
 
 class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -67,8 +67,8 @@ class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):
 
 
 class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    task_completed = "task_completed"
-    task_rejected = "task_rejected"
+    job_completed = "job_completed"
+    submission_rejected = "submission_rejected"
 
 
 class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -82,7 +82,15 @@ class PlatformTypes(str, Enum, metaclass=BetterEnumMeta):
 
 
 class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
+    """
+    State changes:
+
+    - created: -> expired / completed / canceled
+    - completed: -> rejected
+    """
+
     created = "created"
     completed = "completed"
     expired = "expired"
+    rejected = "rejected"
     canceled = "canceled"
