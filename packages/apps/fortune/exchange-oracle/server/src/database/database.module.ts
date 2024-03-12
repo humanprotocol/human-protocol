@@ -8,6 +8,9 @@ import { NS } from '../common/constant';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { LoggerOptions } from 'typeorm';
 import { ConfigNames } from '../common/config';
+import { JobEntity } from '../modules/job/job.entity';
+import { AssignmentEntity } from '../modules/assignment/assignment.entity';
+import { WebhookEntity } from '../modules/webhook/webhook.entity';
 
 @Module({
   imports: [
@@ -29,7 +32,7 @@ import { ConfigNames } from '../common/config';
         return {
           name: 'default',
           type: 'postgres',
-          entities: [],
+          entities: [JobEntity, AssignmentEntity, WebhookEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,
