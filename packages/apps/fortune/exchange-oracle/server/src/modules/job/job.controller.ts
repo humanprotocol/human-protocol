@@ -8,20 +8,20 @@ import { JobService } from './job.service';
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
-  @Get('details/:chain_id/:escrow_address')
-  getDetails(
-    @Param('chain_id') chainId: number,
-    @Param('escrow_address') escrowAddress: string,
-  ): Promise<JobDetailsDto> {
-    return this.jobService.getDetails(chainId, escrowAddress);
-  }
-
   @Get('pending/:chain_id/:worker_address')
   getPendingJobs(
     @Param('chain_id') chainId: number,
     @Param('worker_address') workerAddress: string,
   ): Promise<any> {
     return this.jobService.getPendingJobs(chainId, workerAddress);
+  }
+
+  @Get('details/:chain_id/:escrow_address')
+  getDetails(
+    @Param('chain_id') chainId: number,
+    @Param('escrow_address') escrowAddress: string,
+  ): Promise<JobDetailsDto> {
+    return this.jobService.getDetails(chainId, escrowAddress);
   }
 
   @Post('solve')

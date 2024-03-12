@@ -8,7 +8,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@human-protocol/sdk": "*",
-    "@mui/icons-material": "^5.14.14",
+    "@mui/icons-material": "^5.15.11",
     "@mui/material": "^5.14.14",
     "@reduxjs/toolkit": "^1.9.0",
     "axios": "^1.2.3",
@@ -33,11 +33,11 @@
     "serve": "^14.1.1",
     "swr": "^2.2.4",
     "wagmi": "^0.12.2",
-    "web-vitals": "^3.5.1"
+    "web-vitals": "^3.5.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^14.2.1",
     "@types/crypto-js": "^4.1.2",
     "@types/file-saver": "^2.0.5",
     "@types/glob": "^8.1.0",
@@ -46,7 +46,7 @@
     "@types/react-dom": "^18.2.14",
     "@types/react-gtm-module": "^2.0.3",
     "@types/react-test-renderer": "^18.0.0",
-    "@vitejs/plugin-react": "^3.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.3.2",
     "eslint-config-react-app": "^7.0.1",

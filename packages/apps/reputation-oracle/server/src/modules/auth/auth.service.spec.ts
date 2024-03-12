@@ -35,15 +35,12 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import {
-  SENDGRID_TEMPLATES,
-  SERVICE_NAME,
-  WEB3_SIGNUP_MESSAGE,
-} from '../../common/constants';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
-import { Web3PreSignUpDto, Web3PreSignUpPayloadDto } from './auth.dto';
+import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
+import { SignatureType } from '../../common/enums/web3';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -66,10 +63,7 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
-
-  const signerMock = {
-    address: MOCK_ADDRESS,
-  };
+  let web3Service: Web3Service;
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -112,6 +106,7 @@ describe('AuthService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            prepareSignatureBody: jest.fn(),
           },
         },
       ],
@@ -123,6 +118,7 @@ describe('AuthService', () => {
     userService = moduleRef.get<UserService>(UserService);
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
+    web3Service = moduleRef.get<Web3Service>(Web3Service);
   });
 
   afterEach(() => {
@@ -668,38 +664,10 @@ describe('AuthService', () => {
       });
     });
 
-    describe('presignup', () => {
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should prepare web3 pre sign up payload and return typed structured data', async () => {
-        const preSignUpDataMock: Web3PreSignUpPayloadDto = {
-          from: MOCK_ADDRESS,
-          to: MOCK_ADDRESS,
-          contents: WEB3_SIGNUP_MESSAGE,
-        };
-
-        const web3PreSignUpDto: Web3PreSignUpDto = {
-          address: MOCK_ADDRESS,
-        };
-
-        jest
-          .spyOn(authService as any, 'prepareWeb3PreSignUpPayload')
-          .mockResolvedValue(preSignUpDataMock);
-
-        const result = await authService.web3PreSignup(web3PreSignUpDto);
-
-        expect(authService.prepareWeb3PreSignUpPayload).toHaveBeenCalledWith(
-          web3PreSignUpDto,
-        );
-        expect(result).toStrictEqual(preSignUpDataMock);
-      });
-    });
-
     describe('signup', () => {
-      const web3PreSignUpDto: Web3PreSignUpDto = {
+      const web3PreSignUpDto: PrepareSignatureDto = {
         address: MOCK_ADDRESS,
+        type: SignatureType.SIGNUP,
       };
 
       const nonce = getNonce();
@@ -710,16 +678,14 @@ describe('AuthService', () => {
         nonce,
       };
 
+      const preSignUpDataMock: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'signup',
+      };
       let createUserMock: any;
-      let preSignUpDataMock: Web3PreSignUpPayloadDto;
 
       beforeEach(() => {
-        preSignUpDataMock = {
-          from: MOCK_ADDRESS,
-          to: MOCK_ADDRESS,
-          contents: WEB3_SIGNUP_MESSAGE,
-        };
-
         createUserMock = jest.spyOn(userService, 'createWeb3User');
 
         createUserMock.mockResolvedValue(userEntity);
@@ -728,6 +694,10 @@ describe('AuthService', () => {
           accessToken: MOCK_ACCESS_TOKEN,
           refreshToken: MOCK_REFRESH_TOKEN,
         });
+
+        jest
+          .spyOn(web3Service as any, 'prepareSignatureBody')
+          .mockReturnValue(preSignUpDataMock);
       });
 
       afterEach(() => {

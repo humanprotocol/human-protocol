@@ -11,6 +11,8 @@ import {
   Logger,
   UsePipes,
   Ip,
+  UseFilters,
+  HttpCode,
 } from '@nestjs/common';
 
 import {
@@ -30,22 +32,42 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
+  RefreshDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
-import { AuthRepository } from './auth.repository';
+import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
+import { TokenRepository } from './token.repository';
+import { TokenType } from './token.entity';
 
 @ApiTags('Auth')
+@ApiResponse({
+  status: 400,
+  description: 'Bad Request. Invalid input parameters.',
+})
+@ApiResponse({
+  status: 401,
+  description: 'Unauthorized. Missing or invalid credentials.',
+})
+@ApiResponse({
+  status: 404,
+  description: 'Not Found. Could not find the requested content.',
+})
+@ApiResponse({
+  status: 422,
+  description: 'Unprocessable entity.',
+})
+@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
 
   constructor(
     private readonly authService: AuthService,
-    private readonly authRepository: AuthRepository,
+    private readonly tokenRepository: TokenRepository,
   ) {}
 
   @UsePipes(new PasswordValidationPipe())
@@ -58,26 +80,18 @@ export class AuthJwtController {
   })
   @ApiBody({ type: UserCreateDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'User registered successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Unprocessable entity.',
   })
   public async signup(
     @Body() data: UserCreateDto,
     @Ip() ip: string,
   ): Promise<void> {
     await this.authService.signup(data, ip);
-    return;
   }
 
   @Public()
+  @HttpCode(200)
   @Post('/signin')
   @ApiOperation({
     summary: 'User Signin',
@@ -89,21 +103,14 @@ export class AuthJwtController {
     description: 'User authenticated successfully',
     type: AuthDto,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
   public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
     return this.authService.signin(data, ip);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Public()
+  @HttpCode(200)
   @Post('/refresh')
+  @ApiBody({ type: RefreshDto })
   @ApiOperation({
     summary: 'Refresh Token',
     description: 'Endpoint to refresh the authentication token.',
@@ -113,12 +120,13 @@ export class AuthJwtController {
     description: 'Token refreshed successfully',
     type: AuthDto,
   })
-  async refreshToken(@Req() request: RequestWithUser): Promise<AuthDto> {
-    return this.authService.auth(request.user);
+  public async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
+    return this.authService.refresh(data);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
   @Post('/logout')
   @ApiOperation({
     summary: 'User Logout',
@@ -129,10 +137,14 @@ export class AuthJwtController {
     description: 'User logged out successfully',
   })
   public async logout(@Req() request: RequestWithUser): Promise<void> {
-    await this.authRepository.deleteByUserId(request.user.id);
+    await this.tokenRepository.deleteOneByTypeAndUserId(
+      TokenType.REFRESH,
+      request.user.id,
+    );
   }
 
   @Public()
+  @HttpCode(204)
   @Post('/forgot-password')
   @ApiOperation({
     summary: 'Forgot Password',
@@ -143,19 +155,12 @@ export class AuthJwtController {
     status: 204,
     description: 'Password reset email sent successfully',
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
-    return this.authService.forgotPassword(data);
+  public async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
+    await this.authService.forgotPassword(data);
   }
 
   @Public()
+  @HttpCode(204)
   @Post('/restore-password')
   @ApiOperation({
     summary: 'Restore Password',
@@ -166,19 +171,15 @@ export class AuthJwtController {
     status: 204,
     description: 'Password restored successfully',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
   public async restorePassword(
     @Body() data: RestorePasswordDto,
     @Ip() ip: string,
   ): Promise<void> {
     await this.authService.restorePassword(data, ip);
-    return;
   }
 
   @Public()
+  @HttpCode(200)
   @Post('/email-verification')
   @ApiOperation({
     summary: 'Email Verification',
@@ -189,15 +190,13 @@ export class AuthJwtController {
     status: 200,
     description: 'Email verification successful',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
   public async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
     await this.authService.emailVerification(data);
   }
 
-  @Public()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
   @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Resend Email Verification',
@@ -208,14 +207,10 @@ export class AuthJwtController {
     status: 204,
     description: 'Email verification resent successfully',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public resendEmailVerification(
+  public async resendEmailVerification(
     @Body() data: ResendEmailVerificationDto,
   ): Promise<void> {
-    return this.authService.resendEmailVerification(data);
+    await this.authService.resendEmailVerification(data);
   }
 
   @ApiBearerAuth()
@@ -229,10 +224,6 @@ export class AuthJwtController {
     status: 201,
     description: 'API key created or updated successfully',
     type: ApiKeyDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
   })
   public async createOrUpdateAPIKey(
     @Request() req: RequestWithUser,

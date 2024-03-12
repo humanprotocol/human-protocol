@@ -3,8 +3,10 @@
  */
 export enum ErrorWebhook {
   NotFound = 'Webhook not found',
+  UrlNotFound = 'Webhook url not found',
   NotCreated = 'Webhook has not been created',
   InvalidEventType = 'Invalid event type',
+  NotSent = 'Webhook was not sent',
 }
 
 /**
@@ -105,4 +107,12 @@ export enum ErrorCronJob {
 export enum ErrorWeb3 {
   InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
   InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+  GasPriceError = 'Error calculating gas price',
+}
+
+/**
+ * Represents error messages related to operator.
+ */
+export enum ErrorOperator {
+  OperatorNotActive = 'Operator not active',
 }

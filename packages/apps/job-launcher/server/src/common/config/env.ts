@@ -7,10 +7,12 @@ export const ConfigNames = {
   FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
   MAX_RETRY_COUNT: 'MAX_RETRY_COUNT',
-  HASH_SECRET: 'HASH_SECRET',
-  JWT_SECRET: 'JWT_SECRET',
+  JWT_PRIVATE_KEY: 'JWT_PRIVATE_KEY',
+  JWT_PUBLIC_KEY: 'JWT_PUBLIC_KEY',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
-  JWT_REFRESH_TOKEN_EXPIRES_IN: 'JWT_REFRESH_TOKEN_EXPIRES_IN',
+  REFRESH_TOKEN_EXPIRES_IN: 'REFRESH_TOKEN_EXPIRES_IN',
+  VERIFY_EMAIL_TOKEN_EXPIRES_IN: 'VERIFY_EMAIL_TOKEN_EXPIRES_IN',
+  FORGOT_PASSWORD_TOKEN_EXPIRES_IN: 'FORGOT_PASSWORD_TOKEN_EXPIRES_IN',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
@@ -21,10 +23,9 @@ export const ConfigNames = {
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
+  PGP_ENCRYPT: 'PGP_ENCRYPT',
   PGP_PRIVATE_KEY: 'PGP_PRIVATE_KEY',
   PGP_PASSPHRASE: 'PGP_PASSPHRASE',
-  PGP_ENCRYPT: 'PGP_ENCRYPT',
-  JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   REPUTATION_ORACLE_ADDRESS: 'REPUTATION_ORACLE_ADDRESS',
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: 'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
   FORTUNE_RECORDING_ORACLE_ADDRESS: 'FORTUNE_RECORDING_ORACLE_ADDRESS',
@@ -55,6 +56,7 @@ export const ConfigNames = {
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
   APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -66,10 +68,12 @@ export const envValidator = Joi.object({
   SESSION_SECRET: Joi.string().default('session_key'),
   MAX_RETRY_COUNT: Joi.number().default(5),
   // Auth
-  HASH_SECRET: Joi.string().default('a328af3fc1dad15342cc3d68936008fa'),
-  JWT_SECRET: Joi.string().default('secret'),
-  JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
-  JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
+  JWT_PRIVATE_KEY: Joi.string().required(),
+  JWT_PUBLIC_KEY: Joi.string().required(),
+  JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.number().default(300000),
+  REFRESH_TOKEN_EXPIRES_IN: Joi.number().default(3600000),
+  VERIFY_EMAIL_TOKEN_EXPIRES_IN: Joi.number().default(1800000),
+  FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number().default(1800000),
   // Database
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
   POSTGRES_USER: Joi.string().default('operator'),
@@ -82,7 +86,6 @@ export const envValidator = Joi.object({
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number().default(null),
-  JOB_LAUNCHER_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
@@ -118,10 +121,12 @@ export const envValidator = Joi.object({
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
   //PGP
-  PGP_PRIVATE_KEY: Joi.string().default(null),
-  PGP_PASSPHRASE: Joi.string().optional(),
   PGP_ENCRYPT: Joi.boolean().default(false),
+  PGP_PRIVATE_KEY: Joi.string().optional(),
+  PGP_PASSPHRASE: Joi.string().optional(),
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),
+  // Cron Job Secret
+  CRON_SECRET: Joi.string().required(),
 });

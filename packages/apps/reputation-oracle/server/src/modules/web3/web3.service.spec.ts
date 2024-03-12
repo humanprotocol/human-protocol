@@ -5,7 +5,8 @@ import { Web3Service } from './web3.service';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { ErrorWeb3 } from '../../common/constants/errors';
-import { Web3Env } from '../../common/enums/web3';
+import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { SignatureBodyDto } from './web3.dto';
 
 describe('Web3Service', () => {
   let mockConfigService: Partial<ConfigService>;
@@ -73,6 +74,26 @@ describe('Web3Service', () => {
     it('should get the operator address', () => {
       const operatorAddress = web3Service.getOperatorAddress();
       expect(operatorAddress).toBe(MOCK_ADDRESS);
+    });
+  });
+  describe('prepareSignatureBody', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should prepare web3 pre sign up payload and return typed structured data', async () => {
+      const expectedData: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'signup',
+      };
+
+      const result = await web3Service.prepareSignatureBody(
+        SignatureType.SIGNUP,
+        MOCK_ADDRESS,
+      );
+
+      expect(result).toStrictEqual(expectedData);
     });
   });
 });

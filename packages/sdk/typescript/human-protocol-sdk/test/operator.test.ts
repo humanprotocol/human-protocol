@@ -2,7 +2,7 @@
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { describe, expect, test, vi } from 'vitest';
-import { Role } from '../src/constants';
+import { NETWORKS, Role } from '../src/constants';
 import {
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
@@ -57,9 +57,13 @@ describe('OperatorUtils', () => {
         stakerAddress
       );
 
-      expect(gqlFetchSpy).toHaveBeenCalledWith('', GET_LEADER_QUERY, {
-        address: stakerAddress,
-      });
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADER_QUERY,
+        {
+          address: stakerAddress,
+        }
+      );
       expect(result).toEqual(mockLeader);
     });
 
@@ -107,9 +111,13 @@ describe('OperatorUtils', () => {
 
       const result = await OperatorUtils.getLeaders(filter);
 
-      expect(gqlFetchSpy).toHaveBeenCalledWith('', GET_LEADERS_QUERY(filter), {
-        role: filter.role,
-      });
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          role: filter.role,
+        }
+      );
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
@@ -146,7 +154,7 @@ describe('OperatorUtils', () => {
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        '',
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_REPUTATION_NETWORK_QUERY(),
         {
           address: stakerAddress,
@@ -179,7 +187,7 @@ describe('OperatorUtils', () => {
       amount: ethers.parseEther('100'),
     };
 
-    test('should throw an error if an invalid escrow address is provided', async () => {
+    test('should throw an error if an invalid slasher address is provided', async () => {
       await expect(
         OperatorUtils.getRewards(ChainId.LOCALHOST, invalidAddress)
       ).rejects.toThrow(ErrorInvalidSlasherAddressProvided);

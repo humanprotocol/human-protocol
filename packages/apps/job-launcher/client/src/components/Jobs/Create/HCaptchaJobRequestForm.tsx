@@ -37,7 +37,7 @@ import { HCaptchaJobRequesteValidationSchema } from './schema';
 export const HCaptchaJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
     useCreateJobPageUI();
-  const [expanded, setExpanded] = useState<string | false>('panel1');
+  const [expanded, setExpanded] = useState<string[]>(['panel1']);
   const [searchParams] = useSearchParams();
 
   const initialValues = {
@@ -62,7 +62,11 @@ export const HCaptchaJobRequestForm = () => {
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
+      if (newExpanded) {
+        setExpanded([...expanded, panel]);
+      } else {
+        setExpanded(expanded.filter((item) => item !== panel));
+      }
     };
 
   const handleNext = (data: any) => {
@@ -125,7 +129,7 @@ export const HCaptchaJobRequestForm = () => {
     <Box mt="42px">
       <form>
         <Accordion
-          expanded={expanded === 'panel1'}
+          expanded={expanded.includes('panel1')}
           onChange={handleChange('panel1')}
         >
           <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
@@ -173,12 +177,12 @@ export const HCaptchaJobRequestForm = () => {
                   <FormControl fullWidth>
                     <TextField
                       name="taskBidPrice"
-                      label="Task bid price"
+                      label="Task bid price HMT"
                       placeholder="Task bid price HMT"
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Tooltip title="Task bid price tooltip here .">
+                            <Tooltip title="Task bid price tooltip here.">
                               <HelpOutlineIcon
                                 color="secondary"
                                 sx={{ cursor: 'pointer' }}
@@ -226,7 +230,13 @@ export const HCaptchaJobRequestForm = () => {
                     >
                       Unsure what job type to choose?
                     </Typography>
-                    <Button sx={{ ml: 2 }}>Explore jobs</Button>
+                    <Button
+                      href="https://escrow-dashboard-git-feat-escrow-dashboard-ba2730-humanprotocol.vercel.app/launchpad/explore-jobs"
+                      target="_blank"
+                      sx={{ ml: 2 }}
+                    >
+                      Explore jobs
+                    </Button>
                   </Box>
                 </Box>
               </Grid>
@@ -274,7 +284,7 @@ export const HCaptchaJobRequestForm = () => {
           </AccordionDetails>
         </Accordion>
         <Accordion
-          expanded={expanded === 'panel2'}
+          expanded={expanded.includes('panel2')}
           onChange={handleChange('panel2')}
         >
           <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
@@ -382,6 +392,7 @@ export const HCaptchaJobRequestForm = () => {
                             fullWidth
                             name="images"
                             placeholder="Place link to an example image"
+                            helperText={errors.images?.[index]}
                             sx={{ flex: 1 }}
                             value={image}
                             onChange={(e) => {
@@ -390,7 +401,7 @@ export const HCaptchaJobRequestForm = () => {
                               setFieldValue('images', newImages);
                             }}
                             onBlur={handleBlur}
-                            error={touched.images && Boolean(errors.images)}
+                            error={Boolean(errors.images?.[index])}
                           />
                           <IconButton
                             onClick={() => {
@@ -506,7 +517,7 @@ export const HCaptchaJobRequestForm = () => {
           </AccordionDetails>
         </Accordion>
         <Accordion
-          expanded={expanded === 'panel3'}
+          expanded={expanded.includes('panel3')}
           onChange={handleChange('panel3')}
         >
           <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
@@ -525,6 +536,7 @@ export const HCaptchaJobRequestForm = () => {
                     onChange={(newValue) =>
                       setFieldValue('completionDate', newValue)
                     }
+                    slotProps={{ openPickerIcon: { sx: { color: '#858EC6' } } }}
                   />
                 </FormControl>
               </Grid>
