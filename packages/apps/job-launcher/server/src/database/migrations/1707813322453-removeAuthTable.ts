@@ -10,6 +10,28 @@ export class RemoveAuthTable1707813322453 implements MigrationInterface {
     await queryRunner.query(`
             ALTER TABLE "hmt"."tokens" DROP CONSTRAINT "FK_8769073e38c365f315426554ca5"
         `);
+
+    await queryRunner.query(`
+            CREATE TYPE "hmt"."tokens_type_enum" AS ENUM('EMAIL', 'PASSWORD', 'REFRESH')
+        `);
+
+    await queryRunner.query(`
+            ALTER TABLE "hmt"."tokens"
+            ADD "type" "hmt"."tokens_type_enum"
+        `);
+
+    await queryRunner.query(`
+        UPDATE "hmt"."tokens" SET "type" = 'EMAIL' WHERE "token_type" = 'EMAIL'
+    `);
+
+    await queryRunner.query(`
+        UPDATE "hmt"."tokens" SET "type" = 'PASSWORD' WHERE "token_type" = 'PASSWORD'
+    `);
+
+    await queryRunner.query(`
+            ALTER TABLE "hmt"."tokens"
+            ALTER COLUMN "type" SET NOT NULL
+        `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."tokens" DROP COLUMN "token_type"
         `);
@@ -17,15 +39,17 @@ export class RemoveAuthTable1707813322453 implements MigrationInterface {
             DROP TYPE "hmt"."tokens_token_type_enum"
         `);
     await queryRunner.query(`
-            CREATE TYPE "hmt"."tokens_type_enum" AS ENUM('EMAIL', 'PASSWORD', 'REFRESH')
+            ALTER TABLE "hmt"."tokens"
+            ADD "expires_at" TIMESTAMP WITH TIME ZONE
         `);
+
+    await queryRunner.query(`
+        UPDATE "hmt"."tokens" SET "expires_at" = "updated_at" + INTERVAL '3 hours'
+    `);
+
     await queryRunner.query(`
             ALTER TABLE "hmt"."tokens"
-            ADD "type" "hmt"."tokens_type_enum" NOT NULL
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "hmt"."tokens"
-            ADD "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL
+            ALTER COLUMN "expires_at" SET NOT NULL
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."tokens" DROP CONSTRAINT "REL_8769073e38c365f315426554ca"
