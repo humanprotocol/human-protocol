@@ -54,6 +54,7 @@ export enum ErrorUser {
   InvalidCredentials = 'Invalid credentials',
   IncorrectAddress = 'Incorrect address',
   KycNotApproved = 'KYC not approved',
+  UserNotActive = 'User not active',
 }
 
 /**

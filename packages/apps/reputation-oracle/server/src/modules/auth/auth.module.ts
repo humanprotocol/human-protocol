@@ -7,13 +7,14 @@ import { UserModule } from '../user/user.module';
 import { JwtHttpStrategy } from './strategy';
 import { AuthService } from './auth.service';
 import { AuthJwtController } from './auth.controller';
-import { AuthEntity } from './auth.entity';
 import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
-import { Web3Module } from '../web3/web3.module';
+import { ApiKeyRepository } from './apikey.repository';
+import { ApiKeyEntity } from './apikey.entity';
+import { UserEntity } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
 
 @Module({
   imports: [
@@ -23,8 +24,10 @@ import { Web3Module } from '../web3/web3.module';
       inject: [ConfigService],
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>(ConfigNames.JWT_SECRET, 'secretkey'),
+        privateKey: configService.get<string>(ConfigNames.JWT_PRIVATE_KEY),
+        publicKey: configService.get<string>(ConfigNames.JWT_PUBLIC_KEY),
         signOptions: {
+          algorithm: 'ES256',
           expiresIn: configService.get<number>(
             ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
             3600,
@@ -32,11 +35,16 @@ import { Web3Module } from '../web3/web3.module';
         },
       }),
     }),
-    TypeOrmModule.forFeature([AuthEntity, TokenEntity]),
+    TypeOrmModule.forFeature([TokenEntity, ApiKeyEntity, UserEntity]),
     SendGridModule,
-    Web3Module,
   ],
-  providers: [JwtHttpStrategy, AuthService, AuthRepository, TokenRepository],
+  providers: [
+    JwtHttpStrategy,
+    AuthService,
+    TokenRepository,
+    ApiKeyRepository,
+    UserRepository,
+  ],
   controllers: [AuthJwtController],
   exports: [AuthService],
 })

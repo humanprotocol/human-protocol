@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
-import { UserCreateDto } from '../user/user.dto';
+import { UserCreateDto, Web3UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
@@ -114,10 +114,15 @@ export class AuthService {
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
     const userEntity = await this.userService.create(data);
 
-    const tokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.EMAIL;
+    tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.verifyEmailTokenExpiresIn,
+    );
+
+    await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -272,41 +277,48 @@ export class AuthService {
   }
 
   public async emailVerification(data: VerifyEmailDto): Promise<void> {
-    const tokenEntity = await this.tokenRepository.findOne({
-      uuid: data.token,
-      tokenType: TokenType.EMAIL,
-    });
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
+      data.token,
+      TokenType.EMAIL,
+    );
 
     if (!tokenEntity) {
-      throw new NotFoundException('Token not found');
+      throw new AuthError(ErrorAuth.NotFound);
     }
 
-    this.userService.activate(tokenEntity.user);
-    await tokenEntity.remove();
+    if (new Date() > tokenEntity.expiresAt) {
+      throw new AuthError(ErrorAuth.TokenExpired);
+    }
+
+    tokenEntity.user.status = UserStatus.ACTIVE;
+    await this.userRepository.updateOne(tokenEntity.user);
   }
 
   public async resendEmailVerification(
     data: ResendEmailVerificationDto,
   ): Promise<void> {
-    const userEntity = await this.userService.getByEmail(data.email);
+    const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
-    const existingToken = await this.tokenRepository.findOne({
-      userId: userEntity.id,
-      tokenType: TokenType.EMAIL,
-    });
+    const existingToken = await this.tokenRepository.findOneByUserIdAndType(
+      userEntity.id,
+      TokenType.EMAIL,
+    );
 
     if (existingToken) {
       await existingToken.remove();
     }
 
-    const newTokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    });
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.EMAIL;
+    tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.verifyEmailTokenExpiresIn,
+    );
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -314,7 +326,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${newTokenEntity.uuid}`,
+            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -365,13 +377,18 @@ export class AuthService {
     ) {
       throw new BadRequestException(ErrorAuth.InvalidRole);
     }
+    const nonce = await this.getNonce(data.address);
+
+    const web3UserCreateDto: Web3UserCreateDto = {
+      evmAddress: data.address,
+      nonce: nonce,
+      type: data.type,
+    };
 
     const userEntity = await this.userService.createWeb3User(
+      web3UserCreateDto,
       data.address,
-      data.type,
     );
-
-    await kvstore.set(data.address, 'ACTIVE');
 
     return this.auth(userEntity);
   }
