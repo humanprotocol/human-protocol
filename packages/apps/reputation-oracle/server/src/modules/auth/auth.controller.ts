@@ -16,6 +16,10 @@ import {
   Req,
   UseGuards,
   UseInterceptors,
+  UseFilters,
+  Logger,
+  UsePipes,
+  Ip,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { UserCreateDto } from '../user/user.dto';
@@ -28,16 +32,44 @@ import {
   VerifyEmailDto,
   Web3SignInDto,
   Web3SignUpDto,
+  RefreshDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
+import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
+import { TokenRepository } from './token.repository';
+import { PasswordValidationPipe } from '../../common/pipes';
+import { TokenType } from './token.entity';
 
 @ApiTags('Auth')
+@ApiResponse({
+  status: 400,
+  description: 'Bad Request. Invalid input parameters.',
+})
+@ApiResponse({
+  status: 401,
+  description: 'Unauthorized. Missing or invalid credentials.',
+})
+@ApiResponse({
+  status: 404,
+  description: 'Not Found. Could not find the requested content.',
+})
+@ApiResponse({
+  status: 422,
+  description: 'Unprocessable entity.',
+})
+@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly logger = new Logger(AuthJwtController.name);
 
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tokenRepository: TokenRepository,
+  ) {}
+
+  @UsePipes(new PasswordValidationPipe())
   @Public()
   @Post('/signup')
   @UseInterceptors(ClassSerializerInterceptor)
@@ -54,8 +86,11 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
-  public async signup(@Body() data: UserCreateDto): Promise<void> {
-    await this.authService.signup(data);
+  public async signup(
+    @Body() data: UserCreateDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    await this.authService.signup(data, ip);
     return;
   }
 
@@ -80,8 +115,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public signin(@Body() data: SignInDto): Promise<AuthDto> {
-    return this.authService.signin(data);
+  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
+    return this.authService.signin(data, ip);
   }
 
   @Public()
@@ -143,11 +178,10 @@ export class AuthJwtController {
   public async getNonce(@Param('address') address: string): Promise<string> {
     return this.authService.getNonce(address);
   }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post('/refresh')
+  @Public()
   @HttpCode(200)
+  @Post('/refresh')
+  @ApiBody({ type: RefreshDto })
   @ApiOperation({
     summary: 'Refresh Token',
     description: 'Endpoint to refresh the authentication token.',
@@ -157,14 +191,14 @@ export class AuthJwtController {
     description: 'Token refreshed successfully',
     type: AuthDto,
   })
-  async refreshToken(@Req() request: RequestWithUser): Promise<AuthDto> {
-    return this.authService.auth(request.user);
+  async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
+    return this.authService.refresh(data);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('/logout')
   @HttpCode(204)
+  @Post('/logout')
   @ApiOperation({
     summary: 'User Logout',
     description: 'Endpoint to log out the user.',
@@ -174,7 +208,10 @@ export class AuthJwtController {
     description: 'User logged out successfully',
   })
   public async logout(@Req() request: RequestWithUser): Promise<void> {
-    await this.authService.logout(request.user);
+    await this.tokenRepository.deleteOneByTypeAndUserId(
+      TokenType.REFRESH,
+      request.user.id,
+    );
   }
 
   @Public()
@@ -217,13 +254,16 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public restorePassword(@Body() data: RestorePasswordDto): Promise<boolean> {
-    return this.authService.restorePassword(data);
+  public restorePassword(
+    @Body() data: RestorePasswordDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    return this.authService.restorePassword(data, ip);
   }
 
   @Public()
-  @Post('/email-verification')
   @HttpCode(200)
+  @Post('/email-verification')
   @ApiOperation({
     summary: 'Email Verification',
     description: 'Endpoint to verify the user email address.',
@@ -241,9 +281,10 @@ export class AuthJwtController {
     await this.authService.emailVerification(data);
   }
 
-  @Public()
-  @Post('/resend-email-verification')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(204)
+  @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Resend Email Verification',
     description: 'Endpoint to resend the email verification link.',

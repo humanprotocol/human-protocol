@@ -16,6 +16,7 @@ import { UserService } from '../user/user.service';
 import {
   AuthDto,
   ForgotPasswordDto,
+  RefreshDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
   SignInDto,
@@ -23,7 +24,7 @@ import {
   Web3SignInDto,
   Web3SignUpDto,
 } from './auth.dto';
-import { TokenType } from './token.entity';
+import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
@@ -34,13 +35,20 @@ import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
 import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { UserRepository } from '../user/user.repository';
+import { AuthError } from './auth.error';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly refreshTokenExpiresIn: string;
-  private readonly salt: string;
+  private readonly refreshTokenExpiresIn: number;
+  private readonly accessTokenExpiresIn: number;
+  private readonly verifyEmailTokenExpiresIn: number;
+  private readonly forgotPasswordTokenExpiresIn: number;
   private readonly feURL: string;
+  private readonly iterations: number;
+  private readonly keyLength: number;
+  private readonly salt: string;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -50,23 +58,43 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
+    private readonly userRepository: UserRepository,
   ) {
-    this.refreshTokenExpiresIn = this.configService.get<string>(
-      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
-      '100000000',
+    this.refreshTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.REFRESH_TOKEN_EXPIRES_IN,
+      3600000,
     );
 
-    this.salt = this.configService.get<string>(
-      ConfigNames.HASH_SECRET,
-      'a328af3fc1dad15342cc3d68936008fa',
+    this.accessTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
+      300000,
     );
+
+    this.verifyEmailTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
+      1800000,
+    );
+
+    this.forgotPasswordTokenExpiresIn = this.configService.get<number>(
+      ConfigNames.FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
+      1800000,
+    );
+
     this.feURL = this.configService.get<string>(
       ConfigNames.FE_URL,
       'http://localhost:3005',
     );
+    this.iterations = this.configService.get<number>(
+      ConfigNames.APIKEY_ITERATIONS,
+      1000,
+    );
+    this.keyLength = this.configService.get<number>(
+      ConfigNames.APIKEY_KEY_LENGTH,
+      64,
+    );
   }
 
-  public async signin(data: SignInDto): Promise<AuthDto> {
+  public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -83,7 +111,7 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async signup(data: UserCreateDto): Promise<UserEntity> {
+  public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
     const userEntity = await this.userService.create(data);
 
     const tokenEntity = await this.tokenRepository.create({
@@ -109,6 +137,23 @@ export class AuthService {
 
   public async logout(user: UserEntity): Promise<void> {
     await this.authRepository.delete({ userId: user.id });
+  }
+
+  public async refresh(data: RefreshDto): Promise<AuthDto> {
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
+      data.refreshToken,
+      TokenType.REFRESH,
+    );
+
+    if (!tokenEntity) {
+      throw new AuthError(ErrorAuth.InvalidToken);
+    }
+
+    if (new Date() > tokenEntity.expiresAt) {
+      throw new AuthError(ErrorAuth.TokenExpired);
+    }
+
+    return this.auth(tokenEntity.user);
   }
 
   public async auth(userEntity: UserEntity): Promise<AuthDto> {
@@ -150,28 +195,34 @@ export class AuthService {
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-    const userEntity = await this.userService.getByEmail(data.email);
+    const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
-      throw new NotFoundException(ErrorUser.NotFound);
+      throw new AuthError(ErrorUser.NotFound);
     }
 
-    if (userEntity.status !== UserStatus.ACTIVE)
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
+    if (userEntity.status !== UserStatus.ACTIVE) {
+      throw new AuthError(ErrorUser.UserNotActive);
+    }
 
-    const existingToken = await this.tokenRepository.findOne({
-      userId: userEntity.id,
-      tokenType: TokenType.PASSWORD,
-    });
+    const existingToken = await this.tokenRepository.findOneByUserIdAndType(
+      userEntity.id,
+      TokenType.PASSWORD,
+    );
 
     if (existingToken) {
-      await existingToken.remove();
+      await this.tokenRepository.deleteOne(existingToken);
     }
 
-    const newTokenEntity = await this.tokenRepository.create({
-      tokenType: TokenType.PASSWORD,
-      user: userEntity,
-    });
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.PASSWORD;
+    tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.forgotPasswordTokenExpiresIn,
+    );
+
+    await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -179,7 +230,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/reset-password?token=${newTokenEntity.uuid}`,
+            url: `${this.feURL}/reset-password?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -187,14 +238,21 @@ export class AuthService {
     });
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
-    const tokenEntity = await this.tokenRepository.findOne({
-      uuid: data.token,
-      tokenType: TokenType.PASSWORD,
-    });
+  public async restorePassword(
+    data: RestorePasswordDto,
+    ip?: string,
+  ): Promise<void> {
+    const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
+      data.token,
+      TokenType.PASSWORD,
+    );
 
     if (!tokenEntity) {
-      throw new NotFoundException('Token not found');
+      throw new AuthError(ErrorAuth.InvalidToken);
+    }
+
+    if (new Date() > tokenEntity.expiresAt) {
+      throw new AuthError(ErrorAuth.TokenExpired);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -210,9 +268,7 @@ export class AuthService {
       templateId: SENDGRID_TEMPLATES.passwordChanged,
     });
 
-    await tokenEntity.remove();
-
-    return true;
+    await this.tokenRepository.deleteOne(tokenEntity);
   }
 
   public async emailVerification(data: VerifyEmailDto): Promise<void> {
