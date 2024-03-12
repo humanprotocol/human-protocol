@@ -24,7 +24,7 @@ const REWARD_AMOUNT = '100';
 const REWARD_TOKEN = 'ETH';
 const CREATED_AT = '2024-03-01T12:00:00Z';
 const JOB_TITLE = 'test job';
-
+export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
   exchange_oracle_url: EXCHANGE_ORACLE_URL,
   escrow_address: ESCROW_ADDRESS,

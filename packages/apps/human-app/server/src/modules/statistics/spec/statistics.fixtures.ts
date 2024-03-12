@@ -22,6 +22,8 @@ const ASSIGNMENTS_REJECTED_ORACLE = 231;
 const ASSIGNMENTS_EXPIRED_ORACLE = 434;
 const ORACLE_URL = 'https://test.oracle.com';
 const TOKEN = 'test-token';
+export const statisticsToken = TOKEN;
+export const statisticsOracleUrl = ORACLE_URL;
 export const userStatsResponseFixture: UserStatisticsResponse = {
   assignments_amount: ASSIGNMENTS_AMOUNT,
   submissions_sent: SUBMISSIONS_SENT,

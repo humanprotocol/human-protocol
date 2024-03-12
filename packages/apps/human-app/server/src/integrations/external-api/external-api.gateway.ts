@@ -37,7 +37,7 @@ export class ExternalApiGateway {
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
-    const response: AxiosResponse<T> = await lastValueFrom(
+    const response = await lastValueFrom(
       this.httpService.request(options),
     );
     return response.data;

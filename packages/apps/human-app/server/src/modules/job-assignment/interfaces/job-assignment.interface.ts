@@ -91,14 +91,23 @@ export class JobsFetchParamsDto {
 }
 
 export class JobsFetchParams {
+  @AutoMap()
   assignmentId: string;
+  @AutoMap()
   escrowAddress: string;
+  @AutoMap()
   chainId: number;
+  @AutoMap()
   jobType: string;
+  @AutoMap()
   status: StatusEnum;
+  @AutoMap()
   pageSize: number;
+  @AutoMap()
   page: number;
+  @AutoMap()
   sort: SortOrder;
+  @AutoMap()
   sortField: SortField;
 }
 export class JobsFetchParamsCommand {

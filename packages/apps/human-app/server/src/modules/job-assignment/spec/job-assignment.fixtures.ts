@@ -33,7 +33,8 @@ const UPDATED_AT = 'test_date_2';
 const EXPIRES_AT = 'test_date_3';
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
-
+export const jobAssignmentToken = TOKEN;
+export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
   exchange_oracle_url: EXCHANGE_ORACLE_URL,
   escrow_address: ESCROW_ADDRESS,
@@ -108,6 +109,7 @@ export const jobsFetchParamsDataFixture: JobsFetchParamsData = {
   sort_field: SORT_FIELD,
 };
 
+export const jobsFetchParamsDataAsString = `assignment_id=${ASSIGNMENT_ID}&escrow_address=${ESCROW_ADDRESS}&chain_id=${CHAIN_ID}&job_type=${JOB_TYPE}&status=${STATUS}&page_size=${PAGE_SIZE}&page=${PAGE}&sort=${SORT}&sort_field=${SORT_FIELD}`;
 export const jobsFetchResponseItemFixture: JobsFetchResponseItem = {
   assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,

@@ -26,7 +26,7 @@ export class JobsDiscoveryController {
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
     @Headers('authorization') token: string,
   ): Promise<JobsDiscoveryResponse> {
-    const jobsDiscoveryParamsCommand = this.mapper.map(
+    const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand = this.mapper.map(
       jobsDiscoveryParamsDto,
       JobsDiscoveryParamsDto,
       JobsDiscoveryParamsCommand,

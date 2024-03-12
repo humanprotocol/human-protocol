@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
-  forMember,
+  forMember, mapFrom,
   Mapper,
   mapWith,
   namingConventions,
@@ -52,6 +52,14 @@ export class JobAssignmentProfile extends AutomapperProfile {
         mapper,
         JobsFetchParamsDto,
         JobsFetchParams,
+        forMember(
+          (destination) => destination.pageSize,
+          mapFrom((source: JobsFetchParamsDto ) => source.page_size),
+        ),
+        forMember(
+          (destination) => destination.sortField,
+          mapFrom((source: JobsFetchParamsDto ) => source.sort_field),
+        ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),
@@ -63,7 +71,8 @@ export class JobAssignmentProfile extends AutomapperProfile {
         JobsFetchParamsCommand,
         forMember(
           (destination) => destination.data,
-          mapWith(JobsFetchParams, JobsFetchParamsDto, (source) => source),
+          mapFrom((source: JobsFetchParamsDto ) =>
+            mapper.map(source, JobsFetchParamsDto, JobsFetchParams))
         ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
