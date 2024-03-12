@@ -36,14 +36,6 @@ export class JobsDiscoveryParamsDto {
   fields: JobFields[];
 }
 
-export class JobsDiscoveryParamsCommand {
-  @AutoMap()
-  exchangeOracleUrl: string;
-  token: string;
-  @AutoMap()
-  data: JobsDiscoveryParams;
-}
-
 export class JobsDiscoveryParams {
   @AutoMap()
   escrowAddress: string;
@@ -61,6 +53,13 @@ export class JobsDiscoveryParams {
   jobType: string;
   @AutoMap()
   fields: JobFields[];
+}
+export class JobsDiscoveryParamsCommand {
+  @AutoMap()
+  exchangeOracleUrl: string;
+  token: string;
+  @AutoMap()
+  data: JobsDiscoveryParams;
 }
 export class JobsDiscoveryParamsData {
   @AutoMap()

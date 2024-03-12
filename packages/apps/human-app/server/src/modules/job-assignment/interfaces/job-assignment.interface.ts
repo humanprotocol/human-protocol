@@ -18,18 +18,18 @@ export class JobAssignmentDto {
   chain_id: number;
 }
 
+export class JobAssignmentParams {
+  @AutoMap()
+  chainId: number;
+  @AutoMap()
+  escrowAddress: string;
+}
 export class JobAssignmentCommand {
   data: JobAssignmentParams;
   @AutoMap()
   token: string;
   @AutoMap()
   exchangeOracleUrl: string;
-}
-export class JobAssignmentParams {
-  @AutoMap()
-  chainId: number;
-  @AutoMap()
-  escrowAddress: string;
 }
 
 export class JobAssignmentData {
@@ -90,12 +90,6 @@ export class JobsFetchParamsDto {
   sort_field: SortField;
 }
 
-export class JobsFetchParamsCommand {
-  @AutoMap()
-  exchangeOracleUrl: string;
-  @AutoMap()
-  data: JobsFetchParams;
-}
 export class JobsFetchParams {
   assignmentId: string;
   escrowAddress: string;
@@ -106,6 +100,12 @@ export class JobsFetchParams {
   page: number;
   sort: SortOrder;
   sortField: SortField;
+}
+export class JobsFetchParamsCommand {
+  @AutoMap()
+  exchangeOracleUrl: string;
+  @AutoMap()
+  data: JobsFetchParams;
 }
 
 export class JobsFetchParamsData {

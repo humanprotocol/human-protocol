@@ -1,16 +1,10 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
-import { CommonUtilModule } from '../../common/utils/common-util.module';
-import { TokenMiddleware } from '../../common/interceptors/auth-token.middleware';
-import { StatisticsController } from './statistics.controller';
+import { Module } from '@nestjs/common';
+import { ExternalApiModule } from '../../integrations/external-api/external-api.module';
 
 @Module({
-  imports: [CommonUtilModule],
+  imports: [ExternalApiModule],
   providers: [StatisticsService],
   exports: [StatisticsService],
 })
-export class StatisticsModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TokenMiddleware).forRoutes(StatisticsController);
-  }
-}
+export class StatisticsModule {}
