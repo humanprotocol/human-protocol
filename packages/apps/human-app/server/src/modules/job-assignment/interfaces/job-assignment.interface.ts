@@ -7,7 +7,6 @@ import {
 } from '../../../common/enums/job-assignment';
 
 export class JobAssignmentDto {
-  // @todo: rework this interface, naming is shit
   @AutoMap()
   @ApiProperty({ example: 'string' })
   exchange_oracle_url: string;
@@ -83,7 +82,11 @@ export class JobsFetchParamsDto {
   @ApiProperty({ example: 'ASC', default: 'ASC', required: false })
   sort: SortOrder;
   @AutoMap()
-  @ApiProperty({ example: 'created_at', default: 'created_at', required: false })
+  @ApiProperty({
+    example: 'created_at',
+    default: 'created_at',
+    required: false,
+  })
   sort_field: SortField;
 }
 
