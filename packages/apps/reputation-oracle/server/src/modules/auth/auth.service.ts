@@ -162,41 +162,38 @@ export class AuthService {
   }
 
   public async auth(userEntity: UserEntity): Promise<AuthDto> {
-    const auth = await this.authRepository.findOne({ userId: userEntity.id });
+    const refreshTokenEntity =
+      await this.tokenRepository.findOneByUserIdAndType(
+        userEntity.id,
+        TokenType.REFRESH,
+      );
 
-    const accessToken = await this.jwtService.signAsync({
-      email: userEntity.email,
-      evmAddress: userEntity.evmAddress,
-      userId: userEntity.id,
-      kycStatus: userEntity.kyc?.status,
-    });
-
-    const refreshToken = await this.jwtService.signAsync(
+    const accessToken = await this.jwtService.signAsync(
       {
         email: userEntity.email,
-        evmAddress: userEntity.evmAddress,
         userId: userEntity.id,
-        kycStatus: userEntity.kyc?.status,
+        status: userEntity.status,
       },
       {
-        expiresIn: this.refreshTokenExpiresIn,
+        expiresIn: this.accessTokenExpiresIn,
       },
     );
 
-    const accessTokenHashed = this.hashToken(accessToken);
-    const refreshTokenHashed = this.hashToken(refreshToken);
-
-    if (auth) {
-      await this.logout(userEntity);
+    if (refreshTokenEntity) {
+      await this.tokenRepository.deleteOne(refreshTokenEntity);
     }
 
-    await this.authRepository.create({
-      user: userEntity,
-      refreshToken: refreshTokenHashed,
-      accessToken: accessTokenHashed,
-    });
+    const newRefreshTokenEntity = new TokenEntity();
+    newRefreshTokenEntity.user = userEntity;
+    newRefreshTokenEntity.type = TokenType.REFRESH;
+    const date = new Date();
+    newRefreshTokenEntity.expiresAt = new Date(
+      date.getTime() + this.refreshTokenExpiresIn,
+    );
 
-    return { accessToken, refreshToken };
+    await this.tokenRepository.createUnique(newRefreshTokenEntity);
+
+    return { accessToken, refreshToken: newRefreshTokenEntity.uuid };
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
@@ -300,7 +297,7 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
-      throw new NotFoundException(ErrorUser.NotFound);
+      throw new AuthError(ErrorUser.NotFound);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -319,6 +316,8 @@ export class AuthService {
     tokenEntity.expiresAt = new Date(
       date.getTime() + this.verifyEmailTokenExpiresIn,
     );
+
+    await this.tokenRepository.createUnique(tokenEntity);
 
     await this.sendgridService.sendEmail({
       personalizations: [
@@ -382,7 +381,6 @@ export class AuthService {
     const web3UserCreateDto: Web3UserCreateDto = {
       evmAddress: data.address,
       nonce: nonce,
-      type: data.type,
     };
 
     const userEntity = await this.userService.createWeb3User(

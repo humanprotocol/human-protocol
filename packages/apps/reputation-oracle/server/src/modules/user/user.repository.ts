@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { UserEntity } from './user.entity';
-import { Web3UserDto } from './user.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()

@@ -24,7 +24,6 @@ import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
   UserCreateDto,
-  UserUpdateDto,
   Web3UserCreateDto,
 } from './user.dto';
 import { UserRepository } from './user.repository';
@@ -74,7 +73,7 @@ export class UserService {
     data: ValidatePasswordDto,
   ): Promise<UserEntity> {
     userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
   }
 
   public activate(userEntity: UserEntity): Promise<UserEntity> {
