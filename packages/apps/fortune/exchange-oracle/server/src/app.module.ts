@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { envValidator } from './common/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { DatabaseModule } from './database/database.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
@@ -32,6 +33,7 @@ import { Web3Module } from './modules/web3/web3.module';
         : '.env',
       validationSchema: envValidator,
     }),
+    DatabaseModule,
   ],
   controllers: [AppController],
 })

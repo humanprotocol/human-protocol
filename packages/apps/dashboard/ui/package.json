@@ -33,11 +33,11 @@
     "serve": "^14.1.1",
     "swr": "^2.2.4",
     "wagmi": "^0.12.2",
-    "web-vitals": "^3.5.1"
+    "web-vitals": "^3.5.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^14.2.1",
     "@types/crypto-js": "^4.1.2",
     "@types/file-saver": "^2.0.5",
     "@types/glob": "^8.1.0",

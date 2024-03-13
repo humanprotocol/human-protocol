@@ -44,7 +44,6 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     @Req() request: any,
     payload: { email: string; address: string; kyc_status: string },
   ): Promise<any> {
-    console.log(payload.email);
     if (!payload.kyc_status || !payload.email || !payload.address) {
       throw new UnauthorizedException('Invalid token');
     }
