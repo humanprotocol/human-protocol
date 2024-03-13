@@ -3,7 +3,8 @@ import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
-  forMember, mapFrom,
+  forMember,
+  mapFrom,
   Mapper,
   mapWith,
   namingConventions,
@@ -52,13 +53,14 @@ export class JobAssignmentProfile extends AutomapperProfile {
         mapper,
         JobsFetchParamsDto,
         JobsFetchParams,
+        // forMember usage cause: https://github.com/nartc/mapper/issues/583
         forMember(
           (destination) => destination.pageSize,
-          mapFrom((source: JobsFetchParamsDto ) => source.page_size),
+          mapFrom((source: JobsFetchParamsDto) => source.page_size),
         ),
         forMember(
           (destination) => destination.sortField,
-          mapFrom((source: JobsFetchParamsDto ) => source.sort_field),
+          mapFrom((source: JobsFetchParamsDto) => source.sort_field),
         ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
@@ -71,8 +73,9 @@ export class JobAssignmentProfile extends AutomapperProfile {
         JobsFetchParamsCommand,
         forMember(
           (destination) => destination.data,
-          mapFrom((source: JobsFetchParamsDto ) =>
-            mapper.map(source, JobsFetchParamsDto, JobsFetchParams))
+          mapFrom((source: JobsFetchParamsDto) =>
+            mapper.map(source, JobsFetchParamsDto, JobsFetchParams),
+          ),
         ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),

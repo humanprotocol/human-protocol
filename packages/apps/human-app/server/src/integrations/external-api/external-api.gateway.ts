@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
   UserStatisticsCommand,
@@ -22,7 +22,8 @@ import {
 } from '../../modules/job-assignment/interfaces/job-assignment.interface';
 import {
   JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand, JobsDiscoveryParamsData,
+  JobsDiscoveryParamsCommand,
+  JobsDiscoveryParamsData,
   JobsDiscoveryResponse,
 } from '../../modules/jobs-discovery/interfaces/jobs-discovery.interface';
 import { Mapper } from '@automapper/core';
@@ -37,9 +38,7 @@ export class ExternalApiGateway {
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await lastValueFrom(
-      this.httpService.request(options),
-    );
+    const response = await lastValueFrom(this.httpService.request(options));
     return response.data;
   }
   async fetchUserStatistics(
@@ -95,7 +94,7 @@ export class ExternalApiGateway {
     return this.callExternalHttpUtilRequest<JobAssignmentResponse>(options);
   }
   async fetchDiscoveredJobs(command: JobsDiscoveryParamsCommand) {
-    let options: AxiosRequestConfig = {
+    const options: AxiosRequestConfig = {
       method: 'GET',
       url: `${command.exchangeOracleUrl}/jobs`,
       params: this.mapper.map(

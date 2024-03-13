@@ -5,17 +5,23 @@ import {
   oracleStatsCommandFixture,
   statisticsOracleUrl,
   userStatsCommandFixture,
-  userStatsOptionsFixture, userStatsResponseFixture,
 } from '../../../modules/statistics/spec/statistics.fixtures';
-import { AxiosRequestConfig } from 'axios';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import nock from 'nock';
+import nock, { RequestBodyMatcher } from 'nock';
 import { of } from 'rxjs';
 import {
-  jobAssignmentOracleUrl, jobAssignmentToken,
-  jobsFetchParamsCommandFixture, jobsFetchParamsDataAsString,
+  jobAssignmentCommandFixture,
+  jobAssignmentDataFixture,
+  jobAssignmentOracleUrl,
+  jobsFetchParamsCommandFixture,
+  jobsFetchParamsDataFixtureAsString,
 } from '../../../modules/job-assignment/spec/job-assignment.fixtures';
+import { ExternalApiProfile } from '../external-api.mapper';
+import {
+  jobsDiscoveryParamsCommandFixture,
+  paramsDataFixtureAsString,
+} from '../../../modules/jobs-discovery/spec/jobs-discovery.fixtures';
 
 describe('ExternalApiGateway', () => {
   let gateway: ExternalApiGateway;
@@ -29,6 +35,7 @@ describe('ExternalApiGateway', () => {
         }),
       ],
       providers: [
+        ExternalApiProfile,
         ExternalApiGateway,
         {
           provide: HttpService,
@@ -37,8 +44,7 @@ describe('ExternalApiGateway', () => {
           },
         },
       ],
-    })
-      .compile();
+    }).compile();
 
     gateway = module.get<ExternalApiGateway>(ExternalApiGateway);
     httpService = module.get<HttpService>(HttpService);
@@ -62,23 +68,45 @@ describe('ExternalApiGateway', () => {
   describe('fetchOracleStatistics', () => {
     it('should successfully call the requested url for oracle statistics', async () => {
       const command = oracleStatsCommandFixture;
-      nock(statisticsOracleUrl)
-        .get('/stats')
-        .reply(200);
+      nock(statisticsOracleUrl).get('/stats').reply(200);
       await gateway.fetchOracleStatistics(command);
       expect(httpService.request).toHaveBeenCalled();
     });
   });
   describe('fetchAssignedJobs', () => {
-    it('should successfully call the requested url for oracle statistics', async () => {
+    it('should successfully call get assigned jobs', async () => {
       const command = jobsFetchParamsCommandFixture;
       nock(jobAssignmentOracleUrl)
-        .get(`/assignment${jobsFetchParamsDataAsString}`, )
+        .get(`/assignment${jobsFetchParamsDataFixtureAsString}`)
         .reply(200);
       await gateway.fetchAssignedJobs(command);
       expect(httpService.request).toHaveBeenCalled();
     });
-  })
+  });
+  describe('postNewJobAssignment', () => {
+    it('should successfully post new job assignment', async () => {
+      const command = jobAssignmentCommandFixture;
+      const data = jobAssignmentDataFixture;
+      const matcher: RequestBodyMatcher = {
+        escrowAddress: data.escrow_address,
+        chainId: data.chain_id,
+      };
+      nock(jobAssignmentOracleUrl).post('/assignment', matcher).reply(200);
+      await gateway.postNewJobAssignment(command);
+      expect(httpService.request).toHaveBeenCalled();
+    });
+  });
+
+  describe('fetchDiscoveredJobs', () => {
+    it('should successfully call get discovered jobs', async () => {
+      const command = jobsDiscoveryParamsCommandFixture;
+      nock(jobAssignmentOracleUrl)
+        .get(`/assignment${paramsDataFixtureAsString}`)
+        .reply(200);
+      await gateway.fetchDiscoveredJobs(command);
+      expect(httpService.request).toHaveBeenCalled();
+    });
+  });
 
   afterEach(() => {
     nock.cleanAll();

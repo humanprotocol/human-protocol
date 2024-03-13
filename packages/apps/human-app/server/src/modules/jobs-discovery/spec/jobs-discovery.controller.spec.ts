@@ -3,8 +3,9 @@ import { JobsDiscoveryController } from '../jobs-discovery.controller';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
 import {
-  commandFixture,
-  dtoFixture, jobDiscoveryToken,
+  jobsDiscoveryParamsCommandFixture,
+  dtoFixture,
+  jobDiscoveryToken,
   responseFixture,
 } from './jobs-discovery.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
@@ -55,7 +56,7 @@ describe('JobsDiscoveryController', () => {
   describe('processJobsDiscovery', () => {
     it('should call service processJobsDiscovery method with proper fields set', async () => {
       const dto = dtoFixture;
-      const command = commandFixture;
+      const command = jobsDiscoveryParamsCommandFixture;
       await controller.discoverJobs(dto, jobDiscoveryToken);
       expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
         command,

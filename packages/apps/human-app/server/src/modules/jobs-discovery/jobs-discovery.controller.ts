@@ -26,11 +26,12 @@ export class JobsDiscoveryController {
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
     @Headers('authorization') token: string,
   ): Promise<JobsDiscoveryResponse> {
-    const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand = this.mapper.map(
-      jobsDiscoveryParamsDto,
-      JobsDiscoveryParamsDto,
-      JobsDiscoveryParamsCommand,
-    );
+    const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
+      this.mapper.map(
+        jobsDiscoveryParamsDto,
+        JobsDiscoveryParamsDto,
+        JobsDiscoveryParamsCommand,
+      );
     jobsDiscoveryParamsCommand.token = token;
     return await this.jobsDiscoveryService.processJobsDiscovery(
       jobsDiscoveryParamsCommand,

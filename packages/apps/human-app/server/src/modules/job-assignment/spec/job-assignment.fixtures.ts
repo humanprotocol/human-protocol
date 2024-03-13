@@ -41,11 +41,12 @@ export const jobAssignmentDtoFixture: JobAssignmentDto = {
   chain_id: CHAIN_ID,
 };
 
+const jobAssignmentParams: JobAssignmentParams = {
+  chainId: CHAIN_ID,
+  escrowAddress: ESCROW_ADDRESS,
+};
 export const jobAssignmentCommandFixture: JobAssignmentCommand = {
-  data: {
-    chainId: CHAIN_ID,
-    escrowAddress: ESCROW_ADDRESS,
-  } as JobAssignmentParams,
+  data: jobAssignmentParams,
   token: TOKEN,
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,
 };
@@ -82,18 +83,19 @@ export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
   sort_field: SORT_FIELD,
 };
 
+const jobsFetchParams: JobsFetchParams = {
+  assignmentId: ASSIGNMENT_ID,
+  escrowAddress: ESCROW_ADDRESS,
+  chainId: CHAIN_ID,
+  jobType: JOB_TYPE,
+  status: STATUS,
+  pageSize: PAGE_SIZE,
+  page: PAGE,
+  sort: SORT,
+  sortField: SORT_FIELD,
+};
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
-  data: {
-    assignmentId: ASSIGNMENT_ID,
-    escrowAddress: ESCROW_ADDRESS,
-    chainId: CHAIN_ID,
-    jobType: JOB_TYPE,
-    status: STATUS,
-    pageSize: PAGE_SIZE,
-    page: PAGE,
-    sort: SORT,
-    sortField: SORT_FIELD,
-  } as JobsFetchParams,
+  data: jobsFetchParams,
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,
 };
 
@@ -109,7 +111,7 @@ export const jobsFetchParamsDataFixture: JobsFetchParamsData = {
   sort_field: SORT_FIELD,
 };
 
-export const jobsFetchParamsDataAsString = `assignment_id=${ASSIGNMENT_ID}&escrow_address=${ESCROW_ADDRESS}&chain_id=${CHAIN_ID}&job_type=${JOB_TYPE}&status=${STATUS}&page_size=${PAGE_SIZE}&page=${PAGE}&sort=${SORT}&sort_field=${SORT_FIELD}`;
+export const jobsFetchParamsDataFixtureAsString = `assignment_id=${ASSIGNMENT_ID}&escrow_address=${ESCROW_ADDRESS}&chain_id=${CHAIN_ID}&job_type=${JOB_TYPE}&status=${STATUS}&page_size=${PAGE_SIZE}&page=${PAGE}&sort=${SORT}&sort_field=${SORT_FIELD}`;
 export const jobsFetchResponseItemFixture: JobsFetchResponseItem = {
   assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,

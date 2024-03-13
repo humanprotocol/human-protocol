@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
-  forMember, mapFrom,
+  forMember,
+  mapFrom,
   Mapper,
-  mapWith,
   namingConventions,
   SnakeCaseNamingConvention,
 } from '@automapper/core';
@@ -27,13 +27,19 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
         mapper,
         JobsDiscoveryParamsDto,
         JobsDiscoveryParams,
+        // forMember usage cause: https://github.com/nartc/mapper/issues/583
         forMember(
-          destination => destination.pageSize,
-          mapFrom(source => source.page_size),
+          (destination) => destination.pageSize,
+          mapFrom((source) => source.page_size),
         ),
         forMember(
-          destination => destination.sortField,
-          mapFrom(source => source.sort_field),
+          (destination) => destination.sortField,
+          mapFrom((source) => source.sort_field),
+        ),
+        // Automapper has problem with mapping arrays, thus explicit conversion
+        forMember(
+          (destination) => destination.fields,
+          mapFrom((source) => source.fields),
         ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
@@ -46,7 +52,9 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
         JobsDiscoveryParamsCommand,
         forMember(
           (destination) => destination.data,
-          mapWith(JobsDiscoveryParams, JobsDiscoveryParamsDto, (source) => source),
+          mapFrom((source: JobsDiscoveryParamsDto) =>
+            mapper.map(source, JobsDiscoveryParamsDto, JobsDiscoveryParams),
+          ),
         ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),

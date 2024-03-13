@@ -1,6 +1,7 @@
 import {
   JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
+  JobsDiscoveryParamsData,
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponseItem,
 } from '../interfaces/jobs-discovery.interface';
@@ -37,19 +38,31 @@ export const dtoFixture: JobsDiscoveryParamsDto = {
   fields: FIELDS,
 };
 
-export const commandFixture: JobsDiscoveryParamsCommand = {
+const dataFixture: JobsDiscoveryParams = {
+  escrowAddress: ESCROW_ADDRESS,
+  chainId: CHAIN_ID,
+  pageSize: PAGE_SIZE,
+  page: PAGE,
+  sort: SORT,
+  sortField: SORT_FIELD,
+  jobType: JOB_TYPE,
+  fields: FIELDS,
+};
+const paramsDataFixture: JobsDiscoveryParamsData = {
+  escrow_address: ESCROW_ADDRESS,
+  chain_id: CHAIN_ID,
+  page_size: PAGE_SIZE,
+  page: PAGE,
+  sort: SORT,
+  sort_field: SORT_FIELD,
+  job_type: JOB_TYPE,
+  fields: FIELDS,
+};
+export const paramsDataFixtureAsString = `?escrow_address=${paramsDataFixture.escrow_address}&chain_id=${paramsDataFixture.chain_id}&page_size=${paramsDataFixture.page_size}&page=${paramsDataFixture.page}&sort=${paramsDataFixture.sort}&sort_field=${paramsDataFixture.sort_field}&job_type=${paramsDataFixture.job_type}&fields=${paramsDataFixture.fields.join(',')}`;
+export const jobsDiscoveryParamsCommandFixture: JobsDiscoveryParamsCommand = {
+  data: dataFixture,
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,
   token: TOKEN,
-  data: {
-    escrowAddress: ESCROW_ADDRESS,
-    chainId: CHAIN_ID,
-    pageSize: PAGE_SIZE,
-    page: PAGE,
-    sort: SORT,
-    sortField: SORT_FIELD,
-    jobType: JOB_TYPE,
-    fields: FIELDS,
-  } as JobsDiscoveryParams,
 };
 
 export const responseItemFixture: JobsDiscoveryResponseItem = {

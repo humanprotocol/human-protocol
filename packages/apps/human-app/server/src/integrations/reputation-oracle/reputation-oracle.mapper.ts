@@ -9,7 +9,10 @@ import {
   SignupWorkerCommand,
   SignupWorkerData,
 } from '../../modules/user-worker/interfaces/worker-registration.interface';
-import { SigninWorkerCommand, SigninWorkerData } from '../../modules/user-worker/interfaces/worker-signin.interface';
+import {
+  SigninWorkerCommand,
+  SigninWorkerData,
+} from '../../modules/user-worker/interfaces/worker-signin.interface';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {

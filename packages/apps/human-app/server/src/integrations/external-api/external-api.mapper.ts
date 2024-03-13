@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
+  forMember,
+  mapFrom,
   Mapper,
   namingConventions,
   SnakeCaseNamingConvention,
@@ -48,6 +50,11 @@ export class ExternalApiProfile extends AutomapperProfile {
         mapper,
         JobsDiscoveryParams,
         JobsDiscoveryParamsData,
+        // Automapper has problem with mapping arrays, thus explicit conversion
+        forMember(
+          (destination) => destination.fields,
+          mapFrom((source) => source.fields),
+        ),
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),
