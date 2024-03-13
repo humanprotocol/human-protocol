@@ -12,6 +12,7 @@ export const ConfigNames = {
   POSTGRES_SYNC: 'POSTGRES_SYNC',
   POSTGRES_SSL: 'POSTGRES_SSL',
   POSTGRES_LOGGING: 'POSTGRES_LOGGING',
+  MAX_RETRY_COUNT: 'MAX_RETRY_COUNT',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
@@ -29,6 +30,7 @@ export const envValidator = Joi.object({
   NODE_ENV: Joi.string().default('development'),
   HOST: Joi.string().default('localhost'),
   PORT: Joi.string().default(3002),
+  MAX_RETRY_COUNT: Joi.number().default(5),
   // Database
   DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),

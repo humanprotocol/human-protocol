@@ -11,6 +11,7 @@ export class WebhookService {
   public async handleWebhook(wehbook: WebhookDto): Promise<void> {
     switch (wehbook.eventType) {
       case EventType.ESCROW_CREATED:
+        await this.jobService.createJob(wehbook);
         break;
 
       case EventType.ESCROW_CANCELED:

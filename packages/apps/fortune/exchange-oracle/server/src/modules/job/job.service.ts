@@ -32,6 +32,9 @@ import { CaseConverter } from '../../common/utils/case-converter';
 import { firstValueFrom } from 'rxjs';
 import { ethers } from 'ethers';
 import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
+import { JobRepository } from './job.repository';
+import { JobEntity } from './job.entity';
+import { JobStatus } from 'src/common/enums/job';
 
 @Injectable()
 export class JobService {
@@ -42,12 +45,31 @@ export class JobService {
 
   constructor(
     private readonly configService: ConfigService,
+    public readonly jobRepository: JobRepository,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly httpService: HttpService,
   ) {}
+
+  public async createJob(webhook: WebhookDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
+    );
+
+    if (jobEntity) {
+      this.logger.log('Job already exists', JobService.name);
+      throw new BadRequestException('Job already exists');
+    }
+
+    const newJobEntity = new JobEntity();
+    newJobEntity.escrowAddress = webhook.escrowAddress;
+    newJobEntity.chainId = webhook.chainId;
+    newJobEntity.status = JobStatus.COMPLETED;
+    await this.jobRepository.createUnique(newJobEntity);
+  }
 
   public async getDetails(
     chainId: number,
