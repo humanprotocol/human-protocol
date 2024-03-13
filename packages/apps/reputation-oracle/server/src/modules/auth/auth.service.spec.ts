@@ -70,6 +70,11 @@ describe('AuthService', () => {
       }),
     };
 
+    const signerMock = {
+      address: MOCK_ADDRESS,
+      getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -88,18 +93,9 @@ describe('AuthService', () => {
         {
           provide: Web3Service,
           useValue: {
-            prepareSignatureBody: jest.fn().mockImplementation(() => {
-              return {
-                from: 'mockAddress',
-                to: 'mockOperatorAddress',
-                contents: 'mockContents',
-              };
-            }),
-            getSigner: jest.fn().mockReturnValue({
-              provider: {
-                getFeeData: jest.fn().mockReturnValue({ gasPrice: 1 }),
-              },
-            }),
+            prepareSignatureBody: jest.fn(),
+            getSigner: jest.fn().mockReturnValue(signerMock),
+            signMessage: jest.fn(),
           },
         },
         { provide: ApiKeyRepository, useValue: createMock<ApiKeyRepository>() },
