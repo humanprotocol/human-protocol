@@ -21,12 +21,15 @@ import { StorageService } from '../storage/storage.service';
 import { verifySignature } from '../../common/utils/signature';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
+import { JobRepository } from '../job/job.repository';
+import { createMock } from '@golevelup/ts-jest';
 
 jest.mock('../../common/utils/signature');
 
 describe('webhookController', () => {
   let webhookController: WebhookController;
   let webhookService: WebhookService;
+  let jobRepository: JobRepository;
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -60,6 +63,7 @@ describe('webhookController', () => {
       providers: [
         WebhookService,
         JobService,
+        { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: ConfigService,
           useValue: configServiceMock,
@@ -85,6 +89,7 @@ describe('webhookController', () => {
 
     webhookController = moduleRef.get<WebhookController>(WebhookController);
     webhookService = moduleRef.get<WebhookService>(WebhookService);
+    jobRepository = moduleRef.get<JobRepository>(JobRepository);
   });
 
   describe('processWebhook', () => {
@@ -97,6 +102,9 @@ describe('webhookController', () => {
         escrowAddress,
         eventType: EventType.ESCROW_CREATED,
       };
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(null);
       jest.spyOn(webhookService, 'handleWebhook');
 
       (verifySignature as jest.Mock).mockReturnValue(true);

@@ -1,3 +1,4 @@
+import { createMock } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -32,6 +33,10 @@ import { signMessage } from '../../common/utils/signature';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { StorageService } from '../storage/storage.service';
 import { ManifestDto } from './job.dto';
+import { JobRepository } from './job.repository';
+import { WebhookDto } from '../webhook/webhook.dto';
+import { JobStatus } from '../../common/enums/job';
+import { JobEntity } from './job.entity';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -67,6 +72,7 @@ describe('JobService', () => {
   let web3Service: Web3Service;
   let httpService: HttpService;
   let storageService: StorageService;
+  let jobRepository: JobRepository;
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -117,6 +123,7 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: HttpService,
           useValue: {
@@ -133,6 +140,46 @@ describe('JobService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
     storageService = moduleRef.get<StorageService>(StorageService);
+    jobRepository = moduleRef.get<JobRepository>(JobRepository);
+  });
+
+  describe('createJob', () => {
+    beforeAll(async () => {
+      jest.spyOn(jobRepository, 'createUnique');
+    });
+    const webhook: WebhookDto = {
+      chainId,
+      escrowAddress,
+      eventType: EventType.ESCROW_CREATED,
+    };
+
+    it('should create a new job in the database', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(null);
+      const result = await jobService.createJob(webhook);
+
+      expect(result).toEqual(undefined);
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
+        chainId: chainId,
+        escrowAddress: escrowAddress,
+        status: JobStatus.ACTIVE,
+      });
+    });
+
+    it('should fail if job already exists', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          chainId: chainId,
+          escrowAddress: escrowAddress,
+          status: JobStatus.ACTIVE,
+        } as JobEntity);
+
+      await expect(jobService.createJob(webhook)).rejects.toThrow(
+        'Job already exists',
+      );
+    });
   });
 
   describe('getDetails', () => {

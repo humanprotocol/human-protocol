@@ -18,9 +18,13 @@ import { Web3Service } from '../web3/web3.service';
 import { of } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { StorageService } from '../storage/storage.service';
+import { JobRepository } from '../job/job.repository';
+import { createMock } from '@golevelup/ts-jest';
 
 describe('WebhookService', () => {
-  let webhookService: WebhookService, jobService: JobService;
+  let webhookService: WebhookService,
+    jobService: JobService,
+    jobRepository: JobRepository;
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -61,6 +65,7 @@ describe('WebhookService', () => {
       providers: [
         WebhookService,
         JobService,
+        { provide: JobRepository, useValue: createMock<JobRepository>() },
         StorageService,
         {
           provide: ConfigService,
@@ -86,6 +91,7 @@ describe('WebhookService', () => {
 
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     jobService = moduleRef.get<JobService>(JobService);
+    jobRepository = moduleRef.get<JobRepository>(JobRepository);
   });
 
   afterEach(() => {
@@ -102,6 +108,9 @@ describe('WebhookService', () => {
         escrowAddress,
         eventType: EventType.ESCROW_CREATED,
       };
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(null);
 
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
     });

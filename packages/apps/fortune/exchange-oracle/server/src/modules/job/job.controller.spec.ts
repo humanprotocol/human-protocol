@@ -1,3 +1,4 @@
+import { createMock } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -16,6 +17,7 @@ import { Web3Service } from '../web3/web3.service';
 import { JobController } from './job.controller';
 import { JobDetailsDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
+import { JobRepository } from './job.repository';
 
 jest.mock('../../common/utils/signature');
 
@@ -54,6 +56,7 @@ describe('JobController', () => {
       controllers: [JobController],
       providers: [
         JobService,
+        { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: ConfigService,
           useValue: configServiceMock,

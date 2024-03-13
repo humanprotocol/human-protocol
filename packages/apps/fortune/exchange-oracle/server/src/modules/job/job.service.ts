@@ -34,7 +34,7 @@ import { ethers } from 'ethers';
 import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
 import { JobRepository } from './job.repository';
 import { JobEntity } from './job.entity';
-import { JobStatus } from 'src/common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 
 @Injectable()
 export class JobService {
@@ -67,7 +67,7 @@ export class JobService {
     const newJobEntity = new JobEntity();
     newJobEntity.escrowAddress = webhook.escrowAddress;
     newJobEntity.chainId = webhook.chainId;
-    newJobEntity.status = JobStatus.COMPLETED;
+    newJobEntity.status = JobStatus.ACTIVE;
     await this.jobRepository.createUnique(newJobEntity);
   }
 
