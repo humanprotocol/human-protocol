@@ -48,7 +48,6 @@ class JobsFilter(Filter):
     sort_field: Optional[SortingFields] = Query(default=SortingFields.created_at)
 
     class SelectableFields(StrEnum, metaclass=BetterEnumMeta):
-        job_title = auto()
         job_description = auto()
         reward_amount = auto()
         reward_token = auto()

@@ -21,7 +21,6 @@ class JobResponse(BaseModel):
     chain_id: int  # not Networks, as existing DB entries can be different from the current enum
     job_type: TaskTypes
     status: JobStatuses
-    job_title: Optional[str] = None
     job_description: Optional[str] = None
     reward_amount: Optional[str] = None
     reward_token: Optional[str] = DEFAULT_TOKEN

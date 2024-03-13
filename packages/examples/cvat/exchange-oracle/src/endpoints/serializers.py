@@ -53,7 +53,6 @@ def serialize_job(
             chain_id=project.chain_id,
             job_type=project.job_type,
             status=api_status,
-            job_title=f"Job {project.escrow_address[:10]}",
             job_description=manifest.annotation.description if manifest else None,
             reward_amount=str(manifest.job_bounty) if manifest else None,
             created_at=project.created_at,
