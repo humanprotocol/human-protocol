@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { CommonConfigService } from '../../common/config';
+import { CommonConfigService } from '../../common/config/common-config.service';
 import { SortDirection } from '../../common/enums/collection';
 import { DataSource, In, LessThanOrEqual } from 'typeorm';
 import { JobStatus, JobStatusFilter } from '../../common/enums/job';

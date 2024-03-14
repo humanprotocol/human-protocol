@@ -9,7 +9,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
-import { CommonConfigService } from './common/config';
+import { CommonConfigService } from './common/config/common-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {

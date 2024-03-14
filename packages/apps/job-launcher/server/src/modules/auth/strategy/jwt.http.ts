@@ -5,7 +5,7 @@ import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
 import { UserEntity } from '../../user/user.entity';
 import { RESEND_EMAIL_VERIFICATION_PATH } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
-import { AuthConfigService } from '../../../common/config';
+import { AuthConfigService } from '../../../common/config/auth-config.service';
 import { UserRepository } from '../../user/user.repository';
 
 @Injectable()

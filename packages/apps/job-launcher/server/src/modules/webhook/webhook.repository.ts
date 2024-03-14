@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
-import { CommonConfigService } from '../../common/config';
+import { CommonConfigService } from '../../common/config/common-config.service';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookEntity } from './webhook.entity';
 

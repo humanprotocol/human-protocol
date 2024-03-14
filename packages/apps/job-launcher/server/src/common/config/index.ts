@@ -1,3 +1,2 @@
-export * from './env';
+export * from './env-schema';
 export * from './networks';
-export * from './s3';

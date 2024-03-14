@@ -24,7 +24,8 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { StripeConfigService, networkMap } from '../../common/config';
+import { networkMap } from '../../common/config';
+import { StripeConfigService } from '../../common/config/stripe-config.service';
 import {
   HMToken,
   HMToken__factory,

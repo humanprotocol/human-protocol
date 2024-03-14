@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
-import { Web3ConfigService, networks } from '../../common/config';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { networks } from '../../common/config';
 import { Web3Env } from '../../common/enums/web3';
 import {
   LOCALHOST_CHAIN_IDS,
