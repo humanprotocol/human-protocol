@@ -22,7 +22,6 @@ import { UserRepository } from '../user/user.repository';
       inject: [AuthConfigService],
       useFactory: (authConfigService: AuthConfigService) => ({
         privateKey: authConfigService.jwtPrivateKey,
-        publicKey: authConfigService.jwtPublicKey,
         signOptions: {
           algorithm: 'ES256',
           expiresIn: authConfigService.accessTokenExpiresIn,
