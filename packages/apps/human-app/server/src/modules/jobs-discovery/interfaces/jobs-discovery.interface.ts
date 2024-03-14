@@ -10,43 +10,51 @@ export class JobsDiscoveryParamsDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
   exchange_oracle_url: string;
-
   @AutoMap()
   @ApiProperty({ example: 'string' })
   escrow_address: string;
-
   @AutoMap()
   @ApiProperty({ example: 0 })
   chain_id: number;
-
   @AutoMap()
   @ApiProperty({ example: 5, default: 5, maximum: 10 })
   page_size: number;
-
   @AutoMap()
   @ApiProperty({ example: 0, default: 0 })
   page: number;
-
   @AutoMap()
   @ApiProperty({ example: 'ASC', default: 'ASC' })
   sort: SortOrder;
-
   @AutoMap()
   @ApiProperty({ example: 'created_at', default: 'created_at' })
   sort_field: SortField;
-
   @AutoMap()
   @ApiProperty({ example: 'job type' })
   job_type: string;
-
   @AutoMap()
   @ApiProperty({ example: ['job_title'] })
   fields: JobFields[];
 }
 
-export class JobsDiscoveryParamsCommand {
+export class JobsDiscoveryParams {
   @AutoMap()
-  exchange_oracle_url: string;
+  escrowAddress: string;
+  @AutoMap()
+  chainId: number;
+  @AutoMap()
+  pageSize: number;
+  @AutoMap()
+  page: number;
+  @AutoMap()
+  sort: SortOrder;
+  @AutoMap()
+  sortField: SortField;
+  @AutoMap()
+  jobType: string;
+  @AutoMap()
+  fields: JobFields[];
+}
+export class JobsDiscoveryParamsData {
   @AutoMap()
   escrow_address: string;
   @AutoMap()
@@ -64,26 +72,12 @@ export class JobsDiscoveryParamsCommand {
   @AutoMap()
   fields: JobFields[];
 }
-
-export class JobsDiscoveryParamsData {
+export class JobsDiscoveryParamsCommand {
   @AutoMap()
-  exchange_oracle_url: string;
+  exchangeOracleUrl: string;
+  token: string;
   @AutoMap()
-  escrow_address: string;
-  @AutoMap()
-  chain_id: number;
-  @AutoMap()
-  page_size: number;
-  @AutoMap()
-  page: number;
-  @AutoMap()
-  sort: SortOrder;
-  @AutoMap()
-  sort_field: SortField;
-  @AutoMap()
-  job_type: string;
-  @AutoMap()
-  fields: JobFields[];
+  data: JobsDiscoveryParams;
 }
 
 export class JobsDiscoveryResponseItem {

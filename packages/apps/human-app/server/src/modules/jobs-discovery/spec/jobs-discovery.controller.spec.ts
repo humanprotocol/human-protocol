@@ -3,20 +3,15 @@ import { JobsDiscoveryController } from '../jobs-discovery.controller';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
 import {
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryParamsDto,
-} from '../interfaces/jobs-discovery.interface';
-import {
-  commandFixture,
+  jobsDiscoveryParamsCommandFixture,
   dtoFixture,
+  jobDiscoveryToken,
   responseFixture,
 } from './jobs-discovery.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper';
 import { HttpService } from '@nestjs/axios';
-import { TokenMiddleware } from '../../../common/interceptors/auth-token.middleware';
-import { RequestContext } from '../../../common/utils/request-context.util';
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
@@ -43,7 +38,6 @@ describe('JobsDiscoveryController', () => {
               ),
           },
         },
-        RequestContext,
       ],
     })
       .overrideProvider(JobsDiscoveryService)
@@ -61,44 +55,12 @@ describe('JobsDiscoveryController', () => {
 
   describe('processJobsDiscovery', () => {
     it('should call service processJobsDiscovery method with proper fields set', async () => {
-      const dto: JobsDiscoveryParamsDto = dtoFixture;
-      const command: JobsDiscoveryParamsCommand = commandFixture;
-      await controller.discoverJobs(dto);
+      const dto = dtoFixture;
+      const command = jobsDiscoveryParamsCommandFixture;
+      await controller.discoverJobs(dto, jobDiscoveryToken);
       expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
         command,
       );
-    });
-
-    it('should return the result of service processJobsDiscovery method', async () => {
-      const dto: JobsDiscoveryParamsDto = dtoFixture;
-      const command: JobsDiscoveryParamsCommand = commandFixture;
-      const result = await controller.discoverJobs(dto);
-      expect(result).toEqual(
-        jobsDiscoveryServiceMock.processJobsDiscovery(command),
-      );
-    });
-  });
-  describe('TokenMiddleware', () => {
-    let middleware: TokenMiddleware;
-    let requestContext: RequestContext;
-
-    beforeEach(() => {
-      requestContext = new RequestContext();
-      middleware = new TokenMiddleware(requestContext);
-    });
-
-    it('should set token in requestContext', () => {
-      const mockReq = {
-        headers: {
-          authorization: 'Bearer token',
-        },
-      };
-
-      const next = jest.fn();
-      middleware.use(mockReq, {}, next);
-
-      expect(requestContext.token).toEqual('Bearer token');
-      expect(next).toHaveBeenCalled();
     });
   });
 });

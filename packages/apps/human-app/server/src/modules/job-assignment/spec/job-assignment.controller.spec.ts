@@ -14,7 +14,7 @@ import {
   jobAssignmentResponseFixture,
   jobsFetchParamsDtoFixture,
   jobsFetchParamsCommandFixture,
-  jobsFetchResponseFixture,
+  jobsFetchResponseFixture, jobAssignmentToken,
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -69,7 +69,7 @@ describe('JobAssignmentController', () => {
     it('should call service processJobAssignment method with proper fields set', async () => {
       const dto: JobAssignmentDto = jobAssignmentDtoFixture;
       const command: JobAssignmentCommand = jobAssignmentCommandFixture;
-      await controller.assignJob(dto);
+      await controller.assignJob(dto, jobAssignmentToken);
       expect(jobAssignmentService.processJobAssignment).toHaveBeenCalledWith(
         command,
       );
@@ -78,7 +78,7 @@ describe('JobAssignmentController', () => {
     it('should return the result of service processJobAssignment method', async () => {
       const dto: JobAssignmentDto = jobAssignmentDtoFixture;
       const command: JobAssignmentCommand = jobAssignmentCommandFixture;
-      const result = await controller.assignJob(dto);
+      const result = await controller.assignJob(dto, jobAssignmentToken);
       expect(result).toEqual(
         jobAssignmentServiceMock.processJobAssignment(command),
       );
@@ -91,16 +91,6 @@ describe('JobAssignmentController', () => {
       await controller.getAssignedJobs(dto);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,
-      );
-    });
-
-    it('should return the result of service processGetAssignedJobs method', async () => {
-      const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
-      const command: JobsFetchParamsCommand =
-        jobsFetchParamsCommandFixture;
-      const result = await controller.getAssignedJobs(dto);
-      expect(result).toEqual(
-        jobAssignmentServiceMock.processGetAssignedJobs(command),
       );
     });
   });

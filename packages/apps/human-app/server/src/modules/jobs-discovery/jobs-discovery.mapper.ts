@@ -1,9 +1,17 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
+  CamelCaseNamingConvention,
+  createMap,
+  forMember,
+  mapFrom,
+  Mapper,
+  namingConventions,
+  SnakeCaseNamingConvention,
+} from '@automapper/core';
+import {
+  JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
-  JobsDiscoveryParamsData,
   JobsDiscoveryParamsDto,
 } from './interfaces/jobs-discovery.interface';
 
@@ -18,20 +26,40 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
       createMap(
         mapper,
         JobsDiscoveryParamsDto,
-        JobsDiscoveryParamsCommand,
+        JobsDiscoveryParams,
+        // forMember usage cause: https://github.com/nartc/mapper/issues/583
         forMember(
-          (d) => d.fields,
-          mapFrom((s) => s.fields),
+          (destination) => destination.pageSize,
+          mapFrom((source) => source.page_size),
         ),
+        forMember(
+          (destination) => destination.sortField,
+          mapFrom((source) => source.sort_field),
+        ),
+        // Automapper has problem with mapping arrays, thus explicit conversion
+        forMember(
+          (destination) => destination.fields,
+          mapFrom((source) => source.fields),
+        ),
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
       );
       createMap(
         mapper,
+        JobsDiscoveryParamsDto,
         JobsDiscoveryParamsCommand,
-        JobsDiscoveryParamsData,
         forMember(
-          (d) => d.fields,
-          mapFrom((s) => s.fields),
+          (destination) => destination.data,
+          mapFrom((source: JobsDiscoveryParamsDto) =>
+            mapper.map(source, JobsDiscoveryParamsDto, JobsDiscoveryParams),
+          ),
         ),
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
       );
     };
   }

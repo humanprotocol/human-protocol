@@ -19,7 +19,9 @@ import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.mod
 import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
 import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
 import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
-import { RequestContext } from './common/utils/request-context.util';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { StatisticsController } from './modules/statistics/statistics.controller';
+import { ExternalApiModule } from './integrations/external-api/external-api.module';
 
 @Module({
   imports: [
@@ -38,8 +40,10 @@ import { RequestContext } from './common/utils/request-context.util';
     JobsDiscoveryModule,
     JobAssignmentModule,
     ReputationOracleModule,
+    ExternalApiModule,
     CommonConfigModule,
     OracleDiscoveryModule,
+    StatisticsModule,
   ],
   controllers: [
     AppController,
@@ -48,8 +52,8 @@ import { RequestContext } from './common/utils/request-context.util';
     JobsDiscoveryController,
     OracleDiscoveryController,
     JobAssignmentController,
+    StatisticsController,
   ],
-  providers: [RequestContext],
   exports: [HttpModule],
 })
 export class AppModule {}

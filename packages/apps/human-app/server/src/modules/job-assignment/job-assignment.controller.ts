@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  Get,
+  Get, Headers,
   Post,
   Query,
   UsePipes,
@@ -35,12 +35,14 @@ export class JobAssignmentController {
   @UsePipes(new ValidationPipe())
   public async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
+    @Headers('authorization') token: string,
   ): Promise<JobAssignmentResponse> {
     const jobAssignmentCommand = this.mapper.map(
       jobAssignmentDto,
       JobAssignmentDto,
       JobAssignmentCommand,
     );
+    jobAssignmentCommand.token = token;
     return this.jobAssignmentService.processJobAssignment(jobAssignmentCommand);
   }
 
