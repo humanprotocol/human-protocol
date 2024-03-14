@@ -9,7 +9,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
-import { ConfigNames } from './common/config';
+import { CommonConfigService } from './common/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -17,6 +17,7 @@ async function bootstrap() {
   });
 
   const configService: ConfigService = app.get(ConfigService);
+  const commonConfigService = new CommonConfigService(configService);
 
   // const baseUrl = configService.get<string>(
   //   ConfigNames.FE_URL,
@@ -42,10 +43,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const sessionSecret = configService.get<string>(
-    ConfigNames.SESSION_SECRET,
-    'session-secret',
-  );
+  const sessionSecret = commonConfigService.sessionSecret;
 
   app.use(
     session({
@@ -66,8 +64,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  const host = configService.get<string>(ConfigNames.HOST, 'localhost');
-  const port = +configService.get<string>(ConfigNames.PORT, '5000');
+  const host = commonConfigService.host;
+  const port = commonConfigService.port;
 
   app.use(helmet());
   await app.listen(port, host, async () => {

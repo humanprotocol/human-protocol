@@ -19,8 +19,7 @@ import {
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
-import { ConfigNames } from '../../common/config';
-import { ConfigService } from '@nestjs/config';
+import { AuthConfigService, CommonConfigService } from '../../common/config';
 
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
@@ -35,56 +34,16 @@ import { AuthError } from './auth.error';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly refreshTokenExpiresIn: number;
-  private readonly accessTokenExpiresIn: number;
-  private readonly verifyEmailTokenExpiresIn: number;
-  private readonly forgotPasswordTokenExpiresIn: number;
-  private readonly feURL: string;
-  private readonly iterations: number;
-  private readonly keyLength: number;
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
-    private readonly configService: ConfigService,
+    private readonly commonConfigService: CommonConfigService,
+    private readonly authConfigService: AuthConfigService,
     private readonly sendgridService: SendGridService,
     private readonly apiKeyRepository: ApiKeyRepository,
     private readonly userRepository: UserRepository,
-  ) {
-    this.refreshTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.REFRESH_TOKEN_EXPIRES_IN,
-      3600000,
-    );
-
-    this.accessTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
-      300000,
-    );
-
-    this.verifyEmailTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
-      1800000,
-    );
-
-    this.forgotPasswordTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
-      1800000,
-    );
-
-    this.feURL = this.configService.get<string>(
-      ConfigNames.FE_URL,
-      'http://localhost:3005',
-    );
-    this.iterations = this.configService.get<number>(
-      ConfigNames.APIKEY_ITERATIONS,
-      1000,
-    );
-    this.keyLength = this.configService.get<number>(
-      ConfigNames.APIKEY_KEY_LENGTH,
-      64,
-    );
-  }
+  ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
     // if (
@@ -133,7 +92,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -144,7 +103,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.commonConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -185,7 +144,7 @@ export class AuthService {
         status: userEntity.status,
       },
       {
-        expiresIn: this.accessTokenExpiresIn,
+        expiresIn: this.authConfigService.accessTokenExpiresIn,
       },
     );
 
@@ -198,7 +157,7 @@ export class AuthService {
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.refreshTokenExpiresIn,
+      date.getTime() + this.authConfigService.refreshTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(newRefreshTokenEntity);
@@ -231,7 +190,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.forgotPasswordTokenExpiresIn,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -242,7 +201,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/reset-password?token=${tokenEntity.uuid}`,
+            url: `${this.commonConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -338,7 +297,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -349,7 +308,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.commonConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -363,8 +322,8 @@ export class AuthService {
     const hashedAPIKey = await generateHash(
       apiKey,
       salt,
-      this.iterations,
-      this.keyLength,
+      this.authConfigService.apiKeyIterations,
+      this.authConfigService.apiKeyLength,
     );
 
     let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
@@ -393,8 +352,8 @@ export class AuthService {
     const hash = await generateHash(
       apiKey,
       apiKeyEntity.salt,
-      this.iterations,
-      this.keyLength,
+      this.authConfigService.apiKeyIterations,
+      this.authConfigService.apiKeyLength,
     );
 
     return hash === apiKeyEntity.hashedAPIKey;
@@ -413,8 +372,8 @@ export class AuthService {
     const hash = await generateHash(
       apiKey,
       apiKeyEntity.salt,
-      this.iterations,
-      this.keyLength,
+      this.authConfigService.apiKeyIterations,
+      this.authConfigService.apiKeyLength,
     );
 
     const isValid = crypto.timingSafeEqual(

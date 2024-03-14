@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
 import { IsPassword } from '../../common/validators';
-import { UserEntity } from '../user/user.entity';
 
 export class ForgotPasswordDto {
   @ApiProperty()

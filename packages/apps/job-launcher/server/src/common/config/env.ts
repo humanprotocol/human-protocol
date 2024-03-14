@@ -1,63 +1,246 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 
-export const ConfigNames = {
-  NODE_ENV: 'NODE_ENV',
-  HOST: 'HOST',
-  PORT: 'PORT',
-  FE_URL: 'FE_URL',
-  SESSION_SECRET: 'SESSION_SECRET',
-  MAX_RETRY_COUNT: 'MAX_RETRY_COUNT',
-  JWT_PRIVATE_KEY: 'JWT_PRIVATE_KEY',
-  JWT_PUBLIC_KEY: 'JWT_PUBLIC_KEY',
-  JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
-  REFRESH_TOKEN_EXPIRES_IN: 'REFRESH_TOKEN_EXPIRES_IN',
-  VERIFY_EMAIL_TOKEN_EXPIRES_IN: 'VERIFY_EMAIL_TOKEN_EXPIRES_IN',
-  FORGOT_PASSWORD_TOKEN_EXPIRES_IN: 'FORGOT_PASSWORD_TOKEN_EXPIRES_IN',
-  POSTGRES_HOST: 'POSTGRES_HOST',
-  POSTGRES_USER: 'POSTGRES_USER',
-  POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
-  POSTGRES_DATABASE: 'POSTGRES_DATABASE',
-  POSTGRES_PORT: 'POSTGRES_PORT',
-  POSTGRES_SSL: 'POSTGRES_SSL',
-  POSTGRES_LOGGING: 'POSTGRES_LOGGING',
-  WEB3_ENV: 'WEB3_ENV',
-  WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
-  GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
-  PGP_ENCRYPT: 'PGP_ENCRYPT',
-  PGP_PRIVATE_KEY: 'PGP_PRIVATE_KEY',
-  PGP_PASSPHRASE: 'PGP_PASSPHRASE',
-  REPUTATION_ORACLE_ADDRESS: 'REPUTATION_ORACLE_ADDRESS',
-  FORTUNE_EXCHANGE_ORACLE_ADDRESS: 'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
-  FORTUNE_RECORDING_ORACLE_ADDRESS: 'FORTUNE_RECORDING_ORACLE_ADDRESS',
-  CVAT_EXCHANGE_ORACLE_ADDRESS: 'CVAT_EXCHANGE_ORACLE_ADDRESS',
-  CVAT_RECORDING_ORACLE_ADDRESS: 'CVAT_RECORDING_ORACLE_ADDRESS',
-  HCAPTCHA_RECORDING_ORACLE_URI: 'HCAPTCHA_RECORDING_ORACLE_URI',
-  HCAPTCHA_REPUTATION_ORACLE_URI: 'HCAPTCHA_REPUTATION_ORACLE_URI',
-  HCAPTCHA_ORACLE_ADDRESS: 'HCAPTCHA_ORACLE_ADDRESS',
-  HCAPTCHA_SITE_KEY: 'HCAPTCHA_SITE_KEY',
-  // HCAPTCHA_SECRET: 'HCAPTCHA_SECRET',
-  HCAPTCHA_EXCHANGE_URL: 'HCAPTCHA_EXCHANGE_URL',
-  S3_ENDPOINT: 'S3_ENDPOINT',
-  S3_PORT: 'S3_PORT',
-  S3_ACCESS_KEY: 'S3_ACCESS_KEY',
-  S3_SECRET_KEY: 'S3_SECRET_KEY',
-  S3_BUCKET: 'S3_BUCKET',
-  S3_USE_SSL: 'S3_USE_SSL',
-  STRIPE_SECRET_KEY: 'STRIPE_SECRET_KEY',
-  STRIPE_API_VERSION: 'STRIPE_API_VERSION',
-  STRIPE_APP_NAME: 'STRIPE_APP_NAME',
-  STRIPE_APP_VERSION: 'STRIPE_APP_VERSION',
-  STRIPE_APP_INFO_URL: 'STRIPE_APP_INFO_URL',
-  SENDGRID_API_KEY: 'SENDGRID_API_KEY',
-  SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
-  SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
-  CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
-  CVAT_MAX_TIME: 'CVAT_MAX_TIME',
-  CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
-  APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
-  APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
-  CRON_SECRET: 'CRON_SECRET',
-};
+@Injectable()
+export class CommonConfigService {
+  constructor(private configService: ConfigService) {}
+  get nodeEnv(): string {
+    return this.configService.get<string>('NODE_ENV', 'development');
+  }
+  get host(): string {
+    return this.configService.get<string>('HOST', 'localhost');
+  }
+  get port(): number {
+    return this.configService.get<number>('PORT', 5000);
+  }
+  get feURL(): string {
+    return this.configService.get<string>('FE_URL', 'http://localhost:3005');
+  }
+  get sessionSecret(): string {
+    return this.configService.get<string>('SESSION_SECRET', 'session_key');
+  }
+  get maxRetryCount(): number {
+    return this.configService.get<number>('MAX_RETRY_COUNT', 5);
+  }
+  get cronSecret(): string {
+    return this.configService.get<string>('CRON_SECRET', '');
+  }
+}
+
+@Injectable()
+export class AuthConfigService {
+  constructor(private configService: ConfigService) {}
+  get jwtPrivateKey(): string {
+    return this.configService.get<string>('JWT_PRIVATE_KEY', '');
+  }
+  get jwtPublicKey(): string {
+    return this.configService.get<string>('JWT_PUBLIC_KEY', '');
+  }
+  get accessTokenExpiresIn(): number {
+    return this.configService.get<number>(
+      'JWT_ACCESS_TOKEN_EXPIRES_IN',
+      300000,
+    );
+  }
+  get refreshTokenExpiresIn(): number {
+    return this.configService.get<number>('REFRESH_TOKEN_EXPIRES_IN', 3600000);
+  }
+  get verifyEmailTokenExpiresIn(): number {
+    return this.configService.get<number>(
+      'VERIFY_EMAIL_TOKEN_EXPIRES_IN',
+      1800000,
+    );
+  }
+  get forgotPasswordExpiresIn(): number {
+    return this.configService.get<number>(
+      'FORGOT_PASSWORD_TOKEN_EXPIRES_IN',
+      1800000,
+    );
+  }
+  get apiKeyIterations(): number {
+    return this.configService.get<number>('APIKEY_ITERATIONS', 1000);
+  }
+  get apiKeyLength(): number {
+    return this.configService.get<number>('APIKEY_KEY_LENGTH', 64);
+  }
+  get hCaptchaSiteKey(): string {
+    return this.configService.get<string>('HCAPTCHA_SITE_KEY', '');
+  }
+  get hCaptchaSecret(): string {
+    return this.configService.get<string>('HCAPTCHA_SECRET', '');
+  }
+  get hCaptchaExchangeURL(): string {
+    return this.configService.get<string>(
+      'HCAPTCHA_EXCHANGE_URL',
+      'https://foundation-exchange.hmt.ai',
+    );
+  }
+}
+
+@Injectable()
+export class DatabaseConfigService {
+  constructor(private configService: ConfigService) {}
+  get host(): string {
+    return this.configService.get<string>('POSTGRES_HOST', '127.0.0.1');
+  }
+  get port(): number {
+    return this.configService.get<number>('POSTGRES_PORT', 5432);
+  }
+  get user(): string {
+    return this.configService.get<string>('POSTGRES_USER', 'operator');
+  }
+  get password(): string {
+    return this.configService.get<string>('POSTGRES_PASSWORD', 'qwerty');
+  }
+  get database(): string {
+    return this.configService.get<string>('POSTGRES_DATABASE', 'job-launcher');
+  }
+  get ssl(): boolean {
+    return this.configService.get<string>('POSTGRES_SSL', 'false') === 'true';
+  }
+  get logging(): string {
+    return this.configService.get<string>('POSTGRES_LOGGING', '');
+  }
+}
+
+@Injectable()
+export class Web3ConfigService {
+  constructor(private configService: ConfigService) {}
+  get env(): string {
+    return this.configService.get<string>('WEB3_ENV', 'testnet');
+  }
+  get privateKey(): string {
+    return this.configService.get<string>('WEB3_PRIVATE_KEY', '');
+  }
+  get gasPriceMultiplier(): number {
+    return this.configService.get<number>('GAS_PRICE_MULTIPLIER', 1);
+  }
+  get reputationOracleAddress(): string {
+    return this.configService.get<string>('REPUTATION_ORACLE_ADDRESS', '');
+  }
+  get fortuneExchangeOracleAddress(): string {
+    return this.configService.get<string>(
+      'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
+      '',
+    );
+  }
+  get fortuneRecordingOracleAddress(): string {
+    return this.configService.get<string>(
+      'FORTUNE_RECORDING_ORACLE_ADDRESS',
+      '',
+    );
+  }
+  get cvatExchangeOracleAddress(): string {
+    return this.configService.get<string>('CVAT_EXCHANGE_ORACLE_ADDRESS', '');
+  }
+  get cvatRecordingOracleAddress(): string {
+    return this.configService.get<string>('CVAT_RECORDING_ORACLE_ADDRESS', '');
+  }
+  get hCaptchaRecordingOracleURI(): string {
+    return this.configService.get<string>('HCAPTCHA_RECORDING_ORACLE_URI', '');
+  }
+  get hCaptchaReputationOracleURI(): string {
+    return this.configService.get<string>('HCAPTCHA_REPUTATION_ORACLE_URI', '');
+  }
+  get hCaptchaOracleAddress(): string {
+    return this.configService.get<string>('HCAPTCHA_ORACLE_ADDRESS', '');
+  }
+}
+
+@Injectable()
+export class S3ConfigService {
+  constructor(private configService: ConfigService) {}
+  get endpoint(): string {
+    return this.configService.get<string>('S3_ENDPOINT', '127.0.0.1');
+  }
+  get port(): number {
+    return this.configService.get<number>('S3_PORT', 9000);
+  }
+  get accessKey(): string {
+    return this.configService.get<string>('S3_ACCESS_KEY', '');
+  }
+  get secretKey(): string {
+    return this.configService.get<string>('S3_SECRET_KEY', '');
+  }
+  get bucket(): string {
+    return this.configService.get<string>('S3_BUCKET', 'launcher');
+  }
+  get useSSL(): boolean {
+    return this.configService.get<string>('S3_USE_SSL', 'false') === 'true';
+  }
+}
+
+@Injectable()
+export class StripeConfigService {
+  constructor(private configService: ConfigService) {}
+  get secretKey(): string {
+    return this.configService.get<string>('STRIPE_SECRET_KEY', '127.0.0.1');
+  }
+  get apiVersion(): string {
+    return this.configService.get<string>('STRIPE_API_VERSION', '2022-11-15');
+  }
+  get appName(): string {
+    return this.configService.get<string>('STRIPE_APP_NAME', 'Fortune');
+  }
+  get appVersion(): string {
+    return this.configService.get<string>('STRIPE_APP_VERSION', '0.0.1');
+  }
+  get appInfoURL(): string {
+    return this.configService.get<string>(
+      'STRIPE_APP_INFO_URL',
+      'https://hmt.ai',
+    );
+  }
+}
+
+@Injectable()
+export class SendgridConfigService {
+  constructor(private configService: ConfigService) {}
+  get apiKey(): string {
+    return this.configService.get<string>('SENDGRID_API_KEY', '');
+  }
+  get fromEmail(): string {
+    return this.configService.get<string>(
+      'SENDGRID_FROM_EMAIL',
+      'job-launcher@hmt.ai',
+    );
+  }
+  get fromName(): string {
+    return this.configService.get<string>(
+      'SENDGRID_FROM_NAME',
+      'Human Protocol Job Launcher',
+    );
+  }
+}
+
+@Injectable()
+export class CvatConfigService {
+  constructor(private configService: ConfigService) {}
+  get jobSize(): number {
+    return this.configService.get<number>('CVAT_JOB_SIZE', 10);
+  }
+  get maxTime(): number {
+    return this.configService.get<number>('CVAT_MAX_TIME', 300);
+  }
+  get valSize(): number {
+    return this.configService.get<number>('CVAT_VAL_SIZE', 2);
+  }
+}
+
+@Injectable()
+export class PGPConfigService {
+  constructor(private configService: ConfigService) {}
+  get encrypt(): boolean {
+    return this.configService.get<string>('PGP_ENCRYPT', 'false') === 'true';
+  }
+  get privateKey(): string {
+    return this.configService.get<string>('PGP_PRIVATE_KEY', '');
+  }
+  get passphrase(): string {
+    return this.configService.get<string>('PGP_PASSPHRASE', '');
+  }
+}
 
 export const envValidator = Joi.object({
   // General

@@ -1,18 +1,19 @@
 import { Module, Global, Provider } from '@nestjs/common';
 import { Encryption } from '@human-protocol/sdk';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { PGPConfigService } from 'src/common/config';
 
 const encryptionProvider: Provider = {
   provide: Encryption,
-  useFactory: async (configService: ConfigService) => {
-    if (!configService.get<string>('PGP_ENCRYPT')) {
+  useFactory: async (pgpConfigService: PGPConfigService) => {
+    if (!pgpConfigService.encrypt) {
       return null;
     }
-    const privateKey = configService.get<string>('PGP_PRIVATE_KEY')!;
-    const passPhrase = configService.get<string>('PGP_PASSPHRASE');
+    const privateKey = pgpConfigService.privateKey;
+    const passPhrase = pgpConfigService.passphrase;
     return await Encryption.build(privateKey, passPhrase);
   },
-  inject: [ConfigService],
+  inject: [PGPConfigService],
 };
 
 @Global()
