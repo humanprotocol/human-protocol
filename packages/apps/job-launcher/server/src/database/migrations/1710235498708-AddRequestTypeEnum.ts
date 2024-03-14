@@ -19,11 +19,9 @@ export class AddRequestTypeEnum1710235498708 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-            ALTER TABLE "hmt"."jobs" DROP COLUMN "request_type"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "hmt"."jobs_request_type_enum"
-        `);
+    await queryRunner.query(
+      `ALTER TABLE "hmt"."jobs" DROP COLUMN "request_type"`,
+    );
+    await queryRunner.query(`DROP TYPE "hmt"."jobs_request_type_enum"`);
   }
 }
