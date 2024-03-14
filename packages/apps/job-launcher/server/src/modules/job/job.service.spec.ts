@@ -56,7 +56,6 @@ import {
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
   MOCK_PGP_PUBLIC_KEY,
-  MOCK_MANIFEST,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_REPUTATION_ORACLE_ADDRESS,
@@ -88,6 +87,7 @@ import {
   StorageDataDto,
   JobCaptchaDto,
   CvatManifestDto,
+  JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -351,6 +351,82 @@ describe('JobService', () => {
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.FORTUNE,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+    });
+
+    it('should create a job using quick launch successfully', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userId,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.HCAPTCHA,
+        escrowAddress: MOCK_ADDRESS,
+        fee,
+        fundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublickKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
+
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
+
+      // Create a quick launch payload
+      const quickLaunchJobDto = new JobQuickLaunchDto();
+      quickLaunchJobDto.chainId = MOCK_CHAIN_ID;
+      quickLaunchJobDto.requestType = JobRequestType.HCAPTCHA;
+      quickLaunchJobDto.manifestUrl = MOCK_FILE_URL;
+      quickLaunchJobDto.manifestHash = MOCK_FILE_HASH;
+      quickLaunchJobDto.fundAmount = fundAmount;
+
+      await jobService.createJob(
+        userId,
+        JobRequestType.HCAPTCHA,
+        quickLaunchJobDto,
+      );
+
+      // Methods won't be invoked as the quick launch call includes a manifest data.
+      jobService.createHCaptchaManifest = jest.fn();
+      jobService.uploadManifest = jest.fn();
+      expect(jobService.createHCaptchaManifest).toHaveBeenCalledTimes(0);
+      expect(jobService.uploadManifest).toHaveBeenCalledTimes(0);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
+        userId,
+        jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: -mul(fundAmount + fee, rate),
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
+        chainId: quickLaunchJobDto.chainId,
+        userId,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        requestType: JobRequestType.HCAPTCHA,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,

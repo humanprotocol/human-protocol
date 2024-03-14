@@ -108,7 +108,7 @@ import {
 import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
-import { RequestAction } from './job.interface';
+import { OracleAddresses, RequestAction } from './job.interface';
 
 @Injectable()
 export class JobService {
@@ -417,12 +417,19 @@ export class JobService {
         );
       },
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
-      getTrustedHandlers: () => {
-        const trustedHandlers = this.configService.get<string>(
-          ConfigNames.HCAPTCHA_TRUSTED_HANDLERS,
+      getTrustedHandlers: () => [],
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
         )!;
 
-        return trustedHandlers.split(',');
+        return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
     [JobRequestType.FORTUNE]: {
@@ -437,6 +444,19 @@ export class JobService {
         fundAmount,
       }),
       getTrustedHandlers: () => [],
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
     },
     [JobRequestType.IMAGE_BOXES]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
@@ -446,6 +466,19 @@ export class JobService {
         fundAmount: number,
       ) => this.createCvatManifest(dto, requestType, fundAmount),
       getTrustedHandlers: () => [],
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
     },
     [JobRequestType.IMAGE_POINTS]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
@@ -455,6 +488,19 @@ export class JobService {
         fundAmount: number,
       ) => this.createCvatManifest(dto, requestType, fundAmount),
       getTrustedHandlers: () => [],
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
     },
   };
 
@@ -475,7 +521,13 @@ export class JobService {
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
-    const fundAmount = await calculateFundAmount(dto, rate);
+    let fundAmount = 0;
+    if (dto instanceof JobQuickLaunchDto) {
+      fundAmount = dto.fundAmount;
+    } else {
+      fundAmount = await calculateFundAmount(dto, rate);
+    }
+
     const userBalance = await this.paymentService.getUserBalance(userId);
     const feePercentage = Number(
       await this.getOracleFee(
@@ -615,6 +667,9 @@ export class JobService {
   }
 
   public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const { getOracleAddresses } =
+      this.createJobSpecificActions[jobEntity.requestType];
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -630,12 +685,10 @@ export class JobService {
 
     await this.validateManifest(jobEntity.requestType, manifest);
 
-    const oracleAddresses = this.getOracleAddresses(jobEntity.requestType);
+    const oracleAddresses = getOracleAddresses();
 
     const escrowConfig = {
-      recordingOracle: oracleAddresses.recordingOracle,
-      reputationOracle: oracleAddresses.recordingOracle,
-      exchangeOracle: oracleAddresses.exchangeOracle,
+      ...oracleAddresses,
       recordingOracleFee: await this.getOracleFee(
         oracleAddresses.recordingOracle,
         jobEntity.chainId,
@@ -711,34 +764,6 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   }
 
-  private getOracleAddresses(requestType: JobRequestType) {
-    let recordingOracleConfigKey;
-    let exchangeOracleConfigKey;
-
-    if (requestType === JobRequestType.FORTUNE) {
-      recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
-    } else if (requestType === JobRequestType.HCAPTCHA) {
-      recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
-    } else {
-      recordingOracleConfigKey = ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
-    }
-
-    const exchangeOracle = this.configService.get<string>(
-      exchangeOracleConfigKey,
-    )!;
-    const recordingOracle = this.configService.get<string>(
-      recordingOracleConfigKey,
-    )!;
-    const reputationOracle = this.configService.get<string>(
-      ConfigNames.REPUTATION_ORACLE_ADDRESS,
-    )!;
-
-    return { exchangeOracle, recordingOracle, reputationOracle };
-  }
-
   public async uploadManifest(
     requestType: JobRequestType,
     chainId: ChainId,
@@ -746,10 +771,12 @@ export class JobService {
   ): Promise<any> {
     let manifestFile = data;
     if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
+      const { getOracleAddresses } = this.createJobSpecificActions[requestType];
+
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
       const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
-      const oracleAddresses = this.getOracleAddresses(requestType);
+      const oracleAddresses = getOracleAddresses();
       for (const address in Object.values(oracleAddresses)) {
         const publicKey = await kvstore.getPublicKey(address);
         if (publicKey) publicKeys.push(publicKey);
@@ -1259,7 +1286,7 @@ export class JobService {
 
     const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
 
-    return BigInt(feeValue ? feeValue : 1);
+    return BigInt(feeValue ? feeValue : 0);
   }
 
   private async updateCompletedStatus(
