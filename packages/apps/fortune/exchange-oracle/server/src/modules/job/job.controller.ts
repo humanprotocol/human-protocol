@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JobDetailsDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 
 @ApiTags('Job')
 @Controller('job')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
