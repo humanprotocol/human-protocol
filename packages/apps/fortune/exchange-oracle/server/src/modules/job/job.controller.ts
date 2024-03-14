@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
-import { JobService } from './job.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { GetJobsDto, SolveJobDto } from './job.dto';
+import { JobService } from './job.service';
+import { RequestWithUser } from '../../common/types/jwt';
 
 @ApiTags('Job')
 @Controller('job')
@@ -11,20 +20,12 @@ import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
-  @Get('pending/:chain_id/:worker_address')
-  getPendingJobs(
-    @Param('chain_id') chainId: number,
-    @Param('worker_address') workerAddress: string,
+  @Get()
+  getJobs(
+    @Request() req: RequestWithUser,
+    @Query() query: GetJobsDto,
   ): Promise<any> {
-    return this.jobService.getPendingJobs(chainId, workerAddress);
-  }
-
-  @Get('details/:chain_id/:escrow_address')
-  getDetails(
-    @Param('chain_id') chainId: number,
-    @Param('escrow_address') escrowAddress: string,
-  ): Promise<JobDetailsDto> {
-    return this.jobService.getDetails(chainId, escrowAddress);
+    return this.jobService.getJobList(query, req.user.reputationNetwork);
   }
 
   @Post('solve')

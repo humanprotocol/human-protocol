@@ -3,8 +3,6 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  EscrowStatus,
-  EscrowUtils,
   OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
@@ -17,24 +15,27 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ISolution } from 'src/common/interfaces/job';
+import { ethers } from 'ethers';
+import { firstValueFrom } from 'rxjs';
+import { ISolution } from '../../common/interfaces/job';
+import { PageDto } from '../../common/pagination/pagination.dto';
 import { ConfigNames } from '../../common/config';
 import {
   ESCROW_FAILED_ENDPOINT,
   HEADER_SIGNATURE_KEY,
+  JOB_TYPE,
+  TOKEN,
 } from '../../common/constant';
+import { JobFieldName, JobStatus } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
+import { CaseConverter } from '../../common/utils/case-converter';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { JobDetailsDto, ManifestDto } from './job.dto';
-import { CaseConverter } from '../../common/utils/case-converter';
-import { firstValueFrom } from 'rxjs';
-import { ethers } from 'ethers';
 import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
-import { JobRepository } from './job.repository';
+import { GetJobsDto, JobDto, ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
-import { JobStatus } from '../../common/enums/job';
+import { JobRepository } from './job.repository';
 
 @Injectable()
 export class JobService {
@@ -64,53 +65,68 @@ export class JobService {
       throw new BadRequestException('Job already exists');
     }
 
+    const signer = this.web3Service.getSigner(webhook.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const reputationOracleAddress =
+      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+
     const newJobEntity = new JobEntity();
     newJobEntity.escrowAddress = webhook.escrowAddress;
     newJobEntity.chainId = webhook.chainId;
     newJobEntity.status = JobStatus.ACTIVE;
+    newJobEntity.reputationNetwork = reputationOracleAddress;
     await this.jobRepository.createUnique(newJobEntity);
   }
 
-  public async getDetails(
-    chainId: number,
-    escrowAddress: string,
-  ): Promise<JobDetailsDto> {
-    const manifest = await this.getManifest(chainId, escrowAddress);
-
-    const existingJobSolutions = await this.storageService.downloadJobSolutions(
-      escrowAddress,
-      chainId,
-    );
-
-    if (
-      existingJobSolutions.filter((solution) => !solution.error).length >=
-      manifest.submissionsRequired
-    ) {
-      throw new BadRequestException('This job has already been completed');
-    }
-
-    return {
-      escrowAddress,
-      chainId,
-      manifest,
-    };
-  }
-
-  public async getPendingJobs(
-    chainId: number,
-    workerAddress: string,
-  ): Promise<string[]> {
-    const escrows = await EscrowUtils.getEscrows({
-      exchangeOracle: this.web3Service.getSigner(chainId).address,
-      status: EscrowStatus.Pending,
-      networks: [chainId],
+  public async getJobList(
+    data: GetJobsDto,
+    reputationNetwork: string,
+  ): Promise<PageDto<JobDto>> {
+    const { entities, itemCount } = await this.jobRepository.fetchFiltered({
+      ...data,
+      pageSize: data.pageSize!,
+      skip: data.skip!,
+      reputationNetwork,
     });
+    const jobs = await Promise.all(
+      entities.map(async (entity) => {
+        const job = new JobDto(
+          entity.escrowAddress,
+          entity.chainId,
+          JOB_TYPE,
+          entity.status,
+        );
 
-    return escrows
-      .filter(
-        (escrow) => !this.storage[escrow.address]?.includes(workerAddress),
-      )
-      .map((escrow) => escrow.address);
+        if (data.fields) {
+          if (data.fields.includes(JobFieldName.CreatedAt)) {
+            job.created_at = entity.createdAt.getTime();
+          }
+          if (
+            data.fields.includes(JobFieldName.JobDescription) ||
+            data.fields.includes(JobFieldName.RewardAmount) ||
+            data.fields.includes(JobFieldName.RewardToken)
+          ) {
+            const manifest = await this.getManifest(
+              entity.chainId,
+              entity.escrowAddress,
+            );
+            if (data.fields.includes(JobFieldName.JobDescription)) {
+              job.jobDescription = manifest.requesterDescription;
+            }
+            if (data.fields.includes(JobFieldName.RewardAmount)) {
+              job.reward_amount =
+                manifest.fundAmount / manifest.submissionsRequired;
+            }
+            if (data.fields.includes(JobFieldName.RewardToken)) {
+              job.reward_token = TOKEN;
+            }
+          }
+        }
+
+        return job;
+      }),
+    );
+    return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
   }
 
   public async solveJob(

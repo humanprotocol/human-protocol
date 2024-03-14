@@ -6,7 +6,7 @@ import { useContainer } from 'class-validator';
 
 import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -46,6 +46,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);

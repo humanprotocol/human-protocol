@@ -5,7 +5,7 @@ import { AssignmentStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { JobEntity } from '../job/job.entity';
 
-@Entity({ schema: NS, name: 'assignment' })
+@Entity({ schema: NS, name: 'assignments' })
 @Index(['jobId', 'workerAddress'], { unique: true })
 export class AssignmentEntity extends BaseEntity {
   @Column({ type: 'int' })
