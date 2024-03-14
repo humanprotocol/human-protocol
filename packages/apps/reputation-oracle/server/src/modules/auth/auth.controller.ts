@@ -30,8 +30,8 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
-  Web3SignInDto,
   Web3SignUpDto,
+  Web3SignInDto,
   RefreshDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
@@ -120,6 +120,26 @@ export class AuthJwtController {
   }
 
   @Public()
+  @Post('/web3/signup')
+  @ApiOperation({
+    summary: 'Web3 User Signup',
+    description: 'Endpoint for Web3 user registration.',
+  })
+  @ApiBody({ type: Web3SignUpDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User registered successfully',
+    type: AuthDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async web3SignUp(@Body() data: Web3SignUpDto): Promise<AuthDto> {
+    return this.authService.web3Signup(data);
+  }
+
+  @Public()
   @Post('/web3/signin')
   @HttpCode(200)
   @ApiOperation({
@@ -138,26 +158,6 @@ export class AuthJwtController {
   })
   public async web3SignIn(@Body() data: Web3SignInDto): Promise<AuthDto> {
     return this.authService.web3Signin(data);
-  }
-
-  @Public()
-  @Post('/web3/signup')
-  @ApiOperation({
-    summary: 'Web3 User Signup',
-    description: 'Endpoint for Web3 user registration.',
-  })
-  @ApiBody({ type: Web3SignUpDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User registered successfully',
-    type: AuthDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  public async web3SignUp(@Body() data: Web3SignUpDto): Promise<AuthDto> {
-    return this.authService.web3Signup(data);
   }
 
   @Public()

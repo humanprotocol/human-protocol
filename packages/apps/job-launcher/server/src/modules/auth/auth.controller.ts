@@ -83,6 +83,10 @@ export class AuthJwtController {
     status: 201,
     description: 'User registered successfully',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
   public async signup(
     @Body() data: UserCreateDto,
     @Ip() ip: string,
@@ -155,6 +159,14 @@ export class AuthJwtController {
     status: 204,
     description: 'Password reset email sent successfully',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   public async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
     await this.authService.forgotPassword(data);
   }
@@ -190,6 +202,10 @@ export class AuthJwtController {
     status: 200,
     description: 'Email verification successful',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   public async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
     await this.authService.emailVerification(data);
   }
@@ -206,6 +222,10 @@ export class AuthJwtController {
   @ApiResponse({
     status: 204,
     description: 'Email verification resent successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
   })
   public async resendEmailVerification(
     @Body() data: ResendEmailVerificationDto,
