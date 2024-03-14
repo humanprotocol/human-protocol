@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Headers, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -24,12 +24,15 @@ export class JobsDiscoveryController {
   })
   public async discoverJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
+    @Headers('authorization') token: string,
   ): Promise<JobsDiscoveryResponse> {
-    const jobsDiscoveryParamsCommand = this.mapper.map(
-      jobsDiscoveryParamsDto,
-      JobsDiscoveryParamsDto,
-      JobsDiscoveryParamsCommand,
-    );
+    const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
+      this.mapper.map(
+        jobsDiscoveryParamsDto,
+        JobsDiscoveryParamsDto,
+        JobsDiscoveryParamsCommand,
+      );
+    jobsDiscoveryParamsCommand.token = token;
     return await this.jobsDiscoveryService.processJobsDiscovery(
       jobsDiscoveryParamsCommand,
     );

@@ -10,28 +10,29 @@ export class JobAssignmentDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
   exchange_oracle_url: string;
-
   @AutoMap()
   @ApiProperty({ example: 'string' })
   escrow_address: string;
-
   @AutoMap()
   @ApiProperty({ example: 0 })
   chain_id: number;
 }
 
+export class JobAssignmentParams {
+  @AutoMap()
+  chainId: number;
+  @AutoMap()
+  escrowAddress: string;
+}
 export class JobAssignmentCommand {
+  data: JobAssignmentParams;
   @AutoMap()
-  exchange_oracle_url: string;
+  token: string;
   @AutoMap()
-  escrow_address: string;
-  @AutoMap()
-  chain_id: number;
+  exchangeOracleUrl: string;
 }
 
 export class JobAssignmentData {
-  @AutoMap()
-  exchange_oracle_url: string;
   @AutoMap()
   escrow_address: string;
   @AutoMap()
@@ -56,70 +57,67 @@ export class JobsFetchParamsDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
   exchange_oracle_url: string;
-
   @AutoMap()
   @ApiProperty({ example: 'string', required: false })
   assignment_id: string;
-
   @AutoMap()
   @ApiProperty({ example: 'string', required: false })
   escrow_address: string;
-
   @AutoMap()
   @ApiProperty({ example: 0, required: false })
   chain_id: number;
-
   @AutoMap()
   @ApiProperty({ example: 'job type', required: false })
   job_type: string;
-
   @AutoMap()
   @ApiProperty({ example: 'ACTIVE', required: false })
   status: StatusEnum;
-
   @AutoMap()
   @ApiProperty({ example: 5, default: 5, maximum: 10, required: false })
   page_size: number;
-
   @AutoMap()
   @ApiProperty({ example: 0, default: 0, required: false })
   page: number;
-
   @AutoMap()
   @ApiProperty({ example: 'ASC', default: 'ASC', required: false })
   sort: SortOrder;
-
   @AutoMap()
-  @ApiProperty({ example: 'created_at', default: 'created_at', required: false })
+  @ApiProperty({
+    example: 'created_at',
+    default: 'created_at',
+    required: false,
+  })
   sort_field: SortField;
 }
 
-export class JobsFetchParamsCommand {
+export class JobsFetchParams {
   @AutoMap()
-  exchange_oracle_url: string;
+  assignmentId: string;
   @AutoMap()
-  assignment_id: string;
+  escrowAddress: string;
   @AutoMap()
-  escrow_address: string;
+  chainId: number;
   @AutoMap()
-  chain_id: number;
-  @AutoMap()
-  job_type: string;
+  jobType: string;
   @AutoMap()
   status: StatusEnum;
   @AutoMap()
-  page_size: number;
+  pageSize: number;
   @AutoMap()
   page: number;
   @AutoMap()
   sort: SortOrder;
   @AutoMap()
-  sort_field: SortField;
+  sortField: SortField;
+}
+export class JobsFetchParamsCommand {
+  @AutoMap()
+  exchangeOracleUrl: string;
+  @AutoMap()
+  data: JobsFetchParams;
 }
 
 export class JobsFetchParamsData {
-  @AutoMap()
-  exchange_oracle_url: string;
   @AutoMap()
   assignment_id: string;
   @AutoMap()

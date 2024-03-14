@@ -52,12 +52,8 @@ export class ReputationOracleGateway {
   private async handleRequestToReputationOracle<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
-    try {
-      const response = await lastValueFrom(this.httpService.request(options));
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await lastValueFrom(this.httpService.request(options));
+    return response.data;
   }
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(

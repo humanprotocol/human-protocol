@@ -1,18 +1,11 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JobsDiscoveryService } from './jobs-discovery.service';
 import { JobsDiscoveryProfile } from './jobs-discovery.mapper';
-import { HttpModule } from '@nestjs/axios';
-import { TokenMiddleware } from '../../common/interceptors/auth-token.middleware';
-import { JobsDiscoveryController } from './jobs-discovery.controller';
-import { RequestContext } from '../../common/utils/request-context.util';
+import { Module } from '@nestjs/common';
+import { ExternalApiModule } from '../../integrations/external-api/external-api.module';
 
 @Module({
-  imports: [HttpModule],
-  providers: [JobsDiscoveryService, JobsDiscoveryProfile, RequestContext],
+  imports: [ExternalApiModule],
+  providers: [JobsDiscoveryService, JobsDiscoveryProfile],
   exports: [JobsDiscoveryService],
 })
-export class JobsDiscoveryModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TokenMiddleware).forRoutes(JobsDiscoveryController);
-  }
-}
+export class JobsDiscoveryModule {}
