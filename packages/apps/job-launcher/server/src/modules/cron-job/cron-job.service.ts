@@ -229,14 +229,16 @@ export class CronJobService {
             jobEntity.manifestUrl,
           );
 
-          const oracleType = this.jobService.getOracleType(manifest);
+          const oracleType = this.jobService.getOracleType(
+            jobEntity.requestType,
+          );
           if (oracleType !== OracleType.HCAPTCHA) {
             const webhookEntity = new WebhookEntity();
             Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CANCELED,
-              oracleType: this.jobService.getOracleType(manifest),
+              oracleType,
               hasSignature:
                 (manifest as FortuneManifestDto).requestType ===
                 JobRequestType.FORTUNE,
