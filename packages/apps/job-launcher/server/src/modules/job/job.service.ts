@@ -108,7 +108,12 @@ import {
 import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
-import { OracleAddresses, RequestAction } from './job.interface';
+import {
+  EscrowAction,
+  OracleAction,
+  OracleAddresses,
+  RequestAction,
+} from './job.interface';
 
 @Injectable()
 export class JobService {
@@ -417,7 +422,54 @@ export class JobService {
         );
       },
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
+    },
+    [JobRequestType.FORTUNE]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: async (
+        dto: JobFortuneDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => ({
+        ...dto,
+        requestType,
+        fundAmount,
+      }),
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
+  };
+
+  private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
+    [JobRequestType.HCAPTCHA]: {
       getTrustedHandlers: () => [],
+    },
+    [JobRequestType.FORTUNE]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      getTrustedHandlers: () => [],
+    },
+  };
+
+  private getOraclesSpecificActions: Record<JobRequestType, OracleAction> = {
+    [JobRequestType.HCAPTCHA]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.configService.get<string>(
           ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
@@ -433,17 +485,6 @@ export class JobService {
       },
     },
     [JobRequestType.FORTUNE]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
-      createManifest: async (
-        dto: JobFortuneDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) => ({
-        ...dto,
-        requestType,
-        fundAmount,
-      }),
-      getTrustedHandlers: () => [],
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.configService.get<string>(
           ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
@@ -459,13 +500,6 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_BOXES]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
-      getTrustedHandlers: () => [],
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.configService.get<string>(
           ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
@@ -481,13 +515,6 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_POINTS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
-      getTrustedHandlers: () => [],
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.configService.get<string>(
           ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
@@ -624,22 +651,9 @@ export class JobService {
     );
   }
 
-  public async downloadManifest(manifestUrl: string) {
-    let manifest = await this.storageService.download(manifestUrl);
-    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      manifest = await this.encryption.decrypt(manifest as any);
-    }
-
-    if (isValidJSON(manifest)) {
-      manifest = JSON.parse(manifest);
-    }
-
-    return manifest;
-  }
-
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const { getTrustedHandlers } =
-      this.createJobSpecificActions[jobEntity.requestType];
+      this.createEscrowSpecificActions[jobEntity.requestType];
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
@@ -668,7 +682,7 @@ export class JobService {
 
   public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const { getOracleAddresses } =
-      this.createJobSpecificActions[jobEntity.requestType];
+      this.getOraclesSpecificActions[jobEntity.requestType];
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
@@ -771,7 +785,8 @@ export class JobService {
   ): Promise<any> {
     let manifestFile = data;
     if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
-      const { getOracleAddresses } = this.createJobSpecificActions[requestType];
+      const { getOracleAddresses } =
+        this.getOraclesSpecificActions[requestType];
 
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);

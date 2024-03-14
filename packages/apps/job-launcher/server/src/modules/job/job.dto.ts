@@ -90,7 +90,7 @@ export class JobQuickLaunchDto extends JobDto {
   public requestType: JobRequestType;
 
   @ApiProperty({ name: 'manifest_url' })
-  @IsString()
+  @IsUrl()
   @IsNotEmpty()
   public manifestUrl: string;
 

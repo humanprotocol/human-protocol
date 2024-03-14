@@ -8,7 +8,13 @@ export interface RequestAction {
     requestType: JobRequestType,
     fundAmount: number,
   ) => Promise<any>;
+}
+
+export interface EscrowAction {
   getTrustedHandlers: () => string[];
+}
+
+export interface OracleAction {
   getOracleAddresses: () => OracleAddresses;
 }
 

@@ -50,7 +50,7 @@ export class JobController {
   })
   @ApiBody({ type: JobQuickLaunchDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description:
       'ID of the created job with pre-definde manifest url via quick launch.',
     type: Number,
@@ -82,7 +82,7 @@ export class JobController {
   })
   @ApiBody({ type: JobFortuneDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'ID of the created fortune job.',
     type: Number,
   })
@@ -113,7 +113,7 @@ export class JobController {
   })
   @ApiBody({ type: JobCvatDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'ID of the created CVAT job.',
     type: Number,
   })
@@ -143,7 +143,7 @@ export class JobController {
   })
   @ApiBody({ type: JobCaptchaDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'ID of the created hCaptcha job.',
     type: Number,
   })
