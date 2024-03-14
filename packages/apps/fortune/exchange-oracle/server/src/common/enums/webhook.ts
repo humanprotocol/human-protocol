@@ -4,3 +4,9 @@ export enum EventType {
   TASK_CREATION_FAILED = 'task_creation_failed',
   SUBMISSION_REJECTED = 'submission_rejected',
 }
+
+export enum WebhookStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+}
