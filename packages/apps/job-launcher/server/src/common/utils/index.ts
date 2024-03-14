@@ -43,6 +43,7 @@ export const parseUrl = (
   region: string;
   useSSL: boolean;
   filename?: string;
+  extension?: string;
   port?: number;
 } => {
   const patterns = [
@@ -70,7 +71,7 @@ export const parseUrl = (
   ];
 
   for (const { regex, endPoint, port } of patterns) {
-    const match = url.match(regex);
+    let match = url.match(regex);
 
     if (match) {
       const [, param1, param2, path] = match;
@@ -79,21 +80,31 @@ export const parseUrl = (
         parts[0] || (patterns[2].regex === regex ? param2 : param1);
       const filename = parts.length > 1 ? parts[parts.length - 1] : undefined;
 
-      let region = '';
-      if (regex === patterns[2].regex) {
-        region = param1;
-      } else if (regex === patterns[3].regex) {
-        region = param2;
-      }
-
-      return {
+      const data = {
         useSSL: url.startsWith('https:'),
         endPoint: endPoint.replace('$1', param1),
-        region,
+        region: '',
         port: port && param2 ? Number(param2) || undefined : undefined,
         bucket,
-        filename,
+        filename: '',
+        extension: '',
       };
+
+      if (regex === patterns[2].regex) {
+        data.region = param1;
+      } else if (regex === patterns[3].regex) {
+        data.region = param2;
+      }
+
+      if (filename) {
+        match = filename.match(/([^\/]+)\.([^.\/]+)$/);
+        if (match && match.length > 1) {
+          data.filename = match[1];
+          data.extension = match[2];
+        }
+      }
+
+      return data;
     }
   }
 
