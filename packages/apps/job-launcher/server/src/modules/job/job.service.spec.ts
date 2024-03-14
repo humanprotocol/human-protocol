@@ -313,6 +313,7 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
@@ -349,6 +350,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.FORTUNE,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -386,6 +388,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.FORTUNE,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -893,6 +896,7 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.IMAGE_BOXES,
         escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
@@ -932,6 +936,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.IMAGE_POINTS,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1119,6 +1124,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.IMAGE_POINTS,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1220,6 +1226,7 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.HCAPTCHA,
         escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
@@ -1251,6 +1258,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.HCAPTCHA,
         fee: Number(mul(fee, rate).toFixed(3)),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1283,6 +1291,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.HCAPTCHA,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1316,6 +1325,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.PAID,
@@ -1342,6 +1352,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.PAID,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -1369,6 +1380,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.CREATED,
@@ -1403,6 +1415,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.CREATED,
@@ -1433,6 +1446,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.CREATED,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -1465,6 +1479,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.SET_UP,
@@ -1490,6 +1505,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.SET_UP,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -1999,22 +2015,9 @@ describe('JobService', () => {
 
   describe('getResult', () => {
     let downloadFileFromUrlMock: any;
-    const jobEntityMock = {
-      status: JobStatus.COMPLETED,
-      fundAmount: 100,
-      userId: 1,
-      id: 1,
-      manifestUrl: MOCK_FILE_URL,
-      manifestHash: MOCK_FILE_HASH,
-      escrowAddress: MOCK_ADDRESS,
-      chainId: ChainId.LOCALHOST,
-    };
 
     beforeEach(() => {
       downloadFileFromUrlMock = storageService.download;
-      jobRepository.findOneByIdAndUserId = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock);
     });
 
     afterEach(() => {
@@ -2022,6 +2025,22 @@ describe('JobService', () => {
     });
 
     it('should download and return the fortune result', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
       const fortuneResult: FortuneFinalResultDto[] = [
         {
           workerAddress: MOCK_ADDRESS,
@@ -2037,45 +2056,84 @@ describe('JobService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
       downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
 
       const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(storageService.download).toHaveBeenCalledTimes(1);
       expect(result).toEqual(fortuneResult);
     });
 
     it('should download and return the image binary result', async () => {
-      const manifestMock = {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.IMAGE_BOXES,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
       };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
 
-      downloadFileFromUrlMock.mockResolvedValue(manifestMock);
-
       const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
 
-      expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(result).toEqual(MOCK_FILE_URL);
     });
 
     it('should throw a NotFoundException if the result is not found', async () => {
-      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
       downloadFileFromUrlMock.mockResolvedValueOnce(null);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
       ).rejects.toThrowError(new NotFoundException(ErrorJob.ResultNotFound));
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(storageService.download).toHaveBeenCalledTimes(1);
     });
 
     it('should throw a NotFoundException if the result is not valid', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
       const fortuneResult: any[] = [
         {
           wrongAddress: MOCK_ADDRESS,
@@ -2091,7 +2149,6 @@ describe('JobService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
       downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
 
       await expect(
@@ -2101,7 +2158,7 @@ describe('JobService', () => {
       );
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(storageService.download).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -2310,6 +2367,7 @@ describe('JobService', () => {
         id: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
       };
@@ -2383,6 +2441,7 @@ describe('JobService', () => {
         id: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         escrowAddress: null,
         chainId: ChainId.LOCALHOST,
       };

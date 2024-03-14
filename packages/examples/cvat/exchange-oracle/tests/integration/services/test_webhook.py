@@ -254,20 +254,20 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         pending_webhooks = webhook_service.inbox.get_pending_webhooks(
-            self.session, sender_type=OracleWebhookTypes.job_launcher, limit=10
+            self.session, type=OracleWebhookTypes.job_launcher, limit=10
         )
         self.assertEqual(len(pending_webhooks), 2)
         self.assertEqual(pending_webhooks[0].id, webhook1_id)
         self.assertEqual(pending_webhooks[1].id, webhook2_id)
 
         pending_webhooks = webhook_service.inbox.get_pending_webhooks(
-            self.session, sender_type=OracleWebhookTypes.recording_oracle, limit=10
+            self.session, type=OracleWebhookTypes.recording_oracle, limit=10
         )
         self.assertEqual(len(pending_webhooks), 1)
         self.assertEqual(pending_webhooks[0].id, webhook4_id)
 
         pending_webhooks = webhook_service.outbox.get_pending_webhooks(
-            self.session, sender_type=OracleWebhookTypes.job_launcher, limit=10
+            self.session, type=OracleWebhookTypes.job_launcher, limit=10
         )
         self.assertEqual(len(pending_webhooks), 1)
         self.assertEqual(pending_webhooks[0].id, webhook5_id)
