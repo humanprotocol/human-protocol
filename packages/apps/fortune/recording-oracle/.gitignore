@@ -27,7 +27,7 @@ yarn-error.log*
 # env
 .env.*
 .env
-!.env.sample
+!.env.example
 
 # VisualStudioCode
  ../.vscode/

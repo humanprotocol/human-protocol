@@ -1,18 +1,24 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
+import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { WebhookService } from '../webhook/webhook.service';
-import { WebhookStatus } from '../../common/enums/webhook';
+import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import { EscrowClient } from '@human-protocol/sdk';
+import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
+import { WebhookDto } from '../webhook/webhook.dto';
 
 @Injectable()
 export class CronJobService {
@@ -105,10 +111,10 @@ export class CronJobService {
       );
 
       for (const webhookEntity of webhookEntities) {
-        let results;
+        let resultsUrl;
         try {
           const { chainId, escrowAddress } = webhookEntity;
-          results = await this.payoutService.executePayouts(
+          resultsUrl = await this.payoutService.executePayouts(
             chainId,
             escrowAddress,
           );
@@ -118,8 +124,7 @@ export class CronJobService {
           continue;
         }
         webhookEntity.status = WebhookStatus.PAID;
-        webhookEntity.resultsUrl = results.url;
-        webhookEntity.checkPassed = results.checkPassed;
+        webhookEntity.resultsUrl = resultsUrl;
         webhookEntity.retriesCount = 0;
         await this.webhookRepository.updateOne(webhookEntity);
       }
@@ -155,12 +160,11 @@ export class CronJobService {
 
       for (const webhookEntity of webhookEntities) {
         try {
-          const { chainId, escrowAddress, checkPassed } = webhookEntity;
+          const { chainId, escrowAddress } = webhookEntity;
 
-          await this.reputationService.doAssessReputationScores(
+          await this.reputationService.assessReputationScores(
             chainId,
             escrowAddress,
-            checkPassed,
           );
 
           const signer = this.web3Service.getSigner(chainId);
@@ -169,6 +173,34 @@ export class CronJobService {
           await escrowClient.complete(escrowAddress, {
             gasPrice: await this.web3Service.calculateGasPrice(chainId),
           });
+
+          const webhookUrls = [
+            (
+              await OperatorUtils.getLeader(
+                chainId,
+                await escrowClient.getJobLauncherAddress(escrowAddress),
+              )
+            ).webhookUrl,
+            (
+              await OperatorUtils.getLeader(
+                chainId,
+                await escrowClient.getRecordingOracleAddress(escrowAddress),
+              )
+            ).webhookUrl,
+          ];
+          const webhookBody: WebhookDto = {
+            chainId,
+            escrowAddress,
+            eventType: EventType.ESCROW_COMPLETED,
+          };
+          for (const webhookUrl of webhookUrls) {
+            if (!webhookUrl) {
+              this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
+              throw new NotFoundException(ErrorWebhook.UrlNotFound);
+            }
+
+            await this.webhookService.sendWebhook(webhookUrl, webhookBody);
+          }
         } catch (err) {
           this.logger.error(`Error sending webhook: ${err.message}`);
           await this.webhookService.handleWebhookError(webhookEntity);

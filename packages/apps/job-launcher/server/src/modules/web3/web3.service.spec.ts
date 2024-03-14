@@ -50,20 +50,20 @@ describe('Web3Service', () => {
       const invalidChainId = ChainId.POLYGON;
 
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
-        ErrorWeb3.InvalidTestnetChainId,
+        ErrorWeb3.InvalidChainId,
       );
     });
   });
 
   describe('getValidChains', () => {
     it('should get all valid chainIds on MAINNET', () => {
-      mockConfigService.get = jest.fn().mockReturnValue(Web3Env.MAINNET);
+      (web3Service as any).currentWeb3Env = Web3Env.MAINNET;
       const validChainIds = web3Service.getValidChains();
       expect(validChainIds).toBe(MAINNET_CHAIN_IDS);
     });
 
     it('should get all valid chainIds on TESTNET', () => {
-      mockConfigService.get = jest.fn().mockReturnValue(Web3Env.TESTNET);
+      (web3Service as any).currentWeb3Env = Web3Env.TESTNET;
       const validChainIds = web3Service.getValidChains();
       expect(validChainIds).toBe(TESTNET_CHAIN_IDS);
     });

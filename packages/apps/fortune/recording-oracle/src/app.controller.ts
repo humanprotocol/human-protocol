@@ -1,8 +1,10 @@
 import { Controller, Get, Redirect } from '@nestjs/common';
 
-import { Public } from '@/common/decorators';
+import { Public } from './common/decorators';
+import { ApiExcludeController } from '@nestjs/swagger';
 
 @Controller('/')
+@ApiExcludeController()
 export class AppController {
   @Public()
   @Get('/')

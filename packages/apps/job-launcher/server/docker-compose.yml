@@ -1,33 +1,27 @@
 version: '3.8'
-
 services:
   postgres:
     image: postgres:latest
     restart: always
-    environment:
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DATABASE}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_SYNC=false
     logging:
       options:
         max-size: 10m
         max-file: "3"
     ports:
-      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+      - 5432:5432
     # volumes: 
     #   - ./db:/var/lib/postgresql/data
+    env_file:
+      - path: .env
+        required: true # default
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
   minio:
     container_name: minio
     image: minio/minio:RELEASE.2022-05-26T05-48-41Z
     ports:
       - 9001:9001
       - 9000:9000
-    environment:
-      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
     entrypoint: 'sh'
     command:
       -c "mkdir -p /data/manifests && minio server /data --console-address ':9001'"
@@ -36,6 +30,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
+    env_file:
+      - path: .env
+        required: true # default
   minio-mc:
     container_name: minio-mc
     image: minio/mc
@@ -44,56 +41,23 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 ${S3_ACCESS_KEY} ${S3_SECRET_KEY};
+      /usr/bin/mc config host add myminio http://minio:9000  access-key secret-key;
       /usr/bin/mc mb myminio/manifests;
       /usr/bin/mc anonymous set public myminio/manifests;
       "
-  job-launcher:
-    container_name: job-launcher
-    restart: unless-stopped
-    build:
-      context: ../../../../
-      dockerfile: packages/apps/job-launcher/server/Dockerfile
-    expose:
-      - '${PORT}'
-    ports:
-      - '${LOCAL_PORT}:${PORT}'
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      HOST: ${HOST}
-      PORT: ${PORT}
-      FE_URL: ${FE_URL}
-      SESSION_SECRET: ${SESSION_SECRET}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
-      POSTGRES_SSL: ${POSTGRES_SSL}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      WEB3_ENV: ${WEB3_ENV}
-      WEB3_PRIVATE_KEY: ${WEB3_PRIVATE_KEY}
-      JOB_LAUNCHER_FEE: ${JOB_LAUNCHER_FEE}
-      RECORDING_ORACLE_FEE: ${RECORDING_ORACLE_FEE}
-      REPUTATION_ORACLE_FEE: ${REPUTATION_ORACLE_FEE}
-      EXCHANGE_ORACLE_FEE: ${EXCHANGE_ORACLE_FEE}
-      FORTUNE_EXCHANGE_ORACLE_ADDRESS: ${FORTUNE_EXCHANGE_ORACLE_ADDRESS}
-      FORTUNE_RECORDING_ORACLE_ADDRESS: ${FORTUNE_RECORDING_ORACLE_ADDRESS}
-      CVAT_EXCHANGE_ORACLE_ADDRESS: ${CVAT_EXCHANGE_ORACLE_ADDRESS}
-      CVAT_RECORDING_ORACLE_ADDRESS: ${CVAT_RECORDING_ORACLE_ADDRESS}
-      REPUTATION_ORACLE_ADDRESS: ${REPUTATION_ORACLE_ADDRESS}
-      HASH_SECRET: ${HASH_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_TOKEN_EXPIRES_IN: ${JWT_ACCESS_TOKEN_EXPIRES_IN}
-      JWT_REFRESH_TOKEN_EXPIRES_IN: ${JWT_REFRESH_TOKEN_EXPIRES_IN}
-      S3_ENDPOINT: ${S3_ENDPOINT}
-      S3_PORT: ${S3_PORT}
-      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-      S3_SECRET_KEY: ${S3_SECRET_KEY}
-      S3_BUCKET: ${S3_BUCKET}
-      S3_USE_SSL: ${S3_USE_SSL}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_API_VERSION: ${STRIPE_API_VERSION}
-      STRIPE_APP_NAME: ${STRIPE_APP_NAME}
-      STRIPE_APP_VERSION: ${STRIPE_APP_VERSION}
-      STRIPE_APP_INFO_URL: ${STRIPE_APP_INFO_URL}
-      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+    env_file:
+      - path: .env
+        required: true # default
+  # job-launcher:
+  #   container_name: job-launcher
+  #   restart: unless-stopped
+  #   build:
+  #     context: ../../../../
+  #     dockerfile: packages/apps/job-launcher/server/Dockerfile
+  #   expose:
+  #     - '${PORT}'
+  #   ports:
+  #     - '${LOCAL_PORT}:${PORT}'
+  #   env_file:
+  #     - path: ./.env.development
+  #       required: true # default

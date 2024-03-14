@@ -5,6 +5,7 @@ import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { Role } from '../enums/role';
+import { HEADER_SIGNATURE_KEY } from '../constants';
 
 jest.mock('../../common/utils/signature');
 
@@ -27,7 +28,7 @@ describe('SignatureAuthGuard', () => {
         {
           provide: SignatureAuthGuard,
           useValue: new SignatureAuthGuard([
-            Role.JobLaucher,
+            Role.JobLauncher,
             Role.Exchange,
             Role.Reputation,
           ]),
@@ -61,10 +62,10 @@ describe('SignatureAuthGuard', () => {
     });
 
     it('should return true if signature is verified', async () => {
-      mockRequest.headers['header-signature-key'] = 'validSignature';
+      mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
       mockRequest.body = {
-        escrowAddress: MOCK_ADDRESS,
-        chainId: ChainId.LOCALHOST,
+        escrow_address: MOCK_ADDRESS,
+        chain_id: ChainId.LOCALHOST,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
 

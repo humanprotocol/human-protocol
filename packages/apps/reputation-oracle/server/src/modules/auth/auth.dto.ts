@@ -11,7 +11,6 @@ import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserType } from '../../common/enums/user';
-import { ChainId } from '@human-protocol/sdk';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -86,30 +85,7 @@ export class TokenCreateDto {
   public user: UserEntity;
 }
 
-export class Web3PreSignUpPayloadDto {
-  @ApiProperty()
-  @IsString()
-  @IsEthereumAddress()
-  public from: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsEthereumAddress()
-  public to: string;
-
-  @ApiProperty()
-  @IsString()
-  public contents: string;
-}
-
-export class Web3PreSignUpDto {
-  @ApiProperty()
-  @IsString()
-  @IsEthereumAddress()
-  public address: string;
-}
-
-export class Web3SignUpDto extends Web3PreSignUpDto {
+export class Web3SignUpDto {
   @ApiProperty()
   @IsString()
   public signature: string;
@@ -119,6 +95,11 @@ export class Web3SignUpDto extends Web3PreSignUpDto {
   })
   @IsEnum(UserType)
   public type: UserType;
+
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public address: string;
 }
 
 export class Web3SignInDto {

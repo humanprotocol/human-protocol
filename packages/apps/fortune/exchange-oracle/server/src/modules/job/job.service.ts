@@ -1,6 +1,7 @@
 import {
   ChainId,
   Encryption,
+  EncryptionUtils,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
@@ -28,7 +29,9 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { JobDetailsDto, ManifestDto } from './job.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
-import { WebhookDto } from '../webhook/webhook.dto';
+import { firstValueFrom } from 'rxjs';
+import { ethers } from 'ethers';
+import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
 
 @Injectable()
 export class JobService {
@@ -94,6 +97,17 @@ export class JobService {
     workerAddress: string,
     solution: string,
   ): Promise<void> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw new Error('Invalid address');
+    }
+
+    const solutionsUrl = await this.addSolution(
+      chainId,
+      escrowAddress,
+      workerAddress,
+      solution,
+    );
+
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const recordingOracleAddress =
@@ -107,13 +121,6 @@ export class JobService {
     const recordingOracleWebhookUrl = leader?.webhookUrl;
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
-
-    const solutionsUrl = await this.addSolution(
-      chainId,
-      escrowAddress,
-      workerAddress,
-      solution,
-    );
 
     await this.sendWebhook(recordingOracleWebhookUrl, {
       escrowAddress: escrowAddress,
@@ -131,7 +138,9 @@ export class JobService {
           invalidJobSolution.escrowAddress,
           invalidJobSolution.chainId,
         );
-      for (const invalidSolution of invalidJobSolution.eventData) {
+      for (const invalidSolution of (
+        invalidJobSolution.eventData as RejectionEventData
+      )?.assignments) {
         const foundSolution = existingJobSolutions.find(
           (sol) => sol.workerAddress === invalidSolution.assigneeId,
         );
@@ -203,9 +212,11 @@ export class JobService {
       snake_case_body,
       this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
     );
-    await this.httpService.post(url, snake_case_body, {
-      headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-    });
+    await firstValueFrom(
+      this.httpService.post(url, snake_case_body, {
+        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+      }),
+    );
   }
 
   private async getManifest(
@@ -219,23 +230,28 @@ export class JobService {
       await StorageClient.downloadFileFromUrl(manifestUrl);
 
     let manifest: ManifestDto | null;
-
-    try {
-      manifest = JSON.parse(manifestEncrypted);
-    } catch {
-      manifest = null;
-    }
-
-    if (!manifest) {
+    if (
+      typeof manifestEncrypted === 'string' &&
+      EncryptionUtils.isEncrypted(manifestEncrypted)
+    ) {
       try {
         const encryption = await Encryption.build(
-          this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
-          this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+          this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
+          this.configService.get(ConfigNames.PGP_PASSPHRASE),
         );
 
         manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
       } catch {
         throw new Error('Unable to decrypt manifest');
+      }
+    } else {
+      try {
+        manifest =
+          typeof manifestEncrypted === 'string'
+            ? JSON.parse(manifestEncrypted)
+            : manifestEncrypted;
+      } catch {
+        manifest = null;
       }
     }
 
@@ -258,7 +274,7 @@ export class JobService {
         escrowAddress: escrowAddress,
         chainId: chainId,
         eventType: EventType.TASK_CREATION_FAILED,
-        eventData: [{ reason: 'Unable to get manifest' }],
+        eventData: { assignments: [{ reason: 'Unable to get manifest' }] },
       };
       await this.sendWebhook(
         jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
