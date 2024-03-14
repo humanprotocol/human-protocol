@@ -495,6 +495,7 @@ export class JobService {
     jobEntity.userId = userId;
     jobEntity.manifestUrl = url;
     jobEntity.manifestHash = hash;
+    jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;
     jobEntity.fundAmount = tokenFundAmount;
     jobEntity.status = JobStatus.PENDING;
@@ -576,9 +577,9 @@ export class JobService {
       manifest = JSON.parse(manifest);
     }
 
-    await this.validateManifest(manifest);
+    await this.validateManifest(jobEntity.requestType, manifest);
 
-    const oracleAddresses = this.getOracleAddresses(manifest);
+    const oracleAddresses = this.getOracleAddresses(jobEntity.requestType);
 
     const escrowConfig = {
       recordingOracle: oracleAddresses.recordingOracle,
@@ -659,14 +660,14 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   }
 
-  private getOracleAddresses(manifest: any) {
+  private getOracleAddresses(requestType: JobRequestType) {
     let recordingOracleConfigKey;
     let exchangeOracleConfigKey;
-    const oracleType = this.getOracleType(manifest);
-    if (oracleType === OracleType.FORTUNE) {
+
+    if (requestType === JobRequestType.FORTUNE) {
       recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
       exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
-    } else if (oracleType === OracleType.HCAPTCHA) {
+    } else if (requestType === JobRequestType.HCAPTCHA) {
       recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
       exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
     } else {
@@ -727,17 +728,14 @@ export class JobService {
   }
 
   private async validateManifest(
+    requestType: JobRequestType,
     manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<boolean> {
     let dtoCheck;
 
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
+    if (requestType === JobRequestType.FORTUNE) {
       dtoCheck = new FortuneManifestDto();
-    } else if (
-      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
-    ) {
+    } else if (requestType === JobRequestType.HCAPTCHA) {
       dtoCheck = new HCaptchaManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
@@ -900,10 +898,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const manifest = await this.storageService.download(jobEntity.manifestUrl);
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
       const result = await this.storageService.download(finalResultUrl);
 
       if (!result) {
@@ -948,20 +943,14 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   };
 
-  public getOracleType(manifest: any): OracleType {
-    if (
-      (manifest as FortuneManifestDto)?.requestType === JobRequestType.FORTUNE
-    ) {
+  public getOracleType(requestType: JobRequestType): OracleType {
+    if (requestType === JobRequestType.FORTUNE) {
       return OracleType.FORTUNE;
-    } else if (
-      (manifest as CvatManifestDto)?.annotation?.type ===
-        JobRequestType.IMAGE_BOXES ||
-      (manifest as CvatManifestDto)?.annotation?.type ===
-        JobRequestType.IMAGE_POINTS
-    ) {
+    } else if (requestType === JobRequestType.HCAPTCHA) {
+      return OracleType.HCAPTCHA;
+    } else {
       return OracleType.CVAT;
     }
-    return OracleType.HCAPTCHA;
   }
 
   public async processEscrowCancellation(
@@ -1079,14 +1068,9 @@ export class JobService {
       manifestData = JSON.parse(manifestData);
     }
 
-    if (
-      (manifestData as FortuneManifestDto).requestType ===
-      JobRequestType.FORTUNE
-    ) {
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
       manifest = manifestData as FortuneManifestDto;
-    } else if (
-      (manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH
-    ) {
+    } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
       manifest = manifestData as HCaptchaManifestDto;
     } else {
       manifest = manifestData as CvatManifestDto;
@@ -1103,9 +1087,7 @@ export class JobService {
     };
 
     let specificManifestDetails;
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
       manifest = manifest as FortuneManifestDto;
       specificManifestDetails = {
         title: manifest.requesterTitle,
@@ -1113,9 +1095,7 @@ export class JobService {
         requestType: JobRequestType.FORTUNE,
         submissionsRequired: manifest.submissionsRequired,
       };
-    } else if (
-      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
-    ) {
+    } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
       manifest = manifest as HCaptchaManifestDto;
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
