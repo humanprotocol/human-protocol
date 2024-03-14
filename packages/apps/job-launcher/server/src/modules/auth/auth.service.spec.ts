@@ -6,31 +6,25 @@ import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
-import { AuthEntity } from './auth.entity';
 import { UserService } from '../user/user.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserEntity } from '../user/user.entity';
 import { ErrorAuth } from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
-  MOCK_ACCESS_TOKEN_HASHED,
   MOCK_EMAIL,
   MOCK_EXPIRES_IN,
   MOCK_HASHED_PASSWORD,
   MOCK_PASSWORD,
   MOCK_REFRESH_TOKEN,
-  MOCK_REFRESH_TOKEN_HASHED,
 } from '../../../test/constants';
-import { TokenType } from './token.entity';
+import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { PaymentService } from '../payment/payment.service';
 import { UserStatus } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { ApiKeyRepository } from './apikey.repository';
-import { AuthRepository } from './auth.repository';
+import { AuthError } from './auth.error';
 
 jest.mock('@human-protocol/sdk');
 jest.mock('../../common/utils/hcaptcha', () => ({
@@ -46,7 +40,6 @@ describe('AuthService', () => {
   let tokenRepository: TokenRepository;
   let userService: UserService;
   let userRepository: UserRepository;
-  let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
 
@@ -65,16 +58,11 @@ describe('AuthService', () => {
         AuthService,
         UserService,
         {
-          provide: getRepositoryToken(AuthEntity),
-          useClass: Repository,
-        },
-        {
           provide: JwtService,
           useValue: {
             signAsync: jest.fn(),
           },
         },
-        { provide: AuthRepository, useValue: createMock<AuthRepository>() },
         { provide: TokenRepository, useValue: createMock<TokenRepository>() },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
         { provide: ConfigService, useValue: mockConfigService },
@@ -86,8 +74,7 @@ describe('AuthService', () => {
     }).compile();
 
     authService = moduleRef.get<AuthService>(AuthService);
-    authRepository = moduleRef.get(AuthRepository);
-    tokenRepository = moduleRef.get(TokenRepository);
+    tokenRepository = moduleRef.get<TokenRepository>(TokenRepository);
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get<UserRepository>(UserRepository);
     jwtService = moduleRef.get<JwtService>(JwtService);
@@ -169,20 +156,12 @@ describe('AuthService', () => {
       password: MOCK_HASHED_PASSWORD,
     };
 
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    };
-
-    let createUserMock: any, createTokenMock: any;
+    let createUserMock: any;
 
     beforeEach(() => {
       createUserMock = jest.spyOn(userService, 'create');
-      createTokenMock = jest.spyOn(tokenRepository, 'create');
 
       createUserMock.mockResolvedValue(userEntity);
-      createTokenMock.mockResolvedValue(tokenEntity);
     });
 
     afterEach(() => {
@@ -194,8 +173,9 @@ describe('AuthService', () => {
 
       expect(userService.create).toHaveBeenCalledWith(userCreateDto);
       expect(tokenRepository.createUnique).toHaveBeenCalledWith({
-        tokenType: TokenType.EMAIL,
-        userId: 1,
+        type: TokenType.EMAIL,
+        user: userEntity,
+        expiresAt: expect.any(Date),
       });
       expect(result).toBe(userEntity);
     });
@@ -210,36 +190,23 @@ describe('AuthService', () => {
   });
 
   describe('auth', () => {
+    let jwtSignMock: any, findTokenMock: any;
+
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
     };
 
-    const authEntity: Partial<AuthEntity> = {
-      id: 1,
+    const tokenEntity: Partial<TokenEntity> = {
+      uuid: v4(),
+      type: TokenType.REFRESH,
+      user: userEntity as UserEntity,
     };
 
-    let createAuthMock: any;
-    let jwtSignMock: any;
-    let hashTokenMock: any;
-    let logoutMock: any;
     beforeEach(() => {
-      createAuthMock = jest
-        .spyOn(authRepository, 'createUnique' as any)
-        .mockResolvedValueOnce(authEntity);
-
       jwtSignMock = jest
         .spyOn(jwtService, 'signAsync')
-        .mockResolvedValueOnce(MOCK_ACCESS_TOKEN)
-        .mockResolvedValueOnce(MOCK_REFRESH_TOKEN);
-
-      hashTokenMock = jest
-        .spyOn(authService, 'hashToken')
-        .mockReturnValueOnce(MOCK_ACCESS_TOKEN_HASHED)
-        .mockReturnValueOnce(MOCK_REFRESH_TOKEN_HASHED);
-      logoutMock = jest
-        .spyOn(authRepository, 'deleteByUserId' as any)
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce(MOCK_ACCESS_TOKEN);
     });
 
     afterEach(() => {
@@ -247,95 +214,78 @@ describe('AuthService', () => {
     });
 
     it('should create authentication tokens and return them', async () => {
-      const findAuthMock = jest
-        .spyOn(authRepository, 'findOneByUserId' as any)
-        .mockResolvedValueOnce(undefined);
+      findTokenMock = jest
+        .spyOn(tokenRepository, 'findOneByUserIdAndType')
+        .mockResolvedValueOnce(null);
 
       const result = await authService.auth(userEntity as UserEntity);
-
-      expect(findAuthMock).toHaveBeenCalledWith(userEntity.id);
-      expect(createAuthMock).toHaveBeenCalledWith({
-        user: userEntity,
-        refreshToken: MOCK_REFRESH_TOKEN_HASHED,
-        accessToken: MOCK_ACCESS_TOKEN_HASHED,
-      });
-      expect(jwtSignMock).toHaveBeenCalledWith({
-        email: userEntity.email,
-        userId: userEntity.id,
-      });
+      expect(findTokenMock).toHaveBeenCalledWith(
+        userEntity.id,
+        TokenType.REFRESH,
+      );
       expect(jwtSignMock).toHaveBeenLastCalledWith(
         {
           email: userEntity.email,
           userId: userEntity.id,
         },
         {
-          expiresIn: undefined,
+          expiresIn: MOCK_EXPIRES_IN,
         },
       );
-      expect(logoutMock).not.toHaveBeenCalled();
-      expect(hashTokenMock).toHaveBeenCalledWith(MOCK_ACCESS_TOKEN);
-      expect(hashTokenMock).toHaveBeenLastCalledWith(MOCK_REFRESH_TOKEN);
       expect(result).toEqual({
         accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
+        refreshToken: undefined,
       });
     });
 
-    it('should logout, create authentication tokens and return them', async () => {
-      const findAuthMock = jest
-        .spyOn(authRepository, 'findOneByUserId' as any)
-        .mockResolvedValueOnce(authEntity);
+    it('should remove the refresh token if one already exists', async () => {
+      findTokenMock = jest
+        .spyOn(tokenRepository, 'findOneByUserIdAndType')
+        .mockResolvedValueOnce(tokenEntity as TokenEntity);
+      const deleteMock = jest.spyOn(tokenRepository, 'deleteOne');
 
       const result = await authService.auth(userEntity as UserEntity);
 
-      expect(findAuthMock).toHaveBeenCalledWith(userEntity.id);
-      expect(createAuthMock).toHaveBeenCalledWith({
-        user: userEntity,
-        refreshToken: MOCK_REFRESH_TOKEN_HASHED,
-        accessToken: MOCK_ACCESS_TOKEN_HASHED,
-      });
-      expect(jwtSignMock).toHaveBeenCalledWith({
-        email: userEntity.email,
-        userId: userEntity.id,
-      });
+      expect(findTokenMock).toHaveBeenCalledWith(
+        userEntity.id,
+        TokenType.REFRESH,
+      );
       expect(jwtSignMock).toHaveBeenLastCalledWith(
         {
           email: userEntity.email,
           userId: userEntity.id,
         },
         {
-          expiresIn: undefined,
+          expiresIn: MOCK_EXPIRES_IN,
         },
       );
-      expect(logoutMock).toHaveBeenCalled();
-      expect(hashTokenMock).toHaveBeenCalledWith(MOCK_ACCESS_TOKEN);
-      expect(hashTokenMock).toHaveBeenLastCalledWith(MOCK_REFRESH_TOKEN);
+      expect(deleteMock).toHaveBeenCalledWith(tokenEntity);
       expect(result).toEqual({
         accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
+        refreshToken: undefined,
       });
     });
   });
 
   describe('forgotPassword', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-      status: UserStatus.ACTIVE,
-    };
-
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    };
-
-    let createTokenMock: any;
+    let findByEmailMock: any, findTokenMock: any;
+    let userEntity: Partial<UserEntity>, tokenEntity: Partial<TokenEntity>;
 
     beforeEach(() => {
-      createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
+      userEntity = {
+        id: 1,
+        email: 'user@example.com',
+        status: UserStatus.ACTIVE,
+      };
+      tokenEntity = {
+        uuid: v4(),
+        type: TokenType.EMAIL,
+        user: userEntity as UserEntity,
+      };
 
-      createTokenMock.mockResolvedValue(tokenEntity);
+      findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+      findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
+      findByEmailMock.mockResolvedValue(userEntity);
     });
 
     afterEach(() => {
@@ -343,63 +293,40 @@ describe('AuthService', () => {
     });
 
     it('should throw NotFound exception if user is not found', () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(undefined);
-
+      findByEmailMock.mockResolvedValue(null);
       expect(
         authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(AuthError);
     });
 
     it('should throw Unauthorized exception if user is not active', () => {
-      userService.getByEmail = jest
-        .fn()
-        .mockResolvedValueOnce({ ...userEntity, status: UserStatus.PENDING });
-
+      userEntity.status = UserStatus.INACTIVE;
+      findByEmailMock.mockResolvedValue(userEntity);
       expect(
         authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(UnauthorizedException);
+      ).rejects.toThrow(AuthError);
     });
 
     it('should remove existing token if it exists', async () => {
-      const userEntity = {
-        id: 1,
-        status: UserStatus.ACTIVE,
-      } as UserEntity;
-
-      userService.getByEmail = jest.fn().mockResolvedValue(userEntity);
-
-      const existingToken = {
-        id: 2,
-        userId: userEntity.id,
-        tokenType: TokenType.PASSWORD,
-      };
-      tokenRepository.findOneByUuidAndTokenType = jest
-        .fn()
-        .mockResolvedValue(existingToken);
-
+      findTokenMock.mockResolvedValue(tokenEntity);
       await authService.forgotPassword({ email: 'user@example.com' });
 
       expect(tokenRepository.deleteOne).toHaveBeenCalled();
     });
 
     it('should create a new token and send email', async () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
-
       sendGridService.sendEmail = jest.fn();
       const email = 'user@example.com';
 
       await authService.forgotPassword({ email });
 
-      expect(createTokenMock).toHaveBeenCalled();
       expect(sendGridService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           personalizations: [
             {
               dynamicTemplateData: {
                 service_name: SERVICE_NAME,
-                url: expect.stringContaining(
-                  'undefined/reset-password?token=mocked-uuid',
-                ),
+                url: expect.stringContaining('undefined/reset-password?token='),
               },
               to: email,
             },
@@ -416,24 +343,25 @@ describe('AuthService', () => {
       email: 'user@example.com',
     };
 
-    const tokenEntity = {
+    const tokenEntity: Partial<TokenEntity> = {
       uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
+      type: TokenType.EMAIL,
+      user: userEntity as UserEntity,
     };
 
     let findTokenMock: any;
 
-    beforeEach(() => {
-      findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndTokenType');
+    beforeAll(() => {
+      findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
+      sendGridService.sendEmail = jest.fn();
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it('should throw NotFound exception if token is not found', () => {
-      findTokenMock.mockResolvedValueOnce(undefined);
+    it('should throw an error if token is not found', () => {
+      findTokenMock.mockResolvedValue(null);
 
       expect(
         authService.restorePassword({
@@ -441,12 +369,27 @@ describe('AuthService', () => {
           password: 'password',
           hCaptchaToken: 'token',
         }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(AuthError);
+    });
+
+    it('should throw an error if token is expired', () => {
+      tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
+      findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
+
+      expect(
+        authService.restorePassword({
+          token: 'token',
+          password: 'password',
+          hCaptchaToken: 'token',
+        }),
+      ).rejects.toThrow(AuthError);
     });
 
     it('should update password and send email', async () => {
-      findTokenMock.mockResolvedValueOnce(tokenEntity);
-
+      tokenEntity.expiresAt = new Date(
+        new Date().setDate(new Date().getDate() + 1),
+      );
+      findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
       userService.updatePassword = jest.fn();
       sendGridService.sendEmail = jest.fn();
 
@@ -468,55 +411,67 @@ describe('AuthService', () => {
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
+      status: UserStatus.PENDING,
     };
 
-    const tokenEntity = {
+    const tokenEntity: Partial<TokenEntity> = {
       uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
+      type: TokenType.EMAIL,
+      user: userEntity as UserEntity,
     };
 
     let findTokenMock: any;
 
-    beforeEach(() => {
-      findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndTokenType');
+    beforeAll(() => {
+      findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it('should throw NotFound exception if token is not found', () => {
-      findTokenMock.mockResolvedValueOnce(undefined);
-
+    it('should throw an error if token is not found', () => {
+      findTokenMock.mockResolvedValue(null);
       expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
-        NotFoundException,
+        AuthError,
+      );
+    });
+    it('should throw an error if token is expired', () => {
+      tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
+      findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
+      expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
+        AuthError,
       );
     });
 
     it('should activate user', async () => {
-      findTokenMock.mockResolvedValueOnce(tokenEntity);
-
+      tokenEntity.expiresAt = new Date(
+        new Date().setDate(new Date().getDate() + 1),
+      );
+      findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
       userRepository.updateOne = jest.fn();
 
       await authService.emailVerification({ token: 'token' });
 
       expect(userRepository.updateOne).toHaveBeenCalled();
-      expect(tokenRepository.deleteOne).toHaveBeenCalled();
-      expect(tokenEntity.user.status).toBe(UserStatus.ACTIVE);
+      expect(tokenEntity.user?.status).toBe(UserStatus.ACTIVE);
     });
   });
 
   describe('resendEmailVerification', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-      status: UserStatus.PENDING,
-    };
-
-    let createTokenMock: any;
+    let findByEmailMock: any,
+      findTokenMock: any,
+      createTokenMock: any,
+      userEntity: Partial<UserEntity>;
 
     beforeEach(() => {
+      userEntity = {
+        id: 1,
+        email: 'user@example.com',
+        status: UserStatus.PENDING,
+      };
+      findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+      findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
       createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
     });
 
@@ -524,17 +479,24 @@ describe('AuthService', () => {
       jest.clearAllMocks();
     });
 
-    it('should throw NotFound exception if user is not found', () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(undefined);
-
+    it('should throw an error if user is not found', () => {
+      findByEmailMock.mockResolvedValue(null);
       expect(
         authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(AuthError);
+    });
+
+    it('should throw an error if user is not pending', () => {
+      userEntity.status = UserStatus.ACTIVE;
+      findByEmailMock.mockResolvedValue(userEntity);
+      expect(
+        authService.resendEmailVerification({ email: 'user@example.com' }),
+      ).rejects.toThrow(AuthError);
     });
 
     it('should create token and send email', async () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
-
+      findByEmailMock.mockResolvedValue(userEntity);
+      findTokenMock.mockResolvedValueOnce(null);
       sendGridService.sendEmail = jest.fn();
       const email = 'user@example.com';
 
@@ -547,7 +509,7 @@ describe('AuthService', () => {
             {
               dynamicTemplateData: {
                 service_name: SERVICE_NAME,
-                url: expect.stringContaining('/verify?token=mocked-uuid'),
+                url: expect.stringContaining('/verify?token='),
               },
               to: email,
             },

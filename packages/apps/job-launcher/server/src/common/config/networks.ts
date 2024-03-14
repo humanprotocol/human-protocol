@@ -61,6 +61,13 @@ export const networkMap: NetworkMapDto = {
       hmt: NETWORKS[ChainId.BSC_TESTNET]?.hmtAddress,
     },
   },
+  localhost: {
+    chainId: ChainId.LOCALHOST,
+    rpcUrl: 'http://0.0.0.0:8545',
+    tokens: {
+      hmt: NETWORKS[ChainId.LOCALHOST]?.hmtAddress,
+    },
+  },
 };
 
 export const networks = Object.values(networkMap).map((network) => network);

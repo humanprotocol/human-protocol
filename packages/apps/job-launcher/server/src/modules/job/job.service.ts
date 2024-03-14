@@ -696,12 +696,10 @@ export class JobService {
     if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
-      const publicKeys: string[] = [
-        await kvstore.get(signer.address, KVStoreKeys.publicKey),
-      ];
+      const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
       const oracleAddresses = this.getOracleAddresses(requestType);
       for (const address in Object.values(oracleAddresses)) {
-        const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
+        const publicKey = await kvstore.getPublicKey(address);
         if (publicKey) publicKeys.push(publicKey);
       }
 
@@ -996,11 +994,13 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
-    if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
+    if (
+      dto.eventType !==
+      (EventType.ESCROW_FAILED || EventType.TASK_CREATION_FAILED)
+    ) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }
-
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
       dto.escrowAddress,
@@ -1016,8 +1016,24 @@ export class JobService {
       throw new ConflictException(ErrorJob.NotLaunched);
     }
 
+    if (!dto.eventData) {
+      this.logger.log('Event data is undefined.', JobService.name);
+      throw new BadRequestException(
+        'Event data is required but was not provided.',
+      );
+    }
+
+    const reason = dto.eventData.reason;
+
+    if (!reason) {
+      this.logger.log('Reason is undefined in event data.', JobService.name);
+      throw new BadRequestException(
+        'Reason is required in event data but was not provided.',
+      );
+    }
+
     jobEntity.status = JobStatus.FAILED;
-    jobEntity.failedReason = dto.reason!;
+    jobEntity.failedReason = reason!;
     await this.jobRepository.updateOne(jobEntity);
   }
 
@@ -1228,5 +1244,29 @@ export class JobService {
       updatedJob = await this.jobRepository.updateOne(job);
     }
     return updatedJob;
+  }
+
+  public async completeJob(dto: WebhookDataDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      dto.chainId,
+      dto.escrowAddress,
+    );
+
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    // If job status already completed by getDetails do nothing
+    if (jobEntity.status === JobStatus.COMPLETED) {
+      return;
+    }
+    if (jobEntity.status !== JobStatus.LAUNCHED) {
+      this.logger.log(ErrorJob.NotLaunched, JobService.name);
+      throw new ConflictException(ErrorJob.NotLaunched);
+    }
+
+    jobEntity.status = JobStatus.COMPLETED;
+    await this.jobRepository.updateOne(jobEntity);
   }
 }

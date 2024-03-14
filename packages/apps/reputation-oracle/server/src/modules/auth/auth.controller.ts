@@ -26,8 +26,6 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
-  Web3PreSignUpDto,
-  Web3PreSignUpPayloadDto,
   Web3SignInDto,
   Web3SignUpDto,
 } from './auth.dto';
@@ -105,29 +103,6 @@ export class AuthJwtController {
   })
   public async web3SignIn(@Body() data: Web3SignInDto): Promise<AuthDto> {
     return this.authService.web3Signin(data);
-  }
-
-  @Public()
-  @Post('/web3/pre-signup')
-  @ApiOperation({
-    summary: 'Web3 User Pre-signup',
-    description:
-      'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms.',
-  })
-  @ApiBody({ type: Web3PreSignUpDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Typed structured data object generated successfully',
-    type: Web3PreSignUpPayloadDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  public async web3PreSignUp(
-    @Body() data: Web3PreSignUpDto,
-  ): Promise<Web3PreSignUpPayloadDto> {
-    return this.authService.web3PreSignup(data);
   }
 
   @Public()

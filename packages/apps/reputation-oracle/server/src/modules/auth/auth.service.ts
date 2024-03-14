@@ -20,8 +20,6 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
-  Web3PreSignUpPayloadDto,
-  Web3PreSignUpDto,
   Web3SignInDto,
   Web3SignUpDto,
 } from './auth.dto';
@@ -32,14 +30,10 @@ import { ConfigNames } from '../../common/config';
 import { verifySignature } from '../../common/utils/signature';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import {
-  WEB3_SIGNUP_MESSAGE,
-  SENDGRID_TEMPLATES,
-  SERVICE_NAME,
-} from '../../common/constants';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
 import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
-import { Web3Env } from '../../common/enums/web3';
+import { SignatureType, Web3Env } from '../../common/enums/web3';
 
 @Injectable()
 export class AuthService {
@@ -282,26 +276,13 @@ export class AuthService {
     return this.hashToken(token) === hashedToken;
   }
 
-  public prepareWeb3PreSignUpPayload(
-    data: Web3PreSignUpDto,
-  ): Web3PreSignUpPayloadDto {
-    return {
-      from: data.address,
-      to: this.web3Service.getOperatorAddress(),
-      contents: WEB3_SIGNUP_MESSAGE,
-    };
-  }
-
-  public async web3PreSignup(
-    data: Web3PreSignUpDto,
-  ): Promise<Web3PreSignUpPayloadDto> {
-    return this.prepareWeb3PreSignUpPayload(data);
-  }
-
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = this.prepareWeb3PreSignUpPayload(data);
+    const preSignUpData = this.web3Service.prepareSignatureBody(
+      SignatureType.SIGNUP,
+      data.address,
+    );
 
-    const verified = await verifySignature(preSignUpData, data.signature, [
+    const verified = verifySignature(preSignUpData, data.signature, [
       data.address,
     ]);
 
@@ -313,11 +294,11 @@ export class AuthService {
     const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
     if (currentWeb3Env === Web3Env.MAINNET) {
       kvstore = await KVStoreClient.build(
-        await this.web3Service.getSigner(ChainId.POLYGON),
+        this.web3Service.getSigner(ChainId.POLYGON),
       );
     } else {
       kvstore = await KVStoreClient.build(
-        await this.web3Service.getSigner(ChainId.POLYGON_MUMBAI),
+        this.web3Service.getSigner(ChainId.POLYGON_MUMBAI),
       );
     }
 
@@ -348,7 +329,7 @@ export class AuthService {
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByAddress(data.address);
 
-    const verified = await verifySignature(userEntity.nonce, data.signature, [
+    const verified = verifySignature(userEntity.nonce, data.signature, [
       data.address,
     ]);
 

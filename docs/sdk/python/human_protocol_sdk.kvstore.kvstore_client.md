@@ -86,9 +86,9 @@ Gets the value of a key-value pair in the contract.
   role = kvstore_client.get('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'Role')
   ```
 
-#### get_url(address, key='url')
+#### get_file_url_and_verify_hash(address, key='url')
 
-Gets the URL value of the given entity.
+Gets the URL value of the given entity, and verify its hash.
 
 * **Parameters:**
   * **address** (`str`) – Address from which to get the URL value.
@@ -106,12 +106,38 @@ Gets the URL value of the given entity.
   w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
   kvstore_client = KVStoreClient(w3)
 
-  url = kvstore_client.get_url(
+  url = kvstore_client.get_file_url_and_verify_hash(
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
-  linkedin_url = kvstore_client.get_url(
+  linkedin_url = kvstore_client.get_file_url_and_verify_hash(
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-      'linkedinUrl'
+      'linkedin_url'
+  )
+  ```
+* **Return type:**
+  `str`
+
+#### get_public_key(address)
+
+Gets the public key of the given entity, and verify its hash.
+
+* **Parameters:**
+  **address** (`str`) – Address from which to get the public key.
+* **Return public_key:**
+  The public key of the given address if exists, and the content is valid
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.kvstore import KVStoreClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  kvstore_client = KVStoreClient(w3)
+
+  public_key = kvstore_client.get_public_key(
+      '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
 * **Return type:**
@@ -192,9 +218,9 @@ Sets multiple key-value pairs in the contract.
   kvstore_client.set_bulk(keys, values)
   ```
 
-#### set_url(url, key='url', tx_options=None)
+#### set_file_url_and_hash(url, key='url', tx_options=None)
 
-Sets a URL value for the address that submits the transaction.
+Sets a URL value for the address that submits the transaction, and its hash.
 
 * **Parameters:**
   * **url** (`str`) – URL to set
@@ -228,8 +254,8 @@ Sets a URL value for the address that submits the transaction.
   (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
   kvstore_client = KVStoreClient(w3)
 
-  kvstore_client.set_url('http://localhost')
-  kvstore_client.set_url('https://linkedin.com/me', 'linkedinUrl')
+  kvstore_client.set_file_url_and_hash('http://localhost')
+  kvstore_client.set_file_url_and_hash('https://linkedin.com/me', 'linkedin_url')
   ```
 
 ### *exception* human_protocol_sdk.kvstore.kvstore_client.KVStoreClientError

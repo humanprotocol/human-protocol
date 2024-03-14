@@ -47,8 +47,14 @@ const config: HardhatUserConfig = {
         version: '0.6.2',
       },
       {
-        version: '0.8.9',
-        settings: { optimizer: { enabled: true, runs: 1000000 } },
+        version: '0.8.23',
+        settings: {
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 10,
+          },
+        },
       },
     ],
   },
@@ -64,6 +70,7 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       chainId: 1338,
+      initialBaseFeePerGas: 0,
     },
     mainnet: {
       chainId: 1,
@@ -184,7 +191,7 @@ const config: HardhatUserConfig = {
       runOnCompile: true,
       clear: true,
       flat: true,
-      only: ['legacy'],
+      only: ['contracts/legacy/[a-zA-Z]*.sol'],
       spacing: 2,
       format: 'json',
     },

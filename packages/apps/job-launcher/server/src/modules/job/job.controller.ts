@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   Patch,
   Post,
@@ -20,7 +19,7 @@ import {
   ApiBody,
   ApiResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
+import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import {
   JobFortuneDto,
@@ -34,11 +33,8 @@ import {
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
-import { Public, ApiKey } from '../../common/decorators';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
-import { Role } from '../../common/enums/role';
-import { WebhookDataDto } from '../webhook/webhook.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -64,6 +60,10 @@ export class JobController {
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/fortune')
   @ApiKey()
@@ -93,8 +93,8 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/cvat')
   public async createCvatJob(
@@ -104,6 +104,28 @@ export class JobController {
     return this.jobService.createJob(req.user.id, data.type, data);
   }
 
+  @ApiOperation({
+    summary: 'Create a hCaptcha job',
+    description: 'Endpoint to create a new hCaptcha job.',
+  })
+  @ApiBody({ type: JobCaptchaDto })
+  @ApiResponse({
+    status: 200,
+    description: 'ID of the created hCaptcha job.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
   @Post('/hCaptcha')
   public async createCaptchaJob(
     @Request() req: RequestWithUser,
@@ -177,6 +199,10 @@ export class JobController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
@@ -201,39 +227,16 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
   @Patch('/cancel/:id')
   public async cancelJob(
     @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
   ): Promise<void> {
     await this.jobService.requestToCancelJob(req.user.id, params.id);
-    return;
-  }
-
-  @ApiOperation({
-    summary: 'Handle escrow failed webhook',
-    description: 'Endpoint to handle an escrow failed webhook.',
-  })
-  @Public()
-  @UseGuards(new SignatureAuthGuard([Role.Exchange]))
-  @ApiResponse({
-    status: 200,
-    description: 'Escrow failed webhook handled successfully.',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @Post('/escrow-failed-webhook')
-  public async handleEscrowFailedWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: WebhookDataDto,
-  ): Promise<void> {
-    await this.jobService.escrowFailedWebhook(data);
     return;
   }
 

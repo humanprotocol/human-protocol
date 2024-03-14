@@ -1,10 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsString, IsObject } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
 import { EventType } from '../../common/enums/webhook';
 
-export class EventData {
+export class AssignmentRejection {
   @ApiProperty({ name: 'assignee_id' })
   @IsString()
   assigneeId?: string;
@@ -13,6 +13,22 @@ export class EventData {
   @IsString()
   reason?: string;
 }
+
+export class RejectionEventData {
+  @ApiProperty({
+    type: [AssignmentRejection],
+  })
+  @IsArray()
+  public assignments: AssignmentRejection[];
+}
+
+export class SolutionEventData {
+  @ApiProperty({ name: 'solutions_url' })
+  @IsString()
+  solutionsUrl: string;
+}
+
+export type EventData = RejectionEventData | SolutionEventData;
 
 export class WebhookDto {
   @ApiProperty({
@@ -35,9 +51,8 @@ export class WebhookDto {
   public eventType: EventType;
 
   @ApiProperty({
-    type: [EventData],
     name: 'event_data',
   })
-  @IsArray()
-  public eventData?: EventData[];
+  @IsObject()
+  public eventData?: EventData;
 }

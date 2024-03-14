@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { PayoutsResultDto } from './payout.dto';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 
 import {
@@ -38,12 +37,12 @@ export class PayoutService {
    * and initiates bulk payouts through the escrow client.
    * @param chainId The ID of the blockchain chain.
    * @param escrowAddress The address of the escrow contract.
-   * @returns {Promise<PayoutsResultDto>} An object containing the URL for results and a boolean indicating if checks passed.
+   * @returns {Promise<string>} URL for results.
    */
   public async executePayouts(
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<PayoutsResultDto> {
+  ): Promise<string> {
     this.logger.log('Payouts START');
 
     const signer = this.web3Service.getSigner(chainId);
@@ -79,10 +78,7 @@ export class PayoutService {
 
     this.logger.log('Payouts STOP');
 
-    return {
-      url: results.url,
-      checkPassed: results.checkPassed,
-    };
+    return results.url;
   }
 
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
@@ -167,7 +163,7 @@ export class PayoutService {
       BigInt(recipients.length);
     const amounts = new Array(recipients.length).fill(payoutAmount);
 
-    return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
+    return { recipients, amounts, url, hash };
   }
 
   /**
@@ -216,6 +212,6 @@ export class PayoutService {
     const recipients = [...accumulatedBounties.keys()];
     const amounts = [...accumulatedBounties.values()];
 
-    return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
+    return { recipients, amounts, url, hash };
   }
 }
