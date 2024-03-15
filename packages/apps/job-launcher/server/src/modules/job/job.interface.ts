@@ -9,3 +9,17 @@ export interface RequestAction {
     fundAmount: number,
   ) => Promise<any>;
 }
+
+export interface EscrowAction {
+  getTrustedHandlers: () => string[];
+}
+
+export interface OracleAction {
+  getOracleAddresses: () => OracleAddresses;
+}
+
+export interface OracleAddresses {
+  exchangeOracle: string;
+  recordingOracle: string;
+  reputationOracle: string;
+}
