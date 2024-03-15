@@ -27,7 +27,7 @@ export class StatisticsController {
   public getOracleStatistics(
     @Param('url') oracleUrl: string,
   ): Promise<OracleStatisticsResponse> {
-    const command = { oracleUrl: oracleUrl } as OracleStatisticsCommand;
+    const command = { exchangeOracleUrl: oracleUrl } as OracleStatisticsCommand;
     return this.service.getOracleStats(command);
   }
 
@@ -40,7 +40,7 @@ export class StatisticsController {
     @Headers('authorization') token: string,
   ): Promise<UserStatisticsResponse> {
     const command: UserStatisticsCommand = {
-      oracleUrl: oracleUrl,
+      exchangeOracleUrl: oracleUrl,
       token: token,
     } as UserStatisticsCommand;
     return this.service.getUserStats(command);

@@ -10,26 +10,26 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { ExternalApiGateway } from '../../integrations/external-api/external-api.gateway';
+import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 
 @Injectable()
 export class StatisticsService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private externalApiGateway: ExternalApiGateway,
+    private gateway: ExchangeOracleGateway,
     private configService: EnvironmentConfigService,
   ) {}
   async getOracleStats(
     command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
-    const url = command.oracleUrl;
+    const url = command.exchangeOracleUrl;
     const cachedStatistics: OracleStatisticsResponse | undefined =
       await this.cacheManager.get(url);
     if (cachedStatistics) {
       return cachedStatistics;
     }
     const response: OracleStatisticsResponse =
-      await this.externalApiGateway.fetchOracleStatistics(command);
+      await this.gateway.fetchOracleStatistics(command);
     await this.cacheManager.set(
       url,
       response,
@@ -40,13 +40,13 @@ export class StatisticsService {
   async getUserStats(
     command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
-    const userCacheKey = command.oracleUrl + command.token;
+    const userCacheKey = command.exchangeOracleUrl + command.token;
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
     if (cachedStatistics) {
       return cachedStatistics;
     }
-    const response = this.externalApiGateway.fetchUserStatistics(command);
+    const response = await this.gateway.fetchUserStatistics(command);
     await this.cacheManager.set(
       userCacheKey,
       response,

@@ -22,10 +22,10 @@ export class OracleDiscoveryController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
   @ApiTags('Oracle-Discovery')
-  @Get('/discovery/oracles')
+  @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @UsePipes(new ValidationPipe())
-  public oracleDiscovery(
+  public getOracles(
     @Body() oracleDiscoveryDto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryResponse[]> {
     const oracleDiscoveryCommand = this.mapper.map(

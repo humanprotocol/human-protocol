@@ -20,10 +20,10 @@ const WORKERS_AMOUNT = 3409;
 const ASSIGNMENTS_COMPLETED_ORACLE = 154363;
 const ASSIGNMENTS_REJECTED_ORACLE = 231;
 const ASSIGNMENTS_EXPIRED_ORACLE = 434;
-const ORACLE_URL = 'https://test.oracle.com';
+const EXCHANGE_ORACLE_URL = 'https://test.oracle.com';
 const TOKEN = 'test-token';
 export const statisticsToken = TOKEN;
-export const statisticsOracleUrl = ORACLE_URL;
+export const statisticsExchangeOracleUrl = EXCHANGE_ORACLE_URL;
 export const userStatsResponseFixture: UserStatisticsResponse = {
   assignments_amount: ASSIGNMENTS_AMOUNT,
   submissions_sent: SUBMISSIONS_SENT,
@@ -43,19 +43,19 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
 };
 
 export const userStatsCommandFixture: UserStatisticsCommand = {
-  oracleUrl: ORACLE_URL,
+  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
   token: TOKEN,
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {
-  oracleUrl: ORACLE_URL,
+  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
 };
 export const requestContextFixture = {
   token: TOKEN,
 };
 export const userStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
-  url: `${ORACLE_URL}/stats/assignment`,
+  url: `${EXCHANGE_ORACLE_URL}/stats/assignment`,
   headers: {
     Authorization: `Bearer ${TOKEN}`,
   },
@@ -63,5 +63,5 @@ export const userStatsOptionsFixture: AxiosRequestConfig = {
 
 export const oracleStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
-  url: `${ORACLE_URL}/stats`,
+  url: `${EXCHANGE_ORACLE_URL}/stats`,
 };
