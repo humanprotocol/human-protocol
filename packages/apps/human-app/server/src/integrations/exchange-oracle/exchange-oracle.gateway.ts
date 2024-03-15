@@ -30,7 +30,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 
 @Injectable()
-export class ExternalApiGateway {
+export class ExchangeOracleGateway {
   constructor(
     private httpService: HttpService,
     @InjectMapper() private mapper: Mapper,
@@ -46,7 +46,7 @@ export class ExternalApiGateway {
   ): Promise<UserStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: 'GET',
-      url: `${command.oracleUrl}/stats/assignment`,
+      url: `${command.exchangeOracleUrl}/stats/assignment`,
       headers: {
         Authorization: `Bearer ${command.token}`,
       },
@@ -58,7 +58,7 @@ export class ExternalApiGateway {
   ): Promise<OracleStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: 'GET',
-      url: `${command.oracleUrl}/stats`,
+      url: `${command.exchangeOracleUrl}/stats`,
     };
     return this.callExternalHttpUtilRequest<OracleStatisticsResponse>(options);
   }

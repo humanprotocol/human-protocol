@@ -21,7 +21,7 @@ import {
 } from '../../modules/jobs-discovery/interfaces/jobs-discovery.interface';
 
 @Injectable()
-export class ExternalApiProfile extends AutomapperProfile {
+export class ExchangeOracleProfile extends AutomapperProfile {
   constructor(@InjectMapper() mapper: Mapper) {
     super(mapper);
   }

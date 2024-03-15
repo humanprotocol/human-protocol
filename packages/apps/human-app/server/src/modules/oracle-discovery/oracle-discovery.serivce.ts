@@ -20,29 +20,17 @@ export class OracleDiscoveryService {
     let data: OracleDiscoveryResponse[] | undefined =
       await this.cacheManager.get(command.address);
     if (!data) {
-      data = await this.getOperatorsForOracleDiscovery(command);
-      await this.setOperatorsForAddress(command.address, data);
+      data = await OperatorUtils.getReputationNetworkOperators(
+        command.chainId,
+        command.address,
+        command.role,
+      );
+      await this.cacheManager.set(
+        command.address,
+        data,
+        this.configService.cacheTtlOracleDiscovery,
+      );
     }
     return data;
-  }
-
-  async getOperatorsForOracleDiscovery(
-    cmd: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryResponse[]> {
-    return OperatorUtils.getReputationNetworkOperators(
-      cmd.chainId,
-      cmd.address,
-      cmd.role,
-    );
-  }
-  async setOperatorsForAddress(
-    address: string,
-    operators: OracleDiscoveryResponse[],
-  ): Promise<void> {
-    return this.cacheManager.set(
-      address,
-      operators,
-      this.configService.cacheTtlOracleDiscovery,
-    );
   }
 }

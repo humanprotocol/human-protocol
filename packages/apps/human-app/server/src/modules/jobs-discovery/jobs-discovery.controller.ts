@@ -17,12 +17,12 @@ export class JobsDiscoveryController {
   ) {}
 
   @ApiTags('Jobs-Discovery')
-  @Get('/discovery/jobs')
+  @Get('/jobs')
   @ApiOperation({
     summary:
       'Retrieve a list of filtered available jobs for passed Exchange Oracle url',
   })
-  public async discoverJobs(
+  public async getJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
     @Headers('authorization') token: string,
   ): Promise<JobsDiscoveryResponse> {

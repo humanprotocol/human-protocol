@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
-import { ExternalApiGateway } from '../external-api.gateway';
+import { ExchangeOracleGateway } from '../exchange-oracle.gateway';
 import {
   oracleStatsCommandFixture,
-  statisticsOracleUrl,
+  statisticsExchangeOracleUrl,
   userStatsCommandFixture,
 } from '../../../modules/statistics/spec/statistics.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import nock, { RequestBodyMatcher } from 'nock';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import {
   jobAssignmentCommandFixture,
   jobAssignmentDataFixture,
@@ -17,14 +17,15 @@ import {
   jobsFetchParamsCommandFixture,
   jobsFetchParamsDataFixtureAsString,
 } from '../../../modules/job-assignment/spec/job-assignment.fixtures';
-import { ExternalApiProfile } from '../external-api.mapper';
+import { ExchangeOracleProfile } from '../exchange-oracle.mapper';
 import {
   jobsDiscoveryParamsCommandFixture,
   paramsDataFixtureAsString,
 } from '../../../modules/jobs-discovery/spec/jobs-discovery.fixtures';
+import { GoneException, HttpException } from '@nestjs/common';
 
-describe('ExternalApiGateway', () => {
-  let gateway: ExternalApiGateway;
+describe('ExchangeOracleApiGateway', () => {
+  let gateway: ExchangeOracleGateway;
   let httpService: HttpService;
 
   beforeEach(async () => {
@@ -35,8 +36,8 @@ describe('ExternalApiGateway', () => {
         }),
       ],
       providers: [
-        ExternalApiProfile,
-        ExternalApiGateway,
+        ExchangeOracleProfile,
+        ExchangeOracleGateway,
         {
           provide: HttpService,
           useValue: {
@@ -46,7 +47,7 @@ describe('ExternalApiGateway', () => {
       ],
     }).compile();
 
-    gateway = module.get<ExternalApiGateway>(ExternalApiGateway);
+    gateway = module.get<ExchangeOracleGateway>(ExchangeOracleGateway);
     httpService = module.get<HttpService>(HttpService);
   });
 
@@ -57,20 +58,48 @@ describe('ExternalApiGateway', () => {
   describe('fetchUserStatistics', () => {
     it('should successfully call the requested url for user statistics', async () => {
       const command = userStatsCommandFixture;
-      nock(statisticsOracleUrl)
+      nock(statisticsExchangeOracleUrl)
         .get('/stats/assignment')
         .matchHeader('Authorization', `Bearer ${command.token}`)
         .reply(200);
       await gateway.fetchUserStatistics(command);
       expect(httpService.request).toHaveBeenCalled();
     });
+    it('should handle errors on fetchUserStatistics', async () => {
+      const command = {
+        exchangeOracleUrl: 'https://example.com',
+        token: 'dummyToken',
+      };
+      jest
+        .spyOn(httpService, 'request')
+        .mockReturnValue(
+          throwError(() => new HttpException('Service Unavailable', 503)),
+        );
+
+      await expect(gateway.fetchUserStatistics(command)).rejects.toThrow(
+        HttpException,
+      );
+    });
   });
   describe('fetchOracleStatistics', () => {
     it('should successfully call the requested url for oracle statistics', async () => {
       const command = oracleStatsCommandFixture;
-      nock(statisticsOracleUrl).get('/stats').reply(200);
+      nock(statisticsExchangeOracleUrl).get('/stats').reply(200);
       await gateway.fetchOracleStatistics(command);
       expect(httpService.request).toHaveBeenCalled();
+    });
+    it('should handle errors on fetchOracleStatistics', async () => {
+      const command = {
+        exchangeOracleUrl: 'https://example.com',
+        token: 'dummyToken',
+      };
+      jest
+        .spyOn(httpService, 'request')
+        .mockReturnValue(throwError(() => new GoneException()));
+
+      await expect(gateway.fetchUserStatistics(command)).rejects.toThrow(
+        GoneException,
+      );
     });
   });
   describe('fetchAssignedJobs', () => {

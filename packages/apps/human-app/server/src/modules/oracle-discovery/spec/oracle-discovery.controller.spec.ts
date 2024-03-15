@@ -49,7 +49,7 @@ describe('OracleDiscoveryController', () => {
         role: 'Exchange Oracle',
       };
       const result: OracleDiscoveryResponse[] =
-        await controller.oracleDiscovery(dto);
+        await controller.getOracles(dto);
       const expectedCommand = {
         chainId: ChainId.POLYGON_MUMBAI,
         address: dto.address,

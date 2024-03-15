@@ -57,7 +57,7 @@ describe('JobsDiscoveryController', () => {
     it('should call service processJobsDiscovery method with proper fields set', async () => {
       const dto = dtoFixture;
       const command = jobsDiscoveryParamsCommandFixture;
-      await controller.discoverJobs(dto, jobDiscoveryToken);
+      await controller.getJobs(dto, jobDiscoveryToken);
       expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
         command,
       );
