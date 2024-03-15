@@ -27,7 +27,9 @@ contract WormholeMock {
         address,
         bytes memory,
         uint256,
-        uint256
+        uint256,
+        uint16,
+        address
     ) external payable returns (uint64 sequence) {
         return 100;
     }
