@@ -31,6 +31,7 @@ export class ApiKeyGuard implements CanActivate {
               Number(apiKeyId),
               apiKey,
             );
+
           if (userWithApiKey) {
             request.user = userWithApiKey;
             return true;
@@ -42,7 +43,6 @@ export class ApiKeyGuard implements CanActivate {
         throw new UnauthorizedException('Invalid API Key format');
       }
     }
-
     return false;
   }
 }

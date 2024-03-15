@@ -1,6 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -34,25 +36,37 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
       // see https://github.com/nestjs/passport/blob/master/lib/auth.guard.ts
       return (await super.canActivate(context)) as boolean;
     } catch (jwtError) {
-      // If JWT fails, try API key authentication if it's allowed for this route
-      const useApiKey = this.reflector.getAllAndOverride<boolean>('isApiKey', [
-        context.getHandler(),
-        context.getClass(),
-      ]);
+      switch (jwtError?.response?.statusCode) {
+        case HttpStatus.UNAUTHORIZED:
+          if (jwtError?.response?.message === 'Unauthorized') {
+            throw new UnauthorizedException('Unauthorized');
+          }
+          break;
+        case HttpStatus.FORBIDDEN:
+          if (jwtError?.response?.message === 'Forbidden') {
+            throw new ForbiddenException('Forbidden');
+          }
+          break;
+        default:
+          const useApiKey = this.reflector.getAllAndOverride<boolean>(
+            'isApiKey',
+            [context.getHandler(), context.getClass()],
+          );
+          if (useApiKey) {
+            const apiKeyGuard = await this.moduleRef.create(ApiKeyGuard);
 
-      if (useApiKey) {
-        const apiKeyGuard = await this.moduleRef.create(ApiKeyGuard);
-        try {
-          return await apiKeyGuard.canActivate(context);
-        } catch (apiKeyError) {
-          // If API key also fails, log the error and throw an UnauthorizedException
-          console.error('API key auth failed:', apiKeyError);
-        }
+            try {
+              return await apiKeyGuard.canActivate(context);
+            } catch (apiKeyError) {
+              // If API key also fails, log the error and throw an UnauthorizedException
+              console.error('API key auth failed:', apiKeyError);
+            }
+          }
+
+          throw new UnauthorizedException('Unauthorized');
       }
 
-      // If both JWT and API key authentication failed, log the JWT error and throw an UnauthorizedException
-      console.error('JWT auth failed:', jwtError);
-      throw new UnauthorizedException('Unauthorized');
+      return false;
     }
   }
 }
