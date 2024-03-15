@@ -79,9 +79,9 @@ export class JobDto {
   jobType: string;
   status: JobStatus;
   jobDescription?: string;
-  reward_amount?: number;
-  reward_token?: string;
-  created_at?: number;
+  rewardAmount?: number;
+  rewardToken?: string;
+  createdAt?: number;
 
   constructor(
     escrowAddress: string,

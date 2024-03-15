@@ -99,7 +99,7 @@ export class JobService {
 
         if (data.fields) {
           if (data.fields.includes(JobFieldName.CreatedAt)) {
-            job.created_at = entity.createdAt.getTime();
+            job.createdAt = entity.createdAt.getTime();
           }
           if (
             data.fields.includes(JobFieldName.JobDescription) ||
@@ -114,11 +114,11 @@ export class JobService {
               job.jobDescription = manifest.requesterDescription;
             }
             if (data.fields.includes(JobFieldName.RewardAmount)) {
-              job.reward_amount =
+              job.rewardAmount =
                 manifest.fundAmount / manifest.submissionsRequired;
             }
             if (data.fields.includes(JobFieldName.RewardToken)) {
-              job.reward_token = TOKEN;
+              job.rewardToken = TOKEN;
             }
           }
         }
