@@ -1,24 +1,23 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../../user/user.entity';
 import { RESEND_EMAIL_VERIFICATION_PATH } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
-import { ConfigNames } from '../../../common/config';
+import { AuthConfigService } from '../../../common/config/auth-config.service';
 import { UserRepository } from '../../user/user.repository';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly configService: ConfigService,
+    private readonly authConfigService: AuthConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>(ConfigNames.JWT_PUBLIC_KEY, ''),
+      secretOrKey: authConfigService.jwtPublicKey,
       passReqToCallback: true,
     });
   }
