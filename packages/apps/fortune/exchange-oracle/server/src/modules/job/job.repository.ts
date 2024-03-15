@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { JobEntity } from './job.entity';
+import { JobSortField } from '../../common/enums/job';
+import { JobFilterData, ListResult } from './job.interface';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {
@@ -32,5 +34,38 @@ export class JobRepository extends BaseRepository<JobEntity> {
         escrowAddress,
       },
     });
+  }
+
+  public async fetchFiltered(data: JobFilterData): Promise<ListResult> {
+    const queryBuilder = await this.createQueryBuilder('job');
+    if (
+      data.sortField == JobSortField.CHAIN_ID ||
+      data.sortField == JobSortField.CREATED_AT
+    )
+      queryBuilder.orderBy(data.sortField!, data.sort);
+
+    if (data.chainId !== undefined) {
+      queryBuilder.andWhere('job.chainId = :chainId', {
+        chainId: data.chainId,
+      });
+    }
+    if (data.escrowAddress) {
+      queryBuilder.andWhere('job.escrowAddress = :escrowAddress', {
+        escrowAddress: data.escrowAddress,
+      });
+    }
+    if (data.status !== undefined) {
+      queryBuilder.andWhere('job.status = :status', { status: data.status });
+    }
+
+    queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
+      reputationNetwork: data.reputationNetwork,
+    });
+
+    queryBuilder.skip(data.skip).take(data.pageSize);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+    return { entities, itemCount };
   }
 }

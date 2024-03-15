@@ -4,7 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { KVStoreClient, StorageClient } from '@human-protocol/sdk';
 import * as jwt from 'jsonwebtoken';
-import { Web3Service } from 'src/modules/web3/web3.service';
+import { Web3Service } from '../../../modules/web3/web3.service';
+import { JwtUser } from '../../../common/types/jwt';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -42,14 +43,24 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
 
   public async validate(
     @Req() request: any,
-    payload: { email: string; address: string; kyc_status: string },
-  ): Promise<any> {
+    payload: {
+      email: string;
+      address: string;
+      kyc_status: string;
+      reputation_network: string;
+    },
+  ): Promise<JwtUser> {
     if (!payload.kyc_status || !payload.email || !payload.address) {
       throw new UnauthorizedException('Invalid token');
     }
     if (payload.kyc_status !== 'approved') {
       throw new UnauthorizedException('Invalid KYC status');
     }
-    return true;
+    return {
+      address: payload.address,
+      email: payload.email,
+      kycStatus: payload.kyc_status,
+      reputationNetwork: payload.reputation_network,
+    };
   }
 }
