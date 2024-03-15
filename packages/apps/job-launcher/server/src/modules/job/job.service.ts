@@ -1197,8 +1197,8 @@ export class JobService {
     } else {
       manifest = manifest as CvatManifestDto;
       specificManifestDetails = {
-        requestType: manifest.annotation.type,
-        submissionsRequired: manifest.annotation.job_size,
+        requestType: manifest.annotation?.type,
+        submissionsRequired: manifest.annotation?.job_size,
       };
     }
 
