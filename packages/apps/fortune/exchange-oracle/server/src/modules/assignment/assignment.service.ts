@@ -11,36 +11,48 @@ export class AssignmentService {
     @InjectRepository(AssignmentEntity)
     private assignmentRepository: Repository<AssignmentEntity>,
   ) {}
-  async getAssignmentStats(workerAddress: string): Promise<AssignmentStatsDto> {
-    const stats = new AssignmentStatsDto();
 
+  async getAssignmentStats(workerAddress: string): Promise<AssignmentStatsDto> {
     const assignments = await this.assignmentRepository.find({
       where: { workerAddress },
     });
 
-    stats.assignments_total = assignments.length;
-    stats.submissions_sent = 0;
-    stats.assignments_completed = 0;
-    stats.assignments_rejected = 0;
-    stats.assignments_expired = 0;
+    const initialStats = {
+      assignments_total: 0,
+      submissions_sent: 0,
+      assignments_completed: 0,
+      assignments_rejected: 0,
+      assignments_expired: 0,
+    };
 
-    assignments.forEach((a) => {
-      switch (a.status) {
+    const stats = assignments.reduce((acc, assignment) => {
+      acc.assignments_total += 1;
+
+      switch (assignment.status) {
         case AssignmentStatus.VALIDATION:
-          stats.submissions_sent += 1;
+          acc.submissions_sent += 1;
           break;
         case AssignmentStatus.COMPLETED:
-          stats.assignments_completed += 1;
+          acc.assignments_completed += 1;
           break;
         case AssignmentStatus.REJECTED:
-          stats.assignments_rejected += 1;
+          acc.assignments_rejected += 1;
           break;
         case AssignmentStatus.EXPIRED:
-          stats.assignments_expired += 1;
+          acc.assignments_expired += 1;
           break;
       }
-    });
 
-    return stats;
+      return acc;
+    }, initialStats);
+
+    const finalStats = new AssignmentStatsDto();
+    finalStats.assignments_total = stats.assignments_total;
+    finalStats.submissions_sent = stats.submissions_sent;
+    finalStats.assignments_completed = stats.assignments_completed;
+    finalStats.assignments_rejected = stats.assignments_rejected;
+    finalStats.assignments_expired = stats.assignments_expired;
+
+    return finalStats;
   }
 }
