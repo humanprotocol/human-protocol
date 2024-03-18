@@ -295,7 +295,9 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
                 address(uint160(uint256(hubContractAddress))),
                 payloadToSend,
                 0, // no receiver value needed
-                GAS_LIMIT
+                GAS_LIMIT,
+                hubContractChainId,
+                address(uint160(uint256(hubContractAddress)))
             );
         }
     }
