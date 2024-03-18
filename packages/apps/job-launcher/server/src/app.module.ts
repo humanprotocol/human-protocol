@@ -41,7 +41,6 @@ import { WebhookModule } from './modules/webhook/webhook.module';
     },
   ],
   imports: [
-    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`

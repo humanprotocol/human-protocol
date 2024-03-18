@@ -5,7 +5,6 @@ import { ErrorCronJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { JobService } from '../job/job.service';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
@@ -72,7 +71,6 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -103,7 +101,6 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
@@ -137,7 +134,6 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async fundEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.FundEscrow,
@@ -187,7 +183,6 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CancelEscrow,
@@ -262,7 +257,6 @@ export class CronJobService {
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,
