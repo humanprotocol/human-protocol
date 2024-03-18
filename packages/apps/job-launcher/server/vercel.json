@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "outputDirectory": "dist",
   "functions": {
     "api/crons-app.ts":{
       "maxDuration": 300
