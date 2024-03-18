@@ -16,23 +16,23 @@
   "crons": [
     {
       "path": "/cron/escrow/create",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/cron/escrow/setup",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/cron/escrow/fund",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/cron/escrow/cancel",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/cron/webhook/process",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/10 * * * *"
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
