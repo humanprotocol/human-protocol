@@ -9,7 +9,7 @@
   },
   "rewrites": [
     {
-      "source": "/cron/(.*)",
+      "source": "/(.*)",
       "destination": "/api/crons-app.ts"
     }
   ],

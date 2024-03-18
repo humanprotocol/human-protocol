@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-import { CronsAppModule } from './crons-app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { AppModule } from '../src/app.module';
 const expressApp = express();
 const adapter = new ExpressAdapter(expressApp);
 
 async function bootstrap() {
-  const app = await NestFactory.create(CronsAppModule, adapter);
+  const app = await NestFactory.create(AppModule, adapter);
   await app.init();
 }
 
