@@ -51,7 +51,7 @@
     "cookie-parser": "^1.4.6",
     "decimal.js": "^10.4.3",
     "express-session": "^1.17.3",
-    "joi": "^17.9.2",
+    "joi": "^17.12.2",
     "json-stable-stringify": "^1.1.1",
     "nestjs-minio-client": "^2.2.0",
     "passport": "^0.6.0",
