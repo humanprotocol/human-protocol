@@ -14,7 +14,7 @@
   "dependencies": {
     "@human-protocol/sdk": "*",
     "@strapi/plugin-i18n": "4.16.2",
-    "@strapi/plugin-users-permissions": "4.15.5",
+    "@strapi/plugin-users-permissions": "4.20.5",
     "@strapi/strapi": "4.15.5",
     "axios": "^1.5.1",
     "dayjs": "^1.11.10",
