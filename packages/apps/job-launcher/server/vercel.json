@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "installCommand": "yarn install --ignore-scripts",
   "buildCommand": "yarn workspace @human-protocol/sdk build && yarn build",
   "outputDirectory": "dist",
   "functions": {
