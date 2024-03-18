@@ -3,11 +3,14 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { AppModule } from '../src/app.module';
+import init from '../src/app-init';
+
 const expressApp = express();
 const adapter = new ExpressAdapter(expressApp);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, adapter);
+  await init(app);
   await app.init();
 }
 
