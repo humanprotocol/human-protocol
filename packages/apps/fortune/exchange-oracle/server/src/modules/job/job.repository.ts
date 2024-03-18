@@ -62,7 +62,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
       reputationNetwork: data.reputationNetwork,
     });
 
-    queryBuilder.skip(data.skip).take(data.pageSize);
+    queryBuilder.offset(data.skip).limit(data.pageSize);
 
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();

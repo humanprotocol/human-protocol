@@ -10,6 +10,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
+import { AssignmentModule } from './modules/assignment/assignment.module';
 
 @Module({
   providers: [
@@ -24,6 +25,7 @@ import { Web3Module } from './modules/web3/web3.module';
     JwtHttpStrategy,
   ],
   imports: [
+    AssignmentModule,
     JobModule,
     WebhookModule,
     Web3Module,
