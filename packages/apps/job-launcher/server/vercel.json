@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "cd ../../../../ && yarn install",
+  "installCommand": "ls ../../../../ && pwd ",
   "outputDirectory": "dist",
   "functions": {
     "api/crons-app.ts":{
