@@ -39,3 +39,4 @@ lerna-debug.log*
 
 #Postgres Data
 db
+.vercel
