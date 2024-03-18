@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "installCommand": "ls ../../../../ && pwd ",
+  "installCommand": "yarn install --ignore-scripts",
+  "buildCommand": "yarn workspace @human-protocol/sdk build && yarn build",
   "outputDirectory": "dist",
   "functions": {
     "api/crons-app.ts":{
