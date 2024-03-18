@@ -7,15 +7,19 @@ import init from '../src/app-init';
 
 const expressApp = express();
 const adapter = new ExpressAdapter(expressApp);
+let nestAppInitialized = false;
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule, adapter);
-  await init(app);
-  await app.init();
+async function bootstrapNestApp() {
+  if (!nestAppInitialized) {
+    const app = await NestFactory.create(AppModule, adapter);
+    await init(app); // Initialize additional settings
+    await app.init();
+    nestAppInitialized = true;
+  }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  await bootstrap(); // Ensure NestJS app is bootstrapped
+  await bootstrapNestApp(); // Ensure NestJS app is bootstrapped
 
   return expressApp(req, res);
 }
