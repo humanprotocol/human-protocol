@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "dist",
   "functions": {
     "api/crons-app.ts":{
       "maxDuration": 300
@@ -14,23 +15,23 @@
   "crons": [
     {
       "path": "/cron/escrow/create",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/cron/escrow/setup",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/cron/escrow/fund",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/cron/escrow/cancel",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/cron/webhook/process",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/1 * * * *"
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
