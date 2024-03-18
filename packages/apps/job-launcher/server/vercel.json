@@ -3,14 +3,14 @@
   "buildCommand": "yarn workspace @human-protocol/sdk build && yarn build",
   "outputDirectory": "dist",
   "functions": {
-    "api/crons-app.ts":{
+    "api/app.ts":{
       "maxDuration": 300
     }
   },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/crons-app.ts"
+      "destination": "/api/app.ts"
     }
   ],
   "crons": [
