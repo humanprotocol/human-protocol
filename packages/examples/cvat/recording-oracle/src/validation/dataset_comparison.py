@@ -6,8 +6,11 @@ from typing import Callable, Dict, Optional, Sequence, Set, Tuple, Union
 
 import datumaro as dm
 import numpy as np
-from attrs import define
+from attrs import define, field
 from datumaro.util.annotation_util import BboxCoords
+
+from src.core.config import Config
+from src.core.validation_errors import TooFewGtError
 
 from .annotation_matching import (
     Bbox,
@@ -52,11 +55,17 @@ class CachedSimilarityFunction(SimilarityFunction):
 
 @define
 class DatasetComparator(metaclass=ABCMeta):
-    min_similarity_threshold: float
+    _min_similarity_threshold: float
+    _gt_weights: Dict[str, float] = field(factory=dict)
+
+    failed_gts: Set[str] = field(factory=set, init=False)
+    "Recorded list of failed GT samples, available after compare() call"
 
     def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
         dataset_similarities = []
         dataset_total_anns_to_compare = 0
+        dataset_failed_gts = set()
+        dataset_excluded_gts_count = 0
 
         for ds_sample in ds_dataset:
             gt_sample = gt_dataset.get(ds_sample.id)
@@ -64,7 +73,15 @@ class DatasetComparator(metaclass=ABCMeta):
             if not gt_sample:
                 continue
 
-            matching_result, similarity_fn = self.compare_sample_annotations(gt_sample, ds_sample)
+            sample_weight = self._gt_weights.get(gt_sample.id, 1)
+            if not sample_weight:
+                dataset_excluded_gts_count += 1
+                continue
+
+            sample_similarity_threshold = self._min_similarity_threshold * sample_weight
+            matching_result, similarity_fn = self.compare_sample_annotations(
+                gt_sample, ds_sample, similarity_threshold=sample_similarity_threshold
+            )
 
             sample_similarities = []
             sample_total_anns_to_compare = 0
@@ -81,22 +98,34 @@ class DatasetComparator(metaclass=ABCMeta):
             dataset_similarities.extend(sample_similarities)
             dataset_total_anns_to_compare += sample_total_anns_to_compare
 
+            sample_accuracy = 0
+            if sample_total_anns_to_compare:
+                sample_accuracy = 2 * np.sum(sample_similarities) / sample_total_anns_to_compare
+
+            if sample_accuracy < sample_similarity_threshold:
+                dataset_failed_gts.add(gt_sample.id)
+
+        if dataset_excluded_gts_count == len(gt_dataset):
+            raise TooFewGtError()
+
         dataset_accuracy = 0
         if dataset_total_anns_to_compare:
             dataset_accuracy = 2 * np.sum(dataset_similarities) / dataset_total_anns_to_compare
+
+        self.failed_gts = dataset_failed_gts
 
         return dataset_accuracy
 
     @abstractmethod
     def compare_sample_annotations(
-        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
     ) -> Tuple[MatchResult, SimilarityFunction]:
         ...
 
 
 class BboxDatasetComparator(DatasetComparator):
     def compare_sample_annotations(
-        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
     ) -> Tuple[MatchResult, SimilarityFunction]:
         similarity_fn = CachedSimilarityFunction(bbox_iou)
 
@@ -115,7 +144,7 @@ class BboxDatasetComparator(DatasetComparator):
             gt_boxes,
             ds_boxes,
             similarity=similarity_fn,
-            min_similarity=self.min_similarity_threshold,
+            min_similarity=similarity_threshold,
         )
 
         return matching_result, similarity_fn
@@ -123,7 +152,7 @@ class BboxDatasetComparator(DatasetComparator):
 
 class PointsDatasetComparator(DatasetComparator):
     def compare_sample_annotations(
-        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
     ) -> Tuple[MatchResult, SimilarityFunction]:
         similarity_fn = CachedSimilarityFunction(point_to_bbox_cmp)
 
@@ -146,32 +175,33 @@ class PointsDatasetComparator(DatasetComparator):
             gt_boxes,
             ds_points,
             similarity=similarity_fn,
-            min_similarity=self.min_similarity_threshold,
+            min_similarity=similarity_threshold,
         )
 
         return matching_result, similarity_fn
 
 
+_SkeletonInfo = list[str]
+
+
+@define
 class SkeletonDatasetComparator(DatasetComparator):
-    _SkeletonInfo = list[str]
+    _skeleton_info: Dict[int, _SkeletonInfo] = field(factory=dict, init=False)
+    _categories: Optional[dm.CategoriesInfo] = field(default=None, init=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._skeleton_info: Dict[int, self._SkeletonInfo] = {}
-        self._categories: Optional[dm.CategoriesInfo] = None
-
-        # TODO: find better strategy for sigma estimation
-        self.oks_sigma = 0.1  # average value for COCO points
+    # TODO: find better strategy for sigma estimation
+    _oks_sigma: float = Config.validation.default_oks_sigma
 
     def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
         self._categories = gt_dataset.categories()
         return super().compare(gt_dataset, ds_dataset)
 
     def compare_sample_annotations(
-        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
     ) -> Tuple[MatchResult, SimilarityFunction]:
-        return self._match_skeletons(gt_sample, ds_sample)
+        return self._match_skeletons(
+            gt_sample, ds_sample, similarity_threshold=similarity_threshold
+        )
 
     def _get_skeleton_info(self, skeleton_label_id: int) -> _SkeletonInfo:
         label_cat: dm.LabelCategories = self._categories[dm.AnnotationType.label]
@@ -189,7 +219,7 @@ class SkeletonDatasetComparator(DatasetComparator):
         return skeleton_info
 
     def _match_skeletons(
-        self, item_a: dm.DatasetItem, item_b: dm.DatasetItem
+        self, item_a: dm.DatasetItem, item_b: dm.DatasetItem, *, similarity_threshold: float
     ) -> Tuple[MatchResult, SimilarityFunction]:
         a_skeletons = [a for a in item_a.annotations if isinstance(a, dm.Skeleton)]
         b_skeletons = [a for a in item_b.annotations if isinstance(a, dm.Skeleton)]
@@ -243,13 +273,13 @@ class SkeletonDatasetComparator(DatasetComparator):
                 for ann in instance_group:
                     instance_map[id(ann)] = [instance_group, instance_bbox]
 
-        keypoints_matcher = self._KeypointsMatcher(instance_map=instance_map, sigma=self.oks_sigma)
+        keypoints_matcher = self._KeypointsMatcher(instance_map=instance_map, sigma=self._oks_sigma)
         keypoints_similarity = CachedSimilarityFunction(keypoints_matcher.distance)
         matching_result = match_annotations(
             a_points,
             b_points,
             similarity=keypoints_similarity,
-            min_similarity=self.min_similarity_threshold,
+            min_similarity=similarity_threshold,
         )
 
         distances = keypoints_similarity.cache

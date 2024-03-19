@@ -1,5 +1,6 @@
 import io
 import os
+from collections import Counter
 from logging import Logger
 from typing import Dict, Optional, Union
 
@@ -19,8 +20,9 @@ from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
 )
 from src.core.types import OracleWebhookTypes
+from src.core.validation_errors import TooFewGtError
+from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.handlers.process_intermediate_results import (
-    ValidationSuccess,
     parse_annotation_metafile,
     process_intermediate_results,
     serialize_validation_meta,
@@ -30,7 +32,6 @@ from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
 from src.utils.assignments import compute_resulting_annotations_hash, parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
-from validators import ValidationFailure
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
@@ -130,7 +131,7 @@ class _TaskValidator:
 
         if isinstance(validation_result, ValidationSuccess):
             logger.info(
-                f"Validation for escrow_address={escrow_address} successful, "
+                f"Validation for escrow_address={escrow_address}: successful, "
                 f"average annotation quality is {validation_result.average_quality:.2f}"
             )
 
@@ -177,9 +178,13 @@ class _TaskValidator:
                 event=RecordingOracleEvent_TaskCompleted(),
             )
         else:
+            error_type_counts = Counter(
+                type(e).__name__ for e in validation_result.rejected_jobs.values()
+            )
             logger.info(
-                f"Validation for escrow_address={escrow_address} failed, "
-                f"rejected {len(validation_result.rejected_job_ids)} jobs"
+                f"Validation for escrow_address={escrow_address}: failed, "
+                f"rejected {len(validation_result.rejected_jobs)} jobs. "
+                f"Problems: {dict(error_type_counts)}"
             )
 
             oracle_db_service.outbox.create_webhook(
@@ -188,7 +193,14 @@ class _TaskValidator:
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_TaskRejected(
-                    rejected_job_ids=validation_result.rejected_job_ids
+                    # TODO: update wrt. M2 API changes, send reason
+                    rejected_job_ids=list(
+                        jid
+                        for jid, reason in validation_result.rejected_jobs
+                        if not isinstance(
+                            reason, TooFewGtError
+                        )  # prevent such jobs from reannotation, can also be handled in ExcOr
+                    )
                 ),
             )
 

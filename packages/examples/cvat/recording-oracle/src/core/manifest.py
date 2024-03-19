@@ -133,7 +133,7 @@ class AnnotationInfo(BaseModel):
     job_size: int = 10
     "Frames per job, validation frames are not included"
 
-    max_time: int = Field(default_factory=lambda: Config.core_config.default_assignment_time)
+    max_time: Optional[int] = None
     "Maximum time per job (assignment) for an annotator, in seconds"
 
 
