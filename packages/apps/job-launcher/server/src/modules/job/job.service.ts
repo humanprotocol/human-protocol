@@ -688,18 +688,16 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    if (jobEntity.requestType !== JobRequestType.HCAPTCHA) {
-      let manifest = await this.storageService.download(jobEntity.manifestUrl);
-      if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-        manifest = await this.encryption.decrypt(manifest as any);
-      }
-
-      if (isValidJSON(manifest)) {
-        manifest = JSON.parse(manifest);
-      }
-
-      await this.validateManifest(jobEntity.requestType, manifest);
+    let manifest = await this.storageService.download(jobEntity.manifestUrl);
+    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
+      manifest = await this.encryption.decrypt(manifest as any);
     }
+
+    if (isValidJSON(manifest)) {
+      manifest = JSON.parse(manifest);
+    }
+
+    await this.validateManifest(jobEntity.requestType, manifest);
 
     const oracleAddresses = getOracleAddresses();
 
