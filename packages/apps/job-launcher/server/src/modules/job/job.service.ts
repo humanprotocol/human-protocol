@@ -680,19 +680,6 @@ export class JobService {
     return jobEntity;
   }
 
-  public async downloadManifest(manifestUrl: string) {
-    let manifest = await this.storageService.download(manifestUrl);
-    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      manifest = await this.encryption.decrypt(manifest as any);
-    }
-
-    if (isValidJSON(manifest)) {
-      manifest = JSON.parse(manifest);
-    }
-
-    return manifest;
-  }
-
   public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const { getOracleAddresses } =
       this.getOraclesSpecificActions[jobEntity.requestType];
