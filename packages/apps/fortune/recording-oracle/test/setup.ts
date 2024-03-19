@@ -11,6 +11,6 @@ export async function setup(): Promise<void> {
   const kvStoreClient = await KVStoreClient.build(wallet);
   await kvStoreClient.setBulk(
     [KVStoreKeys.role, KVStoreKeys.fee, KVStoreKeys.webhookUrl],
-    [Role.RecordingOracle, '1', 'http://localhost:5001/jobs/solve'],
+    [Role.RecordingOracle, '1', 'http://localhost:5002/webhook'],
   );
 }
