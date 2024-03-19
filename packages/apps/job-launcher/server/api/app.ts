@@ -19,6 +19,12 @@ async function bootstrapNestApp() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 200;
+    res.end();
+    return;
+  }
+
   await bootstrapNestApp(); // Ensure NestJS app is bootstrapped
 
   return expressApp(req, res);

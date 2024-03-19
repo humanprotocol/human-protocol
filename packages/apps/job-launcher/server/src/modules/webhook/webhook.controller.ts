@@ -53,7 +53,7 @@ export class WebhookController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('webhook')
+  @Post()
   public async processWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDataDto,

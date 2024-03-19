@@ -7,9 +7,16 @@
       "maxDuration": 300
     }
   },
+  "redirects": [
+    { "source": "/", "destination": "/swagger" }
+  ],
   "rewrites": [
     {
       "source": "/swagger",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/swagger/(.*)",
       "destination": "/api/app.ts"
     },
     {
@@ -37,14 +44,13 @@
       "destination": "/api/app.ts"
     },
     {
-      "source": "/webhook/webhook",
+      "source": "/webhook",
       "destination": "/api/app.ts"
     },
     {
       "source": "/cron/(.*)",
       "destination": "/api/app.ts"
     }
-
   ],
   "crons": [
     {
@@ -66,6 +72,25 @@
     {
       "path": "/cron/webhook/process",
       "schedule": "*/10 * * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "*"
+        }
+      ]
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
