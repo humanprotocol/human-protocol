@@ -1,8 +1,8 @@
 import { NS } from '../../common/constant';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1710439119068 implements MigrationInterface {
-  name = 'InitialMigration1710439119068';
+export class InitialMigration1710760785464 implements MigrationInterface {
+  name = 'InitialMigration1710760785464';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createSchema(NS, true);
@@ -49,6 +49,7 @@ export class InitialMigration1710439119068 implements MigrationInterface {
                 "job_id" integer NOT NULL,
                 "worker_address" character varying NOT NULL,
                 "status" "hmt"."assignments_status_enum" NOT NULL,
+                "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
                 CONSTRAINT "PK_c54ca359535e0012b04dcbd80ee" PRIMARY KEY ("id")
             )
         `);

@@ -260,7 +260,7 @@ export class JobService {
     );
   }
 
-  private async getManifest(
+  public async getManifest(
     chainId: number,
     escrowAddress: string,
   ): Promise<ManifestDto> {
