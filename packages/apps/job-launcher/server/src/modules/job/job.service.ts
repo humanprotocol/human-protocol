@@ -1302,7 +1302,7 @@ export class JobService {
 
     const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
 
-    return BigInt(feeValue ? feeValue : 0);
+    return BigInt(feeValue ? feeValue : 1);
   }
 
   private async updateCompletedStatus(
