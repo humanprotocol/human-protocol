@@ -1,16 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AssignmentEntity } from '../assignment/assignment.entity';
+import { Injectable, Logger } from '@nestjs/common';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 import { StatsDto } from './stats.dto';
 import { AssignmentStatus } from '../../common/enums/job';
 
 @Injectable()
 export class StatsService {
-  constructor(
-    @InjectRepository(AssignmentEntity)
-    private assignmentRepository: Repository<AssignmentEntity>,
-  ) {}
+  public readonly logger = new Logger(StatsService.name);
+  constructor(private assignmentRepository: AssignmentRepository) {}
 
   async getAssignmentStats(workerAddress: string): Promise<StatsDto> {
     const assignments = await this.assignmentRepository.find({
