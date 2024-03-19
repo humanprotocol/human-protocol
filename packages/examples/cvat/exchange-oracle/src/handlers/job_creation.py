@@ -32,7 +32,7 @@ from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
-from src.utils.annotations import ProjectLabels, is_point_in_bbox
+from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
 
@@ -212,6 +212,7 @@ class BoxesFromPointsTaskBuilder:
         points_storage_client = self._make_cloud_storage_client(points_bucket)
 
         data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
+        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
         self._data_filenames = filter_image_files(data_filenames)
 
         self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
@@ -287,6 +288,7 @@ class BoxesFromPointsTaskBuilder:
 
         excluded_gt_info = _ExcludedAnnotationsInfo()
         excluded_samples = set()
+        visited_ids = set()
         for gt_sample in self._gt_dataset:
             # Could fail on this as well
             img_h, img_w = gt_sample.media_as(dm.Image).size
@@ -309,6 +311,15 @@ class BoxesFromPointsTaskBuilder:
                     )
                     valid_boxes = []
                     break
+
+                if bbox.id in visited_ids:
+                    excluded_gt_info.add_error(
+                        "Sample '{}': GT bbox #{} ({}) skipped - repeated annotation id {}".format(
+                            gt_sample.id, bbox.id, label_cat[bbox.label].name, bbox.id
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
+                    )
 
                 valid_boxes.append(bbox)
 
@@ -362,7 +373,7 @@ class BoxesFromPointsTaskBuilder:
         remainder_count = len(items) - max_items
         return "{}{}".format(
             separator.join(items[:max_items]),
-            f"(and {remainder_count} more)" if remainder_count > 0 else "",
+            f" (and {remainder_count} more)" if remainder_count > 0 else "",
         )
 
     def _validate_points_categories(self):
@@ -406,30 +417,25 @@ class BoxesFromPointsTaskBuilder:
         known_data_filenames = set(self._data_filenames)
         matched_points_filenames = points_filenames.intersection(known_data_filenames)
 
-        if len(known_data_filenames) != len(matched_points_filenames):
-            missing_point_samples = list(
-                map(os.path.basename, known_data_filenames - matched_points_filenames)
-            )
+        if len(matched_points_filenames) != len(points_filenames):
             extra_point_samples = list(
                 map(os.path.basename, points_filenames - matched_points_filenames)
             )
 
             raise MismatchingAnnotations(
-                "Mismatching points info and input files: {}".format(
-                    "; ".join(
-                        "{} missing points".format(self._format_list(missing_point_samples)),
-                        "{} extra points".format(self._format_list(extra_point_samples)),
-                    )
+                "Failed to find several samples in the dataset files: {}".format(
+                    self._format_list(extra_point_samples),
                 )
             )
 
     def _validate_points_annotations(self):
         def _validate_skeleton(skeleton: dm.Skeleton, *, sample_bbox: dm.Bbox):
+            if skeleton.id in visited_ids:
+                raise DatasetValidationError(f"repeated annotation id ({skeleton.id})")
+
             if len(skeleton.elements) != 1:
                 raise DatasetValidationError(
-                    "invalid points count ({}), expected 1".format(
-                        len(skeleton.elements),
-                    )
+                    "invalid points count ({}), expected 1".format(len(skeleton.elements))
                 )
 
             point = skeleton.elements[0]
@@ -441,6 +447,7 @@ class BoxesFromPointsTaskBuilder:
 
         excluded_points_info = _ExcludedAnnotationsInfo()
         excluded_samples = set()
+        visited_ids = set()
         for sample in self._points_dataset:
             # Could fail on this as well
             image_h, image_w = sample.image.size
@@ -869,7 +876,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._roi_filenames is not _unset
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
-        src_prefix = ""
+        src_prefix = src_bucket.path
         dst_bucket = self.oracle_data_bucket
 
         src_client = self._make_cloud_storage_client(src_bucket)
@@ -1110,6 +1117,7 @@ class SkeletonsFromBoxesTaskBuilder:
         boxes_storage_client = self._make_cloud_storage_client(boxes_bucket)
 
         data_filenames = data_storage_client.list_files(prefix=data_bucket.path)
+        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
         self._data_filenames = filter_image_files(data_filenames)
 
         self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
@@ -1193,6 +1201,9 @@ class SkeletonsFromBoxesTaskBuilder:
 
     def _validate_gt_annotations(self):
         def _validate_skeleton(skeleton: dm.Skeleton, *, sample_bbox: dm.Bbox):
+            if skeleton.id in visited_ids:
+                raise DatasetValidationError(f"repeated annotation id {skeleton.id}")
+
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
                 assert len(element.points) == 2 and len(element.visibility) == 1
@@ -1208,6 +1219,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
         excluded_gt_info = _ExcludedAnnotationsInfo()
         excluded_samples = set()
+        visited_ids = set()
         for gt_sample in self._gt_dataset:
             # Could fail on this as well
             img_h, img_w = gt_sample.media_as(dm.Image).size
@@ -1239,6 +1251,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     )
 
                 valid_skeletons.append(skeleton)
+                visited_ids.add(skeleton.id)
 
             excluded_gt_info.excluded_count += len(sample_skeletons) - len(valid_skeletons)
             excluded_gt_info.total_count += len(sample_skeletons)
@@ -1310,28 +1323,27 @@ class SkeletonsFromBoxesTaskBuilder:
         known_data_filenames = set(self._data_filenames)
         matched_boxes_filenames = boxes_filenames.intersection(known_data_filenames)
 
-        if len(known_data_filenames) != len(matched_boxes_filenames):
-            missing_box_samples = list(
-                map(os.path.basename, known_data_filenames - matched_boxes_filenames)
-            )
-            extra_point_samples = list(
+        if len(matched_boxes_filenames) != len(boxes_filenames):
+            extra_bbox_samples = list(
                 map(os.path.basename, boxes_filenames - matched_boxes_filenames)
             )
 
             raise MismatchingAnnotations(
-                "Mismatching bbox info and input files: {}".format(
-                    "; ".join(
-                        "{} missing boxes".format(self._format_list(missing_box_samples)),
-                        "{} extra boxes".format(self._format_list(extra_point_samples)),
-                    )
+                "Failed to find several samples in the dataset files: {}".format(
+                    self._format_list(extra_bbox_samples),
                 )
             )
 
     def _validate_boxes_annotations(self):
+        # Convert possible polygons and masks into boxes
+        self._boxes_dataset.transform(InstanceSegmentsToBbox)
+        self._boxes_dataset.init_cache()
+
         excluded_boxes_info = _ExcludedAnnotationsInfo()
 
         label_cat: dm.LabelCategories = self._boxes_dataset.categories()[dm.AnnotationType.label]
 
+        visited_ids = set()
         for sample in self._boxes_dataset:
             # Could fail on this as well
             image_h, image_w = sample.media_as(dm.Image).size
@@ -1351,7 +1363,17 @@ class SkeletonsFromBoxesTaskBuilder:
                         sample_subset=sample.subset,
                     )
 
+                if bbox.id in visited_ids:
+                    excluded_boxes_info.add_error(
+                        "Sample '{}': bbox #{} ({}) skipped - repeated annotation id {}".format(
+                            sample.id, bbox.id, label_cat[bbox.label].name, bbox.id
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+
                 valid_boxes.append(bbox)
+                visited_ids.add(bbox.id)
 
             excluded_boxes_info.excluded_count += len(sample_boxes) - len(valid_boxes)
             excluded_boxes_info.total_count += len(sample_boxes)
@@ -1403,7 +1425,7 @@ class SkeletonsFromBoxesTaskBuilder:
         remainder_count = len(items) - max_items
         return "{}{}".format(
             separator.join(items[:max_items]),
-            f"(and {remainder_count} more)" if remainder_count > 0 else "",
+            f" (and {remainder_count} more)" if remainder_count > 0 else "",
         )
 
     def _match_boxes(self, a: BboxCoords, b: BboxCoords):
@@ -1465,9 +1487,26 @@ class SkeletonsFromBoxesTaskBuilder:
                     excluded_gt_info.excluded_count += 1
                     continue
 
+                if all(
+                    v != dm.Points.Visibility.visible
+                    for p in gt_skeleton.elements
+                    for v in p.visibility
+                ):
+                    # Handle fully hidden skeletons
+                    excluded_gt_info.add_error(
+                        "Sample '{}': GT skeleton #{} ({}) skipped - "
+                        "no visible points".format(
+                            gt_sample.id, gt_skeleton_id, gt_label_cat[gt_skeleton.label].name
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
+                    )
+                    excluded_gt_info.excluded_count += 1
+                    continue
+
                 matched_boxes: List[dm.Bbox] = []
                 for input_bbox in input_boxes:
-                    skeleton_id = input_bbox.id
+                    skeleton_id = gt_skeleton.id
                     if skeleton_id in visited_skeletons:
                         continue
 
@@ -1526,22 +1565,23 @@ class SkeletonsFromBoxesTaskBuilder:
 
             updated_gt_dataset.put(gt_sample.wrap(annotations=matched_skeletons))
 
+        if excluded_gt_info.excluded_count:
+            self.logger.warning(
+                "Some GT annotations were excluded due to the errors found: {}".format(
+                    self._format_list([e.message for e in excluded_gt_info.errors], separator="\n")
+                )
+            )
+
         if (
             len(skeleton_bbox_mapping)
             < (1 - self.max_discarded_threshold) * excluded_gt_info.total_count
         ):
             raise DatasetValidationError(
                 "Too many GT skeletons discarded ({} out of {}). "
-                "Please make sure each GT skeleton matches exactly 1 bbox".format(
+                "Please make sure each GT skeleton matches exactly 1 bbox "
+                "and has at least 1 visible point".format(
                     excluded_gt_info.total_count - len(skeleton_bbox_mapping),
                     excluded_gt_info.total_count,
-                )
-            )
-
-        if excluded_gt_info.excluded_count:
-            self.logger.warning(
-                "Some GT annotations were excluded due to the errors found: {}".format(
-                    self._format_list([e.message for e in excluded_gt_info.errors], separator="\n")
                 )
             )
 
@@ -1751,7 +1791,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._roi_infos is not _unset
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
-        src_prefix = ""
+        src_prefix = src_bucket.path
         dst_bucket = self.oracle_data_bucket
 
         src_client = self._make_cloud_storage_client(src_bucket)
@@ -2004,6 +2044,10 @@ def filter_image_files(data_filenames: List[str]) -> List[str]:
     return list(fn for fn in data_filenames if is_image(fn))
 
 
+def strip_bucket_prefix(data_filenames: List[str], prefix: str) -> List[str]:
+    return list(os.path.relpath(fn, prefix) for fn in data_filenames)
+
+
 def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     return [
         {
@@ -2049,14 +2093,11 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         gt_bucket_client = cloud_service.make_client(gt_bucket)
 
         # Task configuration creation
-        data_filenames = data_bucket_client.list_files(
-            prefix=data_bucket.path,
-        )
+        data_filenames = data_bucket_client.list_files(prefix=data_bucket.path)
+        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
         data_filenames = filter_image_files(data_filenames)
 
-        gt_file_data = gt_bucket_client.download_file(
-            gt_bucket.path,
-        )
+        gt_file_data = gt_bucket_client.download_file(gt_bucket.path)
 
         # Validate and parse GT
         gt_filenames = get_gt_filenames(gt_file_data, data_filenames, manifest=manifest)
@@ -2105,7 +2146,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
             cvat_api.put_task_data(
                 task.id,
                 cloud_storage.id,
-                filenames=job_filenames,
+                filenames=[os.path.join(data_bucket.path, fn) for fn in job_filenames],
                 sort_images=False,
             )
 
