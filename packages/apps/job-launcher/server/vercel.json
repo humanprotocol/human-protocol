@@ -9,9 +9,42 @@
   },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/swagger",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/user/balance",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/payment/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/web3/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/job/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/webhook/webhook",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/cron/(.*)",
       "destination": "/api/app.ts"
     }
+
   ],
   "crons": [
     {
