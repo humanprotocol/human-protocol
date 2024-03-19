@@ -829,6 +829,7 @@ export class JobService {
     if (requestType === JobRequestType.FORTUNE) {
       dtoCheck = new FortuneManifestDto();
     } else if (requestType === JobRequestType.HCAPTCHA) {
+      return true;
       dtoCheck = new HCaptchaManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
