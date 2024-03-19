@@ -82,6 +82,9 @@ export class JobService {
     data: GetJobsDto,
     reputationNetwork: string,
   ): Promise<PageDto<JobDto>> {
+    if (data.jobType && data.jobType !== JOB_TYPE)
+      return new PageDto(data.page!, data.pageSize!, 0, []);
+
     const { entities, itemCount } = await this.jobRepository.fetchFiltered({
       ...data,
       pageSize: data.pageSize!,
@@ -257,7 +260,7 @@ export class JobService {
     );
   }
 
-  private async getManifest(
+  public async getManifest(
     chainId: number,
     escrowAddress: string,
   ): Promise<ManifestDto> {

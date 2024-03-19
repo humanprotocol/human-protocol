@@ -11,6 +11,7 @@ import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
 import { StatsModule } from './modules/stats/stats.module';
+import { AssignmentModule } from './modules/assignment/assignment.module';
 
 @Module({
   providers: [
@@ -25,6 +26,7 @@ import { StatsModule } from './modules/stats/stats.module';
     JwtHttpStrategy,
   ],
   imports: [
+    AssignmentModule,
     JobModule,
     WebhookModule,
     Web3Module,

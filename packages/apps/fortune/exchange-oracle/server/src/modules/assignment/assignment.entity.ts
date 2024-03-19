@@ -20,6 +20,9 @@ export class AssignmentEntity extends BaseEntity {
   })
   public status: AssignmentStatus;
 
+  @Column({ type: 'timestamptz' })
+  public expiresAt: Date;
+
   @ManyToOne(() => JobEntity, (job) => job.assignments, { eager: true })
   job: JobEntity;
 }

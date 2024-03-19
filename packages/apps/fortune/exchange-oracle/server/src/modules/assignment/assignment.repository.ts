@@ -4,6 +4,9 @@ import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { AssignmentEntity } from './assignment.entity';
 import { AssignmentStatus } from '../../common/enums/job';
+import { ChainId } from '@human-protocol/sdk';
+import { AssignmentFilterData, ListResult } from './assignment.interface';
+import { AssignmentSortField } from 'src/common/enums/job';
 
 @Injectable()
 export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
@@ -13,7 +16,7 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
   ) {
     super(AssignmentEntity, dataSource);
   }
-
+  
   public async findByWorkerAddress(
     workerAddress: string,
   ): Promise<AssignmentEntity[]> {
@@ -24,30 +27,65 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     });
   }
 
-  public async findByStatus(
-    status: AssignmentStatus,
-  ): Promise<AssignmentEntity[]> {
-    return this.find({
+  public async findOneByJobIdAndWorker(
+    jobId: ChainId,
+    workerAddress: string,
+  ): Promise<AssignmentEntity | null> {
+    return this.findOne({
       where: {
-        status,
+        jobId,
+        workerAddress,
+      },
+    });
+  }
+  
+  public async countByJobId(jobId: ChainId): Promise<number> {
+    return this.count({
+      where: {
+        jobId,
       },
     });
   }
 
-  public async findAssignmentsWithDetails(
-    status: AssignmentStatus,
-    jobId: number,
-  ): Promise<AssignmentEntity[]> {
-    const queryBuilder = this.createQueryBuilder('assignment');
+  public async fetchFiltered(data: AssignmentFilterData): Promise<ListResult> {
+    const queryBuilder = await this.createQueryBuilder(
+      'assignment',
+    ).leftJoinAndSelect('assignment.job', 'job', 'assignment.jobId = job.id');
 
-    if (status) {
-      queryBuilder.andWhere('assignment.status = :status', { status });
+    if (data.sortField == AssignmentSortField.CHAIN_ID)
+      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+    else if (data.sortField == AssignmentSortField.CREATED_AT)
+      queryBuilder.orderBy(`assignment.${data.sortField}`, data.sort);
+    else if (data.sortField == AssignmentSortField.STATUS)
+      queryBuilder.orderBy(`assignment.${data.sortField}`, data.sort);
+    else if (data.sortField == AssignmentSortField.EXPIRES_AT)
+      queryBuilder.orderBy(`assignment.${data.sortField}`, data.sort);
+
+    if (data.chainId !== undefined) {
+      queryBuilder.andWhere('job.chainId = :chainId', {
+        chainId: data.chainId,
+      });
+    }
+    if (data.escrowAddress) {
+      queryBuilder.andWhere('job.escrowAddress = :escrowAddress', {
+        escrowAddress: data.escrowAddress,
+      });
+    }
+    if (data.status !== undefined) {
+      queryBuilder.andWhere('assignment.status = :status', {
+        status: data.status,
+      });
     }
 
-    if (jobId) {
-      queryBuilder.andWhere('assignment.jobId = :jobId', { jobId });
-    }
+    queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
+      reputationNetwork: data.reputationNetwork,
+    });
 
-    return queryBuilder.getMany();
+    queryBuilder.offset(data.skip).limit(data.pageSize);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    return { entities, itemCount };
   }
 }
