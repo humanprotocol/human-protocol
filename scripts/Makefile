@@ -18,6 +18,10 @@ create-env-files:
 		cp ./fortune/.env.exco-server ../packages/apps/fortune/exchange-oracle/server/.env.local ; \
 	fi
 
+	@if [ ! -f "../packages/apps/fortune/recording-oracle/.env.local" ]; then \
+		cp ./fortune/.env.rec-oracle ../packages/apps/fortune/recording-oracle/.env.local ; \
+	fi
+
 hardhat-node:
 	yarn workspace @human-protocol/core local
 
@@ -53,6 +57,7 @@ fortune-exchange-oracle:
 
 fortune-recording-oracle:
 	yarn workspace @human-protocol/fortune-recording-oracle setup:local
+	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start
 
 reputation-oracle:
 	yarn workspace @human-protocol/reputation-oracle setup:local
