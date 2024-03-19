@@ -680,15 +680,8 @@ export class JobService {
     return jobEntity;
   }
 
-  public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
-    const { getOracleAddresses } =
-      this.getOraclesSpecificActions[jobEntity.requestType];
-
-    const signer = this.web3Service.getSigner(jobEntity.chainId);
-
-    const escrowClient = await EscrowClient.build(signer);
-
-    let manifest = await this.storageService.download(jobEntity.manifestUrl);
+  public async downloadManifest(manifestUrl: string) {
+    let manifest = await this.storageService.download(manifestUrl);
     if (typeof manifest === 'string' && isPGPMessage(manifest)) {
       manifest = await this.encryption.decrypt(manifest as any);
     }
@@ -697,7 +690,29 @@ export class JobService {
       manifest = JSON.parse(manifest);
     }
 
-    await this.validateManifest(jobEntity.requestType, manifest);
+    return manifest;
+  }
+
+  public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const { getOracleAddresses } =
+      this.getOraclesSpecificActions[jobEntity.requestType];
+
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    if (jobEntity.requestType !== JobRequestType.HCAPTCHA) {
+      let manifest = await this.storageService.download(jobEntity.manifestUrl);
+      if (typeof manifest === 'string' && isPGPMessage(manifest)) {
+        manifest = await this.encryption.decrypt(manifest as any);
+      }
+
+      if (isValidJSON(manifest)) {
+        manifest = JSON.parse(manifest);
+      }
+
+      await this.validateManifest(jobEntity.requestType, manifest);
+    }
 
     const oracleAddresses = getOracleAddresses();
 
