@@ -51,7 +51,6 @@
       "source": "/cron/(.*)",
       "destination": "/api/app.ts"
     }
-
   ],
   "crons": [
     {
@@ -73,6 +72,25 @@
     {
       "path": "/cron/webhook/process",
       "schedule": "*/10 * * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "*"
+        }
+      ]
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
