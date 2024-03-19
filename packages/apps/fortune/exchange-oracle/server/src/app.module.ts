@@ -10,6 +10,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
+import { StatsModule } from './modules/stats/stats.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { AssignmentModule } from './modules/assignment/assignment.module';
     JobModule,
     WebhookModule,
     Web3Module,
+    StatsModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { AssignmentEntity } from './assignment.entity';
+import { AssignmentStatus } from '../../common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 import { AssignmentFilterData, ListResult } from './assignment.interface';
 import { AssignmentSortField } from 'src/common/enums/job';
@@ -14,6 +15,16 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     public readonly configService: ConfigService,
   ) {
     super(AssignmentEntity, dataSource);
+  }
+  
+  public async findByWorkerAddress(
+    workerAddress: string,
+  ): Promise<AssignmentEntity[]> {
+    return this.find({
+      where: {
+        workerAddress,
+      },
+    });
   }
 
   public async findOneByJobIdAndWorker(
@@ -27,7 +38,7 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
       },
     });
   }
-
+  
   public async countByJobId(jobId: ChainId): Promise<number> {
     return this.count({
       where: {
