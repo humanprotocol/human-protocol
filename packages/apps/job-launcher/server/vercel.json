@@ -7,9 +7,16 @@
       "maxDuration": 300
     }
   },
+  "redirects": [
+    { "source": "/", "destination": "/swagger" }
+  ],
   "rewrites": [
     {
       "source": "/swagger",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/swagger/(.*)",
       "destination": "/api/app.ts"
     },
     {
@@ -37,7 +44,7 @@
       "destination": "/api/app.ts"
     },
     {
-      "source": "/webhook/webhook",
+      "source": "/webhook",
       "destination": "/api/app.ts"
     },
     {
