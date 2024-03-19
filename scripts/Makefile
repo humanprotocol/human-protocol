@@ -18,13 +18,16 @@ create-env-files:
 		cp ./fortune/.env.exco-server ../packages/apps/fortune/exchange-oracle/server/.env.local ; \
 	fi
 
+	@if [ ! -f "../packages/apps/fortune/recording-oracle/.env.local" ]; then \
+		cp ./fortune/.env.rec-oracle ../packages/apps/fortune/recording-oracle/.env.local ; \
+	fi
+
 hardhat-node:
 	yarn workspace @human-protocol/core local
 
 subgraph:
 	docker compose -f ./fortune/docker-compose.yml up -d graph-node
 	NETWORK=localhost yarn workspace @human-protocol/subgraph generate
-	check-container-health:
 	@while [ $$(docker inspect --format='{{.State.Health.Status}}' graph-node) != "healthy" ]; do \
 		sleep 2; \
 	done; \
@@ -38,7 +41,7 @@ minio:
 database:
 	docker compose -f ./fortune/docker-compose.yml up -d postgres
 
-job-launcher-server: minio
+job-launcher-server:
 	yarn workspace @human-protocol/job-launcher-server setup:local
 	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server migration:run
 	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start
@@ -53,11 +56,12 @@ fortune-exchange-oracle:
 
 fortune-recording-oracle:
 	yarn workspace @human-protocol/fortune-recording-oracle setup:local
+	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start
 
 reputation-oracle:
 	yarn workspace @human-protocol/reputation-oracle setup:local
 	
-fortune: check-core-folders
+fortune: check-core-folders minio
 	@echo "RUNNING FORTUNE..."
 	@trap 'echo "STOPPING FORTUNE.."; kill -9 $$PID_HARDHAT $$PID_JL_CLIENT $$PID_JL_SERVER $$PID_EXO $$PID_RECO; docker compose -f ./fortune/docker-compose.yml down; exit 0' SIGINT ERR; \
 	$(MAKE) hardhat-node & PID_HARDHAT=$$!; \
