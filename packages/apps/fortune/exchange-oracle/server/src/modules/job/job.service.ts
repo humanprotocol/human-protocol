@@ -3,10 +3,8 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Inject,
@@ -16,42 +14,39 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
-import { firstValueFrom } from 'rxjs';
+import { ConfigNames } from '../../common/config';
+import { JOB_TYPE, TOKEN } from '../../common/constant';
+import {
+  AssignmentStatus,
+  JobFieldName,
+  JobStatus,
+} from '../../common/enums/job';
+import { EventType } from '../../common/enums/webhook';
 import { ISolution } from '../../common/interfaces/job';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { ConfigNames } from '../../common/config';
-import {
-  ESCROW_FAILED_ENDPOINT,
-  HEADER_SIGNATURE_KEY,
-  JOB_TYPE,
-  TOKEN,
-} from '../../common/constant';
-import { JobFieldName, JobStatus } from '../../common/enums/job';
-import { EventType } from '../../common/enums/webhook';
-import { CaseConverter } from '../../common/utils/case-converter';
-import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { WebhookRepository } from '../webhook/webhook.repository';
 import { GetJobsDto, JobDto, ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  private storage: {
-    [key: string]: string[];
-  } = {};
 
   constructor(
     private readonly configService: ConfigService,
     public readonly jobRepository: JobRepository,
+    public readonly assignmentRepository: AssignmentRepository,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     @Inject(StorageService)
     private readonly storageService: StorageService,
-    private readonly httpService: HttpService,
+    public readonly webhookRepository: WebhookRepository,
   ) {}
 
   public async createJob(webhook: WebhookDto): Promise<void> {
@@ -139,35 +134,28 @@ export class JobService {
     solution: string,
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
-      throw new Error('Invalid address');
+      throw new BadRequestException('Invalid address');
     }
 
-    const solutionsUrl = await this.addSolution(
-      chainId,
+    const assignment = await this.assignmentRepository.findOneByEscrowAndWorker(
       escrowAddress,
       workerAddress,
-      solution,
     );
+    if (!assignment) {
+      throw new BadRequestException('User is not assigned to the job');
+    }
 
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const recordingOracleAddress =
-      await escrowClient.getRecordingOracleAddress(escrowAddress);
+    await this.addSolution(chainId, escrowAddress, workerAddress, solution);
 
-    const leader = await OperatorUtils.getLeader(
-      chainId,
-      recordingOracleAddress,
-    );
+    assignment.status = AssignmentStatus.VALIDATION;
+    await this.assignmentRepository.updateOne(assignment);
 
-    const recordingOracleWebhookUrl = leader?.webhookUrl;
-    if (!recordingOracleWebhookUrl)
-      throw new NotFoundException('Unable to get Recording Oracle webhook URL');
+    const webhook = new WebhookEntity();
+    webhook.escrowAddress = escrowAddress;
+    webhook.chainId = chainId;
+    webhook.eventType = EventType.SUBMISSION_IN_REVIEW;
 
-    await this.sendWebhook(recordingOracleWebhookUrl, {
-      escrowAddress: escrowAddress,
-      chainId: chainId,
-      solutionsUrl: solutionsUrl,
-    });
+    await this.webhookRepository.createUnique(webhook);
   }
 
   public async processInvalidJobSolution(
@@ -247,19 +235,6 @@ export class JobService {
     return url;
   }
 
-  private async sendWebhook(url: string, body: any): Promise<void> {
-    const snake_case_body = CaseConverter.transformToSnakeCase(body);
-    const signedBody = await signMessage(
-      snake_case_body,
-      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
-    );
-    await firstValueFrom(
-      this.httpService.post(url, snake_case_body, {
-        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      }),
-    );
-  }
-
   public async getManifest(
     chainId: number,
     escrowAddress: string,
@@ -297,30 +272,13 @@ export class JobService {
     }
 
     if (!manifest) {
-      const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      const jobLauncherAddress =
-        await escrowClient.getJobLauncherAddress(escrowAddress);
-      const jobLauncher = await OperatorUtils.getLeader(
-        chainId,
-        jobLauncherAddress,
-      );
-      const jobLauncherWebhookUrl = jobLauncher?.webhookUrl;
+      const webhook = new WebhookEntity();
+      webhook.escrowAddress = escrowAddress;
+      webhook.chainId = chainId;
+      webhook.eventType = EventType.TASK_CREATION_FAILED;
 
-      if (!jobLauncherWebhookUrl) {
-        throw new NotFoundException('Unable to get Job Launcher webhook URL');
-      }
+      await this.webhookRepository.createUnique(webhook);
 
-      const body: WebhookDto = {
-        escrowAddress: escrowAddress,
-        chainId: chainId,
-        eventType: EventType.TASK_CREATION_FAILED,
-        eventData: { assignments: [{ reason: 'Unable to get manifest' }] },
-      };
-      await this.sendWebhook(
-        jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
-        body,
-      );
       throw new NotFoundException('Unable to get manifest');
     } else return manifest;
   }

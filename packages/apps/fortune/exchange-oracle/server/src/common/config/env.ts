@@ -24,6 +24,7 @@ export const ConfigNames = {
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   PGP_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
   PGP_PASSPHRASE: 'PGP_PASSPHRASE',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -55,4 +56,6 @@ export const envValidator = Joi.object({
   PGP_ENCRYPT: Joi.boolean().default(false),
   PGP_PRIVATE_KEY: Joi.string().optional(),
   PGP_PASSPHRASE: Joi.string().optional(),
+  // Cron Job Secret
+  CRON_SECRET: Joi.string().optional(),
 });

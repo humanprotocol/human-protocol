@@ -1,8 +1,8 @@
 import { NS } from '../../common/constant';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1710760785464 implements MigrationInterface {
-  name = 'InitialMigration1710760785464';
+export class InitialMigration1710871038249 implements MigrationInterface {
+  name = 'InitialMigration1710871038249';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createSchema(NS, true);
@@ -11,7 +11,8 @@ export class InitialMigration1710760785464 implements MigrationInterface {
                 'escrow_created',
                 'escrow_canceled',
                 'task_creation_failed',
-                'submission_rejected'
+                'submission_rejected',
+                'submission_in_review'
             )
         `);
     await queryRunner.query(`
@@ -30,6 +31,23 @@ export class InitialMigration1710760785464 implements MigrationInterface {
                 "status" "hmt"."webhooks_status_enum" NOT NULL,
                 CONSTRAINT "PK_9e8795cfc899ab7bdaa831e8527" PRIMARY KEY ("id")
             )
+        `);
+    await queryRunner.query(`
+            CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum" AS ENUM('process-pending-webhook')
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "hmt"."cron-jobs" (
+                "id" SERIAL NOT NULL,
+                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "cron_job_type" "hmt"."cron-jobs_cron_job_type_enum" NOT NULL,
+                "started_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "completed_at" TIMESTAMP WITH TIME ZONE,
+                CONSTRAINT "PK_268498ac0d3e7472960fb0faeb1" PRIMARY KEY ("id")
+            )
+        `);
+    await queryRunner.query(`
+            CREATE UNIQUE INDEX "IDX_0dafd70b737e71d21490ad0126" ON "hmt"."cron-jobs" ("cron_job_type")
         `);
     await queryRunner.query(`
             CREATE TYPE "hmt"."assignments_status_enum" AS ENUM(
@@ -101,6 +119,15 @@ export class InitialMigration1710760785464 implements MigrationInterface {
         `);
     await queryRunner.query(`
             DROP TYPE "hmt"."assignments_status_enum"
+        `);
+    await queryRunner.query(`
+            DROP INDEX "hmt"."IDX_0dafd70b737e71d21490ad0126"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "hmt"."cron-jobs"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "hmt"."cron-jobs_cron_job_type_enum"
         `);
     await queryRunner.query(`
             DROP TABLE "hmt"."webhooks"

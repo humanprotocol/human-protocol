@@ -11,6 +11,7 @@ import { ConfigNames } from '../common/config';
 import { JobEntity } from '../modules/job/job.entity';
 import { AssignmentEntity } from '../modules/assignment/assignment.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
+import { CronJobEntity } from 'src/modules/cron-job/cron-job.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { WebhookEntity } from '../modules/webhook/webhook.entity';
         return {
           name: 'default',
           type: 'postgres',
-          entities: [JobEntity, AssignmentEntity, WebhookEntity],
+          entities: [JobEntity, AssignmentEntity, WebhookEntity, CronJobEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,

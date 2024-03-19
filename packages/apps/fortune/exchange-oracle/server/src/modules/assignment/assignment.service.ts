@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { AssignmentStatus } from 'src/common/enums/job';
+import { AssignmentStatus } from '../../common/enums/job';
 import { JwtUser } from '../../common/types/jwt';
 import { JobRepository } from '../job/job.repository';
 import {
@@ -9,11 +9,11 @@ import {
 } from './assignment.dto';
 import { AssignmentEntity } from './assignment.entity';
 import { AssignmentRepository } from './assignment.repository';
-import { PageDto } from 'src/common/pagination/pagination.dto';
-import { JOB_TYPE, TOKEN } from 'src/common/constant';
+import { PageDto } from '../../common/pagination/pagination.dto';
+import { JOB_TYPE, TOKEN } from '../../common/constant';
 import { JobService } from '../job/job.service';
 import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from 'src/common/config';
+import { ConfigNames } from '../../common/config';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 
@@ -95,6 +95,7 @@ export class AssignmentService {
 
   public async getAssignmentList(
     data: GetAssignmentsDto,
+    workerAddress: string,
     reputationNetwork: string,
   ): Promise<PageDto<AssignmentDto>> {
     if (data.jobType && data.jobType !== JOB_TYPE)
@@ -106,6 +107,7 @@ export class AssignmentService {
         pageSize: data.pageSize!,
         skip: data.skip!,
         reputationNetwork,
+        workerAddress,
       });
     const assignments = await Promise.all(
       entities.map(async (entity) => {

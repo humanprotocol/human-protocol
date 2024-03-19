@@ -5,7 +5,7 @@ import { BaseRepository } from '../../database/base.repository';
 import { AssignmentEntity } from './assignment.entity';
 import { ChainId } from '@human-protocol/sdk';
 import { AssignmentFilterData, ListResult } from './assignment.interface';
-import { AssignmentSortField } from 'src/common/enums/job';
+import { AssignmentSortField } from '../../common/enums/job';
 
 @Injectable()
 export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
@@ -17,12 +17,24 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
   }
 
   public async findOneByJobIdAndWorker(
-    jobId: ChainId,
+    jobId: number,
     workerAddress: string,
   ): Promise<AssignmentEntity | null> {
     return this.findOne({
       where: {
         jobId,
+        workerAddress,
+      },
+    });
+  }
+
+  public async findOneByEscrowAndWorker(
+    escrowAddress: string,
+    workerAddress: string,
+  ): Promise<AssignmentEntity | null> {
+    return this.findOne({
+      where: {
+        job: { escrowAddress },
         workerAddress,
       },
     });
@@ -68,6 +80,10 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
 
     queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
       reputationNetwork: data.reputationNetwork,
+    });
+
+    queryBuilder.andWhere('assignment.workerAddress = :workerAddress', {
+      workerAddress: data.workerAddress,
     });
 
     queryBuilder.offset(data.skip).limit(data.pageSize);
