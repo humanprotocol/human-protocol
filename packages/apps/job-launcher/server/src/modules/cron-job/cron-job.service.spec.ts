@@ -497,7 +497,6 @@ describe('CronJobService', () => {
     let fundEscrowMock: any;
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock1: Partial<JobEntity>, jobEntityMock2: Partial<JobEntity>;
-    let createWebhookMock: any;
 
     beforeEach(() => {
       cronJobEntityMock = {
@@ -537,8 +536,6 @@ describe('CronJobService', () => {
       fundEscrowMock.mockResolvedValue(true);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-
-      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
 
       const cvatManifestMock: DeepPartial<CvatManifestDto> = {
         data: {
@@ -584,7 +581,6 @@ describe('CronJobService', () => {
       await service.fundEscrowCronJob();
 
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
-      expect(createWebhookMock).toHaveBeenCalledTimes(2);
     });
 
     it('should increase retriesCount by 1, if the job fund fails', async () => {
@@ -595,8 +591,6 @@ describe('CronJobService', () => {
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.retriesCount).toBe(2);
       expect(jobEntityMock2.retriesCount).toBe(1);
-
-      expect(createWebhookMock).toHaveBeenCalledTimes(1);
     });
 
     it('should mark job as failed if the job fund fails more than max retries count', async () => {
@@ -608,8 +602,6 @@ describe('CronJobService', () => {
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.status).toBe(JobStatus.FAILED);
       expect(jobEntityMock2.status).toBe(JobStatus.SET_UP);
-
-      expect(createWebhookMock).toHaveBeenCalledTimes(1);
     });
 
     it('should complete the cron job entity on database to unlock', async () => {

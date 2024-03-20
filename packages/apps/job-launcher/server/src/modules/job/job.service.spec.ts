@@ -91,6 +91,7 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
+import { WebhookRepository } from '../webhook/webhook.repository';
 import { JobService } from './job.service';
 
 import { div, mul } from '../../common/utils/decimal';
@@ -164,7 +165,8 @@ describe('JobService', () => {
     routingProtocolService: RoutingProtocolService,
     web3Service: Web3Service,
     encryption: Encryption,
-    storageService: StorageService;
+    storageService: StorageService,
+    webhookRepository: WebhookRepository;
 
   let encrypt = true;
 
@@ -238,6 +240,10 @@ describe('JobService', () => {
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
+          provide: WebhookRepository,
+          useValue: createMock<WebhookRepository>(),
+        },
+        {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
         },
@@ -264,6 +270,7 @@ describe('JobService', () => {
     routingProtocolService = moduleRef.get(RoutingProtocolService);
     createPaymentMock = jest.spyOn(paymentRepository, 'createUnique');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
+    webhookRepository = moduleRef.get<WebhookRepository>(WebhookRepository);
     storageService = moduleRef.get<StorageService>(StorageService);
 
     storageService.uploadFile = jest.fn().mockResolvedValue({
@@ -1545,12 +1552,13 @@ describe('JobService', () => {
   });
 
   describe('fundEscrow', () => {
+    let createWebhookMock: any;
     const chainId = ChainId.LOCALHOST;
 
     it('should fund escrow and update the status to launched', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
-
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
       const mockJobEntity: Partial<JobEntity> = {
         chainId,
         manifestUrl: MOCK_FILE_URL,
@@ -1570,9 +1578,11 @@ describe('JobService', () => {
       mockJobEntity.status = JobStatus.LAUNCHED;
       expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
+      expect(createWebhookMock).toHaveBeenCalledTimes(1);
     });
 
     it('should handle error during job fund', async () => {
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
       (EscrowClient.build as any).mockImplementationOnce(() => ({
         fund: jest.fn().mockRejectedValue(new Error()),
       }));
@@ -1589,6 +1599,7 @@ describe('JobService', () => {
       await expect(
         jobService.fundEscrow(mockJobEntity as JobEntity),
       ).rejects.toThrow();
+      expect(createWebhookMock).not.toHaveBeenCalled();
     });
   });
 

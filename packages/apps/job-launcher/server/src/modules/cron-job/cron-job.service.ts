@@ -14,7 +14,7 @@ import {
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
+import { FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
@@ -154,22 +154,6 @@ export class CronJobService {
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.fundEscrow(jobEntity);
-
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
-          if ((manifest as CvatManifestDto)?.annotation?.type) {
-            const webhookEntity = new WebhookEntity();
-            Object.assign(webhookEntity, {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED,
-              oracleType: OracleType.CVAT,
-              hasSignature: false,
-            });
-            await this.webhookRepository.createUnique(webhookEntity);
-          }
         } catch (err) {
           this.logger.error(`Error funding escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
