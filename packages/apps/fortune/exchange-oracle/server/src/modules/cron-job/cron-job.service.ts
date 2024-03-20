@@ -2,8 +2,6 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { ErrorCronJob } from '../../common/constant/errors';
 import { CronJobType } from '../../common/enums/cron-job';
-
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
@@ -60,7 +58,6 @@ export class CronJobService {
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,

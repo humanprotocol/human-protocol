@@ -14,7 +14,7 @@ import { WebhookDto } from './webhook.dto';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
-  @Post('webhook')
+  @Post()
   public async processWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,
