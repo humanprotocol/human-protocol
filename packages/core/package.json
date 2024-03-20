@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types",
-    "precompile": "npm run clean",
+    "precompile": "yarn clean",
     "compile": "hardhat compile",
     "verify": "hardhat verify",
     "test": "hardhat test",
@@ -33,9 +33,9 @@
     "format:contracts": "prettier --write '**/*.sol'",
     "format:scripts": "prettier --write '**/*.ts'",
     "format": "yarn format:contracts && yarn format:scripts",
-    "build": "npm run compile && tsc",
+    "build": "yarn compile && tsc",
     "prebuild": "rm -rf dist",
-    "prepublish": "npm run build"
+    "prepublish": "yarn build"
   },
   "repository": {
     "type": "git",
