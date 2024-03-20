@@ -333,33 +333,38 @@ contract MetaHumanGovernor is
         for (uint16 i = 1; i <= spokeContractsLength; ++i) {
             // Using "1" as the function selector
             bytes memory message = abi.encode(1, proposalId);
+
+            uint16 spokeChainId = spokeContractsSnapshots[proposalId][i - 1]
+                .chainId;
+            address spokeAddress = address(
+                uint160(
+                    uint256(
+                        spokeContractsSnapshots[proposalId][i - 1]
+                            .contractAddress
+                    )
+                )
+            );
+
             bytes memory payload = abi.encode(
-                spokeContractsSnapshots[proposalId][i - 1].contractAddress,
-                spokeContractsSnapshots[proposalId][i - 1].chainId,
+                spokeAddress,
+                spokeChainId,
                 msg.sender,
                 message
             );
 
             uint256 cost = quoteCrossChainMessage(
-                spokeContractsSnapshots[proposalId][i - 1].chainId,
+                spokeChainId,
                 sendMessageToHubCost
             );
 
             wormholeRelayer.sendPayloadToEvm{value: cost}(
-                spokeContractsSnapshots[proposalId][i - 1].chainId,
-                address(
-                    uint160(
-                        uint256(
-                            spokeContractsSnapshots[proposalId][i - 1]
-                                .contractAddress
-                        )
-                    )
-                ),
+                spokeChainId,
+                spokeAddress,
                 payload,
                 sendMessageToHubCost, // send value to enable the spoke to send back vote result
-                GAS_LIMIT
-                // spokeContracts[i-1].chainId, // refund chain
-                // address(this) // target where the refund is sent
+                GAS_LIMIT,
+                spokeChainId,
+                spokeAddress
             );
         }
     }
@@ -410,33 +415,34 @@ contract MetaHumanGovernor is
                     voteEndTimestamp //vote end timestamp
                 );
 
+                uint16 spokeChainId = spokeContractsSnapshots[proposalId][i - 1]
+                    .chainId;
+                address spokeAddress = address(
+                    uint160(
+                        uint256(
+                            spokeContractsSnapshots[proposalId][i - 1]
+                                .contractAddress
+                        )
+                    )
+                );
+
                 bytes memory payload = abi.encode(
-                    spokeContractsSnapshots[proposalId][i - 1].contractAddress,
-                    spokeContractsSnapshots[proposalId][i - 1].chainId,
+                    spokeAddress,
+                    spokeChainId,
                     bytes32(uint256(uint160(address(this)))),
                     message
                 );
 
-                uint256 cost = quoteCrossChainMessage(
-                    spokeContractsSnapshots[proposalId][i - 1].chainId,
-                    0
-                );
+                uint256 cost = quoteCrossChainMessage(spokeChainId, 0);
 
                 wormholeRelayer.sendPayloadToEvm{value: cost}(
-                    spokeContractsSnapshots[proposalId][i - 1].chainId,
-                    address(
-                        uint160(
-                            uint256(
-                                spokeContractsSnapshots[proposalId][i - 1]
-                                    .contractAddress
-                            )
-                        )
-                    ),
+                    spokeChainId,
+                    spokeAddress,
                     payload,
                     0, // no receiver value needed
-                    GAS_LIMIT
-                    // chainId, // refund chain
-                    // address(this) // target where the refund is sent
+                    GAS_LIMIT,
+                    spokeChainId,
+                    spokeAddress
                 );
             }
         }

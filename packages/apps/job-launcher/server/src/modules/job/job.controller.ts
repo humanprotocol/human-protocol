@@ -30,6 +30,7 @@ import {
   JobIdDto,
   FortuneFinalResultDto,
   JobCaptchaDto,
+  JobQuickLaunchDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
@@ -44,12 +45,44 @@ export class JobController {
   constructor(private readonly jobService: JobService) {}
 
   @ApiOperation({
+    summary: 'Create a job via quick launch',
+    description: 'Endpoint to create a new job using pre-definde manifest url.',
+  })
+  @ApiBody({ type: JobQuickLaunchDto })
+  @ApiResponse({
+    status: 201,
+    description:
+      'ID of the created job with pre-definde manifest url via quick launch.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
+  @Post('/quick-launch')
+  @ApiKey()
+  public async quickLaunch(
+    @Request() req: RequestWithUser,
+    @Body() data: JobQuickLaunchDto,
+  ): Promise<number> {
+    return this.jobService.createJob(req.user.id, data.requestType, data);
+  }
+
+  @ApiOperation({
     summary: 'Create a fortune job',
     description: 'Endpoint to create a new fortune job.',
   })
   @ApiBody({ type: JobFortuneDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'ID of the created fortune job.',
     type: Number,
   })
@@ -80,7 +113,7 @@ export class JobController {
   })
   @ApiBody({ type: JobCvatDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'ID of the created CVAT job.',
     type: Number,
   })
@@ -110,7 +143,7 @@ export class JobController {
   })
   @ApiBody({ type: JobCaptchaDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'ID of the created hCaptcha job.',
     type: Number,
   })
