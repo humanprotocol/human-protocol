@@ -18,20 +18,20 @@ async function bootstrap() {
   const host = configService.get<string>(ConfigNames.HOST)!;
   const port = configService.get<string>(ConfigNames.PORT)!;
 
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'staging'
-        ? [
-            `http://localhost:${port}`,
-            `http://127.0.0.1:${port}`,
-            `http://0.0.0.0:${port}`,
-            `http://${host}:${port}`,
-          ]
-        : [`http://${host}:${port}`],
-    credentials: true,
-    exposedHeaders: ['Content-Disposition'],
-  });
+  // app.enableCors({
+  //   origin:
+  //     process.env.NODE_ENV === 'development' ||
+  //     process.env.NODE_ENV === 'staging'
+  //       ? [
+  //           `http://localhost:${port}`,
+  //           `http://127.0.0.1:${port}`,
+  //           `http://0.0.0.0:${port}`,
+  //           `http://${host}:${port}`,
+  //         ]
+  //       : [`http://${host}:${port}`],
+  //   credentials: true,
+  //   exposedHeaders: ['Content-Disposition'],
+  // });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
