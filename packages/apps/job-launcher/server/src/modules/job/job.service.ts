@@ -114,6 +114,8 @@ import {
   OracleAddresses,
   RequestAction,
 } from './job.interface';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { WebhookRepository } from '../webhook/webhook.repository';
 
 @Injectable()
 export class JobService {
@@ -125,6 +127,7 @@ export class JobService {
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
+    public readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
     public readonly configService: ConfigService,
@@ -744,6 +747,16 @@ export class JobService {
 
     jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
+
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CREATED,
+      oracleType: OracleType.CVAT,
+      hasSignature: false,
+    });
+    await this.webhookRepository.createUnique(webhookEntity);
 
     return jobEntity;
   }
