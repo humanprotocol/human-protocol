@@ -26,11 +26,6 @@ export class SolveJobDto {
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiProperty({ name: 'worker_address' })
-  @IsString()
-  @IsValidEthereumAddress()
-  public workerAddress: string;
-
   @ApiProperty()
   @IsString()
   public solution: string;

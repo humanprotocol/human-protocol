@@ -10,6 +10,7 @@ export interface AssignmentFilterData {
   sort?: SortDirection;
   skip: number;
   pageSize: number;
+  workerAddress: string;
   reputationNetwork: string;
 }
 

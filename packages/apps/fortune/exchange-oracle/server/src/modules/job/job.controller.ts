@@ -29,11 +29,14 @@ export class JobController {
   }
 
   @Post('solve')
-  solveJob(@Body() body: SolveJobDto): Promise<any> {
+  solveJob(
+    @Request() req: RequestWithUser,
+    @Body() body: SolveJobDto,
+  ): Promise<any> {
     return this.jobService.solveJob(
       body.chainId,
       body.escrowAddress,
-      body.workerAddress,
+      req.user.address,
       body.solution,
     );
   }

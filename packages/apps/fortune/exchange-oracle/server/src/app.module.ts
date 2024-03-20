@@ -12,6 +12,7 @@ import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 
 @Module({
   providers: [
@@ -30,6 +31,7 @@ import { AssignmentModule } from './modules/assignment/assignment.module';
     JobModule,
     WebhookModule,
     Web3Module,
+    CronJobModule,
     StatsModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV

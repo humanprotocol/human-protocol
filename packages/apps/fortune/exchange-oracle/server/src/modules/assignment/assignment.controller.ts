@@ -29,12 +29,13 @@ export class AssignmentController {
   }
 
   @Get()
-  getJobs(
+  getAssignments(
     @Request() req: RequestWithUser,
     @Query() query: GetAssignmentsDto,
   ): Promise<any> {
     return this.assignmentService.getAssignmentList(
       query,
+      req.user.address,
       req.user.reputationNetwork,
     );
   }
