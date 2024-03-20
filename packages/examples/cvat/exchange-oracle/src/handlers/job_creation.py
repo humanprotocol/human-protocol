@@ -180,7 +180,7 @@ class BoxesFromPointsTaskBuilder:
         self.embedded_point_color = (0, 255, 255)
 
         self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
-        self.min_class_samples_for_roi_estimation = 50
+        self.min_class_samples_for_roi_estimation = 25
 
         self.max_discarded_threshold = 0.05
         """
@@ -253,7 +253,7 @@ class BoxesFromPointsTaskBuilder:
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
-                    self._format_list(gt_labels - manifest_labels),
+                    self._format_list(list(gt_labels - manifest_labels)),
                 )
             )
 
@@ -296,11 +296,10 @@ class BoxesFromPointsTaskBuilder:
             sample_boxes = [a for a in gt_sample.annotations if isinstance(a, dm.Bbox)]
             valid_boxes = []
             for bbox in sample_boxes:
-                if (0 <= bbox.x < bbox.x + bbox.w < img_w) and (
-                    0 <= bbox.y < bbox.y + bbox.h < img_h
+                if not (
+                    (0 <= bbox.x < bbox.x + bbox.w <= img_w)
+                    and (0 <= bbox.y < bbox.y + bbox.h <= img_h)
                 ):
-                    valid_boxes.append(bbox)
-                else:
                     excluded_gt_info.add_error(
                         "Sample '{}': GT bbox #{} ({}) - invalid coordinates. "
                         "The image will be skipped".format(
@@ -633,6 +632,13 @@ class BoxesFromPointsTaskBuilder:
 
             gt_dataset.put(gt_sample.wrap(annotations=matched_boxes))
 
+        if excluded_gt_info.excluded_count:
+            self.logger.warning(
+                "Some GT annotations were excluded due to the errors found: {}".format(
+                    self._format_list([e.message for e in excluded_gt_info.errors], separator="\n")
+                )
+            )
+
         if (
             excluded_gt_info.excluded_count
             > excluded_gt_info.total_count * self.max_discarded_threshold
@@ -642,13 +648,6 @@ class BoxesFromPointsTaskBuilder:
                 "Please make sure each GT box matches exactly 1 point".format(
                     excluded_gt_info.total_count - len(bbox_point_mapping),
                     excluded_gt_info.total_count,
-                )
-            )
-
-        if excluded_gt_info.excluded_count:
-            self.logger.warning(
-                "Some GT annotations were excluded due to the errors found: {}".format(
-                    self._format_list([e.message for e in excluded_gt_info.errors], separator="\n")
                 )
             )
 
@@ -827,10 +826,8 @@ class BoxesFromPointsTaskBuilder:
         )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
-        bucket_name = self.oracle_data_bucket.bucket_name
         for file_data, filename in file_list:
             storage_client.create_file(
-                bucket_name,
                 compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                 file_data,
             )
