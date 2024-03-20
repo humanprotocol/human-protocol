@@ -8,12 +8,15 @@ import {
   JobStatus,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
+import { ChainId } from '@human-protocol/sdk';
 
 export class CreateAssignmentDto {
-  @ApiProperty({ name: 'chain_id' })
-  @Type(() => Number)
-  @IsNumber()
-  chainId: number;
+  @ApiProperty({
+    enum: ChainId,
+    name: 'chain_id',
+  })
+  @IsEnum(ChainId)
+  chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
   @IsString()

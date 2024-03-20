@@ -16,7 +16,7 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
   ) {
     super(AssignmentEntity, dataSource);
   }
-  
+
   public async findByWorkerAddress(
     workerAddress: string,
   ): Promise<AssignmentEntity[]> {
@@ -50,13 +50,67 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
       },
     });
   }
-  
+
   public async countByJobId(jobId: ChainId): Promise<number> {
     return this.count({
       where: {
         jobId,
       },
     });
+  }
+
+  public async countTotalAssignments(workerAddress?: string): Promise<number> {
+    const where: any = {};
+    if (workerAddress) {
+      where.workerAddress = workerAddress;
+    }
+    return this.count({ where });
+  }
+
+  public async countCompletedAssignments(
+    workerAddress?: string,
+  ): Promise<number> {
+    const where: any = { status: AssignmentStatus.COMPLETED };
+    if (workerAddress) {
+      where.workerAddress = workerAddress;
+    }
+    return this.count({ where });
+  }
+
+  public async countSentAssignments(workerAddress?: string): Promise<number> {
+    const where: any = { status: AssignmentStatus.VALIDATION };
+    if (workerAddress) {
+      where.workerAddress = workerAddress;
+    }
+    return this.count({ where });
+  }
+
+  public async countRejectedAssignments(
+    workerAddress?: string,
+  ): Promise<number> {
+    const where: any = { status: AssignmentStatus.REJECTED };
+    if (workerAddress) {
+      where.workerAddress = workerAddress;
+    }
+    return this.count({ where });
+  }
+
+  public async countExpiredAssignments(
+    workerAddress?: string,
+  ): Promise<number> {
+    const where: any = { status: AssignmentStatus.EXPIRED };
+    if (workerAddress) {
+      where.workerAddress = workerAddress;
+    }
+    return this.count({ where });
+  }
+
+  public async countTotalWorkers(): Promise<number> {
+    const count = await this.createQueryBuilder('assignment')
+      .select('COUNT(DISTINCT assignment.workerAddress)', 'count')
+      .getRawOne();
+
+    return parseInt(count.count, 10);
   }
 
   public async fetchFiltered(data: AssignmentFilterData): Promise<ListResult> {

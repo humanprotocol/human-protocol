@@ -1,48 +1,37 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AssignmentRepository } from '../assignment/assignment.repository';
-import { StatsDto } from './stats.dto';
-import { AssignmentStatus } from '../../common/enums/job';
+import { AssignmentStatsDto, OracleStatsDto } from './stats.dto';
 
 @Injectable()
 export class StatsService {
   public readonly logger = new Logger(StatsService.name);
   constructor(private assignmentRepository: AssignmentRepository) {}
 
-  async getAssignmentStats(workerAddress: string): Promise<StatsDto> {
-    const assignments = await this.assignmentRepository.find({
-      where: { workerAddress },
+  async getOracleStats(): Promise<OracleStatsDto> {
+    return new OracleStatsDto({
+      workersTotal: await this.assignmentRepository.countTotalWorkers(),
+      assignmentsCompleted:
+        await this.assignmentRepository.countCompletedAssignments(),
+      assignmentsExpired:
+        await this.assignmentRepository.countExpiredAssignments(),
+      assignmentsRejected:
+        await this.assignmentRepository.countRejectedAssignments(),
     });
-
-    const stats = assignments.reduce(
-      (acc, assignment) => {
-        acc.assignmentsTotal += 1;
-
-        switch (assignment.status) {
-          case AssignmentStatus.VALIDATION:
-            acc.submissionsSent += 1;
-            break;
-          case AssignmentStatus.COMPLETED:
-            acc.assignmentsCompleted += 1;
-            break;
-          case AssignmentStatus.REJECTED:
-            acc.assignmentsRejected += 1;
-            break;
-          case AssignmentStatus.EXPIRED:
-            acc.assignmentsExpired += 1;
-            break;
-        }
-
-        return acc;
-      },
-      {
-        assignmentsTotal: 0,
-        submissionsSent: 0,
-        assignmentsCompleted: 0,
-        assignmentsRejected: 0,
-        assignmentsExpired: 0,
-      },
-    );
-
-    return new StatsDto(stats);
+  }
+  async getAssignmentStats(workerAddress: string): Promise<AssignmentStatsDto> {
+    return new AssignmentStatsDto({
+      assignmentsTotal:
+        await this.assignmentRepository.countTotalAssignments(workerAddress),
+      submissionsSent:
+        await this.assignmentRepository.countSentAssignments(workerAddress),
+      assignmentsCompleted:
+        await this.assignmentRepository.countCompletedAssignments(
+          workerAddress,
+        ),
+      assignmentsExpired:
+        await this.assignmentRepository.countExpiredAssignments(workerAddress),
+      assignmentsRejected:
+        await this.assignmentRepository.countRejectedAssignments(workerAddress),
+    });
   }
 }
