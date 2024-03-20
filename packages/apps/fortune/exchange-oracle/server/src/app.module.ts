@@ -13,6 +13,7 @@ import { Web3Module } from './modules/web3/web3.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   providers: [
@@ -33,6 +34,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
     Web3Module,
     CronJobModule,
     StatsModule,
+    HealthModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`
