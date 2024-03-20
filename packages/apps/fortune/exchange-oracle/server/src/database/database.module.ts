@@ -11,7 +11,7 @@ import { ConfigNames } from '../common/config';
 import { JobEntity } from '../modules/job/job.entity';
 import { AssignmentEntity } from '../modules/assignment/assignment.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
-import { CronJobEntity } from 'src/modules/cron-job/cron-job.entity';
+import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 
 @Module({
   imports: [
