@@ -1,8 +1,14 @@
-import { KVStoreSetEvent, Leader, LeaderURL } from '../../generated/schema';
+import {
+  KVStoreSetEvent,
+  Leader,
+  LeaderURL,
+  ReputationNetwork,
+} from '../../generated/schema';
 import { DataSaved } from '../../generated/KVStore/KVStore';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
-import { BigInt } from '@graphprotocol/graph-ts';
+import { isValidEthAddress } from './utils/ethAdrress';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 
 export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
   const entityId = `${leader.address.toHex()}-${key}`;
@@ -16,6 +22,20 @@ export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
   }
 
   return leaderUrl;
+}
+
+export function createOrLoadReputationNetwork(
+  address: Address
+): ReputationNetwork {
+  let reputationNetwork = ReputationNetwork.load(address.toHex());
+
+  if (!reputationNetwork) {
+    reputationNetwork = new ReputationNetwork(address.toHex());
+    reputationNetwork.address = address;
+    reputationNetwork.save();
+  }
+
+  return reputationNetwork;
 }
 
 export function handleDataSaved(event: DataSaved): void {
@@ -37,12 +57,30 @@ export function handleDataSaved(event: DataSaved): void {
     leader.role = event.params.value;
   } else if (key == 'fee') {
     leader.fee = BigInt.fromString(event.params.value);
-  } else if (key == 'publickey') {
+  } else if (key == 'publickey' || key == 'public_key') {
     leader.publicKey = event.params.value;
-  } else if (key == 'webhookurl') {
+  } else if (key == 'webhookurl' || key == 'webhook_url') {
     leader.webhookUrl = event.params.value;
   } else if (key == 'url') {
     leader.url = event.params.value;
+  } else if (
+    isValidEthAddress(event.params.key) &&
+    leader.role == 'Reputation Oracle'
+  ) {
+    const ethAddress = Address.fromString(event.params.key);
+
+    const reputationNetwork = createOrLoadReputationNetwork(
+      event.params.sender
+    );
+
+    const operator = createOrLoadLeader(ethAddress);
+
+    if (event.params.value == 'ACTIVE') {
+      operator.reputationNetwork = reputationNetwork.id;
+    } else if (event.params.value == 'INACTIVE') {
+      operator.reputationNetwork = '';
+    }
+    operator.save();
   }
 
   if (key.indexOf('url') > -1) {

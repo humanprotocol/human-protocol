@@ -1,4 +1,4 @@
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
 import { ReputationController } from './reputation.controller';
@@ -7,13 +7,29 @@ import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
 import { ReputationDto } from './reputation.dto';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
+import {
+  MOCK_ADDRESS,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+} from '../../../test/constants';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
 
 describe('ReputationController', () => {
-  let reputationController: ReputationController;
-  let reputationService: ReputationService;
+  let reputationController: ReputationController,
+    reputationService: ReputationService;
+
+  const signerMock = {
+    address: MOCK_ADDRESS,
+    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+  };
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -28,7 +44,27 @@ describe('ReputationController', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs('s3', () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+      ],
       providers: [
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+            validateChainId: jest.fn().mockReturnValue(new Error()),
+          },
+        },
+        StorageService,
         ReputationService,
         {
           provide: ReputationRepository,

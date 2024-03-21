@@ -37,7 +37,10 @@ export const HCaptchaJobRequesteValidationSchema = Yup.object().shape({
     .moreThan(0, 'Min Requests must be greater than 0'),
   maxRequests: Yup.number()
     .required('Max Requests is required')
-    .moreThan(0, 'Max Requests must be greater than 0'),
+    .moreThan(
+      Yup.ref('minRequests'),
+      'Max Requests must be greater than min requests',
+    ),
   dataUrl: Yup.string().required('Data URL is required').url('Invalid URL'),
   labelingPrompt: Yup.string().required('Labeling Prompt is required'),
   groundTruths: Yup.string()
@@ -48,4 +51,5 @@ export const HCaptchaJobRequesteValidationSchema = Yup.object().shape({
     .moreThan(0, 'Accuracy target must be greater than 0')
     .max(100, 'Accuracy target must be less than or equal to 100'),
   targetBrowser: Yup.string().required('Target Browser is required'),
+  images: Yup.array().of(Yup.string().url('Invalid Image URL')),
 });

@@ -1,5 +1,8 @@
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
+import { ErrorManifest } from '../constants/errors';
+import { CvatManifestDto, FortuneManifestDto } from '../dto/manifest';
+import { JobRequestType } from '../enums';
 
 export function hashStream(stream: Readable): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -17,4 +20,20 @@ export function hashStream(stream: Readable): Promise<string> {
       reject(error);
     });
   });
+}
+
+export function getRequestType(
+  manifest: FortuneManifestDto | CvatManifestDto,
+): JobRequestType {
+  const requestType =
+    (manifest as FortuneManifestDto).requestType ||
+    ((manifest as CvatManifestDto).annotation &&
+      (manifest as CvatManifestDto).annotation.type) ||
+    null;
+
+  if (!requestType) {
+    throw new Error(ErrorManifest.UnsupportedManifestType);
+  }
+
+  return requestType;
 }

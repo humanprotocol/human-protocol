@@ -19,11 +19,11 @@
   ],
   "crons": [
     {
-      "path": "/webhook/cron/pending",
+      "path": "/cron/webhook/pending",
       "schedule": "*/1 * * * *"
     },
     {
-      "path": "/webhook/cron/paid",
+      "path": "/cron/webhook/paid",
       "schedule": "*/1 * * * *"
     }
   ],

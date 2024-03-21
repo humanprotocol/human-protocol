@@ -1,11 +1,14 @@
 # Changelog
 
-
 ### Added
 
+- **Add function to get the encryption public key:** get public key function added to KVStore client.
+
 ### Changed
-- __Update ethers version:__ update ethers to version 6.
-- __Update cancel escrow method:__ return transaction hash and refunded amount.
+
+- **Rename set url function of KVStore client:** function renamed to be descriptive. This function sets the url and the hash
+- **Rename get url function of KVStore client:** function renamed to be descriptive. This function gets the url and verifies the hash of the content.
+- **Convert operators config keys to snake_case:** use snake_case as standard.
 
 ### Deprecated
 
@@ -15,21 +18,24 @@
 
 ### Security
 
-
-
-
 # How to upgrade
 
 ## Typescript
+
 ### yarn
+
 ```
 yarn upgrade @human-protocol/sdk
 ```
-### npm 
+
+### npm
+
 ```
 npm update @human-protocol/sdk
 ```
+
 ## Python
+
 ```
 pip install --upgrade human-protocol-sdk
 ```

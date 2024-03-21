@@ -89,7 +89,7 @@ class OracleWebhookQueue:
     def get_pending_webhooks(
         self,
         session: Session,
-        sender_type: OracleWebhookTypes,
+        type: OracleWebhookTypes,
         *,
         limit: int = 10,
         for_update: bool = False,
@@ -98,7 +98,7 @@ class OracleWebhookQueue:
             _maybe_for_update(session.query(Webhook), enable=for_update)
             .where(
                 Webhook.direction == self.direction.value,
-                Webhook.type == sender_type.value,
+                Webhook.type == type.value,
                 Webhook.status == OracleWebhookStatuses.pending.value,
                 Webhook.wait_until <= utcnow(),
             )

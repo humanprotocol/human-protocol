@@ -37,7 +37,7 @@ export const CvatJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
     useCreateJobPageUI();
   const [searchParams] = useSearchParams();
-  const [expanded, setExpanded] = useState<string | false>('panel1');
+  const [expanded, setExpanded] = useState<string[]>(['panel1']);
 
   const initialValues = {
     labels: [],
@@ -57,7 +57,11 @@ export const CvatJobRequestForm = () => {
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
+      if (newExpanded) {
+        setExpanded([...expanded, panel]);
+      } else {
+        setExpanded(expanded.filter((item) => item !== panel));
+      }
     };
 
   const handleNext = ({
@@ -133,7 +137,7 @@ export const CvatJobRequestForm = () => {
     <Box sx={{ mt: '42px' }}>
       <form>
         <Accordion
-          expanded={expanded === 'panel1'}
+          expanded={expanded.includes('panel1')}
           onChange={handleChange('panel1')}
         >
           <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
@@ -212,7 +216,7 @@ export const CvatJobRequestForm = () => {
           </AccordionDetails>
         </Accordion>
         <Accordion
-          expanded={expanded === 'panel2'}
+          expanded={expanded.includes('panel2')}
           onChange={handleChange('panel2')}
         >
           <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">

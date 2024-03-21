@@ -1,6 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
-import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { Currency } from '../../common/enums/payment';
@@ -84,13 +83,10 @@ describe('UserService', () => {
       expect(result).toBe(userEntity);
     });
 
-    it('should throw NotFoundException if credentials are invalid', async () => {
+    it('should return null if credentials are invalid', async () => {
       jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
-
-      await expect(
-        userService.getByCredentials(email, password),
-      ).rejects.toThrow(NotFoundException);
-
+      const result = await userService.getByCredentials(email, password);
+      expect(result).toBe(null);
       expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
     });
   });

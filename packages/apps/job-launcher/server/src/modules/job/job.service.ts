@@ -45,7 +45,12 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { isPGPMessage, getRate, isValidJSON } from '../../common/utils';
+import {
+  isPGPMessage,
+  getRate,
+  isValidJSON,
+  parseUrl,
+} from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -64,6 +69,7 @@ import {
   JobCaptchaDto,
   RestrictedAudience,
   CreateJob,
+  JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -102,7 +108,14 @@ import {
 import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
-import { RequestAction } from './job.interface';
+import {
+  EscrowAction,
+  OracleAction,
+  OracleAddresses,
+  RequestAction,
+} from './job.interface';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { WebhookRepository } from '../webhook/webhook.repository';
 
 @Injectable()
 export class JobService {
@@ -114,6 +127,7 @@ export class JobService {
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
+    public readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
     public readonly configService: ConfigService,
@@ -442,6 +456,84 @@ export class JobService {
     },
   };
 
+  private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
+    [JobRequestType.HCAPTCHA]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.FORTUNE]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      getTrustedHandlers: () => [],
+    },
+  };
+
+  private getOraclesSpecificActions: Record<JobRequestType, OracleAction> = {
+    [JobRequestType.HCAPTCHA]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.FORTUNE]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+  };
+
   public async createJob(
     userId: number,
     requestType: JobRequestType,
@@ -459,7 +551,13 @@ export class JobService {
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
-    const fundAmount = await calculateFundAmount(dto, rate);
+    let fundAmount = 0;
+    if (dto instanceof JobQuickLaunchDto) {
+      fundAmount = dto.fundAmount;
+    } else {
+      fundAmount = await calculateFundAmount(dto, rate);
+    }
+
     const userBalance = await this.paymentService.getUserBalance(userId);
     const feePercentage = Number(
       await this.getOracleFee(
@@ -479,22 +577,42 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-    const manifestOrigin = await createManifest(
-      dto,
-      requestType,
-      tokenFundAmount,
-    );
-    const { url, hash } = await this.uploadManifest(
-      requestType,
-      chainId,
-      manifestOrigin,
-    );
-
     let jobEntity = new JobEntity();
+
+    if (dto instanceof JobQuickLaunchDto) {
+      if (!dto.manifestHash) {
+        const { filename } = parseUrl(dto.manifestUrl);
+
+        if (!filename) {
+          this.logger.log(ErrorJob.ManifestHashNotExist, JobService.name);
+          throw new ConflictException(ErrorJob.ManifestHashNotExist);
+        }
+
+        jobEntity.manifestHash = filename;
+      } else {
+        jobEntity.manifestHash = dto.manifestHash;
+      }
+
+      jobEntity.manifestUrl = dto.manifestUrl;
+    } else {
+      const manifestOrigin = await createManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+      const { url, hash } = await this.uploadManifest(
+        requestType,
+        chainId,
+        manifestOrigin,
+      );
+
+      jobEntity.manifestUrl = url;
+      jobEntity.manifestHash = hash;
+    }
+
     jobEntity.chainId = chainId;
     jobEntity.userId = userId;
-    jobEntity.manifestUrl = url;
-    jobEntity.manifestHash = hash;
+    jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;
     jobEntity.fundAmount = tokenFundAmount;
     jobEntity.status = JobStatus.PENDING;
@@ -537,13 +655,16 @@ export class JobService {
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const { getTrustedHandlers } =
+      this.createEscrowSpecificActions[jobEntity.requestType];
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
 
     const escrowAddress = await escrowClient.createEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-      [],
+      getTrustedHandlers(),
       jobEntity.userId.toString(),
       {
         gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
@@ -563,6 +684,9 @@ export class JobService {
   }
 
   public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const { getOracleAddresses } =
+      this.getOraclesSpecificActions[jobEntity.requestType];
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -576,14 +700,12 @@ export class JobService {
       manifest = JSON.parse(manifest);
     }
 
-    await this.validateManifest(manifest);
+    await this.validateManifest(jobEntity.requestType, manifest);
 
-    const oracleAddresses = this.getOracleAddresses(manifest);
+    const oracleAddresses = getOracleAddresses();
 
     const escrowConfig = {
-      recordingOracle: oracleAddresses.recordingOracle,
-      reputationOracle: oracleAddresses.recordingOracle,
-      exchangeOracle: oracleAddresses.exchangeOracle,
+      ...oracleAddresses,
       recordingOracleFee: await this.getOracleFee(
         oracleAddresses.recordingOracle,
         jobEntity.chainId,
@@ -626,6 +748,16 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CREATED,
+      oracleType: OracleType.CVAT,
+      hasSignature: false,
+    });
+    await this.webhookRepository.createUnique(webhookEntity);
+
     return jobEntity;
   }
 
@@ -659,34 +791,6 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   }
 
-  private getOracleAddresses(manifest: any) {
-    let recordingOracleConfigKey;
-    let exchangeOracleConfigKey;
-    const oracleType = this.getOracleType(manifest);
-    if (oracleType === OracleType.FORTUNE) {
-      recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
-    } else if (oracleType === OracleType.HCAPTCHA) {
-      recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
-    } else {
-      recordingOracleConfigKey = ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
-    }
-
-    const exchangeOracle = this.configService.get<string>(
-      exchangeOracleConfigKey,
-    )!;
-    const recordingOracle = this.configService.get<string>(
-      recordingOracleConfigKey,
-    )!;
-    const reputationOracle = this.configService.get<string>(
-      ConfigNames.REPUTATION_ORACLE_ADDRESS,
-    )!;
-
-    return { exchangeOracle, recordingOracle, reputationOracle };
-  }
-
   public async uploadManifest(
     requestType: JobRequestType,
     chainId: ChainId,
@@ -694,14 +798,15 @@ export class JobService {
   ): Promise<any> {
     let manifestFile = data;
     if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
+      const { getOracleAddresses } =
+        this.getOraclesSpecificActions[requestType];
+
       const signer = this.web3Service.getSigner(chainId);
       const kvstore = await KVStoreClient.build(signer);
-      const publicKeys: string[] = [
-        await kvstore.get(signer.address, KVStoreKeys.publicKey),
-      ];
-      const oracleAddresses = this.getOracleAddresses(requestType);
+      const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
+      const oracleAddresses = getOracleAddresses();
       for (const address in Object.values(oracleAddresses)) {
-        const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
+        const publicKey = await kvstore.getPublicKey(address);
         if (publicKey) publicKeys.push(publicKey);
       }
 
@@ -729,17 +834,15 @@ export class JobService {
   }
 
   private async validateManifest(
+    requestType: JobRequestType,
     manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<boolean> {
     let dtoCheck;
 
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
+    if (requestType === JobRequestType.FORTUNE) {
       dtoCheck = new FortuneManifestDto();
-    } else if (
-      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
-    ) {
+    } else if (requestType === JobRequestType.HCAPTCHA) {
+      return true;
       dtoCheck = new HCaptchaManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
@@ -902,10 +1005,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const manifest = await this.storageService.download(jobEntity.manifestUrl);
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
       const result = await this.storageService.download(finalResultUrl);
 
       if (!result) {
@@ -950,20 +1050,14 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   };
 
-  public getOracleType(manifest: any): OracleType {
-    if (
-      (manifest as FortuneManifestDto)?.requestType === JobRequestType.FORTUNE
-    ) {
+  public getOracleType(requestType: JobRequestType): OracleType {
+    if (requestType === JobRequestType.FORTUNE) {
       return OracleType.FORTUNE;
-    } else if (
-      (manifest as CvatManifestDto)?.annotation?.type ===
-        JobRequestType.IMAGE_BOXES ||
-      (manifest as CvatManifestDto)?.annotation?.type ===
-        JobRequestType.IMAGE_POINTS
-    ) {
+    } else if (requestType === JobRequestType.HCAPTCHA) {
+      return OracleType.HCAPTCHA;
+    } else {
       return OracleType.CVAT;
     }
-    return OracleType.HCAPTCHA;
   }
 
   public async processEscrowCancellation(
@@ -996,11 +1090,13 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
-    if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
+    if (
+      dto.eventType !==
+      (EventType.ESCROW_FAILED || EventType.TASK_CREATION_FAILED)
+    ) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }
-
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
       dto.escrowAddress,
@@ -1016,8 +1112,24 @@ export class JobService {
       throw new ConflictException(ErrorJob.NotLaunched);
     }
 
+    if (!dto.eventData) {
+      this.logger.log('Event data is undefined.', JobService.name);
+      throw new BadRequestException(
+        'Event data is required but was not provided.',
+      );
+    }
+
+    const reason = dto.eventData.reason;
+
+    if (!reason) {
+      this.logger.log('Reason is undefined in event data.', JobService.name);
+      throw new BadRequestException(
+        'Reason is required in event data but was not provided.',
+      );
+    }
+
     jobEntity.status = JobStatus.FAILED;
-    jobEntity.failedReason = dto.reason!;
+    jobEntity.failedReason = reason!;
     await this.jobRepository.updateOne(jobEntity);
   }
 
@@ -1063,14 +1175,9 @@ export class JobService {
       manifestData = JSON.parse(manifestData);
     }
 
-    if (
-      (manifestData as FortuneManifestDto).requestType ===
-      JobRequestType.FORTUNE
-    ) {
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
       manifest = manifestData as FortuneManifestDto;
-    } else if (
-      (manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH
-    ) {
+    } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
       manifest = manifestData as HCaptchaManifestDto;
     } else {
       manifest = manifestData as CvatManifestDto;
@@ -1087,9 +1194,7 @@ export class JobService {
     };
 
     let specificManifestDetails;
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
       manifest = manifest as FortuneManifestDto;
       specificManifestDetails = {
         title: manifest.requesterTitle,
@@ -1097,9 +1202,7 @@ export class JobService {
         requestType: JobRequestType.FORTUNE,
         submissionsRequired: manifest.submissionsRequired,
       };
-    } else if (
-      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
-    ) {
+    } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
       manifest = manifest as HCaptchaManifestDto;
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
@@ -1228,5 +1331,29 @@ export class JobService {
       updatedJob = await this.jobRepository.updateOne(job);
     }
     return updatedJob;
+  }
+
+  public async completeJob(dto: WebhookDataDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      dto.chainId,
+      dto.escrowAddress,
+    );
+
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    // If job status already completed by getDetails do nothing
+    if (jobEntity.status === JobStatus.COMPLETED) {
+      return;
+    }
+    if (jobEntity.status !== JobStatus.LAUNCHED) {
+      this.logger.log(ErrorJob.NotLaunched, JobService.name);
+      throw new ConflictException(ErrorJob.NotLaunched);
+    }
+
+    jobEntity.status = JobStatus.COMPLETED;
+    await this.jobRepository.updateOne(jobEntity);
   }
 }

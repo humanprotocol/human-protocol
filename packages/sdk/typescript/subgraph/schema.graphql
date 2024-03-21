@@ -34,6 +34,7 @@ type Leader @entity {
   webhookUrl: String
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
+  reputationNetwork: ReputationNetwork
 }
 
 type LeaderURL @entity {
@@ -41,6 +42,12 @@ type LeaderURL @entity {
   key: String
   url: String
   leader: Leader!
+}
+
+type ReputationNetwork @entity {
+  id: ID!
+  address: Bytes!
+  operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
 }
 
 type Escrow @entity {

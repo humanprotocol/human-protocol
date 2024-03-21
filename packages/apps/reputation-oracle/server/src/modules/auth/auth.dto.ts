@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, IsString, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsEthereumAddress,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
@@ -82,10 +88,6 @@ export class TokenCreateDto {
 export class Web3SignUpDto {
   @ApiProperty()
   @IsString()
-  public address: string;
-
-  @ApiProperty()
-  @IsString()
   public signature: string;
 
   @ApiProperty({
@@ -93,11 +95,17 @@ export class Web3SignUpDto {
   })
   @IsEnum(UserType)
   public type: UserType;
+
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public address: string;
 }
 
 export class Web3SignInDto {
   @ApiProperty()
   @IsString()
+  @IsEthereumAddress()
   public address: string;
 
   @ApiProperty()
