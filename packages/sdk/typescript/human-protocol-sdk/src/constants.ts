@@ -260,7 +260,8 @@ export const NETWORKS: {
     stakingAddress: '0x703936A24DFaDcD34008Db338FDB087c43C8c56a',
     rewardPoolAddress: '0x44FAd6e8d616AD460cf8eEf503FC101170E7De73',
     kvstoreAddress: '0xcCfF9646Abf988d9842d94b171A67d5F6c30dBe2',
-    subgraphUrl: '',
+    subgraphUrl:
+      'https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },

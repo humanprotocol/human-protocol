@@ -203,7 +203,9 @@ NETWORKS = {
     ChainId.X1_TESTNET: {
         "title": "X1 Testnet",
         "scan_url": "https://www.oklink.com/oktc-test",
-        "subgraph_url": (""),
+        "subgraph_url": (
+            "https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet"
+        ),
         "hmt_address": "0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8",
         "factory_address": "0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc",
         "staking_address": "0x703936A24DFaDcD34008Db338FDB087c43C8c56a",
