@@ -606,8 +606,8 @@ export class JobService {
         manifestOrigin,
       );
 
-      jobEntity.manifestHash = url;
-      jobEntity.manifestUrl = hash;
+      jobEntity.manifestUrl = url;
+      jobEntity.manifestHash = hash;
     }
 
     jobEntity.chainId = chainId;
