@@ -551,13 +551,6 @@ export class JobService {
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
-    let fundAmount = 0;
-    if (dto instanceof JobQuickLaunchDto) {
-      fundAmount = dto.fundAmount;
-    } else {
-      fundAmount = await calculateFundAmount(dto, rate);
-    }
-
     const userBalance = await this.paymentService.getUserBalance(userId);
     const feePercentage = Number(
       await this.getOracleFee(
@@ -565,17 +558,28 @@ export class JobService {
         chainId,
       ),
     );
-    const fee = mul(div(feePercentage, 100), fundAmount);
-    const usdTotalAmount = add(fundAmount, fee);
+
+    let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
+
+    if (dto instanceof JobQuickLaunchDto) {
+      tokenFee = mul(div(feePercentage, 100), dto.fundAmount);
+      tokenFundAmount = dto.fundAmount;
+      tokenTotalAmount = add(tokenFundAmount, tokenFee);
+      usdTotalAmount = div(tokenTotalAmount, rate);
+    } else {
+      const fundAmount = await calculateFundAmount(dto, rate);
+      const fee = mul(div(feePercentage, 100), fundAmount);
+
+      tokenFundAmount = mul(fundAmount, rate);
+      tokenFee = mul(fee, rate);
+      tokenTotalAmount = add(tokenFundAmount, tokenFee);
+      usdTotalAmount = add(fundAmount, fee);
+    }
 
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
-
-    const tokenFundAmount = mul(fundAmount, rate);
-    const tokenFee = mul(fee, rate);
-    const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
     let jobEntity = new JobEntity();
 
