@@ -1,15 +1,14 @@
-import { AppController } from './app.controller';
+import { Controller, Get, Redirect } from '@nestjs/common';
 
-describe('AppController', () => {
-  let appController: AppController;
+import { Public } from './common/decorators';
+import { ApiTags, ApiExcludeController } from '@nestjs/swagger';
 
-  beforeEach(() => {
-    appController = new AppController();
-  });
-
-  describe('Health Check', () => {
-    it('should return OK', async () => {
-      expect(await appController.health()).toBe('OK');
-    });
-  });
-});
+@Controller('/')
+@ApiExcludeController()
+@ApiTags('Main')
+export class AppController {
+  @Public()
+  @Get('/')
+  @Redirect('/swagger', 301)
+  public redirect(): void {}
+}

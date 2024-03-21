@@ -5,16 +5,18 @@ import { SignatureAuthGuard } from '../../common/guards';
 import { WebhookService } from './webhook.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { WebhookDto } from './webhook.dto';
+import { Public } from 'src/common/decorators';
 
-@UseGuards(
-  new SignatureAuthGuard([Role.Recording, Role.Reputation, Role.JobLauncher]),
-)
+@Public()
 @ApiTags('Webhook')
 @Controller('/webhook')
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @Post()
+  @UseGuards(
+    new SignatureAuthGuard([Role.Recording, Role.Reputation, Role.JobLauncher]),
+  )
   public async processWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,

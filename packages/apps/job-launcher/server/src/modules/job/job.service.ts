@@ -748,13 +748,14 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
+    const oracleType = this.getOracleType(jobEntity.requestType);
     const webhookEntity = new WebhookEntity();
     Object.assign(webhookEntity, {
       escrowAddress: jobEntity.escrowAddress,
       chainId: jobEntity.chainId,
       eventType: EventType.ESCROW_CREATED,
-      oracleType: OracleType.CVAT,
-      hasSignature: false,
+      oracleType: oracleType,
+      hasSignature: oracleType === OracleType.FORTUNE,
     });
     await this.webhookRepository.createUnique(webhookEntity);
 
