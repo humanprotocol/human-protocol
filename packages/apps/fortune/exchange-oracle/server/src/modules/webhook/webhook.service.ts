@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -105,12 +106,12 @@ export class WebhookService {
     };
 
     // Make the HTTP request to the webhook.
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, transformedWebhook, config),
+    const { status } = await firstValueFrom(
+      this.httpService.post(webhookUrl, webhookData, config),
     );
 
     // Check if the request was successful.
-    if (!data) {
+    if (status !== HttpStatus.OK) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }
