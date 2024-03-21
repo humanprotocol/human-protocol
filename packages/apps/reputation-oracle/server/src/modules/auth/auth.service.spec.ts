@@ -31,8 +31,6 @@ import { KVStoreClient, Role } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthError } from './auth.error';
-import { ApiKeyRepository } from './apikey.repository';
-import { AuthRepository } from './auth.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -96,10 +94,9 @@ describe('AuthService', () => {
             prepareSignatureBody: jest.fn(),
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
+            getOperatorAddress: jest.fn(),
           },
         },
-        { provide: ApiKeyRepository, useValue: createMock<ApiKeyRepository>() },
-        { provide: AuthRepository, useValue: createMock<AuthRepository>() },
       ],
     }).compile();
 
@@ -247,6 +244,9 @@ describe('AuthService', () => {
       findTokenMock = jest
         .spyOn(tokenRepository, 'findOneByUserIdAndType')
         .mockResolvedValueOnce(null);
+      jest
+        .spyOn(web3Service, 'getOperatorAddress')
+        .mockReturnValueOnce(MOCK_ADDRESS);
 
       const result = await authService.auth(userEntity as UserEntity);
       expect(findTokenMock).toHaveBeenCalledWith(
@@ -257,6 +257,9 @@ describe('AuthService', () => {
         {
           email: userEntity.email,
           userId: userEntity.id,
+          address: userEntity.evmAddress,
+          kyc_status: userEntity.kyc?.status,
+          reputation_network: MOCK_ADDRESS,
         },
         {
           expiresIn: MOCK_EXPIRES_IN,
