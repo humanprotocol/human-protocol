@@ -253,7 +253,7 @@ export const NETWORKS: {
   },
   [ChainId.X1_TESTNET]: {
     chainId: ChainId.X1_TESTNET,
-    title: 'X1 Tesnet',
+    title: 'X1 Testnet',
     scanUrl: 'https://www.okx.com/explorer/x1-test',
     factoryAddress: '0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc',
     hmtAddress: '0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8',
