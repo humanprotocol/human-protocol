@@ -80,6 +80,31 @@ export class JobDto {
   public chainId?: ChainId;
 }
 
+export class JobQuickLaunchDto extends JobDto {
+  @ApiProperty({
+    description: 'Request type',
+    name: 'request_type',
+    enum: JobRequestType,
+  })
+  @IsEnum(JobRequestType)
+  public requestType: JobRequestType;
+
+  @ApiProperty({ name: 'manifest_url' })
+  @IsUrl()
+  @IsNotEmpty()
+  public manifestUrl: string;
+
+  @ApiProperty({ name: 'manifest_hash' })
+  @IsString()
+  @IsOptional()
+  public manifestHash: string;
+
+  @ApiProperty({ name: 'fund_amount' })
+  @IsNumber()
+  @IsPositive()
+  public fundAmount: number;
+}
+
 export class JobFortuneDto extends JobDto {
   @ApiProperty({ name: 'requester_title' })
   @IsString()
@@ -747,4 +772,8 @@ class TaskData {
   datapoint_text?: DatapointText;
 }
 
-export type CreateJob = JobFortuneDto | JobCvatDto | JobCaptchaDto;
+export type CreateJob =
+  | JobQuickLaunchDto
+  | JobFortuneDto
+  | JobCvatDto
+  | JobCaptchaDto;

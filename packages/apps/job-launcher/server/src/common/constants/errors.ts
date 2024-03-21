@@ -17,6 +17,7 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+  ManifestHashNotExist = 'Manifest hash does not exist',
 }
 
 /**

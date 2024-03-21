@@ -4,6 +4,7 @@ export const ConfigNames = {
   NODE_ENV: 'NODE_ENV',
   HOST: 'HOST',
   PORT: 'PORT',
+  WEB3_ENV: 'WEB3_ENV',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
@@ -29,6 +30,7 @@ export const envValidator = Joi.object({
   NODE_ENV: Joi.string().default('development'),
   HOST: Joi.string().default('localhost'),
   PORT: Joi.string().default(3002),
+  WEB3_ENV: Joi.string().default('testnet'),
   // Database
   DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
