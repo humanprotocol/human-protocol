@@ -94,7 +94,7 @@ import { JobRepository } from './job.repository';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { JobService } from './job.service';
 
-import { div, mul } from '../../common/utils/decimal';
+import { add, div, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { EventType } from '../../common/enums/webhook';
@@ -366,10 +366,11 @@ describe('JobService', () => {
     });
 
     it('should create a job using quick launch successfully', async () => {
-      const fundAmount = 10;
-      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+      const tokenFundAmount = 100;
+      const tokenFee = (MOCK_JOB_LAUNCHER_FEE / 100) * tokenFundAmount;
+      const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-      const userBalance = 25;
+      const userBalance = 250;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       const mockJobEntity: Partial<JobEntity> = {
@@ -380,8 +381,8 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.HCAPTCHA,
         escrowAddress: MOCK_ADDRESS,
-        fee,
-        fundAmount,
+        fee: tokenFee,
+        fundAmount: tokenFundAmount,
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -403,7 +404,7 @@ describe('JobService', () => {
       quickLaunchJobDto.requestType = JobRequestType.HCAPTCHA;
       quickLaunchJobDto.manifestUrl = MOCK_FILE_URL;
       quickLaunchJobDto.manifestHash = MOCK_FILE_HASH;
-      quickLaunchJobDto.fundAmount = fundAmount;
+      quickLaunchJobDto.fundAmount = tokenFundAmount;
 
       await jobService.createJob(
         userId,
@@ -424,7 +425,7 @@ describe('JobService', () => {
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         currency: TokenId.HMT,
-        amount: -mul(fundAmount + fee, rate),
+        amount: -tokenTotalAmount,
         rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
@@ -434,8 +435,8 @@ describe('JobService', () => {
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.HCAPTCHA,
-        fee: mul(fee, rate),
-        fundAmount: mul(fundAmount, rate),
+        fee: tokenFee,
+        fundAmount: tokenFundAmount,
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
