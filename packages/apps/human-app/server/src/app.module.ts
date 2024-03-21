@@ -15,6 +15,13 @@ import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
 import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
+import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
+import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
+import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
+import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { StatisticsController } from './modules/statistics/statistics.controller';
+import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 
 @Module({
   imports: [
@@ -30,17 +37,23 @@ import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discove
     HttpModule,
     WorkerModule,
     OperatorModule,
+    JobsDiscoveryModule,
+    JobAssignmentModule,
     ReputationOracleModule,
+    ExchangeOracleModule,
     CommonConfigModule,
     OracleDiscoveryModule,
+    StatisticsModule,
   ],
   controllers: [
     AppController,
     OperatorController,
     WorkerController,
+    JobsDiscoveryController,
     OracleDiscoveryController,
+    JobAssignmentController,
+    StatisticsController,
   ],
-  providers: [],
   exports: [HttpModule],
 })
 export class AppModule {}

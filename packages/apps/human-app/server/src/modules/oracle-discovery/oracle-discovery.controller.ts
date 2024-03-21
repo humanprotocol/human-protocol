@@ -11,7 +11,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OracleDiscoveryService } from './oracle-discovery.serivce';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryData,
+  OracleDiscoveryResponse,
   OracleDiscoveryDto,
 } from './interface/oracle-discovery.interface';
 
@@ -23,11 +23,11 @@ export class OracleDiscoveryController {
   ) {}
   @ApiTags('Oracle-Discovery')
   @Get('/oracles')
-  @ApiOperation({ summary: 'Operator signup' })
+  @ApiOperation({ summary: 'Oracles discovery' })
   @UsePipes(new ValidationPipe())
-  public signupOperator(
+  public getOracles(
     @Body() oracleDiscoveryDto: OracleDiscoveryDto,
-  ): Promise<OracleDiscoveryData[]> {
+  ): Promise<OracleDiscoveryResponse[]> {
     const oracleDiscoveryCommand = this.mapper.map(
       oracleDiscoveryDto,
       OracleDiscoveryDto,

@@ -1,67 +1,59 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import {
+  JobFields,
+  SortField,
+  SortOrder,
+} from '../../../common/enums/jobs-discovery';
 
 export class JobsDiscoveryParamsDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
+  exchange_oracle_url: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
   escrow_address: string;
-
   @AutoMap()
   @ApiProperty({ example: 0 })
   chain_id: number;
-
   @AutoMap()
   @ApiProperty({ example: 5, default: 5, maximum: 10 })
   page_size: number;
-
   @AutoMap()
   @ApiProperty({ example: 0, default: 0 })
   page: number;
-
   @AutoMap()
   @ApiProperty({ example: 'ASC', default: 'ASC' })
-  sort: 'ASC' | 'DESC';
-
+  sort: SortOrder;
   @AutoMap()
   @ApiProperty({ example: 'created_at', default: 'created_at' })
-  sort_field: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
-
+  sort_field: SortField;
   @AutoMap()
   @ApiProperty({ example: 'job type' })
   job_type: string;
-
   @AutoMap()
-  @ApiProperty({
-    example: [
-      'job_title',
-      'job_description',
-      'reward_amount',
-      'reward_token',
-      'created_at',
-    ],
-  })
-  fields: string[];
+  @ApiProperty({ example: ['job_title'] })
+  fields: JobFields[];
 }
 
-export class JobsDiscoveryParamsCommand {
+export class JobsDiscoveryParams {
   @AutoMap()
-  escrow_address: string;
+  escrowAddress: string;
   @AutoMap()
-  chain_id: number;
+  chainId: number;
   @AutoMap()
-  page_size: number;
+  pageSize: number;
   @AutoMap()
   page: number;
   @AutoMap()
-  sort: string;
+  sort: SortOrder;
   @AutoMap()
-  sort_field: string;
+  sortField: SortField;
   @AutoMap()
-  job_type: string;
+  jobType: string;
   @AutoMap()
-  fields: string[];
+  fields: JobFields[];
 }
-
 export class JobsDiscoveryParamsData {
   @AutoMap()
   escrow_address: string;
@@ -72,13 +64,20 @@ export class JobsDiscoveryParamsData {
   @AutoMap()
   page: number;
   @AutoMap()
-  sort: string;
+  sort: SortOrder;
   @AutoMap()
-  sort_field: string;
+  sort_field: SortField;
   @AutoMap()
   job_type: string;
   @AutoMap()
-  fields: string[];
+  fields: JobFields[];
+}
+export class JobsDiscoveryParamsCommand {
+  @AutoMap()
+  exchangeOracleUrl: string;
+  token: string;
+  @AutoMap()
+  data: JobsDiscoveryParams;
 }
 
 export class JobsDiscoveryResponseItem {

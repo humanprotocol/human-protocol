@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
 import { JobsDiscoveryService } from './jobs-discovery.service';
 import { JobsDiscoveryProfile } from './jobs-discovery.mapper';
-import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
+import { ExchangeOracleModule } from '../../integrations/exchange-oracle/exchange-oracle.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [ExchangeOracleModule],
   providers: [JobsDiscoveryService, JobsDiscoveryProfile],
   exports: [JobsDiscoveryService],
 })
