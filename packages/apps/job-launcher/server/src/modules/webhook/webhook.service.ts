@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
@@ -78,12 +84,12 @@ export class WebhookService {
     }
 
     // Make the HTTP request to the webhook.
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, config),
+    const { status } = await firstValueFrom(
+      this.httpService.post(webhookUrl, webhookData, config),
     );
 
     // Check if the request was successful.
-    if (!data) {
+    if (status !== HttpStatus.OK) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }
