@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -88,13 +89,13 @@ export class WebhookService {
       snake_case_body,
       this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
     );
-    const { data } = await firstValueFrom(
+    const { status } = await firstValueFrom(
       await this.httpService.post(webhookUrl, snake_case_body, {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
       }),
     );
 
-    if (!data) {
+    if (status !== HttpStatus.OK) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }
