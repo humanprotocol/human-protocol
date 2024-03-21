@@ -562,10 +562,8 @@ export class JobService {
     let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
 
     if (dto instanceof JobQuickLaunchDto) {
-      const fundAmount = dto.fundAmount;
-
-      tokenFee = mul(div(feePercentage, 100), fundAmount);
-      tokenFundAmount = fundAmount;
+      tokenFee = mul(div(feePercentage, 100), dto.fundAmount);
+      tokenFundAmount = dto.fundAmount;
       tokenTotalAmount = add(tokenFundAmount, tokenFee);
       usdTotalAmount = div(tokenTotalAmount, rate);
     } else {
