@@ -6,6 +6,7 @@ import { KVStoreClient, StorageClient } from '@human-protocol/sdk';
 import * as jwt from 'jsonwebtoken';
 import { Web3Service } from '../../../modules/web3/web3.service';
 import { JwtUser } from '../../../common/types/jwt';
+import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -27,7 +28,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
 
           const url = await kvstoreClient.getFileUrlAndVerifyHash(
             (payload as any).reputation_network,
-            'jwt_public_key',
+            JWT_KVSTORE_KEY,
           );
           const publicKey = await StorageClient.downloadFileFromUrl(url);
 
@@ -53,7 +54,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     if (!payload.kyc_status || !payload.email || !payload.address) {
       throw new UnauthorizedException('Invalid token');
     }
-    if (payload.kyc_status !== 'approved') {
+    if (payload.kyc_status !== KYC_APPROVED) {
       throw new UnauthorizedException('Invalid KYC status');
     }
     return {

@@ -18,3 +18,6 @@ export const MAINNET_CHAIN_IDS = [
   ChainId.BSC_MAINNET,
   ChainId.MOONBEAM,
 ];
+
+export const JWT_KVSTORE_KEY = 'jwt_public_key';
+export const KYC_APPROVED = 'APPROVED';
