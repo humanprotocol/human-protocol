@@ -11,10 +11,9 @@ import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { ConfigNames } from '../../common/config';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
-import { ApiKeyRepository } from './apikey.repository';
-import { ApiKeyEntity } from './apikey.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
+import { Web3Module } from '../web3/web3.module';
 
 @Module({
   imports: [
@@ -34,16 +33,11 @@ import { UserRepository } from '../user/user.repository';
         },
       }),
     }),
-    TypeOrmModule.forFeature([TokenEntity, ApiKeyEntity, UserEntity]),
+    TypeOrmModule.forFeature([TokenEntity, UserEntity]),
     SendGridModule,
+    Web3Module,
   ],
-  providers: [
-    JwtHttpStrategy,
-    AuthService,
-    TokenRepository,
-    ApiKeyRepository,
-    UserRepository,
-  ],
+  providers: [JwtHttpStrategy, AuthService, TokenRepository, UserRepository],
   controllers: [AuthJwtController],
   exports: [AuthService],
 })

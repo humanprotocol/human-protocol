@@ -26,7 +26,6 @@ import {
 } from './auth.dto';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
 import { verifySignature } from '../../common/utils/signature';
 import { createHash } from 'crypto';
@@ -46,15 +45,12 @@ export class AuthService {
   private readonly verifyEmailTokenExpiresIn: number;
   private readonly forgotPasswordTokenExpiresIn: number;
   private readonly feURL: string;
-  private readonly iterations: number;
-  private readonly keyLength: number;
   private readonly salt: string;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
-    private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
@@ -83,14 +79,6 @@ export class AuthService {
     this.feURL = this.configService.get<string>(
       ConfigNames.FE_URL,
       'http://localhost:3005',
-    );
-    this.iterations = this.configService.get<number>(
-      ConfigNames.APIKEY_ITERATIONS,
-      1000,
-    );
-    this.keyLength = this.configService.get<number>(
-      ConfigNames.APIKEY_KEY_LENGTH,
-      64,
     );
   }
 
@@ -166,10 +154,6 @@ export class AuthService {
     return userEntity;
   }
 
-  public async logout(user: UserEntity): Promise<void> {
-    await this.authRepository.delete({ userId: user.id });
-  }
-
   public async refresh(data: RefreshDto): Promise<AuthDto> {
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.refreshToken,
@@ -198,7 +182,9 @@ export class AuthService {
       {
         email: userEntity.email,
         userId: userEntity.id,
-        status: userEntity.status,
+        address: userEntity.evmAddress,
+        kyc_status: userEntity.kyc?.status,
+        reputation_network: this.web3Service.getOperatorAddress(),
       },
       {
         expiresIn: this.accessTokenExpiresIn,
