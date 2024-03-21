@@ -92,7 +92,6 @@ export class CronJobService {
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,
@@ -140,7 +139,6 @@ export class CronJobService {
    * Process a paid webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPaidWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPaidWebhook,

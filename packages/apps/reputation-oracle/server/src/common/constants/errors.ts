@@ -54,6 +54,7 @@ export enum ErrorUser {
   InvalidCredentials = 'Invalid credentials',
   IncorrectAddress = 'Incorrect address',
   KycNotApproved = 'KYC not approved',
+  UserNotActive = 'User not active',
 }
 
 /**
@@ -63,9 +64,12 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
+  TokenExpired = 'Token has expired',
   UserNotActive = 'User not active',
   InvalidSignature = 'Invalid signature',
   InvalidRole = 'Invalid role in KVStore',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  InvalidToken = 'Invalid token',
 }
 
 /**
