@@ -15,11 +15,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { ConfigNames } from '../../common/config';
-import { JOB_TYPE, TOKEN } from '../../common/constant';
+import { TOKEN } from '../../common/constant';
 import {
   AssignmentStatus,
   JobFieldName,
   JobStatus,
+  JobType,
 } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { ISolution } from '../../common/interfaces/job';
@@ -77,7 +78,7 @@ export class JobService {
     data: GetJobsDto,
     reputationNetwork: string,
   ): Promise<PageDto<JobDto>> {
-    if (data.jobType && data.jobType !== JOB_TYPE)
+    if (data.jobType && data.jobType !== JobType.FORTUNE)
       return new PageDto(data.page!, data.pageSize!, 0, []);
 
     const { entities, itemCount } = await this.jobRepository.fetchFiltered({
@@ -91,13 +92,13 @@ export class JobService {
         const job = new JobDto(
           entity.escrowAddress,
           entity.chainId,
-          JOB_TYPE,
+          JobType.FORTUNE,
           entity.status,
         );
 
         if (data.fields) {
           if (data.fields.includes(JobFieldName.CreatedAt)) {
-            job.createdAt = entity.createdAt.getTime();
+            job.createdAt = entity.createdAt.toISOString();
           }
           if (
             data.fields.includes(JobFieldName.JobDescription) ||

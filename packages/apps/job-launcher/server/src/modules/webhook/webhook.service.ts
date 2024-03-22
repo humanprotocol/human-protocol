@@ -78,15 +78,9 @@ export class WebhookService {
     }
 
     // Make the HTTP request to the webhook.
-    const { data } = await firstValueFrom(
+    await firstValueFrom(
       await this.httpService.post(webhookUrl, webhookData, config),
     );
-
-    // Check if the request was successful.
-    if (!data) {
-      this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.NotSent);
-    }
   }
 
   /**

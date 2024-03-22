@@ -3,7 +3,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsString, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IsValidEthereumAddress } from '../../common/validators';
-import { JobFieldName, JobSortField, JobStatus } from '../../common/enums/job';
+import {
+  JobFieldName,
+  JobSortField,
+  JobStatus,
+  JobType,
+} from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 
 export class ManifestDto {
@@ -32,16 +37,25 @@ export class SolveJobDto {
 }
 
 export class GetJobsDto extends PageOptionsDto {
+  @ApiPropertyOptional({
+    name: 'sort_field',
+    enum: JobSortField,
+    default: JobSortField.CREATED_AT,
+  })
+  @IsOptional()
+  @IsEnum(JobSortField)
+  sortField?: JobSortField = JobSortField.CREATED_AT;
+
   @ApiPropertyOptional({ name: 'chain_id' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   chainId: number;
 
-  @ApiPropertyOptional({ name: 'job_type' })
+  @ApiPropertyOptional({ name: 'job_type', enum: JobType })
+  @IsEnum(JobType)
   @IsOptional()
-  @IsString()
-  jobType: string;
+  jobType: JobType;
 
   @ApiPropertyOptional({ enum: JobFieldName, isArray: true })
   @IsOptional()
@@ -57,26 +71,32 @@ export class GetJobsDto extends PageOptionsDto {
   @IsEnum(JobStatus)
   @IsOptional()
   status: JobStatus;
-
-  @ApiPropertyOptional({
-    name: 'sort_field',
-    enum: JobSortField,
-    default: JobSortField.CREATED_AT,
-  })
-  @IsOptional()
-  @IsEnum(JobSortField)
-  sortField?: JobSortField = JobSortField.CREATED_AT;
 }
 
 export class JobDto {
+  @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;
+
+  @ApiProperty({ name: 'chain_id' })
   chainId: number;
+
+  @ApiProperty({ name: 'job_type' })
   jobType: string;
+
+  @ApiProperty()
   status: JobStatus;
+
+  @ApiProperty({ name: 'job_description' })
   jobDescription?: string;
+
+  @ApiProperty({ name: 'reward_amount' })
   rewardAmount?: number;
+
+  @ApiProperty({ name: 'reward_token' })
   rewardToken?: string;
-  createdAt?: number;
+
+  @ApiProperty({ name: 'created_at' })
+  createdAt?: string;
 
   constructor(
     escrowAddress: string,

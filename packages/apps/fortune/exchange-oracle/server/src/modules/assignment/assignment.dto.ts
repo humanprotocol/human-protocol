@@ -1,18 +1,20 @@
+import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
-  AssignmentStatus,
   AssignmentSortField,
+  AssignmentStatus,
   JobSortField,
+  JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
-import { ChainId } from '@human-protocol/sdk';
 
 export class CreateAssignmentDto {
   @ApiProperty({
     enum: ChainId,
     name: 'chain_id',
+    required: false,
   })
   @IsEnum(ChainId)
   chainId: ChainId;
@@ -23,16 +25,25 @@ export class CreateAssignmentDto {
 }
 
 export class GetAssignmentsDto extends PageOptionsDto {
+  @ApiPropertyOptional({
+    name: 'sort_field',
+    enum: JobSortField,
+    default: JobSortField.CREATED_AT,
+  })
+  @IsOptional()
+  @IsEnum(AssignmentSortField)
+  sortField?: AssignmentSortField = AssignmentSortField.CREATED_AT;
+
   @ApiPropertyOptional({ name: 'chain_id' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   chainId: number;
 
-  @ApiPropertyOptional({ name: 'job_type' })
+  @ApiPropertyOptional({ name: 'job_type', enum: JobType })
+  @IsEnum(JobType)
   @IsOptional()
-  @IsString()
-  jobType: string;
+  jobType: JobType;
 
   @ApiPropertyOptional({ name: 'escrow_address' })
   @IsOptional()
@@ -43,29 +54,41 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsEnum(AssignmentStatus)
   @IsOptional()
   status: AssignmentStatus;
-
-  @ApiPropertyOptional({
-    name: 'sort_field',
-    enum: JobSortField,
-    default: JobSortField.CREATED_AT,
-  })
-  @IsOptional()
-  @IsEnum(AssignmentSortField)
-  sortField?: AssignmentSortField = AssignmentSortField.CREATED_AT;
 }
 
 export class AssignmentDto {
+  @ApiProperty({ name: 'assignment_id' })
   assignmentId: number;
+
+  @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;
+
+  @ApiProperty({ name: 'chain_id' })
   chainId: number;
+
+  @ApiProperty({ name: 'job_type' })
   jobType: string;
+
+  @ApiProperty()
   status: AssignmentStatus;
+
+  @ApiPropertyOptional()
   url?: string;
+
+  @ApiProperty({ name: 'reward_amount' })
   rewardAmount: number;
+
+  @ApiProperty({ name: 'reward_token' })
   rewardToken: string;
-  createdAt: number;
-  updatedAt?: number;
-  expiresAt: number;
+
+  @ApiProperty({ name: 'created_at' })
+  createdAt: string;
+
+  @ApiPropertyOptional({ name: 'updated_at' })
+  updatedAt?: string;
+
+  @ApiProperty({ name: 'expires_at' })
+  expiresAt: string;
 
   constructor(
     assignmentId: number,
@@ -75,8 +98,8 @@ export class AssignmentDto {
     status: AssignmentStatus,
     rewardAmount: number,
     rewardToken: string,
-    createdAt: number,
-    expiresAt: number,
+    createdAt: string,
+    expiresAt: string,
   ) {
     this.assignmentId = assignmentId;
     this.escrowAddress = escrowAddress;

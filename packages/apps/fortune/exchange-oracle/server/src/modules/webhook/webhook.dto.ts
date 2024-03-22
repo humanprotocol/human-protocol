@@ -1,5 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsEnum,
@@ -56,7 +56,7 @@ export class WebhookDto {
   @IsEnum(EventType)
   public eventType: EventType;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     name: 'event_data',
   })
   @IsOptional()

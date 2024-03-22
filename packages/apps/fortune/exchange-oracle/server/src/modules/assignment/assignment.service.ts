@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { AssignmentStatus } from '../../common/enums/job';
+import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { JwtUser } from '../../common/types/jwt';
 import { JobRepository } from '../job/job.repository';
 import {
@@ -10,10 +10,8 @@ import {
 import { AssignmentEntity } from './assignment.entity';
 import { AssignmentRepository } from './assignment.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { JOB_TYPE, TOKEN } from '../../common/constant';
+import { TOKEN } from '../../common/constant';
 import { JobService } from '../job/job.service';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 
@@ -29,7 +27,6 @@ export class AssignmentService {
     public readonly jobRepository: JobRepository,
     public readonly jobService: JobService,
     public readonly web3Service: Web3Service,
-    public readonly configService: ConfigService,
   ) {}
 
   public async createAssignment(
@@ -97,8 +94,9 @@ export class AssignmentService {
     data: GetAssignmentsDto,
     workerAddress: string,
     reputationNetwork: string,
+    requestUrl: string,
   ): Promise<PageDto<AssignmentDto>> {
-    if (data.jobType && data.jobType !== JOB_TYPE)
+    if (data.jobType && data.jobType !== JobType.FORTUNE)
       return new PageDto(data.page!, data.pageSize!, 0, []);
 
     const { entities, itemCount } =
@@ -119,17 +117,17 @@ export class AssignmentService {
           entity.id,
           entity.job.escrowAddress,
           entity.job.chainId,
-          JOB_TYPE,
+          JobType.FORTUNE,
           entity.status,
           manifest.fundAmount / manifest.submissionsRequired,
           TOKEN,
-          entity.createdAt.getTime(),
-          entity.expiresAt.getTime(),
+          entity.createdAt.toISOString(),
+          entity.expiresAt.toISOString(),
         );
 
         if (entity.status === AssignmentStatus.ACTIVE)
-          assignment.url = `http://${this.configService.get(ConfigNames.HOST)}:${this.configService.get(ConfigNames.PORT)}`;
-        else assignment.updatedAt = entity.updatedAt.getTime();
+          assignment.url = requestUrl;
+        else assignment.updatedAt = entity.updatedAt.toISOString();
 
         return assignment;
       }),

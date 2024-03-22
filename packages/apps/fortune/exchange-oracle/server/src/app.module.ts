@@ -28,13 +28,13 @@ import { HealthModule } from './modules/health/health.module';
     JwtHttpStrategy,
   ],
   imports: [
+    HealthModule,
     AssignmentModule,
     JobModule,
     WebhookModule,
     Web3Module,
-    CronJobModule,
     StatsModule,
-    HealthModule,
+    CronJobModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`

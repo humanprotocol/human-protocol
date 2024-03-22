@@ -35,3 +35,7 @@ export enum AssignmentSortField {
   CREATED_AT = 'created_at',
   EXPIRES_AT = 'expires_at',
 }
+
+export enum JobType {
+  FORTUNE = 'FORTUNE',
+}

@@ -23,6 +23,7 @@ import {
   AssignmentStatus,
   JobFieldName,
   JobStatus,
+  JobType,
 } from '../../common/enums/job';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { AssignmentEntity } from '../assignment/assignment.entity';
@@ -35,7 +36,6 @@ import { ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
-import { JOB_TYPE } from '../../common/constant';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -230,7 +230,7 @@ describe('JobService', () => {
       const result = await jobService.getJobList(
         {
           chainId,
-          jobType: JOB_TYPE,
+          jobType: JobType.FORTUNE,
           fields: [JobFieldName.JobDescription],
           escrowAddress,
           status: JobStatus.ACTIVE,
@@ -246,7 +246,7 @@ describe('JobService', () => {
         chainId: 1,
         jobDescription: 'Example Description',
         escrowAddress: escrowAddress,
-        jobType: JOB_TYPE,
+        jobType: JobType.FORTUNE,
         status: JobStatus.ACTIVE,
       });
       expect(jobService.getManifest).toHaveBeenCalledWith(
@@ -264,7 +264,7 @@ describe('JobService', () => {
       const result = await jobService.getJobList(
         {
           chainId,
-          jobType: JOB_TYPE,
+          jobType: JobType.FORTUNE,
           fields: [JobFieldName.CreatedAt],
           escrowAddress,
           status: JobStatus.ACTIVE,
@@ -278,9 +278,9 @@ describe('JobService', () => {
       expect(result.totalResults).toEqual(1);
       expect(result.results[0]).toEqual({
         chainId: 1,
-        createdAt: expect.any(Number),
+        createdAt: expect.any(String),
         escrowAddress: escrowAddress,
-        jobType: JOB_TYPE,
+        jobType: JobType.FORTUNE,
         status: JobStatus.ACTIVE,
       });
       expect(jobService.getManifest).not.toHaveBeenCalled();

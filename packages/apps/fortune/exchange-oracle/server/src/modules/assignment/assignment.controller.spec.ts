@@ -4,8 +4,8 @@ import { AssignmentController } from './assignment.controller';
 import { AssignmentService } from './assignment.service';
 import { RequestWithUser } from '../../common/types/jwt';
 import { GetAssignmentsDto, CreateAssignmentDto } from './assignment.dto';
-import { JOB_TYPE } from '../../common/constant';
-import { AssignmentStatus } from '../../common/enums/job';
+import { AssignmentStatus, JobType } from '../../common/enums/job';
+import { MOCK_EXCHANGE_ORACLE } from '../../../test/constants';
 
 jest.mock('../../common/utils/signature');
 
@@ -37,7 +37,7 @@ describe('assignmentController', () => {
     it('should call assignmentService.getAssignmentList', async () => {
       const query: GetAssignmentsDto = {
         chainId: 80001,
-        jobType: JOB_TYPE,
+        jobType: JobType.FORTUNE,
         escrowAddress: escrowAddress,
         status: AssignmentStatus.ACTIVE,
         skip: 1,
@@ -56,7 +56,8 @@ describe('assignmentController', () => {
       const result = await assignmentController.getAssignments(
         {
           user: { address: userAddress, reputationNetwork: reputationNetwork },
-        } as RequestWithUser,
+          headers: { referer: MOCK_EXCHANGE_ORACLE },
+        } as any,
         query,
       );
       expect(result).toBe(expectedResult);
@@ -64,6 +65,7 @@ describe('assignmentController', () => {
         query,
         userAddress,
         reputationNetwork,
+        MOCK_EXCHANGE_ORACLE,
       );
     });
 

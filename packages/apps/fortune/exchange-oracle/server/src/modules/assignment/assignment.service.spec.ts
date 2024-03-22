@@ -1,9 +1,12 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { JOB_TYPE, TOKEN } from '../../common/constant';
-import { AssignmentStatus } from '../../common/enums/job';
+import {
+  MOCK_EXCHANGE_ORACLE,
+  MOCK_PRIVATE_KEY,
+} from '../../../test/constants';
+import { TOKEN } from '../../common/constant';
+import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentService } from '../assignment/assignment.service';
 import { ManifestDto } from '../job/job.dto';
@@ -105,7 +108,9 @@ describe('AssignmentService', () => {
       jest.spyOn(assignmentRepository, 'countByJobId').mockResolvedValue(0);
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
       (Escrow__factory.connect as any).mockImplementation(() => ({
-        duration: jest.fn().mockResolvedValue(new Date().getTime() / 1000),
+        duration: jest
+          .fn()
+          .mockResolvedValue((new Date().getTime() + 1000) / 1000),
       }));
 
       const result = await assignmentService.createAssignment(
@@ -258,7 +263,7 @@ describe('AssignmentService', () => {
       const result = await assignmentService.getAssignmentList(
         {
           chainId,
-          jobType: JOB_TYPE,
+          jobType: JobType.FORTUNE,
           escrowAddress,
           status: AssignmentStatus.ACTIVE,
           page: 0,
@@ -267,6 +272,7 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
+        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(result.totalResults).toEqual(1);
@@ -274,13 +280,13 @@ describe('AssignmentService', () => {
         assignmentId: 1,
         chainId: 1,
         escrowAddress: escrowAddress,
-        jobType: JOB_TYPE,
+        jobType: JobType.FORTUNE,
         status: AssignmentStatus.ACTIVE,
         rewardToken: TOKEN,
         rewardAmount: 20,
         url: expect.any(String),
-        createdAt: expect.any(Number),
-        expiresAt: expect.any(Number),
+        createdAt: expect.any(String),
+        expiresAt: expect.any(String),
       } as AssignmentDto);
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
