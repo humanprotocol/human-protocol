@@ -5,7 +5,7 @@ import { SignatureAuthGuard } from '../../common/guards';
 import { WebhookService } from './webhook.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { WebhookDto } from './webhook.dto';
-import { Public } from 'src/common/decorators';
+import { Public } from '../../common/decorators';
 
 @Public()
 @ApiTags('Webhook')

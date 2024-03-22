@@ -120,7 +120,7 @@ export class AssignmentService {
           entity.job.escrowAddress,
           entity.job.chainId,
           JOB_TYPE,
-          entity.job.status,
+          entity.status,
           manifest.fundAmount / manifest.submissionsRequired,
           TOKEN,
           entity.createdAt.getTime(),

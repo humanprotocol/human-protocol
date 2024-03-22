@@ -5,7 +5,6 @@ import {
   AssignmentStatus,
   AssignmentSortField,
   JobSortField,
-  JobStatus,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { ChainId } from '@human-protocol/sdk';
@@ -56,11 +55,11 @@ export class GetAssignmentsDto extends PageOptionsDto {
 }
 
 export class AssignmentDto {
-  assginmentId: number;
+  assignmentId: number;
   escrowAddress: string;
   chainId: number;
   jobType: string;
-  status: JobStatus;
+  status: AssignmentStatus;
   url?: string;
   rewardAmount: number;
   rewardToken: string;
@@ -69,17 +68,17 @@ export class AssignmentDto {
   expiresAt: number;
 
   constructor(
-    assginmentId: number,
+    assignmentId: number,
     escrowAddress: string,
     chainId: number,
     jobType: string,
-    status: JobStatus,
+    status: AssignmentStatus,
     rewardAmount: number,
     rewardToken: string,
     createdAt: number,
     expiresAt: number,
   ) {
-    this.assginmentId = assginmentId;
+    this.assignmentId = assignmentId;
     this.escrowAddress = escrowAddress;
     this.chainId = chainId;
     this.jobType = jobType;

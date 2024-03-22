@@ -107,7 +107,7 @@ export class WebhookService {
 
     // Make the HTTP request to the webhook.
     const { status } = await firstValueFrom(
-      this.httpService.post(webhookUrl, webhookData, config),
+      this.httpService.post(webhookUrl, transformedWebhook, config),
     );
 
     // Check if the request was successful.

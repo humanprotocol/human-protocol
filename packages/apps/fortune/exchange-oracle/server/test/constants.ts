@@ -11,5 +11,6 @@ export const MOCK_S3_SECRET_KEY = 'secret_key';
 export const MOCK_S3_BUCKET = 'solution';
 export const MOCK_S3_USE_SSL = false;
 export const MOCK_REPUTATION_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
+export const MOCK_RECORDING_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
 export const MOCK_MANIFEST_URL = 'http://localhost/manifest.json';
-export const JOB_LAUNCHER_WEBHOOK_URL = 'https://example.com/reputationoracle';
+export const JOB_LAUNCHER_WEBHOOK_URL = 'https://example.com/joblauncher';
