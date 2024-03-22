@@ -95,7 +95,7 @@ export class WebhookService {
       }),
     );
 
-    if (status !== HttpStatus.OK) {
+    if (status !== HttpStatus.CREATED) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }
