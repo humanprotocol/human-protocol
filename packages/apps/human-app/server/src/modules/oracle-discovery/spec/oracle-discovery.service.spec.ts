@@ -32,7 +32,6 @@ describe('OracleDiscoveryService', () => {
         ConfigModule.forRoot({
           envFilePath: '.env',
           isGlobal: true,
-          validationSchema: envValidator,
         }),
       ],
       providers: [

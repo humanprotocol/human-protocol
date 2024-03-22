@@ -22,6 +22,8 @@
     "job-launcher-server:lint": "yarn workspace @human-protocol/job-launcher-server lint",
     "job-launcher-client:test": "yarn workspace @human-protocol/job-launcher-client test",
     "job-launcher-client:lint": "yarn workspace @human-protocol/job-launcher-client lint",
+    "human-app-server:test": "yarn workspace @human-protocol/human-app-server test",
+    "human-app-server:lint": "yarn workspace @human-protocol/human-app-server lint",
     "reputation-oracle:test": "yarn workspace @human-protocol/reputation-oracle test",
     "reputation-oracle:lint": "yarn workspace @human-protocol/reputation-oracle lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
