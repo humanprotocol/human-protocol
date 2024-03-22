@@ -130,12 +130,12 @@ export class CvatDataDto {
   @IsObject()
   public dataset: StorageDataDto;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsObject()
   @IsOptional()
   public points: StorageDataDto | undefined;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsObject()
   @IsOptional()
   public boxes: StorageDataDto | undefined;
@@ -417,10 +417,12 @@ export class Label {
 
   @ApiPropertyOptional()
   @IsArray()
+  @IsOptional()
   public nodes: string[] | undefined;
 
   @ApiPropertyOptional()
   @IsArray()
+  @IsOptional()
   public joints: [] | undefined = [];
 }
 
