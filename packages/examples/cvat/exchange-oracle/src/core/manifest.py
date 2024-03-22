@@ -135,6 +135,24 @@ class AnnotationInfo(BaseModel):
     max_time: Optional[int] = None  # deprecated, TODO: mark deprecated with pydantic 2.7+
     "Maximum time per job (assignment) for an annotator, in seconds"
 
+    @root_validator(pre=True)
+    @classmethod
+    def _validate_label_type(cls, values: dict[str, Any]) -> dict[str, Any]:
+        default_label_type = LabelTypes.plain
+        if values["type"] == TaskTypes.image_skeletons_from_boxes:
+            default_label_type = LabelTypes.skeleton
+
+        # Add default value for labels, if none provided.
+        # pydantic can't do this for tagged unions
+        try:
+            labels = values["labels"]
+            for label_info in labels:
+                label_info["type"] = label_info.get("type", default_label_type)
+        except KeyError:
+            pass
+
+        return values
+
 
 class ValidationInfo(BaseModel):
     min_quality: float = Field(ge=0)
@@ -157,15 +175,4 @@ class TaskManifest(BaseModel):
 
 
 def parse_manifest(manifest: Any) -> TaskManifest:
-    # Add default value for labels, if none provided.
-    # pydantic can't do this for tagged unions
-
-    if isinstance(manifest, dict):
-        try:
-            labels = manifest["annotation"]["labels"]
-            for label_info in labels:
-                label_info["type"] = label_info.get("type", LabelTypes.plain)
-        except KeyError:
-            pass
-
     return TaskManifest.parse_obj(manifest)
