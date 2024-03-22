@@ -141,22 +141,26 @@ export class JobService {
     requestType: JobRequestType,
     tokenFundAmount: number,
   ): Promise<CvatManifestDto> {
-    const elementsCount = (await listObjectsInBucket(dto.data, requestType))
-      .length;
+    const elementsCount = (
+      await listObjectsInBucket(dto.data.dataset, requestType)
+    ).length;
     return {
       data: {
-        data_url: generateBucketUrl(dto.data, requestType),
+        data_url: generateBucketUrl(dto.data.dataset, requestType),
+        points_url: dto.data.points
+          ? generateBucketUrl(dto.data.points, requestType)
+          : undefined,
+        boxes_url: dto.data.boxes
+          ? generateBucketUrl(dto.data.boxes, requestType)
+          : undefined,
       },
       annotation: {
-        labels: dto.labels.map((item) => ({ name: item })),
+        labels: dto.labels,
         description: dto.requesterDescription,
         user_guide: dto.userGuide,
         type: requestType,
         job_size: Number(
           this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-        ),
-        max_time: Number(
-          this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
         ),
       },
       validation: {
@@ -454,6 +458,22 @@ export class JobService {
         fundAmount: number,
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
+    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
+    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
   };
 
   private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
@@ -467,6 +487,12 @@ export class JobService {
       getTrustedHandlers: () => [],
     },
     [JobRequestType.IMAGE_POINTS]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getTrustedHandlers: () => [],
     },
   };
@@ -518,6 +544,36 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_POINTS]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+        )!;
+        const recordingOracle = this.configService.get<string>(
+          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+        )!;
+        const reputationOracle = this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.configService.get<string>(
           ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
