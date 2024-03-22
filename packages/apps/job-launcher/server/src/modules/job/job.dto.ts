@@ -415,15 +415,13 @@ export class Label {
   @IsString()
   public name: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsArray()
-  @IsOptional()
   public nodes: string[] | undefined;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsArray()
-  @IsOptional()
-  public joints: [] | undefined;
+  public joints: [] | undefined = [];
 }
 
 export class Annotation {
