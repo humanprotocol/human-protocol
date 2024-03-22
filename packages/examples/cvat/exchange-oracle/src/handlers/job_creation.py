@@ -178,9 +178,18 @@ class BoxesFromPointsTaskBuilder:
         self.min_embedded_point_radius_percent = 0.005
         self.max_embedded_point_radius_percent = 0.01
         self.embedded_point_color = (0, 255, 255)
+        self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
 
         self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
+
         self.min_class_samples_for_roi_estimation = 25
+
+        self.max_class_roi_image_side_threshold = 0.5
+        """
+        The maximum allowed percent of the image for the estimated class RoI,
+        before the default RoI is used. Too big RoI estimations reduce the overall
+        prediction quality, making them unreliable.
+        """
 
         self.max_discarded_threshold = 0.05
         """
@@ -689,25 +698,39 @@ class BoxesFromPointsTaskBuilder:
         # For big enough datasets, it should be reasonable approximation
         # (due to the central limit theorem). This can work bad for small datasets,
         # so we only do this if there are enough class samples.
-        classes_with_default_roi = []
+        classes_with_default_roi: dict[int, str] = {}  # label_id -> reason
         roi_size_estimations_per_label = {}  # label id -> (w, h)
+        default_roi_size = (2, 2)  # 2 will yield just the image size after halving
         for label_id, label_sizes in bbox_sizes_per_label.items():
             if len(label_sizes) < self.min_class_samples_for_roi_estimation:
-                classes_with_default_roi.append(label_id)
-                estimated_size = (2, 2)  # 2 will yield just the image size after halving
+                estimated_size = default_roi_size
+                classes_with_default_roi[label_id] = "too few GT provided"
             else:
                 max_bbox = np.max(label_sizes, axis=0)
-                estimated_size = max_bbox * self.roi_size_mult
+                if np.any(max_bbox > self.max_class_roi_image_side_threshold):
+                    estimated_size = default_roi_size
+                    classes_with_default_roi[label_id] = "estimated RoI is unreliable"
+                else:
+                    estimated_size = 2 * max_bbox * self.roi_size_mult
 
             roi_size_estimations_per_label[label_id] = estimated_size
 
         if classes_with_default_roi:
             label_cat = self._gt_dataset.categories()[dm.AnnotationType.label]
+            labels_by_reason = {
+                g_reason: list(v[0] for v in g_items)
+                for g_reason, g_items in groupby(
+                    sorted(classes_with_default_roi.items(), key=lambda v: v[1]), key=lambda v: v[1]
+                )
+            }
             self.logger.warning(
-                "Some classes will use the full image instead of RoI"
-                "- too few GT provided: {}".format(
-                    self._format_list(
-                        [label_cat[label_id].name for label_id in classes_with_default_roi]
+                "Some classes will use the full image instead of RoI - {}".format(
+                    "; ".join(
+                        "{}: {}".format(
+                            g_reason,
+                            self._format_list([label_cat[label_id].name for label_id in g_labels]),
+                        )
+                        for g_reason, g_labels in labels_by_reason.items()
                     )
                 )
             )
@@ -832,6 +855,38 @@ class BoxesFromPointsTaskBuilder:
                 file_data,
             )
 
+    def _extract_roi(
+        self, source_pixels: np.ndarray, roi_info: boxes_from_points_task.RoiInfo
+    ) -> np.ndarray:
+        img_h, img_w, *_ = source_pixels.shape
+
+        roi_pixels = source_pixels[
+            max(0, roi_info.roi_y) : min(img_h, roi_info.roi_y + roi_info.roi_h),
+            max(0, roi_info.roi_x) : min(img_w, roi_info.roi_x + roi_info.roi_w),
+        ]
+
+        if not (
+            (0 <= roi_info.roi_x < roi_info.roi_x + roi_info.roi_w < img_w)
+            and (0 <= roi_info.roi_y < roi_info.roi_y + roi_info.roi_h < img_h)
+        ):
+            # Coords can be outside the original image
+            # In this case a border should be added to RoI, so that the image was centered on bbox
+            wrapped_roi_pixels = np.zeros((roi_info.roi_h, roi_info.roi_w, 3), dtype=np.float32)
+            wrapped_roi_pixels[:, :] = self.roi_background_color
+
+            dst_y = max(-roi_info.roi_y, 0)
+            dst_x = max(-roi_info.roi_x, 0)
+            wrapped_roi_pixels[
+                dst_y : dst_y + roi_pixels.shape[0],
+                dst_x : dst_x + roi_pixels.shape[1],
+            ] = roi_pixels
+
+            roi_pixels = wrapped_roi_pixels
+        else:
+            roi_pixels = roi_pixels.copy()
+
+        return roi_pixels
+
     def _draw_roi_point(
         self, roi_pixels: np.ndarray, roi_info: boxes_from_points_task.RoiInfo
     ) -> np.ndarray:
@@ -865,6 +920,7 @@ class BoxesFromPointsTaskBuilder:
 
     def _extract_and_upload_rois(self):
         # TODO: maybe optimize via splitting into separate threads (downloading, uploading, processing)
+
         # Watch for the memory used, as the whole dataset can be quite big (gigabytes, terabytes)
         # Consider also packing RoIs cut into archives
         assert self._points_dataset is not _unset
@@ -910,10 +966,7 @@ class BoxesFromPointsTaskBuilder:
 
             image_rois = {}
             for roi_info in image_roi_infos:
-                roi_pixels = image_pixels[
-                    roi_info.roi_y : roi_info.roi_y + roi_info.roi_h,
-                    roi_info.roi_x : roi_info.roi_x + roi_info.roi_w,
-                ]
+                roi_pixels = self._extract_roi(image_pixels, roi_info)
 
                 if self.embed_point_in_roi_image:
                     roi_pixels = self._draw_roi_point(roi_pixels, roi_info)
