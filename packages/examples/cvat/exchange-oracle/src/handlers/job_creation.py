@@ -1078,9 +1078,6 @@ class SkeletonsFromBoxesTaskBuilder:
         self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
 
         self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
 
         self.min_label_gt_samples = 2  # TODO: find good threshold
 
