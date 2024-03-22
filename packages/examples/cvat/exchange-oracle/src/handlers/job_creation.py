@@ -1057,7 +1057,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
 
         # Configuration / constants
-        self.job_size_mult = 6
+        self.job_size_mult = skeletons_from_boxes_task.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
         "Job size multiplier"
 
         # TODO: consider WebP if produced files are too big
@@ -1081,9 +1081,6 @@ class SkeletonsFromBoxesTaskBuilder:
         self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
 
         self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
-        # TODO: add
-        # credentials=BucketCredentials()
-        "Exchange Oracle's private bucket info"
 
         self.min_label_gt_samples = 2  # TODO: find good threshold
 

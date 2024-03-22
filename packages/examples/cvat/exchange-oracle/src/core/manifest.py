@@ -4,7 +4,6 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
-from src.core.config import Config
 from src.core.types import TaskTypes
 from src.utils.enums import BetterEnumMeta
 
@@ -133,7 +132,7 @@ class AnnotationInfo(BaseModel):
     job_size: int = 10
     "Frames per job, validation frames are not included"
 
-    max_time: int = Field(default_factory=lambda: Config.core_config.default_assignment_time)
+    max_time: Optional[int] = None  # deprecated, TODO: mark deprecated with pydantic 2.7+
     "Maximum time per job (assignment) for an annotator, in seconds"
 
 

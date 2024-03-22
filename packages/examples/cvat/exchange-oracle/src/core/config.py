@@ -148,7 +148,7 @@ class FeaturesConfig:
 
 
 class CoreConfig:
-    default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 300))
+    default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
 
 
 class HumanAppConfig:

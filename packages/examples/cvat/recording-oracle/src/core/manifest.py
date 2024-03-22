@@ -133,7 +133,7 @@ class AnnotationInfo(BaseModel):
     job_size: int = 10
     "Frames per job, validation frames are not included"
 
-    max_time: Optional[int] = None
+    max_time: Optional[int] = None  # deprecated, TODO: mark deprecated with pydantic 2.7+
     "Maximum time per job (assignment) for an annotator, in seconds"
 
 
