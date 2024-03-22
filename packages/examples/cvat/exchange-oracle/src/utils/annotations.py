@@ -142,6 +142,7 @@ def remove_duplicated_gt_frames(dataset: dm.Dataset, known_frames: Sequence[str]
 
 T = TypeVar("T", bound=dm.Annotation)
 
+
 def shift_ann(ann: T, offset_x: float, offset_y: float, *, img_w: int, img_h: int) -> T:
     "Shift annotation coordinates with clipping to the image size"
 
