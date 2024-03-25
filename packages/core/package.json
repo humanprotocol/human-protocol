@@ -11,7 +11,8 @@
     "dist/typechain-types"
   ],
   "scripts": {
-    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types dist",
+    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types",
+    "precompile": "yarn clean",
     "compile": "hardhat compile",
     "verify": "hardhat verify",
     "test": "hardhat test",
@@ -24,8 +25,8 @@
     "deploy:hub": "hardhat run scripts/deploy-hub.ts",
     "deploy:spokes": "hardhat run scripts/deploy-spokes.ts",
     "update:spokes": "hardhat run scripts/update-spokes.ts",
-    "hub:selfdelegate:vote" : "hardhat run scripts/hub-selfdelegate-vote.ts",
-    "spoke:selfdelegate:vote" : "hardhat run scripts/spoke-selfdelegate-vote.ts",
+    "hub:selfdelegate:vote": "hardhat run scripts/hub-selfdelegate-vote.ts",
+    "spoke:selfdelegate:vote": "hardhat run scripts/spoke-selfdelegate-vote.ts",
     "create:proposal": "hardhat run scripts/create-proposal.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -33,7 +34,7 @@
     "format:scripts": "prettier --write '**/*.ts'",
     "format": "yarn format:contracts && yarn format:scripts",
     "build": "yarn compile && tsc",
-    "prebuild": "yarn clean",
+    "prebuild": "rm -rf dist",
     "prepublish": "yarn build"
   },
   "repository": {

@@ -427,7 +427,7 @@ export class JobService {
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
     },
     [JobRequestType.FORTUNE]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      calculateFundAmount: async (dto: JobFortuneDto) => dto.fundAmount,
       createManifest: async (
         dto: JobFortuneDto,
         requestType: JobRequestType,
@@ -752,13 +752,14 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
+    const oracleType = this.getOracleType(jobEntity.requestType);
     const webhookEntity = new WebhookEntity();
     Object.assign(webhookEntity, {
       escrowAddress: jobEntity.escrowAddress,
       chainId: jobEntity.chainId,
       eventType: EventType.ESCROW_CREATED,
-      oracleType: OracleType.CVAT,
-      hasSignature: false,
+      oracleType: oracleType,
+      hasSignature: oracleType === OracleType.FORTUNE,
     });
     await this.webhookRepository.createUnique(webhookEntity);
 

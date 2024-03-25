@@ -5,6 +5,7 @@ export const ConfigNames = {
   HOST: 'HOST',
   PORT: 'PORT',
   WEB3_ENV: 'WEB3_ENV',
+  POSTGRES_URL: 'POSTGRES_URL',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
@@ -13,6 +14,7 @@ export const ConfigNames = {
   POSTGRES_SYNC: 'POSTGRES_SYNC',
   POSTGRES_SSL: 'POSTGRES_SSL',
   POSTGRES_LOGGING: 'POSTGRES_LOGGING',
+  MAX_RETRY_COUNT: 'MAX_RETRY_COUNT',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
@@ -23,6 +25,7 @@ export const ConfigNames = {
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   PGP_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
   PGP_PASSPHRASE: 'PGP_PASSPHRASE',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -30,14 +33,16 @@ export const envValidator = Joi.object({
   NODE_ENV: Joi.string().default('development'),
   HOST: Joi.string().default('localhost'),
   PORT: Joi.string().default(3002),
+  MAX_RETRY_COUNT: Joi.number().default(5),
   WEB3_ENV: Joi.string().default('testnet'),
   // Database
   DB_TYPE: Joi.string().default('postgres'),
-  POSTGRES_HOST: Joi.string().default('127.0.0.1'),
-  POSTGRES_USER: Joi.string().default('operator'),
-  POSTGRES_PASSWORD: Joi.string().default('qwerty'),
-  POSTGRES_DATABASE: Joi.string().default('reputation-oracle'),
-  POSTGRES_PORT: Joi.string().default('5432'),
+  POSTGRES_URL: Joi.string().optional(),
+  POSTGRES_HOST: Joi.string().optional(),
+  POSTGRES_USER: Joi.string().optional(),
+  POSTGRES_PASSWORD: Joi.string().optional(),
+  POSTGRES_DATABASE: Joi.string().optional(),
+  POSTGRES_PORT: Joi.string().optional(),
   POSTGRES_SYNC: Joi.string().default('false'),
   POSTGRES_SSL: Joi.string().default('false'),
   POSTGRES_LOGGING: Joi.string(),
@@ -53,4 +58,6 @@ export const envValidator = Joi.object({
   PGP_ENCRYPT: Joi.boolean().default(false),
   PGP_PRIVATE_KEY: Joi.string().optional(),
   PGP_PASSPHRASE: Joi.string().optional(),
+  // Cron Job Secret
+  CRON_SECRET: Joi.string().optional(),
 });

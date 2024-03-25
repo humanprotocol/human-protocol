@@ -1,19 +1,15 @@
+import { createMock } from '@golevelup/ts-jest';
+import {
+  Encryption,
+  EscrowClient,
+  OperatorUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { Web3Service } from '../web3/web3.service';
-import { JobService } from './job.service';
 import {
-  EscrowClient,
-  StorageClient,
-  EscrowUtils,
-  OperatorUtils,
-  Encryption,
-  EncryptionUtils,
-} from '@human-protocol/sdk';
-import {
-  JOB_LAUNCHER_WEBHOOK_URL,
   MOCK_MANIFEST_URL,
   MOCK_PRIVATE_KEY,
   MOCK_S3_ACCESS_KEY,
@@ -23,15 +19,23 @@ import {
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
-import { EventType } from '../../common/enums/webhook';
 import {
-  ESCROW_FAILED_ENDPOINT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constant';
-import { signMessage } from '../../common/utils/signature';
-import { ConfigModule, registerAs } from '@nestjs/config';
+  AssignmentStatus,
+  JobFieldName,
+  JobStatus,
+  JobType,
+} from '../../common/enums/job';
+import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import { AssignmentEntity } from '../assignment/assignment.entity';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
+import { WebhookDto } from '../webhook/webhook.dto';
+import { WebhookRepository } from '../webhook/webhook.repository';
 import { ManifestDto } from './job.dto';
+import { JobEntity } from './job.entity';
+import { JobRepository } from './job.repository';
+import { JobService } from './job.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -65,12 +69,15 @@ jest.mock('minio', () => {
 describe('JobService', () => {
   let jobService: JobService;
   let web3Service: Web3Service;
-  let httpService: HttpService;
   let storageService: StorageService;
+  let jobRepository: JobRepository;
+  let assignmentRepository: AssignmentRepository;
+  let webhookRepository: WebhookRepository;
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
+  const reputationNetwork = '0x1234567890123456789012345678901234567892';
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -117,6 +124,15 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        { provide: JobRepository, useValue: createMock<JobRepository>() },
+        {
+          provide: AssignmentRepository,
+          useValue: createMock<AssignmentRepository>(),
+        },
+        {
+          provide: WebhookRepository,
+          useValue: createMock<WebhookRepository>(),
+        },
         {
           provide: HttpService,
           useValue: {
@@ -131,21 +147,74 @@ describe('JobService', () => {
 
     jobService = moduleRef.get<JobService>(JobService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
-    httpService = moduleRef.get<HttpService>(HttpService);
     storageService = moduleRef.get<StorageService>(StorageService);
+    jobRepository = moduleRef.get<JobRepository>(JobRepository);
+    assignmentRepository =
+      moduleRef.get<AssignmentRepository>(AssignmentRepository);
+    webhookRepository = moduleRef.get<WebhookRepository>(WebhookRepository);
   });
 
-  describe('getDetails', () => {
+  describe('createJob', () => {
     beforeAll(async () => {
+      jest.spyOn(jobRepository, 'createUnique');
       (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
-        getJobLauncherAddress: jest
+        getReputationOracleAddress: jest
           .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+          .mockResolvedValue(reputationNetwork),
       }));
     });
+    const webhook: WebhookDto = {
+      chainId,
+      escrowAddress,
+      eventType: EventType.ESCROW_CREATED,
+    };
 
-    it('should return job details encrypted', async () => {
+    it('should create a new job in the database', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(null);
+      const result = await jobService.createJob(webhook);
+
+      expect(result).toEqual(undefined);
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
+        chainId: chainId,
+        escrowAddress: escrowAddress,
+        reputationNetwork: reputationNetwork,
+        status: JobStatus.ACTIVE,
+      });
+    });
+
+    it('should fail if job already exists', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          chainId: chainId,
+          escrowAddress: escrowAddress,
+          status: JobStatus.ACTIVE,
+        } as JobEntity);
+
+      await expect(jobService.createJob(webhook)).rejects.toThrow(
+        'Job already exists',
+      );
+    });
+  });
+
+  describe('getJobList', () => {
+    const jobs = [
+      {
+        jobId: 1,
+        chainId: 1,
+        escrowAddress,
+        status: JobStatus.ACTIVE,
+        createdAt: new Date(),
+      },
+    ];
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should return an array of jobs calling the manifest', async () => {
       const manifest: ManifestDto = {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
@@ -153,189 +222,78 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
-      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce('encrypted string');
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: jobs as any, itemCount: 1 });
 
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([]);
-
-      (Encryption.build as any).mockImplementation(() => ({
-        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
-      }));
-
-      const result = await jobService.getDetails(chainId, escrowAddress);
-
-      expect(result).toEqual({
-        escrowAddress,
-        chainId,
-        manifest,
-      });
-    });
-
-    it('should return job details not encrypted', async () => {
-      const manifest: ManifestDto = {
-        requesterTitle: 'Example Title',
-        requesterDescription: 'Example Description',
-        submissionsRequired: 5,
-        fundAmount: 100,
-      };
-
-      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(JSON.stringify(manifest));
-
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([]);
-
-      const result = await jobService.getDetails(chainId, escrowAddress);
-
-      expect(result).toEqual({
-        escrowAddress,
-        chainId,
-        manifest,
-      });
-    });
-
-    it('should call job launcher webhook if manifest is empty', async () => {
-      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValueOnce(null);
-
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        webhookUrl: JOB_LAUNCHER_WEBHOOK_URL,
-      });
-
-      (Encryption.build as any).mockImplementation(() => ({
-        decrypt: jest.fn().mockResolvedValue(null),
-      }));
-
-      httpService.axiosRef.get = jest.fn().mockResolvedValue({
-        status: 200,
-        data: null,
-      });
-      await expect(
-        jobService.getDetails(chainId, escrowAddress),
-      ).rejects.toThrow('Unable to get manifest');
-
-      const expectedBody = {
-        escrow_address: escrowAddress,
-        chain_id: chainId,
-        event_type: EventType.TASK_CREATION_FAILED,
-        event_data: { assignments: [{ reason: 'Unable to get manifest' }] },
-      };
-      expect(httpServicePostMock).toHaveBeenCalledWith(
-        JOB_LAUNCHER_WEBHOOK_URL + ESCROW_FAILED_ENDPOINT,
-        expectedBody,
+      const result = await jobService.getJobList(
         {
-          headers: {
-            [HEADER_SIGNATURE_KEY]: await signMessage(
-              expectedBody,
-              MOCK_PRIVATE_KEY,
-            ),
-          },
+          chainId,
+          jobType: JobType.FORTUNE,
+          fields: [JobFieldName.JobDescription],
+          escrowAddress,
+          status: JobStatus.ACTIVE,
+          page: 0,
+          pageSize: 10,
+          skip: 0,
         },
+        workerAddress,
+      );
+
+      expect(result.totalResults).toEqual(1);
+      expect(result.results[0]).toEqual({
+        chainId: 1,
+        jobDescription: 'Example Description',
+        escrowAddress: escrowAddress,
+        jobType: JobType.FORTUNE,
+        status: JobStatus.ACTIVE,
+      });
+      expect(jobService.getManifest).toHaveBeenCalledWith(
+        chainId,
+        escrowAddress,
       );
     });
 
-    it('should fail if job has already been completed', async () => {
-      const manifest: ManifestDto = {
-        requesterTitle: 'Example Title',
-        requesterDescription: 'Example Description',
-        submissionsRequired: 1,
-        fundAmount: 100,
-      };
+    it('should return an array of jobs without calling the manifest', async () => {
+      jest.spyOn(jobService, 'getManifest');
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: jobs as any, itemCount: 1 });
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
-
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
+      const result = await jobService.getJobList(
         {
-          exchangeAddress: '0x1234567890123456789012345678901234567892',
-          workerAddress: '0x1234567890123456789012345678901234567892',
-          solution: 'test',
+          chainId,
+          jobType: JobType.FORTUNE,
+          fields: [JobFieldName.CreatedAt],
+          escrowAddress,
+          status: JobStatus.ACTIVE,
+          page: 0,
+          pageSize: 10,
+          skip: 0,
         },
-      ]);
-
-      (Encryption.build as any).mockImplementation(() => ({
-        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
-      }));
-
-      await expect(
-        jobService.getDetails(chainId, escrowAddress),
-      ).rejects.toThrow('This job has already been completed');
-    });
-
-    it('should fail if encrypted manifest is invalid', async () => {
-      const manifest = JSON.stringify({
-        requesterTitle: 'Example Title',
-        requesterDescription: 'Example Description',
-        submissionsRequired: 5,
-        fundAmount: 100,
-      });
-
-      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest)
-        .mockResolvedValueOnce([]);
-
-      (Encryption.build as any).mockImplementation(() => ({
-        decrypt: jest.fn().mockRejectedValue(new Error('Invalid manifest')),
-      }));
-
-      await expect(
-        jobService.getDetails(chainId, escrowAddress),
-      ).rejects.toThrow('Unable to decrypt manifest');
-    });
-  });
-
-  describe('getPendingJobs', () => {
-    it('should return an array of pending jobs', async () => {
-      EscrowUtils.getEscrows = jest
-        .fn()
-        .mockReturnValue([
-          { address: '0x1234567890123456789012345678901234567893' },
-          { address: '0x1234567890123456789012345678901234567894' },
-        ]);
-
-      const result = await jobService.getPendingJobs(chainId, workerAddress);
-
-      expect(result).toEqual([
-        '0x1234567890123456789012345678901234567893',
-        '0x1234567890123456789012345678901234567894',
-      ]);
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
-    });
-
-    it('should return an array of pending jobs removing jobs already submitted by worker', async () => {
-      EscrowUtils.getEscrows = jest
-        .fn()
-        .mockReturnValue([
-          { address: '0x1234567890123456789012345678901234567893' },
-          { address: '0x1234567890123456789012345678901234567894' },
-        ]);
-
-      jobService['storage']['0x1234567890123456789012345678901234567893'] = [
         workerAddress,
-      ];
+      );
 
-      const result = await jobService.getPendingJobs(chainId, workerAddress);
-
-      expect(result).toEqual(['0x1234567890123456789012345678901234567894']);
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
-    });
-
-    it('should return an empty array if there are no pending jobs', async () => {
-      EscrowUtils.getEscrows = jest.fn().mockReturnValue([]);
-
-      const result = await jobService.getPendingJobs(chainId, workerAddress);
-
-      expect(result).toEqual([]);
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
+      expect(result.totalResults).toEqual(1);
+      expect(result.results[0]).toEqual({
+        chainId: 1,
+        createdAt: expect.any(String),
+        escrowAddress: escrowAddress,
+        jobType: JobType.FORTUNE,
+        status: JobStatus.ACTIVE,
+      });
+      expect(jobService.getManifest).not.toHaveBeenCalled();
     });
   });
 
   describe('solveJob', () => {
+    const assignment = {
+      jobId: 1,
+      workerAddress: workerAddress,
+      status: AssignmentStatus.ACTIVE,
+    };
+
     beforeAll(async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
@@ -355,6 +313,10 @@ describe('JobService', () => {
         submissionsRequired: 5,
         fundAmount: 100,
       };
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
+        .mockResolvedValue(assignment as AssignmentEntity);
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
 
@@ -380,24 +342,25 @@ describe('JobService', () => {
         workerAddress,
         'solution',
       );
-      const expectedBody = {
-        escrow_address: escrowAddress,
-        chain_id: chainId,
-        solutions_url: solutionsUrl,
-      };
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
-      expect(httpServicePostMock).toHaveBeenCalledWith(
-        recordingOracleURLMock,
-        expect.objectContaining(expectedBody),
-        {
-          headers: {
-            [HEADER_SIGNATURE_KEY]: await signMessage(
-              expectedBody,
-              MOCK_PRIVATE_KEY,
-            ),
-          },
-        },
-      );
+      expect(webhookRepository.createUnique).toHaveBeenCalledWith({
+        escrowAddress,
+        chainId,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+        retriesCount: 0,
+        status: WebhookStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+      expect(assignment.status).toBe(AssignmentStatus.VALIDATION);
+    });
+
+    it('should fail if user is not assigned to the job', async () => {
+      jest
+        .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
+        .mockResolvedValue(null);
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
+      ).rejects.toThrow('User is not assigned to the job');
     });
 
     it('should fail if job has already been completed', async () => {
@@ -407,6 +370,10 @@ describe('JobService', () => {
         submissionsRequired: 1,
         fundAmount: 100,
       };
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
+        .mockResolvedValue(assignment as AssignmentEntity);
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
         {
@@ -446,41 +413,12 @@ describe('JobService', () => {
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
-    it('should fail if recording oracle url is empty', async () => {
-      const manifest: ManifestDto = {
-        requesterTitle: 'Example Title',
-        requesterDescription: 'Example Description',
-        submissionsRequired: 5,
-        fundAmount: 100,
-      };
-
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
-
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
-
-      const solutionsUrl =
-        'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
-
-      storageService.uploadJobSolutions = jest
-        .fn()
-        .mockResolvedValue(solutionsUrl);
-
-      const solution = 'job-solution';
-
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        webhookUrl: '',
-      });
-
-      await expect(
-        jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
-      ).rejects.toThrow('Unable to get Recording Oracle webhook URL');
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
-    });
-
     it('should fail if user has already submitted a solution', async () => {
       const solution = 'job-solution';
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
+        .mockResolvedValue(assignment as AssignmentEntity);
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
@@ -498,8 +436,6 @@ describe('JobService', () => {
           solution: 'test',
         },
       ]);
-
-      jobService['storage'][escrowAddress] = [workerAddress];
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
