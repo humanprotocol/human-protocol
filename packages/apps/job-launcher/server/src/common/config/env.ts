@@ -23,10 +23,9 @@ export const ConfigNames = {
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
+  PGP_ENCRYPT: 'PGP_ENCRYPT',
   PGP_PRIVATE_KEY: 'PGP_PRIVATE_KEY',
   PGP_PASSPHRASE: 'PGP_PASSPHRASE',
-  PGP_ENCRYPT: 'PGP_ENCRYPT',
-  JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   REPUTATION_ORACLE_ADDRESS: 'REPUTATION_ORACLE_ADDRESS',
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: 'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
   FORTUNE_RECORDING_ORACLE_ADDRESS: 'FORTUNE_RECORDING_ORACLE_ADDRESS',
@@ -57,6 +56,7 @@ export const ConfigNames = {
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
   APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -86,7 +86,6 @@ export const envValidator = Joi.object({
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number().default(null),
-  JOB_LAUNCHER_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
@@ -122,10 +121,12 @@ export const envValidator = Joi.object({
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
   //PGP
-  PGP_PRIVATE_KEY: Joi.string().default(null),
-  PGP_PASSPHRASE: Joi.string().optional(),
   PGP_ENCRYPT: Joi.boolean().default(false),
+  PGP_PRIVATE_KEY: Joi.string().optional(),
+  PGP_PASSPHRASE: Joi.string().optional(),
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),
+  // Cron Job Secret
+  CRON_SECRET: Joi.string().required(),
 });

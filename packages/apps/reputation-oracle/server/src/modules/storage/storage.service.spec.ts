@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  OperatorUtils,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
@@ -31,15 +31,17 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn(),
   },
-  OperatorUtils: {
-    getLeader: jest.fn(),
-  },
   Encryption: {
     build: jest.fn(),
   },
   EncryptionUtils: {
     encrypt: jest.fn(),
     isEncrypted: jest.fn(),
+  },
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getPublicKey: jest.fn(),
+    })),
   },
 }));
 
@@ -112,8 +114,8 @@ describe('StorageService', () => {
     EscrowClient.build = jest.fn().mockResolvedValue({
       getJobLauncherAddress: jest.fn().mockResolvedValue(jobLauncherAddress),
     });
-    OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-      publicKey: MOCK_ENCRYPTION_PUBLIC_KEY,
+    (KVStoreClient.build as jest.Mock).mockResolvedValue({
+      getPublicKey: jest.fn().mockResolvedValue(MOCK_ENCRYPTION_PUBLIC_KEY),
     });
   });
 
@@ -140,13 +142,14 @@ describe('StorageService', () => {
         [jobSolution],
       );
 
+      const hash = crypto.createHash('sha1').update('encrypted').digest('hex');
       expect(fileData).toEqual({
-        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-        hash: crypto.createHash('sha1').update('encrypted').digest('hex'),
+        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${hash}.json`,
+        hash,
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
-        `${escrowAddress}-${chainId}.json`,
+        `${hash}.json`,
         expect.stringContaining('encrypted'),
         {
           'Content-Type': 'application/json',
@@ -189,15 +192,16 @@ describe('StorageService', () => {
           chainId,
           [jobSolution],
         );
-        const content = JSON.stringify([jobSolution]);
 
+        const content = JSON.stringify([jobSolution]);
+        const hash = crypto.createHash('sha1').update(content).digest('hex');
         expect(fileData).toEqual({
-          url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-          hash: crypto.createHash('sha1').update(content).digest('hex'),
+          url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${hash}.json`,
+          hash,
         });
         expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
           MOCK_S3_BUCKET,
-          `${escrowAddress}-${chainId}.json`,
+          `${hash}.json`,
           expect.stringContaining(content),
           {
             'Content-Type': 'application/json',

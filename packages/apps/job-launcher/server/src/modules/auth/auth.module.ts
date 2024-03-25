@@ -25,7 +25,6 @@ import { UserRepository } from '../user/user.repository';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         privateKey: configService.get<string>(ConfigNames.JWT_PRIVATE_KEY),
-        publicKey: configService.get<string>(ConfigNames.JWT_PUBLIC_KEY),
         signOptions: {
           algorithm: 'ES256',
           expiresIn: configService.get<number>(

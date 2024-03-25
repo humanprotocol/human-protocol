@@ -1,7 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import { CronJobService } from './cron-job.service';
+import { CronAuthGuard } from '../../common/guards/cron.auth';
 
 @Public()
 @ApiTags('Cron')
@@ -19,6 +25,8 @@ export class CronJobController {
     status: 200,
     description: 'Pending cron jobs processed successfully',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   public async processPendingCronJob(): Promise<void> {
     await this.cronJobService.processPendingWebhooks();
     return;
@@ -35,6 +43,8 @@ export class CronJobController {
     status: 200,
     description: 'Paid cron jobs processed successfully',
   })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
   public async processPaidCronJob(): Promise<void> {
     await this.cronJobService.processPaidWebhooks();
     return;

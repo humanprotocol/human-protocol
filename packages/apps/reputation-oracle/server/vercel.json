@@ -19,12 +19,12 @@
   ],
   "crons": [
     {
-      "path": "/webhook/cron/pending",
-      "schedule": "*/1 * * * *"
+      "path": "/cron/webhook/pending",
+      "schedule": "*/5 * * * *"
     },
     {
-      "path": "/webhook/cron/paid",
-      "schedule": "*/1 * * * *"
+      "path": "/cron/webhook/paid",
+      "schedule": "*/5 * * * *"
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."

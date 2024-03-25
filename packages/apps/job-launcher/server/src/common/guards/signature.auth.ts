@@ -21,8 +21,8 @@ export class SignatureAuthGuard implements CanActivate {
     const oracleAdresses: string[] = [];
     try {
       const escrowData = await EscrowUtils.getEscrow(
-        data.chainId,
-        data.escrowAddress,
+        data.chain_id,
+        data.escrow_address,
       );
       if (
         this.role.includes(Role.Exchange) &&

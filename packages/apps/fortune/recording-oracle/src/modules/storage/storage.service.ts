@@ -2,7 +2,8 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  OperatorUtils,
+  KVStoreClient,
+  EscrowClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -38,26 +39,38 @@ export class StorageService {
       useSSL: this.s3Config.useSSL,
     });
   }
-  public getJobUrl(escrowAddress: string, chainId: ChainId): string {
+  public getJobUrl(hash: string): string {
     return `${this.s3Config.useSSL ? 'https' : 'http'}://${
       this.s3Config.endPoint
-    }:${this.s3Config.port}/${
-      this.s3Config.bucket
-    }/${escrowAddress}-${chainId}.json`;
+    }:${this.s3Config.port}/${this.s3Config.bucket}/${hash}.json`;
   }
 
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
-      try {
-        return JSON.parse(fileContent);
-      } catch {
-        const encryption = await Encryption.build(
-          this.serverConfig.encryptionPrivateKey,
-          this.serverConfig.encryptionPassphrase,
-        );
 
-        return JSON.parse(await encryption.decrypt(fileContent));
+      if (
+        typeof fileContent === 'string' &&
+        EncryptionUtils.isEncrypted(fileContent)
+      ) {
+        try {
+          const encryption = await Encryption.build(
+            this.serverConfig.encryptionPrivateKey,
+            this.serverConfig.encryptionPassphrase,
+          );
+
+          return JSON.parse(await encryption.decrypt(fileContent));
+        } catch {
+          throw new Error('Unable to decrypt manifest');
+        }
+      } else {
+        try {
+          return typeof fileContent === 'string'
+            ? JSON.parse(fileContent)
+            : fileContent;
+        } catch {
+          return null;
+        }
       }
     } catch {
       return [];
@@ -73,37 +86,55 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const signer = this.web3Service.getSigner(chainId);
-    const recordingOracle = await OperatorUtils.getLeader(
-      chainId,
-      signer.address,
-    );
-    const reputationOracle = await OperatorUtils.getLeader(
-      chainId,
-      this.serverConfig.reputationOracleAddress,
-    );
-    if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
-      throw new BadRequestException('Missing public key');
+    let fileToUpload = JSON.stringify(solutions);
+    if (this.serverConfig.pgpEncrypt as boolean) {
+      try {
+        const signer = this.web3Service.getSigner(chainId);
+        const escrowClient = await EscrowClient.build(signer);
+        const reputationOracleAddress =
+          await escrowClient.getReputationOracleAddress(escrowAddress);
+
+        const kvstoreClient = await KVStoreClient.build(signer);
+
+        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+          signer.address,
+        );
+        const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
+          reputationOracleAddress,
+        );
+        if (
+          !recordingOraclePublicKey.length ||
+          !reputationOraclePublicKey.length
+        ) {
+          throw new BadRequestException('Missing public key');
+        }
+
+        if (!recordingOraclePublicKey || !reputationOraclePublicKey) {
+          throw new Error();
+        }
+
+        fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
+          recordingOraclePublicKey,
+          reputationOraclePublicKey,
+        ]);
+      } catch (e) {
+        throw new BadRequestException('Encryption error');
+      }
     }
 
     try {
-      const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
-        recordingOracle.publicKey,
-        reputationOracle.publicKey,
-      ]);
-
-      const hash = crypto.createHash('sha1').update(content).digest('hex');
+      const hash = crypto.createHash('sha1').update(fileToUpload).digest('hex');
       await this.minioClient.putObject(
         this.s3Config.bucket,
-        `${escrowAddress}-${chainId}.json`,
-        content,
+        `${hash}.json`,
+        fileToUpload,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
         },
       );
 
-      return { url: this.getJobUrl(escrowAddress, chainId), hash };
+      return { url: this.getJobUrl(hash), hash };
     } catch (e) {
       throw new BadRequestException('File not uploaded');
     }
