@@ -163,7 +163,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          status: HttpStatus.OK,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -189,7 +189,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          status: HttpStatus.OK,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -215,7 +215,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          status: HttpStatus.OK,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
