@@ -19,6 +19,7 @@ import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -180,7 +181,7 @@ describe('WebhookService', () => {
     it('should successfully send a webhook', async () => {
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(
