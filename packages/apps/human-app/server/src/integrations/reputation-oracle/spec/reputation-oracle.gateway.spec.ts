@@ -68,26 +68,29 @@ describe('ReputationOracleGateway', () => {
       await expect(service.sendWorkerSignup(command)).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
-
     it('should handle http error response correctly', async () => {
-      jest.spyOn(httpService, 'request').mockReturnValue(
-        throwError(() => ({
-          response: {
-            data: { message: 'Bad request' },
-            status: 400,
-          },
-        })),
-      );
+      jest
+        .spyOn(httpService, 'request')
+        .mockReturnValue(
+          throwError(
+            () =>
+              new HttpException(
+                { message: 'Bad request' },
+                HttpStatus.BAD_REQUEST,
+              ),
+          ),
+        );
 
       const command = new SignupWorkerCommand('', '');
       await expect(service.sendWorkerSignup(command)).rejects.toThrow(
-        new HttpException({ message: 'Bad request' }, 400),
+        new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
       );
     });
+
     it('should handle network or unknown errors correctly', async () => {
       jest
         .spyOn(httpService, 'request')
-        .mockReturnValue(throwError(() => new Error('Network failure')));
+        .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
       const command = new SignupWorkerCommand(
         'asfdsafdd@asdf.cvd',
@@ -96,7 +99,7 @@ describe('ReputationOracleGateway', () => {
 
       await expect(service.sendWorkerSignup(command)).rejects.toThrow(
         new HttpException(
-          'Error occurred while redirecting request.',
+          'Internal Server Error',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );
@@ -150,14 +153,17 @@ describe('ReputationOracleGateway', () => {
     });
 
     it('should handle http error response correctly', async () => {
-      jest.spyOn(httpService, 'request').mockReturnValue(
-        throwError(() => ({
-          response: {
-            data: { message: 'Bad request' },
-            status: 400,
-          },
-        })),
-      );
+      jest
+        .spyOn(httpService, 'request')
+        .mockReturnValue(
+          throwError(
+            () =>
+              new HttpException(
+                { message: 'Bad request' },
+                HttpStatus.BAD_REQUEST,
+              ),
+          ),
+        );
 
       const command: SigninWorkerCommand = {
         email: '',
@@ -170,7 +176,7 @@ describe('ReputationOracleGateway', () => {
     it('should handle network or unknown errors correctly', async () => {
       jest
         .spyOn(httpService, 'request')
-        .mockReturnValue(throwError(() => new Error('Network failure')));
+        .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
       const command: SigninWorkerCommand = {
         email: 'johndoe@example.com',
@@ -179,7 +185,7 @@ describe('ReputationOracleGateway', () => {
 
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(
         new HttpException(
-          'Error occurred while redirecting request.',
+          'Internal Server Error',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

@@ -8,7 +8,10 @@ import { beforeAll } from '@jest/globals';
 import { generateOperatorSignupRequestBody } from './fixtures/user-operator.fixture';
 import { SignupOperatorData } from '../src/modules/user-operator/interfaces/operator-registration.interface';
 import { ConfigService } from '@nestjs/config';
-import { TestEnvironmentConfigService, testEnvValidator } from '../src/common/config/test-environment-config.service';
+import {
+  TestEnvironmentConfigService,
+  testEnvValidator,
+} from '../src/common/config/test-environment-config.service';
 
 describe('Human APP (e2e) tests', () => {
   let app: INestApplication;
@@ -27,6 +30,10 @@ describe('Human APP (e2e) tests', () => {
     const { error } = testEnvValidator.validate({
       E2E_TESTING_EMAIL_ADDRESS: envConfigService.e2eTestingEmailAddress,
       E2E_TESTING_PASSWORD: envConfigService.e2eTestingPassword,
+      E2E_TESTING_EXCHANGE_ORACLE_URL:
+        envConfigService.e2eTestingExchangeOracleUrl,
+      E2E_TESTING_ESCROW_ADDRESS: envConfigService.e2eTestingEscrowAddress,
+      E2E_TESTING_ESCROW_CHAIN_ID: envConfigService.e2eTestingEscrowChainId,
     });
 
     if (error) {
@@ -88,6 +95,33 @@ describe('Human APP (e2e) tests', () => {
           expect(res.body).toHaveProperty('access_token');
           expect(res.body).toHaveProperty('refresh_token');
         });
+    });
+  });
+  describe('Jobs discovery', () => {
+    it('should successfully process the jobs discovery request', async () => {
+      const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
+      return request(app.getHttpServer())
+        .get(`${exchangeOracleUrl}/jobs`)
+        .expect(200);
+    });
+  });
+  describe('Job assignment', () => {
+    it('should successfully assign a job to a user', async () => {
+      const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
+      return request(app.getHttpServer())
+        .post(`${exchangeOracleUrl}/assignment`)
+        .send({
+          escrow_address: envConfigService.e2eTestingEscrowAddress,
+          chain_id: envConfigService.e2eTestingEscrowChainId,
+        })
+        .expect(201);
+    });
+    it('should successfully get jobs assigned to a user', async () => {
+      const exchangeOracleUrl = envConfigService.e2eTestingExchangeOracleUrl;
+      return request(app.getHttpServer())
+        .get(`${exchangeOracleUrl}/assignment`)
+        .query({})
+        .expect(200);
     });
   });
 

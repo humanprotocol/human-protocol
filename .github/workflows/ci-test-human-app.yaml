@@ -1,0 +1,23 @@
+name: Human App Check
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    paths:
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/human-app/**"
+  workflow_dispatch:
+
+jobs:
+  job-app-server-test:
+    name: Human App Server Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn human-app-server:test
+        name: Run Job Human App unit tests
