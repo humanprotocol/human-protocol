@@ -181,7 +181,7 @@ describe('WebhookService', () => {
     it('should successfully send a webhook', async () => {
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          status: HttpStatus.OK,
+          status: HttpStatus.CREATED,
         });
       });
       expect(
