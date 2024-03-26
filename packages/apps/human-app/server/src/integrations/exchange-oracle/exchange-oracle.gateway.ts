@@ -35,9 +35,7 @@ export class ExchangeOracleGateway {
   constructor(
     private httpService: HttpService,
     @InjectMapper() private mapper: Mapper,
-  ) {
-    this.initializeRequestInterceptor();
-  }
+  ) {}
 
   private cleanParams(obj: any): any {
     return Object.entries(obj)
@@ -47,15 +45,6 @@ export class ExchangeOracleGateway {
   private toCleanObjParams(params: any): any {
     const plainParams = instanceToPlain(params);
     return this.cleanParams(plainParams);
-  }
-  private initializeRequestInterceptor() {
-    this.httpService.axiosRef.interceptors.request.use(
-      (config) => {
-        console.log('Outgoing request: ', config);
-        return config;
-      },
-      (error) => Promise.reject(error),
-    );
   }
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
