@@ -20,9 +20,8 @@ import {
 } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import { useAccount } from 'wagmi';
-// import { ConnectButton } from '../ConnectButton';
+import { setPreference, getPreference } from '../../utils/storage';
 import { SearchBox } from '../SearchBox';
 import { SocialIcons } from '../SocialIcons';
 import logoSvg from 'src/assets/logo.svg';
@@ -122,19 +121,16 @@ export const Header: FC = () => {
     </Box>
   );
   const handleCloseWarning = () => {
-    localStorage.setItem('HUMAN_ESCROW_DASHBOARD_SHOW_WARNING', 'false');
+    setPreference('HUMAN_ESCROW_DASHBOARD_SHOW_WARNING', false);
     setShowWarning(false);
   };
 
   useEffect(() => {
-    const cacheValue = localStorage.getItem(
-      'HUMAN_ESCROW_DASHBOARD_SHOW_WARNING'
+    const showWarning = getPreference(
+      'HUMAN_ESCROW_DASHBOARD_SHOW_WARNING',
+      true
     );
-    if (cacheValue === 'false') {
-      setShowWarning(false);
-    } else {
-      setShowWarning(true);
-    }
+    setShowWarning(showWarning);
   }, []);
 
   return (
