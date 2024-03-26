@@ -58,8 +58,10 @@ fortune-recording-oracle: rpc-health-check
 	yarn workspace @human-protocol/fortune-recording-oracle setup:local
 	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start
 
-reputation-oracle:
+reputation-oracle: rpc-health-check
 	yarn workspace @human-protocol/reputation-oracle setup:local
+	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle migration:run
+	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start
 
 rpc-health-check:
 	@until curl -s -X POST "http://localhost:8545" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}' | grep -q "result"; do \
@@ -68,11 +70,12 @@ rpc-health-check:
 	
 fortune: check-core-folders minio
 	@echo "RUNNING FORTUNE..."
-	@trap 'echo "STOPPING FORTUNE.."; kill -9 $$PID_HARDHAT $$PID_JL_CLIENT $$PID_JL_SERVER $$PID_EXO $$PID_RECO; docker compose -f ./fortune/docker-compose.yml down; exit 0' SIGINT ERR; \
+	@trap 'echo "STOPPING FORTUNE.."; kill -9 $$PID_HARDHAT $$PID_JL_CLIENT $$PID_JL_SERVER $$PID_EXO $$PID_RECO $$PID_REPO; docker compose -f ./fortune/docker-compose.yml down; exit 0' SIGINT ERR; \
 	$(MAKE) hardhat-node & PID_HARDHAT=$$!; \
 	$(MAKE) job-launcher-client & PID_JL_CLIENT=$$!; \
 	$(MAKE) job-launcher-server & PID_JL_SERVER=$$!; \
 	$(MAKE) fortune-exchange-oracle & PID_EXO=$$!; \
 	$(MAKE) fortune-recording-oracle & PID_RECO=$$!; \
+	$(MAKE) reputation-oracle & PID_REPO=$$!; \
 	$(MAKE) subgraph & \
 	wait

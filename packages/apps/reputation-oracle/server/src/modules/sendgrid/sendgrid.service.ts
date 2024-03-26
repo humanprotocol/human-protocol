@@ -2,7 +2,10 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { ConfigNames } from '../../common/config';
-import { SENDGRID_API_KEY_REGEX } from '../../common/constants';
+import {
+  SENDGRID_API_KEY_DISABLED,
+  SENDGRID_API_KEY_REGEX,
+} from '../../common/constants';
 import { ErrorSendGrid } from '../../common/constants/errors';
 
 @Injectable()
@@ -11,21 +14,16 @@ export class SendGridService {
 
   private readonly defaultFromEmail: string;
   private readonly defaultFromName: string;
+  private readonly apiKey: string;
 
   constructor(
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
   ) {
-    const apiKey = this.configService.get<string>(
+    this.apiKey = this.configService.get<string>(
       ConfigNames.SENDGRID_API_KEY,
       '',
     );
-
-    if (!SENDGRID_API_KEY_REGEX.test(apiKey)) {
-      throw new Error(ErrorSendGrid.InvalidApiKey);
-    }
-
-    this.mailService.setApiKey(apiKey);
 
     this.defaultFromEmail = this.configService.get<string>(
       ConfigNames.SENDGRID_FROM_EMAIL,
@@ -35,6 +33,16 @@ export class SendGridService {
       ConfigNames.SENDGRID_FROM_NAME,
       '',
     );
+
+    if (this.apiKey === SENDGRID_API_KEY_DISABLED) {
+      return;
+    }
+
+    if (!SENDGRID_API_KEY_REGEX.test(this.apiKey)) {
+      throw new Error(ErrorSendGrid.InvalidApiKey);
+    }
+
+    this.mailService.setApiKey(this.apiKey);
   }
 
   async sendEmail({
@@ -47,6 +55,10 @@ export class SendGridService {
     ...emailData
   }: Partial<MailDataRequired>): Promise<void> {
     try {
+      if (this.apiKey === SENDGRID_API_KEY_DISABLED) {
+        this.logger.debug(emailData);
+      }
+
       await this.mailService.send({
         from,
         templateId,
