@@ -28,13 +28,35 @@ import {
 } from '../../modules/jobs-discovery/interfaces/jobs-discovery.interface';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class ExchangeOracleGateway {
   constructor(
     private httpService: HttpService,
     @InjectMapper() private mapper: Mapper,
-  ) {}
+  ) {
+    this.initializeRequestInterceptor();
+  }
+
+  private cleanParams(obj: any): any {
+    return Object.entries(obj)
+      .filter(([_, v]) => v != null)
+      .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {});
+  }
+  private toCleanObjParams(params: any): any {
+    const plainParams = instanceToPlain(params);
+    return this.cleanParams(plainParams);
+  }
+  private initializeRequestInterceptor() {
+    this.httpService.axiosRef.interceptors.request.use(
+      (config) => {
+        console.log('Outgoing request: ', config);
+        return config;
+      },
+      (error) => Promise.reject(error),
+    );
+  }
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
@@ -48,7 +70,7 @@ export class ExchangeOracleGateway {
       method: 'GET',
       url: `${command.exchangeOracleUrl}/stats/assignment`,
       headers: {
-        Authorization: `Bearer ${command.token}`,
+        Authorization: command.token,
       },
     };
     return this.callExternalHttpUtilRequest<UserStatisticsResponse>(options);
@@ -65,14 +87,16 @@ export class ExchangeOracleGateway {
   async fetchAssignedJobs(
     command: JobsFetchParamsCommand,
   ): Promise<JobsFetchResponse> {
+    const jobFetchParamsData = this.mapper.map(
+      command.data,
+      JobsFetchParams,
+      JobsFetchParamsData,
+    );
+    const reducedParams = this.toCleanObjParams(jobFetchParamsData);
     const options: AxiosRequestConfig = {
       method: 'GET',
       url: `${command.exchangeOracleUrl}/assignment`,
-      params: this.mapper.map(
-        command.data,
-        JobsFetchParams,
-        JobsFetchParamsData,
-      ),
+      params: reducedParams,
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);
   }
@@ -88,22 +112,26 @@ export class ExchangeOracleGateway {
         JobAssignmentData,
       ),
       headers: {
-        Authorization: `Bearer ${command.token}`,
+        Authorization: command.token,
       },
     };
     return this.callExternalHttpUtilRequest<JobAssignmentResponse>(options);
   }
   async fetchDiscoveredJobs(command: JobsDiscoveryParamsCommand) {
+    const jobsDiscoveryParamsData = this.mapper.map(
+      command.data,
+      JobsDiscoveryParams,
+      JobsDiscoveryParamsData,
+    );
+    const reducedParams = this.toCleanObjParams(jobsDiscoveryParamsData);
+    // Clean the object to remove undefined or null fields
     const options: AxiosRequestConfig = {
       method: 'GET',
-      url: `${command.exchangeOracleUrl}/jobs`,
-      params: this.mapper.map(
-        command.data,
-        JobsDiscoveryParams,
-        JobsDiscoveryParamsData,
-      ),
+      url: `${command.exchangeOracleUrl}/job`,
+      params: reducedParams,
       headers: {
-        Authorization: `Bearer ${command.token}`,
+        Authorization: command.token,
+        Accept: 'application/json',
       },
     };
     return this.callExternalHttpUtilRequest<JobsDiscoveryResponse>(options);
