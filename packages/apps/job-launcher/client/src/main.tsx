@@ -101,10 +101,6 @@ async function validateSession() {
     const response = await fetch('/auth/validate-session', {
       method: 'GET',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer your_access_token_here`,
-      },
     });
     if (!response.ok) {
       throw new Error('Session validation failed');
