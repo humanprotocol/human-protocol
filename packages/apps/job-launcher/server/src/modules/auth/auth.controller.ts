@@ -114,12 +114,10 @@ export class AuthJwtController {
   ): Promise<AuthDto> {
     const authResult = await this.authService.signin(data, ip);
 
-    // Set refresh token as an HttpOnly cookie
     response.cookie('refreshToken', authResult.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development', // Ensure secure cookies in production
-      sameSite: 'strict', // Recommended for CSRF protection
-      path: '/',
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'strict',
     });
 
     return {
