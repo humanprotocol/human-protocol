@@ -9,7 +9,7 @@ services:
         max-size: 10m
         max-file: "3"
     ports:
-      - 5432:5432
+      - 5434:5432
     command:
       [
         "postgres",
@@ -20,7 +20,7 @@ services:
       POSTGRES_HOST: 0.0.0.0
       POSTGRES_USER: default
       POSTGRES_PASSWORD: qwerty
-      POSTGRES_PORT: 5432
+      POSTGRES_PORT: 5434
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
