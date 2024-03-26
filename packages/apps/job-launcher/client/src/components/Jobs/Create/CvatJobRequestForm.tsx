@@ -30,8 +30,9 @@ import {
   CvatJobType,
   GCSRegions,
   StorageProviders,
+  Label,
 } from '../../../types';
-import { CvatJobRequestValidationSchema } from './schema';
+import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
 
 export const CvatJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
@@ -41,6 +42,7 @@ export const CvatJobRequestForm = () => {
 
   const initialValues = {
     labels: [],
+    nodes: [],
     type: CvatJobType.IMAGE_BOXES,
     description: '',
     userGuide: '',
@@ -49,6 +51,10 @@ export const CvatJobRequestForm = () => {
     dataRegion: '',
     dataBucketName: '',
     dataPath: '',
+    bpProvider: StorageProviders.AWS,
+    bpRegion: '',
+    bpBucketName: '',
+    bpPath: '',
     gtProvider: StorageProviders.AWS,
     gtRegion: '',
     gtBucketName: '',
@@ -66,12 +72,17 @@ export const CvatJobRequestForm = () => {
 
   const handleNext = ({
     labels,
+    nodes,
     type,
     description,
     dataProvider,
     dataRegion,
     dataBucketName,
     dataPath,
+    bpProvider,
+    bpRegion,
+    bpBucketName,
+    bpPath,
     gtProvider,
     gtRegion,
     gtBucketName,
@@ -79,17 +90,42 @@ export const CvatJobRequestForm = () => {
     userGuide,
     accuracyTarget,
   }: any) => {
+    let bp = undefined;
+    if (type === CvatJobType.IMAGE_BOXES_FROM_POINTS)
+      bp = {
+        points: {
+          provider: bpProvider,
+          region: bpRegion,
+          bucketName: bpBucketName,
+          path: bpPath,
+        },
+      };
+    else if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES)
+      bp = {
+        boxes: {
+          provider: bpProvider,
+          region: bpRegion,
+          bucketName: bpBucketName,
+          path: bpPath,
+        },
+      };
+    const labelArray: Label[] = labels.map((name: string) => {
+      return { name: name, nodes: nodes };
+    });
     updateJobRequest?.({
       ...jobRequest,
       cvatRequest: {
-        labels,
+        labels: labelArray,
         type,
         description,
         data: {
-          provider: dataProvider,
-          region: dataRegion,
-          bucketName: dataBucketName,
-          path: dataPath,
+          dataset: {
+            provider: dataProvider,
+            region: dataRegion,
+            bucketName: dataBucketName,
+            path: dataPath,
+          },
+          ...bp,
         },
         groundTruth: {
           provider: gtProvider,
@@ -104,6 +140,10 @@ export const CvatJobRequestForm = () => {
     goToNextStep?.();
   };
 
+  const [updatedValidationSchema, setUpdatedValidationSchema] = useState(
+    CvatJobRequestValidationSchema,
+  );
+
   const {
     errors,
     touched,
@@ -115,8 +155,10 @@ export const CvatJobRequestForm = () => {
     setFieldValue,
   } = useFormik({
     initialValues,
-    validationSchema: CvatJobRequestValidationSchema,
+    validationSchema: updatedValidationSchema,
     onSubmit: handleNext,
+    validateOnChange: true,
+    validateOnMount: true,
   });
 
   useEffect(() => {
@@ -158,13 +200,26 @@ export const CvatJobRequestForm = () => {
                     id="cvat-job-type-select"
                     label="Type of job"
                     value={values.type}
-                    onChange={(e) => setFieldValue('type', e.target.value)}
+                    onChange={(e) => {
+                      setUpdatedValidationSchema(
+                        CvatJobRequestValidationSchema.concat(
+                          dataValidationSchema(e.target.value as CvatJobType),
+                        ),
+                      );
+                      setFieldValue('type', e.target.value);
+                    }}
                     error={touched.type && Boolean(errors.type)}
                     onBlur={handleBlur}
                   >
                     <MenuItem value={CvatJobType.IMAGE_POINTS}>Points</MenuItem>
                     <MenuItem value={CvatJobType.IMAGE_BOXES}>
                       Bounding Boxes
+                    </MenuItem>
+                    <MenuItem value={CvatJobType.IMAGE_BOXES_FROM_POINTS}>
+                      Bounding Boxes from points
+                    </MenuItem>
+                    <MenuItem value={CvatJobType.IMAGE_SKELETONS_FROM_BOXES}>
+                      Bounding Boxes from skeletons
                     </MenuItem>
                   </Select>
                 </FormControl>
@@ -194,6 +249,33 @@ export const CvatJobRequestForm = () => {
                   )}
                 </FormControl>
               </Grid>
+              {values.type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES && (
+                <Grid item xs={12} sm={12}>
+                  <FormControl fullWidth>
+                    <Autocomplete
+                      clearIcon={false}
+                      options={[]}
+                      freeSolo
+                      multiple
+                      renderTags={(value, props) =>
+                        value.map((option, index) => (
+                          <Chip label={option} {...props({ index })} />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <TextField label="Nodes" {...params} />
+                      )}
+                      onChange={(e, value) => setFieldValue('nodes', value)}
+                      onBlur={handleBlur}
+                    />
+                    {errors.nodes && (
+                      <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                        {errors.nodes}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <FormControl fullWidth>
                   <TextField
@@ -319,6 +401,103 @@ export const CvatJobRequestForm = () => {
                   </FormControl>
                 </Grid>
               </Grid>
+              {[
+                CvatJobType.IMAGE_BOXES_FROM_POINTS,
+                CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
+              ].includes(values.type) && (
+                <Grid item container xs={12} spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="body2" fontWeight={700}>
+                      {values.type === CvatJobType.IMAGE_BOXES_FROM_POINTS
+                        ? 'Points'
+                        : 'Boxes'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel id="cvat-bp-storage-provider-select-label">
+                        Storage Provider
+                      </InputLabel>
+                      <Select
+                        labelId="cvat-bp-storage-provider-select-label"
+                        id="cvat-bp-storage-provider-select"
+                        label="Storage Provider"
+                        value={values.bpProvider}
+                        onChange={(e) =>
+                          setFieldValue('bpProvider', e.target.value)
+                        }
+                        error={touched.bpProvider && Boolean(errors.bpProvider)}
+                        onBlur={handleBlur}
+                      >
+                        <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel id="cvat-bp-storage-provider-select-label">
+                        Region
+                      </InputLabel>
+                      <Select
+                        labelId="cvat-bp-storage-provider-select-label"
+                        id="cvat-bp-storage-provider-select"
+                        label="Region"
+                        value={values.bpRegion}
+                        onChange={(e) =>
+                          setFieldValue('bpRegion', e.target.value)
+                        }
+                        error={touched.bpRegion && Boolean(errors.bpRegion)}
+                        onBlur={handleBlur}
+                      >
+                        {Object.values(dataRegions).map((region) => (
+                          <MenuItem key={`bpset-${region}`} value={region}>
+                            {region}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errors.bpRegion && (
+                        <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                          {errors.bpRegion}
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl fullWidth>
+                      <TextField
+                        name="bpBucketName"
+                        label="Bucket Name"
+                        placeholder="Bucket Name"
+                        value={values.bpBucketName}
+                        onBlur={handleBlur}
+                        onChange={(e) =>
+                          setFieldValue('bpBucketName', e.target.value)
+                        }
+                        error={
+                          touched.bpBucketName && Boolean(errors.bpBucketName)
+                        }
+                        helperText={errors.bpBucketName}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl fullWidth>
+                      <TextField
+                        name="bpPath"
+                        label="Path"
+                        placeholder="Path"
+                        value={values.bpPath}
+                        onBlur={handleBlur}
+                        onChange={(e) =>
+                          setFieldValue('bpPath', e.target.value)
+                        }
+                        error={touched.bpPath && Boolean(errors.bpPath)}
+                        helperText={errors.bpPath}
+                      />
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              )}
               <Grid item container xs={12} spacing={2}>
                 <Grid item xs={12}>
                   <Typography variant="body2" fontWeight={700}>
