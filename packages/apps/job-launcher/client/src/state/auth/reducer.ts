@@ -3,7 +3,6 @@ import {
   createAsyncThunk,
   createReducer,
 } from '@reduxjs/toolkit';
-import { LOCAL_STORAGE_KEYS } from '../../constants';
 import { SignUpResponse } from '../../types';
 import api from '../../utils/api';
 import { getJwtPayload } from '../../utils/jwt';
@@ -29,24 +28,17 @@ export const signOut = createAction<void>('auth/signOut');
 
 export default createReducer(initialState, (builder) => {
   builder.addCase(signIn, (state, action) => {
-    const { accessToken, refreshToken } = action.payload;
-
-    localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.refreshToken, refreshToken);
+    const { accessToken } = action.payload;
 
     state.isAuthed = true;
     const { email, status } = getJwtPayload(accessToken);
     state.user = { email: email, status: status };
     state.accessToken = accessToken;
-    state.refreshToken = refreshToken;
   });
-  builder.addCase(signOut, (state, action) => {
+  builder.addCase(signOut, (state) => {
     state.isAuthed = false;
     state.accessToken = undefined;
     state.refreshToken = undefined;
-
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.accessToken);
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.refreshToken);
   });
   builder.addCase(fetchUserBalanceAsync.fulfilled, (state, action) => {
     if (state.user) {

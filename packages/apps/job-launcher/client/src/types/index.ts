@@ -6,6 +6,10 @@ export type SignInRequest = {
   hCaptchaToken: string;
 };
 
+export type SignInResponse = {
+  accessToken: string;
+};
+
 export type SignUpRequest = {
   email: string;
   password: string;
