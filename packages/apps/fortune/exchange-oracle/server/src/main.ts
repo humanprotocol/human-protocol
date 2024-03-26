@@ -6,7 +6,7 @@ import { useContainer } from 'class-validator';
 
 import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -18,20 +18,20 @@ async function bootstrap() {
   const host = configService.get<string>(ConfigNames.HOST)!;
   const port = configService.get<string>(ConfigNames.PORT)!;
 
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'staging'
-        ? [
-            `http://localhost:${port}`,
-            `http://127.0.0.1:${port}`,
-            `http://0.0.0.0:${port}`,
-            `http://${host}:${port}`,
-          ]
-        : [`http://${host}:${port}`],
-    credentials: true,
-    exposedHeaders: ['Content-Disposition'],
-  });
+  // app.enableCors({
+  //   origin:
+  //     process.env.NODE_ENV === 'development' ||
+  //     process.env.NODE_ENV === 'staging'
+  //       ? [
+  //           `http://localhost:${port}`,
+  //           `http://127.0.0.1:${port}`,
+  //           `http://0.0.0.0:${port}`,
+  //           `http://${host}:${port}`,
+  //         ]
+  //       : [`http://${host}:${port}`],
+  //   credentials: true,
+  //   exposedHeaders: ['Content-Disposition'],
+  // });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -46,6 +46,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);

@@ -56,7 +56,6 @@ import {
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
   MOCK_PGP_PUBLIC_KEY,
-  MOCK_MANIFEST,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_REPUTATION_ORACLE_ADDRESS,
@@ -88,12 +87,14 @@ import {
   StorageDataDto,
   JobCaptchaDto,
   CvatManifestDto,
+  JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
+import { WebhookRepository } from '../webhook/webhook.repository';
 import { JobService } from './job.service';
 
-import { div, mul } from '../../common/utils/decimal';
+import { add, div, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { EventType } from '../../common/enums/webhook';
@@ -132,6 +133,7 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
+      getPublicKey: jest.fn(),
     })),
   },
 }));
@@ -163,7 +165,8 @@ describe('JobService', () => {
     routingProtocolService: RoutingProtocolService,
     web3Service: Web3Service,
     encryption: Encryption,
-    storageService: StorageService;
+    storageService: StorageService,
+    webhookRepository: WebhookRepository;
 
   let encrypt = true;
 
@@ -176,8 +179,6 @@ describe('JobService', () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case 'JOB_LAUNCHER_FEE':
-            return MOCK_JOB_LAUNCHER_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
@@ -239,6 +240,10 @@ describe('JobService', () => {
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
+          provide: WebhookRepository,
+          useValue: createMock<WebhookRepository>(),
+        },
+        {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
         },
@@ -265,6 +270,7 @@ describe('JobService', () => {
     routingProtocolService = moduleRef.get(RoutingProtocolService);
     createPaymentMock = jest.spyOn(paymentRepository, 'createUnique');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
+    webhookRepository = moduleRef.get<WebhookRepository>(WebhookRepository);
     storageService = moduleRef.get<StorageService>(StorageService);
 
     storageService.uploadFile = jest.fn().mockResolvedValue({
@@ -314,6 +320,7 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
@@ -326,7 +333,8 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublickKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
@@ -349,8 +357,86 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.FORTUNE,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+    });
+
+    it('should create a job using quick launch successfully', async () => {
+      const tokenFundAmount = 100;
+      const tokenFee = (MOCK_JOB_LAUNCHER_FEE / 100) * tokenFundAmount;
+      const tokenTotalAmount = add(tokenFundAmount, tokenFee);
+
+      const userBalance = 250;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userId,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.HCAPTCHA,
+        escrowAddress: MOCK_ADDRESS,
+        fee: tokenFee,
+        fundAmount: tokenFundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      (KVStoreClient.build as any)
+        .mockImplementationOnce(() => ({
+          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+        }))
+        .mockImplementation(() => ({
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublickKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        }));
+
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
+
+      // Create a quick launch payload
+      const quickLaunchJobDto = new JobQuickLaunchDto();
+      quickLaunchJobDto.chainId = MOCK_CHAIN_ID;
+      quickLaunchJobDto.requestType = JobRequestType.HCAPTCHA;
+      quickLaunchJobDto.manifestUrl = MOCK_FILE_URL;
+      quickLaunchJobDto.manifestHash = MOCK_FILE_HASH;
+      quickLaunchJobDto.fundAmount = tokenFundAmount;
+
+      await jobService.createJob(
+        userId,
+        JobRequestType.HCAPTCHA,
+        quickLaunchJobDto,
+      );
+
+      // Methods won't be invoked as the quick launch call includes a manifest data.
+      jobService.createHCaptchaManifest = jest.fn();
+      jobService.uploadManifest = jest.fn();
+      expect(jobService.createHCaptchaManifest).toHaveBeenCalledTimes(0);
+      expect(jobService.uploadManifest).toHaveBeenCalledTimes(0);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
+        userId,
+        jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: -tokenTotalAmount,
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
+        chainId: quickLaunchJobDto.chainId,
+        userId,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        requestType: JobRequestType.HCAPTCHA,
+        fee: tokenFee,
+        fundAmount: tokenFundAmount,
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -372,7 +458,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, {
@@ -386,6 +472,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.FORTUNE,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -395,12 +482,12 @@ describe('JobService', () => {
 
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
-        throw new Error(ErrorWeb3.InvalidTestnetChainId);
+        throw new Error(ErrorWeb3.InvalidChainId);
       });
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
+      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -893,6 +980,7 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.IMAGE_BOXES,
         escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
@@ -907,7 +995,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       await jobService.createJob(
@@ -932,6 +1020,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.IMAGE_POINTS,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1105,7 +1194,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
 
       await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
@@ -1119,6 +1208,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.IMAGE_POINTS,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1128,7 +1218,7 @@ describe('JobService', () => {
 
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
-        throw new Error(ErrorWeb3.InvalidTestnetChainId);
+        throw new Error(ErrorWeb3.InvalidChainId);
       });
 
       await expect(
@@ -1137,7 +1227,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
+      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -1197,7 +1287,7 @@ describe('JobService', () => {
           get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
         }))
         .mockImplementation(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
     });
 
@@ -1220,6 +1310,7 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.HCAPTCHA,
         escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
@@ -1251,6 +1342,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.HCAPTCHA,
         fee: Number(mul(fee, rate).toFixed(3)),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1283,6 +1375,7 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        requestType: JobRequestType.HCAPTCHA,
         fee: mul(fee, rate),
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
@@ -1316,6 +1409,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.PAID,
@@ -1342,6 +1436,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.PAID,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -1369,6 +1464,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.CREATED,
@@ -1403,6 +1499,7 @@ describe('JobService', () => {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.CREATED,
@@ -1433,6 +1530,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.CREATED,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -1455,16 +1553,18 @@ describe('JobService', () => {
   });
 
   describe('fundEscrow', () => {
+    let createWebhookMock: any;
     const chainId = ChainId.LOCALHOST;
 
     it('should fund escrow and update the status to launched', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
-
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
       const mockJobEntity: Partial<JobEntity> = {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
         status: JobStatus.SET_UP,
@@ -1479,9 +1579,11 @@ describe('JobService', () => {
       mockJobEntity.status = JobStatus.LAUNCHED;
       expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
+      expect(createWebhookMock).toHaveBeenCalledTimes(1);
     });
 
     it('should handle error during job fund', async () => {
+      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
       (EscrowClient.build as any).mockImplementationOnce(() => ({
         fund: jest.fn().mockRejectedValue(new Error()),
       }));
@@ -1490,6 +1592,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.SET_UP,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -1497,6 +1600,7 @@ describe('JobService', () => {
       await expect(
         jobService.fundEscrow(mockJobEntity as JobEntity),
       ).rejects.toThrow();
+      expect(createWebhookMock).not.toHaveBeenCalled();
     });
   });
 
@@ -1690,7 +1794,7 @@ describe('JobService', () => {
 
     beforeAll(() => {
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
     });
 
@@ -1809,7 +1913,7 @@ describe('JobService', () => {
 
     beforeAll(() => {
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
     });
 
@@ -1915,7 +2019,7 @@ describe('JobService', () => {
 
     beforeAll(() => {
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
       encrypt = false;
     });
@@ -1999,22 +2103,9 @@ describe('JobService', () => {
 
   describe('getResult', () => {
     let downloadFileFromUrlMock: any;
-    const jobEntityMock = {
-      status: JobStatus.COMPLETED,
-      fundAmount: 100,
-      userId: 1,
-      id: 1,
-      manifestUrl: MOCK_FILE_URL,
-      manifestHash: MOCK_FILE_HASH,
-      escrowAddress: MOCK_ADDRESS,
-      chainId: ChainId.LOCALHOST,
-    };
 
     beforeEach(() => {
       downloadFileFromUrlMock = storageService.download;
-      jobRepository.findOneByIdAndUserId = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock);
     });
 
     afterEach(() => {
@@ -2022,6 +2113,22 @@ describe('JobService', () => {
     });
 
     it('should download and return the fortune result', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
       const fortuneResult: FortuneFinalResultDto[] = [
         {
           workerAddress: MOCK_ADDRESS,
@@ -2037,45 +2144,84 @@ describe('JobService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
       downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
 
       const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(storageService.download).toHaveBeenCalledTimes(1);
       expect(result).toEqual(fortuneResult);
     });
 
     it('should download and return the image binary result', async () => {
-      const manifestMock = {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.IMAGE_BOXES,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
       };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
 
-      downloadFileFromUrlMock.mockResolvedValue(manifestMock);
-
       const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
 
-      expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(result).toEqual(MOCK_FILE_URL);
     });
 
     it('should throw a NotFoundException if the result is not found', async () => {
-      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
       downloadFileFromUrlMock.mockResolvedValueOnce(null);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
       ).rejects.toThrowError(new NotFoundException(ErrorJob.ResultNotFound));
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(storageService.download).toHaveBeenCalledTimes(1);
     });
 
     it('should throw a NotFoundException if the result is not valid', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
       const fortuneResult: any[] = [
         {
           wrongAddress: MOCK_ADDRESS,
@@ -2091,7 +2237,6 @@ describe('JobService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
       downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
 
       await expect(
@@ -2101,7 +2246,7 @@ describe('JobService', () => {
       );
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(storageService.download).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -2310,6 +2455,7 @@ describe('JobService', () => {
         id: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
       };
@@ -2383,6 +2529,7 @@ describe('JobService', () => {
         id: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
         escrowAddress: null,
         chainId: ChainId.LOCALHOST,
       };
@@ -2523,6 +2670,81 @@ describe('JobService', () => {
 
       expect(Number(result)).toBe(MOCK_ORACLE_FEE);
       expect(typeof result).toBe('bigint');
+    });
+  });
+
+  describe('escrowCompletedWebhook', () => {
+    it('should throw NotFoundException if jobEntity is not found', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(null);
+
+      await expect(jobService.completeJob(dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      const mockJobEntity = {
+        status: JobStatus.CANCELED,
+      };
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await expect(jobService.completeJob(dto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+
+    it('should update jobEntity status to completed', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      const mockJobEntity = {
+        status: JobStatus.LAUNCHED,
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.completeJob(dto);
+
+      expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
+      expect(jobRepository.updateOne).toHaveBeenCalled();
+    });
+
+    it('should not execute anything if status is already completed', async () => {
+      const dto = {
+        eventType: EventType.ESCROW_COMPLETED,
+        chainId: 1,
+        escrowAddress: 'address',
+      };
+      const mockJobEntity = {
+        status: JobStatus.COMPLETED,
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.completeJob(dto);
+
+      expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
   });
 });

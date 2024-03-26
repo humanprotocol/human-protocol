@@ -935,9 +935,7 @@ describe.only('MetaHumanGovernor', function () {
           await wormholeMockForDaoSpoke.getAddress()
         )
       )
-    ).to.be.revertedWith(
-      'Only messages from the spoke contracts can be received!'
-    );
+    ).to.be.revertedWithCustomError(governor, 'OnlyMessagesFromSpokeReceived');
   });
 
   it('Should receive message', async function () {
@@ -1031,7 +1029,7 @@ describe.only('MetaHumanGovernor', function () {
           await daoSpoke.getAddress()
         )
       )
-    ).to.be.revertedWith('Message already processed');
+    ).to.be.revertedWithCustomError(governor, 'MessageAlreadyProcessed');
   });
 
   it('should reverts to receive message when intended receipient is not different', async function () {
@@ -1075,7 +1073,7 @@ describe.only('MetaHumanGovernor', function () {
           await daoSpoke.getAddress()
         )
       )
-    ).to.be.revertedWith('Message is not addressed for this contract');
+    ).to.be.revertedWithCustomError(governor, 'InvalidIntendedRecipient');
   });
 
   it('Should finish collection phase', async function () {
@@ -1126,9 +1124,9 @@ describe.only('MetaHumanGovernor', function () {
     // Mine 2 blocks
     await mineNBlocks(2);
 
-    await expect(governor.requestCollections(proposalId)).to.be.revertedWith(
-      'Cannot request for vote collection until after the vote period is over!'
-    );
+    await expect(
+      governor.requestCollections(proposalId)
+    ).to.be.revertedWithCustomError(governor, 'RequestAfterVotePeriodOver');
   });
 
   it('Should fails to request collections when collection already started', async function () {
@@ -1147,9 +1145,7 @@ describe.only('MetaHumanGovernor', function () {
 
     await expect(
       governor.requestCollections(proposalId, { value: 100 })
-    ).to.be.revertedWith(
-      'Collection phase for this proposal has already started!'
-    );
+    ).to.be.revertedWithCustomError(governor, 'CollectionPhaseAlreadyStarted');
   });
 
   it('Should vote on proposal with reason', async function () {

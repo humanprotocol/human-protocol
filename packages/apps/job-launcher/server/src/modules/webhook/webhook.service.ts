@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
@@ -78,12 +84,12 @@ export class WebhookService {
     }
 
     // Make the HTTP request to the webhook.
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, config),
+    const { status } = await firstValueFrom(
+      this.httpService.post(webhookUrl, webhookData, config),
     );
 
     // Check if the request was successful.
-    if (!data) {
+    if (status !== HttpStatus.CREATED) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }
@@ -142,10 +148,10 @@ export class WebhookService {
 
   public async handleWebhook(wehbook: WebhookDataDto): Promise<void> {
     switch (wehbook.eventType) {
-      case EventType.ESCROW_CREATED:
+      case EventType.ESCROW_COMPLETED:
+        await this.jobService.completeJob(wehbook);
         break;
 
-      case EventType.ESCROW_CANCELED:
       case EventType.TASK_CREATION_FAILED:
         await this.jobService.escrowFailedWebhook(wehbook);
         break;

@@ -48,6 +48,22 @@ import { TokenType } from './token.entity';
 import { Response } from 'express';
 
 @ApiTags('Auth')
+@ApiResponse({
+  status: 400,
+  description: 'Bad Request. Invalid input parameters.',
+})
+@ApiResponse({
+  status: 401,
+  description: 'Unauthorized. Missing or invalid credentials.',
+})
+@ApiResponse({
+  status: 404,
+  description: 'Not Found. Could not find the requested content.',
+})
+@ApiResponse({
+  status: 422,
+  description: 'Unprocessable entity.',
+})
 @UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
@@ -75,10 +91,6 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
-  @ApiResponse({
-    status: 422,
-    description: 'Unprocessable entity.',
-  })
   public async signup(
     @Body() data: UserCreateDto,
     @Ip() ip: string,
@@ -86,7 +98,7 @@ export class AuthJwtController {
     await this.authService.signup(data, ip);
   }
 
-  @Public()
+   @Public()
   @HttpCode(200)
   @Post('/signin')
   @ApiOperation({
@@ -208,10 +220,6 @@ export class AuthJwtController {
     status: 204,
     description: 'Password restored successfully',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
   public async restorePassword(
     @Body() data: RestorePasswordDto,
     @Ip() ip: string,
@@ -273,10 +281,6 @@ export class AuthJwtController {
     status: 201,
     description: 'API key created or updated successfully',
     type: ApiKeyDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
   })
   public async createOrUpdateAPIKey(
     @Request() req: RequestWithUser,

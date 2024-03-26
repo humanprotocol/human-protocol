@@ -5,7 +5,6 @@ import { ErrorCronJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { JobService } from '../job/job.service';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
@@ -15,7 +14,7 @@ import {
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
+import { FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
@@ -72,7 +71,6 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -103,7 +101,6 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
@@ -137,7 +134,6 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async fundEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.FundEscrow,
@@ -158,22 +154,6 @@ export class CronJobService {
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.fundEscrow(jobEntity);
-
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
-          if ((manifest as CvatManifestDto)?.annotation?.type) {
-            const webhookEntity = new WebhookEntity();
-            Object.assign(webhookEntity, {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED,
-              oracleType: OracleType.CVAT,
-              hasSignature: false,
-            });
-            await this.webhookRepository.createUnique(webhookEntity);
-          }
         } catch (err) {
           this.logger.error(`Error funding escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
@@ -187,7 +167,6 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CancelEscrow,
@@ -229,14 +208,16 @@ export class CronJobService {
             jobEntity.manifestUrl,
           );
 
-          const oracleType = this.jobService.getOracleType(manifest);
+          const oracleType = this.jobService.getOracleType(
+            jobEntity.requestType,
+          );
           if (oracleType !== OracleType.HCAPTCHA) {
             const webhookEntity = new WebhookEntity();
             Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CANCELED,
-              oracleType: this.jobService.getOracleType(manifest),
+              oracleType,
               hasSignature:
                 (manifest as FortuneManifestDto).requestType ===
                 JobRequestType.FORTUNE,
@@ -260,7 +241,6 @@ export class CronJobService {
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,

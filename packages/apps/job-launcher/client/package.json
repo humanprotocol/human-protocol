@@ -9,7 +9,7 @@
     "@human-protocol/sdk": "*",
     "@mui/lab": "^5.0.0-alpha.141",
     "@mui/material": "^5.14.14",
-    "@mui/x-date-pickers": "^6.19.2",
+    "@mui/x-date-pickers": "^6.19.7",
     "@reduxjs/toolkit": "^1.9.5",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.4.0",
@@ -26,7 +26,7 @@
     "swr": "^2.2.4",
     "typescript": "^4.9.3",
     "wagmi": "^0.12.2",
-    "web-vitals": "^3.5.1",
+    "web-vitals": "^3.5.2",
     "xml2js": "^0.6.2",
     "yup": "^1.2.0"
   },
@@ -39,7 +39,7 @@
     "test": "vitest run -u",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
-    "format": "npm run format:prettier && npm run format:lint",
+    "format": "yarn format:prettier && yarn format:lint",
     "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
   },
   "browserslist": {
@@ -56,12 +56,12 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^14.2.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.14",
     "@types/react-test-renderer": "^18.0.0",
     "@types/xml2js": "^0.4.14",
-    "@vitejs/plugin-react": "^3.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^3.5.3",
     "eslint-plugin-import": "^2.29.0",

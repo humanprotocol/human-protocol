@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -16,7 +9,7 @@ import {
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
-import { WebhookIncomingDto } from './webhook.dto';
+import { WebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
 import { Role } from '../../common/enums/role';
 
@@ -37,7 +30,7 @@ export class WebhookController {
     description: 'Signature for webhook authentication.',
     required: true,
   })
-  @ApiBody({ type: WebhookIncomingDto })
+  @ApiBody({ type: WebhookDto })
   @ApiResponse({
     status: 200,
     description: 'Incoming webhook created successfully',
@@ -56,7 +49,7 @@ export class WebhookController {
   })
   public async createIncomingWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: WebhookIncomingDto,
+    @Body() data: WebhookDto,
   ): Promise<void> {
     await this.webhookService.createIncomingWebhook(data);
     return;

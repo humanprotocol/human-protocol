@@ -70,6 +70,7 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       chainId: 1338,
+      initialBaseFeePerGas: 0,
     },
     mainnet: {
       chainId: 1,
@@ -190,7 +191,7 @@ const config: HardhatUserConfig = {
       runOnCompile: true,
       clear: true,
       flat: true,
-      only: ['legacy'],
+      only: ['contracts/legacy/[a-zA-Z]*.sol'],
       spacing: 2,
       format: 'json',
     },

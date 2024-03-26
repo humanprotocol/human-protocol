@@ -5,8 +5,8 @@ dotenv.config();
 
 async function main() {
   const chainId = process.env.HUB_WORMHOLE_CHAIN_ID;
-  const governorAddress = process.env.GOVERNOR;
-  const spokeChainId = process.env.SPOKE_WORMHOLE_CHAIN_ID;
+  const governorAddress = process.env.GOVERNOR_ADDRESS;
+  const spokeChainId = process.env.SPOKE_WORMHOLE_CHAIN_IDS;
   const vHMTokenAddress = process.env.SPOKE_VOTE_TOKEN_ADDRESS;
   const spokeAutomaticRelayerAddress =
     process.env.SPOKE_AUTOMATIC_RELAYER_ADDRESS;

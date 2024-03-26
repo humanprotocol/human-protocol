@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { HttpValidationPipe } from '@/common/pipes';
-import { JobModule } from '@/modules/job/job.module';
+import { HttpValidationPipe } from './common/pipes';
+import { JobModule } from './modules/job/job.module';
 
 import { AppController } from './app.controller';
 import {

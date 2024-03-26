@@ -93,10 +93,11 @@ const kvstoreClient = await KVStoreClient.build(signer);
 ### Methods
 
 - [get](kvstore.KVStoreClient.md#get)
-- [getURL](kvstore.KVStoreClient.md#geturl)
+- [getFileUrlAndVerifyHash](kvstore.KVStoreClient.md#getfileurlandverifyhash)
+- [getPublicKey](kvstore.KVStoreClient.md#getpublickey)
 - [set](kvstore.KVStoreClient.md#set)
 - [setBulk](kvstore.KVStoreClient.md#setbulk)
-- [setURL](kvstore.KVStoreClient.md#seturl)
+- [setFileUrlAndHash](kvstore.KVStoreClient.md#setfileurlandhash)
 - [build](kvstore.KVStoreClient.md#build)
 
 ## Constructors
@@ -124,7 +125,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
+[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
 
 ## Properties
 
@@ -134,7 +135,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
+[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
 
 ___
 
@@ -148,7 +149,7 @@ ___
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -162,7 +163,7 @@ ___
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -170,7 +171,7 @@ ___
 
 ▸ **get**(`address`, `key`): `Promise`\<`string`\>
 
-This function returns the value for a specified key and address.
+Gets the value of a key-value pair in the contract.
 
 #### Parameters
 
@@ -203,15 +204,15 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
+[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
 
 ___
 
-### getURL
+### getFileUrlAndVerifyHash
 
-▸ **getURL**(`address`, `urlKey?`): `Promise`\<`string`\>
+▸ **getFileUrlAndVerifyHash**(`address`, `urlKey?`): `Promise`\<`string`\>
 
-This function returns the URL value for the given entity.
+Gets the URL value of the given entity, and verify its hash.
 
 #### Parameters
 
@@ -237,16 +238,54 @@ const rpcUrl = 'YOUR_RPC_URL';
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const kvstoreClient = await KVStoreClient.build(provider);
 
-const url = await kvstoreClient.getURL('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-const linkedinUrl = await kvstoreClient.getURL(
+const url = await kvstoreClient.getFileUrlAndVerifyHash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   'linkedinUrl'
+   'linkedin_url'
 );
 ```
 
 #### Defined in
 
-[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
+[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
+
+___
+
+### getPublicKey
+
+▸ **getPublicKey**(`address`): `Promise`\<`string`\>
+
+Gets the public key of the given entity, and verify its hash.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `address` | `string` | Address from which to get the public key. |
+
+#### Returns
+
+`Promise`\<`string`\>
+
+Public key for the given address if exists, and the content is valid
+
+**Code example**
+
+```ts
+import { providers } from 'ethers';
+import { KVStoreClient } from '@human-protocol/sdk';
+
+const rpcUrl = 'YOUR_RPC_URL';
+
+const provider = new providers.JsonRpcProvider(rpcUrl);
+const kvstoreClient = await KVStoreClient.build(provider);
+
+const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+```
+
+#### Defined in
+
+[kvstore.ts:398](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L398)
 
 ___
 
@@ -290,7 +329,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
+[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
 
 ___
 
@@ -329,22 +368,22 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const kvstoreClient = await KVStoreClient.build(signer);
 
-const keys = ['role', 'webhookUrl'];
+const keys = ['role', 'webhook_url'];
 const values = ['RecordingOracle', 'http://localhost'];
 await kvstoreClient.set(keys, values);
 ```
 
 #### Defined in
 
-[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
+[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
 
 ___
 
-### setURL
+### setFileUrlAndHash
 
-▸ **setURL**(`url`, `urlKey?`, `txOptions?`): `Promise`\<`void`\>
+▸ **setFileUrlAndHash**(`url`, `urlKey?`, `txOptions?`): `Promise`\<`void`\>
 
-This function sets a URL value for the address that submits the transaction.
+Sets a URL value for the address that submits the transaction, and its hash.
 
 #### Parameters
 
@@ -373,13 +412,13 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const kvstoreClient = await KVStoreClient.build(signer);
 
-await kvstoreClient.setURL('example.com');
-await kvstoreClient.setURL('linkedin.com/example', 'linkedinUrl);
+await kvstoreClient.setFileUrlAndHash('example.com');
+await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 ```
 
 #### Defined in
 
-[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
+[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
 
 ___
 
@@ -411,4 +450,4 @@ Creates an instance of KVStoreClient from a runner.
 
 #### Defined in
 
-[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/87747676/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)
+[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)

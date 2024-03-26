@@ -28,7 +28,7 @@ describe('SignatureAuthGuard', () => {
         {
           provide: SignatureAuthGuard,
           useValue: new SignatureAuthGuard([
-            Role.JobLaucher,
+            Role.JobLauncher,
             Role.Exchange,
             Role.Recording,
           ]),
@@ -64,8 +64,8 @@ describe('SignatureAuthGuard', () => {
     it('should return true if signature is verified', async () => {
       mockRequest.headers['header-signature-key'] = 'validSignature';
       mockRequest.body = {
-        escrowAddress: MOCK_ADDRESS,
-        chainId: ChainId.LOCALHOST,
+        escrow_address: MOCK_ADDRESS,
+        chain_id: ChainId.LOCALHOST,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
 
