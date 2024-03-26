@@ -17,6 +17,7 @@ export class OracleDiscoveryService {
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
   ): Promise<OracleDiscoveryResponse[]> {
+    command.address = command.address.toLowerCase();
     let data: OracleDiscoveryResponse[] | undefined =
       await this.cacheManager.get(command.address);
     if (!data) {
