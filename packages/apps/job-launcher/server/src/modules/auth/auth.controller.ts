@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Post,
+  Get,
   Req,
   Res,
   UseGuards,
@@ -14,7 +15,6 @@ import {
   Ip,
   UseFilters,
   HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -35,6 +35,7 @@ import {
   SignInDto,
   VerifyEmailDto,
   RefreshDto,
+  SessionValidationDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
@@ -141,6 +142,17 @@ export class AuthJwtController {
   })
   public async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
     return this.authService.refresh(data);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('/validate-session')
+  @ApiOperation({
+    summary: 'Validate Session',
+    description: 'Checks if the user session is valid.',
+  })
+  public validateSession(): SessionValidationDto {
+    return { isAuthenticated: true };
   }
 
   @ApiBearerAuth()

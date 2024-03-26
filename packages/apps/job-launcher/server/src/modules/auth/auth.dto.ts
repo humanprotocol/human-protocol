@@ -68,6 +68,11 @@ export class AuthDto {
   public refreshToken?: string;
 }
 
+export class SessionValidationDto {
+  @ApiProperty()
+  isAuthenticated: boolean;
+}
+
 export class ApiKeyDto {
   @ApiProperty({ name: 'api_key' })
   @IsString()

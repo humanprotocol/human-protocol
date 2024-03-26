@@ -26,13 +26,11 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { publicProvider } from 'wagmi/providers/public';
 
 import App from './App';
-import { LOCAL_STORAGE_KEYS } from './constants';
 import SnackbarProvider from './providers/SnackProvider';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
 import theme from './theme';
-// import { isJwtExpired } from './utils/jwt';
 
 window.Buffer = window.Buffer || Buffer;
 
@@ -98,20 +96,37 @@ const client = createClient({
   webSocketProvider,
 });
 
+async function validateSession() {
+  try {
+    const response = await fetch('/auth/validate-session', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer your_access_token_here`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Session validation failed');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error validating session:', error);
+    return { isAuthenticated: false };
+  }
+}
+
 const publishableKey = import.meta.env.VITE_APP_STRIPE_PUBLISHABLE_KEY ?? '';
 loadStripe(publishableKey).then((stripePromise) => {
-  const accessToken = localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken);
-  const refreshToken = localStorage.getItem(LOCAL_STORAGE_KEYS.refreshToken);
-
-  if (accessToken && refreshToken) {
-    store.dispatch(
-      signIn({
-        accessToken,
-        refreshToken,
-      }),
-    );
-    store.dispatch(fetchUserBalanceAsync());
-  }
+  validateSession().then(({ isAuthenticated, user }) => {
+    if (isAuthenticated) {
+      store.dispatch(
+        signIn({ accessToken: user.accessToken, refreshToken: '' }),
+      );
+      store.dispatch(fetchUserBalanceAsync());
+    }
+  });
 
   root.render(
     <React.StrictMode>
