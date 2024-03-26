@@ -124,7 +124,6 @@ export class ExchangeOracleGateway {
       JobsDiscoveryParamsData,
     );
     const reducedParams = this.toCleanObjParams(jobsDiscoveryParamsData);
-    // Clean the object to remove undefined or null fields
     const options: AxiosRequestConfig = {
       method: 'GET',
       url: `${command.exchangeOracleUrl}/job`,
