@@ -2,7 +2,7 @@ import {
   Controller,
   Get,
   Headers,
-  Param,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -10,10 +10,12 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StatisticsService } from './statistics.service';
 import {
   OracleStatisticsCommand,
+  OracleStatisticsDto,
   OracleStatisticsResponse,
 } from './interfaces/oracle-statistics.interface';
 import {
   UserStatisticsCommand,
+  UserStatisticsDto,
   UserStatisticsResponse,
 } from './interfaces/user-statistics.interface';
 
@@ -25,9 +27,11 @@ export class StatisticsController {
   @ApiOperation({ summary: 'General Oracle Statistics' })
   @UsePipes(new ValidationPipe())
   public getOracleStatistics(
-    @Param('url') oracleUrl: string,
+    @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
-    const command = { exchangeOracleUrl: oracleUrl } as OracleStatisticsCommand;
+    const command = {
+      exchangeOracleUrl: dto.exchangeOracleUrl,
+    } as OracleStatisticsCommand;
     return this.service.getOracleStats(command);
   }
 
@@ -36,11 +40,11 @@ export class StatisticsController {
   @ApiOperation({ summary: 'Statistics for requesting user' })
   @UsePipes(new ValidationPipe())
   public getUserStatistics(
-    @Param('url') oracleUrl: string,
+    @Query() dto: UserStatisticsDto,
     @Headers('authorization') token: string,
   ): Promise<UserStatisticsResponse> {
     const command: UserStatisticsCommand = {
-      exchangeOracleUrl: oracleUrl,
+      exchangeOracleUrl: dto.exchangeOracleUrl,
       token: token,
     } as UserStatisticsCommand;
     return this.service.getUserStats(command);
