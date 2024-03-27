@@ -147,12 +147,12 @@ export class JobService {
     return {
       data: {
         data_url: generateBucketUrl(dto.data.dataset, requestType),
-        points_url: dto.data.points
-          ? generateBucketUrl(dto.data.points, requestType)
-          : undefined,
-        boxes_url: dto.data.boxes
-          ? generateBucketUrl(dto.data.boxes, requestType)
-          : undefined,
+        ...(dto.data.points && {
+          points_url: generateBucketUrl(dto.data.points, requestType),
+        }),
+        ...(dto.data.boxes && {
+          boxes_url: generateBucketUrl(dto.data.boxes, requestType),
+        }),
       },
       annotation: {
         labels: dto.labels,

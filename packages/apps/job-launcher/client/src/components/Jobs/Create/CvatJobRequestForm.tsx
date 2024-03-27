@@ -219,7 +219,7 @@ export const CvatJobRequestForm = () => {
                       Bounding Boxes from points
                     </MenuItem>
                     <MenuItem value={CvatJobType.IMAGE_SKELETONS_FROM_BOXES}>
-                      Bounding Boxes from skeletons
+                      Skeletons from Bounding Boxes
                     </MenuItem>
                   </Select>
                 </FormControl>

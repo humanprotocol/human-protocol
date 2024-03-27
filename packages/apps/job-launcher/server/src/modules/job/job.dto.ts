@@ -125,22 +125,6 @@ export class JobFortuneDto extends JobDto {
   public fundAmount: number;
 }
 
-export class CvatDataDto {
-  @ApiProperty()
-  @IsObject()
-  public dataset: StorageDataDto;
-
-  @ApiPropertyOptional()
-  @IsObject()
-  @IsOptional()
-  public points: StorageDataDto | undefined;
-
-  @ApiPropertyOptional()
-  @IsObject()
-  @IsOptional()
-  public boxes: StorageDataDto | undefined;
-}
-
 export class StorageDataDto {
   @ApiProperty({ enum: StorageProviders })
   @IsEnum(StorageProviders)
@@ -158,6 +142,22 @@ export class StorageDataDto {
   @IsOptional()
   @IsString()
   public path: string;
+}
+
+export class CvatDataDto {
+  @ApiProperty()
+  @IsObject()
+  public dataset: StorageDataDto;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  public points?: StorageDataDto;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  public boxes?: StorageDataDto;
 }
 
 export class JobCvatDto extends JobDto {
@@ -403,11 +403,11 @@ export class CvatData {
 
   @IsUrl()
   @IsOptional()
-  public points_url: string | undefined;
+  public points_url?: string;
 
   @IsUrl()
   @IsOptional()
-  public boxes_url: string | undefined;
+  public boxes_url?: string;
 }
 
 export class Label {
@@ -418,12 +418,12 @@ export class Label {
   @ApiPropertyOptional()
   @IsArray()
   @IsOptional()
-  public nodes: string[] | undefined;
+  public nodes?: string[];
 
   @ApiPropertyOptional()
   @IsArray()
   @IsOptional()
-  public joints: [] | undefined = [];
+  public joints?: string[];
 }
 
 export class Annotation {
