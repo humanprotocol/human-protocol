@@ -110,7 +110,9 @@ export const CvatJobRequestForm = () => {
         },
       };
     const labelArray: Label[] = labels.map((name: string) => {
-      return { name: name, nodes: nodes };
+      if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES)
+        return { name: name, nodes: nodes };
+      else return { name: name };
     });
     updateJobRequest?.({
       ...jobRequest,
