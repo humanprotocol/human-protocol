@@ -77,7 +77,7 @@ class SkeletonLabelInfo(LabelInfoBase):
     ]
     """
 
-    joints: List[Tuple[int, int]]
+    joints: Optional[List[Tuple[int, int]]] = Field(default_factory=list)
     "A list of node adjacency, e.g. [[0, 1], [1, 2], [1, 3]]"
 
     @root_validator
