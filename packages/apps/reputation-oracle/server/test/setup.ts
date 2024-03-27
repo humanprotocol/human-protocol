@@ -8,7 +8,7 @@ export async function setup(): Promise<void> {
   if (!privateKey) {
     throw new Error('Private key is empty');
   }
-  const provider = new ethers.JsonRpcProvider('http://localhost:8545');
+  const provider = new ethers.JsonRpcProvider('http://0.0.0.0:8545');
   const wallet = new Wallet(privateKey, provider);
 
   const kvStoreClient = await KVStoreClient.build(wallet);

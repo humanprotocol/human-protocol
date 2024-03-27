@@ -22,6 +22,10 @@ create-env-files:
 		cp ./fortune/.env.rec-oracle ../packages/apps/fortune/recording-oracle/.env.local ; \
 	fi
 
+	@if [ ! -f "../packages/apps/fortune/reputation-oracle/.env.local" ]; then \
+		cp ./fortune/.env.rep-oracle ../packages/apps/fortune/reputation-oracle/.env.local ; \
+	fi
+
 hardhat-node:
 	yarn workspace @human-protocol/core local
 
