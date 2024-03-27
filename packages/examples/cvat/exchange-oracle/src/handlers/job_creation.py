@@ -614,7 +614,7 @@ class BoxesFromPointsTaskBuilder:
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
-                    excluded_gt_info.excluded_count += 1
+                    # Don't need to count as excluded, because it's not an error
                     continue
                 elif len(matched_skeletons) == 0:
                     # Handle unmatched boxes
