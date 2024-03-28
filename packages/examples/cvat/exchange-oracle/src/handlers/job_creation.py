@@ -352,7 +352,7 @@ class BoxesFromPointsTaskBuilder:
 
         if (
             excluded_gt_info.excluded_count
-            > excluded_gt_info.total_count * self.max_discarded_threshold
+            > ceil(excluded_gt_info.total_count * self.max_discarded_threshold)
         ):
             raise TooFewSamples(
                 "Too many GT boxes discarded, canceling job creation. Errors: {}".format(
@@ -512,7 +512,7 @@ class BoxesFromPointsTaskBuilder:
 
         if (
             excluded_points_info.excluded_count
-            > excluded_points_info.total_count * self.max_discarded_threshold
+            > ceil(excluded_points_info.total_count * self.max_discarded_threshold)
         ):
             raise TooFewSamples(
                 "Too many points discarded, canceling job creation. Errors: {}".format(
@@ -614,7 +614,7 @@ class BoxesFromPointsTaskBuilder:
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
-                    # Don't need to count as excluded, because it's not an error
+                    # Don't need to count as excluded, because it's not an error in annotations
                     continue
                 elif len(matched_skeletons) == 0:
                     # Handle unmatched boxes
@@ -650,7 +650,7 @@ class BoxesFromPointsTaskBuilder:
 
         if (
             excluded_gt_info.excluded_count
-            > excluded_gt_info.total_count * self.max_discarded_threshold
+            > ceil(excluded_gt_info.total_count * self.max_discarded_threshold)
         ):
             raise DatasetValidationError(
                 "Too many GT boxes discarded ({} out of {}). "
@@ -1327,7 +1327,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
         if (
             excluded_gt_info.excluded_count
-            > excluded_gt_info.total_count * self.max_discarded_threshold
+            > ceil(excluded_gt_info.total_count * self.max_discarded_threshold)
         ):
             raise TooFewSamples(
                 "Too many GT skeletons discarded, canceling job creation. Errors: {}".format(
@@ -1430,7 +1430,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
         if (
             excluded_boxes_info.excluded_count
-            > excluded_boxes_info.total_count * self.max_discarded_threshold
+            > ceil(excluded_boxes_info.total_count * self.max_discarded_threshold)
         ):
             raise TooFewSamples(
                 "Too many boxes discarded, canceling job creation. Errors: {}".format(
@@ -1580,7 +1580,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
-                    excluded_gt_info.excluded_count += 1
+                    # Don't need to count as excluded, because it's not an error in annotations
                     continue
                 elif len(matched_boxes) == 0:
                     # Handle unmatched boxes
@@ -1620,8 +1620,8 @@ class SkeletonsFromBoxesTaskBuilder:
             )
 
         if (
-            len(skeleton_bbox_mapping)
-            < (1 - self.max_discarded_threshold) * excluded_gt_info.total_count
+            excluded_gt_info.excluded_count
+            > ceil(self.max_discarded_threshold * excluded_gt_info.total_count)
         ):
             raise DatasetValidationError(
                 "Too many GT skeletons discarded ({} out of {}). "
