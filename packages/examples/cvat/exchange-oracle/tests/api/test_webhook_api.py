@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.sql import select
 from web3 import HTTPProvider, Web3
 
-from src.core.types import JobLauncherEventType, Networks
+from src.core.types import JobLauncherEventTypes, Networks
 from src.db import SessionLocal
 from src.models.webhook import Webhook
 
@@ -23,7 +23,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         mock_get_web3.return_value = Web3(HTTPProvider(Networks.localhost))
         mock_escrow = Mock()
         mock_escrow.launcher = JOB_LAUNCHER
-        mock_escrow.recordingOracle = RECORDING_ORACLE_ADDRESS
+        mock_escrow.recording_oracle = RECORDING_ORACLE_ADDRESS
         mock_get_escrow.return_value = mock_escrow
 
         response = client.post(
@@ -45,7 +45,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         )
         assert webhook.escrow_address == escrow_address
         assert webhook.chain_id == 80001
-        assert webhook.event_type == JobLauncherEventType.escrow_created.value
+        assert webhook.event_type == JobLauncherEventTypes.escrow_created.value
         assert webhook.event_data == {}
         assert webhook.direction == "incoming"
         assert webhook.signature == WEBHOOK_MESSAGE_SIGNED
@@ -130,7 +130,7 @@ def test_incoming_webhook_401(client: TestClient) -> None:
         mock_get_web3.return_value = Web3(HTTPProvider(Networks.localhost))
         mock_escrow = Mock()
         mock_escrow.launcher = escrow_address
-        mock_escrow.recordingOracle = RECORDING_ORACLE_ADDRESS
+        mock_escrow.recording_oracle = RECORDING_ORACLE_ADDRESS
         mock_get_escrow.return_value = mock_escrow
         response = client.post(
             "/oracle-webhook",

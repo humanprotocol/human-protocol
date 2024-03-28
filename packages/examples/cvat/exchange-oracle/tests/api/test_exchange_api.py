@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from src.core.types import AssignmentStatus
+from src.core.types import AssignmentStatuses
 from src.db import SessionLocal
 from src.models.cvat import Assignment, User
 
@@ -317,7 +317,7 @@ def test_create_assignment_200(client: TestClient) -> None:
 
     assert db_assignment.cvat_job_id == cvat_job_1.cvat_id
     assert db_assignment.user_wallet_address == user_address
-    assert db_assignment.status == AssignmentStatus.created
+    assert db_assignment.status == AssignmentStatuses.created
     assert response.json()["assignment"]
     session.close()
 

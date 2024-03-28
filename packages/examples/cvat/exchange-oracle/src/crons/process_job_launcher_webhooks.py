@@ -4,14 +4,14 @@ import httpx
 from human_protocol_sdk.constants import Status as EscrowStatus
 from sqlalchemy.orm import Session
 
-import src.cvat.tasks as cvat
+import src.handlers.job_creation as cvat
 import src.services.cvat as cvat_db_service
 import src.services.webhook as oracle_db_service
 from src.chain.escrow import validate_escrow
 from src.chain.kvstore import get_job_launcher_url
 from src.core.config import Config, CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
-from src.core.types import JobLauncherEventType, OracleWebhookTypes, ProjectStatuses
+from src.core.types import JobLauncherEventTypes, OracleWebhookTypes, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
@@ -66,7 +66,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
     assert webhook.type == OracleWebhookTypes.job_launcher
 
     match webhook.event_type:
-        case JobLauncherEventType.escrow_created:
+        case JobLauncherEventTypes.escrow_created:
             try:
                 validate_escrow(
                     webhook.chain_id,
@@ -108,7 +108,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
 
                 raise
 
-        case JobLauncherEventType.escrow_canceled:
+        case JobLauncherEventTypes.escrow_canceled:
             try:
                 validate_escrow(
                     webhook.chain_id,
@@ -187,13 +187,6 @@ def process_outgoing_job_launcher_webhooks():
                         webhook.event_data,
                         timestamp=None,  # TODO: launcher doesn't support it yet
                     )
-
-                    # TODO: remove when field naming is updated in launcher
-                    body["escrowAddress"] = body.pop("escrow_address")
-                    body["chainId"] = body.pop("chain_id")
-                    body["eventType"] = body.pop("event_type")
-                    body["eventData"] = body.pop("event_data")
-                    # ^^^
 
                     _, signature = prepare_signed_message(
                         webhook.escrow_address,

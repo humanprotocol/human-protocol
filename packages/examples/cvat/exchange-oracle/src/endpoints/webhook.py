@@ -19,13 +19,12 @@ async def receive_oracle_webhook(
     human_signature: Union[str, None] = Header(default=None),
 ) -> OracleWebhookResponse:
     try:
-        # TODO: remove mock
+        # TODO: remove mock once implemented in launcher
         if not human_signature:
             human_signature = "launcher-{}".format(utcnow().timestamp())
             sender_type = OracleWebhookTypes.job_launcher
 
         else:
-            # TODO: add allowed sender type checks
             sender_type = await validate_oracle_webhook_signature(request, human_signature, webhook)
 
         with SessionLocal.begin() as session:
