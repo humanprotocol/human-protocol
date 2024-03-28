@@ -144,6 +144,22 @@ export class StorageDataDto {
   public path: string;
 }
 
+export class CvatDataDto {
+  @ApiProperty()
+  @IsObject()
+  public dataset: StorageDataDto;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  public points?: StorageDataDto;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  public boxes?: StorageDataDto;
+}
+
 export class JobCvatDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
@@ -151,12 +167,12 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty()
   @IsObject()
-  public data: StorageDataDto;
+  public data: CvatDataDto;
 
   @ApiProperty()
   @IsArray()
   @ArrayMinSize(1)
-  public labels: string[];
+  public labels: Label[];
 
   @ApiProperty({ name: 'min_quality' })
   @IsNumber()
@@ -382,75 +398,75 @@ export class FortuneManifestDto {
 }
 
 export class CvatData {
-  @ApiProperty()
-  @IsString()
+  @IsUrl()
   public data_url: string;
+
+  @IsUrl()
+  @IsOptional()
+  public points_url?: string;
+
+  @IsUrl()
+  @IsOptional()
+  public boxes_url?: string;
 }
 
 export class Label {
   @ApiProperty()
   @IsString()
   public name: string;
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public nodes?: string[];
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public joints?: string[];
 }
 
 export class Annotation {
-  @ApiProperty()
   @IsArray()
   public labels: Label[];
 
-  @ApiProperty()
   @IsString()
   public description: string;
 
-  @ApiProperty()
   @IsString()
   public user_guide: string;
 
-  @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
   public type: JobRequestType;
 
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public job_size: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public max_time: number;
 }
 
 export class Validation {
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public min_quality: number;
 
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public val_size: number;
 
-  @ApiProperty()
   @IsString()
   public gt_url: string;
 }
 
 export class CvatManifestDto {
-  @ApiProperty()
   @IsObject()
   public data: CvatData;
 
-  @ApiProperty()
   @IsObject()
   public annotation: Annotation;
 
-  @ApiProperty()
   @IsObject()
   public validation: Validation;
 
-  @ApiProperty()
   @IsString()
   public job_bounty: string;
 }
