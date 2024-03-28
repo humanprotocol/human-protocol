@@ -1107,7 +1107,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
 
         # Configuration / constants
-        self.job_size_mult = 6
+        self.job_size_mult = skeletons_from_boxes_task.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
         "Job size multiplier"
 
         # TODO: consider WebP if produced files are too big

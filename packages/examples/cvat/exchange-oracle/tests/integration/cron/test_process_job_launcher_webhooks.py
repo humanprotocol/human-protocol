@@ -172,7 +172,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
         self.assertEqual(new_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(new_webhook.event_type, ExchangeOracleEventType.task_creation_failed)
+        self.assertEqual(new_webhook.event_type, ExchangeOracleEventTypes.task_creation_failed)
         self.assertEqual(new_webhook.attempts, 0)
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_remove_when_error(

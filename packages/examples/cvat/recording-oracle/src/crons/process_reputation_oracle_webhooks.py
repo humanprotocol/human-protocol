@@ -48,16 +48,6 @@ def process_outgoing_reputation_oracle_webhooks():
                         timestamp=None,  # TODO: reputation oracle doesn't support
                     )
 
-                    # TODO: remove compatibility code
-                    # FIXME: For a sake of compatibility with the current
-                    # version of Reputation Oracle keep this
-                    # vvv
-                    body["escrowAddress"] = body.pop("escrow_address")
-                    body["chainId"] = body.pop("chain_id")
-                    body["eventType"] = body.pop("event_type")
-                    body.pop("event_data")
-                    # ^^^
-
                     _, signature = prepare_signed_message(
                         webhook.escrow_address,
                         webhook.chain_id,
