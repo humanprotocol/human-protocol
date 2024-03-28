@@ -1,0 +1,46 @@
+name: Generate and Sync Contract ABIs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-and-sync-abis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
+      
+      - name: Install dependencies
+        run: npm install --global yarn && yarn --ignore-scripts
+        working-directory: ./packages/core
+
+      - name: Build core package
+        run: yarn build
+        working-directory: ./packages/core
+
+      - name: Extract ABIs
+        run: |
+          jq '.abi' artifacts/contracts/governance/MetaHumanGovernor.sol/MetaHumanGovernor.json > abis/MetaHumanGovernor.abi.json
+          jq '.abi' artifacts/contracts/governance/DAOSpokeContract.sol/DAOSpokeContract.json > abis/DAOSpokeContract.abi.json
+        working-directory: ./packages/core
+
+      - name: Commit ABIs to the Repository
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add abis/*
+          git commit -m "Update ABIs for MetaHumanGovernor and DAOSpokeContract" || echo "No changes to commit"
+          git push
+        working-directory: ./packages/core
+
+      - name: Sync ABIs to Governance Repository
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git clone https://github.com/<your-org>/<governance-repo>.git temp-governance-repo
+          cp -a ./packages/core/abis/. temp-governance-repo/<path-to-abis>/
+          cd temp-governance-repo
+          git add .
+          git commit -m "Sync ABIs for MetaHumanGovernor and DAOSpokeContract" || echo "No changes to ABIs"
+          git push
