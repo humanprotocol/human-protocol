@@ -1,6 +1,11 @@
 import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
 import { JobRequestType } from '../src/common/enums/job';
-import { FortuneManifestDto, StorageDataDto } from '../src/modules/job/job.dto';
+import {
+  FortuneManifestDto,
+  StorageDataDto,
+  CvatDataDto,
+  Label,
+} from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -113,5 +118,16 @@ export const MOCK_STORAGE_DATA: StorageDataDto = {
   bucketName: 'bucket',
   path: 'folder/test',
 };
+export const MOCK_CVAT_DATA: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+};
+export const MOCK_CVAT_LABELS: Label[] = [
+  {
+    name: 'label1',
+  },
+  {
+    name: 'label2',
+  },
+];
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';

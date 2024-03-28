@@ -65,6 +65,8 @@ import {
   MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
   MOCK_STORAGE_DATA,
+  MOCK_CVAT_DATA,
+  MOCK_CVAT_LABELS,
   MOCK_CVAT_JOB_SIZE,
   MOCK_CVAT_MAX_TIME,
   MOCK_CVAT_VAL_SIZE,
@@ -88,6 +90,7 @@ import {
   JobCaptchaDto,
   CvatManifestDto,
   JobQuickLaunchDto,
+  CvatDataDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -515,8 +518,8 @@ describe('JobService', () => {
         .mockResolvedValueOnce(jobBounty);
 
       const dto: JobCvatDto = {
-        data: MOCK_STORAGE_DATA,
-        labels: ['label1', 'label2'],
+        data: MOCK_CVAT_DATA,
+        labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         userGuide: MOCK_FILE_URL,
         minQuality: 0.8,
@@ -544,7 +547,6 @@ describe('JobService', () => {
           user_guide: MOCK_FILE_URL,
           type: requestType,
           job_size: 1,
-          max_time: 300,
         },
         validation: {
           min_quality: 0.8,
@@ -945,8 +947,8 @@ describe('JobService', () => {
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
-      data: MOCK_STORAGE_DATA,
-      labels: ['cat', 'dog'],
+      data: MOCK_CVAT_DATA,
+      labels: MOCK_CVAT_LABELS,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       minQuality: 0.95,
       fundAmount: 10,
@@ -1031,17 +1033,19 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: StorageDataDto = {
-        provider: StorageProviders.GCS,
-        region: AWSRegions.EU_CENTRAL_1,
-        bucketName: 'bucket',
-        path: 'folder/test',
+      const storageDataMock: any = {
+        dataset: {
+          provider: StorageProviders.GCS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
       };
 
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
         data: storageDataMock,
-        labels: ['cat', 'dog'],
+        labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
@@ -1070,16 +1074,18 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       const storageDataMock: any = {
-        provider: StorageProviders.AWS,
-        region: 'test-region',
-        bucketName: 'bucket',
-        path: 'folder/test',
+        dataset: {
+          provider: StorageProviders.AWS,
+          region: 'test-region',
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
       };
 
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
         data: storageDataMock,
-        labels: ['cat', 'dog'],
+        labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
@@ -1108,15 +1114,17 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       const storageDataMock: any = {
-        provider: StorageProviders.AWS,
-        bucketName: 'bucket',
-        path: 'folder/test',
+        dataset: {
+          provider: StorageProviders.AWS,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
       };
 
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
         data: storageDataMock,
-        labels: ['cat', 'dog'],
+        labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
@@ -1145,15 +1153,17 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       const storageDataMock: any = {
-        provider: StorageProviders.AWS,
-        region: AWSRegions.EU_CENTRAL_1,
-        path: 'folder/test',
+        dataset: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          path: 'folder/test',
+        },
       };
 
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
         data: storageDataMock,
-        labels: ['cat', 'dog'],
+        labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
@@ -1894,7 +1904,6 @@ describe('JobService', () => {
         user_guide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
         job_size: 10,
-        max_time: 300,
       },
       validation: {
         min_quality: 1,
