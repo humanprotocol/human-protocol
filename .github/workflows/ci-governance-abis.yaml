@@ -11,20 +11,29 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
       
+      # Install dependencies 
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
         working-directory: ./packages/core
+      
+      # Install node-jq 
+      - name: Install node-jq
+        run: npm install node-jq
+        working-directory: ./packages/core
 
+      # Build core package
       - name: Build core package
         run: yarn build
         working-directory: ./packages/core
 
+      # Extract ABIs using node-jq
       - name: Extract ABIs
         run: |
           jq '.abi' artifacts/contracts/governance/MetaHumanGovernor.sol/MetaHumanGovernor.json > abis/MetaHumanGovernor.abi.json
           jq '.abi' artifacts/contracts/governance/DAOSpokeContract.sol/DAOSpokeContract.json > abis/DAOSpokeContract.abi.json
         working-directory: ./packages/core
 
+      # Commit ABIs to the Repository
       - name: Commit ABIs to the Repository
         run: |
           git config --global user.name 'GitHub Actions'
@@ -34,9 +43,8 @@ jobs:
           git push
         working-directory: ./packages/core
 
+      # Sync ABIs to Governance Repository
       - name: Sync ABIs to Governance Repository
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git clone https://github.com/humanprotocol/governance.git temp-governance-repo
           cp -a ./packages/core/abis/. temp-governance-repo/abis/
