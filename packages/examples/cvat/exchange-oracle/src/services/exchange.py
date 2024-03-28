@@ -8,7 +8,11 @@ from src.chain.escrow import get_escrow_manifest
 from src.core.types import AssignmentStatuses, JobStatuses, PlatformTypes, ProjectStatuses
 from src.db import SessionLocal
 from src.schemas import exchange as service_api
-from src.utils.assignments import compose_assignment_url, parse_manifest
+from src.utils.assignments import (
+    compose_assignment_url,
+    get_default_assignment_timeout,
+    parse_manifest,
+)
 from src.utils.requests import get_or_404
 from src.utils.time import utcnow
 
@@ -43,7 +47,8 @@ def serialize_task(
             title=f"Task {project.escrow_address[:10]}",
             description=manifest.annotation.description,
             job_bounty=manifest.job_bounty,
-            job_time_limit=manifest.annotation.max_time,
+            job_time_limit=manifest.annotation.max_time
+            or get_default_assignment_timeout(manifest.annotation.type),
             job_size=manifest.annotation.job_size + manifest.validation.val_size,
             job_type=project.job_type,
             platform=PlatformTypes.CVAT,
@@ -159,7 +164,11 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             session,
             wallet_address=user.wallet_address,
             cvat_job_id=unassigned_job.cvat_id,
-            expires_at=now + timedelta(seconds=manifest.annotation.max_time),
+            expires_at=now
+            + timedelta(
+                seconds=manifest.annotation.max_time
+                or get_default_assignment_timeout(manifest.annotation.type)
+            ),
         )
 
         cvat_api.clear_job_annotations(unassigned_job.cvat_id)

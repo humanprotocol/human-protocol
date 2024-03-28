@@ -213,10 +213,9 @@ def track_task_creation() -> None:
             failed: List[cvat_models.DataUpload] = []
             for upload in uploads:
                 status, reason = cvat_api.get_task_upload_status(upload.task_id)
+                project = upload.task.project
                 if not status or status == cvat_api.UploadStatus.FAILED:
                     failed.append(upload)
-
-                    project = upload.task.project
 
                     oracle_db_service.outbox.create_webhook(
                         session,

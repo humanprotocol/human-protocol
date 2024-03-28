@@ -188,13 +188,6 @@ def process_outgoing_job_launcher_webhooks():
                         timestamp=None,  # TODO: launcher doesn't support it yet
                     )
 
-                    # TODO: remove when field naming is updated in launcher
-                    body["escrowAddress"] = body.pop("escrow_address")
-                    body["chainId"] = body.pop("chain_id")
-                    body["eventType"] = body.pop("event_type")
-                    body["eventData"] = body.pop("event_data")
-                    # ^^^
-
                     _, signature = prepare_signed_message(
                         webhook.escrow_address,
                         webhook.chain_id,
