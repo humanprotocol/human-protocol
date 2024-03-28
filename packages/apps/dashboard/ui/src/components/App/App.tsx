@@ -29,6 +29,7 @@ const defaultChains = [
   wagmiChains.avalancheFuji,
   wagmiChains.avalanche,
   wagmiChains.skaleHumanProtocol,
+  wagmiChains.okc,
 ];
 
 const rpcProviders = Object.values(RPC_URLS).map((rpcUrl) =>

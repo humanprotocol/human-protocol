@@ -163,6 +163,13 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    x1testnet: {
+      chainId: 195,
+      timeout: 2000000,
+      url: process.env.ETH_OKT_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -212,6 +219,7 @@ const config: HardhatUserConfig = {
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
+      x1testnet: process.env.OKT_API_KEY || '',
     },
     customChains: [
       {
@@ -220,6 +228,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: process.env.SKALE_BROWSER_API_URL || '',
           browserURL: process.env.SKALE_BROWSER_URL || '',
+        },
+      },
+      {
+        network: 'x1testnet',
+        chainId: 195,
+        urls: {
+          apiURL: process.env.OKT_API_URL || '',
+          browserURL: process.env.OKT_BROWSER_URL || '',
         },
       },
     ],

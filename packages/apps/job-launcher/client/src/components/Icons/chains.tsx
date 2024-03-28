@@ -8,6 +8,7 @@ import { EthereumIcon } from './EthereumIcon';
 import { HumanIcon } from './HumanIcon';
 import { MoonbaseAlphaIcon } from './MoonbaseAlphaIcon';
 import { MoonbeamIcon } from './MoonbeamIcon';
+import { OkxIcon } from './OkxIcon';
 import { PolygonIcon } from './PolygonIcon';
 import { SkaleHumanProtocolIcon } from './SkaleHumanProtocolIcon';
 
@@ -27,6 +28,7 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
   [ChainId.CELO]: <CeloIcon />,
   [ChainId.CELO_ALFAJORES]: <CeloIcon />,
+  [ChainId.X1_TESTNET]: <OkxIcon />,
 };
 
 export const TOKEN_ICONS: Record<string, ReactElement> = {

@@ -251,6 +251,20 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
   },
+  [ChainId.X1_TESTNET]: {
+    chainId: ChainId.X1_TESTNET,
+    title: 'X1 Testnet',
+    scanUrl: 'https://www.okx.com/explorer/x1-test',
+    factoryAddress: '0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc',
+    hmtAddress: '0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8',
+    stakingAddress: '0x703936A24DFaDcD34008Db338FDB087c43C8c56a',
+    rewardPoolAddress: '0x44FAd6e8d616AD460cf8eEf503FC101170E7De73',
+    kvstoreAddress: '0xcCfF9646Abf988d9842d94b171A67d5F6c30dBe2',
+    subgraphUrl:
+      'https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',
