@@ -146,23 +146,23 @@ export class WebhookService {
     this.webhookRepository.updateOne(webhookEntity);
   }
 
-  public async handleWebhook(wehbook: WebhookDataDto): Promise<void> {
-    switch (wehbook.eventType) {
+  public async handleWebhook(webhook: WebhookDataDto): Promise<void> {
+    switch (webhook.eventType) {
       case EventType.ESCROW_COMPLETED:
-        await this.jobService.completeJob(wehbook);
+        await this.jobService.completeJob(webhook);
         break;
 
       case EventType.TASK_CREATION_FAILED:
-        await this.jobService.escrowFailedWebhook(wehbook);
+        await this.jobService.escrowFailedWebhook(webhook);
         break;
 
       case EventType.ESCROW_FAILED:
-        await this.jobService.escrowFailedWebhook(wehbook);
+        await this.jobService.escrowFailedWebhook(webhook);
         break;
 
       default:
         throw new BadRequestException(
-          `Invalid webhook event type: ${wehbook.eventType}`,
+          `Invalid webhook event type: ${webhook.eventType}`,
         );
     }
   }
