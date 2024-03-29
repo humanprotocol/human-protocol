@@ -3,8 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
-import { ConfigNames } from './common/config';
 import init from './app-init';
+import { CommonConfigService } from './common/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -13,9 +13,11 @@ async function bootstrap() {
   await init(app);
 
   const configService: ConfigService = app.get(ConfigService);
+  const commonConfigService = new CommonConfigService(configService);
 
-  const host = configService.get<string>(ConfigNames.HOST, 'localhost');
-  const port = +configService.get<string>(ConfigNames.PORT, '5000');
+  const host = commonConfigService.host;
+  const port = commonConfigService.port;
+
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
   });

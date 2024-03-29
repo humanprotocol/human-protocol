@@ -20,6 +20,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { EnvConfigModule } from './common/config/config.module';
 
 @Module({
   providers: [
@@ -64,6 +65,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
       ),
     }),
     CronJobModule,
+    EnvConfigModule,
   ],
   controllers: [AppController],
 })
