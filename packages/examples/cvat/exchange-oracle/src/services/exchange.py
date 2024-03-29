@@ -10,6 +10,7 @@ from src.db import SessionLocal
 from src.schemas import exchange as service_api
 from src.utils.assignments import (
     compose_assignment_url,
+    get_default_assignment_size,
     get_default_assignment_timeout,
     parse_manifest,
 )
@@ -49,7 +50,7 @@ def serialize_task(
             job_bounty=manifest.job_bounty,
             job_time_limit=manifest.annotation.max_time
             or get_default_assignment_timeout(manifest.annotation.type),
-            job_size=manifest.annotation.job_size + manifest.validation.val_size,
+            job_size=get_default_assignment_size(manifest),
             job_type=project.job_type,
             platform=PlatformTypes.CVAT,
             assignment=serialized_assignment,
