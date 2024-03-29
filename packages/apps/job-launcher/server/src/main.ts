@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
 import init from './app-init';
-import { CommonConfigService } from './common/config';
+import { CommonConfigService } from './common/config/common-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {

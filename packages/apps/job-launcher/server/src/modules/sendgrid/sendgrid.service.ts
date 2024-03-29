@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
-import { SendgridConfigService } from '../../common/config';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 import { SENDGRID_API_KEY_REGEX } from '../../common/constants';
 import { ErrorSendGrid } from '../../common/constants/errors';
 

@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 import { AuthJwtController } from './auth.controller';
 import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { AuthConfigService } from '../../common/config';
+import { AuthConfigService } from '../../common/config/auth-config.service';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
 import { ApiKeyRepository } from './apikey.repository';
 import { ApiKeyEntity } from './apikey.entity';

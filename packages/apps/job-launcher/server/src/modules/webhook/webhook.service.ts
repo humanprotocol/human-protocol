@@ -12,7 +12,8 @@ import {
   KVStoreClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
-import { CommonConfigService, Web3ConfigService } from '../../common/config';
+import { CommonConfigService } from '../../common/config/common-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { signMessage } from '../../common/utils/signature';
 import { WebhookRepository } from './webhook.repository';
 import { firstValueFrom } from 'rxjs';

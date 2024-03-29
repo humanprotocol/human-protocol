@@ -1,7 +1,7 @@
 import { Module, Global, Provider } from '@nestjs/common';
 import { Encryption } from '@human-protocol/sdk';
 import { ConfigModule } from '@nestjs/config';
-import { PGPConfigService } from 'src/common/config';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 const encryptionProvider: Provider = {
   provide: Encryption,

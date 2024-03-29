@@ -23,13 +23,11 @@ import {
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
-import {
-  AuthConfigService,
-  CommonConfigService,
-  CvatConfigService,
-  PGPConfigService,
-  Web3ConfigService,
-} from '../../common/config';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { CommonConfigService } from '../../common/config/common-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import {
   ErrorBucket,
   ErrorEscrow,

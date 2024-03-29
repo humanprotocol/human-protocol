@@ -9,12 +9,12 @@ import { UserEntity } from '../modules/user/user.entity';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
-import { CommonConfigService } from '../common/config';
+import { CommonConfigService } from '../common/config/common-config.service';
+import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { LoggerOptions } from 'typeorm';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
-import { DatabaseConfigService } from '../common/config';
 
 @Module({
   imports: [

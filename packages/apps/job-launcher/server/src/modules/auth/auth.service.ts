@@ -19,7 +19,8 @@ import {
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
-import { AuthConfigService, CommonConfigService } from '../../common/config';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { CommonConfigService } from '../../common/config/common-config.service';
 
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
@@ -49,9 +50,9 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
@@ -75,9 +76,9 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
@@ -216,9 +217,9 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
