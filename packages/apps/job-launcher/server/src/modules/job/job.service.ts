@@ -815,7 +815,7 @@ export class JobService {
       chainId: jobEntity.chainId,
       eventType: EventType.ESCROW_CREATED,
       oracleType: oracleType,
-      hasSignature: oracleType === OracleType.FORTUNE,
+      hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
     });
     await this.webhookRepository.createUnique(webhookEntity);
 

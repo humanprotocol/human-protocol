@@ -218,9 +218,7 @@ export class CronJobService {
               chainId: jobEntity.chainId,
               eventType: EventType.ESCROW_CANCELED,
               oracleType,
-              hasSignature:
-                (manifest as FortuneManifestDto).requestType ===
-                JobRequestType.FORTUNE,
+              hasSignature: true,
             });
             await this.webhookRepository.createUnique(webhookEntity);
           }
