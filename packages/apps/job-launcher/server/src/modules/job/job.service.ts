@@ -70,6 +70,8 @@ import {
   RestrictedAudience,
   CreateJob,
   JobQuickLaunchDto,
+  CvatDataDto,
+  Label,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -109,6 +111,7 @@ import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
 import {
+  CvatAction,
   EscrowAction,
   OracleAction,
   OracleAddresses,
@@ -141,9 +144,14 @@ export class JobService {
     requestType: JobRequestType,
     tokenFundAmount: number,
   ): Promise<CvatManifestDto> {
-    const elementsCount = (
-      await listObjectsInBucket(dto.data.dataset, requestType)
-    ).length;
+    const { getElementsCount } = this.createCvatActions[requestType];
+
+    const elementsCount = await getElementsCount(
+      requestType,
+      dto.data,
+      dto.labels,
+    );
+
     return {
       data: {
         data_url: generateBucketUrl(dto.data.dataset, requestType),
@@ -494,6 +502,62 @@ export class JobService {
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getTrustedHandlers: () => [],
+    },
+  };
+
+  private createCvatActions: Record<JobRequestType, CvatAction> = {
+    [JobRequestType.HCAPTCHA]: {
+      getElementsCount: async () => 0,
+    },
+    [JobRequestType.FORTUNE]: {
+      getElementsCount: async () => 0,
+    },
+    [JobRequestType.IMAGE_BOXES]: {
+      getElementsCount: async (
+        requestType: JobRequestType,
+        data: CvatDataDto,
+      ) => (await listObjectsInBucket(data.dataset, requestType)).length,
+    },
+    [JobRequestType.IMAGE_POINTS]: {
+      getElementsCount: async (
+        requestType: JobRequestType,
+        data: CvatDataDto,
+      ) => (await listObjectsInBucket(data.dataset, requestType)).length,
+    },
+    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+      getElementsCount: async (
+        requestType: JobRequestType,
+        data: CvatDataDto,
+      ) => {
+        if (!data.points) {
+          throw new ConflictException(ErrorJob.DataNotExist);
+        }
+
+        return (
+          await this.storageService.download(
+            generateBucketUrl(data.points, requestType),
+          )
+        ).images.length;
+      },
+    },
+    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      getElementsCount: async (
+        requestType: JobRequestType,
+        data: CvatDataDto,
+        labels: Label[],
+      ) => {
+        if (!data.boxes || !labels[0].nodes) {
+          throw new ConflictException(ErrorJob.DataNotExist);
+        }
+
+        return (
+          (
+            await this.storageService.download(
+              generateBucketUrl(data.boxes, requestType),
+            )
+          ).images.length * labels[0].nodes.length
+        );
+      },
     },
   };
 

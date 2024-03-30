@@ -118,9 +118,20 @@ export const MOCK_STORAGE_DATA: StorageDataDto = {
   bucketName: 'bucket',
   path: 'folder/test',
 };
-export const MOCK_CVAT_DATA: CvatDataDto = {
+export const MOCK_CVAT_DATA_DATASET: CvatDataDto = {
   dataset: MOCK_STORAGE_DATA,
 };
+
+export const MOCK_CVAT_DATA_POINTS: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+  points: MOCK_STORAGE_DATA,
+};
+
+export const MOCK_CVAT_DATA_BOXES: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+  boxes: MOCK_STORAGE_DATA,
+};
+
 export const MOCK_CVAT_LABELS: Label[] = [
   {
     name: 'label1',
@@ -129,5 +140,17 @@ export const MOCK_CVAT_LABELS: Label[] = [
     name: 'label2',
   },
 ];
+
+export const MOCK_CVAT_LABELS_WITH_NODES: Label[] = [
+  {
+    name: 'label1',
+    nodes: ['node 1', 'node 2', 'node 3', 'node 4'],
+  },
+  {
+    name: 'label2',
+    nodes: ['node 1', 'node 2', 'node 3', 'node 4'],
+  },
+];
+
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
