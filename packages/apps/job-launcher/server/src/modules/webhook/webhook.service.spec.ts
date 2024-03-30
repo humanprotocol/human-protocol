@@ -25,6 +25,8 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { JobService } from '../job/job.service';
 import { WebhookDataDto } from './webhook.dto';
 import { HttpStatus } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -67,6 +69,8 @@ describe('WebhookService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,
+        ServerConfigService,
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {

@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { CommonConfigService } from '../../common/config/common-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 import { SortDirection } from '../../common/enums/collection';
 import { DataSource, In, LessThanOrEqual } from 'typeorm';
 import { JobStatus, JobStatusFilter } from '../../common/enums/job';
@@ -11,7 +11,7 @@ import { BaseRepository } from '../../database/base.repository';
 export class JobRepository extends BaseRepository<JobEntity> {
   constructor(
     private dataSource: DataSource,
-    public readonly commonConfigService: CommonConfigService,
+    public readonly serverConfigService: ServerConfigService,
   ) {
     super(JobEntity, dataSource);
   }
@@ -44,7 +44,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
     return this.find({
       where: {
         status: status,
-        retriesCount: LessThanOrEqual(this.commonConfigService.maxRetryCount),
+        retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },
       order: {

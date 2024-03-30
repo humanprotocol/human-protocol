@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
-import { CommonConfigService } from '../../common/config/common-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookEntity } from './webhook.entity';
 
@@ -11,7 +11,7 @@ export class WebhookRepository extends BaseRepository<WebhookEntity> {
   private readonly logger = new Logger(WebhookRepository.name);
   constructor(
     private dataSource: DataSource,
-    public readonly commonConfigService: CommonConfigService,
+    public readonly serverConfigService: ServerConfigService,
   ) {
     super(WebhookEntity, dataSource);
   }
@@ -20,7 +20,7 @@ export class WebhookRepository extends BaseRepository<WebhookEntity> {
     return this.find({
       where: {
         status: status,
-        retriesCount: LessThanOrEqual(this.commonConfigService.maxRetryCount),
+        retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },
 

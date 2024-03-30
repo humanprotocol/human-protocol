@@ -4,11 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CommonConfigService } from '../config/common-config.service';
+import { ServerConfigService } from '../config/server-config.service';
 
 @Injectable()
 export class CronAuthGuard implements CanActivate {
-  constructor(private readonly commonConfiService: CommonConfigService) {}
+  constructor(private readonly commonConfiService: ServerConfigService) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

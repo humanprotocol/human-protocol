@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
-import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 import { SENDGRID_API_KEY_REGEX } from '../../common/constants';
 import { ErrorSendGrid } from '../../common/constants/errors';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 
 @Injectable()
 export class SendGridService {
   private readonly logger = new Logger(SendGridService.name);
+
+  private readonly defaultFromEmail: string;
+  private readonly defaultFromName: string;
 
   constructor(
     private readonly mailService: MailService,
@@ -19,12 +22,15 @@ export class SendGridService {
     }
 
     this.mailService.setApiKey(apiKey);
+
+    this.defaultFromEmail = this.sendgridConfigService.fromEmail;
+    this.defaultFromName = this.sendgridConfigService.fromName;
   }
 
   async sendEmail({
     from = {
-      email: this.sendgridConfigService.fromEmail,
-      name: this.sendgridConfigService.fromName,
+      email: this.defaultFromEmail,
+      name: this.defaultFromName,
     },
     templateId = '',
     personalizations,
@@ -37,7 +43,6 @@ export class SendGridService {
         personalizations,
         ...emailData,
       });
-
       this.logger.log('Email sent successfully');
       return;
     } catch (error) {

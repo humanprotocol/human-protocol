@@ -20,7 +20,7 @@ import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
 import { AuthConfigService } from '../../common/config/auth-config.service';
-import { CommonConfigService } from '../../common/config/common-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
@@ -39,7 +39,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
-    private readonly commonConfigService: CommonConfigService,
+    private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly sendgridService: SendGridService,
     private readonly apiKeyRepository: ApiKeyRepository,
@@ -104,7 +104,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.commonConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -202,7 +202,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.commonConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -309,7 +309,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.commonConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],

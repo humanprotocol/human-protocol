@@ -12,7 +12,7 @@ import {
   KVStoreClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
-import { CommonConfigService } from '../../common/config/common-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { signMessage } from '../../common/utils/signature';
 import { WebhookRepository } from './webhook.repository';
@@ -37,7 +37,7 @@ export class WebhookService {
     private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
-    public readonly commonConfigSerice: CommonConfigService,
+    public readonly commonConfigSerice: ServerConfigService,
     public readonly web3ConfigService: Web3ConfigService,
     public readonly httpService: HttpService,
   ) {}

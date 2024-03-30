@@ -24,7 +24,7 @@ import {
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
 import { AuthConfigService } from '../../common/config/auth-config.service';
-import { CommonConfigService } from '../../common/config/common-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -132,7 +132,7 @@ export class JobService {
     public readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
-    public readonly commonConfigService: CommonConfigService,
+    public readonly serverConfigService: ServerConfigService,
     public readonly authConfigService: AuthConfigService,
     public readonly web3ConfigService: Web3ConfigService,
     public readonly cvatConfigService: CvatConfigService,
@@ -507,8 +507,10 @@ export class JobService {
     },
     [JobRequestType.FORTUNE]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.web3ConfigService.fortuneExchangeOracleAddress;
-        const recordingOracle = this.web3ConfigService.fortuneRecordingOracleAddress;
+        const exchangeOracle =
+          this.web3ConfigService.fortuneExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.fortuneRecordingOracleAddress;
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
@@ -517,7 +519,8 @@ export class JobService {
     [JobRequestType.IMAGE_BOXES]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
-        const recordingOracle = this.web3ConfigService.cvatRecordingOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
@@ -526,7 +529,8 @@ export class JobService {
     [JobRequestType.IMAGE_POINTS]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
-        const recordingOracle = this.web3ConfigService.cvatRecordingOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
@@ -535,7 +539,8 @@ export class JobService {
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
-        const recordingOracle = this.web3ConfigService.cvatRecordingOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
@@ -544,7 +549,8 @@ export class JobService {
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
-        const recordingOracle = this.web3ConfigService.cvatRecordingOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
@@ -1075,7 +1081,7 @@ export class JobService {
   }
 
   public handleProcessJobFailure = async (jobEntity: JobEntity) => {
-    if (jobEntity.retriesCount < this.commonConfigService.maxRetryCount) {
+    if (jobEntity.retriesCount < this.serverConfigService.maxRetryCount) {
       jobEntity.retriesCount += 1;
     } else {
       jobEntity.status = JobStatus.FAILED;
