@@ -163,8 +163,8 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    x1testnet: {
-      chainId: 195,
+    xlayer: {
+      chainId: 196,
       timeout: 2000000,
       url: process.env.ETH_OKT_URL || '',
       accounts:
@@ -219,7 +219,7 @@ const config: HardhatUserConfig = {
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
-      x1testnet: process.env.OKT_API_KEY || '',
+      xlayer: process.env.OKT_API_KEY || '',
     },
     customChains: [
       {
@@ -231,7 +231,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'x1testnet',
+        network: 'xlayer',
         chainId: 195,
         urls: {
           apiURL: process.env.OKT_API_URL || '',

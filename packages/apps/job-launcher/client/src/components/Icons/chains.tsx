@@ -28,7 +28,7 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
   [ChainId.CELO]: <CeloIcon />,
   [ChainId.CELO_ALFAJORES]: <CeloIcon />,
-  [ChainId.X1_TESTNET]: <OkxIcon />,
+  [ChainId.X_LAYER]: <OkxIcon />,
 };
 
 export const TOKEN_ICONS: Record<string, ReactElement> = {

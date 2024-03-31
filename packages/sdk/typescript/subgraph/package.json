@@ -18,7 +18,6 @@
     "quickstart:avalanche": "NETWORK=avalanche yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "quickstart:fuji": "NETWORK=fuji yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "quickstart:skale": "NETWORK=skale yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
-    "quickstart:x1testnet": "NETWORK=x1testnet yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "create-local": "graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "remove-local": "graph remove --node http://localhost:8020/ posix4e/humansubgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 posix4e/humansubgraph",

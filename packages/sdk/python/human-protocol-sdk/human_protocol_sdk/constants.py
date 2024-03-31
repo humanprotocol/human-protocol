@@ -19,7 +19,7 @@ class ChainId(Enum):
     SKALE = 1273227453
     CELO = 42220
     CELO_ALFAJORES = 44787
-    X1_TESTNET = 195
+    X_LAYER = 195
     LOCALHOST = 1338
 
 
@@ -200,8 +200,8 @@ NETWORKS = {
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
-    ChainId.X1_TESTNET: {
-        "title": "X1 Testnet",
+    ChainId.X_LAYER: {
+        "title": "X Layer",
         "scan_url": "https://www.oklink.com/oktc-test",
         "subgraph_url": (
             "https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet"

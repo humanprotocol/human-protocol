@@ -1,14 +1,14 @@
 {
-  "network": "x1testnet",
-  "description": "Human subgraph on X1 Testnet",
+  "network": "xlayer",
+  "description": "Human subgraph on X Layer",
   "EscrowFactory": {
     "address": "0xdA7cFC2e8D1D57e5eC52Fc04D80623A2A4B423B1",
     "startBlock": 11995159,
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
-    "address": "0xE136D172143993e8cF0e79D6a4dB6d041120a78B",
-    "startBlock": 10243149,
+    "address": "0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8",
+    "startBlock": 11061328,
     "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
   },
   "Escrow": {

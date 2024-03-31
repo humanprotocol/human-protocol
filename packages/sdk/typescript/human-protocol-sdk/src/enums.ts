@@ -14,6 +14,6 @@ export enum ChainId {
   SKALE = 1273227453,
   CELO = 42220,
   CELO_ALFAJORES = 44787,
-  X1_TESTNET = 195,
+  X_LAYER = 195,
   LOCALHOST = 1338,
 }
