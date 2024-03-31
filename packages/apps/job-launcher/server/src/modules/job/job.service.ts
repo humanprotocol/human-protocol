@@ -146,11 +146,7 @@ export class JobService {
   ): Promise<CvatManifestDto> {
     const { getElementsCount } = this.createCvatActions[requestType];
 
-    const elementsCount = await getElementsCount(
-      requestType,
-      dto.data,
-      dto.labels,
-    );
+    const elementsCount = await getElementsCount(requestType, dto.data);
 
     return {
       data: {
@@ -178,7 +174,19 @@ export class JobService {
         ),
         gt_url: generateBucketUrl(dto.groundTruth, requestType),
       },
-      job_bounty: await this.calculateJobBounty(elementsCount, tokenFundAmount),
+      job_bounty:
+        requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES
+          ? await this.calculateJobBounty(
+              elementsCount,
+              tokenFundAmount,
+              requestType,
+              dto.labels[0].nodes?.length,
+            )
+          : await this.calculateJobBounty(
+              elementsCount,
+              tokenFundAmount,
+              requestType,
+            ),
     };
   }
 
@@ -537,26 +545,23 @@ export class JobService {
           await this.storageService.download(
             generateBucketUrl(data.points, requestType),
           )
-        ).images.length;
+        ).annotations.length;
       },
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
-        labels: Label[],
       ) => {
-        if (!data.boxes || !labels[0].nodes) {
+        if (!data.boxes) {
           throw new ConflictException(ErrorJob.DataNotExist);
         }
 
         return (
-          (
-            await this.storageService.download(
-              generateBucketUrl(data.boxes, requestType),
-            )
-          ).images.length * labels[0].nodes.length
-        );
+          await this.storageService.download(
+            generateBucketUrl(data.boxes, requestType),
+          )
+        ).annotations.length;
       },
     },
   };
@@ -765,13 +770,32 @@ export class JobService {
   public async calculateJobBounty(
     elementsCount: number,
     fundAmount: number,
+    jobType: JobRequestType,
+    nodesTotal?: number,
   ): Promise<string> {
-    const totalJobs = Math.ceil(
-      div(
-        elementsCount,
-        Number(this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!),
-      ),
+    const cvatDefaultJobSize = Number(
+      this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
     );
+    let jobSize;
+    if (jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) {
+      const jobSizeMultiplier = Number(
+        this.configService.get<number>(
+          ConfigNames.CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
+        )!,
+      );
+      jobSize = jobSizeMultiplier * cvatDefaultJobSize;
+    } else {
+      jobSize = cvatDefaultJobSize;
+    }
+
+    let totalJobs: number;
+
+    // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
+    if (jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES && nodesTotal) {
+      totalJobs = Math.ceil(div(elementsCount, jobSize)) * nodesTotal;
+    } else {
+      totalJobs = Math.ceil(div(elementsCount, jobSize));
+    }
 
     return ethers.formatEther(
       ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs),

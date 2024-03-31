@@ -105,6 +105,7 @@ export const MOCK_HCAPTCHA_ORACLE_ADDRESS =
 export const MOCK_CVAT_JOB_SIZE = '10';
 export const MOCK_CVAT_MAX_TIME = '300';
 export const MOCK_CVAT_VAL_SIZE = '2';
+export const MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER = '6';
 export const MOCK_HCAPTCHA_SITE_KEY = '1234';
 export const MOCK_HCAPTCHA_IMAGE_URL =
   'http://mockedFileUrl.test/bucket/img_1.jpg';

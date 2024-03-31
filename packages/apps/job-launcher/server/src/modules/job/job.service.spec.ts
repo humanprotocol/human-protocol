@@ -70,6 +70,7 @@ import {
   MOCK_CVAT_JOB_SIZE,
   MOCK_CVAT_MAX_TIME,
   MOCK_CVAT_VAL_SIZE,
+  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_HCAPTCHA_IMAGE_LABEL,
   MOCK_HCAPTCHA_IMAGE_URL,
@@ -221,6 +222,8 @@ describe('JobService', () => {
             return MOCK_CVAT_MAX_TIME;
           case 'CVAT_VAL_SIZE':
             return MOCK_CVAT_VAL_SIZE;
+          case 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER':
+            return MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER;
           case 'HCAPTCHA_REPUTATION_ORACLE_URI':
             return MOCK_HCAPTCHA_REPO_URI;
           case 'HCAPTCHA_RECORDING_ORACLE_URI':
@@ -565,7 +568,7 @@ describe('JobService', () => {
       const jobBounty = '25.0';
 
       const data = {
-        images: ['string', 'string', 'string', 'string'],
+        annotations: ['string', 'string', 'string', 'string'],
       };
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(data);
 
@@ -611,10 +614,10 @@ describe('JobService', () => {
     });
 
     it('should create a valid CVAT manifest for image skeletons from boxes job type', async () => {
-      const jobBounty = '6.25';
+      const jobBounty = '4.0';
 
       const data = {
-        images: ['string', 'string', 'string', 'string'],
+        annotations: ['string', 'string', 'string', 'string'],
       };
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(data);
 
@@ -630,7 +633,7 @@ describe('JobService', () => {
       };
 
       const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
-      const tokenFundAmount = 100;
+      const tokenFundAmount = 16;
 
       const result = await jobService.createCvatManifest(
         dto,
@@ -1037,7 +1040,11 @@ describe('JobService', () => {
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
       const tokenFundAmount = 0.013997056833333334;
-      const result = await jobService['calculateJobBounty'](6, tokenFundAmount);
+      const result = await jobService['calculateJobBounty'](
+        6,
+        tokenFundAmount,
+        JobRequestType.IMAGE_BOXES,
+      );
 
       expect(result).toEqual('0.002332842805555555');
     });

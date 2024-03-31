@@ -52,6 +52,7 @@ export const ConfigNames = {
   SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
   SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
   CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
+  CVAT_SKELETONS_JOB_SIZE_MULTIPLIER: 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER',
   CVAT_MAX_TIME: 'CVAT_MAX_TIME',
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
@@ -120,6 +121,7 @@ export const envValidator = Joi.object({
   CVAT_JOB_SIZE: Joi.string().default('10'),
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
+  CVAT_SKELETONS_JOB_SIZE_MULTIPLIER: Joi.string().default('6'),
   //PGP
   PGP_ENCRYPT: Joi.boolean().default(false),
   PGP_PRIVATE_KEY: Joi.string().optional(),
