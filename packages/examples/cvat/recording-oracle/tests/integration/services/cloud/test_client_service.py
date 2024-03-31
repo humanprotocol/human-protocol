@@ -4,7 +4,7 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 
-from src.services.cloud import S3Client
+from src.services.cloud.s3 import S3Client
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -25,49 +25,56 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.client.delete_bucket(Bucket=self.bucket_name)
 
     def test_file_operations(self):
-        client = S3Client(self.url, access_key=self.access_key, secret_key=self.secret)
+        client = S3Client(
+            endpoint_url=self.url,
+            bucket=self.bucket_name,
+            access_key=self.access_key,
+            secret_key=self.secret,
+        )
 
-        assert len(client.list_files(self.bucket_name)) == 0
+        assert len(client.list_files()) == 0
 
         file_name = "test_file"
         data = "this is a test".encode("utf-8")
 
-        assert not client.file_exists(self.bucket_name, file_name)
-        client.create_file(self.bucket_name, file_name, data)
-        assert client.file_exists(self.bucket_name, file_name)
-        assert len(client.list_files(self.bucket_name)) == 1
+        assert not client.file_exists(file_name)
+        client.create_file(file_name, data)
+        assert client.file_exists(file_name)
+        assert len(client.list_files()) == 1
 
-        file_content = client.download_fileobj(bucket=self.bucket_name, key=file_name)
+        file_content = client.download_file(key=file_name)
         assert file_content == data
 
-        client.remove_file(self.bucket_name, file_name)
-        assert not client.file_exists(self.bucket_name, file_name)
+        client.remove_file(file_name)
+        assert not client.file_exists(file_name)
 
     def test_degenerate_file_operations(self):
-        client = S3Client(self.url, access_key=self.access_key, secret_key=self.secret)
+        client = S3Client(endpoint_url=self.url, access_key=self.access_key, secret_key=self.secret)
         invalid_bucket = "non-existent-bucket"
         invalid_file = "non-existent-file"
 
         with pytest.raises(ClientError):
-            client.download_fileobj(bucket=invalid_bucket, key=invalid_file)
+            client.download_file(invalid_file, bucket=invalid_bucket)
 
         with pytest.raises(ClientError):
-            client.download_fileobj(bucket=self.bucket_name, key=invalid_file)
+            client.download_file(invalid_file, bucket=self.bucket_name)
 
         with pytest.raises(ClientError):
-            client.create_file(bucket=invalid_bucket, filename=invalid_file)
+            client.create_file(invalid_file, bucket=invalid_bucket)
 
         with pytest.raises(ClientError):
             client.list_files(bucket=invalid_bucket)
 
-        client.remove_file(bucket=self.bucket_name, filename=invalid_file)
+        client.remove_file(invalid_file, bucket=self.bucket_name)
 
     def test_degenerate_client(self):
         with pytest.raises(EndpointConnectionError):
             invalid_client = S3Client(
-                "http://not.an.url:1234", access_key=self.access_key, secret_key=self.secret
+                endpoint_url="http://not.an.url:1234",
+                access_key=self.access_key,
+                secret_key=self.secret,
             )
-            invalid_client.create_file(self.bucket_name, "test.txt")
+            invalid_client.create_file("test.txt", bucket=self.bucket_name)
 
         with pytest.raises(ValueError):
-            S3Client("nonsense-stuff")
+            S3Client(endpoint_url="nonsense-stuff")

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from src.core.types import AssignmentStatus, JobStatuses
+from src.core.types import AssignmentStatuses, JobStatuses
 
 from tests.utils.setup_cvat import (
     add_asignment_to_db,
@@ -109,7 +109,7 @@ def test_incoming_webhook_200_update_expired_assignmets(client: TestClient) -> N
 
     (job, asignees) = get_cvat_job_from_db(1)
     assert job.status == JobStatuses.new.value
-    assert asignees[0].status == AssignmentStatus.expired.value
+    assert asignees[0].status == AssignmentStatuses.expired.value
 
 
 def test_incoming_webhook_200_update(client: TestClient) -> None:
@@ -152,7 +152,7 @@ def test_incoming_webhook_200_update(client: TestClient) -> None:
 
     (job, asignees) = get_cvat_job_from_db(1)
     assert job.status == JobStatuses.completed.value
-    assert asignees[0].status == AssignmentStatus.completed.value
+    assert asignees[0].status == AssignmentStatuses.completed.value
 
 
 data = {

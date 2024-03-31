@@ -7,7 +7,7 @@ from web3 import Web3
 
 from tests.utils.constants import (
     DEFAULT_HASH,
-    DEFAULT_URL,
+    DEFAULT_MANIFEST_URL,
     EXCHANGE_ORACLE_ADDRESS,
     EXCHANGE_ORACLE_FEE,
     JOB_REQUESTER_ID,
@@ -36,7 +36,7 @@ def create_escrow(web3: Web3):
             recording_oracle_fee=RECORDING_ORACLE_FEE,
             reputation_oracle_address=REPUTATION_ORACLE_ADDRESS,
             reputation_oracle_fee=REPUTATION_ORACLE_FEE,
-            manifest_url=DEFAULT_URL,
+            manifest_url=DEFAULT_MANIFEST_URL,
             hash=DEFAULT_HASH,
         ),
     )
@@ -50,7 +50,9 @@ def fund_escrow(web3: Web3, escrow_address: str):
 
 def bulk_payout(web3: Web3, escrow_address: str, recipient: str, amount: Decimal):
     escrow_client = EscrowClient(web3)
-    escrow_client.bulk_payout(escrow_address, [recipient], [amount], DEFAULT_URL, DEFAULT_HASH, 1)
+    escrow_client.bulk_payout(
+        escrow_address, [recipient], [amount], DEFAULT_MANIFEST_URL, DEFAULT_HASH, 1
+    )
 
 
 def get_intermediate_results_url(web3: Web3, escrow_address: str):

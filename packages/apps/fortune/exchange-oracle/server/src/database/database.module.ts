@@ -11,6 +11,7 @@ import { ConfigNames } from '../common/config';
 import { JobEntity } from '../modules/job/job.entity';
 import { AssignmentEntity } from '../modules/assignment/assignment.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
+import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { WebhookEntity } from '../modules/webhook/webhook.entity';
         return {
           name: 'default',
           type: 'postgres',
-          entities: [JobEntity, AssignmentEntity, WebhookEntity],
+          entities: [JobEntity, AssignmentEntity, WebhookEntity, CronJobEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,
@@ -47,22 +48,29 @@ import { WebhookEntity } from '../modules/webhook/webhook.entity';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
-          host: configService.get<string>(
+          url: configService.get<string | undefined>(
+            ConfigNames.POSTGRES_URL,
+            undefined,
+          ),
+          host: configService.get<string | undefined>(
             ConfigNames.POSTGRES_HOST,
-            'localhost',
+            undefined,
           ),
-          port: configService.get<number>(ConfigNames.POSTGRES_PORT, 5432),
-          username: configService.get<string>(
+          port: configService.get<number | undefined>(
+            ConfigNames.POSTGRES_PORT,
+            undefined,
+          ),
+          username: configService.get<string | undefined>(
             ConfigNames.POSTGRES_USER,
-            'operator',
+            undefined,
           ),
-          password: configService.get<string>(
+          password: configService.get<string | undefined>(
             ConfigNames.POSTGRES_PASSWORD,
-            'qwerty',
+            undefined,
           ),
-          database: configService.get<string>(
+          database: configService.get<string | undefined>(
             ConfigNames.POSTGRES_DATABASE,
-            'exchange-oracle',
+            undefined,
           ),
           keepConnectionAlive:
             configService.get<string>(ConfigNames.NODE_ENV) === 'test',
