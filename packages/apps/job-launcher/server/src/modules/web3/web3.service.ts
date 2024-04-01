@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Wallet, ethers } from 'ethers';
-import { ConfigNames, networks } from '../../common/config';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { networks } from '../../common/config';
 import { Web3Env } from '../../common/enums/web3';
 import {
   LOCALHOST_CHAIN_IDS,
@@ -16,13 +16,9 @@ export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
   public readonly logger = new Logger(Web3Service.name);
   public readonly signerAddress: string;
-  public readonly currentWeb3Env: string;
 
-  constructor(private readonly configService: ConfigService) {
-    this.currentWeb3Env = this.configService.get(
-      ConfigNames.WEB3_ENV,
-    ) as string;
-    const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
+  constructor(public readonly web3ConfigService: Web3ConfigService) {
+    const privateKey = this.web3ConfigService.privateKey;
     const validChains = this.getValidChains();
     const validNetworks = networks.filter((network) =>
       validChains.includes(network.chainId),
@@ -48,7 +44,7 @@ export class Web3Service {
   }
 
   public getValidChains(): ChainId[] {
-    switch (this.currentWeb3Env) {
+    switch (this.web3ConfigService.env) {
       case Web3Env.MAINNET:
         return MAINNET_CHAIN_IDS;
       case Web3Env.TESTNET:
@@ -61,10 +57,7 @@ export class Web3Service {
 
   public async calculateGasPrice(chainId: number): Promise<bigint> {
     const signer = this.getSigner(chainId);
-    const multiplier = this.configService.get<number>(
-      ConfigNames.GAS_PRICE_MULTIPLIER,
-      1,
-    );
+    const multiplier = this.web3ConfigService.gasPriceMultiplier;
     const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
     if (gasPrice) {
       return gasPrice * BigInt(multiplier);

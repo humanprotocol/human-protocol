@@ -1,8 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
-import { DEFAULT_MAX_RETRY_COUNT } from '../../common/constants';
+import { ServerConfigService } from '../../common/config/server-config.service';
 import { SortDirection } from '../../common/enums/collection';
 import { DataSource, In, LessThanOrEqual } from 'typeorm';
 import { JobStatus, JobStatusFilter } from '../../common/enums/job';
@@ -13,7 +11,7 @@ import { BaseRepository } from '../../database/base.repository';
 export class JobRepository extends BaseRepository<JobEntity> {
   constructor(
     private dataSource: DataSource,
-    public readonly configService: ConfigService,
+    public readonly serverConfigService: ServerConfigService,
   ) {
     super(JobEntity, dataSource);
   }
@@ -46,12 +44,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
     return this.find({
       where: {
         status: status,
-        retriesCount: LessThanOrEqual(
-          this.configService.get(
-            ConfigNames.MAX_RETRY_COUNT,
-            DEFAULT_MAX_RETRY_COUNT,
-          ),
-        ),
+        retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },
       order: {
