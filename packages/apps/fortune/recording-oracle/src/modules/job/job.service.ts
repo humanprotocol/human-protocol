@@ -199,7 +199,7 @@ export class JobService {
         {
           chainId: webhook.chainId,
           escrowAddress: webhook.escrowAddress,
-          eventType: EventType.ESCROW_RECORDED,
+          eventType: EventType.TASK_COMPLETED,
         },
         this.web3Config.web3PrivateKey,
       );

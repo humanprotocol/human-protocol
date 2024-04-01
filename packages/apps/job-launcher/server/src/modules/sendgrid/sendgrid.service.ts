@@ -56,7 +56,8 @@ export class SendGridService {
   }: Partial<MailDataRequired>): Promise<void> {
     try {
       if (this.apiKey === SENDGRID_API_KEY_DISABLED) {
-        this.logger.debug(emailData);
+        this.logger.debug(personalizations);
+        return;
       }
 
       await this.mailService.send({

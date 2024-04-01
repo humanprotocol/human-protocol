@@ -30,7 +30,7 @@ export const networkMap: NetworkMapDto = {
   },
   localhost: {
     chainId: ChainId.LOCALHOST,
-    rpcUrl: 'http://localhost:8545',
+    rpcUrl: 'http://0.0.0.0:8545/',
   },
 };
 

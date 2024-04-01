@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsString } from 'class-validator';
+import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
 import { EventType } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
@@ -18,5 +18,6 @@ export class WebhookDto {
 
   @ApiPropertyOptional({ name: 'event_data' })
   @IsObject()
+  @IsOptional()
   public eventData?: any;
 }

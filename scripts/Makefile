@@ -48,7 +48,7 @@ database:
 job-launcher-server: rpc-health-check
 	yarn workspace @human-protocol/job-launcher-server setup:local
 	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server migration:run
-	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start
+	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start:watch
 
 job-launcher-client:
 	NODE_ENV=local yarn workspace @human-protocol/job-launcher-client start
@@ -56,16 +56,16 @@ job-launcher-client:
 fortune-exchange-oracle: rpc-health-check
 	yarn workspace @human-protocol/fortune-exchange-oracle-server setup:local
 	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server migration:run
-	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start
+	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start:watch
 
 fortune-recording-oracle: rpc-health-check
 	yarn workspace @human-protocol/fortune-recording-oracle setup:local
-	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start
+	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start:watch
 
 reputation-oracle: rpc-health-check
 	yarn workspace @human-protocol/reputation-oracle setup:local
 	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle migration:run
-	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start
+	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:watch
 
 rpc-health-check:
 	@until curl -s -X POST "http://localhost:8545" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}' | grep -q "result"; do \
