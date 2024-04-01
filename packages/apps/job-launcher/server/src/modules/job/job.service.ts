@@ -794,7 +794,7 @@ export class JobService {
       await this.storageService.download(
         generateBucketUrl(storageData, requestType),
       )
-    ).annotations.length;
+    ).annotations?.length;
   }
 
   public async calculateCvatJobBounty(
