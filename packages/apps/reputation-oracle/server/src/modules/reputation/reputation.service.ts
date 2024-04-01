@@ -132,6 +132,20 @@ export class ReputationService {
         manifest: CvatManifestDto,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
+    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
+    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
   };
 
   private async processFortune(
