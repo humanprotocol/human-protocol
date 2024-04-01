@@ -76,7 +76,6 @@ import {
   MOCK_HCAPTCHA_RO_URI,
   MOCK_BUCKET_FILE,
   MOCK_MAX_RETRY_COUNT,
-  MOCK_S3_BUCKET,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
