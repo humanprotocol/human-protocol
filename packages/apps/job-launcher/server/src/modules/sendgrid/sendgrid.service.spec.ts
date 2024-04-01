@@ -8,6 +8,7 @@ import {
   MOCK_SENDGRID_FROM_EMAIL,
   MOCK_SENDGRID_FROM_NAME,
 } from '../../../test/constants';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
@@ -36,6 +37,7 @@ describe('SendGridService', () => {
     const app = await Test.createTestingModule({
       providers: [
         SendGridService,
+        SendgridConfigService,
         {
           provide: MailService,
           useValue: mockMailService,
@@ -107,11 +109,6 @@ describe('SendGridService', () => {
 
   describe('constructor', () => {
     it('should initialize SendGridService with valid API key', () => {
-      sendGridService = new SendGridService(
-        mailService,
-        mockConfigService as any,
-      );
-
       expect(mailService.setApiKey).toHaveBeenCalledWith(MOCK_SENDGRID_API_KEY);
       expect(sendGridService['defaultFromEmail']).toEqual(
         MOCK_SENDGRID_FROM_EMAIL,
@@ -122,15 +119,14 @@ describe('SendGridService', () => {
     });
 
     it('should throw an error with invalid API key', async () => {
-      const invalidApiKey = 'invalid-api-key';
-      mockConfigService.get = jest.fn().mockReturnValue(invalidApiKey);
+      mockConfigService.get = jest.fn().mockReturnValue('invalid-api-key');
 
       expect(() => {
         sendGridService = new SendGridService(
           mailService,
           mockConfigService as any,
         );
-      }).toThrowError(ErrorSendGrid.InvalidApiKey);
+      }).toThrow(ErrorSendGrid.InvalidApiKey);
     });
   });
 });

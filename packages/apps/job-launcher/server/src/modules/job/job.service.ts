@@ -21,10 +21,13 @@ import {
   NotFoundException,
   ValidationError,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
-import { ConfigNames } from '../../common/config';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import {
   ErrorBucket,
   ErrorEscrow,
@@ -78,7 +81,6 @@ import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
-  DEFAULT_MAX_RETRY_COUNT,
   HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
   HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
   HCAPTCHA_IMMO_MAX_LENGTH,
@@ -133,7 +135,11 @@ export class JobService {
     public readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
-    public readonly configService: ConfigService,
+    public readonly serverConfigService: ServerConfigService,
+    public readonly authConfigService: AuthConfigService,
+    public readonly web3ConfigService: Web3ConfigService,
+    public readonly cvatConfigService: CvatConfigService,
+    public readonly pgpConfigService: PGPConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
     @Inject(Encryption) private readonly encryption: Encryption,
@@ -169,15 +175,11 @@ export class JobService {
         description: dto.requesterDescription,
         user_guide: dto.userGuide,
         type: requestType,
-        job_size: Number(
-          this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-        ),
+        job_size: this.cvatConfigService.jobSize,
       },
       validation: {
         min_quality: dto.minQuality,
-        val_size: Number(
-          this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
-        ),
+        val_size: this.cvatConfigService.valSize,
         gt_url: generateBucketUrl(dto.groundTruth, requestType),
       },
       job_bounty: jobBounty,
@@ -212,12 +214,8 @@ export class JobService {
       ),
       public_results: true,
       oracle_stake: HCAPTCHA_ORACLE_STAKE,
-      repo_uri: this.configService.get<string>(
-        ConfigNames.HCAPTCHA_REPUTATION_ORACLE_URI,
-      )!,
-      ro_uri: this.configService.get<string>(
-        ConfigNames.HCAPTCHA_RECORDING_ORACLE_URI,
-      )!,
+      repo_uri: this.web3ConfigService.hCaptchaReputationOracleURI,
+      ro_uri: this.web3ConfigService.hCaptchaRecordingOracleURI,
     };
 
     let groundTruthsData;
@@ -361,7 +359,7 @@ export class JobService {
 
     restrictedAudience.sitekey = [
       {
-        [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+        [this.authConfigService.hCaptchaSiteKey]: {
           score: 1,
         },
       },
@@ -559,14 +557,10 @@ export class JobService {
         fundAmount: number,
         nodesTotal: number,
       ): Promise<string> => {
-        const cvatDefaultJobSize = Number(
-          this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-        );
+        const cvatDefaultJobSize = Number(this.cvatConfigService.jobSize);
 
         const jobSizeMultiplier = Number(
-          this.configService.get<number>(
-            ConfigNames.CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
-          )!,
+          this.cvatConfigService.skeletonsJobSizeMultiplier,
         );
         const jobSize = jobSizeMultiplier * cvatDefaultJobSize;
 
@@ -584,90 +578,60 @@ export class JobService {
   private getOraclesSpecificActions: Record<JobRequestType, OracleAction> = {
     [JobRequestType.HCAPTCHA]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.configService.get<string>(
-          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
-        )!;
-        const recordingOracle = this.configService.get<string>(
-          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
-        )!;
-        const reputationOracle = this.configService.get<string>(
-          ConfigNames.HCAPTCHA_ORACLE_ADDRESS,
-        )!;
+        const exchangeOracle = this.web3ConfigService.hCaptchaOracleAddress;
+        const recordingOracle = this.web3ConfigService.hCaptchaOracleAddress;
+        const reputationOracle = this.web3ConfigService.hCaptchaOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
     [JobRequestType.FORTUNE]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.configService.get<string>(
-          ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
-        )!;
-        const recordingOracle = this.configService.get<string>(
-          ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS,
-        )!;
-        const reputationOracle = this.configService.get<string>(
-          ConfigNames.REPUTATION_ORACLE_ADDRESS,
-        )!;
+        const exchangeOracle =
+          this.web3ConfigService.fortuneExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.fortuneRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
     [JobRequestType.IMAGE_BOXES]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.configService.get<string>(
-          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
-        )!;
-        const recordingOracle = this.configService.get<string>(
-          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
-        )!;
-        const reputationOracle = this.configService.get<string>(
-          ConfigNames.REPUTATION_ORACLE_ADDRESS,
-        )!;
+        const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
     [JobRequestType.IMAGE_POINTS]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.configService.get<string>(
-          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
-        )!;
-        const recordingOracle = this.configService.get<string>(
-          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
-        )!;
-        const reputationOracle = this.configService.get<string>(
-          ConfigNames.REPUTATION_ORACLE_ADDRESS,
-        )!;
+        const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.configService.get<string>(
-          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
-        )!;
-        const recordingOracle = this.configService.get<string>(
-          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
-        )!;
-        const reputationOracle = this.configService.get<string>(
-          ConfigNames.REPUTATION_ORACLE_ADDRESS,
-        )!;
+        const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getOracleAddresses: (): OracleAddresses => {
-        const exchangeOracle = this.configService.get<string>(
-          ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
-        )!;
-        const recordingOracle = this.configService.get<string>(
-          ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
-        )!;
-        const reputationOracle = this.configService.get<string>(
-          ConfigNames.REPUTATION_ORACLE_ADDRESS,
-        )!;
+        const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
@@ -801,11 +765,7 @@ export class JobService {
     elementsCount: number,
     fundAmount: number,
   ): Promise<string> {
-    const cvatDefaultJobSize = Number(
-      this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-    );
-
-    const jobSize = cvatDefaultJobSize;
+    const jobSize = Number(this.cvatConfigService.jobSize);
 
     const totalJobs = Math.ceil(div(elementsCount, jobSize));
 
@@ -952,13 +912,32 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   }
 
+  private getOracleAddresses(manifest: any) {
+    let exchangeOracle;
+    let recordingOracle;
+    const oracleType = this.getOracleType(manifest);
+    if (oracleType === OracleType.FORTUNE) {
+      exchangeOracle = this.web3ConfigService.fortuneExchangeOracleAddress;
+      recordingOracle = this.web3ConfigService.fortuneRecordingOracleAddress;
+    } else if (oracleType === OracleType.HCAPTCHA) {
+      exchangeOracle = this.web3ConfigService.hCaptchaOracleAddress;
+      recordingOracle = this.web3ConfigService.hCaptchaOracleAddress;
+    } else {
+      exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+      recordingOracle = this.web3ConfigService.cvatRecordingOracleAddress;
+    }
+    const reputationOracle = this.web3ConfigService.reputationOracleAddress;
+
+    return { exchangeOracle, recordingOracle, reputationOracle };
+  }
+
   public async uploadManifest(
     requestType: JobRequestType,
     chainId: ChainId,
     data: any,
   ): Promise<any> {
     let manifestFile = data;
-    if (this.configService.get(ConfigNames.PGP_ENCRYPT) as boolean) {
+    if (this.pgpConfigService.encrypt) {
       const { getOracleAddresses } =
         this.getOraclesSpecificActions[requestType];
 
@@ -1197,13 +1176,7 @@ export class JobService {
   }
 
   public handleProcessJobFailure = async (jobEntity: JobEntity) => {
-    if (
-      jobEntity.retriesCount <
-      this.configService.get(
-        ConfigNames.MAX_RETRY_COUNT,
-        DEFAULT_MAX_RETRY_COUNT,
-      )
-    ) {
+    if (jobEntity.retriesCount < this.serverConfigService.maxRetryCount) {
       jobEntity.retriesCount += 1;
     } else {
       jobEntity.status = JobStatus.FAILED;

@@ -68,7 +68,6 @@ import {
   MOCK_CVAT_DATA_DATASET,
   MOCK_CVAT_LABELS,
   MOCK_CVAT_JOB_SIZE,
-  MOCK_CVAT_MAX_TIME,
   MOCK_CVAT_VAL_SIZE,
   MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
   MOCK_HCAPTCHA_SITE_KEY,
@@ -117,6 +116,12 @@ import {
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobService } from '../cron-job/cron-job.service';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -175,7 +180,7 @@ describe('JobService', () => {
     storageService: StorageService,
     webhookRepository: WebhookRepository;
 
-  let encrypt = true;
+  let encrypt = 'true';
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -218,8 +223,6 @@ describe('JobService', () => {
             return MOCK_HCAPTCHA_SITE_KEY;
           case 'CVAT_JOB_SIZE':
             return MOCK_CVAT_JOB_SIZE;
-          case 'CVAT_MAX_TIME':
-            return MOCK_CVAT_MAX_TIME;
           case 'CVAT_VAL_SIZE':
             return MOCK_CVAT_VAL_SIZE;
           case 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER':
@@ -238,6 +241,12 @@ describe('JobService', () => {
       providers: [
         JobService,
         Encryption,
+        ServerConfigService,
+        AuthConfigService,
+        Web3ConfigService,
+        CvatConfigService,
+        PGPConfigService,
+        S3ConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -496,7 +505,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
+      ).rejects.toThrow(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -513,7 +522,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
     });
   });
 
@@ -1073,9 +1082,9 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      await expect(
-        jobService.createHCaptchaManifest(jobDto),
-      ).rejects.toThrowError(BadRequestException);
+      await expect(jobService.createHCaptchaManifest(jobDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -1214,7 +1223,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.InvalidProvider);
+      ).rejects.toThrow(ErrorBucket.InvalidProvider);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1254,7 +1263,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.InvalidRegion);
+      ).rejects.toThrow(ErrorBucket.InvalidRegion);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1293,7 +1302,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.EmptyRegion);
+      ).rejects.toThrow(ErrorBucket.EmptyRegion);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1332,7 +1341,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.EmptyBucket);
+      ).rejects.toThrow(ErrorBucket.EmptyBucket);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1386,7 +1395,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
+      ).rejects.toThrow(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -1408,7 +1417,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
     });
   });
 
@@ -1553,7 +1562,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
-      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
     });
   });
 
@@ -2003,9 +2012,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
+      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -2029,7 +2036,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(new Error(errorMessage));
+      ).rejects.toThrow(new Error(errorMessage));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -2101,6 +2108,7 @@ describe('JobService', () => {
       ]);
 
       expect(storageService.uploadFile).toHaveBeenCalled();
+
       expect(
         JSON.parse(
           await encryption.decrypt(
@@ -2121,9 +2129,7 @@ describe('JobService', () => {
           chainId,
           manifest,
         ),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
+      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -2147,7 +2153,7 @@ describe('JobService', () => {
           chainId,
           manifest,
         ),
-      ).rejects.toThrowError(new Error(errorMessage));
+      ).rejects.toThrow(new Error(errorMessage));
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
@@ -2179,7 +2185,7 @@ describe('JobService', () => {
       (KVStoreClient.build as any).mockImplementation(() => ({
         getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
-      encrypt = false;
+      encrypt = 'false';
     });
 
     afterEach(() => {
@@ -2187,7 +2193,7 @@ describe('JobService', () => {
     });
 
     afterAll(() => {
-      encrypt = true;
+      encrypt = 'true';
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
@@ -2228,9 +2234,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
+      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
@@ -2250,7 +2254,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(new Error(errorMessage));
+      ).rejects.toThrow(new Error(errorMessage));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
@@ -2358,7 +2362,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
-      ).rejects.toThrowError(new NotFoundException(ErrorJob.ResultNotFound));
+      ).rejects.toThrow(new NotFoundException(ErrorJob.ResultNotFound));
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(storageService.download).toHaveBeenCalledTimes(1);
     });
@@ -2399,9 +2403,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
-      ).rejects.toThrowError(
-        new NotFoundException(ErrorJob.ResultValidationFailed),
-      );
+      ).rejects.toThrow(new NotFoundException(ErrorJob.ResultValidationFailed));
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(storageService.download).toHaveBeenCalledTimes(1);
