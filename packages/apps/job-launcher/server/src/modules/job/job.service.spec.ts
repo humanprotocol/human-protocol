@@ -65,10 +65,11 @@ import {
   MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
   MOCK_STORAGE_DATA,
-  MOCK_CVAT_DATA,
+  MOCK_CVAT_DATA_DATASET,
   MOCK_CVAT_LABELS,
   MOCK_CVAT_JOB_SIZE,
   MOCK_CVAT_VAL_SIZE,
+  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_HCAPTCHA_IMAGE_LABEL,
   MOCK_HCAPTCHA_IMAGE_URL,
@@ -76,6 +77,9 @@ import {
   MOCK_HCAPTCHA_RO_URI,
   MOCK_BUCKET_FILE,
   MOCK_MAX_RETRY_COUNT,
+  MOCK_CVAT_LABELS_WITH_NODES,
+  MOCK_CVAT_DATA_POINTS,
+  MOCK_CVAT_DATA_BOXES,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -221,6 +225,8 @@ describe('JobService', () => {
             return MOCK_CVAT_JOB_SIZE;
           case 'CVAT_VAL_SIZE':
             return MOCK_CVAT_VAL_SIZE;
+          case 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER':
+            return MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER;
           case 'HCAPTCHA_REPUTATION_ORACLE_URI':
             return MOCK_HCAPTCHA_REPO_URI;
           case 'HCAPTCHA_RECORDING_ORACLE_URI':
@@ -521,14 +527,14 @@ describe('JobService', () => {
   });
 
   describe('createCvatManifest', () => {
-    it('should create a valid CVAT manifest', async () => {
+    it('should create a valid CVAT manifest for image boxes job type', async () => {
       const jobBounty = '50';
       jest
-        .spyOn(jobService, 'calculateJobBounty')
+        .spyOn(jobService, 'calculateCvatJobBounty')
         .mockResolvedValueOnce(jobBounty);
 
       const dto: JobCvatDto = {
-        data: MOCK_CVAT_DATA,
+        data: MOCK_CVAT_DATA_DATASET,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         userGuide: MOCK_FILE_URL,
@@ -552,7 +558,7 @@ describe('JobService', () => {
           data_url: MOCK_BUCKET_FILE,
         },
         annotation: {
-          labels: [{ name: 'label1' }, { name: 'label2' }],
+          labels: MOCK_CVAT_LABELS,
           description: MOCK_REQUESTER_DESCRIPTION,
           user_guide: MOCK_FILE_URL,
           type: requestType,
@@ -565,6 +571,146 @@ describe('JobService', () => {
         },
         job_bounty: jobBounty,
       });
+    });
+
+    it('should create a valid CVAT manifest for image boxes from points job type', async () => {
+      const jobBounty = '25.0';
+
+      const data = {
+        annotations: ['string', 'string', 'string', 'string'],
+      };
+      jest.spyOn(storageService, 'download').mockResolvedValueOnce(data);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_POINTS,
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_BOXES_FROM_POINTS,
+        fundAmount: 10,
+      };
+
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+      const tokenFundAmount = 100;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+          points_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
+    it('should create a valid CVAT manifest for image skeletons from boxes job type', async () => {
+      const jobBounty = '4.0';
+
+      const data = {
+        annotations: ['string', 'string', 'string', 'string'],
+      };
+      jest.spyOn(storageService, 'download').mockResolvedValueOnce(data);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_BOXES,
+        labels: MOCK_CVAT_LABELS_WITH_NODES,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+        fundAmount: 10,
+      };
+
+      const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
+      const tokenFundAmount = 16;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+          boxes_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS_WITH_NODES,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
+    it('should throw an error data not exist for image boxes from points job type', async () => {
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET, // Data without points
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: requestType,
+        fundAmount: 10,
+      };
+
+      const tokenFundAmount = 100;
+
+      expect(
+        jobService.createCvatManifest(dto, requestType, tokenFundAmount),
+      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
+    });
+
+    it('should throw an error data not exist for image skeletons from boxes job type', async () => {
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET, // Data without points
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: requestType,
+        fundAmount: 10,
+      };
+
+      const tokenFundAmount = 100;
+
+      expect(
+        jobService.createCvatManifest(dto, requestType, tokenFundAmount),
+      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
     });
   });
 
@@ -942,10 +1088,13 @@ describe('JobService', () => {
     });
   });
 
-  describe('calculateJobBounty', () => {
+  describe('calculateCvatJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
       const tokenFundAmount = 0.013997056833333334;
-      const result = await jobService['calculateJobBounty'](6, tokenFundAmount);
+      const result = await jobService['calculateCvatJobBounty'](
+        6,
+        tokenFundAmount,
+      );
 
       expect(result).toEqual('0.002332842805555555');
     });
@@ -957,7 +1106,7 @@ describe('JobService', () => {
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
-      data: MOCK_CVAT_DATA,
+      data: MOCK_CVAT_DATA_DATASET,
       labels: MOCK_CVAT_LABELS,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       minQuality: 0.95,

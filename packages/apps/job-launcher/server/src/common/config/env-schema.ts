@@ -57,7 +57,9 @@ export const envValidator = Joi.object({
   SENDGRID_FROM_NAME: Joi.string(),
   // CVAT
   CVAT_JOB_SIZE: Joi.string(),
+  CVAT_MAX_TIME: Joi.string(),
   CVAT_VAL_SIZE: Joi.string(),
+  CVAT_SKELETONS_JOB_SIZE_MULTIPLIER: Joi.string(),
   //PGP
   PGP_ENCRYPT: Joi.boolean(),
   PGP_PRIVATE_KEY: Joi.string().optional(),

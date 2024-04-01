@@ -1,5 +1,5 @@
 import { JobRequestType } from '../../common/enums/job';
-import { CreateJob } from './job.dto';
+import { CreateJob, CvatDataDto, Label } from './job.dto';
 
 export interface RequestAction {
   calculateFundAmount: (dto: CreateJob, rate: number) => Promise<number>;
@@ -8,6 +8,18 @@ export interface RequestAction {
     requestType: JobRequestType,
     fundAmount: number,
   ) => Promise<any>;
+}
+
+export interface ManifestAction {
+  getElementsCount: (
+    requestType: JobRequestType,
+    data: CvatDataDto,
+  ) => Promise<number>;
+  calculateJobBounty: (
+    elementsCount: number,
+    fundAmount: number,
+    nodesTotal?: number,
+  ) => Promise<string>;
 }
 
 export interface EscrowAction {

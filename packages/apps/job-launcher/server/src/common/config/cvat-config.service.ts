@@ -13,4 +13,10 @@ export class CvatConfigService {
   get valSize(): number {
     return +this.configService.get<number>('CVAT_VAL_SIZE', 2);
   }
+  get skeletonsJobSizeMultiplier(): number {
+    return +this.configService.get<number>(
+      'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER',
+      6,
+    );
+  }
 }
