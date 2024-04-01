@@ -106,7 +106,7 @@ describe('WebhookService', () => {
 
       await webhookService.createIncomingWebhook(validDto);
 
-      expect(webhookRepository.create).toHaveBeenCalled();
+      expect(webhookRepository.createUnique).toHaveBeenCalled();
       expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
       expect(webhookEntity.retriesCount).toBe(0);
       expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
@@ -131,7 +131,9 @@ describe('WebhookService', () => {
         eventType: EventType.TASK_COMPLETED,
       };
 
-      jest.spyOn(webhookRepository as any, 'create').mockResolvedValue(null);
+      jest
+        .spyOn(webhookRepository as any, 'createUnique')
+        .mockResolvedValue(null);
 
       await expect(
         webhookService.createIncomingWebhook(validDto),
