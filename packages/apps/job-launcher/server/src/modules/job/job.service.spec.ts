@@ -521,7 +521,7 @@ describe('JobService', () => {
     it('should create a valid CVAT manifest for image boxes job type', async () => {
       const jobBounty = '50';
       jest
-        .spyOn(jobService, 'calculateJobBounty')
+        .spyOn(jobService, 'calculateCvatJobBounty')
         .mockResolvedValueOnce(jobBounty);
 
       const dto: JobCvatDto = {
@@ -660,6 +660,48 @@ describe('JobService', () => {
         },
         job_bounty: jobBounty,
       });
+    });
+
+    it('should throw an error data not exist for image boxes from points job type', async () => {
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET, // Data without points
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: requestType,
+        fundAmount: 10,
+      };
+
+      const tokenFundAmount = 100;
+
+      expect(
+        jobService.createCvatManifest(dto, requestType, tokenFundAmount),
+      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
+    });
+
+    it('should throw an error data not exist for image skeletons from boxes job type', async () => {
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET, // Data without points
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: requestType,
+        fundAmount: 10,
+      };
+
+      const tokenFundAmount = 100;
+
+      expect(
+        jobService.createCvatManifest(dto, requestType, tokenFundAmount),
+      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
     });
   });
 
@@ -1037,13 +1079,12 @@ describe('JobService', () => {
     });
   });
 
-  describe('calculateJobBounty', () => {
+  describe('calculateCvatJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
       const tokenFundAmount = 0.013997056833333334;
-      const result = await jobService['calculateJobBounty'](
+      const result = await jobService['calculateCvatJobBounty'](
         6,
         tokenFundAmount,
-        JobRequestType.IMAGE_BOXES,
       );
 
       expect(result).toEqual('0.002332842805555555');

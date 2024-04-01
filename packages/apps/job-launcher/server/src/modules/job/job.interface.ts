@@ -10,12 +10,16 @@ export interface RequestAction {
   ) => Promise<any>;
 }
 
-export interface CvatAction {
+export interface ManifestAction {
   getElementsCount: (
     requestType: JobRequestType,
     data: CvatDataDto,
-    labels?: Label[],
   ) => Promise<number>;
+  calculateJobBounty: (
+    elementsCount: number,
+    fundAmount: number,
+    nodesTotal?: number,
+  ) => Promise<string>;
 }
 
 export interface EscrowAction {
