@@ -134,7 +134,7 @@ export class OperatorUtils {
       const { reputationNetwork } = await gqlFetch<{
         reputationNetwork: IReputationNetwork;
       }>(networkData.subgraphUrl, GET_REPUTATION_NETWORK_QUERY(role), {
-        address: address,
+        address: address.toLowerCase(),
         role: role,
       });
 
