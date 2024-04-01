@@ -41,13 +41,14 @@ export class WebhookService {
         throw new BadRequestException(ErrorWebhook.InvalidEventType);
       }
 
-      const webhookEntity = await this.webhookRepository.create({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        status: WebhookStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      });
+      let webhookEntity = new WebhookIncomingEntity();
+      webhookEntity.chainId = dto.chainId;
+      webhookEntity.escrowAddress = dto.escrowAddress;
+      webhookEntity.status = WebhookStatus.PENDING;
+      webhookEntity.waitUntil = new Date();
+      webhookEntity.retriesCount = 0;
+
+      webhookEntity = await this.webhookRepository.createUnique(webhookEntity);
 
       if (!webhookEntity) {
         this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
