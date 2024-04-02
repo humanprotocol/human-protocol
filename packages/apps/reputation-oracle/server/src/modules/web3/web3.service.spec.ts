@@ -1,12 +1,12 @@
+import { ChainId } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/config';
-import { Web3Service } from './web3.service';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { ChainId } from '@human-protocol/sdk';
+import { TESTNET_CHAIN_IDS } from '../../common/config';
 import { ErrorWeb3 } from '../../common/constants/errors';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { SignatureType } from '../../common/enums/web3';
 import { SignatureBodyDto } from './web3.dto';
+import { Web3Service } from './web3.service';
 
 describe('Web3Service', () => {
   let mockConfigService: Partial<ConfigService>;
@@ -51,20 +51,13 @@ describe('Web3Service', () => {
       const invalidChainId = ChainId.POLYGON;
 
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
-        ErrorWeb3.InvalidTestnetChainId,
+        ErrorWeb3.InvalidChainId,
       );
     });
   });
 
   describe('getValidChains', () => {
-    it('should get all valid chainIds on MAINNET', () => {
-      mockConfigService.get = jest.fn().mockReturnValue(Web3Env.MAINNET);
-      const validChainIds = web3Service.getValidChains();
-      expect(validChainIds).toBe(MAINNET_CHAIN_IDS);
-    });
-
     it('should get all valid chainIds on TESTNET', () => {
-      mockConfigService.get = jest.fn().mockReturnValue(Web3Env.TESTNET);
       const validChainIds = web3Service.getValidChains();
       expect(validChainIds).toBe(TESTNET_CHAIN_IDS);
     });

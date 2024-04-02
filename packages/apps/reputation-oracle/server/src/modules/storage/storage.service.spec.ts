@@ -64,7 +64,7 @@ jest.mock('axios');
 describe('StorageService', () => {
   let storageService: StorageService;
 
-  let encrypt = true;
+  let encrypt = 'true';
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -160,7 +160,7 @@ describe('StorageService', () => {
 
     describe('without encryption', () => {
       beforeAll(() => {
-        encrypt = false;
+        encrypt = 'false';
       });
 
       afterEach(() => {
@@ -168,7 +168,7 @@ describe('StorageService', () => {
       });
 
       afterAll(() => {
-        encrypt = true;
+        encrypt = 'true';
       });
 
       it('should upload the solutions', async () => {
@@ -397,7 +397,7 @@ describe('StorageService', () => {
 
     describe('without encryption', () => {
       beforeAll(() => {
-        encrypt = false;
+        encrypt = 'false';
       });
 
       afterEach(() => {
@@ -405,7 +405,7 @@ describe('StorageService', () => {
       });
 
       afterAll(() => {
-        encrypt = true;
+        encrypt = 'true';
       });
 
       it('should copy a file from a valid URL to a bucket', async () => {
