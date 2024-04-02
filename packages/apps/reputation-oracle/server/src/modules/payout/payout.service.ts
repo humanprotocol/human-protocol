@@ -11,7 +11,6 @@ import { ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
-import { ConfigService } from '@nestjs/config';
 import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
 import {
   CvatAnnotationMeta,
@@ -28,7 +27,6 @@ export class PayoutService {
     @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly web3Service: Web3Service,
-    public readonly configService: ConfigService,
   ) {}
 
   /**

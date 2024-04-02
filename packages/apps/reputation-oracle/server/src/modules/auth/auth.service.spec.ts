@@ -1,7 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { TokenRepository } from './token.repository';
-import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from '../user/user.repository';
@@ -13,7 +12,6 @@ import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
   MOCK_EMAIL,
-  MOCK_EXPIRES_IN,
   MOCK_HASHED_PASSWORD,
   MOCK_PASSWORD,
   MOCK_PRIVATE_KEY,
@@ -31,6 +29,10 @@ import { KVStoreClient, Role } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthError } from './auth.error';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -57,17 +59,9 @@ describe('AuthService', () => {
   let jwtService: JwtService;
   let sendGridService: SendGridService;
   let web3Service: Web3Service;
+  let authConfigService: AuthConfigService;
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
-            return MOCK_EXPIRES_IN;
-        }
-      }),
-    };
-
     const signerMock = {
       address: MOCK_ADDRESS,
       getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
@@ -77,6 +71,10 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         UserService,
+        AuthConfigService,
+        ServerConfigService,
+        Web3ConfigService,
+        ConfigService,
         {
           provide: JwtService,
           useValue: {
@@ -85,7 +83,6 @@ describe('AuthService', () => {
         },
         { provide: TokenRepository, useValue: createMock<TokenRepository>() },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
         {
@@ -107,6 +104,7 @@ describe('AuthService', () => {
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
+    authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
   });
 
   afterEach(() => {
@@ -224,12 +222,6 @@ describe('AuthService', () => {
       email: 'user@example.com',
     };
 
-    const tokenEntity: Partial<TokenEntity> = {
-      uuid: v4(),
-      type: TokenType.REFRESH,
-      user: userEntity as UserEntity,
-    };
-
     beforeEach(() => {
       jwtSignMock = jest
         .spyOn(jwtService, 'signAsync')
@@ -262,7 +254,7 @@ describe('AuthService', () => {
           reputation_network: MOCK_ADDRESS,
         },
         {
-          expiresIn: MOCK_EXPIRES_IN,
+          expiresIn: authConfigService.accessTokenExpiresIn,
         },
       );
       expect(result).toEqual({
@@ -331,7 +323,7 @@ describe('AuthService', () => {
                 dynamicTemplateData: {
                   service_name: SERVICE_NAME,
                   url: expect.stringContaining(
-                    'undefined/reset-password?token=',
+                    'http://localhost:3001/reset-password?token=',
                   ),
                 },
                 to: email,

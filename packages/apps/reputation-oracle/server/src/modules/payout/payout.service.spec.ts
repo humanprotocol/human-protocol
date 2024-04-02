@@ -14,8 +14,7 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { JobRequestType } from '../../common/enums';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
+import { ConfigModule, registerAs } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
@@ -43,17 +42,6 @@ describe('PayoutService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case ConfigNames.REPUTATION_LEVEL_LOW:
-            return 300;
-          case ConfigNames.REPUTATION_LEVEL_HIGH:
-            return 700;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -78,10 +66,6 @@ describe('PayoutService', () => {
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
         PayoutService,
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
       ],
     }).compile();
 

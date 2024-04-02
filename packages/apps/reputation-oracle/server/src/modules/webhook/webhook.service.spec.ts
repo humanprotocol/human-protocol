@@ -20,6 +20,8 @@ import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
 import { HttpStatus } from '@nestjs/common';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -34,7 +36,8 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
-    httpService: HttpService;
+    httpService: HttpService,
+    web3ConfigService: Web3ConfigService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -42,21 +45,6 @@ describe('WebhookService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'HOST':
-            return '127.0.0.1';
-          case 'PORT':
-            return 5000;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,
@@ -70,7 +58,9 @@ describe('WebhookService', () => {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
         },
-        { provide: ConfigService, useValue: mockConfigService },
+        ConfigService,
+        Web3ConfigService,
+        ServerConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
@@ -78,6 +68,11 @@ describe('WebhookService', () => {
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
     httpService = moduleRef.get(HttpService);
+    web3ConfigService = moduleRef.get(Web3ConfigService);
+
+    jest
+      .spyOn(web3ConfigService, 'privateKey', 'get')
+      .mockReturnValue(MOCK_PRIVATE_KEY);
   });
 
   afterEach(() => {

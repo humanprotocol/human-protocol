@@ -1,6 +1,5 @@
 import session from 'express-session';
 import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
@@ -9,6 +8,8 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ServerConfigService } from './common/config/server-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -16,8 +17,9 @@ async function bootstrap() {
   });
 
   const configService: ConfigService = app.get(ConfigService);
+  const serverConfigService = new ServerConfigService(configService);
 
-  // const baseUrl = configService.get<string>('FE_URL', 'http://localhost:3001');
+  // const baseUrl = serverConfigService.feURL;
 
   // app.enableCors({
   //   origin:
@@ -62,9 +64,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  const host = configService.get<string>('HOST', 'localhost');
-  const port = configService.get<string>('PORT', '5000');
-
+  const host = serverConfigService.host;
+  const port = serverConfigService.port;
   app.use(helmet());
 
   await app.listen(port, host, async () => {

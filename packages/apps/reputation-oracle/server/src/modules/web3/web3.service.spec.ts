@@ -7,33 +7,18 @@ import { ErrorWeb3 } from '../../common/constants/errors';
 import { SignatureType } from '../../common/enums/web3';
 import { SignatureBodyDto } from './web3.dto';
 import { Web3Service } from './web3.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 describe('Web3Service', () => {
-  let mockConfigService: Partial<ConfigService>;
   let web3Service: Web3Service;
 
-  beforeAll(async () => {
-    mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'WEB3_ENV':
-            return 'testnet';
-          default:
-            return defaultValue;
-        }
-      }),
-    };
+  jest
+    .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
+    .mockReturnValue(MOCK_PRIVATE_KEY);
 
+  beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [
-        Web3Service,
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-      ],
+      providers: [Web3Service, ConfigService, Web3ConfigService],
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);
