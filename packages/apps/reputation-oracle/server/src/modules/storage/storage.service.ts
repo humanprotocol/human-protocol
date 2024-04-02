@@ -45,7 +45,7 @@ export class StorageService {
     chainId: ChainId,
     content: any,
   ) {
-    if (this.configService.get(ConfigNames.PGP_ENCRYPT) == 'false') {
+    if (this.configService.get(ConfigNames.PGP_ENCRYPT) !== 'true') {
       return content;
     }
 

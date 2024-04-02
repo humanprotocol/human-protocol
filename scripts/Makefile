@@ -22,8 +22,8 @@ create-env-files:
 		cp ./fortune/.env.rec-oracle ../packages/apps/fortune/recording-oracle/.env.local ; \
 	fi
 
-	@if [ ! -f "../packages/apps/fortune/reputation-oracle/.env.local" ]; then \
-		cp ./fortune/.env.rep-oracle ../packages/apps/fortune/reputation-oracle/.env.local ; \
+	@if [ ! -f "../packages/apps/reputation-oracle/server/.env.local" ]; then \
+		cp ./fortune/.env.rep-oracle ../packages/apps/reputation-oracle/server/.env.local ; \
 	fi
 
 hardhat-node:
@@ -48,7 +48,7 @@ database:
 job-launcher-server: rpc-health-check
 	yarn workspace @human-protocol/job-launcher-server setup:local
 	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server migration:run
-	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start:watch
+	NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start:dev
 
 job-launcher-client:
 	NODE_ENV=local yarn workspace @human-protocol/job-launcher-client start
@@ -56,16 +56,16 @@ job-launcher-client:
 fortune-exchange-oracle: rpc-health-check
 	yarn workspace @human-protocol/fortune-exchange-oracle-server setup:local
 	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server migration:run
-	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start:watch
+	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start:dev
 
 fortune-recording-oracle: rpc-health-check
 	yarn workspace @human-protocol/fortune-recording-oracle setup:local
-	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start:watch
+	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start:dev
 
 reputation-oracle: rpc-health-check
 	yarn workspace @human-protocol/reputation-oracle setup:local
 	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle migration:run
-	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:watch
+	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:dev
 
 rpc-health-check:
 	@until curl -s -X POST "http://localhost:8545" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}' | grep -q "result"; do \
