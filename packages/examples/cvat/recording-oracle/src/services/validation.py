@@ -1,11 +1,12 @@
 import uuid
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from sqlalchemy.orm import Session
 
+from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
-from src.models.validation import Job, Task, ValidationResult
+from src.models.validation import GtStats, Job, Task, ValidationResult
 
 
 def create_task(session: Session, escrow_address: str, chain_id: int) -> str:
@@ -99,3 +100,40 @@ def get_validation_result_by_assignment_id(
         .where(ValidationResult.assignment_id == assignment_id)
         .first()
     )
+
+
+def get_task_gt_stats(
+    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[GtStats]:
+    return (
+        _maybe_for_update(session.query(GtStats), enable=for_update)
+        .where(GtStats.task_id == task_id)
+        .all()
+    )
+
+
+def update_gt_stats(session: Session, task_id: str, values: Dict[str, int]):
+    # Read more about upsert:
+    # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
+
+    if db_engine.driver != "psycopg2":
+        raise NotImplementedError
+
+    from sqlalchemy.dialects.postgresql import insert as psql_insert
+    from sqlalchemy.inspection import inspect
+
+    statement = psql_insert(GtStats).values(
+        [
+            dict(
+                task_id=task_id,
+                gt_key=gt_key,
+                failed_attempts=failed_attempts,
+            )
+            for gt_key, failed_attempts in values.items()
+        ],
+    )
+    statement = statement.on_conflict_do_update(
+        index_elements=inspect(GtStats).primary_key, set_=statement.excluded
+    )
+
+    session.execute(statement)

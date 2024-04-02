@@ -13,7 +13,9 @@ export function generateBucketUrl(
 ): string {
   if (
     (jobType === JobRequestType.IMAGE_BOXES ||
-      jobType === JobRequestType.IMAGE_POINTS) &&
+      jobType === JobRequestType.IMAGE_POINTS ||
+      jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
+      jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
     storageData.provider != StorageProviders.AWS
   ) {
     throw new BadRequestException(ErrorBucket.InvalidProvider);

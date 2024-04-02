@@ -74,6 +74,8 @@ export enum JobType {
 export enum CvatJobType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
+  IMAGE_BOXES_FROM_POINTS = 'IMAGE_BOXES_FROM_POINTS',
+  IMAGE_SKELETONS_FROM_BOXES = 'IMAGE_SKELETONS_FROM_BOXES',
 }
 
 export enum HCaptchaJobType {
@@ -179,11 +181,23 @@ type CvatDataSource = {
   path: string;
 };
 
+type CvatData = {
+  dataset: CvatDataSource;
+  points?: CvatDataSource;
+  boxes?: CvatDataSource;
+};
+
+export type Label = {
+  name: string;
+  nodes?: string[];
+  joints?: string[];
+};
+
 export type CvatRequest = {
-  labels: string[];
+  labels: Label[];
   type: CvatJobType;
   description: string;
-  data: CvatDataSource;
+  data: CvatData;
   groundTruth: CvatDataSource;
   userGuide: string;
   accuracyTarget: number;

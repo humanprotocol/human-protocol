@@ -33,6 +33,7 @@ import { PaymentEntity } from './payment.entity';
 import { verifySignature } from '../../common/utils/signature';
 import { ConflictException } from '@nestjs/common';
 import { DatabaseError } from '../../database/database.error';
+import { StripeConfigService } from '../../common/config/stripe-config.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -77,6 +78,7 @@ describe('PaymentService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         PaymentService,
+        StripeConfigService,
         {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),

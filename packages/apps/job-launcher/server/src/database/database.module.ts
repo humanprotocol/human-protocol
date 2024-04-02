@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -10,7 +9,8 @@ import { UserEntity } from '../modules/user/user.entity';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
-import { ConfigNames } from '../common/config';
+import { ServerConfigService } from '../common/config/server-config.service';
+import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { LoggerOptions } from 'typeorm';
@@ -19,15 +19,18 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [TypeOrmLoggerModule, ConfigModule],
-      inject: [TypeOrmLoggerService, ConfigService],
+      imports: [TypeOrmLoggerModule],
+      inject: [
+        TypeOrmLoggerService,
+        DatabaseConfigService,
+        ServerConfigService,
+      ],
       useFactory: (
         typeOrmLoggerService: TypeOrmLoggerService,
-        configService: ConfigService,
+        databaseConfigService: DatabaseConfigService,
+        serverConfigService: ServerConfigService,
       ) => {
-        const loggerOptions = configService
-          .get<string>(ConfigNames.POSTGRES_LOGGING)
-          ?.split(', ');
+        const loggerOptions = databaseConfigService.logging?.split(', ');
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
@@ -59,30 +62,14 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
-          host: configService.get<string>(
-            ConfigNames.POSTGRES_HOST,
-            'localhost',
-          ),
-          port: configService.get<number>(ConfigNames.POSTGRES_PORT, 5432),
-          username: configService.get<string>(
-            ConfigNames.POSTGRES_USER,
-            'operator',
-          ),
-          password: configService.get<string>(
-            ConfigNames.POSTGRES_PASSWORD,
-            'qwerty',
-          ),
-          database: configService.get<string>(
-            ConfigNames.POSTGRES_DATABASE,
-            'job-launcher',
-          ),
-          keepConnectionAlive:
-            configService.get<string>(ConfigNames.NODE_ENV) === 'test',
+          host: databaseConfigService.host,
+          port: databaseConfigService.port,
+          username: databaseConfigService.user,
+          password: databaseConfigService.password,
+          database: databaseConfigService.database,
+          keepConnectionAlive: serverConfigService.nodeEnv === 'test',
           migrationsRun: false,
-          ssl:
-            configService
-              .get<string>(ConfigNames.POSTGRES_SSL)
-              ?.toLowerCase() === 'true',
+          ssl: databaseConfigService.ssl,
         };
       },
     }),

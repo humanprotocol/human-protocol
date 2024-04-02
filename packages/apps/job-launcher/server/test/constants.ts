@@ -1,6 +1,11 @@
 import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
 import { JobRequestType } from '../src/common/enums/job';
-import { FortuneManifestDto, StorageDataDto } from '../src/modules/job/job.dto';
+import {
+  FortuneManifestDto,
+  StorageDataDto,
+  CvatDataDto,
+  Label,
+} from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -100,6 +105,7 @@ export const MOCK_HCAPTCHA_ORACLE_ADDRESS =
 export const MOCK_CVAT_JOB_SIZE = '10';
 export const MOCK_CVAT_MAX_TIME = '300';
 export const MOCK_CVAT_VAL_SIZE = '2';
+export const MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER = '6';
 export const MOCK_HCAPTCHA_SITE_KEY = '1234';
 export const MOCK_HCAPTCHA_IMAGE_URL =
   'http://mockedFileUrl.test/bucket/img_1.jpg';
@@ -113,5 +119,39 @@ export const MOCK_STORAGE_DATA: StorageDataDto = {
   bucketName: 'bucket',
   path: 'folder/test',
 };
+export const MOCK_CVAT_DATA_DATASET: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+};
+
+export const MOCK_CVAT_DATA_POINTS: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+  points: MOCK_STORAGE_DATA,
+};
+
+export const MOCK_CVAT_DATA_BOXES: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+  boxes: MOCK_STORAGE_DATA,
+};
+
+export const MOCK_CVAT_LABELS: Label[] = [
+  {
+    name: 'label1',
+  },
+  {
+    name: 'label2',
+  },
+];
+
+export const MOCK_CVAT_LABELS_WITH_NODES: Label[] = [
+  {
+    name: 'label1',
+    nodes: ['node 1', 'node 2', 'node 3', 'node 4'],
+  },
+  {
+    name: 'label2',
+    nodes: ['node 1', 'node 2', 'node 3', 'node 4'],
+  },
+];
+
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';

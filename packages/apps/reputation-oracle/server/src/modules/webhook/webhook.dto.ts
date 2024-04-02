@@ -17,6 +17,7 @@ export class WebhookDto {
   public escrowAddress: string;
 
   @ApiPropertyOptional({ name: 'event_data' })
+  @IsOptional()
   @IsObject()
   @IsOptional()
   public eventData?: any;

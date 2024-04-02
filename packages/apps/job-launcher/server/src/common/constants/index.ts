@@ -32,6 +32,8 @@ export const HEADER_SIGNATURE_KEY = 'human-signature';
 export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
+  JobRequestType.IMAGE_BOXES_FROM_POINTS,
+  JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
 ];
 
 export const CANCEL_JOB_STATUSES = [
