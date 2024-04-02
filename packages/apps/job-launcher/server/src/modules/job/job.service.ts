@@ -119,6 +119,8 @@ import {
   OracleAddresses,
   RequestAction,
   CvatCalculateJobBounty,
+  CvatImageData,
+  CvatAnnotationData,
 } from './job.interface';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
@@ -153,7 +155,9 @@ export class JobService {
   ): Promise<CvatManifestDto> {
     const { getElementsCount } = this.createDatasetActions[requestType];
 
-    const elementsCount = await getElementsCount(requestType, dto.data);
+    const gtUrl = generateBucketUrl(dto.groundTruth, requestType);
+    const elementsCount = await getElementsCount(requestType, dto.data, gtUrl);
+
     const jobBounty = await this.calculateJobBounty({
       requestType,
       elementsCount,
@@ -181,7 +185,7 @@ export class JobService {
       validation: {
         min_quality: dto.minQuality,
         val_size: this.cvatConfigService.valSize,
-        gt_url: generateBucketUrl(dto.groundTruth, requestType),
+        gt_url: gtUrl,
       },
       job_bounty: jobBounty,
     };
@@ -529,13 +533,15 @@ export class JobService {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
-      ) => this.getCvatElementsCount(requestType, data.points!),
+        gtUrl: string,
+      ) => this.getCvatElementsCount(requestType, data.points!, gtUrl),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
-      ) => this.getCvatElementsCount(requestType, data.boxes!),
+        gtUrl: string,
+      ) => this.getCvatElementsCount(requestType, data.boxes!, gtUrl),
     },
   };
 
@@ -713,16 +719,34 @@ export class JobService {
   public async getCvatElementsCount(
     requestType: JobRequestType,
     storageData: StorageDataDto,
+    gtUrl: string,
   ): Promise<number> {
     if (!storageData) {
       throw new ConflictException(ErrorJob.DataNotExist);
     }
 
-    return (
-      await this.storageService.download(
-        generateBucketUrl(storageData, requestType),
-      )
-    ).annotations?.length;
+    const data = await this.storageService.download(
+      generateBucketUrl(storageData, requestType),
+    );
+    const gt = await this.storageService.download(gtUrl);
+
+    let gtEntries = 0;
+
+    gt.images.forEach((gtImage: CvatImageData) => {
+      const { id } = data.images.find(
+        (dataImage: CvatImageData) => dataImage.file_name === gtImage.file_name,
+      );
+
+      if (id) {
+        const matchingAnnotations = data.annotations.filter(
+          (dataAnnotation: CvatAnnotationData) =>
+            dataAnnotation.image_id === id,
+        );
+        gtEntries += matchingAnnotations.length;
+      }
+    });
+
+    return data.annotations.length - gtEntries;
   }
 
   public async calculateJobBounty(

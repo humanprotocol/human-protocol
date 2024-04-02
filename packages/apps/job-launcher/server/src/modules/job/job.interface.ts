@@ -14,6 +14,7 @@ export interface DatasetAction {
   getElementsCount: (
     requestType: JobRequestType,
     data: CvatDataDto,
+    gtUrl?: string,
   ) => Promise<number>;
 }
 
@@ -31,9 +32,37 @@ export interface OracleAddresses {
   reputationOracle: string;
 }
 
-export class CvatCalculateJobBounty {
+export interface CvatCalculateJobBounty {
   requestType: JobRequestType;
   elementsCount: number;
   fundAmount: number;
   nodesTotal?: number;
+}
+
+export interface CvatImageData {
+  id: number;
+  width: number;
+  height: number;
+  file_name: string;
+  license: number;
+  flickr_url: string;
+  coco_url: string;
+  date_captured: number;
+}
+
+export interface CvatAnnotationData {
+  id: number;
+  image_id: number;
+  category_id: number;
+  segmentation: number[];
+  area: number;
+  bbox: [number, number, number, number];
+  iscrowd: number;
+  attributes: {
+    scale: number;
+    x: number;
+    y: number;
+  };
+  keypoints: [number, number, number];
+  num_keypoints: number;
 }

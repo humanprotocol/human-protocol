@@ -80,6 +80,8 @@ import {
   MOCK_CVAT_LABELS_WITH_NODES,
   MOCK_CVAT_DATA_POINTS,
   MOCK_CVAT_DATA_BOXES,
+  MOCK_CVAT_DATA,
+  MOCK_CVAT_GT,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -526,6 +528,43 @@ describe('JobService', () => {
     });
   });
 
+  describe('getCvatElementsCount', () => {
+    let storageDatasetMock: StorageDataDto;
+
+    beforeAll(async () => {
+      storageDatasetMock = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.AP_EAST_1,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+    });
+
+    it('should throw ConflictException if storageData is not provided', async () => {
+      await expect(
+        jobService.getCvatElementsCount(
+          JobRequestType.IMAGE_BOXES_FROM_POINTS,
+          null as any,
+          'some-gt-url',
+        ),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should calculate the number of CVAT elements correctly', async () => {
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      const result = await jobService.getCvatElementsCount(
+        JobRequestType.IMAGE_BOXES_FROM_POINTS,
+        storageDatasetMock,
+        'some-gt-url',
+      );
+      expect(result).toBe(2);
+    });
+  });
+
   describe('createCvatManifest', () => {
     it('should create a valid CVAT manifest for image boxes job type', async () => {
       const jobBounty = '50';
@@ -574,12 +613,12 @@ describe('JobService', () => {
     });
 
     it('should create a valid CVAT manifest for image boxes from points job type', async () => {
-      const jobBounty = '25.0';
+      const jobBounty = '50.0';
 
-      const data = {
-        annotations: ['string', 'string', 'string', 'string'],
-      };
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(data);
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
 
       const dto: JobCvatDto = {
         data: MOCK_CVAT_DATA_POINTS,
@@ -625,10 +664,10 @@ describe('JobService', () => {
     it('should create a valid CVAT manifest for image skeletons from boxes job type', async () => {
       const jobBounty = '4.0';
 
-      const data = {
-        annotations: ['string', 'string', 'string', 'string'],
-      };
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(data);
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
 
       const dto: JobCvatDto = {
         data: MOCK_CVAT_DATA_BOXES,
@@ -1205,7 +1244,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.GCS,
           region: AWSRegions.EU_CENTRAL_1,
@@ -1214,14 +1253,21 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.GCS,
+        region: AWSRegions.EU_CENTRAL_1,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1245,7 +1291,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.AWS,
           region: 'test-region',
@@ -1254,14 +1300,21 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.AWS,
+        region: 'test-region',
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1285,7 +1338,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.AWS,
           bucketName: 'bucket',
@@ -1293,14 +1346,20 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.AWS,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1324,7 +1383,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.AWS,
           region: AWSRegions.EU_CENTRAL_1,
@@ -1332,14 +1391,20 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.EU_CENTRAL_1,
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
