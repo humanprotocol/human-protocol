@@ -113,7 +113,7 @@ import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
 import {
-  ManifestAction,
+  DatasetAction,
   EscrowAction,
   OracleAction,
   OracleAddresses,
@@ -151,7 +151,7 @@ export class JobService {
     requestType: JobRequestType,
     tokenFundAmount: number,
   ): Promise<CvatManifestDto> {
-    const { getElementsCount } = this.createManifestActions[requestType];
+    const { getElementsCount } = this.createDatasetActions[requestType];
 
     const elementsCount = await getElementsCount(requestType, dto.data);
     const jobBounty = await this.calculateJobBounty({
@@ -506,7 +506,7 @@ export class JobService {
     },
   };
 
-  private createManifestActions: Record<JobRequestType, ManifestAction> = {
+  private createDatasetActions: Record<JobRequestType, DatasetAction> = {
     [JobRequestType.HCAPTCHA]: {
       getElementsCount: async () => 0,
     },

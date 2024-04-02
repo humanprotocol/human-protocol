@@ -10,7 +10,7 @@ export interface RequestAction {
   ) => Promise<any>;
 }
 
-export interface ManifestAction {
+export interface DatasetAction {
   getElementsCount: (
     requestType: JobRequestType,
     data: CvatDataDto,
