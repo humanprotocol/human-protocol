@@ -15,11 +15,6 @@ export interface ManifestAction {
     requestType: JobRequestType,
     data: CvatDataDto,
   ) => Promise<number>;
-  calculateJobBounty: (
-    elementsCount: number,
-    fundAmount: number,
-    nodesTotal?: number,
-  ) => Promise<string>;
 }
 
 export interface EscrowAction {
@@ -34,4 +29,11 @@ export interface OracleAddresses {
   exchangeOracle: string;
   recordingOracle: string;
   reputationOracle: string;
+}
+
+export class CvatCalculateJobBounty {
+  requestType: JobRequestType;
+  elementsCount: number;
+  fundAmount: number;
+  nodesTotal?: number;
 }

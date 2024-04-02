@@ -530,7 +530,7 @@ describe('JobService', () => {
     it('should create a valid CVAT manifest for image boxes job type', async () => {
       const jobBounty = '50';
       jest
-        .spyOn(jobService, 'calculateCvatJobBounty')
+        .spyOn(jobService, 'calculateJobBounty')
         .mockResolvedValueOnce(jobBounty);
 
       const dto: JobCvatDto = {
@@ -1088,15 +1088,28 @@ describe('JobService', () => {
     });
   });
 
-  describe('calculateCvatJobBounty', () => {
-    it('should calculate the job bounty correctly', async () => {
-      const tokenFundAmount = 0.013997056833333334;
-      const result = await jobService['calculateCvatJobBounty'](
-        6,
-        tokenFundAmount,
-      );
+  describe('calculateJobBounty', () => {
+    it('should calculate the job bounty correctly for image boxes from points type', async () => {
+      const data = {
+        requestType: JobRequestType.IMAGE_BOXES_FROM_POINTS,
+        elementsCount: 28883,
+        fundAmount: 22.918128652290278,
+      };
+      const result = await jobService['calculateJobBounty'](data);
 
-      expect(result).toEqual('0.002332842805555555');
+      expect(result).toEqual('0.000793481586133375');
+    });
+
+    it('should calculate the job bounty correctly for image skeletons from boxed type', async () => {
+      const data = {
+        requestType: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+        elementsCount: 50,
+        fundAmount: 22.918128652290278,
+        nodesTotal: 4,
+      };
+      const result = await jobService['calculateJobBounty'](data);
+
+      expect(result).toEqual('0.636614684785841055');
     });
   });
 
