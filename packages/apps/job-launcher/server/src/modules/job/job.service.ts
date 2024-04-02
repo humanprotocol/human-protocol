@@ -729,9 +729,8 @@ export class JobService {
     data: CvatCalculateJobBounty,
   ): Promise<string> {
     const { requestType, elementsCount, fundAmount, nodesTotal } = data;
-    const cvatDefaultJobSize = Number(this.cvatConfigService.jobSize);
 
-    let jobSize = cvatDefaultJobSize;
+    let jobSize = Number(this.cvatConfigService.jobSize);
 
     if (requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) {
       const jobSizeMultiplier = Number(
