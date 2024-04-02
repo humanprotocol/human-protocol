@@ -4,16 +4,16 @@ import { apiPaths } from '../api-paths';
 import { testSchema } from './test.schema';
 
 function getTest() {
-	return apiClient(apiPaths.test.path, {
-		options: { method: 'GET' },
-		successSchema: testSchema,
-	});
+  return apiClient(apiPaths.test.path, {
+    options: { method: 'GET' },
+    successSchema: testSchema,
+  });
 }
 
 export function useGetTest() {
-	return useQuery({
-		queryKey: ['test'],
-		retry: false,
-		queryFn: getTest,
-	});
+  return useQuery({
+    queryKey: ['test'],
+    retry: false,
+    queryFn: getTest,
+  });
 }

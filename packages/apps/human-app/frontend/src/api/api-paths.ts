@@ -1,5 +1,5 @@
 export const apiPaths = {
-	test: {
-		path: '/test',
-	},
+  test: {
+    path: '/test',
+  },
 } as const;

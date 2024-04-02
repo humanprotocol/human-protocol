@@ -4,13 +4,13 @@ import { MODAL_STATE } from './modal.store';
 import { ExampleModal } from './example-modal';
 
 const MODAL_COMPONENTS: Record<ModalStateKeys, ComponentType> = {
-	[MODAL_STATE.EXAMPLE_MODAL]: ExampleModal,
+  [MODAL_STATE.EXAMPLE_MODAL]: ExampleModal,
 };
 
 interface ModalContent {
-	modalType: ModalStateUnion;
+  modalType: ModalStateUnion;
 }
 export function ModalContent({ modalType }: ModalContent) {
-	const Content = MODAL_COMPONENTS[modalType];
-	return <Content />;
+  const Content = MODAL_COMPONENTS[modalType];
+  return <Content />;
 }

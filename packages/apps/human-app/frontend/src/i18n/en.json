@@ -6,7 +6,7 @@
     "max": "Max {{count}} characters"
   },
   "errors":{
-    "unknown": "Unknown error",
+    "unknown": "Unknown error"
   },
   "components": {
     "multiSelect": {

@@ -4,9 +4,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { colorPalette } from '@/styles/color-palette';
 
 const LoaderStyled = styled(CircularProgress)({
-	'.MuiCircularProgress-circle': { color: colorPalette.primary.main },
+  '.MuiCircularProgress-circle': { color: colorPalette.primary.main },
 });
 
 export function Loader({ ...props }: CircularProgressProps) {
-	return <LoaderStyled {...props} />;
+  return <LoaderStyled {...props} />;
 }

@@ -21,13 +21,13 @@ let themes = createTheme(theme);
 themes = responsiveFontSizes(themes);
 
 createRoot(root).render(
-	<StrictMode>
-		<ThemeProvider theme={themes}>
-			<CssBaseline />
-			<QueryClientProvider client={queryClient}>
-				<RouterProvider router={router} />
-				<ReactQueryDevtools initialIsOpen={false} />
-			</QueryClientProvider>
-		</ThemeProvider>
-	</StrictMode>
+  <StrictMode>
+    <ThemeProvider theme={themes}>
+      <CssBaseline />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ThemeProvider>
+  </StrictMode>
 );

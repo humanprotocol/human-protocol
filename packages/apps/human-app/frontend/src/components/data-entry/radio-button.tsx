@@ -8,45 +8,45 @@ import Radio from '@mui/material/Radio';
 import FormHelperText from '@mui/material/FormHelperText';
 
 interface RadioGroupProps extends Omit<RadioGroupPropsMui, 'name' | 'error'> {
-	name: string;
-	ariaLabelledby?: string;
-	groupLabel?: string;
-	options: { label: string; value: string | number }[];
+  name: string;
+  ariaLabelledby?: string;
+  groupLabel?: string;
+  options: { label: string; value: string | number }[];
 }
 
 export function RadioButton({
-	name,
-	ariaLabelledby,
-	options,
-	groupLabel,
-	...rest
+  name,
+  ariaLabelledby,
+  options,
+  groupLabel,
+  ...rest
 }: RadioGroupProps) {
-	return (
-		<Controller
-			name={name}
-			render={({ field, fieldState }) => (
-				<FormControl error={Boolean(fieldState.error)}>
-					{groupLabel ? (
-						<FormLabel id={ariaLabelledby || name}>{groupLabel}</FormLabel>
-					) : null}
-					<RadioGroup
-						{...field}
-						aria-labelledby={ariaLabelledby || name}
-						name={name}
-						{...rest}
-					>
-						{options.map(({ label, value }) => (
-							<FormControlLabel
-								control={<Radio />}
-								key={value}
-								label={label}
-								value={value}
-							/>
-						))}
-					</RadioGroup>
-					<FormHelperText>{fieldState.error?.message}</FormHelperText>
-				</FormControl>
-			)}
-		/>
-	);
+  return (
+    <Controller
+      name={name}
+      render={({ field, fieldState }) => (
+        <FormControl error={Boolean(fieldState.error)}>
+          {groupLabel ? (
+            <FormLabel id={ariaLabelledby || name}>{groupLabel}</FormLabel>
+          ) : null}
+          <RadioGroup
+            {...field}
+            aria-labelledby={ariaLabelledby || name}
+            name={name}
+            {...rest}
+          >
+            {options.map(({ label, value }) => (
+              <FormControlLabel
+                control={<Radio />}
+                key={value}
+                label={label}
+                value={value}
+              />
+            ))}
+          </RadioGroup>
+          <FormHelperText>{fieldState.error?.message}</FormHelperText>
+        </FormControl>
+      )}
+    />
+  );
 }

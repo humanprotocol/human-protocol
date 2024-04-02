@@ -1,8 +1,8 @@
 export const routerPaths = {
-	app: {
-		path: '/',
-	},
-	playground: {
-		path: '/playground',
-	},
+  app: {
+    path: '/',
+  },
+  playground: {
+    path: '/playground',
+  },
 } as const;

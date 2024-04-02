@@ -5,26 +5,26 @@ import svgr from 'vite-plugin-svgr';
 
 // https://vitejs.dev/config/
 const config = defineConfig({
-	plugins: [
-		react(),
-		svgr({
-			include: '**/*.svg',
-		}),
-	],
-	resolve: {
-		alias: {
-			'@': path.resolve(__dirname, './src'),
-		},
-	},
-	test: {
-		environment: 'jsdom',
-		globals: true,
-		includeSource: ['./src/**/*.{ts,tsx}'],
-		setupFiles: ['./src/setup-tests.ts/'],
-	},
-	build: {
-		target: 'esnext',
-	},
+  plugins: [
+    react(),
+    svgr({
+      include: '**/*.svg',
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    includeSource: ['./src/**/*.{ts,tsx}'],
+    setupFiles: ['./src/setup-tests.ts/'],
+  },
+  build: {
+    target: 'esnext',
+  },
 });
 
 // eslint-disable-next-line import/no-default-export -- export vite config

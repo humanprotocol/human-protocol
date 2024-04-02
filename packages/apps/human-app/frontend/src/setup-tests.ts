@@ -7,14 +7,14 @@ expect.extend(matchers);
 
 //Mock for the i18 translation https://vitest.dev/api/vi#vi-importactual
 vi.mock('react-i18next', async () => {
-	const mod = await vi.importActual('react-i18next');
-	return {
-		...mod,
-		useTranslation: () => {
-			return {
-				t: (str: string) => str,
-				i18n: vi.fn(),
-			};
-		},
-	};
+  const mod = await vi.importActual('react-i18next');
+  return {
+    ...mod,
+    useTranslation: () => {
+      return {
+        t: (str: string) => str,
+        i18n: vi.fn(),
+      };
+    },
+  };
 });
