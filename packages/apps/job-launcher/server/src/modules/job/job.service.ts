@@ -113,11 +113,12 @@ import { WebhookDataDto } from '../webhook/webhook.dto';
 import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
 import {
-  ManifestAction,
+  DatasetAction,
   EscrowAction,
   OracleAction,
   OracleAddresses,
   RequestAction,
+  CvatCalculateJobBounty,
 } from './job.interface';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
@@ -150,15 +151,15 @@ export class JobService {
     requestType: JobRequestType,
     tokenFundAmount: number,
   ): Promise<CvatManifestDto> {
-    const { getElementsCount, calculateJobBounty } =
-      this.createManifestActions[requestType];
+    const { getElementsCount } = this.createDatasetActions[requestType];
 
     const elementsCount = await getElementsCount(requestType, dto.data);
-    const jobBounty = await calculateJobBounty(
+    const jobBounty = await this.calculateJobBounty({
+      requestType,
       elementsCount,
-      tokenFundAmount,
-      dto.labels[0]?.nodes?.length,
-    );
+      fundAmount: tokenFundAmount,
+      nodesTotal: dto.labels[0]?.nodes?.length,
+    });
 
     return {
       data: {
@@ -505,73 +506,36 @@ export class JobService {
     },
   };
 
-  private createManifestActions: Record<JobRequestType, ManifestAction> = {
+  private createDatasetActions: Record<JobRequestType, DatasetAction> = {
     [JobRequestType.HCAPTCHA]: {
       getElementsCount: async () => 0,
-      calculateJobBounty: async () => ethers.formatEther(0),
     },
     [JobRequestType.FORTUNE]: {
       getElementsCount: async () => 0,
-      calculateJobBounty: async () => ethers.formatEther(0),
     },
     [JobRequestType.IMAGE_BOXES]: {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
       ) => (await listObjectsInBucket(data.dataset, requestType)).length,
-      calculateJobBounty: async (
-        elementsCount: number,
-        fundAmount: number,
-      ): Promise<string> =>
-        this.calculateCvatJobBounty(elementsCount, fundAmount),
     },
     [JobRequestType.IMAGE_POINTS]: {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
       ) => (await listObjectsInBucket(data.dataset, requestType)).length,
-      calculateJobBounty: async (
-        elementsCount: number,
-        fundAmount: number,
-      ): Promise<string> =>
-        this.calculateCvatJobBounty(elementsCount, fundAmount),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
       ) => this.getCvatElementsCount(requestType, data.points!),
-      calculateJobBounty: async (
-        elementsCount: number,
-        fundAmount: number,
-      ): Promise<string> =>
-        this.calculateCvatJobBounty(elementsCount, fundAmount),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       getElementsCount: async (
         requestType: JobRequestType,
         data: CvatDataDto,
       ) => this.getCvatElementsCount(requestType, data.boxes!),
-      calculateJobBounty: async (
-        elementsCount: number,
-        fundAmount: number,
-        nodesTotal: number,
-      ): Promise<string> => {
-        const cvatDefaultJobSize = Number(this.cvatConfigService.jobSize);
-
-        const jobSizeMultiplier = Number(
-          this.cvatConfigService.skeletonsJobSizeMultiplier,
-        );
-        const jobSize = jobSizeMultiplier * cvatDefaultJobSize;
-
-        // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
-        const totalJobs =
-          Math.ceil(div(elementsCount, jobSize)) * (nodesTotal || 1);
-
-        return ethers.formatEther(
-          ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs),
-        );
-      },
     },
   };
 
@@ -761,17 +725,35 @@ export class JobService {
     ).annotations?.length;
   }
 
-  public async calculateCvatJobBounty(
-    elementsCount: number,
-    fundAmount: number,
+  public async calculateJobBounty(
+    data: CvatCalculateJobBounty,
   ): Promise<string> {
-    const jobSize = Number(this.cvatConfigService.jobSize);
+    const { requestType, elementsCount, fundAmount, nodesTotal } = data;
 
-    const totalJobs = Math.ceil(div(elementsCount, jobSize));
+    let jobSize = Number(this.cvatConfigService.jobSize);
 
-    return ethers.formatEther(
-      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs),
-    );
+    if (requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) {
+      const jobSizeMultiplier = Number(
+        this.cvatConfigService.skeletonsJobSizeMultiplier,
+      );
+      jobSize *= jobSizeMultiplier;
+    }
+
+    let totalJobs: number;
+
+    // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
+    if (
+      requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES &&
+      nodesTotal
+    ) {
+      totalJobs = Math.ceil(elementsCount / jobSize) * nodesTotal;
+    } else {
+      totalJobs = Math.ceil(elementsCount / jobSize);
+    }
+
+    const jobBounty =
+      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
+    return ethers.formatEther(jobBounty);
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
