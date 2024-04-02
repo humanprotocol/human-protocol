@@ -1,0 +1,133 @@
+import merge from 'lodash/merge';
+import type { ZodType, ZodTypeDef } from 'zod';
+import type { ResponseError } from '@/shared/types/global.type';
+
+export class FetchError extends Error {
+	status: number;
+	data: unknown;
+
+	constructor({
+		message,
+		data,
+		status,
+	}: {
+		message: string;
+		status: number;
+		data: unknown;
+	}) {
+		super(message);
+		this.status = status;
+		this.data = data;
+	}
+}
+
+export type FetcherOptionsWithValidation<SuccessInput, SuccessOutput> =
+	Readonly<{
+		options?: RequestInit;
+		successSchema: ZodType<SuccessOutput, ZodTypeDef, SuccessInput>;
+		skipValidation?: false | undefined;
+	}>;
+
+export type FetcherOptionsWithoutValidation = Readonly<{
+	options?: RequestInit;
+	skipValidation: true;
+}>;
+
+export type FetcherOptions<SuccessInput, SuccessOutput> =
+	| FetcherOptionsWithValidation<SuccessInput, SuccessOutput>
+	| FetcherOptionsWithoutValidation;
+
+export type FetcherUrl = string | URL;
+
+export function createFetcher(defaultFetcherConfig?: {
+	options?: RequestInit | (() => RequestInit);
+	baseUrl: FetcherUrl | (() => FetcherUrl);
+}) {
+	async function fetcher<SuccessInput, SuccessOutput>(
+		url: string | URL,
+		fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>
+	): Promise<SuccessOutput>;
+
+	async function fetcher(
+		url: FetcherUrl,
+		fetcherOptions: FetcherOptionsWithoutValidation
+	): Promise<unknown>;
+
+	async function fetcher<SuccessInput, SuccessOutput>(
+		url: FetcherUrl,
+		fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>
+		// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- required unknown for correct type intellisense
+	): Promise<SuccessOutput | unknown> {
+		const fetcherOptionsWithDefaults = defaultFetcherConfig?.options
+			? merge(
+					{},
+					(() => {
+						const options = defaultFetcherConfig.options;
+						if (options instanceof Function) return options();
+						return options;
+					})(),
+					fetcherOptions.options
+				)
+			: fetcherOptions.options;
+
+		const baseUrl = (() => {
+			const currentUrl = defaultFetcherConfig?.baseUrl;
+			if (currentUrl instanceof Function) return currentUrl();
+			return currentUrl;
+		})();
+
+		function fetchUrlToString(fetchUrl: string | URL): string;
+		function fetchUrlToString(fetchUrl: undefined): undefined;
+		function fetchUrlToString(
+			fetchUrl: string | URL | undefined
+		): string | undefined;
+		function fetchUrlToString(
+			fetchUrl: string | URL | undefined
+		): string | undefined {
+			if (!fetchUrl) return undefined;
+			if (fetchUrl instanceof URL) return fetchUrl.href;
+			return fetchUrl;
+		}
+
+		const fetcherUrl = (() => {
+			const urlAsString = fetchUrlToString(baseUrl);
+			if (!urlAsString) return url;
+			const normalizedUrl = fetchUrlToString(url).replace(/\//, '');
+			const normalizedBaseUrl = urlAsString.replace(/\/$/, '');
+
+			return `${normalizedBaseUrl}/${normalizedUrl}`;
+		})();
+
+		const response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
+
+		let data: unknown = null;
+		try {
+			data = await response.json();
+		} catch {
+			try {
+				data = await response.text();
+			} catch (error) {
+				data = null;
+			}
+		}
+
+		if (!response.ok) {
+			throw new FetchError({
+				status: response.status,
+				message: response.statusText,
+				data,
+			});
+		}
+
+		if (fetcherOptions.skipValidation) {
+			return data;
+		}
+
+		return fetcherOptions.successSchema.parse(data);
+	}
+
+	return fetcher;
+}
+
+export const isFetcherError = (error: ResponseError): error is FetchError =>
+	error instanceof FetchError;

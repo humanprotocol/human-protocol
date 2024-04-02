@@ -1,0 +1,20 @@
+{
+  "dashboard": {},
+  "validation":{
+    "required": "Required",
+    "min": "Min {{count}} characters",
+    "max": "Max {{count}} characters"
+  },
+  "errors":{
+    "unknown": "Unknown error",
+  },
+  "components": {
+    "multiSelect": {
+      "allFields": "All fields",
+      "andMore": "(and {{number}} more)"
+    },
+    "breadcrumb": {
+      "back": "Back"
+    }
+  }
+}
