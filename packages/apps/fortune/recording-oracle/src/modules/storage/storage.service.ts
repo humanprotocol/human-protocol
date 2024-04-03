@@ -87,7 +87,7 @@ export class StorageService {
     }
 
     let fileToUpload = JSON.stringify(solutions);
-    if (this.serverConfig.pgpEncrypt === 'true') {
+    if (this.serverConfig.pgpEncrypt.toString() === 'true') {
       try {
         const signer = this.web3Service.getSigner(chainId);
         const escrowClient = await EscrowClient.build(signer);
