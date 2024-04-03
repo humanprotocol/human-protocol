@@ -52,7 +52,7 @@ def point_to_bbox_cmp(
     bbox: Bbox,
     point: Point,
     *,
-    rel_sigma: float = Config.features.default_point_validity_relative_radius,
+    rel_sigma: float = Config.validation.default_point_validity_relative_radius,
 ) -> float:
     """
     Checks that the point is within the axis-aligned bbox,
@@ -103,6 +103,8 @@ def match_annotations(
             for a, _ in itertools.zip_longest(a_anns, range(max_ann_count), fillvalue=None)
         ]
     )
+
+    distances[~np.isfinite(distances)] = 1
     distances[distances > 1 - min_similarity] = 1
 
     if a_anns and b_anns:

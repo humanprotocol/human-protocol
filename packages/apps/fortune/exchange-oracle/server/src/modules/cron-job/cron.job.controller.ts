@@ -27,7 +27,7 @@ export class CronJobController {
     description: 'Bad Request. Invalid input parameters.',
   })
   @ApiBearerAuth()
-  @Get('/wehbhook/process')
+  @Get('/webhook/process')
   public async processPendingWebhooks(): Promise<any> {
     await this.cronJobService.processPendingWebhooks();
     return;

@@ -25,12 +25,15 @@ export const MAINNET_CHAIN_IDS = [
 
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
+export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
+  JobRequestType.IMAGE_BOXES_FROM_POINTS,
+  JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
 ];
 
 export const CANCEL_JOB_STATUSES = [

@@ -10,7 +10,6 @@ import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { WebhookService } from '../webhook/webhook.service';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';

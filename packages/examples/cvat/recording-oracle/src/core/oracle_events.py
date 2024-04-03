@@ -2,11 +2,11 @@ from typing import Optional, Type, Union
 
 from pydantic import BaseModel
 
-from src.core.types import ExchangeOracleEventType, OracleWebhookTypes, RecordingOracleEventType
+from src.core.types import ExchangeOracleEventTypes, OracleWebhookTypes, RecordingOracleEventTypes
 
 EventTypeTag = Union[
-    ExchangeOracleEventType,
-    RecordingOracleEventType,
+    ExchangeOracleEventTypes,
+    RecordingOracleEventTypes,
 ]
 
 
@@ -43,10 +43,10 @@ class ExchangeOracleEvent_TaskFinished(OracleEvent):
 
 
 _event_type_map = {
-    RecordingOracleEventType.task_completed: RecordingOracleEvent_TaskCompleted,
-    RecordingOracleEventType.task_rejected: RecordingOracleEvent_TaskRejected,
-    ExchangeOracleEventType.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
-    ExchangeOracleEventType.task_finished: ExchangeOracleEvent_TaskFinished,
+    RecordingOracleEventTypes.task_completed: RecordingOracleEvent_TaskCompleted,
+    RecordingOracleEventTypes.task_rejected: RecordingOracleEvent_TaskRejected,
+    ExchangeOracleEventTypes.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
+    ExchangeOracleEventTypes.task_finished: ExchangeOracleEvent_TaskFinished,
 }
 
 
@@ -72,8 +72,8 @@ def parse_event(
     sender: OracleWebhookTypes, event_type: str, event_data: Optional[dict] = None
 ) -> OracleEvent:
     sender_events_mapping = {
-        OracleWebhookTypes.recording_oracle: RecordingOracleEventType,
-        OracleWebhookTypes.exchange_oracle: ExchangeOracleEventType,
+        OracleWebhookTypes.recording_oracle: RecordingOracleEventTypes,
+        OracleWebhookTypes.exchange_oracle: ExchangeOracleEventTypes,
     }
 
     sender_events = sender_events_mapping.get(sender)

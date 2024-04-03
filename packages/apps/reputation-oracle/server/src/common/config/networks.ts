@@ -36,6 +36,10 @@ export const networkMap: NetworkMapDto = {
     chainId: ChainId.BSC_TESTNET,
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
+  localhost: {
+    chainId: ChainId.LOCALHOST,
+    rpcUrl: 'http://0.0.0.0:8545',
+  },
 };
 
 export const networks = Object.values(networkMap).map((network) => network);
@@ -51,3 +55,5 @@ export const MAINNET_CHAIN_IDS = [
   ChainId.POLYGON,
   ChainId.MOONBEAM,
 ];
+
+export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];
