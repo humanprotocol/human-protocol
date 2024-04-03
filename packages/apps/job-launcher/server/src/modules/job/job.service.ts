@@ -161,19 +161,18 @@ export class JobService {
     const jobBounty = await this.calculateJobBounty({
       requestType,
       fundAmount: tokenFundAmount,
-      data: dto.data,
-      gtUrl: urls.gtUrl,
+      urls: urls,
       nodesTotal: dto.labels[0]?.nodes?.length,
     });
 
     return {
       data: {
-        data_url: urls.dataUrl,
-        ...(dto.data.points && {
-          points_url: urls.pointsUrl,
+        data_url: urls.dataUrl.href,
+        ...(urls.pointsUrl && {
+          points_url: urls.pointsUrl?.href,
         }),
-        ...(dto.data.boxes && {
-          boxes_url: urls.boxesUrl,
+        ...(urls.boxesUrl && {
+          boxes_url: urls.boxesUrl?.href,
         }),
       },
       annotation: {
@@ -186,7 +185,7 @@ export class JobService {
       validation: {
         min_quality: dto.minQuality,
         val_size: this.cvatConfigService.valSize,
-        gt_url: urls.gtUrl,
+        gt_url: urls.gtUrl.href,
       },
       job_bounty: jobBounty,
     };
@@ -197,10 +196,7 @@ export class JobService {
   ): Promise<HCaptchaManifestDto> {
     const jobType = jobDto.annotations.typeOfJob;
     const dataUrl = generateBucketUrl(jobDto.data, JobRequestType.HCAPTCHA);
-    const objectsInBucket = await listObjectsInBucket(
-      jobDto.data,
-      JobRequestType.HCAPTCHA,
-    );
+    const objectsInBucket = await listObjectsInBucket(dataUrl);
 
     const commonManifestProperties = {
       job_mode: JobCaptchaMode.BATCH,
@@ -215,7 +211,7 @@ export class JobService {
       job_total_tasks: objectsInBucket.length,
       task_bid_price: jobDto.annotations.taskBidPrice,
       taskdata_uri: await this.generateAndUploadTaskData(
-        dataUrl,
+        dataUrl.href,
         objectsInBucket,
       ),
       public_results: true,
@@ -433,14 +429,9 @@ export class JobService {
   private createJobSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.HCAPTCHA]: {
       calculateFundAmount: async (dto: JobCaptchaDto, rate: number) => {
-        const objectsInBucket = await listObjectsInBucket(
-          dto.data,
-          JobRequestType.HCAPTCHA,
-        );
-        return await div(
-          dto.annotations.taskBidPrice * objectsInBucket.length,
-          rate,
-        );
+        const dataUrl = generateBucketUrl(dto.data, JobRequestType.HCAPTCHA);
+        const objectsInBucket = await listObjectsInBucket(dataUrl);
+        return div(dto.annotations.taskBidPrice * objectsInBucket.length, rate);
       },
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
     },
@@ -514,17 +505,15 @@ export class JobService {
   private createManifestActions: Record<JobRequestType, ManifestAction> = {
     [JobRequestType.HCAPTCHA]: {
       getElementsCount: async () => 0,
-      generateUrls: () => ({ dataUrl: '', gtUrl: '' }),
+      generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
     },
     [JobRequestType.FORTUNE]: {
       getElementsCount: async () => 0,
-      generateUrls: () => ({ dataUrl: '', gtUrl: '' }),
+      generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      getElementsCount: async (
-        requestType: JobRequestType,
-        data: CvatDataDto,
-      ) => (await listObjectsInBucket(data.dataset, requestType)).length,
+      getElementsCount: async (urls: GenerateUrls) =>
+        (await listObjectsInBucket(urls.dataUrl)).length,
       generateUrls: (
         data: CvatDataDto,
         groundTruth: StorageDataDto,
@@ -538,10 +527,8 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_POINTS]: {
-      getElementsCount: async (
-        requestType: JobRequestType,
-        data: CvatDataDto,
-      ) => (await listObjectsInBucket(data.dataset, requestType)).length,
+      getElementsCount: async (urls: GenerateUrls) =>
+        (await listObjectsInBucket(urls.dataUrl)).length,
       generateUrls: (
         data: CvatDataDto,
         groundTruth: StorageDataDto,
@@ -555,11 +542,8 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      getElementsCount: async (
-        requestType: JobRequestType,
-        data: CvatDataDto,
-        gtUrl: string,
-      ) => this.getCvatElementsCount(requestType, data.points!, gtUrl),
+      getElementsCount: async (urls: GenerateUrls) =>
+        this.getCvatElementsCount(urls.gtUrl, urls.pointsUrl!),
       generateUrls: (
         data: CvatDataDto,
         groundTruth: StorageDataDto,
@@ -578,11 +562,8 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      getElementsCount: async (
-        requestType: JobRequestType,
-        data: CvatDataDto,
-        gtUrl: string,
-      ) => this.getCvatElementsCount(requestType, data.boxes!, gtUrl),
+      getElementsCount: async (urls: GenerateUrls) =>
+        this.getCvatElementsCount(urls.gtUrl, urls.boxesUrl!),
       generateUrls: (
         data: CvatDataDto,
         groundTruth: StorageDataDto,
@@ -773,19 +754,9 @@ export class JobService {
     return jobEntity.id;
   }
 
-  public async getCvatElementsCount(
-    requestType: JobRequestType,
-    storageData: StorageDataDto,
-    gtUrl: string,
-  ): Promise<number> {
-    if (!storageData) {
-      throw new ConflictException(ErrorJob.DataNotExist);
-    }
-
-    const data = await this.storageService.download(
-      generateBucketUrl(storageData, requestType),
-    );
-    const gt = await this.storageService.download(gtUrl);
+  public async getCvatElementsCount(gtUrl: URL, dataUrl: URL): Promise<number> {
+    const data = await this.storageService.download(dataUrl.href);
+    const gt = await this.storageService.download(gtUrl.href);
 
     let gtEntries = 0;
 
@@ -809,10 +780,10 @@ export class JobService {
   public async calculateJobBounty(
     params: CvatCalculateJobBounty,
   ): Promise<string> {
-    const { requestType, fundAmount, data, gtUrl, nodesTotal } = params;
+    const { requestType, fundAmount, urls, nodesTotal } = params;
 
     const { getElementsCount } = this.createManifestActions[requestType];
-    const elementsCount = await getElementsCount(requestType, data, gtUrl);
+    const elementsCount = await getElementsCount(urls);
 
     let jobSize = Number(this.cvatConfigService.jobSize);
 
