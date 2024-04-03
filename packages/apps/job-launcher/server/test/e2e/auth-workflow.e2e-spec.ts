@@ -7,6 +7,7 @@ import { UserRepository } from '../../src/modules/user/user.repository';
 import { TokenRepository } from '../../src/modules/auth/token.repository';
 import { TokenType } from '../../src/modules/auth/token.entity';
 import { UserStatus } from '../../src/common/enums/user';
+import setupE2eEnvironment from './env-setup';
 
 describe('AuthService E2E', () => {
   let app: INestApplication;
@@ -14,6 +15,7 @@ describe('AuthService E2E', () => {
   let tokenRepository: TokenRepository;
 
   beforeAll(async () => {
+    setupE2eEnvironment();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

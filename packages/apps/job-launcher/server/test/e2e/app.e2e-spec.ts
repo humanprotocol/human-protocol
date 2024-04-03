@@ -2,9 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import setupE2eEnvironment from './env-setup';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  beforeAll(async () => {
+    setupE2eEnvironment();
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

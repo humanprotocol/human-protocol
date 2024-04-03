@@ -65,3 +65,5 @@ export const HCAPTCHA_ORACLE_STAKE = 0.05;
 export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';
 
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+
+export const E2E_TEST_ENV = 'test-e2e';

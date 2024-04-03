@@ -13,23 +13,20 @@ export class SendGridService {
 
   private readonly defaultFromEmail: string;
   private readonly defaultFromName: string;
-  private readonly apiKey: string;
 
   constructor(
     private readonly mailService: MailService,
     private readonly sendgridConfigService: SendgridConfigService,
   ) {
-    const apiKey = this.sendgridConfigService.apiKey;
-
-    if (this.apiKey === SENDGRID_API_KEY_DISABLED) {
+    if (this.sendgridConfigService.apiKey === SENDGRID_API_KEY_DISABLED) {
       return;
     }
 
-    if (!SENDGRID_API_KEY_REGEX.test(apiKey)) {
+    if (!SENDGRID_API_KEY_REGEX.test(this.sendgridConfigService.apiKey)) {
       throw new Error(ErrorSendGrid.InvalidApiKey);
     }
 
-    this.mailService.setApiKey(apiKey);
+    this.mailService.setApiKey(this.sendgridConfigService.apiKey);
 
     this.defaultFromEmail = this.sendgridConfigService.fromEmail;
     this.defaultFromName = this.sendgridConfigService.fromName;
@@ -45,7 +42,7 @@ export class SendGridService {
     ...emailData
   }: Partial<MailDataRequired>): Promise<void> {
     try {
-      if (this.apiKey === SENDGRID_API_KEY_DISABLED) {
+      if (this.sendgridConfigService.apiKey === SENDGRID_API_KEY_DISABLED) {
         this.logger.debug(personalizations);
         return;
       }
