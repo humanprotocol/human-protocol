@@ -116,6 +116,9 @@ def update_gt_stats(session: Session, task_id: str, values: Dict[str, int]):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
 
+    if not values:
+        return
+
     if db_engine.driver != "psycopg2":
         raise NotImplementedError
 

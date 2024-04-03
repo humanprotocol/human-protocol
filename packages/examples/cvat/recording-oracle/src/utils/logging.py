@@ -6,6 +6,10 @@ from src.utils.stack import current_function_name
 LogLevel = NewType("LogLevel", int)
 
 
+TRACE = 5
+logging.addLevelName(TRACE, "TRACE")
+
+
 def parse_log_level(level: str) -> LogLevel:
     return logging._nameToLevel[level.upper()]
 
