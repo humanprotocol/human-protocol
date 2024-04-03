@@ -155,3 +155,59 @@ export const MOCK_CVAT_LABELS_WITH_NODES: Label[] = [
 
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
+
+export const MOCK_CVAT_DATA = {
+  images: [
+    {
+      id: 1,
+      file_name: '1.jpg',
+    },
+    {
+      id: 2,
+      file_name: '2.jpg',
+    },
+    {
+      id: 3,
+      file_name: '3.jpg',
+    },
+    {
+      id: 4,
+      file_name: '4.jpg',
+    },
+    {
+      id: 5,
+      file_name: '5.jpg',
+    },
+  ],
+  annotations: [
+    {
+      image_id: 1,
+    },
+    {
+      image_id: 2,
+    },
+    {
+      image_id: 3,
+    },
+    {
+      image_id: 4,
+    },
+    {
+      image_id: 5,
+    },
+  ],
+};
+
+export const MOCK_CVAT_GT = {
+  images: [
+    {
+      file_name: '1.jpg',
+    },
+    {
+      file_name: '2.jpg',
+    },
+    {
+      file_name: '3.jpg',
+    },
+  ],
+};
