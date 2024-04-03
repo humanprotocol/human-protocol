@@ -12,9 +12,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
-import { ConfigNames } from '../../common/config';
 import { TOKEN } from '../../common/constant';
 import {
   AssignmentStatus,
@@ -34,13 +32,14 @@ import { GetJobsDto, JobDto, ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly pgpConfigService: PGPConfigService,
     public readonly jobRepository: JobRepository,
     public readonly assignmentRepository: AssignmentRepository,
     @Inject(Web3Service)
@@ -253,8 +252,8 @@ export class JobService {
     ) {
       try {
         const encryption = await Encryption.build(
-          this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
-          this.configService.get(ConfigNames.PGP_PASSPHRASE),
+          this.pgpConfigService.privateKey,
+          this.pgpConfigService.passphrase,
         );
 
         manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
