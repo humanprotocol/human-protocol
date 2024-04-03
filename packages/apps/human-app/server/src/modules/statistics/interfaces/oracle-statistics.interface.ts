@@ -15,5 +15,5 @@ export class OracleStatisticsCommand {
 
 export class OracleStatisticsDto {
   @ApiProperty({ example: 'string' })
-  exchangeOracleUrl: string;
+  exchange_oracle_url: string;
 }
