@@ -1,5 +1,5 @@
 import { JobRequestType } from '../../common/enums/job';
-import { CreateJob, CvatDataDto, Label } from './job.dto';
+import { CreateJob, CvatDataDto, Label, StorageDataDto } from './job.dto';
 
 export interface RequestAction {
   calculateFundAmount: (dto: CreateJob, rate: number) => Promise<number>;
@@ -10,12 +10,16 @@ export interface RequestAction {
   ) => Promise<any>;
 }
 
-export interface DatasetAction {
+export interface ManifestAction {
   getElementsCount: (
     requestType: JobRequestType,
     data: CvatDataDto,
     gtUrl?: string,
   ) => Promise<number>;
+  generateUrls: (
+    data: CvatDataDto,
+    groundTruth: StorageDataDto,
+  ) => GenerateUrls;
 }
 
 export interface EscrowAction {
@@ -34,9 +38,17 @@ export interface OracleAddresses {
 
 export interface CvatCalculateJobBounty {
   requestType: JobRequestType;
-  elementsCount: number;
   fundAmount: number;
+  data: CvatDataDto;
+  gtUrl: string;
   nodesTotal?: number;
+}
+
+export interface GenerateUrls {
+  dataUrl: string;
+  gtUrl: string;
+  pointsUrl?: string;
+  boxesUrl?: string;
 }
 
 export interface CvatImageData {

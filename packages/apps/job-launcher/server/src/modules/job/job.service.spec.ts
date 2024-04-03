@@ -1129,26 +1129,70 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly for image boxes from points type', async () => {
+      const storageDatasetMock: any = {
+        dataset: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+        points: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+      };
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
       const data = {
         requestType: JobRequestType.IMAGE_BOXES_FROM_POINTS,
-        elementsCount: 28883,
         fundAmount: 22.918128652290278,
+        data: storageDatasetMock,
+        gtUrl: MOCK_FILE_URL,
       };
-      const result = await jobService['calculateJobBounty'](data);
 
-      expect(result).toEqual('0.000793481586133375');
+      const result = await jobService['calculateJobBounty'](data); //  elementsCount = 2
+
+      expect(result).toEqual('11.459064326145139');
     });
 
     it('should calculate the job bounty correctly for image skeletons from boxed type', async () => {
+      const storageDatasetMock: any = {
+        dataset: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+        boxes: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+      };
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
       const data = {
         requestType: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
-        elementsCount: 50,
         fundAmount: 22.918128652290278,
+        data: storageDatasetMock,
+        gtUrl: MOCK_FILE_URL,
         nodesTotal: 4,
       };
-      const result = await jobService['calculateJobBounty'](data);
 
-      expect(result).toEqual('0.636614684785841055');
+      const result = await jobService['calculateJobBounty'](data); //  elementsCount = 2
+
+      expect(result).toEqual('5.7295321630725695');
     });
   });
 
