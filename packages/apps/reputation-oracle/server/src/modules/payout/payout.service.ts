@@ -106,6 +106,22 @@ export class PayoutService {
       ): Promise<ProcessingResultDto> =>
         this.processCvat(manifest, chainId, escrowAddress),
     },
+    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+      calculateResults: async (
+        manifest: CvatManifestDto,
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<ProcessingResultDto> =>
+        this.processCvat(manifest, chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      calculateResults: async (
+        manifest: CvatManifestDto,
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<ProcessingResultDto> =>
+        this.processCvat(manifest, chainId, escrowAddress),
+    },
   };
 
   /**

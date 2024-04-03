@@ -42,7 +42,6 @@
     "@human-protocol/core": "*",
     "aws-sdk": "^2.1528.0",
     "axios": "^1.4.0",
-    "crypto": "^1.0.1",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",

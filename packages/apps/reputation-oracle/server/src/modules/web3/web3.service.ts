@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Wallet, ethers } from 'ethers';
 import {
   ConfigNames,
+  LOCALHOST_CHAIN_IDS,
   MAINNET_CHAIN_IDS,
   TESTNET_CHAIN_IDS,
   networks,
@@ -15,9 +16,15 @@ import { SignatureBodyDto } from './web3.dto';
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
+  public readonly signerAddress: string;
+  public readonly currentWeb3Env: string;
   public readonly logger = new Logger(Web3Service.name);
 
   constructor(private readonly configService: ConfigService) {
+    this.currentWeb3Env = this.configService.get(
+      ConfigNames.WEB3_ENV,
+    ) as string;
+
     const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
     const validChains = this.getValidChains();
     const validNetworks = networks.filter((network) =>
@@ -35,27 +42,24 @@ export class Web3Service {
   }
 
   public validateChainId(chainId: number): void {
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
     const validChainIds = this.getValidChains();
-
     if (!validChainIds.includes(chainId)) {
-      const errorType =
-        currentWeb3Env === Web3Env.MAINNET
-          ? ErrorWeb3.InvalidMainnetChainId
-          : ErrorWeb3.InvalidTestnetChainId;
-      this.logger.log(errorType, Web3Service.name);
-      throw new BadRequestException(errorType);
+      this.logger.log(ErrorWeb3.InvalidChainId, Web3Service.name);
+      throw new BadRequestException(ErrorWeb3.InvalidChainId);
     }
   }
 
   public getValidChains(): ChainId[] {
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
-    const validChainIds =
-      currentWeb3Env === Web3Env.MAINNET
-        ? MAINNET_CHAIN_IDS
-        : TESTNET_CHAIN_IDS;
-
-    return validChainIds;
+    switch (this.currentWeb3Env) {
+      case Web3Env.MAINNET:
+        return MAINNET_CHAIN_IDS;
+      case Web3Env.TESTNET:
+        return TESTNET_CHAIN_IDS;
+      case Web3Env.LOCALHOST:
+        return LOCALHOST_CHAIN_IDS;
+      default:
+        return LOCALHOST_CHAIN_IDS;
+    }
   }
 
   public async calculateGasPrice(chainId: number): Promise<bigint> {
@@ -65,10 +69,10 @@ export class Web3Service {
       1,
     );
     const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
-    if (!gasPrice) {
-      throw new Error(ErrorWeb3.GasPriceError);
+    if (gasPrice) {
+      return gasPrice * BigInt(multiplier);
     }
-    return gasPrice * BigInt(multiplier);
+    throw new Error(ErrorWeb3.GasPriceError);
   }
 
   public getOperatorAddress(): string {

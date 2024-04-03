@@ -46,6 +46,7 @@ export class UserUpdateDto {
   @ApiPropertyOptional({
     enum: UserStatus,
   })
+  @IsOptional()
   @IsEnum(UserStatus)
   public status?: UserStatus;
 }

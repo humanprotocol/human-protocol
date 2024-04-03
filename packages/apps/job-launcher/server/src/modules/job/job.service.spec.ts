@@ -65,11 +65,11 @@ import {
   MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
   MOCK_STORAGE_DATA,
-  MOCK_CVAT_DATA,
+  MOCK_CVAT_DATA_DATASET,
   MOCK_CVAT_LABELS,
   MOCK_CVAT_JOB_SIZE,
-  MOCK_CVAT_MAX_TIME,
   MOCK_CVAT_VAL_SIZE,
+  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_HCAPTCHA_IMAGE_LABEL,
   MOCK_HCAPTCHA_IMAGE_URL,
@@ -77,6 +77,11 @@ import {
   MOCK_HCAPTCHA_RO_URI,
   MOCK_BUCKET_FILE,
   MOCK_MAX_RETRY_COUNT,
+  MOCK_CVAT_LABELS_WITH_NODES,
+  MOCK_CVAT_DATA_POINTS,
+  MOCK_CVAT_DATA_BOXES,
+  MOCK_CVAT_DATA,
+  MOCK_CVAT_GT,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -113,6 +118,12 @@ import {
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobService } from '../cron-job/cron-job.service';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -171,7 +182,7 @@ describe('JobService', () => {
     storageService: StorageService,
     webhookRepository: WebhookRepository;
 
-  let encrypt = true;
+  let encrypt = 'true';
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -214,10 +225,10 @@ describe('JobService', () => {
             return MOCK_HCAPTCHA_SITE_KEY;
           case 'CVAT_JOB_SIZE':
             return MOCK_CVAT_JOB_SIZE;
-          case 'CVAT_MAX_TIME':
-            return MOCK_CVAT_MAX_TIME;
           case 'CVAT_VAL_SIZE':
             return MOCK_CVAT_VAL_SIZE;
+          case 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER':
+            return MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER;
           case 'HCAPTCHA_REPUTATION_ORACLE_URI':
             return MOCK_HCAPTCHA_REPO_URI;
           case 'HCAPTCHA_RECORDING_ORACLE_URI':
@@ -232,6 +243,12 @@ describe('JobService', () => {
       providers: [
         JobService,
         Encryption,
+        ServerConfigService,
+        AuthConfigService,
+        Web3ConfigService,
+        CvatConfigService,
+        PGPConfigService,
+        S3ConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -490,7 +507,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
+      ).rejects.toThrow(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -507,19 +524,56 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
+    });
+  });
+
+  describe('getCvatElementsCount', () => {
+    let storageDatasetMock: StorageDataDto;
+
+    beforeAll(async () => {
+      storageDatasetMock = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.AP_EAST_1,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+    });
+
+    it('should throw ConflictException if storageData is not provided', async () => {
+      await expect(
+        jobService.getCvatElementsCount(
+          JobRequestType.IMAGE_BOXES_FROM_POINTS,
+          null as any,
+          'some-gt-url',
+        ),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should calculate the number of CVAT elements correctly', async () => {
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      const result = await jobService.getCvatElementsCount(
+        JobRequestType.IMAGE_BOXES_FROM_POINTS,
+        storageDatasetMock,
+        'some-gt-url',
+      );
+      expect(result).toBe(2);
     });
   });
 
   describe('createCvatManifest', () => {
-    it('should create a valid CVAT manifest', async () => {
+    it('should create a valid CVAT manifest for image boxes job type', async () => {
       const jobBounty = '50';
       jest
         .spyOn(jobService, 'calculateJobBounty')
         .mockResolvedValueOnce(jobBounty);
 
       const dto: JobCvatDto = {
-        data: MOCK_CVAT_DATA,
+        data: MOCK_CVAT_DATA_DATASET,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         userGuide: MOCK_FILE_URL,
@@ -543,7 +597,7 @@ describe('JobService', () => {
           data_url: MOCK_BUCKET_FILE,
         },
         annotation: {
-          labels: [{ name: 'label1' }, { name: 'label2' }],
+          labels: MOCK_CVAT_LABELS,
           description: MOCK_REQUESTER_DESCRIPTION,
           user_guide: MOCK_FILE_URL,
           type: requestType,
@@ -556,6 +610,146 @@ describe('JobService', () => {
         },
         job_bounty: jobBounty,
       });
+    });
+
+    it('should create a valid CVAT manifest for image boxes from points job type', async () => {
+      const jobBounty = '50.0';
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_POINTS,
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_BOXES_FROM_POINTS,
+        fundAmount: 10,
+      };
+
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+      const tokenFundAmount = 100;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+          points_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
+    it('should create a valid CVAT manifest for image skeletons from boxes job type', async () => {
+      const jobBounty = '4.0';
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_BOXES,
+        labels: MOCK_CVAT_LABELS_WITH_NODES,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+        fundAmount: 10,
+      };
+
+      const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
+      const tokenFundAmount = 16;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+          boxes_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS_WITH_NODES,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
+    it('should throw an error data not exist for image boxes from points job type', async () => {
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET, // Data without points
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: requestType,
+        fundAmount: 10,
+      };
+
+      const tokenFundAmount = 100;
+
+      expect(
+        jobService.createCvatManifest(dto, requestType, tokenFundAmount),
+      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
+    });
+
+    it('should throw an error data not exist for image skeletons from boxes job type', async () => {
+      const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET, // Data without points
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: requestType,
+        fundAmount: 10,
+      };
+
+      const tokenFundAmount = 100;
+
+      expect(
+        jobService.createCvatManifest(dto, requestType, tokenFundAmount),
+      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
     });
   });
 
@@ -927,18 +1121,78 @@ describe('JobService', () => {
         advanced: {},
       };
 
-      await expect(
-        jobService.createHCaptchaManifest(jobDto),
-      ).rejects.toThrowError(BadRequestException);
+      await expect(jobService.createHCaptchaManifest(jobDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('calculateJobBounty', () => {
-    it('should calculate the job bounty correctly', async () => {
-      const tokenFundAmount = 0.013997056833333334;
-      const result = await jobService['calculateJobBounty'](6, tokenFundAmount);
+    it('should calculate the job bounty correctly for image boxes from points type', async () => {
+      const storageDatasetMock: any = {
+        dataset: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+        points: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+      };
 
-      expect(result).toEqual('0.002332842805555555');
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      const data = {
+        requestType: JobRequestType.IMAGE_BOXES_FROM_POINTS,
+        fundAmount: 22.918128652290278,
+        data: storageDatasetMock,
+        gtUrl: MOCK_FILE_URL,
+      };
+
+      const result = await jobService['calculateJobBounty'](data); //  elementsCount = 2
+
+      expect(result).toEqual('11.459064326145139');
+    });
+
+    it('should calculate the job bounty correctly for image skeletons from boxed type', async () => {
+      const storageDatasetMock: any = {
+        dataset: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+        boxes: {
+          provider: StorageProviders.AWS,
+          region: AWSRegions.EU_CENTRAL_1,
+          bucketName: 'bucket',
+          path: 'folder/test',
+        },
+      };
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_DATA)
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      const data = {
+        requestType: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+        fundAmount: 22.918128652290278,
+        data: storageDatasetMock,
+        gtUrl: MOCK_FILE_URL,
+        nodesTotal: 4,
+      };
+
+      const result = await jobService['calculateJobBounty'](data); //  elementsCount = 2
+
+      expect(result).toEqual('5.7295321630725695');
     });
   });
 
@@ -948,7 +1202,7 @@ describe('JobService', () => {
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
-      data: MOCK_CVAT_DATA,
+      data: MOCK_CVAT_DATA_DATASET,
       labels: MOCK_CVAT_LABELS,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       minQuality: 0.95,
@@ -1034,7 +1288,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.GCS,
           region: AWSRegions.EU_CENTRAL_1,
@@ -1043,14 +1297,21 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.GCS,
+        region: AWSRegions.EU_CENTRAL_1,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1065,7 +1326,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.InvalidProvider);
+      ).rejects.toThrow(ErrorBucket.InvalidProvider);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1074,7 +1335,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.AWS,
           region: 'test-region',
@@ -1083,14 +1344,21 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.AWS,
+        region: 'test-region',
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1105,7 +1373,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.InvalidRegion);
+      ).rejects.toThrow(ErrorBucket.InvalidRegion);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1114,7 +1382,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.AWS,
           bucketName: 'bucket',
@@ -1122,14 +1390,20 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.AWS,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1144,7 +1418,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.EmptyRegion);
+      ).rejects.toThrow(ErrorBucket.EmptyRegion);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1153,7 +1427,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const storageDataMock: any = {
+      const storageDatasetMock: any = {
         dataset: {
           provider: StorageProviders.AWS,
           region: AWSRegions.EU_CENTRAL_1,
@@ -1161,14 +1435,20 @@ describe('JobService', () => {
         },
       };
 
+      const storageGtMock: any = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.EU_CENTRAL_1,
+        path: 'folder/test',
+      };
+
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: storageDataMock,
+        data: storageDatasetMock,
         labels: MOCK_CVAT_LABELS,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: storageDataMock,
+        groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -1183,7 +1463,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorBucket.EmptyBucket);
+      ).rejects.toThrow(ErrorBucket.EmptyBucket);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1237,7 +1517,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorWeb3.InvalidChainId);
+      ).rejects.toThrow(ErrorWeb3.InvalidChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -1259,7 +1539,7 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
     });
   });
 
@@ -1404,7 +1684,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
-      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
     });
   });
 
@@ -1854,9 +2134,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
+      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -1880,7 +2158,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(new Error(errorMessage));
+      ).rejects.toThrow(new Error(errorMessage));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -1952,6 +2230,7 @@ describe('JobService', () => {
       ]);
 
       expect(storageService.uploadFile).toHaveBeenCalled();
+
       expect(
         JSON.parse(
           await encryption.decrypt(
@@ -1972,9 +2251,7 @@ describe('JobService', () => {
           chainId,
           manifest,
         ),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
+      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -1998,7 +2275,7 @@ describe('JobService', () => {
           chainId,
           manifest,
         ),
-      ).rejects.toThrowError(new Error(errorMessage));
+      ).rejects.toThrow(new Error(errorMessage));
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
@@ -2030,7 +2307,7 @@ describe('JobService', () => {
       (KVStoreClient.build as any).mockImplementation(() => ({
         getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
-      encrypt = false;
+      encrypt = 'false';
     });
 
     afterEach(() => {
@@ -2038,7 +2315,7 @@ describe('JobService', () => {
     });
 
     afterAll(() => {
-      encrypt = true;
+      encrypt = 'true';
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
@@ -2079,9 +2356,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
+      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
@@ -2101,7 +2376,7 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrowError(new Error(errorMessage));
+      ).rejects.toThrow(new Error(errorMessage));
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
@@ -2209,7 +2484,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
-      ).rejects.toThrowError(new NotFoundException(ErrorJob.ResultNotFound));
+      ).rejects.toThrow(new NotFoundException(ErrorJob.ResultNotFound));
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(storageService.download).toHaveBeenCalledTimes(1);
     });
@@ -2250,9 +2525,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
-      ).rejects.toThrowError(
-        new NotFoundException(ErrorJob.ResultValidationFailed),
-      );
+      ).rejects.toThrow(new NotFoundException(ErrorJob.ResultValidationFailed));
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(storageService.download).toHaveBeenCalledTimes(1);
