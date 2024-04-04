@@ -43,6 +43,10 @@ describe('Kyc Service', () => {
     kycRepository = moduleRef.get<KycRepository>(KycRepository);
     synapsConfigService =
       moduleRef.get<SynapsConfigService>(SynapsConfigService);
+
+    jest
+      .spyOn(SynapsConfigService.prototype, 'apiKey', 'get')
+      .mockReturnValue('test');
   });
 
   describe('initSession', () => {
