@@ -87,6 +87,4 @@ query GetEscrow(
     }}
 }}
 {escrow_fragment}
-""".format(
-        escrow_fragment=escrow_fragment
-    )
+""".format(escrow_fragment=escrow_fragment)
