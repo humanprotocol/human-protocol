@@ -11,9 +11,6 @@ export class WebhookIncomingEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;
 
-  @Column({ type: 'varchar', nullable: true })
-  public oracleAddress: string;
-
   @Column({ type: 'varchar' })
   public escrowAddress: string;
 
