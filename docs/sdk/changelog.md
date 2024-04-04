@@ -1,34 +1,38 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+#### Deprecated
 
-### Fixed
+#### Removed
 
-### Security
+#### Fixed
 
-# How to upgrade
+* **Fix getReputationNetworkOperators:** fix to accept non case sensitive address.
 
-## Typescript
+#### Security
 
-### yarn
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
