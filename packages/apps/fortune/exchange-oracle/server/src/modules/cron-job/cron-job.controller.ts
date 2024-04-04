@@ -30,7 +30,7 @@ export class CronJobController {
   })
   @ApiBearerAuth()
   @Get('/webhook/process')
-  public async processPendingWebhooks(): Promise<any> {
+  public async processPendingWebhooks(): Promise<void> {
     await this.cronJobService.processPendingWebhooks();
     return;
   }
