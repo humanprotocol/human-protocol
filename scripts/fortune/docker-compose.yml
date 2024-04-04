@@ -55,8 +55,15 @@ services:
       /usr/bin/mc anonymous set public myminio/bucket;
       "
   graph-node:
+    container_name: graph-node
     hostname: graph-node
     image: graphprotocol/graph-node
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8000 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - 8000:8000
       - 8001:8001

@@ -24,7 +24,7 @@ import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
   UserCreateDto,
-  UserUpdateDto,
+  Web3UserCreateDto,
 } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
@@ -45,44 +45,27 @@ export class UserService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async update(userId: number, dto: UserUpdateDto): Promise<UserEntity> {
-    return this.userRepository.updateOne({ id: userId }, dto);
-  }
-
   public async create(dto: UserCreateDto): Promise<UserEntity> {
-    const { email, password, ...rest } = dto;
-
-    await this.checkEmail(email, 0);
-
-    return await this.userRepository.create({
-      ...rest,
-      email,
-      password: bcrypt.hashSync(password, this.HASH_ROUNDS),
-      status: UserStatus.PENDING,
-    });
+    const newUser = new UserEntity();
+    newUser.email = dto.email;
+    newUser.password = bcrypt.hashSync(dto.password, this.HASH_ROUNDS);
+    newUser.type = UserType.WORKER;
+    newUser.status = UserStatus.PENDING;
+    await this.userRepository.createUnique(newUser);
+    return newUser;
   }
 
   public async getByCredentials(
     email: string,
     password: string,
-  ): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOne({
-      email,
-    });
+  ): Promise<UserEntity | null> {
+    const userEntity = await this.userRepository.findByEmail(email);
 
-    if (!userEntity) {
-      throw new NotFoundException(ErrorUser.InvalidCredentials);
-    }
-
-    if (!bcrypt.compareSync(password, userEntity.password)) {
-      throw new NotFoundException(ErrorUser.InvalidCredentials);
+    if (!userEntity || !bcrypt.compareSync(password, userEntity.password)) {
+      return null;
     }
 
     return userEntity;
-  }
-
-  public async getByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ email });
   }
 
   public updatePassword(
@@ -90,7 +73,7 @@ export class UserService {
     data: ValidatePasswordDto,
   ): Promise<UserEntity> {
     userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
   }
 
   public activate(userEntity: UserEntity): Promise<UserEntity> {
@@ -98,36 +81,24 @@ export class UserService {
     return userEntity.save();
   }
 
-  public async checkEmail(email: string, id: number): Promise<void> {
-    const userEntity = await this.userRepository.findOne({
-      email,
-      id: Not(id),
-    });
-
-    if (userEntity) {
-      this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
-      throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
-    }
-  }
-
   public async createWeb3User(
+    dto: Web3UserCreateDto,
     address: string,
-    type: UserType,
   ): Promise<UserEntity> {
     await this.checkEvmAddress(address);
 
-    return await this.userRepository.createWeb3User({
-      evmAddress: address,
-      nonce: getNonce(),
-      status: UserStatus.ACTIVE,
-      type,
-    });
+    const newUser = new UserEntity();
+    newUser.evmAddress = dto.evmAddress;
+    newUser.nonce = getNonce();
+    newUser.type = UserType.OPERATOR;
+    newUser.status = UserStatus.ACTIVE;
+
+    await this.userRepository.createUnique(newUser);
+    return newUser;
   }
 
   public async checkEvmAddress(address: string): Promise<void> {
-    const userEntity = await this.userRepository.findOne({
-      evmAddress: address,
-    });
+    const userEntity = await this.userRepository.findOneByEvmAddress(address);
 
     if (userEntity) {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
@@ -136,9 +107,7 @@ export class UserService {
   }
 
   public async getByAddress(address: string): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOne({
-      evmAddress: address,
-    });
+    const userEntity = await this.userRepository.findOneByEvmAddress(address);
 
     if (!userEntity) {
       throw new NotFoundException(ErrorUser.NotFound);

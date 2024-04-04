@@ -38,6 +38,11 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { HttpService } from '@nestjs/axios';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -95,6 +100,11 @@ describe('CronJobService', () => {
         JobService,
         WebhookService,
         Encryption,
+        ServerConfigService,
+        AuthConfigService,
+        Web3ConfigService,
+        CvatConfigService,
+        PGPConfigService,
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: PaymentRepository,
@@ -497,7 +507,6 @@ describe('CronJobService', () => {
     let fundEscrowMock: any;
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock1: Partial<JobEntity>, jobEntityMock2: Partial<JobEntity>;
-    let createWebhookMock: any;
 
     beforeEach(() => {
       cronJobEntityMock = {
@@ -537,8 +546,6 @@ describe('CronJobService', () => {
       fundEscrowMock.mockResolvedValue(true);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-
-      createWebhookMock = jest.spyOn(webhookRepository, 'createUnique');
 
       const cvatManifestMock: DeepPartial<CvatManifestDto> = {
         data: {
@@ -584,7 +591,6 @@ describe('CronJobService', () => {
       await service.fundEscrowCronJob();
 
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
-      expect(createWebhookMock).toHaveBeenCalledTimes(2);
     });
 
     it('should increase retriesCount by 1, if the job fund fails', async () => {
@@ -595,8 +601,6 @@ describe('CronJobService', () => {
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.retriesCount).toBe(2);
       expect(jobEntityMock2.retriesCount).toBe(1);
-
-      expect(createWebhookMock).toHaveBeenCalledTimes(1);
     });
 
     it('should mark job as failed if the job fund fails more than max retries count', async () => {
@@ -608,8 +612,6 @@ describe('CronJobService', () => {
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.status).toBe(JobStatus.FAILED);
       expect(jobEntityMock2.status).toBe(JobStatus.SET_UP);
-
-      expect(createWebhookMock).toHaveBeenCalledTimes(1);
     });
 
     it('should complete the cron job entity on database to unlock', async () => {

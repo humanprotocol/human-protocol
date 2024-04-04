@@ -205,6 +205,9 @@ class OperatorUtils:
             )
             leaders_raw = leaders_data["data"]["leaders"]
 
+            if not leaders_raw:
+                continue
+
             leaders.extend(
                 [
                     LeaderData(
@@ -271,7 +274,7 @@ class OperatorUtils:
         leader_data = get_data_from_subgraph(
             network["subgraph_url"],
             query=get_leader_query,
-            params={"address": leader_address},
+            params={"address": leader_address.lower()},
         )
         leader = leader_data["data"]["leader"]
 
@@ -337,8 +340,12 @@ class OperatorUtils:
         reputation_network_data = get_data_from_subgraph(
             network["subgraph_url"],
             query=get_reputation_network_query(role),
-            params={"address": address, "role": role},
+            params={"address": address.lower(), "role": role},
         )
+
+        if not reputation_network_data["data"]["reputationNetwork"]:
+            return []
+
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
 
         return [
@@ -383,6 +390,10 @@ class OperatorUtils:
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},
         )
+
+        if not reward_added_events_data["data"]["rewardAddedEvents"]:
+            return []
+
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
 
         return [

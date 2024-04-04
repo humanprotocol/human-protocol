@@ -89,7 +89,7 @@ describe('JobService', () => {
 
   const httpServicePostMock = jest
     .fn()
-    .mockReturnValue(of({ status: 200, data: {} }));
+    .mockReturnValue(of({ status: 201, data: {} }));
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -113,6 +113,7 @@ describe('JobService', () => {
           registerAs('server', () => ({
             encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
             encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
+            pgpEncrypt: 'false',
           })),
         ),
       ],
@@ -491,7 +492,7 @@ describe('JobService', () => {
       const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
-        event_type: EventType.ESCROW_RECORDED,
+        event_type: EventType.TASK_COMPLETED,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -583,7 +584,7 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.ESCROW_RECORDED,
+      event_type: EventType.TASK_COMPLETED,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(

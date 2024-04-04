@@ -9,10 +9,10 @@
     "@human-protocol/sdk": "*",
     "@mui/lab": "^5.0.0-alpha.141",
     "@mui/material": "^5.14.14",
-    "@mui/x-date-pickers": "^6.19.2",
+    "@mui/x-date-pickers": "^6.19.7",
     "@reduxjs/toolkit": "^1.9.5",
     "@stripe/react-stripe-js": "^2.4.0",
-    "@stripe/stripe-js": "^2.4.0",
+    "@stripe/stripe-js": "^3.1.0",
     "axios": "^1.1.3",
     "dayjs": "^1.11.9",
     "ethers": "^5.7.2",
@@ -39,7 +39,7 @@
     "test": "vitest run -u",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
-    "format": "npm run format:prettier && npm run format:lint",
+    "format": "yarn format:prettier && yarn format:lint",
     "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
   },
   "browserslist": {

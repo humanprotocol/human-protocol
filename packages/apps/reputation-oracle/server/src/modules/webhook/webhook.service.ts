@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -40,13 +41,14 @@ export class WebhookService {
         throw new BadRequestException(ErrorWebhook.InvalidEventType);
       }
 
-      const webhookEntity = await this.webhookRepository.create({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        status: WebhookStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      });
+      let webhookEntity = new WebhookIncomingEntity();
+      webhookEntity.chainId = dto.chainId;
+      webhookEntity.escrowAddress = dto.escrowAddress;
+      webhookEntity.status = WebhookStatus.PENDING;
+      webhookEntity.waitUntil = new Date();
+      webhookEntity.retriesCount = 0;
+
+      webhookEntity = await this.webhookRepository.createUnique(webhookEntity);
 
       if (!webhookEntity) {
         this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
@@ -88,13 +90,13 @@ export class WebhookService {
       snake_case_body,
       this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
     );
-    const { data } = await firstValueFrom(
+    const { status } = await firstValueFrom(
       await this.httpService.post(webhookUrl, snake_case_body, {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
       }),
     );
 
-    if (!data) {
+    if (status !== HttpStatus.CREATED) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }

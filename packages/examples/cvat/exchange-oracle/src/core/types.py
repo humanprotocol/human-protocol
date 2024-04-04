@@ -24,7 +24,7 @@ class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
     recorded = "recorded"
 
 
-class TaskStatus(str, Enum, metaclass=BetterEnumMeta):
+class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
     annotation = "annotation"
     completed = "completed"
 
@@ -36,21 +36,18 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     completed = "completed"
 
 
-class TaskType(str, Enum, metaclass=BetterEnumMeta):
+class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
     image_label_binary = "IMAGE_LABEL_BINARY"
     image_points = "IMAGE_POINTS"
     image_boxes = "IMAGE_BOXES"
+    image_boxes_from_points = "IMAGE_BOXES_FROM_POINTS"
+    image_skeletons_from_boxes = "IMAGE_SKELETONS_FROM_BOXES"
 
 
-class CvatLabelType(str, Enum, metaclass=BetterEnumMeta):
+class CvatLabelTypes(str, Enum, metaclass=BetterEnumMeta):
     tag = "tag"
     points = "points"
     rectangle = "rectangle"
-
-
-class CloudProviders(str, Enum, metaclass=BetterEnumMeta):
-    aws = "AWS_S3_BUCKET"
-    gcs = "GOOGLE_CLOUD_STORAGE"
 
 
 class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -59,17 +56,17 @@ class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
     recording_oracle = "recording_oracle"
 
 
-class ExchangeOracleEventType(str, Enum, metaclass=BetterEnumMeta):
+class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     task_creation_failed = "task_creation_failed"
     task_finished = "task_finished"
 
 
-class JobLauncherEventType(str, Enum, metaclass=BetterEnumMeta):
+class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):
     escrow_created = "escrow_created"
     escrow_canceled = "escrow_canceled"
 
 
-class RecordingOracleEventType(str, Enum, metaclass=BetterEnumMeta):
+class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     task_completed = "task_completed"
     task_rejected = "task_rejected"
 
@@ -80,11 +77,11 @@ class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
     failed = "failed"
 
 
-class PlatformType(str, Enum, metaclass=BetterEnumMeta):
+class PlatformTypes(str, Enum, metaclass=BetterEnumMeta):
     CVAT = "cvat"
 
 
-class AssignmentStatus(str, Enum, metaclass=BetterEnumMeta):
+class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
     created = "created"
     completed = "completed"
     expired = "expired"

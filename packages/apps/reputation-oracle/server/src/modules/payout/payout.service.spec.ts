@@ -97,6 +97,12 @@ describe('PayoutService', () => {
       [JobRequestType.IMAGE_POINTS]: {
         calculateResults: jest.fn(),
       },
+      [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+        calculateResults: jest.fn(),
+      },
+      [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+        calculateResults: jest.fn(),
+      },
     };
   });
 

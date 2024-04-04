@@ -24,6 +24,9 @@ import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { JobService } from '../job/job.service';
 import { WebhookDataDto } from './webhook.dto';
+import { HttpStatus } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -66,6 +69,8 @@ describe('WebhookService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,
+        ServerConfigService,
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -137,7 +142,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -162,7 +167,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -188,7 +193,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -214,7 +219,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(

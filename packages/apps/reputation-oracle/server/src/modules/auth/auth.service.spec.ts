@@ -6,41 +6,32 @@ import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
-import { AuthEntity } from './auth.entity';
 import { UserService } from '../user/user.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserEntity } from '../user/user.entity';
-import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
-  MOCK_ACCESS_TOKEN_HASHED,
   MOCK_ADDRESS,
   MOCK_EMAIL,
   MOCK_EXPIRES_IN,
   MOCK_HASHED_PASSWORD,
+  MOCK_HCAPTCHA_TOKEN,
   MOCK_PASSWORD,
   MOCK_PRIVATE_KEY,
   MOCK_REFRESH_TOKEN,
-  MOCK_REFRESH_TOKEN_HASHED,
 } from '../../../test/constants';
-import { TokenType } from './token.entity';
+import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import {
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { getNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
 import { SignatureType } from '../../common/enums/web3';
+import { AuthError } from './auth.error';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -51,6 +42,9 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
 }));
+jest.mock('../../common/utils/hcaptcha', () => ({
+  verifyToken: jest.fn().mockReturnValue({ success: true }),
+}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
@@ -60,7 +54,7 @@ describe('AuthService', () => {
   let authService: AuthService;
   let tokenRepository: TokenRepository;
   let userService: UserService;
-  let authRepository: AuthRepository;
+  let userRepository: UserRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
   let web3Service: Web3Service;
@@ -85,16 +79,11 @@ describe('AuthService', () => {
         AuthService,
         UserService,
         {
-          provide: getRepositoryToken(AuthEntity),
-          useClass: Repository,
-        },
-        {
           provide: JwtService,
           useValue: {
             signAsync: jest.fn(),
           },
         },
-        { provide: AuthRepository, useValue: createMock<AuthRepository>() },
         { provide: TokenRepository, useValue: createMock<TokenRepository>() },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
         { provide: ConfigService, useValue: mockConfigService },
@@ -103,19 +92,19 @@ describe('AuthService', () => {
         {
           provide: Web3Service,
           useValue: {
+            prepareSignatureBody: jest.fn(),
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
-            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
-            prepareSignatureBody: jest.fn(),
+            getOperatorAddress: jest.fn(),
           },
         },
       ],
     }).compile();
 
     authService = moduleRef.get<AuthService>(AuthService);
-    authRepository = moduleRef.get(AuthRepository);
-    tokenRepository = moduleRef.get(TokenRepository);
+    tokenRepository = moduleRef.get<TokenRepository>(TokenRepository);
     userService = moduleRef.get<UserService>(UserService);
+    userRepository = moduleRef.get<UserRepository>(UserRepository);
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
@@ -129,6 +118,7 @@ describe('AuthService', () => {
     const signInDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
+      hCaptchaToken: MOCK_HCAPTCHA_TOKEN,
     };
 
     const userEntity: Partial<UserEntity> = {
@@ -186,7 +176,7 @@ describe('AuthService', () => {
     const userCreateDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
-      type: UserType.WORKER,
+      hCaptchaToken: 'token',
     };
 
     const userEntity: Partial<UserEntity> = {
@@ -195,20 +185,12 @@ describe('AuthService', () => {
       password: MOCK_HASHED_PASSWORD,
     };
 
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    };
-
-    let createUserMock: any, createTokenMock: any;
+    let createUserMock: any;
 
     beforeEach(() => {
       createUserMock = jest.spyOn(userService, 'create');
-      createTokenMock = jest.spyOn(tokenRepository, 'create');
 
       createUserMock.mockResolvedValue(userEntity);
-      createTokenMock.mockResolvedValue(tokenEntity);
     });
 
     afterEach(() => {
@@ -219,9 +201,10 @@ describe('AuthService', () => {
       const result = await authService.signup(userCreateDto);
 
       expect(userService.create).toHaveBeenCalledWith(userCreateDto);
-      expect(tokenRepository.create).toHaveBeenCalledWith({
-        tokenType: TokenType.EMAIL,
+      expect(tokenRepository.createUnique).toHaveBeenCalledWith({
+        type: TokenType.EMAIL,
         user: userEntity,
+        expiresAt: expect.any(Date),
       });
       expect(result).toBe(userEntity);
     });
@@ -235,71 +218,24 @@ describe('AuthService', () => {
     });
   });
 
-  describe('logout', () => {
-    let updateAuth: any;
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-    };
-
-    const updateResult = {};
-
-    beforeEach(() => {
-      updateAuth = jest.spyOn(authRepository, 'update');
-      updateAuth.mockResolvedValue(updateResult);
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should delete the authentication entities based on email', async () => {
-      const result = await authService.logout(userEntity as UserEntity);
-
-      const expectedUpdateQuery = {
-        userId: userEntity.id,
-      };
-
-      expect(authRepository.delete).toHaveBeenCalledWith(expectedUpdateQuery);
-      expect(result).toBe(undefined);
-    });
-  });
-
   describe('auth', () => {
+    let jwtSignMock: any, findTokenMock: any;
+
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
     };
 
-    const authEntity: Partial<AuthEntity> = {
-      id: 1,
+    const tokenEntity: Partial<TokenEntity> = {
+      uuid: v4(),
+      type: TokenType.REFRESH,
+      user: userEntity as UserEntity,
     };
 
-    let createAuthMock: any;
-    let updateAuthMock: any;
-    let jwtSignMock: any;
-    let hashTokenMock: any;
-    let logoutMock: any;
     beforeEach(() => {
-      createAuthMock = jest
-        .spyOn(authRepository, 'create' as any)
-        .mockResolvedValueOnce(authEntity);
-
-      updateAuthMock = jest
-        .spyOn(authRepository, 'update' as any)
-        .mockResolvedValueOnce(authEntity);
-
       jwtSignMock = jest
         .spyOn(jwtService, 'signAsync')
-        .mockResolvedValueOnce(MOCK_ACCESS_TOKEN)
-        .mockResolvedValueOnce(MOCK_REFRESH_TOKEN);
-
-      hashTokenMock = jest
-        .spyOn(authService, 'hashToken')
-        .mockReturnValueOnce(MOCK_ACCESS_TOKEN_HASHED)
-        .mockReturnValueOnce(MOCK_REFRESH_TOKEN_HASHED);
-      logoutMock = jest
-        .spyOn(authService, 'logout' as any)
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce(MOCK_ACCESS_TOKEN);
     });
 
     afterEach(() => {
@@ -307,459 +243,477 @@ describe('AuthService', () => {
     });
 
     it('should create authentication tokens and return them', async () => {
-      const findAuthMock = jest
-        .spyOn(authRepository, 'findOne' as any)
-        .mockResolvedValueOnce(undefined);
+      findTokenMock = jest
+        .spyOn(tokenRepository, 'findOneByUserIdAndType')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(web3Service, 'getOperatorAddress')
+        .mockReturnValueOnce(MOCK_ADDRESS);
 
       const result = await authService.auth(userEntity as UserEntity);
-
-      expect(findAuthMock).toHaveBeenCalledWith({ userId: userEntity.id });
-      expect(updateAuthMock).not.toHaveBeenCalled();
-      expect(createAuthMock).toHaveBeenCalledWith({
-        user: userEntity,
-        refreshToken: MOCK_REFRESH_TOKEN_HASHED,
-        accessToken: MOCK_ACCESS_TOKEN_HASHED,
-      });
-      expect(jwtSignMock).toHaveBeenCalledWith({
-        email: userEntity.email,
-        userId: userEntity.id,
-      });
+      expect(findTokenMock).toHaveBeenCalledWith(
+        userEntity.id,
+        TokenType.REFRESH,
+      );
       expect(jwtSignMock).toHaveBeenLastCalledWith(
         {
           email: userEntity.email,
           userId: userEntity.id,
+          address: userEntity.evmAddress,
+          kyc_status: userEntity.kyc?.status,
+          reputation_network: MOCK_ADDRESS,
         },
         {
-          expiresIn: undefined,
+          expiresIn: MOCK_EXPIRES_IN,
         },
       );
-      expect(logoutMock).not.toHaveBeenCalled();
-      expect(hashTokenMock).toHaveBeenCalledWith(MOCK_ACCESS_TOKEN);
-      expect(hashTokenMock).toHaveBeenLastCalledWith(MOCK_REFRESH_TOKEN);
       expect(result).toEqual({
         accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
+        refreshToken: undefined,
       });
     });
 
-    it('should logout, create authentication tokens and return them', async () => {
-      const findAuthMock = jest
-        .spyOn(authRepository, 'findOne' as any)
-        .mockResolvedValueOnce(authEntity);
+    describe('forgotPassword', () => {
+      let findByEmailMock: any, findTokenMock: any;
+      let userEntity: Partial<UserEntity>, tokenEntity: Partial<TokenEntity>;
 
-      const result = await authService.auth(userEntity as UserEntity);
+      beforeEach(() => {
+        userEntity = {
+          id: 1,
+          email: 'user@example.com',
+          status: UserStatus.ACTIVE,
+        };
+        tokenEntity = {
+          uuid: v4(),
+          type: TokenType.EMAIL,
+          user: userEntity as UserEntity,
+        };
 
-      expect(findAuthMock).toHaveBeenCalledWith({ userId: userEntity.id });
-      expect(updateAuthMock).not.toHaveBeenCalled();
-      expect(createAuthMock).toHaveBeenCalledWith({
-        user: userEntity,
-        refreshToken: MOCK_REFRESH_TOKEN_HASHED,
-        accessToken: MOCK_ACCESS_TOKEN_HASHED,
+        findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
+        findByEmailMock.mockResolvedValue(userEntity);
       });
-      expect(jwtSignMock).toHaveBeenCalledWith({
-        email: userEntity.email,
-        userId: userEntity.id,
+
+      afterEach(() => {
+        jest.clearAllMocks();
       });
-      expect(jwtSignMock).toHaveBeenLastCalledWith(
-        {
-          email: userEntity.email,
-          userId: userEntity.id,
-        },
-        {
-          expiresIn: undefined,
-        },
-      );
-      expect(logoutMock).toHaveBeenCalled();
-      expect(hashTokenMock).toHaveBeenCalledWith(MOCK_ACCESS_TOKEN);
-      expect(hashTokenMock).toHaveBeenLastCalledWith(MOCK_REFRESH_TOKEN);
-      expect(result).toEqual({
-        accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
+
+      it('should throw NotFound exception if user is not found', () => {
+        findByEmailMock.mockResolvedValue(null);
+        expect(
+          authService.forgotPassword({ email: 'user@example.com' }),
+        ).rejects.toThrow(AuthError);
       });
-    });
-  });
 
-  describe('forgotPassword', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-      status: UserStatus.ACTIVE,
-    };
+      it('should throw Unauthorized exception if user is not active', () => {
+        userEntity.status = UserStatus.INACTIVE;
+        findByEmailMock.mockResolvedValue(userEntity);
+        expect(
+          authService.forgotPassword({ email: 'user@example.com' }),
+        ).rejects.toThrow(AuthError);
+      });
 
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    };
+      it('should remove existing token if it exists', async () => {
+        findTokenMock.mockResolvedValue(tokenEntity);
+        await authService.forgotPassword({ email: 'user@example.com' });
 
-    let createTokenMock: any;
+        expect(tokenRepository.deleteOne).toHaveBeenCalled();
+      });
 
-    beforeEach(() => {
-      createTokenMock = jest.spyOn(tokenRepository, 'create');
+      it('should create a new token and send email', async () => {
+        sendGridService.sendEmail = jest.fn();
+        const email = 'user@example.com';
 
-      createTokenMock.mockResolvedValue(tokenEntity);
-    });
+        await authService.forgotPassword({ email });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should throw NotFound exception if user is not found', () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(undefined);
-
-      expect(
-        authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw Unauthorized exception if user is not active', () => {
-      userService.getByEmail = jest
-        .fn()
-        .mockResolvedValueOnce({ ...userEntity, status: UserStatus.PENDING });
-
-      expect(
-        authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-
-    it('should create a new token and send email', async () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
-
-      sendGridService.sendEmail = jest.fn();
-      const email = 'user@example.com';
-
-      await authService.forgotPassword({ email });
-
-      expect(createTokenMock).toHaveBeenCalled();
-      expect(sendGridService.sendEmail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          personalizations: [
-            {
-              dynamicTemplateData: {
-                service_name: SERVICE_NAME,
-                url: expect.stringContaining(
-                  'undefined/reset-password?token=mocked-uuid',
-                ),
+        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+          expect.objectContaining({
+            personalizations: [
+              {
+                dynamicTemplateData: {
+                  service_name: SERVICE_NAME,
+                  url: expect.stringContaining(
+                    'undefined/reset-password?token=',
+                  ),
+                },
+                to: email,
               },
-              to: email,
-            },
-          ],
-          templateId: SENDGRID_TEMPLATES.resetPassword,
-        }),
-      );
-    });
-  });
-
-  describe('restorePassword', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-    };
-
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-      remove: jest.fn(),
-    };
-
-    let findTokenMock: any;
-
-    beforeEach(() => {
-      findTokenMock = jest.spyOn(tokenRepository, 'findOne');
+            ],
+            templateId: SENDGRID_TEMPLATES.resetPassword,
+          }),
+        );
+      });
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+    describe('restorePassword', () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        email: 'user@example.com',
+      };
 
-    it('should throw NotFound exception if token is not found', () => {
-      findTokenMock.mockResolvedValueOnce(undefined);
+      const tokenEntity: Partial<TokenEntity> = {
+        uuid: v4(),
+        type: TokenType.EMAIL,
+        user: userEntity as UserEntity,
+      };
 
-      expect(
-        authService.restorePassword({
+      let findTokenMock: any;
+
+      beforeEach(() => {
+        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
+        sendGridService.sendEmail = jest.fn();
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should throw an error if token is not found', () => {
+        findTokenMock.mockResolvedValue(null);
+
+        expect(
+          authService.restorePassword({
+            token: 'token',
+            password: 'password',
+            hCaptchaToken: 'token',
+          }),
+        ).rejects.toThrow(AuthError);
+      });
+
+      it('should throw an error if token is expired', () => {
+        tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
+        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
+
+        expect(
+          authService.restorePassword({
+            token: 'token',
+            password: 'password',
+            hCaptchaToken: 'token',
+          }),
+        ).rejects.toThrow(AuthError);
+      });
+
+      it('should update password and send email', async () => {
+        tokenEntity.expiresAt = new Date(
+          new Date().setDate(new Date().getDate() + 1),
+        );
+        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
+        userService.updatePassword = jest.fn();
+        sendGridService.sendEmail = jest.fn();
+
+        const updatePasswordMock = jest.spyOn(userService, 'updatePassword');
+
+        await authService.restorePassword({
           token: 'token',
           password: 'password',
-        }),
-      ).rejects.toThrow(NotFoundException);
+          hCaptchaToken: 'token',
+        });
+
+        expect(updatePasswordMock).toHaveBeenCalled();
+        expect(sendGridService.sendEmail).toHaveBeenCalled();
+        expect(tokenRepository.deleteOne).toHaveBeenCalled();
+      });
     });
 
-    it('should update password and send email', async () => {
-      findTokenMock.mockResolvedValueOnce(tokenEntity);
+    describe('emailVerification', () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        email: 'user@example.com',
+      };
 
-      userService.updatePassword = jest.fn();
-      sendGridService.sendEmail = jest.fn();
+      const tokenEntity: Partial<TokenEntity> = {
+        uuid: v4(),
+        type: TokenType.EMAIL,
+        user: userEntity as UserEntity,
+      };
 
-      const updatePasswordMock = jest.spyOn(userService, 'updatePassword');
+      let findTokenMock: any;
 
-      await authService.restorePassword({
-        token: 'token',
-        password: 'password',
+      beforeEach(() => {
+        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
       });
 
-      expect(updatePasswordMock).toHaveBeenCalled();
-      expect(sendGridService.sendEmail).toHaveBeenCalled();
-      expect(tokenEntity.remove).toHaveBeenCalled();
-    });
-  });
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
 
-  describe('emailVerification', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-    };
+      it('should throw an error if token is not found', () => {
+        findTokenMock.mockResolvedValue(null);
+        expect(
+          authService.emailVerification({ token: 'token' }),
+        ).rejects.toThrow(AuthError);
+      });
+      it('should throw an error if token is expired', () => {
+        tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
+        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
+        expect(
+          authService.emailVerification({ token: 'token' }),
+        ).rejects.toThrow(AuthError);
+      });
 
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-      remove: jest.fn(),
-    };
+      it('should activate user', async () => {
+        tokenEntity.expiresAt = new Date(
+          new Date().setDate(new Date().getDate() + 1),
+        );
+        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
+        userRepository.updateOne = jest.fn();
 
-    let findTokenMock: any;
+        await authService.emailVerification({ token: 'token' });
 
-    beforeEach(() => {
-      findTokenMock = jest.spyOn(tokenRepository, 'findOne');
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should throw NotFound exception if token is not found', () => {
-      findTokenMock.mockResolvedValueOnce(undefined);
-
-      expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
-        NotFoundException,
-      );
+        expect(userRepository.updateOne).toHaveBeenCalled();
+        expect(tokenEntity.user?.status).toBe(UserStatus.ACTIVE);
+      });
     });
 
-    it('should activate user', async () => {
-      findTokenMock.mockResolvedValueOnce(tokenEntity);
+    describe('resendEmailVerification', () => {
+      let findByEmailMock: any,
+        findTokenMock: any,
+        createTokenMock: any,
+        userEntity: Partial<UserEntity>;
 
-      userService.activate = jest.fn();
-      const userActivateMock = jest.spyOn(userService, 'activate');
+      beforeEach(() => {
+        userEntity = {
+          id: 1,
+          email: 'user@example.com',
+          status: UserStatus.PENDING,
+        };
+        findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
+        createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
+      });
 
-      await authService.emailVerification({ token: 'token' });
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
 
-      expect(userActivateMock).toHaveBeenCalled();
-      expect(tokenEntity.remove).toHaveBeenCalled();
-    });
-  });
+      it('should throw an error if user is not found', () => {
+        findByEmailMock.mockResolvedValue(null);
+        expect(
+          authService.resendEmailVerification({ email: 'user@example.com' }),
+        ).rejects.toThrow(AuthError);
+      });
 
-  describe('resendEmailVerification', () => {
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-      status: UserStatus.PENDING,
-    };
+      it('should throw an error if user is not pending', () => {
+        userEntity.status = UserStatus.ACTIVE;
+        findByEmailMock.mockResolvedValue(userEntity);
+        expect(
+          authService.resendEmailVerification({ email: 'user@example.com' }),
+        ).rejects.toThrow(AuthError);
+      });
 
-    let createTokenMock: any;
+      it('should create token and send email', async () => {
+        findByEmailMock.mockResolvedValue(userEntity);
+        findTokenMock.mockResolvedValueOnce(null);
+        sendGridService.sendEmail = jest.fn();
+        const email = 'user@example.com';
 
-    beforeEach(() => {
-      createTokenMock = jest.spyOn(tokenRepository, 'create');
-    });
+        await authService.resendEmailVerification({ email });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should throw NotFound exception if user is not found', () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(undefined);
-
-      expect(
-        authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should create token and send email', async () => {
-      userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
-
-      sendGridService.sendEmail = jest.fn();
-      const email = 'user@example.com';
-
-      await authService.resendEmailVerification({ email });
-
-      expect(createTokenMock).toHaveBeenCalled();
-      expect(sendGridService.sendEmail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          personalizations: [
-            {
-              dynamicTemplateData: {
-                service_name: SERVICE_NAME,
-                url: expect.stringContaining('/verify?token=mocked-uuid'),
+        expect(createTokenMock).toHaveBeenCalled();
+        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+          expect.objectContaining({
+            personalizations: [
+              {
+                dynamicTemplateData: {
+                  service_name: SERVICE_NAME,
+                  url: expect.stringContaining('/verify?token='),
+                },
+                to: email,
               },
-              to: email,
-            },
-          ],
-          templateId: SENDGRID_TEMPLATES.signup,
-        }),
-      );
-    });
-  });
-
-  describe('web3auth', () => {
-    describe('signin', () => {
-      const nonce = getNonce();
-      const nonce1 = getNonce();
-
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        evmAddress: MOCK_ADDRESS,
-        nonce,
-      };
-
-      let getByAddressMock: any;
-      let updateNonceMock: any;
-
-      beforeEach(() => {
-        getByAddressMock = jest.spyOn(userService, 'getByAddress');
-        updateNonceMock = jest.spyOn(userService, 'updateNonce');
-
-        jest.spyOn(authService, 'auth').mockResolvedValue({
-          accessToken: MOCK_ACCESS_TOKEN,
-          refreshToken: MOCK_REFRESH_TOKEN,
-        });
-      });
-
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should sign in the user, reset nonce and return the JWT', async () => {
-        getByAddressMock.mockResolvedValue(userEntity as UserEntity);
-        updateNonceMock.mockResolvedValue({
-          ...userEntity,
-          nonce: nonce1,
-        } as UserEntity);
-
-        const signature = await signMessage(nonce, MOCK_PRIVATE_KEY);
-        const result = await authService.web3Signin({
-          address: MOCK_ADDRESS,
-          signature,
-        });
-
-        expect(userService.getByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
-        expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
-
-        expect(authService.auth).toHaveBeenCalledWith(userEntity);
-        expect(result).toStrictEqual({
-          accessToken: MOCK_ACCESS_TOKEN,
-          refreshToken: MOCK_REFRESH_TOKEN,
-        });
-      });
-
-      it("should throw ConflictException if signature doesn't match", async () => {
-        const invalidSignature = await signMessage(
-          'invalid message',
-          MOCK_PRIVATE_KEY,
+            ],
+            templateId: SENDGRID_TEMPLATES.signup,
+          }),
         );
+      });
+    });
 
-        await expect(
-          authService.web3Signin({
+    describe('web3auth', () => {
+      describe('signin', () => {
+        const nonce = getNonce();
+        const nonce1 = getNonce();
+
+        const userEntity: Partial<UserEntity> = {
+          id: 1,
+          evmAddress: MOCK_ADDRESS,
+          nonce,
+        };
+
+        let getByAddressMock: any;
+        let updateNonceMock: any;
+
+        beforeEach(() => {
+          getByAddressMock = jest.spyOn(userService, 'getByAddress');
+          updateNonceMock = jest.spyOn(userService, 'updateNonce');
+
+          jest.spyOn(authService, 'auth').mockResolvedValue({
+            accessToken: MOCK_ACCESS_TOKEN,
+            refreshToken: MOCK_REFRESH_TOKEN,
+          });
+        });
+
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it('should sign in the user, reset nonce and return the JWT', async () => {
+          getByAddressMock.mockResolvedValue(userEntity as UserEntity);
+          updateNonceMock.mockResolvedValue({
+            ...userEntity,
+            nonce: nonce1,
+          } as UserEntity);
+
+          const signature = await signMessage(nonce, MOCK_PRIVATE_KEY);
+          const result = await authService.web3Signin({
             address: MOCK_ADDRESS,
-            signature: invalidSignature,
-          }),
-        ).rejects.toThrow(ConflictException);
-      });
-    });
+            signature,
+          });
 
-    describe('signup', () => {
-      const web3PreSignUpDto: PrepareSignatureDto = {
-        address: MOCK_ADDRESS,
-        type: SignatureType.SIGNUP,
-      };
+          expect(userService.getByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
+          expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
 
-      const nonce = getNonce();
-
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        evmAddress: web3PreSignUpDto.address,
-        nonce,
-      };
-
-      const preSignUpDataMock: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
-        contents: 'signup',
-      };
-      let createUserMock: any;
-
-      beforeEach(() => {
-        createUserMock = jest.spyOn(userService, 'createWeb3User');
-
-        createUserMock.mockResolvedValue(userEntity);
-
-        jest.spyOn(authService, 'auth').mockResolvedValue({
-          accessToken: MOCK_ACCESS_TOKEN,
-          refreshToken: MOCK_REFRESH_TOKEN,
+          expect(authService.auth).toHaveBeenCalledWith(userEntity);
+          expect(result).toStrictEqual({
+            accessToken: MOCK_ACCESS_TOKEN,
+            refreshToken: MOCK_REFRESH_TOKEN,
+          });
         });
 
-        jest
-          .spyOn(web3Service as any, 'prepareSignatureBody')
-          .mockReturnValue(preSignUpDataMock);
-      });
+        it("should throw ConflictException if signature doesn't match", async () => {
+          const invalidSignature = await signMessage(
+            'invalid message',
+            MOCK_PRIVATE_KEY,
+          );
 
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should create a new web3 user and return the token', async () => {
-        (KVStoreClient.build as any).mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(Role.JobLauncher),
-          set: jest.fn(),
-        }));
-
-        const signature = await signMessage(
-          preSignUpDataMock,
-          MOCK_PRIVATE_KEY,
-        );
-
-        const result = await authService.web3Signup({
-          ...web3PreSignUpDto,
-          type: UserType.WORKER,
-          signature,
-        });
-
-        expect(userService.createWeb3User).toHaveBeenCalledWith(
-          web3PreSignUpDto.address,
-          UserType.WORKER,
-        );
-
-        expect(authService.auth).toHaveBeenCalledWith(userEntity);
-        expect(result).toStrictEqual({
-          accessToken: MOCK_ACCESS_TOKEN,
-          refreshToken: MOCK_REFRESH_TOKEN,
+          await expect(
+            authService.web3Signin({
+              address: MOCK_ADDRESS,
+              signature: invalidSignature,
+            }),
+          ).rejects.toThrow(ConflictException);
         });
       });
 
-      it("should throw ConflictException if signature doesn't match", async () => {
-        const invalidSignature = await signMessage(
-          'invalid message',
-          MOCK_PRIVATE_KEY,
-        );
+      describe('signup', () => {
+        const web3PreSignUpDto: PrepareSignatureDto = {
+          address: MOCK_ADDRESS,
+          type: SignatureType.SIGNUP,
+        };
 
-        await expect(
-          authService.web3Signup({
-            ...web3PreSignUpDto,
+        const nonce = getNonce();
+
+        const userEntity: Partial<UserEntity> = {
+          id: 1,
+          evmAddress: web3PreSignUpDto.address,
+          nonce,
+        };
+
+        const preSignUpDataMock: SignatureBodyDto = {
+          from: MOCK_ADDRESS,
+          to: MOCK_ADDRESS,
+          contents: 'signup',
+        };
+        let createUserMock: any;
+
+        beforeEach(() => {
+          createUserMock = jest.spyOn(userService, 'createWeb3User');
+
+          createUserMock.mockResolvedValue(userEntity);
+
+          jest.spyOn(authService, 'auth').mockResolvedValue({
+            accessToken: MOCK_ACCESS_TOKEN,
+            refreshToken: MOCK_REFRESH_TOKEN,
+          });
+
+          jest
+            .spyOn(web3Service as any, 'prepareSignatureBody')
+            .mockReturnValue(preSignUpDataMock);
+        });
+
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it('should prepare the signature body and return it', async () => {
+          const signatureType = SignatureType.SIGNUP;
+          const address = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
+
+          const expectedResult = {
+            from: address,
+            to: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
+            contents: 'signup',
+          };
+
+          jest
+            .spyOn(web3Service, 'prepareSignatureBody')
+            .mockReturnValue(expectedResult);
+
+          const result = web3Service.prepareSignatureBody(
+            signatureType,
+            address,
+          );
+
+          expect(result).toEqual(expectedResult);
+        });
+
+        it('should create a new web3 user and return the token', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest.fn().mockResolvedValue(Role.JobLauncher),
+            set: jest.fn(),
+          }));
+
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          const result = await authService.web3Signup({
+            address: web3PreSignUpDto.address,
             type: UserType.WORKER,
-            signature: invalidSignature,
-          }),
-        ).rejects.toThrow(ConflictException);
-      });
-      it('should throw BadRequestException if role is not in KVStore', async () => {
-        const signature = await signMessage(
-          preSignUpDataMock,
-          MOCK_PRIVATE_KEY,
-        );
+            signature,
+          });
 
-        await expect(
-          authService.web3Signup({
-            ...web3PreSignUpDto,
-            type: UserType.WORKER,
-            signature: signature,
-          }),
-        ).rejects.toThrow(BadRequestException);
+          expect(userService.createWeb3User).toHaveBeenCalledWith(
+            expect.objectContaining({
+              evmAddress: web3PreSignUpDto.address,
+            }),
+            web3PreSignUpDto.address,
+          );
+
+          expect(authService.auth).toHaveBeenCalledWith(userEntity);
+          expect(result).toStrictEqual({
+            accessToken: MOCK_ACCESS_TOKEN,
+            refreshToken: MOCK_REFRESH_TOKEN,
+          });
+        });
+
+        it("should throw ConflictException if signature doesn't match", async () => {
+          const invalidSignature = await signMessage(
+            'invalid message',
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: UserType.WORKER,
+              signature: invalidSignature,
+            }),
+          ).rejects.toThrow(ConflictException);
+        });
+        it('should throw BadRequestException if role is not in KVStore', async () => {
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: UserType.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(BadRequestException);
+        });
       });
     });
   });

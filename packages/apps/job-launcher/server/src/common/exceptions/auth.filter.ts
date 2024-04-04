@@ -19,6 +19,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.FORBIDDEN;
+
     if (exception.message === ErrorUser.NotFound) {
       status = HttpStatus.NO_CONTENT;
     }

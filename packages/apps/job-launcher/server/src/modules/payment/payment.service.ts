@@ -5,7 +5,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { ethers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
@@ -25,7 +24,8 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { ConfigNames, networkMap } from '../../common/config';
+import { networkMap } from '../../common/config';
+import { StripeConfigService } from '../../common/config/stripe-config.service';
 import {
   HMToken,
   HMToken__factory,
@@ -45,30 +45,16 @@ export class PaymentService {
   constructor(
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
-    private configService: ConfigService,
+    private stripeConfigService: StripeConfigService,
   ) {
-    this.stripe = new Stripe(
-      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY, ''),
-      {
-        apiVersion: this.configService.get<any>(
-          ConfigNames.STRIPE_API_VERSION,
-          '',
-        ),
-        appInfo: {
-          name: this.configService.get<string>(
-            ConfigNames.STRIPE_APP_NAME,
-            'Fortune',
-          ),
-          version: this.configService.get<string>(
-            ConfigNames.STRIPE_APP_VERSION,
-          ),
-          url: this.configService.get<string>(
-            ConfigNames.STRIPE_APP_INFO_URL,
-            '',
-          ),
-        },
+    this.stripe = new Stripe(this.stripeConfigService.secretKey, {
+      apiVersion: this.stripeConfigService.apiVersion as any,
+      appInfo: {
+        name: this.stripeConfigService.appName,
+        version: this.stripeConfigService.appVersion,
+        url: this.stripeConfigService.appInfoURL,
       },
-    );
+    });
   }
 
   public async createFiatPayment(

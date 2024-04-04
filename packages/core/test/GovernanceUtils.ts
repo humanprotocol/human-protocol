@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
+import { mine } from '@nomicfoundation/hardhat-network-helpers';
 import {
   MetaHumanGovernor,
   VHMToken,
@@ -16,13 +17,7 @@ import {
 let owner: Signer;
 
 export const mineNBlocks = async (n: number) => {
-  await Promise.all(
-    Array(n)
-      .fill(0)
-      .map(async () => {
-        await ethers.provider.send('evm_mine', []);
-      })
-  );
+  await mine(n);
 };
 
 export async function createMockUserWithVotingPower(

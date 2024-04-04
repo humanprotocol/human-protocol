@@ -12,7 +12,7 @@ import { UserModule } from './modules/user/user.module';
 import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { Web3Module } from './modules/web3/web3.module';
-import { envValidator } from './common/config';
+import { envValidator } from './common/config/env-schema';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { StorageModule } from './modules/storage/storage.module';
@@ -20,6 +20,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { EnvConfigModule } from './common/config/config.module';
 
 @Module({
   providers: [
@@ -41,7 +42,6 @@ import { WebhookModule } from './modules/webhook/webhook.module';
     },
   ],
   imports: [
-    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`
@@ -65,6 +65,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
       ),
     }),
     CronJobModule,
+    EnvConfigModule,
   ],
   controllers: [AppController],
 })

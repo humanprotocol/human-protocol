@@ -19,6 +19,7 @@ import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -105,7 +106,7 @@ describe('WebhookService', () => {
 
       await webhookService.createIncomingWebhook(validDto);
 
-      expect(webhookRepository.create).toHaveBeenCalled();
+      expect(webhookRepository.createUnique).toHaveBeenCalled();
       expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
       expect(webhookEntity.retriesCount).toBe(0);
       expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
@@ -130,7 +131,9 @@ describe('WebhookService', () => {
         eventType: EventType.TASK_COMPLETED,
       };
 
-      jest.spyOn(webhookRepository as any, 'create').mockResolvedValue(null);
+      jest
+        .spyOn(webhookRepository as any, 'createUnique')
+        .mockResolvedValue(null);
 
       await expect(
         webhookService.createIncomingWebhook(validDto),
@@ -180,7 +183,7 @@ describe('WebhookService', () => {
     it('should successfully send a webhook', async () => {
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(

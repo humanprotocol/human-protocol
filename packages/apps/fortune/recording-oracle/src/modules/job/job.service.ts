@@ -181,17 +181,17 @@ export class JobService {
       jobSolutionUploaded.hash,
     );
 
-    const reputationOracleAddress =
-      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-    const reputationOracleWebhook = (await kvstoreClient.get(
-      reputationOracleAddress,
-      KVStoreKeys.webhookUrl,
-    )) as string;
-
     if (
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
       submissionsRequired
     ) {
+      const reputationOracleAddress =
+        await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+      const reputationOracleWebhook = (await kvstoreClient.get(
+        reputationOracleAddress,
+        KVStoreKeys.webhookUrl,
+      )) as string;
+
       await sendWebhook(
         this.httpService,
         this.logger,
@@ -199,7 +199,7 @@ export class JobService {
         {
           chainId: webhook.chainId,
           escrowAddress: webhook.escrowAddress,
-          eventType: EventType.ESCROW_RECORDED,
+          eventType: EventType.TASK_COMPLETED,
         },
         this.web3Config.web3PrivateKey,
       );
