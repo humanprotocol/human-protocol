@@ -14,6 +14,8 @@ import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
+import { SYNAPS_API_KEY_DISABLED } from 'src/common/constants';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class KycService {
@@ -46,6 +48,19 @@ export class KycService {
 
       return {
         sessionId: userEntity.kyc.sessionId,
+      };
+    }
+
+    if (this.synapsConfigService.apiKey === SYNAPS_API_KEY_DISABLED) {
+      const sessionId = uuidv4();
+      await this.kycRepository.create({
+        sessionId: sessionId,
+        status: KycStatus.NONE,
+        userId: userEntity.id,
+      });
+
+      return {
+        sessionId: sessionId,
       };
     }
 
