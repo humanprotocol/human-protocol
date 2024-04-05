@@ -4,19 +4,22 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class DatabaseConfigService {
   constructor(private configService: ConfigService) {}
-  get host(): string {
-    return this.configService.get<string>('POSTGRES_HOST', '127.0.0.1');
+  get url(): string | undefined {
+    return this.configService.get<string>('POSTGRES_URL');
   }
-  get port(): number {
-    return +this.configService.get<number>('POSTGRES_PORT', 5432);
+  get host(): string | undefined {
+    return this.configService.get<string>('POSTGRES_HOST');
   }
-  get user(): string {
-    return this.configService.get<string>('POSTGRES_USER', 'operator');
+  get port(): number | undefined {
+    return this.configService.get<number>('POSTGRES_PORT');
   }
-  get password(): string {
-    return this.configService.get<string>('POSTGRES_PASSWORD', 'qwerty');
+  get user(): string | undefined {
+    return this.configService.get<string>('POSTGRES_USER');
   }
-  get database(): string {
+  get password(): string | undefined {
+    return this.configService.get<string>('POSTGRES_PASSWORD');
+  }
+  get database(): string | undefined {
     return this.configService.get<string>(
       'POSTGRES_DATABASE',
       'exchange-oracle',
