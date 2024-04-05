@@ -1,11 +1,9 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ChainId } from '@human-protocol/sdk';
 import {
   CVAT_VALIDATION_META_FILENAME,
   INITIAL_REPUTATION,
 } from '../../common/constants';
-import { ConfigNames } from '../../common/config';
 import {
   JobRequestType,
   ReputationEntityType,
@@ -29,7 +27,8 @@ import {
 } from '../../common/dto/result';
 import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../common/utils';
-import { CvatManifestDto } from 'src/common/dto/manifest';
+import { CvatManifestDto } from '../../common/dto/manifest';
+import { ReputationConfigService } from '../../common/config/reputation-config.service';
 
 @Injectable()
 export class ReputationService {
@@ -39,7 +38,7 @@ export class ReputationService {
     @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly reputationRepository: ReputationRepository,
-    private readonly configService: ConfigService,
+    private readonly reputationConfigService: ReputationConfigService,
     private readonly web3Service: Web3Service,
   ) {}
 
@@ -339,21 +338,11 @@ export class ReputationService {
    * @returns {ReputationLevel} The reputation level.
    */
   public getReputationLevel(reputationPoints: number): ReputationLevel {
-    const reputationLevelLow = this.configService.get<number>(
-      ConfigNames.REPUTATION_LEVEL_LOW,
-      300,
-    );
-
-    const reputationLevelHigh = this.configService.get<number>(
-      ConfigNames.REPUTATION_LEVEL_HIGH,
-      700,
-    );
-
-    if (reputationPoints <= reputationLevelLow) {
+    if (reputationPoints <= this.reputationConfigService.lowLevel) {
       return ReputationLevel.LOW;
     }
 
-    if (reputationPoints >= reputationLevelHigh) {
+    if (reputationPoints >= this.reputationConfigService.highLevel) {
       return ReputationLevel.HIGH;
     }
 

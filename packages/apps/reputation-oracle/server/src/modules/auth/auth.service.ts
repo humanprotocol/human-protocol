@@ -5,7 +5,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -26,7 +25,6 @@ import {
 } from './auth.dto';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { ConfigNames } from '../../common/config';
 import { verifySignature } from '../../common/utils/signature';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
@@ -36,59 +34,34 @@ import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { UserRepository } from '../user/user.repository';
 import { AuthError } from './auth.error';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly refreshTokenExpiresIn: number;
-  private readonly accessTokenExpiresIn: number;
-  private readonly verifyEmailTokenExpiresIn: number;
-  private readonly forgotPasswordTokenExpiresIn: number;
-  private readonly feURL: string;
   private readonly salt: string;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
-    private readonly configService: ConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly authConfigService: AuthConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
-  ) {
-    this.refreshTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.REFRESH_TOKEN_EXPIRES_IN,
-      3600000,
-    );
-
-    this.accessTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
-      300000,
-    );
-
-    this.verifyEmailTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
-      1800000,
-    );
-
-    this.forgotPasswordTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
-      1800000,
-    );
-
-    this.feURL = this.configService.get<string>(
-      ConfigNames.FE_URL,
-      'http://localhost:3005',
-    );
-  }
+  ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
@@ -116,9 +89,9 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
@@ -133,7 +106,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -144,7 +117,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -187,7 +160,7 @@ export class AuthService {
         reputation_network: this.web3Service.getOperatorAddress(),
       },
       {
-        expiresIn: this.accessTokenExpiresIn,
+        expiresIn: this.authConfigService.accessTokenExpiresIn,
       },
     );
 
@@ -200,7 +173,7 @@ export class AuthService {
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.refreshTokenExpiresIn,
+      date.getTime() + this.authConfigService.refreshTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(newRefreshTokenEntity);
@@ -233,7 +206,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.forgotPasswordTokenExpiresIn,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -244,7 +217,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/reset-password?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -259,9 +232,9 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
@@ -340,7 +313,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -351,7 +324,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -384,7 +357,7 @@ export class AuthService {
     }
 
     let kvstore: KVStoreClient;
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
       kvstore = await KVStoreClient.build(
         this.web3Service.getSigner(ChainId.POLYGON),
