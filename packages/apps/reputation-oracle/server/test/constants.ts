@@ -232,5 +232,3 @@ Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
 export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
-
-export const MOCK_HCAPTCHA_TOKEN = 'test-token';

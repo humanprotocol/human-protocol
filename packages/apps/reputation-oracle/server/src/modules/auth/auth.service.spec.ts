@@ -15,7 +15,6 @@ import {
   MOCK_EMAIL,
   MOCK_EXPIRES_IN,
   MOCK_HASHED_PASSWORD,
-  MOCK_HCAPTCHA_TOKEN,
   MOCK_PASSWORD,
   MOCK_PRIVATE_KEY,
   MOCK_REFRESH_TOKEN,
@@ -118,7 +117,6 @@ describe('AuthService', () => {
     const signInDto = {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
-      hCaptchaToken: MOCK_HCAPTCHA_TOKEN,
     };
 
     const userEntity: Partial<UserEntity> = {
