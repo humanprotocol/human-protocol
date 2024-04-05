@@ -93,6 +93,17 @@ export function UiExample() {
         </Grid>
       </Stack>
 
+      <Stack
+        alignItems="center"
+        direction="row"
+        spacing={2}
+        sx={{ margin: '12px 0' }}
+      >
+        <Button fullWidth variant="contained">
+          Full width
+        </Button>
+      </Stack>
+
       <h2>Loader</h2>
       <Stack
         alignItems="center"

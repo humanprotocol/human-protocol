@@ -82,15 +82,6 @@ export const theme: ThemeOptions = {
             color: colorPalette.white,
           },
         },
-        sizeLarge: {
-          padding: '0.5rem 6rem',
-        },
-        sizeMedium: {
-          padding: '0.5rem 3rem',
-        },
-        sizeSmall: {
-          padding: '0.5rem 1.2rem',
-        },
       },
     },
     MuiCheckbox: {
