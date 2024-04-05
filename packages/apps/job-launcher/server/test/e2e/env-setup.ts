@@ -37,18 +37,18 @@ export default function setupE2eEnvironment() {
 
   process.env.HASH_SECRET = 'a328af3fc1dad15342cc3d68936008fa';
   process.env.JWT_PRIVATE_KEY = `-----BEGIN EC PARAMETERS-----
-  BggqhkjOPQMBBw==
-  -----END EC PARAMETERS-----
-  -----BEGIN EC PRIVATE KEY-----
-  MHcCAQEEID2jVcOtjupW4yqNTz70nvmt1GSvqET5G7lpC0Gp31LFoAoGCCqGSM49
-  AwEHoUQDQgAEUznVCoagfRCuMA3TfG51xWShNrMJt86lkzfAep9bfBxbaCBbUhJ1
-  s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
-  -----END EC PRIVATE KEY-----`;
+BggqhkjOPQMBBw==
+-----END EC PARAMETERS-----
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEID2jVcOtjupW4yqNTz70nvmt1GSvqET5G7lpC0Gp31LFoAoGCCqGSM49
+AwEHoUQDQgAEUznVCoagfRCuMA3TfG51xWShNrMJt86lkzfAep9bfBxbaCBbUhJ1
+s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
+-----END EC PRIVATE KEY-----`;
 
   process.env.JWT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
-  MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUznVCoagfRCuMA3TfG51xWShNrMJ
-  t86lkzfAep9bfBxbaCBbUhJ1s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
-  -----END PUBLIC KEY-----`;
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUznVCoagfRCuMA3TfG51xWShNrMJ
+t86lkzfAep9bfBxbaCBbUhJ1s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
+-----END PUBLIC KEY-----`;
   process.env.JWT_ACCESS_TOKEN_EXPIRES_IN = '600';
   process.env.JWT_REFRESH_TOKEN_EXPIRES_IN = '1d';
 
