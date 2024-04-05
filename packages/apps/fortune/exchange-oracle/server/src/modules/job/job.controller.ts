@@ -14,6 +14,7 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
+import { Web3SignatureGuard } from '../../common/guards/web3auth.auth';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { GetJobsDto, JobDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
@@ -74,6 +75,7 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @Post('solve')
+  @UseGuards(Web3SignatureGuard)
   solveJob(
     @Request() req: RequestWithUser,
     @Body() body: SolveJobDto,
