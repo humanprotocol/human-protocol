@@ -1194,9 +1194,15 @@ export class JobService {
       jobId,
       userId,
     );
+
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (!jobEntity.escrowAddress) {
+      this.logger.log(ErrorJob.ResultNotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
@@ -1387,7 +1393,9 @@ export class JobService {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
       requesterAddress: signer.address,
-      fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
+      fundAmount: escrow
+        ? Number(ethers.formatEther(escrow.totalFundedAmount))
+        : 0,
       exchangeOracleAddress: escrow?.exchangeOracle || ethers.ZeroAddress,
       recordingOracleAddress: escrow?.recordingOracle || ethers.ZeroAddress,
       reputationOracleAddress: escrow?.reputationOracle || ethers.ZeroAddress,
@@ -1446,13 +1454,13 @@ export class JobService {
         manifestUrl,
         manifestHash,
         balance: Number(ethers.formatEther(escrow?.balance || 0)),
-        paidOut: Number(escrow?.amountPaid || 0),
+        paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
         status: jobEntity.status,
       },
       manifest: manifestDetails,
       staking: {
         staker: allocation?.staker as string,
-        allocated: Number(allocation?.tokens),
+        allocated: Number(ethers.formatEther(allocation?.tokens || 0)),
         slashed: 0, // TODO: Retrieve slash tokens
       },
     };
