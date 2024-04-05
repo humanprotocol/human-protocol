@@ -78,7 +78,7 @@
     "@types/zxcvbn": "4.4.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "@vercel/node": "^3.0.24",
+    "@vercel/node": "^3.0.26",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",

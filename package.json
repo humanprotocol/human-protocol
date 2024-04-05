@@ -73,6 +73,7 @@
     "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
     "qrcode": "^1.5.0",
-    "semver": "^7.5.2"
+    "semver": "^7.5.2",
+    "undici": "^6.11.1"
   }
 }
