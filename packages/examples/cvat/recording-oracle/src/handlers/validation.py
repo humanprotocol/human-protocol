@@ -11,7 +11,7 @@ import src.core.annotation_meta as annotation
 import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
 from src.core.config import Config
-from src.core.manifest import TaskManifest, parse_manifest
+from src.core.manifest import TaskManifest
 from src.core.oracle_events import (
     RecordingOracleEvent_TaskCompleted,
     RecordingOracleEvent_TaskRejected,
@@ -30,6 +30,7 @@ from src.handlers.process_intermediate_results import (
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
+from src.core.manifest import parse_manifest
 from src.utils.assignments import compute_resulting_annotations_hash
 from src.utils.logging import NullLogger, get_function_logger
 
