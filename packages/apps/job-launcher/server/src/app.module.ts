@@ -44,12 +44,12 @@ import { E2E_TEST_ENV } from './common/constants';
   imports: [
     ConfigModule.forRoot({
       ignoreEnvFile: process.env.NODE_ENV === E2E_TEST_ENV,
-      ...(process.env.NODE_ENV !== E2E_TEST_ENV && {
+      ...(process.env.NODE_ENV === E2E_TEST_ENV && {
         envFilePath: process.env.NODE_ENV
           ? `.env.${process.env.NODE_ENV as string}`
           : '.env',
       }),
-      ...(process.env.NODE_ENV !== E2E_TEST_ENV && {
+      ...(process.env.NODE_ENV === E2E_TEST_ENV && {
         validationSchema: envValidator,
       }),
     }),
