@@ -76,7 +76,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * model IStatisticsParams {
    *   from?: Date;
    *   to?: Date;
    *   limit?: number;
@@ -156,7 +156,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * model IStatisticsParams {
    *   from?: Date;
    *   to?: Date;
    *   limit?: number;
@@ -222,7 +222,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * model IStatisticsParams {
    *   from?: Date;
    *   to?: Date;
    *   limit?: number;
@@ -317,7 +317,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * model IStatisticsParams {
    *   from?: Date;
    *   to?: Date;
    *   limit?: number;
