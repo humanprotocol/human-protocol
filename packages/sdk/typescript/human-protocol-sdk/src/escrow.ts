@@ -1411,7 +1411,7 @@ export class EscrowUtils {
    * **Input parameters**
    *
    * ```ts
-   * model IEscrowsFilter {
+   * interface IEscrowsFilter {
    *   networks: ChainId[];
    *   launcher?: string;
    *   reputationOracle?: string;
