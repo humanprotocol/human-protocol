@@ -8,6 +8,27 @@ import { colorPalette } from '@/styles/color-palette';
 import { MODAL_STATE, useModalStore } from '@/components/ui/modal/modal.store';
 import { Modal } from '@/components/ui/modal/modal';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import {
+  ConversionIcon,
+  ConversionPurpleIcon,
+  FileIcon,
+  HandsIcon,
+  HumanLogoIcon,
+  RefreshIcon,
+  ShadowFileIcon,
+  ShadowHumanLogoIcon,
+  ShadowUserIcon,
+  ShadowHandIcon,
+  UserIcon,
+  WhiteUserIcon,
+  EllipseUserIcon,
+  EllipseHumanLogoIcon,
+  EllipseFileIcon,
+  InfoIcon,
+  ProfileIcon,
+  BackArrowMobileIcon,
+  BackArrowDesktopIcon,
+} from '@/components/ui/icons';
 
 export function UiExample() {
   const { openModal, isModalOpen, closeModal } = useModalStore();
@@ -121,6 +142,83 @@ export function UiExample() {
         {/*//Temporary function passed in prop*/}
         <Breadcrumbs onClick={closeModal} />
       </Box>
+
+      {/* ConversionIcon,
+  FileIcon,
+  HandsIcon,
+  HumanLogoIcon,
+  RefreshIcon,
+  ShadowFileIcon,
+  ShadowHumanLogo,
+  ShadowUserIcon,
+  UserIcon,
+  WhiteUserIcon,
+  EllipseFile,
+  EllipseUser,
+  EllipseHumanLogo, */}
+
+      <h2>Icons</h2>
+      <Stack alignItems="center" direction="row" spacing={4}>
+        <Grid>
+          <ConversionIcon />
+        </Grid>
+        <Grid>
+          <ConversionPurpleIcon />
+        </Grid>
+        <Grid>
+          <FileIcon />
+        </Grid>
+        <Grid>
+          <HandsIcon />
+        </Grid>
+        <Grid>
+          <HumanLogoIcon />
+        </Grid>
+        <Grid>
+          <RefreshIcon />
+        </Grid>
+        <Grid>
+          <ShadowFileIcon />
+        </Grid>
+        <Grid>
+          <ShadowHumanLogoIcon />
+        </Grid>
+        <Grid>
+          <ShadowUserIcon />
+        </Grid>
+        <Grid>
+          <UserIcon />
+        </Grid>
+        <Grid>
+          <WhiteUserIcon />
+        </Grid>
+      </Stack>
+      <Stack alignItems="center" direction="row" spacing={4}>
+        <Grid>
+          <EllipseFileIcon />
+        </Grid>
+        <Grid>
+          <EllipseUserIcon />
+        </Grid>
+        <Grid>
+          <EllipseHumanLogoIcon />
+        </Grid>
+        <Grid>
+          <ShadowHandIcon />
+        </Grid>
+        <Grid>
+          <InfoIcon />
+        </Grid>
+        <Grid>
+          <ProfileIcon />
+        </Grid>
+        <Grid>
+          <BackArrowMobileIcon />
+        </Grid>
+        <Grid>
+          <BackArrowDesktopIcon />
+        </Grid>
+      </Stack>
 
       <h2>Modal</h2>
 
