@@ -4,6 +4,7 @@ import SelectMui from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { Controller } from 'react-hook-form';
 import InputLabel from '@mui/material/InputLabel';
+import FormHelperText from '@mui/material/FormHelperText';
 
 export interface OptionsProps {
   id: number;
@@ -29,7 +30,7 @@ export function Select({
     <Controller
       name={name}
       render={({ field, fieldState }) => (
-        <FormControl fullWidth>
+        <FormControl error={Boolean(fieldState.error)} fullWidth>
           {label ? <InputLabel id={`${name}-label`}>{label}</InputLabel> : null}
           <SelectMui
             {...field}
@@ -45,6 +46,7 @@ export function Select({
               </MenuItem>
             ))}
           </SelectMui>
+          <FormHelperText>{fieldState.error?.message}</FormHelperText>
         </FormControl>
       )}
     />

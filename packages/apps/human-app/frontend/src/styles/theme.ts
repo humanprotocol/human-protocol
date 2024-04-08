@@ -93,13 +93,6 @@ export const theme: ThemeOptions = {
         },
       },
     },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          color: colorPalette.primary.main,
-        },
-      },
-    },
     MuiSvgIcon: {
       styleOverrides: {
         root: {

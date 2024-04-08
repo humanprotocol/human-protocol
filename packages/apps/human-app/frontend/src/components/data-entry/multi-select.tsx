@@ -45,14 +45,14 @@ export function MultiSelect({
   };
 
   const onDelete = (value: string) => {
-    const values = context.getValues();
-    const selectValues = values[name] as string[];
-    const index = selectValues.indexOf(value);
-    if (index === -1) {
-      return;
-    }
+    const currentValues = context.getValues()[name] as string[];
 
-    context.unregister(`${name}.${index}`);
+    context.setValue(
+      name,
+      currentValues.filter((val) => {
+        return val !== value;
+      })
+    );
   };
 
   const renderValue = (selected: string[]) => (
