@@ -9,25 +9,21 @@ import { MODAL_STATE, useModalStore } from '@/components/ui/modal/modal.store';
 import { Modal } from '@/components/ui/modal/modal';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import {
-  ConversionIcon,
-  ConversionPurpleIcon,
-  FileIcon,
-  HandsIcon,
+  HomepageLogoIcon,
+  HomepageUserIcon,
+  HomepageWorkIcon,
   HumanLogoIcon,
-  RefreshIcon,
-  ShadowFileIcon,
-  ShadowHumanLogoIcon,
-  ShadowUserIcon,
-  ShadowHandIcon,
-  UserIcon,
-  WhiteUserIcon,
-  EllipseUserIcon,
-  EllipseHumanLogoIcon,
-  EllipseFileIcon,
+  HumanLogoCircleIcon,
+  BackArrowIcon,
+  ChatIcon,
+  HandIcon,
   InfoIcon,
-  ProfileIcon,
-  BackArrowMobileIcon,
-  BackArrowDesktopIcon,
+  RefreshIcon,
+  UserFilledIcon,
+  UserOutlinedIcon,
+  UserSecondaryIcon,
+  WorkIcon,
+  WorkSecondaryIcon,
 } from '@/components/ui/icons';
 
 export function UiExample() {
@@ -143,80 +139,54 @@ export function UiExample() {
         <Breadcrumbs onClick={closeModal} />
       </Box>
 
-      {/* ConversionIcon,
-  FileIcon,
-  HandsIcon,
-  HumanLogoIcon,
-  RefreshIcon,
-  ShadowFileIcon,
-  ShadowHumanLogo,
-  ShadowUserIcon,
-  UserIcon,
-  WhiteUserIcon,
-  EllipseFile,
-  EllipseUser,
-  EllipseHumanLogo, */}
-
       <h2>Icons</h2>
       <Stack alignItems="center" direction="row" spacing={4}>
         <Grid>
-          <ConversionIcon />
+          <HomepageLogoIcon />
         </Grid>
         <Grid>
-          <ConversionPurpleIcon />
+          <HomepageUserIcon />
         </Grid>
         <Grid>
-          <FileIcon />
-        </Grid>
-        <Grid>
-          <HandsIcon />
+          <HomepageWorkIcon />
         </Grid>
         <Grid>
           <HumanLogoIcon />
         </Grid>
         <Grid>
+          <HumanLogoCircleIcon />
+        </Grid>
+        <Grid>
+          <HandIcon />
+        </Grid>
+        <Grid>
           <RefreshIcon />
-        </Grid>
-        <Grid>
-          <ShadowFileIcon />
-        </Grid>
-        <Grid>
-          <ShadowHumanLogoIcon />
-        </Grid>
-        <Grid>
-          <ShadowUserIcon />
-        </Grid>
-        <Grid>
-          <UserIcon />
-        </Grid>
-        <Grid>
-          <WhiteUserIcon />
         </Grid>
       </Stack>
       <Stack alignItems="center" direction="row" spacing={4}>
         <Grid>
-          <EllipseFileIcon />
+          <UserFilledIcon />
         </Grid>
         <Grid>
-          <EllipseUserIcon />
+          <UserOutlinedIcon />
         </Grid>
         <Grid>
-          <EllipseHumanLogoIcon />
+          <UserSecondaryIcon />
         </Grid>
         <Grid>
-          <ShadowHandIcon />
+          <WorkIcon />
+        </Grid>
+        <Grid>
+          <WorkSecondaryIcon />
+        </Grid>
+        <Grid>
+          <BackArrowIcon />
+        </Grid>
+        <Grid>
+          <ChatIcon />
         </Grid>
         <Grid>
           <InfoIcon />
-        </Grid>
-        <Grid>
-          <ProfileIcon />
-        </Grid>
-        <Grid>
-          <BackArrowMobileIcon />
-        </Grid>
-        <Grid>
-          <BackArrowDesktopIcon />
         </Grid>
       </Stack>
 

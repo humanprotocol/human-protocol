@@ -1,41 +1,33 @@
-import ConversionIcon from '@/assets/icons/conversation.svg';
-import ConversionPurpleIcon from '@/assets/icons/conversation-purple.svg';
-import FileIcon from '@/assets/icons/file.svg';
-import HandsIcon from '@/assets/icons/hands.svg';
-import HumanLogoIcon from '@/assets/icons/human-logo.svg';
-import RefreshIcon from '@/assets/icons/refresh.svg';
-import ShadowFileIcon from '@/assets/icons/shadow-file.svg';
-import ShadowHumanLogoIcon from '@/assets/icons/shadow-human-logo.svg';
-import ShadowUserIcon from '@/assets/icons/shadow-user.svg';
-import UserIcon from '@/assets/icons/user.svg';
-import WhiteUserIcon from '@/assets/icons/white-user.svg';
-import EllipseUserIcon from '@/assets/icons/ellipse-user.svg';
-import EllipseHumanLogoIcon from '@/assets/icons/ellipse-human-logo.svg';
-import EllipseFileIcon from '@/assets/icons/ellipse-file.svg';
-import ShadowHandIcon from '@/assets/icons/shadow-hand.svg';
+import HomepageLogoIcon from '@/assets/icons/icons-homepage/logo.svg';
+import HomepageUserIcon from '@/assets/icons/icons-homepage/user.svg';
+import HomepageWorkIcon from '@/assets/icons/icons-homepage/work.svg';
+import HumanLogoIcon from '@/assets/icons/icons-human-logo/human-logo.svg';
+import HumanLogoCircleIcon from '@/assets/icons/icons-human-logo/human-logo-circle.svg';
+import BackArrowIcon from '@/assets/icons/back-arrow.svg';
+import ChatIcon from '@/assets/icons/chat.svg';
+import HandIcon from '@/assets/icons/hand.svg';
 import InfoIcon from '@/assets/icons/info.svg';
-import ProfileIcon from '@/assets/icons/profile.svg';
-import BackArrowMobileIcon from '@/assets/icons/back-arrow-mobile.svg';
-import BackArrowDesktopIcon from '@/assets/icons/back-arrow-desktop.svg';
+import RefreshIcon from '@/assets/icons/refresh.svg';
+import UserFilledIcon from '@/assets/icons/user-filled.svg';
+import UserOutlinedIcon from '@/assets/icons/user-outlined.svg';
+import UserSecondaryIcon from '@/assets/icons/user-secondary.svg';
+import WorkIcon from '@/assets/icons/work.svg';
+import WorkSecondaryIcon from '@/assets/icons/work-secondary.svg';
 
 export {
-  ConversionIcon,
-  ConversionPurpleIcon,
-  FileIcon,
-  HandsIcon,
+  HomepageLogoIcon,
+  HomepageUserIcon,
+  HomepageWorkIcon,
   HumanLogoIcon,
-  RefreshIcon,
-  ShadowFileIcon,
-  ShadowHumanLogoIcon,
-  ShadowUserIcon,
-  ShadowHandIcon,
-  UserIcon,
-  WhiteUserIcon,
-  EllipseUserIcon,
-  EllipseHumanLogoIcon,
-  EllipseFileIcon,
+  HumanLogoCircleIcon,
+  BackArrowIcon,
+  ChatIcon,
+  HandIcon,
   InfoIcon,
-  ProfileIcon,
-  BackArrowMobileIcon,
-  BackArrowDesktopIcon,
+  RefreshIcon,
+  UserFilledIcon,
+  UserOutlinedIcon,
+  UserSecondaryIcon,
+  WorkIcon,
+  WorkSecondaryIcon,
 };
