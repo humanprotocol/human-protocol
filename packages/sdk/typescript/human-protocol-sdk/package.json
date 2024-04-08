@@ -48,7 +48,7 @@
     "minio": "^7.0.32",
     "openpgp": "^5.10.2",
     "secp256k1": "^4.0.3",
-    "vitest": "^0.30.1",
+    "vitest": "^1.4.0",
     "winston": "^3.13.0"
   },
   "devDependencies": {
