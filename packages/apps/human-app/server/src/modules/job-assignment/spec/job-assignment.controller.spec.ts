@@ -7,7 +7,7 @@ import {
   JobAssignmentDto,
   JobsFetchParamsCommand,
   JobsFetchParamsDto,
-} from '../interfaces/job-assignment.interface';
+} from '../model/job-assignment.model';
 import {
   jobAssignmentDtoFixture,
   jobAssignmentCommandFixture,
@@ -86,9 +86,8 @@ describe('JobAssignmentController', () => {
 
     it('should call service processGetAssignedJobs method with proper fields set', async () => {
       const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
-      const command: JobsFetchParamsCommand =
-        jobsFetchParamsCommandFixture;
-      await controller.getAssignedJobs(dto);
+      const command: JobsFetchParamsCommand = jobsFetchParamsCommandFixture;
+      await controller.getAssignedJobs(dto, jobAssignmentToken);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,
       );

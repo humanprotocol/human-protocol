@@ -26,7 +26,6 @@ export class JobAssignmentParams {
 }
 export class JobAssignmentCommand {
   data: JobAssignmentParams;
-  @AutoMap()
   token: string;
   @AutoMap()
   exchangeOracleUrl: string;
@@ -115,6 +114,7 @@ export class JobsFetchParamsCommand {
   exchangeOracleUrl: string;
   @AutoMap()
   data: JobsFetchParams;
+  token: string;
 }
 
 export class JobsFetchParamsData {

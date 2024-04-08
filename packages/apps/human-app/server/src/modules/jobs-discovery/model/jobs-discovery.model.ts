@@ -8,31 +8,35 @@ import {
 
 export class JobsDiscoveryParamsDto {
   @AutoMap()
-  @ApiProperty({ example: 'string' })
+  @ApiProperty({ example: 'string', required: false })
   exchange_oracle_url: string;
   @AutoMap()
-  @ApiProperty({ example: 'string' })
+  @ApiProperty({ example: 'string', required: false })
   escrow_address: string;
   @AutoMap()
-  @ApiProperty({ example: 0 })
+  @ApiProperty({ example: 0, required: false })
   chain_id: number;
   @AutoMap()
-  @ApiProperty({ example: 5, default: 5, maximum: 10 })
+  @ApiProperty({ example: 5, default: 5, maximum: 10, required: false })
   page_size: number;
   @AutoMap()
-  @ApiProperty({ example: 0, default: 0 })
+  @ApiProperty({ example: 0, default: 0, required: false })
   page: number;
   @AutoMap()
-  @ApiProperty({ example: 'ASC', default: 'ASC' })
+  @ApiProperty({ example: 'ASC', default: 'ASC', required: false })
   sort: SortOrder;
   @AutoMap()
-  @ApiProperty({ example: 'created_at', default: 'created_at' })
+  @ApiProperty({
+    example: 'created_at',
+    default: 'created_at',
+    required: false,
+  })
   sort_field: SortField;
   @AutoMap()
-  @ApiProperty({ example: 'job type' })
+  @ApiProperty({ example: 'job type', required: false })
   job_type: string;
   @AutoMap()
-  @ApiProperty({ example: ['job_title'] })
+  @ApiProperty({ example: ['job_title'], required: false })
   fields: JobFields[];
 }
 

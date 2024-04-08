@@ -17,5 +17,16 @@ services:
       PORT: ${PORT}
       REPUTATION_ORACLE_URL: ${REPUTATION_ORACLE_URL}
       REDIS_PORT: ${REDIS_PORT}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
       CACHE_TTL_ORACLE_DISCOVERY: ${CACHE_TTL_ORACLE_DISCOVERY}
+    depends_on:
+      - redis
+  redis:
+    image: redis:latest
+    container_name: human_app_cache
+    ports:
+      - '${REDIS_PORT}:6379'
+    volumes:
+      - redis_data:/data
+volumes:
+  redis_data:

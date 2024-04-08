@@ -6,18 +6,18 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StatisticsService } from './statistics.service';
 import {
   OracleStatisticsCommand,
   OracleStatisticsDto,
   OracleStatisticsResponse,
-} from './interfaces/oracle-statistics.interface';
+} from './model/oracle-statistics.model';
 import {
   UserStatisticsCommand,
   UserStatisticsDto,
   UserStatisticsResponse,
-} from './interfaces/user-statistics.interface';
+} from './model/user-statistics.model';
 
 @Controller()
 export class StatisticsController {
@@ -38,6 +38,7 @@ export class StatisticsController {
   @ApiTags('Statistics')
   @Get('stats/assignment')
   @ApiOperation({ summary: 'Statistics for requesting user' })
+  @ApiBearerAuth('access-token')
   @UsePipes(new ValidationPipe())
   public getUserStatistics(
     @Query() dto: UserStatisticsDto,

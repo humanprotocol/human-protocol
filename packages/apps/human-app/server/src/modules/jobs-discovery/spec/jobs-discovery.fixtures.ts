@@ -4,7 +4,7 @@ import {
   JobsDiscoveryParamsData,
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponseItem,
-} from '../interfaces/jobs-discovery.interface';
+} from '../model/jobs-discovery.model';
 import {
   JobFields,
   SortField,
