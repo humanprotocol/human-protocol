@@ -13,7 +13,7 @@ import {
   JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsDto,
-} from './interfaces/jobs-discovery.interface';
+} from './model/jobs-discovery.model';
 
 @Injectable()
 export class JobsDiscoveryProfile extends AutomapperProfile {

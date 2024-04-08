@@ -17,7 +17,7 @@ import {
   JobsFetchParams,
   JobsFetchParamsCommand,
   JobsFetchParamsDto,
-} from './interfaces/job-assignment.interface';
+} from './model/job-assignment.model';
 
 @Injectable()
 export class JobAssignmentProfile extends AutomapperProfile {

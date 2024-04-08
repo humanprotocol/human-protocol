@@ -10,7 +10,7 @@ import {
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
-} from '../interfaces/job-assignment.interface';
+} from '../model/job-assignment.model';
 import {
   SortField,
   SortOrder,
@@ -97,6 +97,7 @@ const jobsFetchParams: JobsFetchParams = {
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
   data: jobsFetchParams,
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,
+  token: TOKEN,
 };
 
 export const jobsFetchParamsDataFixture: JobsFetchParamsData = {

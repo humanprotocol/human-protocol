@@ -2,11 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   UserStatisticsCommand,
   UserStatisticsResponse,
-} from './interfaces/user-statistics.interface';
+} from './model/user-statistics.model';
 import {
   OracleStatisticsCommand,
   OracleStatisticsResponse,
-} from './interfaces/oracle-statistics.interface';
+} from './model/oracle-statistics.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';

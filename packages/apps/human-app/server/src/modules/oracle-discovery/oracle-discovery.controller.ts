@@ -13,7 +13,7 @@ import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
   OracleDiscoveryDto,
-} from './interface/oracle-discovery.interface';
+} from './model/oracle-discovery.model';
 
 @Controller()
 export class OracleDiscoveryController {

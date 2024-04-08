@@ -6,11 +6,11 @@ import { Mapper } from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
-} from '../../modules/user-worker/interfaces/worker-registration.interface';
+} from '../../modules/user-worker/model/worker-registration.model';
 import {
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/user-operator/interfaces/operator-registration.interface';
+} from '../../modules/user-operator/model/operator-registration.model';
 import { GatewayConfigService } from '../../common/config/gateway-config.service';
 import { GatewayConfig } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';
@@ -21,7 +21,7 @@ import {
   SigninWorkerCommand,
   SigninWorkerData,
   SigninWorkerResponse,
-} from '../../modules/user-worker/interfaces/worker-signin.interface';
+} from '../../modules/user-worker/model/worker-signin.model';
 
 @Injectable()
 export class ReputationOracleGateway {
