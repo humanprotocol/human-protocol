@@ -191,11 +191,13 @@ class BoxesFromPointsTaskBuilder:
         prediction quality, making them unreliable.
         """
 
-        self.max_discarded_threshold = 0.05
+        self.max_discarded_threshold = 0.5
         """
         The maximum allowed percent of discarded
         GT boxes, points, or samples for successful job launch
         """
+
+        # TODO: probably, need to also add an absolute number of minimum GT RoIs
 
     def __enter__(self):
         return self
@@ -1184,11 +1186,13 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self.min_label_gt_samples = 2  # TODO: find good threshold
 
-        self.max_discarded_threshold = 0.05
+        self.max_discarded_threshold = 0.5
         """
         The maximum allowed percent of discarded
         GT annotations or samples for successful job launch
         """
+
+        # TODO: probably, need to also add an absolute number of minimum GT RoIs per class
 
     def __enter__(self):
         return self
