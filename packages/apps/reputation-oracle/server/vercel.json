@@ -24,7 +24,7 @@
       "destination": "/api/app.ts"
     },
     {
-      "source": "/reputation/(.*)",
+      "source": "/reputation(.*)",
       "destination": "/api/app.ts"
     },
     {
