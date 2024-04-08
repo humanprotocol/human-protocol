@@ -1,6 +1,6 @@
 import type { SelectProps } from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
-import MuiSelect from '@mui/material/Select';
+import SelectMui from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { Controller } from 'react-hook-form';
 import InputLabel from '@mui/material/InputLabel';
@@ -31,7 +31,7 @@ export function Select({
       render={({ field, fieldState }) => (
         <FormControl fullWidth>
           {label ? <InputLabel id={`${name}-label`}>{label}</InputLabel> : null}
-          <MuiSelect
+          <SelectMui
             {...field}
             aria-labelledby={ariaLabelledby}
             error={Boolean(fieldState.error)}
@@ -40,11 +40,11 @@ export function Select({
             label={label}
           >
             {options.map((elem) => (
-              <MenuItem key={crypto.randomUUID() as string} value={elem.value}>
+              <MenuItem key={crypto.randomUUID().toString()} value={elem.value}>
                 {elem.name}
               </MenuItem>
             ))}
-          </MuiSelect>
+          </SelectMui>
         </FormControl>
       )}
     />

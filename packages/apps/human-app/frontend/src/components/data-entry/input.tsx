@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField';
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
   name: string;
+  label?: string;
   autoComplete?: string;
   isCustomError?: boolean;
 }
