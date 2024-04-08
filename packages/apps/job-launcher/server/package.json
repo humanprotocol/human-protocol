@@ -58,7 +58,7 @@
     "pg": "8.11.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
-    "stripe": "^14.20.0",
+    "stripe": "^14.24.0",
     "typeorm": "^0.3.17",
     "typeorm-naming-strategies": "^4.1.0",
     "zxcvbn": "^4.4.2"
