@@ -19,6 +19,7 @@ import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../web3/web3.dto';
 import { SignatureType } from '../../common/enums/web3';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -31,23 +32,11 @@ jest.mock('@human-protocol/sdk', () => ({
 }));
 
 describe('UserService', () => {
-  let mockConfigService: Partial<ConfigService>;
   let userService: UserService;
   let userRepository: UserRepository;
   let web3Service: Web3Service;
 
   beforeEach(async () => {
-    mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'WEB3_ENV':
-            return 'testnet';
-          default:
-            return defaultValue;
-        }
-      }),
-    };
-
     const signerMock = {
       address: MOCK_ADDRESS,
       getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
@@ -65,10 +54,8 @@ describe('UserService', () => {
             prepareSignatureBody: jest.fn(),
           },
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        Web3ConfigService,
       ],
     }).compile();
 

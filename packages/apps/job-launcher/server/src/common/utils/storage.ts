@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ErrorBucket } from '../constants/errors';
@@ -9,8 +9,7 @@ import { parseString } from 'xml2js';
 export function generateBucketUrl(
   storageData: StorageDataDto,
   jobType: JobRequestType,
-  addPath = true,
-): string {
+): URL {
   if (
     (jobType === JobRequestType.IMAGE_BOXES ||
       jobType === JobRequestType.IMAGE_POINTS ||
@@ -31,17 +30,19 @@ export function generateBucketUrl(
       if (!isRegion(storageData.region)) {
         throw new BadRequestException(ErrorBucket.InvalidRegion);
       }
-      return `https://${storageData.bucketName}.s3.${
-        storageData.region
-      }.amazonaws.com${
-        storageData.path && addPath
-          ? `/${storageData.path.replace(/\/$/, '')}`
-          : ''
-      }`;
+      return new URL(
+        `https://${storageData.bucketName}.s3.${
+          storageData.region
+        }.amazonaws.com${
+          storageData.path ? `/${storageData.path.replace(/\/$/, '')}` : ''
+        }`,
+      );
     case StorageProviders.GCS:
-      return `https://${storageData.bucketName}.storage.googleapis.com${
-        storageData.path && addPath ? `/${storageData.path}` : ''
-      }`;
+      return new URL(
+        `https://${storageData.bucketName}.storage.googleapis.com${
+          storageData.path ? `/${storageData.path}` : ''
+        }`,
+      );
     default:
       throw new BadRequestException(ErrorBucket.InvalidProvider);
   }
@@ -51,28 +52,24 @@ function isRegion(value: string): value is AWSRegions {
   return Object.values(AWSRegions).includes(value as AWSRegions);
 }
 
-export async function listObjectsInBucket(
-  storageData: StorageDataDto,
-  jobType: JobRequestType,
-): Promise<string[]> {
+export async function listObjectsInBucket(url: URL): Promise<string[]> {
   return new Promise(async (resolve, reject) => {
     try {
       let objects: string[] = [];
-      const url = generateBucketUrl(storageData, jobType, false);
       let nextContinuationToken: string | undefined;
-
+      const baseUrl = `${url.protocol}//${url.host}`;
       do {
         const response = await axios.get(
-          `${url}?list-type=2${
+          `${baseUrl}?list-type=2${
             nextContinuationToken
               ? `&continuation-token=${encodeURIComponent(
                   nextContinuationToken,
                 )}`
               : ''
-          }${storageData.path ? `&prefix=${storageData.path}` : ''}`,
+          }${url.pathname ? `&prefix=${url.pathname}` : ''}`,
         );
 
-        if (response.status === 200 && response.data) {
+        if (response.status === HttpStatus.OK && response.data) {
           parseString(response.data, (err: any, result: any) => {
             if (err) {
               reject(err);
