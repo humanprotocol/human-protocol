@@ -25,7 +25,7 @@ describe('statsController', () => {
     statsService = moduleRef.get<StatsService>(StatsService);
   });
 
-  describe('processWebhook', () => {
+  describe('getOracleStats', () => {
     it('should call statsService.getOracleStats', async () => {
       const stats = new OracleStatsDto();
       jest.spyOn(statsService, 'getOracleStats').mockResolvedValue(stats);
@@ -33,7 +33,9 @@ describe('statsController', () => {
       expect(result).toBe(stats);
       expect(statsService.getOracleStats).toHaveBeenCalledWith();
     });
+  });
 
+  describe('getAssignmentStats', () => {
     it('should call statsService.getAssignmentStats', async () => {
       const stats = new AssignmentStatsDto();
       jest.spyOn(statsService, 'getAssignmentStats').mockResolvedValue(stats);

@@ -6,19 +6,10 @@ import {
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import {
-  MOCK_MANIFEST_URL,
-  MOCK_PRIVATE_KEY,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-} from '../../../test/constants';
+import { MOCK_MANIFEST_URL } from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -36,6 +27,8 @@ import { ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -84,40 +77,18 @@ describe('JobService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
-  const configServiceMock: Partial<ConfigService> = {
-    get: jest.fn((key: string) => {
-      switch (key) {
-        case 'WEB3_PRIVATE_KEY':
-          return MOCK_PRIVATE_KEY;
-      }
-    }),
-  };
-
   const httpServicePostMock = jest
     .fn()
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-      ],
       providers: [
         JobService,
         StorageService,
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
+        ConfigService,
+        PGPConfigService,
+        S3ConfigService,
         {
           provide: Web3Service,
           useValue: {
