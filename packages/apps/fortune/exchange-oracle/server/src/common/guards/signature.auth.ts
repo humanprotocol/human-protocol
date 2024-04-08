@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  Module
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
@@ -18,26 +19,36 @@ export class SignatureAuthGuard implements CanActivate {
 
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
-    const oracleAdresses: string[] = [];
-    try {
-      const escrowData = await EscrowUtils.getEscrow(
-        data.chain_id,
-        data.escrow_address,
-      );
-      if (this.role.includes(Role.JobLauncher))
-        oracleAdresses.push(escrowData.launcher);
-      if (this.role.includes(Role.Recording))
-        oracleAdresses.push(escrowData.recordingOracle!);
-      if (this.role.includes(Role.Reputation))
-        oracleAdresses.push(escrowData.reputationOracle!);
 
-      const isVerified = verifySignature(data, signature, oracleAdresses);
-
+    if (this.role.includes(Role.Worker)) {
+      const isVerified = verifySignature(data, signature, []);
       if (isVerified) {
         return true;
       }
-    } catch (error) {
-      console.error(error);
+    } else {
+      try {
+        const escrowData = await EscrowUtils.getEscrow(
+          data.chain_id,
+          data.escrow_address,
+        );
+        const oracleAddresses: string[] = [];
+        if (this.role.includes(Role.JobLauncher)) {
+          oracleAddresses.push(escrowData.launcher);
+        }
+        if (this.role.includes(Role.Recording)) {
+          oracleAddresses.push(escrowData.recordingOracle!);
+        }
+        if (this.role.includes(Role.Reputation)) {
+          oracleAddresses.push(escrowData.reputationOracle!);
+        }
+
+        const isVerified = verifySignature(data, signature, oracleAddresses);
+        if (isVerified) {
+          return true;
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     throw new UnauthorizedException('Unauthorized');

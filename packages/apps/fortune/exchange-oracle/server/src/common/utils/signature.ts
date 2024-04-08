@@ -4,11 +4,12 @@ import { ethers } from 'ethers';
 export function verifySignature(
   message: object | string,
   signature: string,
-  addresses: string[],
+  addresses: string[] = [],
 ): boolean {
   const signer = recoverSigner(message, signature);
 
   if (
+    addresses.length > 0 &&
     !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
   ) {
     throw new ConflictException('Signature not verified');
