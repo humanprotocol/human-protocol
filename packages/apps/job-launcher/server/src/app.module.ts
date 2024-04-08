@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './common/guards';
@@ -21,6 +20,7 @@ import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { EnvConfigModule } from './common/config/config.module';
+import { E2E_TEST_ENV } from './common/constants';
 
 @Module({
   providers: [
@@ -43,10 +43,15 @@ import { EnvConfigModule } from './common/config/config.module';
   ],
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
-      validationSchema: envValidator,
+      ignoreEnvFile: process.env.NODE_ENV === E2E_TEST_ENV,
+      ...(process.env.NODE_ENV !== E2E_TEST_ENV && {
+        envFilePath: process.env.NODE_ENV
+          ? `.env.${process.env.NODE_ENV as string}`
+          : '.env',
+      }),
+      ...(process.env.NODE_ENV !== E2E_TEST_ENV && {
+        validationSchema: envValidator,
+      }),
     }),
     DatabaseModule,
     HealthModule,

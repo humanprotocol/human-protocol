@@ -14,6 +14,7 @@ import { StatsModule } from './modules/stats/stats.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { HealthModule } from './modules/health/health.module';
+import { EnvConfigModule } from './common/config/config.module';
 
 @Module({
   providers: [
@@ -42,6 +43,7 @@ import { HealthModule } from './modules/health/health.module';
       validationSchema: envValidator,
     }),
     DatabaseModule,
+    EnvConfigModule,
   ],
   controllers: [AppController],
 })

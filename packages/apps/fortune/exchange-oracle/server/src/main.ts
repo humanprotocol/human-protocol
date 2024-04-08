@@ -5,8 +5,8 @@ import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
 
 import { AppModule } from './app.module';
-import { ConfigNames } from './common/config';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ServerConfigService } from './common/config/server-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -14,9 +14,10 @@ async function bootstrap() {
   });
 
   const configService: ConfigService = app.get(ConfigService);
+  const serverConfigService = new ServerConfigService(configService);
 
-  const host = configService.get<string>(ConfigNames.HOST)!;
-  const port = configService.get<string>(ConfigNames.PORT)!;
+  const host = serverConfigService.host;
+  const port = serverConfigService.port;
 
   // app.enableCors({
   //   origin:

@@ -2,7 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ChainId, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { HttpStatus } from '@nestjs/common';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import {
@@ -10,17 +10,8 @@ import {
   MOCK_ADDRESS,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_WEBHOOK_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
 } from '../../../test/constants';
-import {
-  DEFAULT_MAX_RETRY_COUNT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constant';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { AssignmentRepository } from '../assignment/assignment.repository';
@@ -32,6 +23,10 @@ import { WebhookDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -50,6 +45,7 @@ describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
     jobService: JobService,
+    web3ConfigService: Web3ConfigService,
     httpService: HttpService;
 
   const chainId = 1;
@@ -61,35 +57,12 @@ describe('WebhookService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
-  const configServiceMock: Partial<ConfigService> = {
-    get: jest.fn((key: string) => {
-      switch (key) {
-        case 'WEB3_PRIVATE_KEY':
-          return MOCK_PRIVATE_KEY;
-        case 'MAX_RETRY_COUNT':
-          return DEFAULT_MAX_RETRY_COUNT;
-      }
-    }),
-  };
-
   const httpServicePostMock = jest
     .fn()
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-      ],
       providers: [
         WebhookService,
         JobService,
@@ -103,10 +76,11 @@ describe('WebhookService', () => {
           useValue: createMock<AssignmentRepository>(),
         },
         StorageService,
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
+        ConfigService,
+        Web3ConfigService,
+        ServerConfigService,
+        PGPConfigService,
+        S3ConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -129,6 +103,11 @@ describe('WebhookService', () => {
     webhookRepository = moduleRef.get(WebhookRepository);
     jobService = moduleRef.get<JobService>(JobService);
     httpService = moduleRef.get<HttpService>(HttpService);
+    web3ConfigService = moduleRef.get<Web3ConfigService>(Web3ConfigService);
+
+    jest
+      .spyOn(web3ConfigService, 'privateKey', 'get')
+      .mockReturnValue(MOCK_PRIVATE_KEY);
   });
 
   afterEach(() => {

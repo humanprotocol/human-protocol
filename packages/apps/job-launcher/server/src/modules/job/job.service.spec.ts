@@ -91,11 +91,9 @@ import {
   JobFortuneDto,
   JobCvatDto,
   JobDetailsDto,
-  StorageDataDto,
   JobCaptchaDto,
   CvatManifestDto,
   JobQuickLaunchDto,
-  CvatDataDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -124,6 +122,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { CvatCalculateJobBounty } from './job.interface';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -529,38 +528,15 @@ describe('JobService', () => {
   });
 
   describe('getCvatElementsCount', () => {
-    let storageDatasetMock: StorageDataDto;
-
-    beforeAll(async () => {
-      storageDatasetMock = {
-        provider: StorageProviders.AWS,
-        region: AWSRegions.AP_EAST_1,
-        bucketName: 'bucket',
-        path: 'folder/test',
-      };
-    });
-
-    it('should throw ConflictException if storageData is not provided', async () => {
-      await expect(
-        jobService.getCvatElementsCount(
-          JobRequestType.IMAGE_BOXES_FROM_POINTS,
-          null as any,
-          'some-gt-url',
-        ),
-      ).rejects.toThrow(ConflictException);
-    });
-
     it('should calculate the number of CVAT elements correctly', async () => {
+      const gtUrl = new URL('http://some-gt-url.com');
+      const dataUrl = new URL('http://some-data-url.com');
       jest
         .spyOn(storageService, 'download')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
-      const result = await jobService.getCvatElementsCount(
-        JobRequestType.IMAGE_BOXES_FROM_POINTS,
-        storageDatasetMock,
-        'some-gt-url',
-      );
+      const result = await jobService.getCvatElementsCount(gtUrl, dataUrl);
       expect(result).toBe(2);
     });
   });
@@ -1149,34 +1125,22 @@ describe('JobService', () => {
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
-      const data = {
+      const data: CvatCalculateJobBounty = {
         requestType: JobRequestType.IMAGE_BOXES_FROM_POINTS,
         fundAmount: 22.918128652290278,
-        data: storageDatasetMock,
-        gtUrl: MOCK_FILE_URL,
+        urls: {
+          dataUrl: new URL(MOCK_FILE_URL),
+          gtUrl: new URL(MOCK_FILE_URL),
+          pointsUrl: new URL(MOCK_FILE_URL),
+        },
       };
 
-      const result = await jobService['calculateJobBounty'](data); //  elementsCount = 2
+      const result = await jobService.calculateJobBounty(data); //  elementsCount = 2
 
       expect(result).toEqual('11.459064326145139');
     });
 
     it('should calculate the job bounty correctly for image skeletons from boxed type', async () => {
-      const storageDatasetMock: any = {
-        dataset: {
-          provider: StorageProviders.AWS,
-          region: AWSRegions.EU_CENTRAL_1,
-          bucketName: 'bucket',
-          path: 'folder/test',
-        },
-        boxes: {
-          provider: StorageProviders.AWS,
-          region: AWSRegions.EU_CENTRAL_1,
-          bucketName: 'bucket',
-          path: 'folder/test',
-        },
-      };
-
       jest
         .spyOn(storageService, 'download')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
@@ -1185,12 +1149,15 @@ describe('JobService', () => {
       const data = {
         requestType: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
         fundAmount: 22.918128652290278,
-        data: storageDatasetMock,
-        gtUrl: MOCK_FILE_URL,
+        urls: {
+          dataUrl: new URL(MOCK_FILE_URL),
+          gtUrl: new URL(MOCK_FILE_URL),
+          boxesUrl: new URL(MOCK_FILE_URL),
+        },
         nodesTotal: 4,
       };
 
-      const result = await jobService['calculateJobBounty'](data); //  elementsCount = 2
+      const result = await jobService.calculateJobBounty(data); //  elementsCount = 2
 
       expect(result).toEqual('5.7295321630725695');
     });
