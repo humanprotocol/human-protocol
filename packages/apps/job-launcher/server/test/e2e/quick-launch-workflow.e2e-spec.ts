@@ -9,7 +9,7 @@ import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
 import setupE2eEnvironment from './env-setup';
 import { MOCK_FILE_HASH, MOCK_FILE_URL } from '../../test/constants';
-import { JobRequestType } from '../../src/common/enums/job';
+import { JobRequestType, JobStatus } from '../../src/common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 import { ErrorJob } from '../../src/common/constants/errors';
 import {
@@ -17,14 +17,17 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
+  TokenId,
 } from '../../src/common/enums/payment';
 import { PaymentEntity } from '../../src/modules/payment/payment.entity';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
+import { JobRepository } from '../../src/modules/job/job.repository';
 
 describe('Quick launch E2E workflow', () => {
   let app: INestApplication;
   let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;
+  let jobRepository: JobRepository;
   let userService: UserService;
 
   let userEntity: UserEntity;
@@ -43,6 +46,7 @@ describe('Quick launch E2E workflow', () => {
 
     userRepository = moduleFixture.get<UserRepository>(UserRepository);
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
+    jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
 
     userEntity = await userService.create({
@@ -88,7 +92,7 @@ describe('Quick launch E2E workflow', () => {
       request_type: JobRequestType.HCAPTCHA,
       manifest_url: MOCK_FILE_URL,
       manifest_hash: MOCK_FILE_HASH,
-      fund_amount: 10,
+      fund_amount: 10, // HMT
     };
 
     const response = await request(app.getHttpServer())
@@ -99,6 +103,23 @@ describe('Quick launch E2E workflow', () => {
 
     expect(response.text).toBeDefined();
     expect(typeof response.text).toBe('string');
+
+    const jobEntity = await jobRepository.findOneByIdAndUserId(
+      Number(response.text),
+      userEntity.id,
+    );
+
+    expect(jobEntity).toBeDefined();
+    expect(jobEntity!.status).toBe(JobStatus.PAID);
+
+    const paymentEntities = await paymentRepository.findByUserAndStatus(
+      userEntity.id,
+      PaymentStatus.SUCCEEDED,
+    );
+
+    expect(paymentEntities[0]).toBeDefined();
+    expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
+    expect(paymentEntities[0].currency).toBe(TokenId.HMT);
   });
 
   it('should handle not enough funds error', async () => {
@@ -107,7 +128,7 @@ describe('Quick launch E2E workflow', () => {
       request_type: JobRequestType.HCAPTCHA,
       manifest_url: MOCK_FILE_URL,
       manifest_hash: MOCK_FILE_HASH,
-      fund_amount: 100000000,
+      fund_amount: 100000000, // HMT
     };
 
     const invalidQuickLaunchResponse = await request(app.getHttpServer())
@@ -127,7 +148,7 @@ describe('Quick launch E2E workflow', () => {
       chain_id: ChainId.POLYGON_MUMBAI,
       request_type: JobRequestType.HCAPTCHA,
       manifest_url: 'http://example.com',
-      fund_amount: 10,
+      fund_amount: 10, // HMT
     };
 
     const invalidQuickLaunchResponse = await request(app.getHttpServer())
