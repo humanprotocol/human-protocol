@@ -88,7 +88,7 @@ describe('Quick launch E2E workflow', () => {
 
   it('should create a job via quick launch successfully', async () => {
     const quickLaunchDto = {
-      chain_id: ChainId.POLYGON_MUMBAI,
+      chain_id: ChainId.LOCALHOST,
       request_type: JobRequestType.HCAPTCHA,
       manifest_url: MOCK_FILE_URL,
       manifest_hash: MOCK_FILE_HASH,
@@ -124,7 +124,7 @@ describe('Quick launch E2E workflow', () => {
 
   it('should handle not enough funds error', async () => {
     const quickLaunchData = {
-      chain_id: ChainId.POLYGON_MUMBAI,
+      chain_id: ChainId.LOCALHOST,
       request_type: JobRequestType.HCAPTCHA,
       manifest_url: MOCK_FILE_URL,
       manifest_hash: MOCK_FILE_HASH,
@@ -145,7 +145,7 @@ describe('Quick launch E2E workflow', () => {
 
   it('should handle manifest hash does not exist error', async () => {
     const quickLaunchData = {
-      chain_id: ChainId.POLYGON_MUMBAI,
+      chain_id: ChainId.LOCALHOST,
       request_type: JobRequestType.HCAPTCHA,
       manifest_url: 'http://example.com',
       fund_amount: 10, // HMT
