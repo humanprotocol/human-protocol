@@ -26,7 +26,7 @@ createRoot(root).render(
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>
