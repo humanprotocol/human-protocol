@@ -22579,10 +22579,10 @@ strip-literal@^1.0.1:
   dependencies:
     acorn "^8.10.0"
 
-stripe@^14.20.0:
-  version "14.23.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-14.23.0.tgz#a92ab57c4ce8670c9252f5f6e890fa1018cc5794"
-  integrity sha512-OPD7LqBmni6uDdqA05GGgMZyyRWxJOehONBNC9tYgY4Uh089EtXd6QLIgRGrqTDlQH3cA2BXo848nxwa/zsQzw==
+stripe@^14.24.0:
+  version "14.24.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-14.24.0.tgz#cb52bcdf233186d060e285e39ce937d3bf4ab88c"
+  integrity sha512-r0JWz2quThXsFbp1pevkAAoDk4sw3kFMQEc2qvxMFUOhw/SFGqtAGz4vQgP/fMWzO28ljBNEiz68KqRx0JS3dw==
   dependencies:
     "@types/node" ">=8.1.0"
     qs "^6.11.0"
@@ -22889,19 +22889,6 @@ tarn@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/tarn/-/tarn-3.0.2.tgz#73b6140fbb881b71559c4f8bfde3d9a4b3d27693"
   integrity sha512-51LAVKUSZSVfI05vjPESNc5vwqqZpbXCsU+/+wxlOrUjk2SnFTt97v9ZgQrD4YmxYW1Px6w2KjaDitCfkvgxMQ==
-
-tenderly@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/tenderly/-/tenderly-0.7.0.tgz#70fb9aa78fe9b738df38fdf76c72f083a6bd18d1"
-  integrity sha512-yA5KEYRRgT5lva1o8mhAU+zwpVc5f6+HJ+lVxPhdmK3LeTrm+ZEW7FYKM8WwM2HHgVugwKja+7wuS7gRhnZ/ug==
-  dependencies:
-    axios "^0.27.2"
-    cli-table3 "^0.6.2"
-    commander "^9.4.0"
-    js-yaml "^4.1.0"
-    open "^8.4.0"
-    prompts "^2.4.2"
-    tslog "^4.4.0"
 
 tenderly@^0.9.1:
   version "0.9.1"
@@ -23733,9 +23720,9 @@ undici-types@~5.26.4:
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
 undici@5.26.5, undici@^5.14.0, undici@^6.0.0, undici@^6.11.1:
-  version "6.11.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.11.1.tgz#75ab573677885b421ca2e6f5f17ff1185b24c68d"
-  integrity sha512-KyhzaLJnV1qa3BSHdj4AZ2ndqI0QWPxYzaIOio0WzcEJB9gvuysprJSLtpvc2D9mhR9jPDUk7xlJlZbH2KR5iw==
+  version "6.12.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.12.0.tgz#396d4dbd2ea2351094c00be44655d489afe4fb8a"
+  integrity sha512-d87yk8lqSFUYtR5fTFe2frpkMIrUEz+lgoJmhcL+J3StVl+8fj8ytE4lLnJOTPCE12YbumNGzf4LYsQyusdV5g==
 
 unenv@^1.9.0:
   version "1.9.0"
