@@ -27,7 +27,7 @@ export const colorPalette = {
     dark: '#AE8600',
   },
   error: {
-    main: '#9E0505',
+    main: '#fa1875',
     light: '#F5E5E5',
     dark: '#6F0404',
   },

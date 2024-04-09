@@ -2,7 +2,7 @@ import { Controller } from 'react-hook-form';
 import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 
-interface InputProps
+export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
   name: string;
   label?: string;
@@ -29,7 +29,7 @@ export function Input({
           helperText={isCustomError ? undefined : fieldState.error?.message}
           label={label}
           name={name}
-          variant="standard"
+          variant="outlined"
           {...rest}
         />
       )}

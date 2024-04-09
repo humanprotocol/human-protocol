@@ -11,6 +11,7 @@ import { RadioButton } from '@/components/data-entry/radio-button';
 import { Checkbox } from '@/components/data-entry/checkbox';
 import { Slider } from '@/components/data-entry/slider';
 import { MultiSelect } from '@/components/data-entry/multi-select';
+import { Password } from '@/components/data-entry/password';
 
 export interface Inputs {
   name: string;
@@ -102,15 +103,18 @@ export function FormExample() {
             <Grid item xs={6}>
               <Input label="Email" name="email" />
             </Grid>
+            <Grid item xs={6}>
+              <Password label="Password" name="password" />
+            </Grid>
 
             <Grid item xs={6}>
               <Select
                 label="Bank account"
                 name="bankAccount"
                 options={accounts}
+                variant="outlined"
               />
             </Grid>
-
             <Grid item xs={6}>
               <MultiSelect label="ID Merchanta" name="names" options={names} />
             </Grid>

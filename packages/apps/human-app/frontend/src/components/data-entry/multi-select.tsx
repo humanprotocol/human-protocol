@@ -8,6 +8,8 @@ import InputLabel from '@mui/material/InputLabel';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import { useTranslation } from 'react-i18next';
+import { Box, Chip, OutlinedInput } from '@mui/material';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
   options: string[];
@@ -42,15 +44,38 @@ export function MultiSelect({
     return false;
   };
 
-  const renderValue = (selected: string[]) => {
-    if (selected.length > 2) {
-      const text: string = t('components.multiSelect.andMore', {
-        number: selected.slice(2).length,
-      });
-      return `${selected.slice(0, 2).join(', ')} ... ${text} `;
-    }
-    return selected.map((elem) => elem).join(', ');
+  const onDelete = (value: string) => {
+    const currentValues = context.getValues()[name] as string[];
+
+    context.setValue(
+      name,
+      currentValues.filter((val) => {
+        return val !== value;
+      })
+    );
   };
+
+  const renderValue = (selected: string[]) => (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+      {selected.map((value) => (
+        <Chip
+          clickable
+          deleteIcon={
+            <CancelIcon
+              onMouseDown={(e) => {
+                e.stopPropagation();
+              }}
+            />
+          }
+          key={value}
+          label={value}
+          onDelete={() => {
+            onDelete(value);
+          }}
+        />
+      ))}
+    </Box>
+  );
 
   const handleChange = (
     event: SelectChangeEvent<string[]>,
@@ -76,17 +101,16 @@ export function MultiSelect({
       name={name}
       render={({ field }) => {
         return (
-          <FormControl fullWidth variant="standard">
-            <InputLabel id={`${name}-label`}>{label}</InputLabel>
+          <FormControl fullWidth>
+            <InputLabel id={`${name}-${label}`}>{label}</InputLabel>
             <Select
+              input={<OutlinedInput id={name} label={label} />}
               {...field}
-              aria-labelledby={name}
               defaultValue={[]}
               id={name}
-              labelId={`${name}-label`}
+              labelId={`${name}-${label}`}
               multiple
               renderValue={renderValue}
-              variant="standard"
               {...props}
               onChange={(event) => {
                 handleChange(event, field);

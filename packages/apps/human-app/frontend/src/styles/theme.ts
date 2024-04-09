@@ -93,6 +93,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: {
+          fill: colorPalette.primary.main,
+        },
+      },
+    },
   },
   palette: {
     primary: {
