@@ -4,19 +4,18 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../config';
+
+import { ServerConfigService } from '../config/server-config.service';
 
 @Injectable()
 export class CronAuthGuard implements CanActivate {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private serverConfigService: ServerConfigService) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const cronSecret = this.configService.get(ConfigNames.CRON_SECRET);
     if (
-      cronSecret &&
-      request.headers['authorization'] === `Bearer ${cronSecret}`
+      request.headers['authorization'] !==
+      `Bearer ${this.serverConfigService.cronSecret}`
     ) {
       throw new UnauthorizedException('Unauthorized');
     }

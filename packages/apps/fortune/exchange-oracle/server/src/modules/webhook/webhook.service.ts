@@ -12,12 +12,7 @@ import { JobService } from '../job/job.service';
 import { WebhookEntity } from './webhook.entity';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { signMessage } from '../../common/utils/signature';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
-import {
-  DEFAULT_MAX_RETRY_COUNT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constant';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ErrorWebhook } from '../../common/constant/errors';
@@ -25,6 +20,8 @@ import { WebhookRepository } from './webhook.repository';
 import { ChainId, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class WebhookService {
@@ -33,7 +30,8 @@ export class WebhookService {
   constructor(
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
-    public readonly configService: ConfigService,
+    public readonly web3ConfigService: Web3ConfigService,
+    public readonly serverConfigService: ServerConfigService,
     public readonly httpService: HttpService,
     public readonly web3Service: Web3Service,
     public readonly storageService: StorageService,
@@ -98,7 +96,7 @@ export class WebhookService {
 
     const signedBody = await signMessage(
       transformedWebhook,
-      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+      this.web3ConfigService.privateKey,
     );
 
     config = {
@@ -125,13 +123,7 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   public async handleWebhookError(webhookEntity: WebhookEntity): Promise<void> {
-    if (
-      webhookEntity.retriesCount >=
-      this.configService.get(
-        ConfigNames.MAX_RETRY_COUNT,
-        DEFAULT_MAX_RETRY_COUNT,
-      )
-    ) {
+    if (webhookEntity.retriesCount >= this.serverConfigService.maxRetryCount) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {
       webhookEntity.waitUntil = new Date();

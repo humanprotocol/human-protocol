@@ -10,6 +10,7 @@ import { UserStatus } from '../../src/common/enums/user';
 import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
 import { ErrorAuth } from '../../src/common/constants/errors';
+import setupE2eEnvironment from './env-setup';
 
 describe('Restore password E2E workflow', () => {
   let app: INestApplication;
@@ -23,6 +24,7 @@ describe('Restore password E2E workflow', () => {
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
 
   beforeAll(async () => {
+    setupE2eEnvironment();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

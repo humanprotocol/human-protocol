@@ -11,11 +11,7 @@ export interface RequestAction {
 }
 
 export interface ManifestAction {
-  getElementsCount: (
-    requestType: JobRequestType,
-    data: CvatDataDto,
-    gtUrl?: string,
-  ) => Promise<number>;
+  getElementsCount: (urls: GenerateUrls) => Promise<number>;
   generateUrls: (
     data: CvatDataDto,
     groundTruth: StorageDataDto,
@@ -39,16 +35,15 @@ export interface OracleAddresses {
 export interface CvatCalculateJobBounty {
   requestType: JobRequestType;
   fundAmount: number;
-  data: CvatDataDto;
-  gtUrl: string;
+  urls: GenerateUrls;
   nodesTotal?: number;
 }
 
 export interface GenerateUrls {
-  dataUrl: string;
-  gtUrl: string;
-  pointsUrl?: string;
-  boxesUrl?: string;
+  dataUrl: URL;
+  gtUrl: URL;
+  pointsUrl?: URL;
+  boxesUrl?: URL;
 }
 
 export interface CvatImageData {

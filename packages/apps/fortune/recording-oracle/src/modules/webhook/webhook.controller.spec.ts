@@ -1,28 +1,20 @@
+import { PGPConfigService } from '@/common/config/pgp-config.service';
+import { S3ConfigService } from '@/common/config/s3-config.service';
+import { ServerConfigService } from '@/common/config/server-config.service';
+import { Web3ConfigService } from '@/common/config/web3-config.service';
+import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { WebhookController } from './webhook.controller';
-import { WebhookService } from './webhook.service';
-import { WebhookDto } from './webhook.dto';
-import { Web3Service } from '../web3/web3.service';
-import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
-import { ConfigModule, registerAs } from '@nestjs/config';
-import {
-  MOCK_FILE_URL,
-  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-  MOCK_SIGNATURE,
-  MOCK_WEB3_PRIVATE_KEY,
-} from '../../../test/constants';
-import { StorageService } from '../storage/storage.service';
-import { verifySignature } from '../../common/utils/signature';
+import { MOCK_FILE_URL, MOCK_SIGNATURE } from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
+import { verifySignature } from '../../common/utils/signature';
 import { JobService } from '../job/job.service';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
+import { WebhookController } from './webhook.controller';
+import { WebhookDto } from './webhook.dto';
+import { WebhookService } from './webhook.service';
 
 jest.mock('../../common/utils/signature');
 
@@ -34,47 +26,21 @@ describe('webhookController', () => {
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
 
-  const reputationOracleURL = 'https://example.com/reputationoracle';
-  const configServiceMock = {
-    get: jest.fn().mockReturnValue(reputationOracleURL),
-  };
-
   const httpServicePostMock = jest
     .fn()
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('web3', () => ({
-            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
-          })),
-        ),
-      ],
       controllers: [WebhookController],
       providers: [
         WebhookService,
         JobService,
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
+        ConfigService,
+        Web3ConfigService,
+        PGPConfigService,
+        S3ConfigService,
+        ServerConfigService,
         {
           provide: Web3Service,
           useValue: {

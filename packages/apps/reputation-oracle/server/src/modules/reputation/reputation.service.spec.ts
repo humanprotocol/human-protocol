@@ -22,11 +22,11 @@ import {
   SolutionError,
 } from '../../common/enums';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 import { EscrowClient } from '@human-protocol/sdk';
+import { ReputationConfigService } from '../../common/config/reputation-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -52,17 +52,6 @@ describe('ReputationService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case ConfigNames.REPUTATION_LEVEL_LOW:
-            return 300;
-          case ConfigNames.REPUTATION_LEVEL_HIGH:
-            return 700;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -94,10 +83,8 @@ describe('ReputationService', () => {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        ReputationConfigService,
       ],
     }).compile();
 

@@ -7,7 +7,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Not } from 'typeorm';
 import {
   ErrorAuth,
   ErrorOperator,
@@ -30,10 +29,9 @@ import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
 import { Wallet } from 'ethers';
-import { ConfigNames } from '../../common/config';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
-import { ConfigService } from '@nestjs/config';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @Injectable()
 export class UserService {
@@ -42,7 +40,7 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private readonly web3Service: Web3Service,
-    private readonly configService: ConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -156,7 +154,7 @@ export class UserService {
     }
 
     let signer: Wallet;
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
       signer = this.web3Service.getSigner(ChainId.POLYGON);
     } else {
