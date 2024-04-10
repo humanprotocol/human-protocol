@@ -902,8 +902,7 @@ def process_intermediate_results(
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("process_intermediate_results for escrow %s", escrow_address)
-        logger.debug("Task id %s", task_id)
-        logger.debug("Task %s %s", task, getattr(task, "__dict__", None))
+        logger.debug("Task id %s, %s", getattr(task, 'id', None), getattr(task, "__dict__", None))
 
     initial_gt_stats = {
         gt_image_stat.gt_key: gt_image_stat.failed_attempts
