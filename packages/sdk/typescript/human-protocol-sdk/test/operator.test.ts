@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
-import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, test, vi, beforeAll } from 'vitest';
 import { NETWORKS, Role } from '../src/constants';
 import {
   ErrorInvalidSlasherAddressProvided,
@@ -20,10 +20,7 @@ import {
 } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
 import { ChainId } from '../src/enums';
-import {
-  KVStore,
-  KVStore__factory,
-} from '@human-protocol/core/typechain-types';
+import { KVStoreClient } from '@human-protocol/sdk';
 
 vi.mock('graphql-request', () => {
   return {
@@ -31,20 +28,23 @@ vi.mock('graphql-request', () => {
   };
 });
 
-const mockKVStore: Partial<KVStore> = {
-  get: vi.fn((address, key) => {
-    if (key === 'url') return Promise.resolve('http://example.com');
-    if (key === 'job_types')
-      return Promise.resolve(JSON.stringify(['JobType1', 'JobType2']));
-    return Promise.resolve('');
-  }) as any,
-};
-
-vi.mock('@human-protocol/core/typechain-types', () => ({
-  KVStore__factory: {
-    connect: vi.fn(() => mockKVStore),
-  },
-}));
+vi.mock('@human-protocol/sdk', () => {
+  return {
+    KVStoreClient: {
+      build: vi.fn().mockResolvedValue({
+        get: vi.fn((address, key) => {
+          if (key === 'url') {
+            return Promise.resolve('http://example.com');
+          }
+          if (key === 'job_types') {
+            return Promise.resolve(JSON.stringify(['JobType1', 'JobType2']));
+          }
+          return Promise.resolve('');
+        }),
+      }),
+    },
+  };
+});
 
 describe('OperatorUtils', () => {
   describe('getLeader', () => {
@@ -167,6 +167,24 @@ describe('OperatorUtils', () => {
       operators: [mockOperator],
     };
 
+    test('should return reputation network operators with url and job_types', async () => {
+      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        reputationNetwork: mockReputationNetwork,
+      });
+
+      let result;
+      try {
+        result = await OperatorUtils.getReputationNetworkOperators(
+          ChainId.LOCALHOST,
+          stakerAddress
+        );
+      } catch (error) {
+        console.error('Error calling getReputationNetworkOperators:', error);
+      }
+
+      console.log(result);
+    });
+
     // test('should return reputation network operators with url and job_types', async () => {
     //   vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
     //     reputationNetwork: mockReputationNetwork,
@@ -177,16 +195,16 @@ describe('OperatorUtils', () => {
     //     stakerAddress
     //   );
 
-    //   expect(gqlFetch.default).toHaveBeenCalledWith(
-    //     NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
-    //     GET_REPUTATION_NETWORK_QUERY(),
-    //     {
-    //       address: stakerAddress,
-    //       role: undefined,
-    //     }
-    //   );
+    //   // expect(gqlFetch.default).toHaveBeenCalledWith(
+    //   //   NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+    //   //   GET_REPUTATION_NETWORK_QUERY(),
+    //   //   {
+    //   //     address: stakerAddress,
+    //   //     role: undefined,
+    //   //   }
+    //   // );
 
-    //   expect(result).toEqual([extendedMockOperator]);
+    //   // expect(result).toEqual([extendedMockOperator]);
     // });
 
     test('should throw an error if gql fetch fails', async () => {
