@@ -1675,6 +1675,8 @@ class SkeletonsFromBoxesTaskBuilder:
                 matched_skeletons.append(gt_skeleton)
                 skeleton_bbox_mapping[gt_skeleton_id] = matched_boxes[0].id
 
+            return matched_skeletons
+
         assert self._data_filenames is not _unset
         assert self._boxes_dataset is not _unset
         assert self._input_gt_dataset is not _unset
