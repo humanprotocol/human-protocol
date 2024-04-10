@@ -23,6 +23,9 @@ import {
 import { throwError } from './utils';
 import { ChainId } from './enums';
 import { NETWORKS } from './constants';
+import { KVStore } from '@human-protocol/core/typechain-types/contracts';
+
+let kvStoreContract: KVStore;
 
 export class OperatorUtils {
   /**
@@ -138,7 +141,24 @@ export class OperatorUtils {
         role: role,
       });
 
-      return reputationNetwork.operators;
+      const operatorsWithDetails = await Promise.all(
+        reputationNetwork.operators.map(async (operator) => {
+          const operatorAddress = ethers.getAddress(operator.address);
+          const url = await kvStoreContract.get(operatorAddress, 'url');
+          const jobTypesJson = await kvStoreContract.get(
+            operatorAddress,
+            'job_types'
+          );
+          const jobTypes = JSON.parse(jobTypesJson || '[]');
+          return {
+            ...operator,
+            url,
+            job_types: jobTypes,
+          };
+        })
+      );
+
+      return operatorsWithDetails;
     } catch (e) {
       return throwError(e);
     }

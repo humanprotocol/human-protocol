@@ -18,7 +18,6 @@ import {
 } from './error';
 import { NetworkData } from './types';
 import { isValidUrl } from './utils';
-
 /**
  * ## Introduction
  *
@@ -88,6 +87,7 @@ import { isValidUrl } from './utils';
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  */
+
 export class KVStoreClient extends BaseEthersClient {
   private contract: KVStore;
 
