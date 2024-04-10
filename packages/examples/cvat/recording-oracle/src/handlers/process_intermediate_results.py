@@ -510,6 +510,10 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
         return job_gt_dataset
 
+    def _prepare_merged_dataset(self):
+        super()._parse_gt()  # We need to download the original GT dataset
+        return super()._prepare_merged_dataset()
+
 
 class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
     def __init__(self, *args, **kwargs):
@@ -844,6 +848,10 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
             updated_gt_stats[raw_gt_key].failed_jobs.add(job_cvat_id)
 
         return updated_gt_stats
+
+    def _prepare_merged_dataset(self):
+        super()._parse_gt()  # We need to download the original GT dataset
+        return super()._prepare_merged_dataset()
 
 
 def _compute_gt_stats_update(
