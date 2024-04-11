@@ -58,7 +58,7 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_MUMBAI, '0x62dD5123
 
 #### Defined in
 
-[operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+[operator.ts:46](https://github.com/humanprotocol/human-protocol/blob/84f2377c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L46)
 
 ___
 
@@ -90,7 +90,7 @@ const leaders = await OperatorUtils.getLeaders();
 
 #### Defined in
 
-[operator.ts:84](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L84)
+[operator.ts:87](https://github.com/humanprotocol/human-protocol/blob/84f2377c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L87)
 
 ___
 
@@ -124,7 +124,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-[operator.ts:123](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L123)
+[operator.ts:126](https://github.com/humanprotocol/human-protocol/blob/84f2377c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L126)
 
 ___
 
@@ -157,4 +157,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_MUMBAI, '0x62dD51
 
 #### Defined in
 
-[operator.ts:162](https://github.com/humanprotocol/human-protocol/blob/48066071/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L162)
+[operator.ts:182](https://github.com/humanprotocol/human-protocol/blob/84f2377c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L182)

@@ -48,7 +48,7 @@ type ReputationNetwork @entity {
   id: ID!
   address: Bytes!
   role: String
-  jobTypes: [String]
+  jobTypes: [String!]
   operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
 }
 
