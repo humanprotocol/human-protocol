@@ -21,7 +21,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const theme: Theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = !useMediaQuery(theme.breakpoints.up('md'));
   return (
     <Box
       position="static"
@@ -35,7 +35,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
         alignItems: 'center',
       }}
     >
-      {isMobile ? <HumanLogoNavbarIcon /> : <HumanLogoIcon />}
+      {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}
       {withNavigation ? (
         <Box
           sx={{

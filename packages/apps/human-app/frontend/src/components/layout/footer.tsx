@@ -16,7 +16,7 @@ import { ChatIcon, DiscordIcon } from '../ui/icons';
 export function Footer() {
   const { t } = useTranslation();
   const theme: Theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = !useMediaQuery(theme.breakpoints.up('md'));
 
   return (
     <Grid container>
@@ -52,11 +52,11 @@ export function Footer() {
         </Link>
       </Grid>
       <Grid
-        alignItems={isMobile ? 'flex-start' : 'center'}
+        alignItems={isMobile ? 'center' : 'flex-start'}
         container
         direction="column"
         justifyContent="center"
-        xs={isMobile ? 11 : 12}
+        xs={isMobile ? 12 : 11}
       >
         <Stack
           direction="row"
