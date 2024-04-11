@@ -12,7 +12,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
-import { colorPalette } from '@/styles/color-palette';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -49,31 +48,13 @@ export function Navbar({ withNavigation }: NavbarProps) {
               display: { xs: 'none', md: 'flex' },
             }}
           >
-            <Link
-              color={colorPalette.primary.main}
-              href="#"
-              sx={{ mr: 1.5 }}
-              underline="none"
-            >
-              <Typography
-                color={colorPalette.primary.main}
-                fontSize={15}
-                fontWeight={600}
-              >
+            <Link href="#" sx={{ mr: 1.5 }} underline="none">
+              <Typography fontSize={15} fontWeight={600}>
                 {t('components.navbar.humanProtocol')}
               </Typography>
             </Link>
-            <Link
-              color={colorPalette.primary.main}
-              href="#"
-              sx={{ mr: 1.5 }}
-              underline="none"
-            >
-              <Typography
-                color={colorPalette.primary.main}
-                fontSize={15}
-                fontWeight={600}
-              >
+            <Link href="#" sx={{ mr: 1.5 }} underline="none">
+              <Typography fontSize={15} fontWeight={600}>
                 {t('components.navbar.howItWorks')}
               </Typography>
             </Link>
@@ -83,7 +64,6 @@ export function Navbar({ withNavigation }: NavbarProps) {
               onClick={() => {
                 setIsDrawerOpen(!isDrawerOpen);
               }}
-              sx={{ color: colorPalette.primary.main }}
             >
               <MenuIcon />
             </IconButton>
@@ -102,20 +82,10 @@ export function Navbar({ withNavigation }: NavbarProps) {
                   p: 2,
                 }}
               >
-                <Link
-                  color={colorPalette.primary.main}
-                  href="#"
-                  sx={{ my: 1 }}
-                  underline="none"
-                >
+                <Link href="#" sx={{ my: 1 }} underline="none">
                   {t('components.navbar.humanProtocol')}
                 </Link>
-                <Link
-                  color={colorPalette.primary.main}
-                  href="#"
-                  sx={{ my: 1 }}
-                  underline="none"
-                >
+                <Link href="#" sx={{ my: 1 }} underline="none">
                   {t('components.navbar.howItWorks')}
                 </Link>
               </Box>
