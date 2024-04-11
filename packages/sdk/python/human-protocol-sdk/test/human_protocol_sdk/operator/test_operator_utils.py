@@ -181,6 +181,8 @@ class TestOperatorUtils(unittest.TestCase):
         reputation_address = "0x1234567890123456789012345678901234567891"
         operator_address = "0x1234567890123456789012345678901234567891"
         role = "Job Launcher"
+        url = "https://example.com"
+        job_types = ["type1", "type2"]
 
         mock_function = MagicMock()
 
@@ -193,7 +195,14 @@ class TestOperatorUtils(unittest.TestCase):
                         "reputationNetwork": {
                             "id": reputation_address,
                             "address": reputation_address,
-                            "operators": [{"address": operator_address, "role": role}],
+                            "operators": [
+                                {
+                                    "address": operator_address,
+                                    "role": role,
+                                    "url": url,
+                                    "job_types": job_types,
+                                }
+                            ],
                         }
                     }
                 }
@@ -212,6 +221,8 @@ class TestOperatorUtils(unittest.TestCase):
         self.assertNotEqual(operators, [])
         self.assertEqual(operators[0].address, operator_address)
         self.assertEqual(operators[0].role, role)
+        self.assertEqual(operators[0].url, url)
+        self.assertEqual(operators[0].job_types, job_types)
 
     def test_get_reputation_network_operators_empty_data(self):
         reputation_address = "0x1234567890123456789012345678901234567891"

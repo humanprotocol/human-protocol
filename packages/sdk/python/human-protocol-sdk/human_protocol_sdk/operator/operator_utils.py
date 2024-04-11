@@ -149,9 +149,7 @@ class RewardData:
 
 class Operator:
     def __init__(
-        self,
-        address: str,
-        role: str,
+        self, address: str, role: str, url: str = "", job_types: List[str] = None
     ):
         """
         Initializes an Operator instance.
@@ -162,6 +160,8 @@ class Operator:
 
         self.address = address
         self.role = role
+        self.url = url
+        self.job_types = job_types if job_types is not None else []
 
 
 class OperatorUtils:
@@ -306,7 +306,7 @@ class OperatorUtils:
         chain_id: ChainId,
         address: str,
         role: Optional[str] = None,
-        job_types: List[str] = [],
+        job_types: Optional[List[str]] = None,
     ) -> List[Operator]:
         """Get the reputation network operators of the specified address.
 
@@ -339,6 +339,10 @@ class OperatorUtils:
 
         network = NETWORKS[chain_id]
 
+        params = {"address": address.lower(), "role": role}
+        if job_types:
+            params["job_types"] = job_types
+
         reputation_network_data = get_data_from_subgraph(
             network["subgraph_url"],
             query=get_reputation_network_query(role),
@@ -354,6 +358,8 @@ class OperatorUtils:
             Operator(
                 address=operator.get("address", ""),
                 role=operator.get("role", ""),
+                url=operator.get("url", ""),
+                job_types=operator.get("job_types", []),
             )
             for operator in operators
         ]
