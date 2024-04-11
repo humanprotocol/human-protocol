@@ -15,6 +15,9 @@
     },
     "breadcrumb": {
       "back": "Back"
+    },
+    "table": {
+      "clearBtn": "clear"
     }
   }
 }

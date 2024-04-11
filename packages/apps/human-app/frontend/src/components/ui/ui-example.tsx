@@ -25,6 +25,7 @@ import {
   WorkIcon,
   WorkSecondaryIcon,
 } from '@/components/ui/icons';
+import { TableExample } from '@/pages/playground/table-example/table-example';
 
 export function UiExample() {
   const { openModal, isModalOpen, closeModal } = useModalStore();
@@ -64,7 +65,7 @@ export function UiExample() {
           H5 / Roboto Medium 20
         </Typography>
 
-        <Typography variant="text_field">
+        <Typography variant="textField">
           Text field / Roboto Regular 16
         </Typography>
 
@@ -207,6 +208,9 @@ export function UiExample() {
           <Loader size={100} sx={{ marginY: '60px' }} />
         </Stack>
       </Modal>
+
+      <h2>Table</h2>
+      <TableExample />
     </div>
   );
 }

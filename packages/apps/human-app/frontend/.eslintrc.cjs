@@ -33,6 +33,10 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    // allow imports from material react table library
+    camelcase: ['error', { allow: ['MRT_'] }],
+    'react/jsx-pascal-case': ['error', { ignore: ['MRT_'] }],
   },
   settings: {
     'import/resolver': {
