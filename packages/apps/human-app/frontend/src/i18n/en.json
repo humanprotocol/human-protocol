@@ -1,11 +1,11 @@
 {
   "dashboard": {},
-  "validation":{
+  "validation": {
     "required": "Required",
     "min": "Min {{count}} characters",
     "max": "Max {{count}} characters"
   },
-  "errors":{
+  "errors": {
     "unknown": "Unknown error"
   },
   "components": {
