@@ -46,39 +46,72 @@ export function UiExample() {
 
       <Stack gap={3} sx={{ marginBottom: 4 }}>
         <Typography component="p" variant="h1">
-          H1 / Roboto Medium 56
+          H1 / Inter Extrabold 80
         </Typography>
 
         <Typography component="p" variant="h2">
-          H2 / Roboto Medium 36
+          H2 / Inter Semibold 60
         </Typography>
 
         <Typography component="p" variant="h3">
-          H3 / Roboto Bold 28
+          H3 / Inter Regular 48
         </Typography>
 
         <Typography component="p" variant="h4">
-          H4 / Roboto Medium 24
+          H4 / Inter Semibold 34
         </Typography>
 
         <Typography component="p" variant="h5">
-          H5 / Roboto Medium 20
+          H5 / Inter Regular 24
         </Typography>
 
-        <Typography variant="textField">
-          Text field / Roboto Regular 16
+        <Typography component="p" variant="h6">
+          H6 / Inter Medium 20
         </Typography>
-
-        <Typography variant="body1">Body 1 / Roboto Regular 14</Typography>
-
-        <Typography variant="body2">Body 2 / Roboto Medium 14</Typography>
 
         <Typography variant="subtitle1">
-          Subtitle 1 / Roboto Regular 12
+          Subtitle 1 / Inter Regular 16
         </Typography>
 
         <Typography variant="subtitle2">
-          Subtitle 2 / Roboto Medium 12
+          Subtitle 2 / Inter Semibold 14
+        </Typography>
+
+        <Typography variant="body1">Body 1 / Inter Regular 16</Typography>
+
+        <Typography variant="body2">Body 1 / Inter Regular 14</Typography>
+
+        <Typography variant="body3">Body 3 / Inter Medium 16</Typography>
+
+        <Typography variant="buttonLarge">
+          Button large / Inter Semibold 15
+        </Typography>
+
+        <Typography variant="buttonMedium">
+          Button medium / Inter Semibold 14
+        </Typography>
+
+        <Typography variant="buttonSmall">
+          Button small / Inter Semibold 13
+        </Typography>
+
+        <Typography variant="caption">Caption / Inter Regular 12</Typography>
+        <Typography variant="overline">Overline / Inter Regular 12</Typography>
+        <Typography variant="avatarLetter">
+          Avatar Letter / Inter Regular 20
+        </Typography>
+        <Typography variant="inputLabel">
+          Input Label / Inter Regular 12
+        </Typography>
+        <Typography variant="helperText">
+          Helper Text / Inter Regular 12
+        </Typography>
+        <Typography variant="inputText">
+          Input Text / Inter Regular 16
+        </Typography>
+        <Typography variant="tooltip">Tooltip / Inter Medium 12</Typography>
+        <Typography variant="inputUnderline">
+          Input Under line / Inter Semibold 12
         </Typography>
       </Stack>
 
