@@ -126,7 +126,7 @@ export class EscrowClient extends BaseEthersClient {
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
-
+    console.log(networkData.factoryAddress);
     this.escrowFactoryContract = EscrowFactory__factory.connect(
       networkData.factoryAddress,
       runner
