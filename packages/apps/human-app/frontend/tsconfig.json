@@ -3,7 +3,12 @@
   "compilerOptions": {
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["vite-plugin-svgr/client", "vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "types": [
+      "vite-plugin-svgr/client",
+      "vite/client",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
     "strictNullChecks": true,
 
     /* Bundler mode */
@@ -20,9 +25,7 @@
     /* Absolute paths */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
