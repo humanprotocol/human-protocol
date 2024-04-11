@@ -1,11 +1,11 @@
 {
   "dashboard": {},
-  "validation":{
+  "validation": {
     "required": "Required",
     "min": "Min {{count}} characters",
     "max": "Max {{count}} characters"
   },
-  "errors":{
+  "errors": {
     "unknown": "Unknown error"
   },
   "components": {
@@ -25,6 +25,9 @@
       "termsOfService": "Terms of Service",
       "humanProtocol": "HUMAN Protocol",
       "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
+    },
+    "table": {
+      "clearBtn": "clear"
     }
   }
 }
