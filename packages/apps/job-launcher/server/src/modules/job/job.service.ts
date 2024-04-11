@@ -949,25 +949,6 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   }
 
-  private getOracleAddresses(manifest: any) {
-    let exchangeOracle;
-    let recordingOracle;
-    const oracleType = this.getOracleType(manifest);
-    if (oracleType === OracleType.FORTUNE) {
-      exchangeOracle = this.web3ConfigService.fortuneExchangeOracleAddress;
-      recordingOracle = this.web3ConfigService.fortuneRecordingOracleAddress;
-    } else if (oracleType === OracleType.HCAPTCHA) {
-      exchangeOracle = this.web3ConfigService.hCaptchaOracleAddress;
-      recordingOracle = this.web3ConfigService.hCaptchaOracleAddress;
-    } else {
-      exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
-      recordingOracle = this.web3ConfigService.cvatRecordingOracleAddress;
-    }
-    const reputationOracle = this.web3ConfigService.reputationOracleAddress;
-
-    return { exchangeOracle, recordingOracle, reputationOracle };
-  }
-
   public async uploadManifest(
     requestType: JobRequestType,
     chainId: ChainId,
@@ -1068,6 +1049,7 @@ export class JobService {
           );
           break;
         case JobStatusFilter.LAUNCHED:
+        case JobStatusFilter.PARTIAL:
         case JobStatusFilter.COMPLETED:
           escrows = await this.findEscrowsByStatus(
             networks,
@@ -1149,7 +1131,7 @@ export class JobService {
           escrow.address.toLowerCase() === job.escrowAddress.toLowerCase(),
       );
       if (escrow) {
-        const newJob = await this.updateCompletedStatus(job, escrow);
+        const newJob = await this.updateJobStatus(job, escrow);
         return newJob.status;
       }
     }
@@ -1334,7 +1316,7 @@ export class JobService {
 
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
-      jobEntity = await this.updateCompletedStatus(jobEntity, escrow);
+      jobEntity = await this.updateJobStatus(jobEntity, escrow);
     }
 
     let manifestData = await this.storageService.download(manifestUrl);
@@ -1497,7 +1479,7 @@ export class JobService {
     return BigInt(feeValue ? feeValue : 1);
   }
 
-  private async updateCompletedStatus(
+  private async updateJobStatus(
     job: JobEntity,
     escrow: EscrowData,
   ): Promise<JobEntity> {
@@ -1507,6 +1489,13 @@ export class JobService {
       job.status !== JobStatus.COMPLETED
     ) {
       job.status = JobStatus.COMPLETED;
+      updatedJob = await this.jobRepository.updateOne(job);
+    }
+    if (
+      escrow.status === EscrowStatus[EscrowStatus.Partial] &&
+      job.status !== JobStatus.PARTIAL
+    ) {
+      job.status = JobStatus.PARTIAL;
       updatedJob = await this.jobRepository.updateOne(job);
     }
     return updatedJob;
