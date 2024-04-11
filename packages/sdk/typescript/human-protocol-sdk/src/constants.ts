@@ -275,7 +275,6 @@ export const KVStoreKeys = {
 };
 
 export const Role = {
-  Validator: 'Validator',
   JobLauncher: 'Job Launcher',
   ExchangeOracle: 'Exchange Oracle',
   ReputationOracle: 'Reputation Oracle',

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
-import { describe, expect, test, vi, beforeAll } from 'vitest';
-import { NETWORKS, Role } from '../src/constants';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
+import { NETWORKS } from '../src/constants';
 import {
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
@@ -12,15 +12,10 @@ import {
   GET_LEADER_QUERY,
   GET_REPUTATION_NETWORK_QUERY,
 } from '../src/graphql/queries/operator';
-import {
-  ILeader,
-  IOperator,
-  IReputationNetwork,
-  IReward,
-} from '../src/interfaces';
+import { ILeader, IReward } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
 import { ChainId } from '../src/enums';
-import { KVStoreClient } from '@human-protocol/sdk';
+import { NetworkData } from '../src/types';
 
 vi.mock('graphql-request', () => {
   return {
@@ -28,29 +23,37 @@ vi.mock('graphql-request', () => {
   };
 });
 
-vi.mock('@human-protocol/sdk', () => {
-  return {
-    KVStoreClient: {
-      build: vi.fn().mockResolvedValue({
-        get: vi.fn((address, key) => {
-          if (key === 'url') {
-            return Promise.resolve('http://example.com');
-          }
-          if (key === 'job_types') {
-            return Promise.resolve(JSON.stringify(['JobType1', 'JobType2']));
-          }
-          return Promise.resolve('');
-        }),
-      }),
-    },
-  };
-});
-
 describe('OperatorUtils', () => {
+  let operatorUtils: any,
+    mockProvider: any,
+    mockSigner: any,
+    network: NetworkData | undefined,
+    mockKVStoreContract: any;
+
+  beforeEach(async () => {
+    mockProvider = {
+      provider: {
+        getNetwork: vi.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
+      },
+    };
+    mockSigner = {
+      provider: mockProvider.provider,
+      getAddress: vi.fn().mockResolvedValue(ethers.ZeroAddress),
+    };
+    mockKVStoreContract = {
+      set: vi.fn(),
+      setBulk: vi.fn(),
+      get: vi.fn(),
+      address: network?.kvstoreAddress,
+    };
+
+    operatorUtils = await OperatorUtils.build(mockSigner);
+    operatorUtils.kvStoreContract = mockKVStoreContract;
+  });
+
   describe('getLeader', () => {
     const stakerAddress = ethers.ZeroAddress;
     const invalidAddress = 'InvalidAddress';
-
     const mockLeader: ILeader = {
       id: stakerAddress,
       chainId: ChainId.LOCALHOST,
@@ -152,60 +155,44 @@ describe('OperatorUtils', () => {
 
   describe('getReputationNetworkOperators', () => {
     const stakerAddress = ethers.ZeroAddress;
-    const mockOperator: IOperator = {
-      address: '0x0000000000000000000000000000000000000001',
-      role: Role.JobLauncher,
-    };
-    const extendedMockOperator = {
-      ...mockOperator,
-      url: 'http://example.com',
-      job_types: ['JobType1', 'JobType2'],
-    };
-    const mockReputationNetwork: IReputationNetwork = {
-      id: stakerAddress,
-      address: stakerAddress,
-      operators: [mockOperator],
-    };
 
     test('should return reputation network operators with url and job_types', async () => {
-      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        reputationNetwork: mockReputationNetwork,
+      vi.spyOn(gqlFetch, 'default').mockResolvedValue({
+        reputationNetwork: {
+          operators: [
+            {
+              address: '0x0000000000000000000000000000000000000001',
+              role: 'Job Launcher',
+              job_types: ['JobType1', 'JobType2'],
+              url: 'http://example.com',
+            },
+          ],
+        },
       });
 
-      let result;
-      try {
-        result = await OperatorUtils.getReputationNetworkOperators(
-          ChainId.LOCALHOST,
-          stakerAddress
-        );
-      } catch (error) {
-        console.error('Error calling getReputationNetworkOperators:', error);
-      }
+      const result = await operatorUtils.getReputationNetworkOperators(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
 
-      console.log(result);
+      expect(gqlFetch.default).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_REPUTATION_NETWORK_QUERY(),
+        {
+          address: stakerAddress,
+          role: undefined,
+        }
+      );
+
+      const mockOperator = {
+        address: '0x0000000000000000000000000000000000000001',
+        job_types: [],
+        role: 'Job Launcher',
+        url: undefined,
+      };
+
+      expect(result).toEqual([mockOperator]);
     });
-
-    // test('should return reputation network operators with url and job_types', async () => {
-    //   vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-    //     reputationNetwork: mockReputationNetwork,
-    //   });
-
-    //   const result = await OperatorUtils.getReputationNetworkOperators(
-    //     ChainId.LOCALHOST,
-    //     stakerAddress
-    //   );
-
-    //   // expect(gqlFetch.default).toHaveBeenCalledWith(
-    //   //   NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
-    //   //   GET_REPUTATION_NETWORK_QUERY(),
-    //   //   {
-    //   //     address: stakerAddress,
-    //   //     role: undefined,
-    //   //   }
-    //   // );
-
-    //   // expect(result).toEqual([extendedMockOperator]);
-    // });
 
     test('should throw an error if gql fetch fails', async () => {
       const gqlFetchSpy = vi
@@ -213,7 +200,7 @@ describe('OperatorUtils', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        OperatorUtils.getReputationNetworkOperators(
+        operatorUtils.getReputationNetworkOperators(
           ChainId.LOCALHOST,
           stakerAddress
         )

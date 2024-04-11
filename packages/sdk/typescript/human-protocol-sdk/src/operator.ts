@@ -9,25 +9,70 @@ import {
 } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
 import { RewardAddedEventData } from './graphql';
+import { NetworkData } from './types';
 import {
   GET_LEADER_QUERY,
   GET_LEADERS_QUERY,
   GET_REPUTATION_NETWORK_QUERY,
 } from './graphql/queries/operator';
-import { ethers } from 'ethers';
+import { ContractRunner, ethers } from 'ethers';
+import { BaseEthersClient } from './base';
 import {
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
+  ErrorProviderDoesNotExist,
 } from './error';
 import { throwError } from './utils';
 import { ChainId } from './enums';
+import { requiresSigner } from './decorators';
 import { NETWORKS } from './constants';
-import { KVStore } from '@human-protocol/core/typechain-types/contracts';
+import {
+  KVStore,
+  KVStore__factory,
+} from '@human-protocol/core/typechain-types';
 
-let kvStoreContract: KVStore;
+export class OperatorUtils extends BaseEthersClient {
+  public kvStoreContract: KVStore;
 
-export class OperatorUtils {
+  /**
+   * **KVStoreClient constructor**
+   *
+   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
+   * @param {NetworkData} network - The network information required to connect to the Staking contract
+   */
+  constructor(runner: ContractRunner, networkData: NetworkData) {
+    super(runner, networkData);
+
+    this.kvStoreContract = KVStore__factory.connect(
+      networkData.kvstoreAddress,
+      runner
+    );
+  }
+
+  /**
+   * Static method to build an instance of OperatorUtils with necessary setup.
+   *
+   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network.
+   * @returns {Promise<OperatorUtils>} - An instance of OperatorUtils.
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported.
+   */
+  public static async build(runner: ContractRunner) {
+    if (!runner.provider) {
+      throw ErrorProviderDoesNotExist;
+    }
+
+    const network = await runner.provider.getNetwork();
+    const chainId: ChainId = Number(network.chainId);
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    return new OperatorUtils(runner, networkData);
+  }
+
   /**
    * This function returns the leader data for the given address.
    *
@@ -123,7 +168,8 @@ export class OperatorUtils {
    * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
-  public static async getReputationNetworkOperators(
+  @requiresSigner
+  public async getReputationNetworkOperators(
     chainId: ChainId,
     address: string,
     role?: string
@@ -144,8 +190,8 @@ export class OperatorUtils {
       const operatorsWithDetails = await Promise.all(
         reputationNetwork.operators.map(async (operator) => {
           const operatorAddress = ethers.getAddress(operator.address);
-          const url = await kvStoreContract.get(operatorAddress, 'url');
-          const jobTypesJson = await kvStoreContract.get(
+          const url = await this.kvStoreContract.get(operatorAddress, 'url');
+          const jobTypesJson = await this.kvStoreContract.get(
             operatorAddress,
             'job_types'
           );
