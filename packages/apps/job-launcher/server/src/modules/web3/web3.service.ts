@@ -57,10 +57,13 @@ export class Web3Service {
 
   public async calculateGasPrice(chainId: number): Promise<bigint> {
     const signer = this.getSigner(chainId);
-    const multiplier = this.web3ConfigService.gasPriceMultiplier;
     const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
+    console.log('Gas price:', gasPrice);
     if (gasPrice) {
-      return gasPrice * BigInt(multiplier);
+      const multipliedGasPrice =
+        gasPrice * BigInt(this.web3ConfigService.gasPriceMultiplier);
+      console.log('Gas price multiplied:', multipliedGasPrice);
+      return multipliedGasPrice;
     }
     throw new Error(ErrorWeb3.GasPriceError);
   }
