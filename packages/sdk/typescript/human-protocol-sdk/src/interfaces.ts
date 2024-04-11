@@ -49,7 +49,7 @@ export interface IOperator {
   address: string;
   role?: string;
   url?: string;
-  job_types?: string[];
+  job_types: string[];
 }
 
 export interface IEscrowsFilter {
