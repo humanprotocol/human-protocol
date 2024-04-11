@@ -24,6 +24,7 @@ import {
   UserSecondaryIcon,
   WorkIcon,
   WorkSecondaryIcon,
+  HumanLogoNavbarIcon,
 } from '@/components/ui/icons';
 
 export function UiExample() {
@@ -187,6 +188,9 @@ export function UiExample() {
         </Grid>
         <Grid>
           <InfoIcon />
+        </Grid>
+        <Grid>
+          <HumanLogoNavbarIcon />
         </Grid>
       </Stack>
 

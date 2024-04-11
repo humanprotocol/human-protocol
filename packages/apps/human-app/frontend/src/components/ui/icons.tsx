@@ -13,6 +13,8 @@ import UserOutlinedIcon from '@/assets/icons/user-outlined.svg';
 import UserSecondaryIcon from '@/assets/icons/user-secondary.svg';
 import WorkIcon from '@/assets/icons/work.svg';
 import WorkSecondaryIcon from '@/assets/icons/work-secondary.svg';
+import HumanLogoNavbarIcon from '@/assets/icons/icons-navbar/human-logo-navbar.svg';
+import DiscordIcon from '@/assets/icons/icons-homepage/discord.svg';
 
 export {
   HomepageLogoIcon,
@@ -20,6 +22,7 @@ export {
   HomepageWorkIcon,
   HumanLogoIcon,
   HumanLogoCircleIcon,
+  HumanLogoNavbarIcon,
   BackArrowIcon,
   ChatIcon,
   HandIcon,
@@ -30,4 +33,5 @@ export {
   UserSecondaryIcon,
   WorkIcon,
   WorkSecondaryIcon,
+  DiscordIcon,
 };

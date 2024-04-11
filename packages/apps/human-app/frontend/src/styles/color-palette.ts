@@ -43,4 +43,7 @@ export const colorPalette = {
     main: '#303030',
     light: '#F2F3F5',
   },
+  grey: {
+    light: '#858EC6',
+  },
 } as const;

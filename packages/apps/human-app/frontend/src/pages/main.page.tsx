@@ -1,9 +1,10 @@
 import Box from '@mui/material/Box';
+import { Layout } from '@/components/layout/unprotected/layout';
 
 export function MainPage() {
   return (
     <Box>
-      <div>Human app</div>
+      <Layout>Main Content</Layout>
     </Box>
   );
 }
