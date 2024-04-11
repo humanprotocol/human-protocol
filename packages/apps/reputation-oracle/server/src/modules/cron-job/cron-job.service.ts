@@ -178,12 +178,13 @@ export class CronJobService {
                 await escrowClient.getJobLauncherAddress(escrowAddress),
               )
             ).webhookUrl,
-            (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getRecordingOracleAddress(escrowAddress),
-              )
-            ).webhookUrl,
+            // Temporarily disable sending webhook to Recoring Oracle
+            // (
+            //   await OperatorUtils.getLeader(
+            //     chainId,
+            //     await escrowClient.getRecordingOracleAddress(escrowAddress),
+            //   )
+            // ).webhookUrl,
           ];
           const webhookBody: WebhookDto = {
             chainId,
