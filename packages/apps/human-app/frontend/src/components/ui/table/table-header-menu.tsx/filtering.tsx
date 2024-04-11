@@ -47,7 +47,7 @@ export function Filtering({ label, filteringOptions }: FilteringProps) {
                   return [...prevFilters, value];
                 });
               }}
-              sx={{ paddingLeft: 0 }}
+              sx={{ paddingLeft: 0, ':hover': { background: 'none' } }}
             />
             <ListItemText primary={text}>
               <Typography color={colorPalette.primary.main} variant="subtitle2">

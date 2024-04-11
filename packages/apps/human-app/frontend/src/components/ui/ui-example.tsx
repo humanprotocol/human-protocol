@@ -1,5 +1,4 @@
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,6 @@ import { Loader } from '@/components/ui/loader';
 import { colorPalette } from '@/styles/color-palette';
 import { MODAL_STATE, useModalStore } from '@/components/ui/modal/modal.store';
 import { Modal } from '@/components/ui/modal/modal';
-import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -30,7 +28,7 @@ import {
 import { TableExample } from '@/pages/playground/table-example/table-example';
 
 export function UiExample() {
-  const { openModal, isModalOpen, closeModal } = useModalStore();
+  const { openModal, isModalOpen } = useModalStore();
   return (
     <div>
       <Typography sx={{ marginBottom: '10px' }} variant="h1">
@@ -168,12 +166,6 @@ export function UiExample() {
         <Loader size={70} thickness={5.0} />
         <Loader size={90} />
       </Stack>
-
-      <h2>Breadcrumb</h2>
-      <Box>
-        {/*//Temporary function passed in prop*/}
-        <Breadcrumbs onClick={closeModal} />
-      </Box>
 
       <h2>Icons</h2>
       <Stack alignItems="center" direction="row" spacing={4}>
