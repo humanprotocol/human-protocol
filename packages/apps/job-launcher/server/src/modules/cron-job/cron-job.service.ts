@@ -89,6 +89,7 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (err) {
+          console.log(err);
           this.logger.error(`Error creating escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
         }
