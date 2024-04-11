@@ -47,7 +47,6 @@ type LeaderURL @entity {
 type ReputationNetwork @entity {
   id: ID!
   address: Bytes!
-  role: String
   jobTypes: [String!]
   operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
 }
