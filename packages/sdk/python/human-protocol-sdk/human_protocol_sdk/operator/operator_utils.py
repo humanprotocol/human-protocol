@@ -306,12 +306,14 @@ class OperatorUtils:
         chain_id: ChainId,
         address: str,
         role: Optional[str] = None,
+        job_types: List[str] = [],
     ) -> List[Operator]:
         """Get the reputation network operators of the specified address.
 
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
+        :parem job_types: (Optional) Job types of the operator
 
         :return: Returns an array of operator details
 
