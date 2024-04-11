@@ -4,18 +4,18 @@ import { colorPalette } from '@/styles/color-palette';
 
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
-    text_field: true;
+    textField: true;
   }
 }
 
 declare module '@mui/material/styles' {
   interface TypographyVariants {
-    text_field: CSSProperties;
+    textField: CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
-    text_field?: CSSProperties;
+    textField?: CSSProperties;
   }
 }
 
@@ -41,7 +41,7 @@ export const theme: ThemeOptions = {
       fontSize: 20,
       fontWeight: 500,
     },
-    text_field: {
+    textField: {
       fontSize: 16,
     },
     body1: {
@@ -68,7 +68,7 @@ export const theme: ThemeOptions = {
         variantMapping: {
           subtitle1: 'p',
           subtitle2: 'p',
-          text_field: 'p',
+          textField: 'p',
         },
       },
     },
@@ -97,6 +97,13 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         root: {
           fill: colorPalette.primary.main,
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer',
         },
       },
     },

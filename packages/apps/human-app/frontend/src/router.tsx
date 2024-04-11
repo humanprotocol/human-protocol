@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainPage } from '@/pages/main.page';
-import { Playground } from '@/pages/playground';
+import { Playground } from '@/pages/playground/playground.page';
 
 export const router = createBrowserRouter([
   {
