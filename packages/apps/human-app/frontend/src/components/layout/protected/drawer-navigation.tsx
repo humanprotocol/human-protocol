@@ -5,8 +5,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
-import type { Theme } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
   HelpIcon,
@@ -15,15 +14,26 @@ import {
   WorkIcon,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
-interface SideDrawerProps {
+interface DrawerNavigationProps {
   open: boolean;
   drawerWidth: number;
 }
 
-export function SideDrawer({ open, drawerWidth }: SideDrawerProps) {
-  const theme: Theme = useTheme();
-  const isMobile = !useMediaQuery(theme.breakpoints.up('md'));
+const topMenuItems = [
+  'components.DrawerNavigation.jobs',
+  'components.DrawerNavigation.captchaLabelling',
+  'components.DrawerNavigation.jobsDiscovery',
+] as const;
+
+const bottomMenuItems = [
+  'components.DrawerNavigation.profile',
+  'components.DrawerNavigation.help',
+] as const;
+
+export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
+  const isMobile = useIsMobile();
   const { t } = useTranslation();
 
   return (
@@ -59,11 +69,7 @@ export function SideDrawer({ open, drawerWidth }: SideDrawerProps) {
               marginTop: '66px',
             }}
           >
-            {[
-              'components.sideDrawer.jobs' as const,
-              'components.sideDrawer.captchaLabelling' as const,
-              'components.sideDrawer.jobsDiscovery' as const,
-            ].map((text, index) => (
+            {topMenuItems.map((text, index) => (
               <ListItem disablePadding key={text}>
                 <ListItemButton>
                   <Stack
@@ -88,10 +94,7 @@ export function SideDrawer({ open, drawerWidth }: SideDrawerProps) {
             ))}
           </List>
           <List>
-            {[
-              'components.sideDrawer.profile' as const,
-              'components.sideDrawer.help' as const,
-            ].map((text, index) => (
+            {bottomMenuItems.map((text, index) => (
               <ListItem alignItems="center" disablePadding key={text}>
                 <ListItemButton alignItems="center">
                   <Stack

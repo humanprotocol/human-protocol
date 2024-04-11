@@ -1,22 +1,14 @@
-import type { Theme } from '@mui/material';
-import {
-  Grid,
-  Link,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { ChatIcon, DiscordIcon } from '../ui/icons';
 
 export function Footer() {
   const { t } = useTranslation();
-  const theme: Theme = useTheme();
-  const isMobile = !useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = useIsMobile();
 
   return (
     <Grid container>

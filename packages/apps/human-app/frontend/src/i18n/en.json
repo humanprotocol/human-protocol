@@ -20,7 +20,7 @@
       "humanProtocol": "HUMAN Protocol",
       "howItWorks": "How It Works"
     },
-    "sideDrawer": {
+    "DrawerNavigation": {
       "jobs": "Jobs",
       "captchaLabelling": "hCaptcha labelling",
       "jobsDiscovery": "Jobs discovery",

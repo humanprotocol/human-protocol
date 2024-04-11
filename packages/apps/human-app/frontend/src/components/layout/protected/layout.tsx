@@ -1,9 +1,9 @@
-import { Grid, useMediaQuery } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useState, type ReactNode } from 'react';
-import type { Theme } from '@mui/material/styles';
-import { styled, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Footer } from '../footer';
-import { SideDrawer } from './side-drawer';
+import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
 
 interface LayoutProps {
@@ -36,8 +36,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
 }));
 
 export function Layout({ children }: LayoutProps) {
-  const theme: Theme = useTheme();
-  const isMobile = !useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(!isMobile);
   return (
     <Grid
@@ -54,7 +53,7 @@ export function Layout({ children }: LayoutProps) {
       }}
     >
       <Navbar open={open} setOpen={setOpen} />
-      <SideDrawer drawerWidth={drawerWidth} open={open} />
+      <DrawerNavigation drawerWidth={drawerWidth} open={open} />
       <Main isMobile={isMobile} open={open}>
         {children}
         <Footer />

@@ -1,17 +1,9 @@
 import { useState } from 'react';
-import type { Theme } from '@mui/material';
-import {
-  Box,
-  Link,
-  Typography,
-  Drawer,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Link, Typography, Drawer, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -20,8 +12,7 @@ interface NavbarProps {
 export function Navbar({ withNavigation }: NavbarProps) {
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const theme: Theme = useTheme();
-  const isMobile = !useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = useIsMobile();
   return (
     <Box
       position="static"
