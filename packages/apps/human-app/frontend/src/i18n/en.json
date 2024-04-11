@@ -16,6 +16,16 @@
     "breadcrumb": {
       "back": "Back"
     },
+    "navbar": {
+      "humanProtocol": "HUMAN Protocol",
+      "howItWorks": "How It Works"
+    },
+    "footer": {
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "humanProtocol": "HUMAN Protocol",
+      "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
+    },
     "table": {
       "clearBtn": "clear"
     }

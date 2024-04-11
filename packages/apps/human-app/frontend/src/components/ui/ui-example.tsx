@@ -24,6 +24,8 @@ import {
   UserSecondaryIcon,
   WorkIcon,
   WorkSecondaryIcon,
+  HumanLogoNavbarIcon,
+  DiscordIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 
@@ -221,6 +223,12 @@ export function UiExample() {
         </Grid>
         <Grid>
           <InfoIcon />
+        </Grid>
+        <Grid>
+          <HumanLogoNavbarIcon />
+        </Grid>
+        <Grid>
+          <DiscordIcon />
         </Grid>
       </Stack>
 
