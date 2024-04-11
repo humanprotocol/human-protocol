@@ -221,6 +221,15 @@ export class EscrowClient extends BaseEthersClient {
     });
 
     try {
+      console.log(
+        'Estimate gas:',
+        await this.escrowFactoryContract.createEscrow.estimateGas(
+          tokenAddress,
+          trustedHandlers,
+          jobRequesterId,
+          txOptions
+        )
+      );
       const result = await (
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
