@@ -114,4 +114,24 @@ export class CronJobController {
     await this.cronJobService.processPendingWebhooks();
     return;
   }
+
+  @ApiOperation({
+    summary: 'Process abuse cron job',
+    description: 'Endpoint to launch abuse cron job.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cron job launched successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
+  @Get('/abuse/process')
+  public async abuseCronJob(): Promise<any> {
+    await this.cronJobService.processAbuse();
+    return;
+  }
 }

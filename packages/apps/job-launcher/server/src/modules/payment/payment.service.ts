@@ -10,6 +10,7 @@ import { ethers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
+  CardConfirmDto,
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
@@ -36,6 +37,11 @@ import { getRate } from '../../common/utils';
 import { add, div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
+import { UserEntity } from '../user/user.entity';
+import { PaymentInfoRepository } from './payment-info.repository';
+import { PaymentInfoEntity } from './payment-info.entity';
+import { JobEntity } from '../job/job.entity';
+import { ServerConfigService } from 'src/common/config/server-config.service';
 
 @Injectable()
 export class PaymentService {
@@ -45,7 +51,9 @@ export class PaymentService {
   constructor(
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
+    private readonly paymentInfoRepository: PaymentInfoRepository,
     private stripeConfigService: StripeConfigService,
+    private serverConfigService: ServerConfigService,
   ) {
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,
@@ -57,8 +65,69 @@ export class PaymentService {
     });
   }
 
+  public async createCustomerAndAssignCard(user: UserEntity): Promise<string> {
+    let setupIntent: Stripe.Response<Stripe.SetupIntent>;
+
+    if (!!user.paymentInfo) {
+      this.logger.log(ErrorPayment.CardAssigned, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.CardAssigned);
+    }
+
+    try {
+      const customer = await this.stripe.customers.create({
+        email: user.email,
+      });
+
+      setupIntent = await this.stripe.setupIntents.create({
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        customer: customer.id,
+      });
+    } catch (error) {
+      this.logger.log(error.message, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.CardNotAssigned);
+    }
+
+    if (!setupIntent.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        PaymentService.name,
+      );
+      throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    return setupIntent.client_secret;
+  }
+
+  public async confirmCard(
+    user: UserEntity,
+    data: CardConfirmDto,
+  ): Promise<boolean> {
+    const setup = await this.stripe.setupIntents.retrieve(data.setupId);
+
+    if (!setup) {
+      this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.SetupNotFound);
+    }
+
+    await this.stripe.customers.update(<string>setup.customer, {
+      invoice_settings: {
+        default_payment_method: <string>setup.payment_method,
+      },
+    });
+
+    const paymentInfo = new PaymentInfoEntity();
+    paymentInfo.user = user;
+    paymentInfo.customerId = setup.customer as string;
+    paymentInfo.paymentMethodId = setup.payment_method as string;
+    await this.paymentInfoRepository.createUnique(paymentInfo);
+
+    return true;
+  }
+
   public async createFiatPayment(
-    userId: number,
+    user: UserEntity,
     dto: PaymentFiatCreateDto,
   ): Promise<string> {
     const { amount, currency } = dto;
@@ -67,6 +136,9 @@ export class PaymentService {
     const params: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
       currency: currency,
+      customer: user.paymentInfo.customerId,
+      payment_method: user.paymentInfo.paymentMethodId,
+      off_session: false,
     };
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
@@ -95,7 +167,7 @@ export class PaymentService {
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
-      userId,
+      userId: user.id,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
       amount: div(amountInCents, 100),
@@ -273,13 +345,73 @@ export class PaymentService {
     Object.assign(paymentEntity, {
       userId: dto.userId,
       jobId: dto.jobId,
-      source: PaymentSource.BALANCE,
-      type: PaymentType.REFUND,
+      source: PaymentSource.FIAT,
+      type: PaymentType.SLASH,
       amount: dto.refundAmount,
-      currency: TokenId.HMT,
+      currency: TokenId.USDT,
       rate,
       status: PaymentStatus.SUCCEEDED,
     });
     await this.paymentRepository.createUnique(paymentEntity);
+  }
+
+  public async createSlash(job: JobEntity): Promise<void> {
+    const amount = this.serverConfigService.abuseAmount,
+      currency = Currency.USD;
+
+    const paymentInfo = await this.paymentInfoRepository.findOneByUser(
+      job.userId,
+    );
+    if (!paymentInfo) {
+      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
+      throw new BadRequestException(ErrorPayment.CustomerNotFound);
+    }
+
+    const amountInCents = Math.ceil(mul(amount, 100));
+    const params: Stripe.PaymentIntentCreateParams = {
+      amount: amountInCents,
+      currency: currency,
+      customer: paymentInfo.customerId,
+      payment_method: paymentInfo.paymentMethodId,
+      off_session: true,
+      confirm: true,
+    };
+
+    const paymentIntent = await this.stripe.paymentIntents.create(params);
+
+    if (!paymentIntent.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        PaymentService.name,
+      );
+      throw new BadRequestException(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    const newPaymentEntity = new PaymentEntity();
+    Object.assign(newPaymentEntity, {
+      userId: job.user.id,
+      source: PaymentSource.FIAT,
+      type: PaymentType.DEPOSIT,
+      amount: div(amountInCents, 100),
+      currency,
+      rate: 1,
+      transaction: paymentIntent.id,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    await this.paymentRepository.createUnique(newPaymentEntity);
+
+    Object.assign(newPaymentEntity, {
+      userId: job.user.id,
+      source: PaymentSource.FIAT,
+      type: PaymentType.SLASH,
+      amount: div(-amountInCents, 100),
+      currency,
+      rate: 1,
+      transaction: null,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    await this.paymentRepository.createUnique(newPaymentEntity);
+
+    return;
   }
 }

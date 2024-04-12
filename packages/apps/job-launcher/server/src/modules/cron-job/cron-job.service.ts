@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
+import { ErrorCronJob, ErrorJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { JobService } from '../job/job.service';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
 import { StorageService } from '../storage/storage.service';
 import {
@@ -14,7 +14,6 @@ import {
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
@@ -204,10 +203,6 @@ export class CronJobService {
           jobEntity.status = JobStatus.CANCELED;
           await this.jobRepository.updateOne(jobEntity);
 
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
@@ -236,7 +231,7 @@ export class CronJobService {
   }
 
   /**
-   * Process a pending webhook job.
+   * Process a pending  webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   public async processPendingWebhooks(): Promise<void> {
@@ -252,8 +247,9 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
-      const webhookEntities = await this.webhookRepository.findByStatus(
+      const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PENDING,
+        EventType.ESCROW_CREATED,
       );
 
       for (const webhookEntity of webhookEntities) {
@@ -272,6 +268,61 @@ export class CronJobService {
     }
 
     this.logger.log('Pending webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  /**
+   * Process an abuse webhook.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async processAbuse(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(CronJobType.Abuse);
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Abuse START');
+    const cronJob = await this.startCronJob(CronJobType.Abuse);
+
+    try {
+      const webhookEntities = await this.webhookRepository.findByStatusAndType(
+        WebhookStatus.PENDING,
+        EventType.ABUSE,
+      );
+
+      for (const webhookEntity of webhookEntities) {
+        try {
+          const jobEntity =
+            await this.jobRepository.findOneByChainIdAndEscrowAddress(
+              webhookEntity.chainId,
+              webhookEntity.escrowAddress,
+            );
+          if (!jobEntity) {
+            this.logger.log(ErrorJob.NotFound, JobService.name);
+            throw new BadRequestException(ErrorJob.NotFound);
+          }
+          if (jobEntity.escrowAddress) {
+            await this.jobService.processEscrowCancellation(jobEntity);
+            jobEntity.status = JobStatus.CANCELED;
+            await this.jobRepository.updateOne(jobEntity);
+          }
+          await this.paymentService.createSlash(jobEntity);
+        } catch (err) {
+          this.logger.error(
+            `Error slashing escrow (address: ${webhookEntity.id}, chainId: ${webhookEntity.chainId}: ${err.message}`,
+          );
+          await this.webhookService.handleWebhookError(webhookEntity);
+          continue;
+        }
+        webhookEntity.status = WebhookStatus.COMPLETED;
+        await this.webhookRepository.updateOne(webhookEntity);
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Abuse STOP');
     await this.completeCronJob(cronJob);
   }
 }
