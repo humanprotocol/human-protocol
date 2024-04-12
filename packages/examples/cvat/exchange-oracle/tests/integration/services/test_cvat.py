@@ -735,12 +735,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 2)
 
-        cvat_service.finish_uploads(self.session, [data_uploads[0]])
+        cvat_service.finish_data_uploads(self.session, [data_uploads[0]])
 
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 1)
 
-        cvat_service.finish_uploads(self.session, [data_uploads[0]])
+        cvat_service.finish_data_uploads(self.session, [data_uploads[0]])
 
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 0)

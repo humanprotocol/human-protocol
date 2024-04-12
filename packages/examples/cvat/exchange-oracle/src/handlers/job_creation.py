@@ -889,12 +889,6 @@ class BoxesFromPointsTaskBuilder:
 
         self._job_layout = job_layout
 
-        self.logger.info(
-            "Task creation for escrow '%s': will create %s assignments",
-            self.escrow_address,
-            len(job_layout),
-        )
-
     def _prepare_label_configuration(self):
         self._label_configuration = make_label_configuration(self.manifest)
 
@@ -1078,6 +1072,19 @@ class BoxesFromPointsTaskBuilder:
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
+            total_jobs = len(self._job_layout)
+            self.logger.info(
+                "Task creation for escrow '%s': will create %s assignments",
+                self.escrow_address,
+                total_jobs,
+            )
+            db_service.create_escrow_creation(
+                session,
+                escrow_address=self.escrow_address,
+                chain_id=self.chain_id,
+                total_jobs=total_jobs,
+            )
+
             project_id = db_service.create_project(
                 session,
                 cvat_project.id,
@@ -1883,12 +1890,6 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self._job_params = job_params
 
-        self.logger.info(
-            "Task creation for escrow '%s': will create %s assignments",
-            self.escrow_address,
-            sum(len(self.manifest.annotation.labels[jp.label_id].nodes) for jp in job_params),
-        )
-
     def _prepare_job_labels(self):
         self.point_labels = {}
 
@@ -2068,6 +2069,22 @@ class SkeletonsFromBoxesTaskBuilder:
         cvat_cloud_storage = cvat_api.create_cloudstorage(
             **_make_cvat_cloud_storage_params(oracle_bucket)
         )
+
+        total_jobs = sum(
+            len(self.manifest.annotation.labels[jp.label_id].nodes) for jp in self._job_params
+        )
+        self.logger.info(
+            "Task creation for escrow '%s': will create %s assignments",
+            self.escrow_address,
+            total_jobs,
+        )
+        with SessionLocal.begin() as session:
+            db_service.create_escrow_creation(
+                session,
+                escrow_address=self.escrow_address,
+                chain_id=self.chain_id,
+                total_jobs=total_jobs,
+            )
 
         for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
             # Each skeleton point uses the same file layout in jobs
@@ -2313,6 +2330,16 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
+            total_jobs = len(job_configuration)
+            logger.info(
+                "Task creation for escrow '%s': will create %s assignments",
+                escrow_address,
+                total_jobs,
+            )
+            db_service.create_escrow_creation(
+                session, escrow_address=escrow_address, chain_id=chain_id, total_jobs=total_jobs
+            )
+
             project_id = db_service.create_project(
                 session,
                 cvat_project.id,
