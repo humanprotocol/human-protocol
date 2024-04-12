@@ -26,6 +26,7 @@ import {
   DiscordIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
+import { Alert } from '@/components/ui/alert';
 
 export function UiExample() {
   const { openModal, isModalOpen } = useModalStore();
@@ -244,6 +245,9 @@ export function UiExample() {
 
       <h2>Table</h2>
       <TableExample />
+
+      <h2>Alert</h2>
+      <Alert />
     </div>
   );
 }
