@@ -1,14 +1,11 @@
 import { Grid } from '@mui/material';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { styled } from '@mui/material/styles';
+import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
-
-interface LayoutProps {
-  children: ReactNode;
-}
 
 const drawerWidth = 240;
 
@@ -35,7 +32,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   }),
 }));
 
-export function Layout({ children }: LayoutProps) {
+export function Layout() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(!isMobile);
   return (
@@ -55,7 +52,7 @@ export function Layout({ children }: LayoutProps) {
       <Navbar open={open} setOpen={setOpen} />
       <DrawerNavigation drawerWidth={drawerWidth} open={open} />
       <Main isMobile={isMobile} open={open}>
-        {children}
+        <Outlet />
         <Footer />
       </Main>
     </Grid>
