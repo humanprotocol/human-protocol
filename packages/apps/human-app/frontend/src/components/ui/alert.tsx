@@ -6,8 +6,8 @@ import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import { Typography } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
 
-const getIcon = (color: AlertProps['color']) => {
-  switch (color) {
+const getIcon = (severity: MuiAlertProps['severity']) => {
+  switch (severity) {
     case 'success':
       return <CheckCircleIcon />;
 
@@ -22,12 +22,8 @@ const getIcon = (color: AlertProps['color']) => {
   }
 };
 
-type AlertProps = MuiAlertProps & {
-  closeIcon?: boolean;
-};
-
-export function Alert({ color, children, ...rest }: AlertProps) {
-  const icon = getIcon(color);
+export function Alert({ severity, color, children, ...rest }: MuiAlertProps) {
+  const icon = getIcon(severity);
   const fontColor = color === 'error' ? colorPalette.error.main : 'inherit';
   return (
     <MuiAlert color={color} icon={icon} {...rest} variant="standard">
