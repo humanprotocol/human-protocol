@@ -1,17 +1,10 @@
 import { useState } from 'react';
-import type { Theme } from '@mui/material';
-import {
-  Box,
-  Link,
-  Typography,
-  Drawer,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Drawer, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { Button } from '@/components/ui/button';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -20,8 +13,7 @@ interface NavbarProps {
 export function Navbar({ withNavigation }: NavbarProps) {
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const theme: Theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = useIsMobile();
   return (
     <Box
       position="static"
@@ -35,7 +27,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
         alignItems: 'center',
       }}
     >
-      {isMobile ? <HumanLogoNavbarIcon /> : <HumanLogoIcon />}
+      {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}
       {withNavigation ? (
         <Box
           sx={{
@@ -48,16 +40,12 @@ export function Navbar({ withNavigation }: NavbarProps) {
               display: { xs: 'none', md: 'flex' },
             }}
           >
-            <Link href="#" sx={{ mr: 1.5 }} underline="none">
-              <Typography fontSize={15} fontWeight={600}>
-                {t('components.navbar.humanProtocol')}
-              </Typography>
-            </Link>
-            <Link href="#" sx={{ mr: 1.5 }} underline="none">
-              <Typography fontSize={15} fontWeight={600}>
-                {t('components.navbar.howItWorks')}
-              </Typography>
-            </Link>
+            <Button size="large" variant="text">
+              {t('components.navbar.humanProtocol')}
+            </Button>
+            <Button size="large" variant="text">
+              {t('components.navbar.howItWorks')}
+            </Button>
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
@@ -80,14 +68,15 @@ export function Navbar({ withNavigation }: NavbarProps) {
                   display: 'flex',
                   flexDirection: 'column',
                   p: 2,
+                  alignItems: 'flex-end',
                 }}
               >
-                <Link href="#" sx={{ my: 1 }} underline="none">
+                <Button size="large" variant="text">
                   {t('components.navbar.humanProtocol')}
-                </Link>
-                <Link href="#" sx={{ my: 1 }} underline="none">
+                </Button>
+                <Button size="large" variant="text">
                   {t('components.navbar.howItWorks')}
-                </Link>
+                </Button>
               </Box>
             </Drawer>
           </Box>

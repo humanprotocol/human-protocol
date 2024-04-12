@@ -219,7 +219,7 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         root: {
           fontSize: '14px',
-          fontWeight: 500,
+          fontWeight: 600,
           '&.Mui-disabled': {
             backgroundColor: colorPalette.primary.contrastText,
             color: colorPalette.text.secondary,
@@ -238,8 +238,11 @@ export const theme: ThemeOptions = {
     },
     MuiSvgIcon: {
       styleOverrides: {
-        root: {
+        colorPrimary: {
           fill: colorPalette.primary.main,
+        },
+        colorSecondary: {
+          fill: colorPalette.text.disabled,
         },
       },
     },
