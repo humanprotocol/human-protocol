@@ -221,8 +221,8 @@ export const theme: ThemeOptions = {
           fontSize: '14px',
           fontWeight: 500,
           '&.Mui-disabled': {
-            backgroundColor: colorPalette.ink.light,
-            color: colorPalette.white,
+            backgroundColor: colorPalette.primary.contrastText,
+            color: colorPalette.text.secondary,
           },
         },
       },
@@ -231,7 +231,7 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         root: {
           '&.Mui-checked': {
-            color: colorPalette.ink.main,
+            color: colorPalette.primary.main,
           },
         },
       },
@@ -251,25 +251,5 @@ export const theme: ThemeOptions = {
       },
     },
   },
-  palette: {
-    primary: {
-      main: colorPalette.primary.main,
-      light: colorPalette.primary.light,
-      contrastText: colorPalette.white,
-    },
-    secondary: {
-      main: colorPalette.pale.main,
-      light: colorPalette.pale.light,
-      contrastText: colorPalette.white,
-    },
-    error: {
-      main: colorPalette.error.main,
-      light: colorPalette.error.light,
-      dark: colorPalette.error.dark,
-    },
-    success: {
-      main: colorPalette.success.main,
-      light: colorPalette.success.light,
-    },
-  },
+  palette: colorPalette,
 };

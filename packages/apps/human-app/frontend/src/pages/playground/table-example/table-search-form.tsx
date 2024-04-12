@@ -3,6 +3,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { MRT_RowData, MRT_TableInstance } from 'material-react-table';
 import { Input } from '@/components/data-entry/input';
+import { colorPalette } from '@/styles/color-palette';
 
 interface SearchFormProps<T extends MRT_RowData> {
   updater: MRT_TableInstance<T>['setColumnFilters'];
@@ -29,6 +30,7 @@ export function SearchForm<T extends MRT_RowData>({
     <FormProvider {...methods}>
       <Input
         InputProps={{
+          sx: { color: colorPalette.text.secondary },
           startAdornment: (
             <InputAdornment position="start">
               <Search />
