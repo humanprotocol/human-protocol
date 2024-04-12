@@ -20,6 +20,14 @@
       "humanProtocol": "HUMAN Protocol",
       "howItWorks": "How It Works"
     },
+    "DrawerNavigation": {
+      "jobs": "Jobs",
+      "captchaLabelling": "hCaptcha labelling",
+      "jobsDiscovery": "Jobs discovery",
+      "profile": "Profile",
+      "help": "Help",
+      "logout": "Log out"
+    },
     "footer": {
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",

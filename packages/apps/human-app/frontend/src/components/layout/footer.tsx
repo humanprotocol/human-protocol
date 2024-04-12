@@ -1,22 +1,15 @@
-import type { Theme } from '@mui/material';
-import {
-  Grid,
-  Link,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { colorPalette } from '@/styles/color-palette';
 import { ChatIcon, DiscordIcon } from '../ui/icons';
 
 export function Footer() {
   const { t } = useTranslation();
-  const theme: Theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = useIsMobile();
 
   return (
     <Grid container>
@@ -32,31 +25,33 @@ export function Footer() {
       >
         <Link href="#" underline="none">
           <GitHubIcon
+            color="secondary"
             sx={{
               mr: '19px',
             }}
           />
         </Link>
         <Link href="#" underline="none">
-          <DiscordIcon />
+          <DiscordIcon color="secondary" />
         </Link>
         <Link href="#" underline="none">
           <TwitterIcon
+            color="secondary"
             sx={{
               mx: '19px',
             }}
           />
         </Link>
         <Link href="#" underline="none">
-          <LinkedInIcon />
+          <LinkedInIcon color="secondary" />
         </Link>
       </Grid>
       <Grid
-        alignItems={isMobile ? 'flex-start' : 'center'}
+        alignItems={isMobile ? 'center' : 'flex-start'}
         container
         direction="column"
         justifyContent="center"
-        xs={isMobile ? 11 : 12}
+        xs={isMobile ? 12 : 11}
       >
         <Stack
           direction="row"
@@ -65,22 +60,26 @@ export function Footer() {
           }}
         >
           <Link href="#" sx={{ mr: 1.5 }} underline="none">
-            <Typography variant="subtitle1">
+            <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.privacyPolicy')}
             </Typography>
           </Link>
           <Link href="#" sx={{ mr: 1.5 }} underline="none">
-            <Typography variant="subtitle1">
+            <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.termsOfService')}
             </Typography>
           </Link>
           <Link href="#" underline="none">
-            <Typography variant="subtitle1">
+            <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.humanProtocol')}
             </Typography>
           </Link>
         </Stack>
-        <Typography align="center" variant="subtitle1">
+        <Typography
+          align="center"
+          color={colorPalette.text.secondary}
+          variant="caption"
+        >
           {t('components.footer.copyrightNote')}
         </Typography>
       </Grid>
