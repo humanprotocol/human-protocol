@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/ui/loader';
 import { colorPalette } from '@/styles/color-palette';
 import { MODAL_STATE, useModalStore } from '@/components/ui/modal/modal.store';
-import { Modal } from '@/components/ui/modal/modal';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -29,7 +28,7 @@ import {
 import { TableExample } from '@/pages/playground/table-example/table-example';
 
 export function UiExample() {
-  const { openModal, isModalOpen } = useModalStore();
+  const { openModal } = useModalStore();
   return (
     <div>
       <Typography sx={{ marginBottom: '10px' }} variant="h1">
@@ -232,19 +231,11 @@ export function UiExample() {
 
       <Button
         onClick={() => {
-          openModal(MODAL_STATE.EXAMPLE_MODAL);
+          openModal(MODAL_STATE.MODAL_EXAMPLE);
         }}
-        title="Open Modal"
-      />
-      <Modal isOpen={isModalOpen}>
-        <Stack alignContent="center" alignItems="center">
-          <Typography variant="subtitle1">Title</Typography>
-          <Typography sx={{ marginY: 2 }} variant="subtitle2">
-            Subtitle
-          </Typography>
-          <Loader size={100} sx={{ marginY: '60px' }} />
-        </Stack>
-      </Modal>
+      >
+        Open modal
+      </Button>
 
       <h2>Table</h2>
       <TableExample />
