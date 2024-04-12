@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { Footer } from '../footer';
-import { DrawerNavigation } from './drawer-navigation';
-import { Navbar } from './navbar';
+import { breakpoints } from '@/styles/theme';
+import { DrawerNavigation } from '@/components/layout/protected/drawer-navigation';
+import { Navbar } from '@/components/layout/protected/navbar';
+import { Footer } from '@/components/layout/footer';
 
 const drawerWidth = 240;
 
@@ -48,6 +49,9 @@ export function Layout() {
         px: '44px',
         pb: '44px',
         pt: isMobile ? '32px' : '44px',
+        [breakpoints.mobile]: {
+          px: '10px',
+        },
       }}
     >
       <Navbar open={open} setOpen={setOpen} />
