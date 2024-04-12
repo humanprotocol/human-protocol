@@ -716,6 +716,7 @@ export class JobService {
         requestType,
         tokenFundAmount,
       );
+
       const { url, hash } = await this.uploadManifest(
         requestType,
         chainId,
@@ -993,6 +994,7 @@ export class JobService {
       );
       manifestFile = encryptedManifest;
     }
+
     const hash = crypto
       .createHash('sha1')
       .update(stringify(manifestFile))
