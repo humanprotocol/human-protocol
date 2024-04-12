@@ -182,7 +182,7 @@ class TestOperatorUtils(unittest.TestCase):
         operator_address = "0x1234567890123456789012345678901234567891"
         role = "Job Launcher"
         url = "https://example.com"
-        job_types = "type1, type2"
+        job_types = ["type1, type2"]
 
         mock_function = MagicMock()
 

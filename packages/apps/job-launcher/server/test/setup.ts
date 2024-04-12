@@ -31,9 +31,28 @@ export async function setup(): Promise<void> {
     nonce: 1,
   });
   const kvStoreClient = await KVStoreClient.build(wallet);
+
+  // JobTypes format validation
+  const jobTypesInput: string | string[] = 'type1,type2'; // or ['type1', 'type2']
+  const jobTypesString: string = Array.isArray(jobTypesInput)
+    ? jobTypesInput.join(', ')
+    : jobTypesInput;
+
   await kvStoreClient.setBulk(
-    [KVStoreKeys.role, KVStoreKeys.fee, KVStoreKeys.webhookUrl],
-    [Role.JobLauncher, '1', 'http://localhost:5000/webhook'],
+    [
+      KVStoreKeys.role,
+      KVStoreKeys.fee,
+      KVStoreKeys.webhookUrl,
+      KVStoreKeys.url,
+      KVStoreKeys.jobTypes,
+    ],
+    [
+      Role.JobLauncher,
+      '1',
+      'http://localhost:5000/webhook',
+      'http://localhost:5000',
+      jobTypesString,
+    ],
     { nonce: 2 },
   );
 }

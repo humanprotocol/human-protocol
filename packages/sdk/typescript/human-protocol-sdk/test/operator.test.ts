@@ -137,7 +137,7 @@ describe('OperatorUtils', () => {
       address: '0x0000000000000000000000000000000000000001',
       role: Role.JobLauncher,
       url: 'www.google.com',
-      jobTypes: 'type1,type2',
+      jobTypes: ['type1,type2'],
     };
     const mockReputationNetwork: IReputationNetwork = {
       id: stakerAddress,
