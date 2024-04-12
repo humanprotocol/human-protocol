@@ -26,31 +26,11 @@ type AlertProps = MuiAlertProps & {
   closeIcon?: boolean;
 };
 
-export function Alert({
-  color,
-  children,
-  closeIcon,
-  onClose,
-  ...rest
-}: AlertProps) {
+export function Alert({ color, children, ...rest }: AlertProps) {
   const icon = getIcon(color);
   const fontColor = color === 'error' ? colorPalette.error.main : 'inherit';
   return (
-    <MuiAlert
-      color={color}
-      icon={icon}
-      {...rest}
-      onClose={
-        closeIcon || onClose
-          ? (e) => {
-              if (onClose) {
-                onClose(e);
-              }
-            }
-          : undefined
-      }
-      variant="standard"
-    >
+    <MuiAlert color={color} icon={icon} {...rest} variant="standard">
       <Typography color={fontColor} variant="subtitle2">
         {children}
       </Typography>
