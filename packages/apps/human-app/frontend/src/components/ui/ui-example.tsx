@@ -251,7 +251,18 @@ export function UiExample() {
       <TableExample />
 
       <h2>Alert</h2>
-      <Alert />
+      <Stack direction="column" spacing={4}>
+        <Alert color="error" variant="filled">
+          An error has occurred, please try again.
+        </Alert>
+        <Alert color="success" variant="filled">
+          Your password has been successfully updated!
+        </Alert>
+        <Alert color="warning" variant="filled">
+          We have switched to the Polygon network. You’ll need to replace your
+          Ethereum wallet address with one connected to Polygon.
+        </Alert>
+      </Stack>
     </div>
   );
 }
