@@ -309,7 +309,6 @@ class OperatorUtils:
         chain_id: ChainId,
         address: str,
         role: Optional[str] = None,
-        job_types: Optional[List[str]] = None,
     ) -> List[Operator]:
         """Get the reputation network operators of the specified address.
 
@@ -341,10 +340,6 @@ class OperatorUtils:
             raise OperatorUtilsError(f"Invalid reputation address: {address}")
 
         network = NETWORKS[chain_id]
-
-        params = {"address": address.lower(), "role": role}
-        if job_types:
-            params["job_types"] = job_types
 
         reputation_network_data = get_data_from_subgraph(
             network["subgraph_url"],
