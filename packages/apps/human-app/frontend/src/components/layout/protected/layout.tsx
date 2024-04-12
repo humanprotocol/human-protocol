@@ -40,6 +40,7 @@ export function Layout() {
       alignItems="center"
       container
       direction="column"
+      flexWrap="nowrap"
       justifyContent="space-between"
       sx={{
         height: '100vh',
@@ -53,8 +54,8 @@ export function Layout() {
       <DrawerNavigation drawerWidth={drawerWidth} open={open} />
       <Main isMobile={isMobile} open={open}>
         <Outlet />
-        <Footer />
       </Main>
+      <Footer />
     </Grid>
   );
 }

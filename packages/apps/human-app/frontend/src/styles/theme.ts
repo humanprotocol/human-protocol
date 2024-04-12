@@ -49,7 +49,7 @@ declare module '@mui/material/styles' {
   }
 }
 
-const breakpoints = {
+export const breakpoints = {
   mobile: '@media (max-width:900px)',
 };
 

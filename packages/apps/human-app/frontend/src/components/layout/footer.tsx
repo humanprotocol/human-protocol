@@ -12,7 +12,7 @@ export function Footer() {
   const isMobile = useIsMobile();
 
   return (
-    <Grid container>
+    <Grid component="footer" container>
       <Grid
         alignItems="center"
         container
