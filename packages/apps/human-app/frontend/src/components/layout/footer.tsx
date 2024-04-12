@@ -4,6 +4,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { colorPalette } from '@/styles/color-palette';
 import { ChatIcon, DiscordIcon } from '../ui/icons';
 
 export function Footer() {
@@ -24,23 +25,25 @@ export function Footer() {
       >
         <Link href="#" underline="none">
           <GitHubIcon
+            color="secondary"
             sx={{
               mr: '19px',
             }}
           />
         </Link>
         <Link href="#" underline="none">
-          <DiscordIcon />
+          <DiscordIcon color="secondary" />
         </Link>
         <Link href="#" underline="none">
           <TwitterIcon
+            color="secondary"
             sx={{
               mx: '19px',
             }}
           />
         </Link>
         <Link href="#" underline="none">
-          <LinkedInIcon />
+          <LinkedInIcon color="secondary" />
         </Link>
       </Grid>
       <Grid
@@ -57,22 +60,26 @@ export function Footer() {
           }}
         >
           <Link href="#" sx={{ mr: 1.5 }} underline="none">
-            <Typography variant="subtitle1">
+            <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.privacyPolicy')}
             </Typography>
           </Link>
           <Link href="#" sx={{ mr: 1.5 }} underline="none">
-            <Typography variant="subtitle1">
+            <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.termsOfService')}
             </Typography>
           </Link>
           <Link href="#" underline="none">
-            <Typography variant="subtitle1">
+            <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.humanProtocol')}
             </Typography>
           </Link>
         </Stack>
-        <Typography align="center" variant="subtitle1">
+        <Typography
+          align="center"
+          color={colorPalette.text.secondary}
+          variant="caption"
+        >
           {t('components.footer.copyrightNote')}
         </Typography>
       </Grid>

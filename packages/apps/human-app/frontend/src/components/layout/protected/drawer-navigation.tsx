@@ -82,7 +82,12 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                     <ListItemText
                       disableTypography
                       primary={
-                        <Typography variant="body2">{t(text)}</Typography>
+                        <Typography
+                          fontWeight={index === 0 ? '600' : '500'}
+                          variant="body2"
+                        >
+                          {t(text)}
+                        </Typography>
                       }
                       sx={{
                         marginLeft: index === 0 ? '10px' : '0px',
@@ -118,7 +123,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                     <ListItemText
                       disableTypography
                       primary={
-                        <Typography variant="body2">{t(text)}</Typography>
+                        <Typography variant="body1">{t(text)}</Typography>
                       }
                       sx={{
                         textAlign: 'center',
@@ -132,6 +137,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
           </List>
         </Stack>
         <Button
+          size="large"
           sx={{
             marginBottom: '44px',
             mx: isMobile ? '28px' : '16px',
