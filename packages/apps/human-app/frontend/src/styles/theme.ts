@@ -244,22 +244,12 @@ export const theme: ThemeOptions = {
         colorSecondary: {
           fill: colorPalette.text.disabled,
         },
-        colorAction: {
-          fill: colorPalette.white,
-        },
       },
     },
     MuiTableHead: {
       styleOverrides: {
         root: {
           cursor: 'pointer',
-        },
-      },
-    },
-    MuiAlert: {
-      styleOverrides: {
-        root: {
-          color: colorPalette.white,
         },
       },
     },

@@ -30,8 +30,5 @@ export const colorPalette = {
     light: '#00EDA6',
     contrastText: '#FFFFFF',
   },
-  warning: {
-    main: '#FF9800',
-  },
   // 'info' native colors from MUI were pointed as expected
 } as const;

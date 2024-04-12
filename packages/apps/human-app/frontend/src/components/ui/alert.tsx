@@ -1,50 +1,57 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
 import MuiAlert from '@mui/material/Alert';
-import type { AlertProps } from '@mui/material/Alert';
+import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import { Typography } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
 
 const getIcon = (color: AlertProps['color']) => {
   switch (color) {
     case 'success':
-      return <CheckCircleOutlineIcon color="action" />;
+      return <CheckCircleIcon />;
 
     case 'error':
-      return <ErrorOutlineIcon color="action" />;
+      return <ErrorIcon />;
 
     case 'warning':
-      return <WarningAmberIcon color="action" />;
-
-    case 'info':
-      return <InfoOutlinedIcon color="action" />;
+      return <WarningIcon />;
 
     default:
       return undefined;
   }
 };
 
-export function Alert({ color, children, onClose, ...rest }: AlertProps) {
+type AlertProps = MuiAlertProps & {
+  closeIcon?: boolean;
+};
+
+export function Alert({
+  color,
+  children,
+  closeIcon,
+  onClose,
+  ...rest
+}: AlertProps) {
   const icon = getIcon(color);
-
-  if (!icon) {
-    return <MuiAlert color={color} {...rest} />;
-  }
-
+  const fontColor = color === 'error' ? colorPalette.error.main : 'inherit';
   return (
     <MuiAlert
       color={color}
       icon={icon}
       {...rest}
-      onClose={(e) => {
-        if (onClose) {
-          onClose(e);
-        }
-      }}
+      onClose={
+        closeIcon || onClose
+          ? (e) => {
+              if (onClose) {
+                onClose(e);
+              }
+            }
+          : undefined
+      }
+      variant="standard"
     >
-      <Typography sx={{ color: colorPalette.white }} variant="subtitle2">
+      <Typography color={fontColor} variant="subtitle2">
         {children}
       </Typography>
     </MuiAlert>

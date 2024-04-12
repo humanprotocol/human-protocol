@@ -252,13 +252,13 @@ export function UiExample() {
 
       <h2>Alert</h2>
       <Stack direction="column" spacing={4}>
-        <Alert color="error" variant="filled">
+        <Alert closeIcon color="error">
           An error has occurred, please try again.
         </Alert>
-        <Alert color="success" variant="filled">
+        <Alert color="success">
           Your password has been successfully updated!
         </Alert>
-        <Alert color="warning" variant="filled">
+        <Alert color="warning">
           We have switched to the Polygon network. You’ll need to replace your
           Ethereum wallet address with one connected to Polygon.
         </Alert>
