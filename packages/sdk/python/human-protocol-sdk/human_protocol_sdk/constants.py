@@ -262,3 +262,4 @@ class KVStoreKeys(Enum):
     public_key = "public_key"
     webhook_url = "webhook_url"
     url = "url"
+    job_types = "job_types"

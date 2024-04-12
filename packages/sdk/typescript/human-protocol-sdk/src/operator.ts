@@ -123,8 +123,7 @@ export class OperatorUtils {
   public static async getReputationNetworkOperators(
     chainId: ChainId,
     address: string,
-    role?: string,
-    jobTypes?: string[]
+    role?: string
   ): Promise<IOperator[]> {
     const networkData = NETWORKS[chainId];
 
@@ -139,13 +138,7 @@ export class OperatorUtils {
         role: role,
       });
 
-      const filteredOperators = jobTypes
-        ? reputationNetwork.operators.filter((operator) =>
-            jobTypes.some((jobType) => operator.jobTypes.includes(jobType))
-          )
-        : reputationNetwork.operators;
-
-      return filteredOperators;
+      return reputationNetwork.operators;
     } catch (e) {
       return throwError(e);
     }

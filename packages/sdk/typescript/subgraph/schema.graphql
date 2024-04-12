@@ -32,6 +32,7 @@ type Leader @entity {
   fee: BigInt
   publicKey: String
   webhookUrl: String
+  jobTypes: String
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
   reputationNetwork: ReputationNetwork
@@ -47,7 +48,6 @@ type LeaderURL @entity {
 type ReputationNetwork @entity {
   id: ID!
   address: Bytes!
-  jobTypes: [String!]
   operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
 }
 
