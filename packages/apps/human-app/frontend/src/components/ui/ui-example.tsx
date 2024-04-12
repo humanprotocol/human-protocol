@@ -27,6 +27,7 @@ import {
   HelpIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
+import { Alert } from '@/components/ui/alert';
 
 export function UiExample() {
   const { openModal, isModalOpen } = useModalStore();
@@ -248,6 +249,20 @@ export function UiExample() {
 
       <h2>Table</h2>
       <TableExample />
+
+      <h2>Alert</h2>
+      <Stack direction="column" spacing={4}>
+        <Alert color="error" severity="error">
+          An error has occurred, please try again.
+        </Alert>
+        <Alert color="success" severity="success">
+          Your password has been successfully updated!
+        </Alert>
+        <Alert color="warning" severity="warning">
+          We have switched to the Polygon network. You’ll need to replace your
+          Ethereum wallet address with one connected to Polygon.
+        </Alert>
+      </Stack>
     </div>
   );
 }
