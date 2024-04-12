@@ -34,6 +34,7 @@ describe('Quick launch E2E workflow', () => {
   let accessToken: string;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
+  const paymentIntentId = crypto.randomBytes(16).toString('hex');
 
   beforeAll(async () => {
     setupE2eEnvironment();
@@ -76,7 +77,7 @@ describe('Quick launch E2E workflow', () => {
       amount: 100,
       currency: Currency.USD,
       rate: 1,
-      transaction: 'payment_intent_id',
+      transaction: paymentIntentId,
       status: PaymentStatus.SUCCEEDED,
     });
     await paymentRepository.createUnique(newPaymentEntity);

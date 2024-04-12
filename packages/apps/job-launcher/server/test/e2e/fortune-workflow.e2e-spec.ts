@@ -7,7 +7,7 @@ import { UserStatus } from '../../src/common/enums/user';
 import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
 import setupE2eEnvironment from './env-setup';
-import { JobStatus } from '../../src/common/enums/job';
+import { JobRequestType, JobStatus } from '../../src/common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 import { ErrorJob } from '../../src/common/constants/errors';
 import {
@@ -20,17 +20,21 @@ import {
 import { PaymentEntity } from '../../src/modules/payment/payment.entity';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
 import { JobRepository } from '../../src/modules/job/job.repository';
+import { StorageService } from '../../src/modules/storage/storage.service';
+import { delay } from './utils';
 
 describe('Fortune E2E workflow', () => {
   let app: INestApplication;
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
+  let storageService: StorageService;
 
   let userEntity: UserEntity;
   let accessToken: string;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
+  const paymentIntentId = crypto.randomBytes(16).toString('hex');
 
   beforeAll(async () => {
     setupE2eEnvironment();
@@ -44,6 +48,7 @@ describe('Fortune E2E workflow', () => {
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
+    storageService = moduleFixture.get<StorageService>(StorageService);
 
     userEntity = await userService.create({
       email,
@@ -72,10 +77,15 @@ describe('Fortune E2E workflow', () => {
       amount: 100,
       currency: Currency.USD,
       rate: 1,
-      transaction: 'payment_intent_id',
+      transaction: paymentIntentId,
       status: PaymentStatus.SUCCEEDED,
     });
     await paymentRepository.createUnique(newPaymentEntity);
+  });
+
+  afterEach(async () => {
+    // Add a delay of 1 second between each test. Prevention: "429 Too Many Requests"
+    await delay(1000);
   });
 
   afterAll(async () => {
@@ -88,7 +98,7 @@ describe('Fortune E2E workflow', () => {
       requester_title: 'Write an odd number',
       requester_description: 'Prime number',
       submissions_required: 10,
-      fund_amount: 10, // HMT
+      fund_amount: 10, // USD
     };
 
     const response = await request(app.getHttpServer())
@@ -107,6 +117,17 @@ describe('Fortune E2E workflow', () => {
 
     expect(jobEntity).toBeDefined();
     expect(jobEntity!.status).toBe(JobStatus.PAID);
+    expect(jobEntity!.manifestUrl).toBeDefined();
+
+    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    expect(manifest).toMatchObject({
+      chainId: ChainId.LOCALHOST,
+      fundAmount: expect.any(Number),
+      requestType: JobRequestType.FORTUNE,
+      requesterDescription: createJobDto.requester_description,
+      requesterTitle: createJobDto.requester_title,
+      submissionsRequired: createJobDto.submissions_required,
+    });
 
     const paymentEntities = await paymentRepository.findByUserAndStatus(
       userEntity.id,
@@ -124,7 +145,7 @@ describe('Fortune E2E workflow', () => {
       requester_title: 'Write an odd number',
       requester_description: 'Prime number',
       submissions_required: 10,
-      fund_amount: 100000000, // HMT
+      fund_amount: 100000000, // USD
     };
 
     const invalidQuickLaunchResponse = await request(app.getHttpServer())
