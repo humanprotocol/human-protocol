@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
@@ -8,34 +8,41 @@ import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
 
-const drawerWidth = 240;
+export const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
   isMobile?: boolean;
 }>(({ theme, open, isMobile }) => ({
+  width: '100%',
   flexGrow: 1,
-  padding: theme.spacing(3),
-  display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  marginLeft: 0,
   ...(open && {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: isMobile ? 0 : `${drawerWidth}px`,
+    paddingLeft: isMobile ? 0 : `${drawerWidth}px`,
   }),
 }));
 
 export function Layout() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(!isMobile);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [isMobile]);
+
   return (
     <Grid
       alignItems="center"
@@ -44,8 +51,8 @@ export function Layout() {
       flexWrap="nowrap"
       justifyContent="space-between"
       sx={{
-        height: '100vh',
         width: '100%',
+        height: '100vh',
         px: '44px',
         pb: '44px',
         pt: isMobile ? '32px' : '44px',
@@ -59,7 +66,7 @@ export function Layout() {
       <Main isMobile={isMobile} open={open}>
         <Outlet />
       </Main>
-      <Footer />
+      <Footer marginLeft={isMobile ? '0' : `${drawerWidth}px`} />
     </Grid>
   );
 }
