@@ -69,7 +69,9 @@ query getReputationNetwork(
       }} 
     ) {{
       address,
-      role
+      role,
+      url,
+      jobTypes
     }}
   }}
 }}

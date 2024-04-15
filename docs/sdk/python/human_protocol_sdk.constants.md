@@ -46,6 +46,8 @@ Enum for KVStore keys
 
 #### fee *= 'fee'*
 
+#### job_types *= 'job_types'*
+
 #### public_key *= 'public_key'*
 
 #### role *= 'role'*

@@ -111,6 +111,7 @@
     * [`ChainId.SKALE`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.SKALE)
   * [`KVStoreKeys`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys)
     * [`KVStoreKeys.fee`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.fee)
+    * [`KVStoreKeys.job_types`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.job_types)
     * [`KVStoreKeys.public_key`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.public_key)
     * [`KVStoreKeys.role`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.role)
     * [`KVStoreKeys.url`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.url)

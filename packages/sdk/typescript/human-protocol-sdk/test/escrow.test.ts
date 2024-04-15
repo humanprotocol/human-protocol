@@ -48,7 +48,6 @@ vi.mock('graphql-request', () => {
     default: vi.fn(),
   };
 });
-vi.mock('../src/init');
 
 describe('EscrowClient', () => {
   let escrowClient: any,

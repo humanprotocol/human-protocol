@@ -88,6 +88,7 @@ class LeaderData:
         public_key: Optional[str] = None,
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
+        job_types: Optional[str] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -109,6 +110,7 @@ class LeaderData:
         :param public_key: Public key
         :param webhook_url: Webhook url
         :param url: Url
+        :param job_types: Job types
         """
 
         self.chain_id = chain_id
@@ -128,6 +130,7 @@ class LeaderData:
         self.public_key = public_key
         self.webhook_url = webhook_url
         self.url = url
+        self.job_types = job_types
 
 
 class RewardData:
@@ -148,11 +151,7 @@ class RewardData:
 
 
 class Operator:
-    def __init__(
-        self,
-        address: str,
-        role: str,
-    ):
+    def __init__(self, address: str, role: str, url: str = "", job_types: str = ""):
         """
         Initializes an Operator instance.
 
@@ -162,6 +161,8 @@ class Operator:
 
         self.address = address
         self.role = role
+        self.url = url
+        self.job_types = job_types
 
 
 class OperatorUtils:
@@ -230,6 +231,7 @@ class OperatorUtils:
                         public_key=leader.get("publicKey", None),
                         webhook_url=leader.get("webhookUrl", None),
                         url=leader.get("url", None),
+                        job_types=leader.get("jobTypes", None),
                     )
                     for leader in leaders_raw
                 ]
@@ -299,6 +301,7 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
+            job_types=leader.get("jobTypes", None),
         )
 
     @staticmethod
@@ -312,6 +315,7 @@ class OperatorUtils:
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
+        :parem job_types: (Optional) Job types of the operator
 
         :return: Returns an array of operator details
 
@@ -352,6 +356,8 @@ class OperatorUtils:
             Operator(
                 address=operator.get("address", ""),
                 role=operator.get("role", ""),
+                url=operator.get("url", ""),
+                job_types=operator.get("jobTypes", []),
             )
             for operator in operators
         ]
