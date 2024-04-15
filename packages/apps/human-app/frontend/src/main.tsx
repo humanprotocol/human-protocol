@@ -6,6 +6,7 @@ import '@/i18n/i18n';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { theme } from '@/styles/theme';
+import { DisplayModal } from '@/components/ui/modal/display-modal';
 import { AuthProvider } from '@/auth/auth-context';
 import { Router } from '@/router/router';
 import '@fontsource/inter';
@@ -30,6 +31,7 @@ createRoot(root).render(
           <Router />
         </AuthProvider>
         <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
+        <DisplayModal />
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>

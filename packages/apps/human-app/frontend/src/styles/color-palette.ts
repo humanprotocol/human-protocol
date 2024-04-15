@@ -1,5 +1,5 @@
 export const colorPalette = {
-  white: '#FFFFF',
+  white: '#FFFFFF',
   black: '#000000',
   text: {
     primary: '#320A8D',
@@ -30,5 +30,5 @@ export const colorPalette = {
     light: '#00EDA6',
     contrastText: '#FFFFFF',
   },
-  // for 'warning', 'info' native colors from MUI were pointed as expected
+  // 'info' native colors from MUI were pointed as expected
 } as const;

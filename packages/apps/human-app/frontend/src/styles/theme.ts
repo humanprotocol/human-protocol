@@ -220,6 +220,7 @@ export const theme: ThemeOptions = {
         root: {
           fontSize: '14px',
           fontWeight: 600,
+          textTransform: 'none',
           '&.Mui-disabled': {
             backgroundColor: colorPalette.primary.contrastText,
             color: colorPalette.text.secondary,

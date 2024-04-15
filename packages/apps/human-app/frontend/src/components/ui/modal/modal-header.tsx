@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid';
-import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
+import { Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface ModalHeaderElementProps {
   isVisible: boolean;
@@ -13,25 +13,20 @@ interface ModalHeaderProps {
 }
 
 export function ModalHeader({ closeButton }: ModalHeaderProps) {
+  const { t } = useTranslation();
   return (
-    <Grid container direction="row" justifyContent="space-between">
+    <Grid container direction="row" justifyContent="flex-end" width="100%">
       <Grid item>
         {closeButton ? (
           <Grid>
             <Button
               data-testid="button-close-modal"
               onClick={closeButton.onClick}
+              variant="text"
             >
-              <Box
-                sx={{
-                  p: '6px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  justifySelf: 'center',
-                }}
-              >
-                <CloseIcon fontSize="small" />
-              </Box>
+              <Typography variant="buttonMedium">
+                {t('components.modal.header.closeBtn')}
+              </Typography>
             </Button>
           </Grid>
         ) : null}
