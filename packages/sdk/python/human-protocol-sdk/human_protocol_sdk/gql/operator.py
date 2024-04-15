@@ -61,8 +61,6 @@ def get_reputation_network_query(role: Optional[str]):
 query getReputationNetwork(
   $address: String,
   $role: String
-  $url: String
-  $job_types: [String]
 ) {{
   reputationNetwork(id: $address) {{
     operators(
@@ -73,7 +71,7 @@ query getReputationNetwork(
       address,
       role,
       url,
-      job_types
+      jobTypes
     }}
   }}
 }}

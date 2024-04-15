@@ -357,7 +357,7 @@ class OperatorUtils:
                 address=operator.get("address", ""),
                 role=operator.get("role", ""),
                 url=operator.get("url", ""),
-                job_types=operator.get("job_types", []),
+                job_types=operator.get("jobTypes", []),
             )
             for operator in operators
         ]
