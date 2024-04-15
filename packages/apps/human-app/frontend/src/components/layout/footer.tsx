@@ -1,83 +1,70 @@
 import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
-import { ChatIcon, DiscordIcon } from '../ui/icons';
+import { ChatIcon } from '../ui/icons';
 
 export function Footer() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   return (
-    <Grid container>
+    <Grid
+      container
+      sx={{
+        backgroundColor: isMobile ? colorPalette.paper.main : 'transparent',
+        px: isMobile ? 0 : '44px',
+        pb: isMobile ? 0 : '44px',
+        pt: isMobile ? '32px' : 0,
+      }}
+    >
       <Grid
-        alignItems="center"
-        container
-        item
-        justifyContent="center"
-        sx={{
-          display: { md: 'none' },
-        }}
-        xs={12}
-      >
-        <Link href="#" underline="none">
-          <GitHubIcon
-            color="secondary"
-            sx={{
-              mr: '19px',
-            }}
-          />
-        </Link>
-        <Link href="#" underline="none">
-          <DiscordIcon color="secondary" />
-        </Link>
-        <Link href="#" underline="none">
-          <TwitterIcon
-            color="secondary"
-            sx={{
-              mx: '19px',
-            }}
-          />
-        </Link>
-        <Link href="#" underline="none">
-          <LinkedInIcon color="secondary" />
-        </Link>
-      </Grid>
-      <Grid
-        alignItems={isMobile ? 'center' : 'flex-start'}
+        alignItems="flex-start"
         container
         direction="column"
         justifyContent="center"
+        sx={{
+          px: isMobile ? '32px' : 0,
+        }}
         xs={isMobile ? 12 : 11}
       >
-        <Stack
-          direction="row"
-          sx={{
-            display: { xs: 'none', md: 'flex' },
-          }}
-        >
-          <Link href="#" sx={{ mr: 1.5 }} underline="none">
+        <Stack direction={isMobile ? 'column' : 'row'}>
+          <Link
+            href="#"
+            sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
+            underline="none"
+          >
             <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.privacyPolicy')}
             </Typography>
           </Link>
-          <Link href="#" sx={{ mr: 1.5 }} underline="none">
+          <Link
+            href="#"
+            sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
+            underline="none"
+          >
             <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.termsOfService')}
             </Typography>
           </Link>
-          <Link href="#" underline="none">
+          <Link
+            href="#"
+            sx={{
+              mb: isMobile ? '10px' : 0,
+            }}
+            underline="none"
+          >
             <Typography color={colorPalette.text.secondary} variant="caption">
               {t('components.footer.humanProtocol')}
             </Typography>
           </Link>
         </Stack>
         <Typography
-          align="center"
+          align={isMobile ? 'left' : 'center'}
           color={colorPalette.text.secondary}
+          sx={{
+            pb: isMobile ? '32px' : 0,
+          }}
           variant="caption"
         >
           {t('components.footer.copyrightNote')}
@@ -88,9 +75,9 @@ export function Footer() {
         container
         justifyContent="flex-end"
         sx={{
-          display: { xs: 'none', md: 'flex' },
+          position: isMobile ? 'absolute' : 'relative',
         }}
-        xs={1}
+        xs={isMobile ? 12 : 1}
       >
         <ChatIcon />
       </Grid>

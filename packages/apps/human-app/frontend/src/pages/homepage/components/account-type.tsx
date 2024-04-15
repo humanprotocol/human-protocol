@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BackArrowIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 interface AccountType {
   setStep: (step: number) => void;
@@ -10,8 +11,16 @@ interface AccountType {
 
 export function AccountType({ setStep }: AccountType) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
+
   return (
-    <Container maxWidth="md">
+    <Container
+      maxWidth="md"
+      sx={{
+        paddingBottom: isMobile ? '44px' : 0,
+        paddingTop: isMobile ? '12px' : 0,
+      }}
+    >
       <Button
         onClick={() => {
           setStep(0);
@@ -20,7 +29,7 @@ export function AccountType({ setStep }: AccountType) {
         sx={{
           position: 'absolute',
           right: '30px',
-          top: '30px',
+          top: isMobile ? '21px' : '30px',
         }}
       >
         <Typography variant="buttonMedium">
@@ -34,9 +43,10 @@ export function AccountType({ setStep }: AccountType) {
               setStep(0);
             }}
             sx={{
-              position: 'absolute',
-              marginLeft: -7,
-              marginTop: 1,
+              position: isMobile ? 'relative' : 'absolute',
+              marginLeft: isMobile ? '-20px' : -7,
+              marginTop: isMobile ? 0 : 1,
+              transform: isMobile ? 'scale(0.6)' : 'none',
             }}
             variant="text"
           >
@@ -61,7 +71,7 @@ export function AccountType({ setStep }: AccountType) {
           sx={{
             paddingTop: '44px',
           }}
-          xs={6}
+          xs={isMobile ? 12 : 6}
         >
           <Typography color={colorPalette.primary.light} variant="h6">
             {t('components.signUpPage.iWantToEarn')}
@@ -92,7 +102,7 @@ export function AccountType({ setStep }: AccountType) {
           sx={{
             paddingTop: '44px',
           }}
-          xs={6}
+          xs={isMobile ? 12 : 6}
         >
           <Typography color={colorPalette.primary.light} variant="h6">
             {t('components.signUpPage.joinAsOperator')}
@@ -118,12 +128,12 @@ export function AccountType({ setStep }: AccountType) {
             />
           </List>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={isMobile ? 12 : 6}>
           <Button fullWidth size="large" variant="contained">
             {t('components.signUpPage.signUpToComplete')}
           </Button>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={isMobile ? 12 : 6}>
           <Button fullWidth size="large" variant="contained">
             {t('components.signUpPage.signAsOperator')}
           </Button>

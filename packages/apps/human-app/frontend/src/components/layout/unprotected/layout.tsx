@@ -20,10 +20,8 @@ export function Layout({
       direction="column"
       justifyContent="space-between"
       sx={{
-        height: '100vh',
-        width: '100%',
-        px: '44px',
-        pb: '44px',
+        height: '100%',
+        minHeight: '100vh',
         pt: '0',
         backgroundColor,
       }}

@@ -45,7 +45,8 @@ export function Layout({ children }: LayoutProps) {
       direction="column"
       justifyContent="space-between"
       sx={{
-        height: '100vh',
+        height: '100%',
+        minHeight: '100vh',
         width: '100%',
         px: '44px',
         pb: '44px',

@@ -22,8 +22,8 @@ export function MainPage() {
         <Paper
           sx={{
             backgroundColor: colorPalette.white,
-            py: '250px',
-            px: '150px',
+            py: !isMobile ? '250px' : 0,
+            px: !isMobile ? '150px' : 0,
             boxShadow: 'none',
             borderRadius: '20px',
             position: 'relative',

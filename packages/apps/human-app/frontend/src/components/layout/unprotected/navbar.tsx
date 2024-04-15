@@ -25,6 +25,8 @@ export function Navbar({ withNavigation }: NavbarProps) {
         justifyContent: 'space-between',
         flexDirection: 'row',
         alignItems: 'center',
+        px: '44px',
+        pt: '44px',
       }}
     >
       {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}
