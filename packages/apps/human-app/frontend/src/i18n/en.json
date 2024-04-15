@@ -36,6 +36,11 @@
     },
     "table": {
       "clearBtn": "clear"
+    },
+    "modal": {
+      "header": {
+        "closeBtn": "Cancel"
+      }
     }
   }
 }

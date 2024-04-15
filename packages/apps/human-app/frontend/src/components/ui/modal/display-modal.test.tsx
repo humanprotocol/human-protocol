@@ -10,7 +10,7 @@ describe('Display modal contents', () => {
     vi.spyOn(useModalStoreModule, 'useModalStore').mockImplementation(() => {
       return {
         isModalOpen: true,
-        modalState: MODAL_STATE.EXAMPLE_MODAL,
+        modalState: MODAL_STATE.MODAL_EXAMPLE,
       };
     });
     //ARRANGE
@@ -26,7 +26,7 @@ describe('Display modal contents', () => {
     vi.spyOn(useModalStoreModule, 'useModalStore').mockImplementation(() => {
       return {
         isModalOpen: true,
-        modalState: MODAL_STATE.EXAMPLE_MODAL,
+        modalState: MODAL_STATE.MODAL_EXAMPLE,
         closeModal: mockedCloseModal,
       };
     });
