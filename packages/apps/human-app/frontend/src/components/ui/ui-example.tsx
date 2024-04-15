@@ -25,6 +25,7 @@ import {
   HumanLogoNavbarIcon,
   DiscordIcon,
   HelpIcon,
+  MobileHeaderIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 
@@ -225,6 +226,11 @@ export function UiExample() {
         </Grid>
         <Grid>
           <HelpIcon />
+        </Grid>
+      </Stack>
+      <Stack alignItems="center" direction="row" spacing={4}>
+        <Grid>
+          <MobileHeaderIcon />
         </Grid>
       </Stack>
 
