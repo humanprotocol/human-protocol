@@ -200,7 +200,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "address": operator_address,
                                     "role": role,
                                     "url": url,
-                                    "job_types": job_types,
+                                    "jobTypes": job_types,
                                 }
                             ],
                         }
