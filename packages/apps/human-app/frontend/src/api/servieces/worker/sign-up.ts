@@ -14,14 +14,8 @@ export type SignUpDto = z.infer<typeof signUpDtoSchema>;
 
 const signUpSuccessResponseSchema = z.unknown();
 
-// function signUpMutationFn(data: SignUpDto) {
-//   return apiClient(apiPaths.worker.signUp.path, {
-//     successSchema: signUpSuccessResponseSchema,
-//   });
-// }
-
 function signUpMutationFn() {
-  return apiClient(apiPaths.test.path, {
+  return apiClient(apiPaths.worker.signUp.path, {
     successSchema: signUpSuccessResponseSchema,
   });
 }
