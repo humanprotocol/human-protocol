@@ -12,7 +12,6 @@ export function Footer() {
     <Grid
       container
       sx={{
-        backgroundColor: isMobile ? colorPalette.paper.main : 'transparent',
         px: isMobile ? 0 : '44px',
         pb: isMobile ? 0 : '44px',
         pt: '32px',

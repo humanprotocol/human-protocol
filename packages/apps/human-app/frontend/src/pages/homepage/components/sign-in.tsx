@@ -19,8 +19,6 @@ export function SignIn({ setStep }: SignInProps) {
   const logoText: string = t('components.signUpPage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('xl');
-  // const theme = useTheme();
-  // const isMobile = !useMediaQuery(theme.breakpoints.up('xl'));
   return (
     <Grid
       container

@@ -2,6 +2,7 @@ import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { colorPalette } from '@/styles/color-palette';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -26,7 +27,7 @@ export function Layout({ withNavigation = true }: LayoutProps) {
         width: '100%',
         pt: '0',
         px: isMobile ? 0 : '120px',
-        backgroundColor,
+        backgroundColor: isMobile ? colorPalette.white : backgroundColor,
       }}
     >
       <Navbar withNavigation={withNavigation} />

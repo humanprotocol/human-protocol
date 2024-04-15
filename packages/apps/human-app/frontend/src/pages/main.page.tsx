@@ -5,7 +5,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { SignUpPage } from './homepage/signup.page';
 
 export function MainPage() {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile('xl');
 
   return (
     <Box>
