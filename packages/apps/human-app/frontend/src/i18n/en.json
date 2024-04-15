@@ -50,13 +50,18 @@
       "iWantToEarn": "I want to earn HMT",
       "completeTask": "Complete simple tasks and get paid.",
       "workAnywhere": "Work anywhere, any time.",
-      "signUpToComplete": "Sign Up to Complete Tasks",
+      "signUpToComplete": "Sign Up to Complete Tasks",
       "joinAsOperator": "I want to join as an operator",
       "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
       "becomePartner": "Become a HUMAN App partner.",
       "signAsOperator": "Sign Up as an Operator",
       "termsAndConditions": "Terms & conditions",
       "cancel": "Cancel"
+    },
+    "modal": {
+      "header": {
+        "closeBtn": "Cancel"
+      }
     }
   }
 }
