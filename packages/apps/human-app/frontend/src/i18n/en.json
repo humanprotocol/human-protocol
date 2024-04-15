@@ -42,5 +42,14 @@
         "closeBtn": "Cancel"
       }
     }
+  },
+  "worker": {
+    "signUpForm": {
+      "fields": {
+        "password": "Password",
+        "email": "Email"
+      },
+      "submitBtn": "Sign up"
+    }
   }
 }
