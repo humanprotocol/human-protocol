@@ -309,19 +309,17 @@ class BoxesFromPointsTaskBuilder:
             valid_boxes = []
             for bbox in sample_boxes:
                 if not (
-                    (0 <= bbox.x < bbox.x + bbox.w <= img_w)
-                    and (0 <= bbox.y < bbox.y + bbox.h <= img_h)
+                    (0 <= int(bbox.x) < int(bbox.x + bbox.w) <= img_w)
+                    and (0 <= int(bbox.y) < int(bbox.y + bbox.h) <= img_h)
                 ):
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT bbox #{} ({}) - invalid coordinates. "
-                        "The image will be skipped".format(
+                        "Sample '{}': GT bbox #{} ({}) - invalid coordinates".format(
                             gt_sample.id, bbox.id, label_cat[bbox.label].name
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
-                    valid_boxes = []
-                    break
+                    continue
 
                 if bbox.id in visited_ids:
                     excluded_gt_info.add_message(
@@ -331,6 +329,7 @@ class BoxesFromPointsTaskBuilder:
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
+                    continue
 
                 valid_boxes.append(bbox)
 
@@ -473,15 +472,13 @@ class BoxesFromPointsTaskBuilder:
                     _validate_skeleton(skeleton, sample_bbox=sample_bbox)
                 except InvalidCoordinates as error:
                     excluded_points_info.add_message(
-                        "Sample '{}': point #{} ({}) - {}. "
-                        "The image will be skipped".format(
+                        "Sample '{}': point #{} ({}) skipped - {}".format(
                             sample.id, skeleton.id, label_cat[skeleton.label].name, error
                         ),
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
-                    valid_skeletons = []
-                    break
+                    continue
                 except DatasetValidationError as error:
                     excluded_points_info.add_message(
                         "Sample '{}': point #{} ({}) - {}".format(
@@ -490,6 +487,7 @@ class BoxesFromPointsTaskBuilder:
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
+                    continue
 
                 valid_skeletons.append(skeleton)
 
@@ -1340,7 +1338,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     continue
 
                 px, py = element.points[:2]
-                if not is_point_in_bbox(px, py, sample_bbox):
+                if not is_point_in_bbox(int(px), int(py), sample_bbox):
                     raise InvalidCoordinates("skeleton point is outside the image")
 
         label_cat: dm.LabelCategories = self._input_gt_dataset.categories()[dm.AnnotationType.label]
@@ -1360,15 +1358,13 @@ class SkeletonsFromBoxesTaskBuilder:
                     _validate_skeleton(skeleton, sample_bbox=sample_bbox)
                 except InvalidCoordinates as error:
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) - {}. "
-                        "The image will be skipped".format(
+                        "Sample '{}': GT skeleton #{} ({}) skipped - {}".format(
                             gt_sample.id, skeleton.id, label_cat[skeleton.label].name, error
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
-                    valid_skeletons = []
-                    break
+                    continue
                 except DatasetValidationError as error:
                     excluded_gt_info.add_message(
                         "Sample '{}': GT skeleton #{} ({}) skipped - {}".format(
@@ -1377,6 +1373,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
+                    continue
 
                 valid_skeletons.append(skeleton)
                 visited_ids.add(skeleton.id)
@@ -1481,8 +1478,8 @@ class SkeletonsFromBoxesTaskBuilder:
             valid_boxes = []
             for bbox in sample_boxes:
                 if not (
-                    (0 <= bbox.x < bbox.x + bbox.w <= image_w)
-                    and (0 <= bbox.y < bbox.y + bbox.h <= image_h)
+                    (0 <= int(bbox.x) < int(bbox.x + bbox.w) <= image_w)
+                    and (0 <= int(bbox.y) < int(bbox.y + bbox.h) <= image_h)
                 ):
                     excluded_boxes_info.add_message(
                         "Sample '{}': bbox #{} ({}) skipped - invalid coordinates".format(
@@ -1491,6 +1488,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
+                    continue
 
                 if bbox.id in visited_ids:
                     excluded_boxes_info.add_message(
@@ -1500,6 +1498,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
+                    continue
 
                 valid_boxes.append(bbox)
                 visited_ids.add(bbox.id)
