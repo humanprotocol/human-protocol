@@ -2,7 +2,8 @@ import type { RouteProps } from 'react-router-dom';
 import { MainPage } from '@/pages/main.page';
 import { Playground } from '@/pages/playground/playground.page';
 import { ProtectedPage } from '@/pages/protected.page';
-import { SignInWorker } from '@/pages/sign-in/sign-in-worker.page';
+import { SignInWorkerPage } from '@/pages/worker/sign-in.page';
+import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -14,8 +15,12 @@ export const unprotectedRoutes: RouteProps[] = [
     element: <Playground />,
   },
   {
-    path: '/sign-in/worker',
-    element: <SignInWorker />,
+    path: '/worker/sign-in',
+    element: <SignInWorkerPage />,
+  },
+  {
+    path: '/worker/sign-up',
+    element: <SignUpWorkerPage />,
   },
 ];
 

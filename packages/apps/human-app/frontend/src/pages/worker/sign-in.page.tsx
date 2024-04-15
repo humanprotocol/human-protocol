@@ -21,7 +21,7 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export function SignInWorker() {
+export function SignInWorkerPage() {
   // eslint-disable-next-line react/hook-use-state -- temporary
   const [_, setValues] = useState<Schema>();
 
