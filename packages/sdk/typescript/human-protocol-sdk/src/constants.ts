@@ -272,10 +272,10 @@ export const KVStoreKeys = {
   publicKey: 'public_key',
   webhookUrl: 'webhook_url',
   url: 'url',
+  jobTypes: 'job_types',
 };
 
 export const Role = {
-  Validator: 'Validator',
   JobLauncher: 'Job Launcher',
   ExchangeOracle: 'Exchange Oracle',
   ReputationOracle: 'Reputation Oracle',
