@@ -118,7 +118,7 @@ export function UiExample() {
       </Stack>
 
       <h2>Buttons</h2>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" flexWrap="wrap" spacing={2}>
         <Button variant="text">Text</Button>
         <Button variant="contained">Contained</Button>
         <Button variant="outlined">Outlined</Button>
@@ -128,7 +128,7 @@ export function UiExample() {
       </Stack>
 
       <h2>Button sizes</h2>
-      <Stack alignItems="center" direction="row" spacing={2}>
+      <Stack alignItems="center" direction="row" flexWrap="wrap" spacing={2}>
         <Grid>
           <Button size="small" variant="contained">
             small
@@ -161,6 +161,7 @@ export function UiExample() {
       <Stack
         alignItems="center"
         direction="row"
+        flexWrap="wrap"
         spacing={8}
         sx={{ marginBottom: '30px' }}
       >
@@ -170,7 +171,7 @@ export function UiExample() {
       </Stack>
 
       <h2>Icons</h2>
-      <Stack alignItems="center" direction="row" spacing={4}>
+      <Stack alignItems="center" direction="row" flexWrap="wrap" spacing={4}>
         <Grid>
           <HomepageLogoIcon />
         </Grid>
@@ -192,8 +193,6 @@ export function UiExample() {
         <Grid>
           <RefreshIcon />
         </Grid>
-      </Stack>
-      <Stack alignItems="center" direction="row" spacing={4}>
         <Grid>
           <UserFilledIcon />
         </Grid>

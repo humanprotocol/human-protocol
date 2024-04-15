@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Button } from '@/components/ui/button';
+import { breakpoints } from '@/styles/theme';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -19,7 +20,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
       position="static"
       sx={{
         background: 'transparent',
-        height: '90px',
+        margin: '20px 0',
         width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
@@ -27,6 +28,9 @@ export function Navbar({ withNavigation }: NavbarProps) {
         alignItems: 'center',
         px: '44px',
         pt: '44px',
+        [breakpoints.mobile]: {
+          margin: '10px 0',
+        },
       }}
     >
       {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}

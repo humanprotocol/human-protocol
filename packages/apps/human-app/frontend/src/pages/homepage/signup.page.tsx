@@ -1,22 +1,20 @@
 import { Container } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { SignIn } from './components/sign-in';
 import { AccountType } from './components/account-type';
 
-interface SignUpPageProps {
-  setIsGreyBackground: (isGreyBackground: boolean) => void;
-}
-
-export function SignUpPage({ setIsGreyBackground }: SignUpPageProps) {
+export function SignUpPage() {
   const [step, setStep] = useState(0);
+  const { setWhiteBackground, setGrayBackground } = useBackgroundColorStore();
 
   useEffect(() => {
     if (step === 1) {
-      setIsGreyBackground(true);
+      setGrayBackground();
     } else {
-      setIsGreyBackground(false);
+      setWhiteBackground();
     }
-  }, [step, setIsGreyBackground]);
+  }, [setGrayBackground, setWhiteBackground, step]);
 
   return (
     <Container>

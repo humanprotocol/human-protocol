@@ -15,7 +15,7 @@ export function Footer() {
         backgroundColor: isMobile ? colorPalette.paper.main : 'transparent',
         px: isMobile ? 0 : '44px',
         pb: isMobile ? 0 : '44px',
-        pt: isMobile ? '32px' : 0,
+        pt: '32px',
       }}
     >
       <Grid
@@ -76,6 +76,7 @@ export function Footer() {
         justifyContent="flex-end"
         sx={{
           position: isMobile ? 'absolute' : 'relative',
+          right: isMobile ? '32px' : 0,
         }}
         xs={isMobile ? 12 : 1}
       >
