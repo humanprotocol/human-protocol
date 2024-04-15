@@ -11,6 +11,7 @@ export function Navbar({ setOpen, open }: NavbarProps) {
   return (
     <Stack
       alignItems="center"
+      component="header"
       direction="row"
       justifyContent="space-between"
       sx={{
