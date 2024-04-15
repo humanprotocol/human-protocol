@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Grid } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormCard } from '@/components/ui/form-card';
@@ -15,14 +15,14 @@ export interface Inputs {
 }
 
 const schema = z.object({
-  email: z.string().min(2),
-  password: z.string().min(6),
+  email: z.string().email(),
+  password: z.string(),
 });
 
 type Schema = z.infer<typeof schema>;
 
 export function SignInWorker() {
-  // eslint-disable-next-line react/hook-use-state -- temporary solution
+  // eslint-disable-next-line react/hook-use-state -- temporary
   const [_, setValues] = useState<Schema>();
 
   const methods = useForm<Schema>({
@@ -44,11 +44,10 @@ export function SignInWorker() {
     <FormCard title="Sign In">
       <FormProvider {...methods}>
         <form onSubmit={(event) => void methods.handleSubmit(onSubmit)(event)}>
-          <Grid container gap="4rem">
-            <Grid container gap="2rem">
-              <Input fullWidth label="Email" name="email" />
-              <Password fullWidth label="Password" name="password" />
-            </Grid>
+          <Grid container gap="2rem">
+            <Input fullWidth label="Email" name="email" />
+            <Password fullWidth label="Password" name="password" />
+            <Typography variant="body1">Forgot password?</Typography>
             <Button fullWidth type="submit" variant="contained">
               Sign In
             </Button>
