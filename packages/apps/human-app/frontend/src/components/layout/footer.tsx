@@ -7,12 +7,12 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
 import { ChatIcon, DiscordIcon } from '../ui/icons';
 
-export function Footer({ marginLeft }: { marginLeft: string }) {
+export function Footer({ paddingLeft }: { paddingLeft?: string }) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   return (
-    <Grid component="footer" sx={{ marginLeft }}>
+    <Grid component="footer" sx={{ paddingLeft, width: '100%' }}>
       <Grid container>
         <Grid
           alignItems="center"

@@ -8,7 +8,7 @@ import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
 
-export const drawerWidth = 240;
+const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -66,7 +66,7 @@ export function Layout() {
       <Main isMobile={isMobile} open={open}>
         <Outlet />
       </Main>
-      <Footer marginLeft={isMobile ? '0' : `${drawerWidth}px`} />
+      <Footer paddingLeft={isMobile ? '0' : `${drawerWidth}px`} />
     </Grid>
   );
 }
