@@ -32,12 +32,6 @@ export async function setup(): Promise<void> {
   });
   const kvStoreClient = await KVStoreClient.build(wallet);
 
-  // JobTypes format validation
-  const jobTypesInput: string | string[] = 'type1,type2'; // or ['type1', 'type2']
-  const jobTypesString: string = Array.isArray(jobTypesInput)
-    ? jobTypesInput.join(', ')
-    : jobTypesInput;
-
   await kvStoreClient.setBulk(
     [
       KVStoreKeys.role,
@@ -51,7 +45,7 @@ export async function setup(): Promise<void> {
       '1',
       'http://localhost:5000/webhook',
       'http://localhost:5000',
-      jobTypesString,
+      'type1, type2',
     ],
     { nonce: 2 },
   );
