@@ -1,10 +1,10 @@
 import type { ComponentType } from 'react';
+import { ModalExample } from '@/pages/playground/modal-example/modal-example';
 import type { ModalStateKeys, ModalStateUnion } from './modal.store';
 import { MODAL_STATE } from './modal.store';
-import { ExampleModal } from './example-modal';
 
 const MODAL_COMPONENTS: Record<ModalStateKeys, ComponentType> = {
-  [MODAL_STATE.EXAMPLE_MODAL]: ExampleModal,
+  [MODAL_STATE.MODAL_EXAMPLE]: ModalExample,
 };
 
 interface ModalContent {

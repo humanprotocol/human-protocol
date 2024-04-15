@@ -13,7 +13,7 @@ interface ModalState {
 }
 
 export const MODAL_STATE = {
-  EXAMPLE_MODAL: 'EXAMPLE_MODAL',
+  MODAL_EXAMPLE: 'MODAL_EXAMPLE',
 } as const;
 
 export type ModalStateUnion = (typeof MODAL_STATE)[keyof typeof MODAL_STATE];

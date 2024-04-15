@@ -7,6 +7,7 @@ import '@/i18n/i18n';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { theme } from '@/styles/theme';
+import { DisplayModal } from '@/components/ui/modal/display-modal';
 import { router } from './router';
 import '@fontsource/inter';
 import '@fontsource/inter/400.css';
@@ -28,6 +29,7 @@ createRoot(root).render(
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
         <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
+        <DisplayModal />
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>
