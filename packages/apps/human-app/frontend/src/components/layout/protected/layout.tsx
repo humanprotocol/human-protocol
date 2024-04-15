@@ -33,13 +33,13 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
 
 export function Layout() {
   const isMobile = useIsMobile();
-  const [open, setOpen] = useState(!isMobile);
+  const [drawerOpen, setDrawerOpen] = useState(!isMobile);
 
   useEffect(() => {
-    if (!isMobile) {
-      setOpen(true);
+    if (isMobile) {
+      setDrawerOpen(false);
     } else {
-      setOpen(false);
+      setDrawerOpen(true);
     }
   }, [isMobile]);
 
@@ -61,12 +61,12 @@ export function Layout() {
         },
       }}
     >
-      <Navbar open={open} setOpen={setOpen} />
-      <DrawerNavigation drawerWidth={drawerWidth} open={open} />
-      <Main isMobile={isMobile} open={open}>
+      <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
+      <DrawerNavigation drawerWidth={drawerWidth} open={drawerOpen} />
+      <Main isMobile={isMobile} open={drawerOpen}>
         <Outlet />
       </Main>
-      <Footer paddingLeft={isMobile ? '0' : `${drawerWidth}px`} />
+      <Footer sx={{ paddingLeft: isMobile ? '0' : `${drawerWidth}px` }} />
     </Grid>
   );
 }

@@ -1,4 +1,5 @@
 import { Grid, Link, Stack, Typography } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -7,12 +8,12 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
 import { ChatIcon, DiscordIcon } from '../ui/icons';
 
-export function Footer({ paddingLeft }: { paddingLeft?: string }) {
+export function Footer({ sx }: { sx?: SxProps<Theme> }) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   return (
-    <Grid component="footer" sx={{ paddingLeft, width: '100%' }}>
+    <Grid component="footer" sx={{ width: '100%', ...sx }}>
       <Grid container>
         <Grid
           alignItems="center"
