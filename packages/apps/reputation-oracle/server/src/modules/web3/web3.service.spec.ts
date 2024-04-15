@@ -26,7 +26,7 @@ describe('Web3Service', () => {
 
   describe('getSigner', () => {
     it('should return a signer for a valid chainId on TESTNET', () => {
-      const validChainId = ChainId.POLYGON_MUMBAI;
+      const validChainId = ChainId.POLYGON_AMOY;
 
       const signer = web3Service.getSigner(validChainId);
       expect(signer).toBeDefined();

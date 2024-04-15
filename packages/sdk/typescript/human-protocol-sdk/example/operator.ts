@@ -4,7 +4,7 @@ import { ChainId } from '../src/enums';
 import { OperatorUtils } from '../src/operator';
 
 export const getLeaders = async () => {
-  if (!NETWORKS[ChainId.POLYGON_MUMBAI]) {
+  if (!NETWORKS[ChainId.POLYGON_AMOY]) {
     return;
   }
 
@@ -13,14 +13,14 @@ export const getLeaders = async () => {
   console.log('Leaders:', leaders);
 
   const leader = await OperatorUtils.getLeader(
-    ChainId.POLYGON_MUMBAI,
+    ChainId.POLYGON_AMOY,
     leaders[0].address
   );
 
   console.log('First leader: ', leader);
 
   const reputationOracles = await OperatorUtils.getLeaders({
-    networks: [ChainId.POLYGON_MUMBAI],
+    networks: [ChainId.POLYGON_AMOY],
     role: 'Reputation Oracle',
   });
 

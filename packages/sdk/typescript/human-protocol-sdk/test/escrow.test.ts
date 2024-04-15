@@ -2163,7 +2163,7 @@ describe('EscrowUtils', () => {
       const launcher = FAKE_ADDRESS;
 
       await expect(
-        EscrowUtils.getEscrows({ networks: [ChainId.POLYGON_MUMBAI], launcher })
+        EscrowUtils.getEscrows({ networks: [ChainId.POLYGON_AMOY], launcher })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -2172,7 +2172,7 @@ describe('EscrowUtils', () => {
 
       await expect(
         EscrowUtils.getEscrows({
-          networks: [ChainId.POLYGON_MUMBAI],
+          networks: [ChainId.POLYGON_AMOY],
           recordingOracle,
         })
       ).rejects.toThrow(ErrorInvalidAddress);
@@ -2183,7 +2183,7 @@ describe('EscrowUtils', () => {
 
       await expect(
         EscrowUtils.getEscrows({
-          networks: [ChainId.POLYGON_MUMBAI],
+          networks: [ChainId.POLYGON_AMOY],
           reputationOracle,
         })
       ).rejects.toThrow(ErrorInvalidAddress);
@@ -2223,7 +2223,7 @@ describe('EscrowUtils', () => {
         .mockResolvedValue({ escrows });
 
       const filter = {
-        networks: [ChainId.POLYGON_MUMBAI],
+        networks: [ChainId.POLYGON_AMOY],
       };
 
       const result = await EscrowUtils.getEscrows(filter);
@@ -2256,7 +2256,7 @@ describe('EscrowUtils', () => {
         .mockResolvedValue({ escrows });
 
       const result = await EscrowUtils.getEscrows({
-        networks: [ChainId.POLYGON_MUMBAI],
+        networks: [ChainId.POLYGON_AMOY],
         launcher: ethers.ZeroAddress,
       });
 
@@ -2302,12 +2302,12 @@ describe('EscrowUtils', () => {
         });
 
       const result = await EscrowUtils.getEscrows({
-        networks: [ChainId.POLYGON, ChainId.POLYGON_MUMBAI],
+        networks: [ChainId.POLYGON, ChainId.POLYGON_AMOY],
       });
       expect(result[0]).toEqual(polygonEscrow);
       expect(result[1]).toEqual(mumbaiEscrow);
       expect(result[0].chainId).toEqual(ChainId.POLYGON);
-      expect(result[1].chainId).toEqual(ChainId.POLYGON_MUMBAI);
+      expect(result[1].chainId).toEqual(ChainId.POLYGON_AMOY);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
@@ -2332,7 +2332,7 @@ describe('EscrowUtils', () => {
         .mockResolvedValue({ escrows });
 
       const result = await EscrowUtils.getEscrows({
-        networks: [ChainId.POLYGON_MUMBAI],
+        networks: [ChainId.POLYGON_AMOY],
         jobRequesterId: '1',
       });
 

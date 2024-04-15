@@ -375,7 +375,7 @@ describe('PaymentService', () => {
     it('should create a crypto payment successfully', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -390,7 +390,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -426,7 +426,7 @@ describe('PaymentService', () => {
         amount: 10,
         rate: 1.5,
         transaction: MOCK_TRANSACTION_HASH,
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         status: PaymentStatus.SUCCEEDED,
       });
       expect(result).toBe(true);
@@ -435,7 +435,7 @@ describe('PaymentService', () => {
     it('should throw a conflict exception if the token address is unsupported', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -474,7 +474,7 @@ describe('PaymentService', () => {
     it('should throw a conflict exception if an unsupported token is used', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -489,7 +489,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -513,7 +513,7 @@ describe('PaymentService', () => {
     it('should throw a signature error if the signature is wrong', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
       (verifySignature as jest.Mock).mockImplementation(() => {
@@ -538,7 +538,7 @@ describe('PaymentService', () => {
     it('should throw a not found exception if the transaction is not found by hash', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -574,7 +574,7 @@ describe('PaymentService', () => {
     it('should throw a not found exception if the transaction has insufficient confirmations', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -587,7 +587,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -613,7 +613,7 @@ describe('PaymentService', () => {
     it('should throw a bad request exception if the payment with the same transaction hash already exists', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -628,7 +628,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,

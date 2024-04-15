@@ -62,7 +62,7 @@ def get_escrows():
     print(
         EscrowUtils.get_escrows(
             EscrowFilter(
-                networks=[ChainId.POLYGON_MUMBAI],
+                networks=[ChainId.POLYGON_AMOY],
                 status=Status.Pending,
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
@@ -73,7 +73,7 @@ def get_escrows():
     print(
         vars(
             EscrowUtils.get_escrow(
-                ChainId.POLYGON_MUMBAI, "0xf9ec66feeafb850d85b88142a7305f55e0532959"
+                ChainId.POLYGON_AMOY, "0xf9ec66feeafb850d85b88142a7305f55e0532959"
             )
         )
     )
@@ -82,10 +82,10 @@ def get_escrows():
 def get_leaders():
     leaders = StakingUtils.get_leaders()
     print(leaders)
-    print(vars(StakingUtils.get_leader(ChainId.POLYGON_MUMBAI, leaders[0].address)))
+    print(vars(StakingUtils.get_leader(ChainId.POLYGON_AMOY, leaders[0].address)))
     print(
         StakingUtils.get_leaders(
-            LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
+            LeaderFilter(networks=[ChainId.POLYGON_AMOY], role="Job Launcher")
         )
     )
 

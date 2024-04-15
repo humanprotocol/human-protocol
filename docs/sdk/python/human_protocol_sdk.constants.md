@@ -30,6 +30,8 @@ Enum for chain IDs.
 
 #### POLYGON *= 137*
 
+#### POLYGON_AMOY *= 80002*
+
 #### POLYGON_MUMBAI *= 80001*
 
 #### RINKEBY *= 4*

@@ -364,7 +364,7 @@ export class AuthService {
       );
     } else {
       kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON_MUMBAI),
+        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
       );
     }
 
