@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import { Input, type InputProps } from '@/components/data-entry/input';
 
 export function Password(props: InputProps & { type?: never }) {
-  const [showPassword, setShowPassword] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
     setShowPassword((show) => !show);

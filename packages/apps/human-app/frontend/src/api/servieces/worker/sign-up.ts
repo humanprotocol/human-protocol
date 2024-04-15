@@ -14,9 +14,10 @@ export type SignUpDto = z.infer<typeof signUpDtoSchema>;
 
 const signUpSuccessResponseSchema = z.unknown();
 
-function signUpMutationFn() {
+function signUpMutationFn(data: SignUpDto) {
   return apiClient(apiPaths.worker.signUp.path, {
     successSchema: signUpSuccessResponseSchema,
+    options: { body: JSON.stringify(data) },
   });
 }
 
