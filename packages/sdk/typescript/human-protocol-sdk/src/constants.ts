@@ -151,6 +151,20 @@ export const NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
     oldFactoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
   },
+  [ChainId.POLYGON_AMOY]: {
+    chainId: ChainId.POLYGON_AMOY,
+    title: 'Polygon Amoy',
+    scanUrl: 'https://www.oklink.com/amoy',
+    factoryAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    stakingAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
+    rewardPoolAddress: '0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7',
+    kvstoreAddress: '0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7',
+    subgraphUrl:
+      'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.MOONBEAM]: {
     chainId: ChainId.MOONBEAM,
     title: 'Moonbeam',

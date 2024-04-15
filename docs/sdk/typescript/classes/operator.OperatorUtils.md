@@ -53,12 +53,16 @@ Returns the leader details.
 ```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const leader = await OperatorUtils.getLeader(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+=======
 [operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+>>>>>>> develop
 
 ___
 
@@ -90,7 +94,11 @@ const leaders = await OperatorUtils.getLeaders();
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:84](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L84)
+=======
 [operator.ts:84](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L84)
+>>>>>>> develop
 
 ___
 
@@ -119,12 +127,16 @@ Retrieves the reputation network operators of the specified address.
 ```typescript
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:123](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L123)
+=======
 [operator.ts:123](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L123)
+>>>>>>> develop
 
 ___
 
@@ -152,9 +164,13 @@ Returns an array of Reward objects that contain the rewards earned by the user t
 ```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:162](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L162)
+=======
 [operator.ts:162](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L162)
+>>>>>>> develop

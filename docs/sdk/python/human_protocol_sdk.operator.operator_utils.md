@@ -10,7 +10,7 @@ from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 
 print(
     OperatorUtils.get_leaders(
-        LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
+        LeaderFilter(networks=[ChainId.POLYGON_AMOY], role="Job Launcher")
     )
 )
 ```
@@ -94,7 +94,7 @@ Get the leader details.
   from human_protocol_sdk.operator import OperatorUtils
 
   leader = OperatorUtils.get_leader(
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
@@ -116,7 +116,7 @@ Get leaders data of the protocol
 
   print(
       OperatorUtils.get_leaders(
-          LeaderFilter(networks=[ChainId.POLYGON_MUMBAI])
+          LeaderFilter(networks=[ChainId.POLYGON_AMOY])
       )
   )
   ```
@@ -141,7 +141,7 @@ Get the reputation network operators of the specified address.
   from human_protocol_sdk.operator import OperatorUtils
 
   leader = OperatorUtils.get_reputation_network_operators(
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
@@ -163,7 +163,7 @@ Get rewards of the given slasher
   from human_protocol_sdk.operator import OperatorUtils
 
   rewards_info = OperatorUtils.get_rewards_info(
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```

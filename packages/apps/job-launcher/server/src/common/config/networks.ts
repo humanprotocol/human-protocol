@@ -31,13 +31,12 @@ export const networkMap: NetworkMapDto = {
       usdt: '0x55d398326f99059fF775485246999027B3197955',
     },
   },
-  mumbai: {
-    chainId: ChainId.POLYGON_MUMBAI,
+  amoy: {
+    chainId: ChainId.POLYGON_AMOY,
     rpcUrl:
-      'https://polygon-mumbai.g.alchemy.com/v2/vKNSJzJf6SW2sdW-05bgFwoyFxUrMzii',
+      'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
     tokens: {
-      hmt: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress,
-      usdt: '0x5b20e68f501590C130d77C87C2A2f2B43Fc09701',
+      hmt: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress,
     },
   },
   goerli: {

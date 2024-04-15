@@ -105,6 +105,7 @@
     * [`ChainId.MOONBASE_ALPHA`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.MOONBASE_ALPHA)
     * [`ChainId.MOONBEAM`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.MOONBEAM)
     * [`ChainId.POLYGON`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.POLYGON)
+    * [`ChainId.POLYGON_AMOY`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.POLYGON_AMOY)
     * [`ChainId.POLYGON_MUMBAI`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.POLYGON_MUMBAI)
     * [`ChainId.RINKEBY`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.RINKEBY)
     * [`ChainId.SKALE`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.SKALE)

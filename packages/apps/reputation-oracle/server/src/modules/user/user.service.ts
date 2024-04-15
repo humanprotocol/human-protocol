@@ -158,7 +158,7 @@ export class UserService {
     if (currentWeb3Env === Web3Env.MAINNET) {
       signer = this.web3Service.getSigner(ChainId.POLYGON);
     } else {
-      signer = this.web3Service.getSigner(ChainId.POLYGON_MUMBAI);
+      signer = this.web3Service.getSigner(ChainId.POLYGON_AMOY);
     }
 
     const kvstore = await KVStoreClient.build(signer);

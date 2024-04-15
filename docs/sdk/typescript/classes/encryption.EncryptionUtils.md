@@ -108,7 +108,11 @@ const result = await EncriptionUtils.encrypt('message', publicKeys);
 
 #### Defined in
 
+<<<<<<< HEAD
+[encryption.ts:422](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L422)
+=======
 [encryption.ts:422](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L422)
+>>>>>>> develop
 
 ___
 
@@ -157,7 +161,11 @@ const result = await EncriptionUtils.generateKeyPair(name, email, passphrase);
 
 #### Defined in
 
+<<<<<<< HEAD
+[encryption.ts:360](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L360)
+=======
 [encryption.ts:360](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L360)
+>>>>>>> develop
 
 ___
 
@@ -189,7 +197,11 @@ const signedData = await EncriptionUtils.getSignedData('message');
 
 #### Defined in
 
+<<<<<<< HEAD
+[encryption.ts:317](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L317)
+=======
 [encryption.ts:317](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L317)
+>>>>>>> develop
 
 ___
 
@@ -237,7 +249,11 @@ if (isEncrypted) {
 
 #### Defined in
 
+<<<<<<< HEAD
+[encryption.ts:471](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L471)
+=======
 [encryption.ts:471](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L471)
+>>>>>>> develop
 
 ___
 
@@ -282,4 +298,8 @@ const result = await EncriptionUtils.verify('message', publicKey);
 
 #### Defined in
 
+<<<<<<< HEAD
+[encryption.ts:284](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L284)
+=======
 [encryption.ts:284](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L284)
+>>>>>>> develop

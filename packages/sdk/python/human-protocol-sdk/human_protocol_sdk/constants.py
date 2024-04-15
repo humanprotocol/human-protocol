@@ -12,6 +12,7 @@ class ChainId(Enum):
     BSC_TESTNET = 97
     POLYGON = 137
     POLYGON_MUMBAI = 80001
+    POLYGON_AMOY = 80002
     MOONBEAM = 1284
     MOONBASE_ALPHA = 1287
     AVALANCHE_TESTNET = 43113
@@ -112,6 +113,20 @@ NETWORKS = {
             "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai"
         ),
         "old_factory_address": "0x558cd800f9F0B02f3B149667bDe003284c867E94",
+    },
+    ChainId.POLYGON_AMOY: {
+        "title": "Polygon Amoy",
+        "scan_url": "https://www.oklink.com/amoy",
+        "subgraph_url": (
+            "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2"
+        ),
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+        "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+        "staking_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+        "reward_pool_address": "0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7",
+        "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
     },
     ChainId.MOONBEAM: {
         "title": "Moonbeam",
