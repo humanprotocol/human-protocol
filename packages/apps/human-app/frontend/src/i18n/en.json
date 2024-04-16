@@ -3,7 +3,9 @@
   "validation": {
     "required": "Required",
     "min": "Min {{count}} characters",
-    "max": "Max {{count}} characters"
+    "max": "Max {{count}} characters",
+    "passwordWeak": "Password should be at least 8 characters long and contain at least one uppercase and one lowercase letter, one number and one special character",
+    "passwordMismatch": "Passwords are not the same"
   },
   "errors": {
     "unknown": "Unknown error"
@@ -46,10 +48,12 @@
   "worker": {
     "signUpForm": {
       "fields": {
+        "createPassword": "Create Password",
         "password": "Password",
-        "email": "Email"
+        "confirmPassword": "Confirm Password",
+        "email": "your@email.com"
       },
-      "title": "Sign Un",
+      "title": "Sign Up",
       "submitBtn": "Sign up"
     },
     "signInForm": {

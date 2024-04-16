@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password';
 import { FormCard } from '@/components/ui/form-card';
+import { Captcha } from '@/components/h-captcha';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
@@ -28,11 +30,13 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 }
 
 export function SignUpWorkerPage() {
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const { t } = useTranslation();
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
       password: '',
+      confirmPassword: '',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -45,7 +49,9 @@ export function SignUpWorkerPage() {
   } = useSignUpMutation();
 
   function handleWorkerSignUp(data: SignUpDto) {
-    signUpWorkerMutate(data);
+    if (captchaToken) {
+      signUpWorkerMutate({ ...data, token: captchaToken });
+    }
   }
 
   return (
@@ -55,7 +61,7 @@ export function SignUpWorkerPage() {
           ? formattedSignUpErrorMessage(signUpWorkerError)
           : undefined
       }
-      title={t('worker.signInForm.title')}
+      title={t('worker.signUpForm.title')}
     >
       <FormProvider {...methods}>
         <form
@@ -69,6 +75,7 @@ export function SignUpWorkerPage() {
               label={t('worker.signUpForm.fields.password')}
               name="password"
             />
+            <Captcha setCaptchaToken={setCaptchaToken} />
             <Button
               disabled={isSignUpWorkerPending}
               fullWidth
