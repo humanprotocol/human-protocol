@@ -3,7 +3,6 @@ __pycache__
 .pytest_cache
 
 # pipenv
-Pipfile.lock
 pip-log.txt
 pip-wheel-metadata/
 
