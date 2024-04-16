@@ -3,12 +3,14 @@ import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Trans, useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { FormCard } from '@/components/ui/form-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
-import { Password } from '@/components/data-entry/password';
+import { Password } from '@/components/data-entry/password/password';
 import { useSignInMutation } from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
+import { routerPaths } from '@/shared/router-paths';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (
@@ -84,7 +86,9 @@ export function SignInWorkerPage() {
               name="password"
             />
             <Typography variant="body1">
-              {t('worker.signInForm.forgotPassword')}
+              <Link to={routerPaths.resetPassword}>
+                {t('worker.signInForm.forgotPassword')}
+              </Link>
             </Typography>
             <Button
               disabled={isSignInWorkerPending}

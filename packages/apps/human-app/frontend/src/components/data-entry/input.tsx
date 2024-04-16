@@ -1,20 +1,22 @@
 import { Controller } from 'react-hook-form';
 import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
+import { Typography } from '@mui/material';
+import { colorPalette } from '@/styles/color-palette';
 
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
   name: string;
   label?: string;
   autoComplete?: string;
-  isCustomError?: boolean;
+  customError?: React.ReactNode;
 }
 
 export function Input({
   name,
   autoComplete,
   label,
-  isCustomError = false,
+  customError,
   ...rest
 }: InputProps) {
   return (
@@ -26,7 +28,14 @@ export function Input({
           autoComplete={autoComplete || name}
           error={Boolean(fieldState.error)}
           fullWidth
-          helperText={isCustomError ? undefined : fieldState.error?.message}
+          helperText={
+            <Typography
+              color={customError ? undefined : colorPalette.error.main}
+              variant="helperText"
+            >
+              {customError ? customError : fieldState.error?.message}
+            </Typography>
+          }
           label={label}
           name={name}
           variant="outlined"

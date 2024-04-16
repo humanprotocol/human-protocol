@@ -7,13 +7,12 @@ import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/shared/router-paths';
 import { Alert } from '@/components/ui/alert';
 
-const IconWrapper = styled('div')<{ background: string }>(({ background }) => ({
+const IconWrapper = styled('div')(() => ({
   width: '40px',
   height: '40px',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  background,
   borderRadius: '50%',
   cursor: 'pointer',
   ':hover': {
@@ -25,7 +24,8 @@ interface FormCardProps {
   title: string;
   children: React.JSX.Element;
   alert?: React.JSX.Element;
-  maxWidth?: string;
+  cardMaxWidth?: string;
+  childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
 }
@@ -34,9 +34,10 @@ export function FormCard({
   title,
   children,
   alert,
+  cardMaxWidth = '1200px',
+  childrenMaxWidth = '486px',
   backArrowPath = -1,
   cancelBtnPath = routerPaths.app.path,
-  maxWidth = '486px',
 }: FormCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -59,7 +60,7 @@ export function FormCard({
         alignItems: 'center',
         gap: '2rem',
         borderRadius: '20px',
-        maxWidth: '1200px',
+        maxWidth: cardMaxWidth,
         width: '100%',
         background: 'whitesmoke',
         [breakpoints.mobile]: {
@@ -67,7 +68,16 @@ export function FormCard({
         },
       }}
     >
-      <Grid sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+      <Grid
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: '100%',
+          [breakpoints.mobile]: {
+            display: 'none',
+          },
+        }}
+      >
         <Button onClick={goBack.bind(null, cancelBtnPath)}>
           <Typography variant="buttonMedium">
             {t('components.modal.header.closeBtn')}
@@ -77,36 +87,80 @@ export function FormCard({
       <Box
         sx={{
           flexGrow: 1,
-          maxWidth,
+          maxWidth: childrenMaxWidth,
           width: '100%',
           justifyContent: 'center',
           alignItems: 'center',
         }}
       >
-        <Grid container rowGap="1rem">
-          <Grid item xs={1} />
-          <Grid item sx={{ paddingLeft: '1rem' }} xs={11}>
-            <div style={{ height: '3rem', width: '100%' }}>
-              {alert ? (
-                <Alert color="error" severity="error" sx={{ width: '100%' }}>
-                  {alert}
-                </Alert>
-              ) : null}
-            </div>
+        <Grid
+          container
+          sx={{
+            rowGap: '1rem',
+            [breakpoints.mobile]: {
+              rowGap: '0.4rem',
+            },
+          }}
+        >
+          <Grid
+            sx={{
+              display: 'none',
+              [breakpoints.mobile]: {
+                display: 'flex',
+                width: '100%',
+                justifyContent: 'space-between',
+              },
+            }}
+          >
+            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+              <ArrowBackIcon />
+            </IconWrapper>
+            <Button onClick={goBack.bind(null, cancelBtnPath)}>
+              <Typography variant="buttonMedium">
+                {t('components.modal.header.closeBtn')}
+              </Typography>
+            </Button>
           </Grid>
-          <Grid item xs={1}>
-            <IconWrapper
-              background="white"
-              onClick={goBack.bind(null, backArrowPath)}
-            >
+          <Grid item md={1} order={{ xs: 3, md: 1 }} xs={12} />
+          <Grid
+            item
+            md={11}
+            order={{ xs: 2, md: 2 }}
+            sx={{
+              height: '3rem',
+              width: '100%',
+              [breakpoints.mobile]: {
+                height: 'auto',
+              },
+            }}
+            xs={12}
+          >
+            {alert ? (
+              <Alert color="error" severity="error" sx={{ width: '100%' }}>
+                {alert}
+              </Alert>
+            ) : null}
+          </Grid>
+          <Grid
+            item
+            md={1}
+            order={{ xs: 1, md: 3 }}
+            sx={{
+              [breakpoints.mobile]: {
+                display: 'none',
+              },
+            }}
+            xs={12}
+          >
+            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
               <ArrowBackIcon />
             </IconWrapper>
           </Grid>
-          <Grid item sx={{ paddingLeft: '1rem' }} xs={11}>
+          <Grid item md={11} order={{ xs: 4, md: 4 }} xs={12}>
             <Typography variant="h4">{title}</Typography>
           </Grid>
-          <Grid item xs={1} />
-          <Grid item sx={{ paddingLeft: '1rem' }} xs={11}>
+          <Grid item md={1} order={{ xs: 5, md: 5 }} xs={1} />
+          <Grid item md={11} order={{ xs: 6, md: 6 }} xs={12}>
             {children}
           </Grid>
         </Grid>

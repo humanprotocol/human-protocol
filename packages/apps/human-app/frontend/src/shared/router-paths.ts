@@ -5,4 +5,7 @@ export const routerPaths = {
   playground: {
     path: '/playground',
   },
+  privacyPolicy: '/privacy-policy',
+  termsOfService: '/terms-of-service',
+  resetPassword: '/reset-password',
 } as const;

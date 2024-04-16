@@ -3,6 +3,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
+import { z } from 'zod';
+import { Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
@@ -11,9 +14,18 @@ import {
 import { FetchError } from '@/api/fetcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
-import { Password } from '@/components/data-entry/password';
+import { Password } from '@/components/data-entry/password/password';
 import { FormCard } from '@/components/ui/form-card';
 import { Captcha } from '@/components/h-captcha';
+import {
+  password8Chars,
+  passwordLowercase,
+  passwordNumeric,
+  passwordSpecialCharacter,
+  passwordUppercase,
+} from '@/shared/helpers/regex';
+import { routerPaths } from '@/shared/router-paths';
+import type { PasswordCheck } from '@/components/data-entry/password/password-check-label';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
@@ -28,6 +40,29 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
   }
   return <Trans>errors.unknown</Trans>;
 }
+
+const passwordChecks: PasswordCheck[] = [
+  {
+    requirementsLabel: <Trans>validation.password8Chars</Trans>,
+    schema: z.string().regex(password8Chars),
+  },
+  {
+    requirementsLabel: <Trans>validation.passwordUppercase</Trans>,
+    schema: z.string().regex(passwordUppercase),
+  },
+  {
+    requirementsLabel: <Trans>validation.passwordLowercase</Trans>,
+    schema: z.string().regex(passwordLowercase),
+  },
+  {
+    requirementsLabel: <Trans>validation.passwordNumeric</Trans>,
+    schema: z.string().regex(passwordNumeric),
+  },
+  {
+    requirementsLabel: <Trans>validation.passwordSpecialCharacter</Trans>,
+    schema: z.string().regex(passwordSpecialCharacter),
+  },
+];
 
 export function SignUpWorkerPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -74,8 +109,25 @@ export function SignUpWorkerPage() {
             <Password
               label={t('worker.signUpForm.fields.password')}
               name="password"
+              passwordCheckHeader="Password must contain at least:"
+              passwordChecks={passwordChecks}
             />
-            <Captcha setCaptchaToken={setCaptchaToken} />
+            <Password
+              label={t('worker.signUpForm.fields.confirmPassword')}
+              name="confirmPassword"
+            />
+            <Grid width="100%">
+              <Captcha setCaptchaToken={setCaptchaToken} />
+            </Grid>
+            <Grid>
+              <Typography variant="textField">
+                <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
+                  Terms
+                  <Link to={routerPaths.termsOfService} />
+                  <Link to={routerPaths.privacyPolicy} />
+                </Trans>
+              </Typography>
+            </Grid>
             <Button
               disabled={isSignUpWorkerPending}
               fullWidth
