@@ -4,6 +4,7 @@ export enum JobStatus {
   CREATED = 'CREATED',
   SET_UP = 'SET_UP',
   LAUNCHED = 'LAUNCHED',
+  PARTIAL = 'PARTIAL',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   TO_CANCEL = 'TO_CANCEL',
@@ -13,6 +14,7 @@ export enum JobStatus {
 export enum JobStatusFilter {
   PENDING = 'PENDING',
   LAUNCHED = 'LAUNCHED',
+  PARTIAL = 'PARTIAL',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   CANCELED = 'CANCELED',

@@ -17,8 +17,6 @@ import { KVStoreClient } from '../src/kvstore';
 import { NetworkData } from '../src/types';
 import { DEFAULT_GAS_PAYER_PRIVKEY } from './utils/constants';
 
-vi.mock('../src/init');
-
 global.fetch = vi.fn().mockResolvedValue({
   text: () => Promise.resolve('example'),
 });

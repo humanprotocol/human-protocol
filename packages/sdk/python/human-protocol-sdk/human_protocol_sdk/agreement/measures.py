@@ -185,11 +185,13 @@ def _percentage_from_label_counts(label_counts):
     max_item_agreements = (n_raters * (n_raters - 1)).sum()
 
     if max_item_agreements == 0:
-        warn("""
+        warn(
+            """
             All annotations were made by a single annotator,
             check your data to ensure this is not an error.
             Returning 1.0
-            """)
+            """
+        )
         return 1.0
 
     return item_agreements / max_item_agreements
@@ -197,11 +199,13 @@ def _percentage_from_label_counts(label_counts):
 
 def _kappa(agreement_observed, agreement_expected):
     if agreement_expected == 1.0:
-        warn("""
+        warn(
+            """
             Annotations contained only a single value,
             check your data to ensure this is not an error.
             Returning 1.0.
-            """)
+            """
+        )
         return 1.0
 
     return (agreement_observed - agreement_expected) / (1 - agreement_expected)
