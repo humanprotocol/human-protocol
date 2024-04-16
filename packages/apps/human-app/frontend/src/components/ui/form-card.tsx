@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
-import { routerPaths } from '@/shared/router-paths';
+import { routerPaths } from '@/router/router-paths';
 import { Alert } from '@/components/ui/alert';
 import { colorPalette } from '@/styles/color-palette';
 
@@ -39,7 +39,7 @@ export function FormCard({
   cardMaxWidth = '1200px',
   childrenMaxWidth = '486px',
   backArrowPath = -1,
-  cancelBtnPath = routerPaths.app.path,
+  cancelBtnPath = routerPaths.homePage,
 }: FormCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();

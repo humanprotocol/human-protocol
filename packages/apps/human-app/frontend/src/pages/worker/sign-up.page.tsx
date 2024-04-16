@@ -4,8 +4,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import { z } from 'zod';
-import { Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
+import Typography from '@mui/material/Typography';
+import Link from '@mui/material/Link';
 import { t } from 'i18next';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
@@ -25,9 +25,9 @@ import {
   passwordSpecialCharacter,
   passwordUppercase,
 } from '@/shared/helpers/regex';
-import { routerPaths } from '@/shared/router-paths';
 import type { PasswordCheck } from '@/components/data-entry/password/password-check-label';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { env } from '@/shared/env';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
@@ -131,8 +131,8 @@ export function SignUpWorkerPage() {
               <Typography variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
                   Terms
-                  <Link to={routerPaths.termsOfService} />
-                  <Link to={routerPaths.privacyPolicy} />
+                  <Link href={env.VITE_TERMS_OF_SERVICE_URL} />
+                  <Link href={env.VITE_PRIVACY_POLICY_URL} />
                 </Trans>
               </Typography>
             </Grid>

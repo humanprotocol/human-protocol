@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { routerPaths } from '@/shared/router-paths';
+import { routerPaths } from '@/router/router-paths';
 
 export const signInDtoSchema = z.object({
   email: z.string().email(),
@@ -33,7 +33,7 @@ export function useSignInMutation() {
     mutationFn: signInMutationFn,
     onSuccess: async () => {
       // TODO add correct path
-      navigate(routerPaths.app.path);
+      navigate(routerPaths.homePage);
       await queryClient.invalidateQueries();
     },
     onError: async () => {

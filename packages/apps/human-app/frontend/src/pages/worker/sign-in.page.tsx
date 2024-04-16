@@ -14,7 +14,7 @@ import {
   useSignInMutation,
 } from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
-import { routerPaths } from '@/shared/router-paths';
+import { routerPaths } from '@/router/router-paths';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 function formattedSignInErrorMessage(unknownError: unknown) {

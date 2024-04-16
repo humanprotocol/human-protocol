@@ -7,11 +7,13 @@ import {
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { BackArrowIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { HomePageStageType } from '@/pages/homepage/components/home-container';
+import { routerPaths } from '@/router/router-paths';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
@@ -130,12 +132,24 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
           </List>
         </Grid>
         <Grid item xs={isMobile ? 12 : 6}>
-          <Button fullWidth size="large" variant="contained">
+          <Button
+            component={Link}
+            fullWidth
+            size="large"
+            to={routerPaths.worker.signUp}
+            variant="contained"
+          >
             {t('homepage.signUpToComplete')}
           </Button>
         </Grid>
         <Grid item xs={isMobile ? 12 : 6}>
-          <Button fullWidth size="large" variant="contained">
+          <Button
+            component={Link}
+            fullWidth
+            size="large"
+            to={routerPaths.operator.signUp}
+            variant="contained"
+          >
             {t('homepage.signAsOperator')}
           </Button>
         </Grid>
