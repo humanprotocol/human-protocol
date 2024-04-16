@@ -30,5 +30,10 @@ export const colorPalette = {
     light: '#00EDA6',
     contrastText: '#FFFFFF',
   },
+  paper: {
+    main: '#F6F7FE',
+    light: '#F6F6FF',
+  },
+  // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
 } as const;
