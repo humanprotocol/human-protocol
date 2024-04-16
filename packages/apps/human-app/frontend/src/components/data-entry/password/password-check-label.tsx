@@ -6,7 +6,7 @@ import { colorPalette } from '@/styles/color-palette';
 
 export interface PasswordCheck {
   schema: z.ZodSchema;
-  requirementsLabel: React.ReactElement;
+  requirementsLabel: string;
 }
 
 const getColor = (isSubmitted: boolean, isValid: boolean) => {

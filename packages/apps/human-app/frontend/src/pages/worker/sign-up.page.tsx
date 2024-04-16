@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import { z } from 'zod';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { t } from 'i18next';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
@@ -43,30 +44,30 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 
 const passwordChecks: PasswordCheck[] = [
   {
-    requirementsLabel: <Trans>validation.password8Chars</Trans>,
+    requirementsLabel: t('validation.password8Chars'),
     schema: z.string().regex(password8Chars),
   },
   {
-    requirementsLabel: <Trans>validation.passwordUppercase</Trans>,
+    requirementsLabel: t('validation.passwordUppercase'),
     schema: z.string().regex(passwordUppercase),
   },
   {
-    requirementsLabel: <Trans>validation.passwordLowercase</Trans>,
+    requirementsLabel: t('validation.passwordLowercase'),
     schema: z.string().regex(passwordLowercase),
   },
   {
-    requirementsLabel: <Trans>validation.passwordNumeric</Trans>,
+    requirementsLabel: t('validation.passwordNumeric'),
     schema: z.string().regex(passwordNumeric),
   },
   {
-    requirementsLabel: <Trans>validation.passwordSpecialCharacter</Trans>,
+    requirementsLabel: t('validation.passwordSpecialCharacter'),
     schema: z.string().regex(passwordSpecialCharacter),
   },
 ];
 
 export function SignUpWorkerPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const { t } = useTranslation();
+
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
