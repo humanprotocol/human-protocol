@@ -9,7 +9,7 @@ import {
 export class JobAssignmentDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
-  exchange_oracle_url: string;
+  address: string;
   @AutoMap()
   @ApiProperty({ example: 'string' })
   escrow_address: string;
@@ -28,7 +28,7 @@ export class JobAssignmentCommand {
   data: JobAssignmentParams;
   token: string;
   @AutoMap()
-  exchangeOracleUrl: string;
+  address: string;
 }
 
 export class JobAssignmentData {
@@ -55,7 +55,7 @@ export class JobAssignmentResponse {
 export class JobsFetchParamsDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
-  exchange_oracle_url: string;
+  address: string;
   @AutoMap()
   @ApiProperty({ example: 'string', required: false })
   assignment_id: string;
@@ -111,7 +111,7 @@ export class JobsFetchParams {
 }
 export class JobsFetchParamsCommand {
   @AutoMap()
-  exchangeOracleUrl: string;
+  address: string;
   @AutoMap()
   data: JobsFetchParams;
   token: string;

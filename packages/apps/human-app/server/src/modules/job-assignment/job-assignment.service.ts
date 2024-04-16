@@ -10,6 +10,7 @@ import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchan
 export class JobAssignmentService {
   constructor(private readonly gateway: ExchangeOracleGateway) {}
 
+
   async processJobAssignment(
     command: JobAssignmentCommand,
   ): Promise<JobAssignmentResponse> {

@@ -10,6 +10,7 @@ const DEFAULT_REPUTATION_ORACLE_URL = '';
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
+const DEFAULT_KVSTORE_ADDRESS = '0xbcB28672F826a50B03EE91B28145EAbddA73B2eD';
 @Injectable()
 export class EnvironmentConfigService {
 
@@ -57,6 +58,12 @@ export class EnvironmentConfigService {
       'CACHE_TTL_ORACLE_DISCOVERY',
       DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
     );
+  }
+  get polygonKVStoreAddress(): string {
+    return this.configService.get<string>(
+      'POLYGON_KVSTORE_ADDRESS',
+      DEFAULT_KVSTORE_ADDRESS
+    )
   }
 }
 
