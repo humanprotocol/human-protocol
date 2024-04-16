@@ -4,13 +4,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { FormCard } from '@/components/ui/form-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
-import { useSignInMutation } from '@/api/servieces/worker/sign-in';
+import {
+  signInDtoSchema,
+  useSignInMutation,
+} from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/shared/router-paths';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (
@@ -40,12 +45,19 @@ type SignUpDto = z.infer<typeof signUpDtoSchema>;
 
 export function SignInWorkerPage() {
   const { t } = useTranslation();
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    setGrayBackground();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
+
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
       password: '',
     },
-    resolver: zodResolver(signUpDtoSchema),
+    resolver: zodResolver(signInDtoSchema),
   });
 
   const {
