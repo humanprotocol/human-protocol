@@ -76,5 +76,35 @@
       },
       "submitBtn": "Sign up"
     }
+  },
+  "operator": {
+    "profile": {
+      "profileHeader": "Profile",
+      "about": {
+        "header": "About",
+        "role": "Role",
+        "status": {
+          "statusHeader": "Status",
+          "statusActivated": "Active",
+          "statusDeactivated": "Deactivated",
+          "statusActivateButton": "Activate",
+          "statusDeactivateButton": "Deactivate"
+        },
+        "fee": "Fee",
+        "url": "URL",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job Types"
+      },
+      "statistics": {
+        "header": "Statistics",
+        "escrowsProcessed": "Escrows processed",
+        "escrowsActive": "Escrows active",
+        "escrowsCancelled": "Escrows cancelled",
+        "workersAmount": "Workers amount",
+        "assignmentsCompleted": "Assignments completed",
+        "assignmentsRejected": "Assignments rejected",
+        "assignmentsExpired": "Assignments expired"
+      }
+    }
   }
 }

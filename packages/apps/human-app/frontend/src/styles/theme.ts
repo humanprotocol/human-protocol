@@ -15,6 +15,7 @@ declare module '@mui/material/Typography' {
     inputText: true;
     tooltip: true;
     inputUnderline: true;
+    chip: true;
   }
 }
 
@@ -31,6 +32,7 @@ declare module '@mui/material/styles' {
     inputText: CSSProperties;
     tooltip: CSSProperties;
     inputUnderline: CSSProperties;
+    chip: CSSProperties;
   }
 
   // allow configuration using `createTheme`
@@ -46,6 +48,7 @@ declare module '@mui/material/styles' {
     inputText?: CSSProperties;
     tooltip?: CSSProperties;
     inputUnderline?: CSSProperties;
+    chip?: CSSProperties;
   }
 }
 
@@ -200,6 +203,11 @@ export const theme: ThemeOptions = {
       fontWeight: 600,
       letterSpacing: 0.15,
       textDecoration: 'underline',
+    },
+    chip: {
+      fontSize: 13,
+      fontWeight: 400,
+      letterSpacing: 0.16,
     },
   },
   components: {
