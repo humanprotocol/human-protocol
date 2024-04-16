@@ -11,7 +11,7 @@ interface AccountType {
 
 export function AccountType({ setStep }: AccountType) {
   const { t } = useTranslation();
-  const isMobile = useIsMobile('xl');
+  const isMobile = useIsMobile('lg');
 
   return (
     <Container

@@ -5,15 +5,15 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { SignUpPage } from './homepage/signup.page';
 
 export function MainPage() {
-  const isMobile = useIsMobile('xl');
+  const isMobile = useIsMobile();
 
   return (
     <Box>
       <Paper
         sx={{
           backgroundColor: colorPalette.white,
-          py: !isMobile ? '200px' : 0,
-          px: !isMobile ? '150px' : 0,
+          py: !isMobile ? '100px' : 0,
+          mx: !isMobile ? '30px' : 0,
           boxShadow: 'none',
           borderRadius: '20px',
           position: 'relative',

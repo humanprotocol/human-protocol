@@ -18,7 +18,7 @@ export function SignIn({ setStep }: SignInProps) {
   const { t } = useTranslation();
   const logoText: string = t('components.signUpPage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
-  const isMobile = useIsMobile('xl');
+  const isMobile = useIsMobile('lg');
   return (
     <Grid
       container

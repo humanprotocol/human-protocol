@@ -26,8 +26,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
         justifyContent: 'space-between',
         flexDirection: 'row',
         alignItems: 'center',
-        px: '44px',
-        pt: '44px',
+        px: isMobile ? '44px' : 0,
         [breakpoints.mobile]: {
           margin: '10px 0',
         },
