@@ -2,6 +2,7 @@ import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
+import { env } from '@/shared/env';
 import { ChatIcon } from '../ui/icons';
 
 export function Footer() {
@@ -28,7 +29,7 @@ export function Footer() {
       >
         <Stack direction={isMobile ? 'column' : 'row'}>
           <Link
-            href="#"
+            href={env.VITE_PRIVACY_POLICY_URL}
             sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
             underline="none"
           >
@@ -37,7 +38,7 @@ export function Footer() {
             </Typography>
           </Link>
           <Link
-            href="#"
+            href={env.VITE_TERMS_OF_SERVICE_URL}
             sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
             underline="none"
           >
@@ -46,7 +47,7 @@ export function Footer() {
             </Typography>
           </Link>
           <Link
-            href="#"
+            href={env.VITE_HUMAN_PROTOCOL_URL}
             sx={{
               mb: isMobile ? '10px' : 0,
             }}
