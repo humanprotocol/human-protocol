@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import { Container } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { FetchError } from '@/api/fetcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password';
+import { Captcha } from '@/components/h-captcha';
 
 function formatedSignUpErrorMessage(unknownError: unknown) {
   if (
@@ -30,11 +32,13 @@ function formatedSignUpErrorMessage(unknownError: unknown) {
 }
 
 export function SignUpWorkerPage() {
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const { t } = useTranslation();
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
       password: '',
+      confirmPassword: '',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -47,7 +51,9 @@ export function SignUpWorkerPage() {
   } = useSignUpMutation();
 
   function handleWorkerSignUp(data: SignUpDto) {
-    signUpWorkerMutate(data);
+    if (captchaToken) {
+      signUpWorkerMutate({ ...data, token: captchaToken });
+    }
   }
 
   return (
@@ -60,14 +66,24 @@ export function SignUpWorkerPage() {
             }
           >
             <Grid item xs={6}>
-              <Input label={t('worker.signUpForm.fields.email')} name="email" />
+              <Input
+                name="email"
+                placeholder={t('worker.signUpForm.fields.email')}
+              />
             </Grid>
             <Grid item xs={6}>
               <Password
-                label={t('worker.signUpForm.fields.password')}
                 name="password"
+                placeholder={t('worker.signUpForm.fields.createPassword')}
               />
             </Grid>
+            <Grid item xs={6}>
+              <Password
+                name="confirmPassword"
+                placeholder={t('worker.signUpForm.fields.confirmPassword')}
+              />
+            </Grid>
+            <Captcha setCaptchaToken={setCaptchaToken} />
             <Button
               disabled={isSignUpWorkerPending}
               type="submit"
