@@ -1,55 +1,98 @@
-import { useState } from 'react';
-import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Trans, useTranslation } from 'react-i18next';
 import { FormCard } from '@/components/ui/form-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password';
+import { useSignInMutation } from '@/api/servieces/worker/sign-in';
+import { FetchError } from '@/api/fetcher';
+
+function formattedSignInErrorMessage(unknownError: unknown) {
+  if (
+    unknownError instanceof FetchError &&
+    (unknownError.status === 403 || unknownError.status === 401)
+  ) {
+    return <Trans>auth.login.errors.unauthorized</Trans>;
+  }
+
+  if (unknownError instanceof Error) {
+    return <Trans>errors.withInfoCode</Trans>;
+  }
+  return <Trans>errors.unknown</Trans>;
+}
 
 export interface Inputs {
   email: string;
   password: string;
 }
 
-const schema = z.object({
+const signUpDtoSchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
 
-type Schema = z.infer<typeof schema>;
+type SignUpDto = z.infer<typeof signUpDtoSchema>;
 
 export function SignInWorkerPage() {
-  // eslint-disable-next-line react/hook-use-state -- temporary
-  const [_, setValues] = useState<Schema>();
-
-  const methods = useForm<Schema>({
-    resolver: zodResolver(schema),
+  const { t } = useTranslation();
+  const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
       password: '',
     },
+    resolver: zodResolver(signUpDtoSchema),
   });
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    const formData = {
-      ...data,
-    };
-    setValues(formData);
-  };
+  const {
+    mutate: signInWorkerMutate,
+    error: signInWorkerError,
+    isError: isSignInWorkerError,
+    isPending: isSignInWorkerPending,
+  } = useSignInMutation();
+
+  function handleWorkerSignIn(data: SignUpDto) {
+    signInWorkerMutate(data);
+  }
 
   return (
-    <FormCard title="Sign In">
+    <FormCard
+      alert={
+        isSignInWorkerError
+          ? formattedSignInErrorMessage(signInWorkerError)
+          : undefined
+      }
+      title={t('worker.signInForm.title')}
+    >
       <FormProvider {...methods}>
-        <form onSubmit={(event) => void methods.handleSubmit(onSubmit)(event)}>
+        <form
+          onSubmit={(event) =>
+            void methods.handleSubmit(handleWorkerSignIn)(event)
+          }
+        >
           <Grid container gap="2rem">
-            <Input fullWidth label="Email" name="email" />
-            <Password fullWidth label="Password" name="password" />
-            <Typography variant="body1">Forgot password?</Typography>
-            <Button fullWidth type="submit" variant="contained">
-              Sign In
+            <Input
+              fullWidth
+              label={t('worker.signInForm.fields.email')}
+              name="email"
+            />
+            <Password
+              fullWidth
+              label={t('worker.signInForm.fields.password')}
+              name="password"
+            />
+            <Typography variant="body1">
+              {t('worker.signInForm.forgotPassword')}
+            </Typography>
+            <Button
+              disabled={isSignInWorkerPending}
+              fullWidth
+              type="submit"
+              variant="contained"
+            >
+              {t('worker.signInForm.submitBtn')}
             </Button>
           </Grid>
         </form>

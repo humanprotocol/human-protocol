@@ -49,7 +49,17 @@
         "password": "Password",
         "email": "Email"
       },
+      "title": "Sign Un",
       "submitBtn": "Sign up"
+    },
+    "signInForm": {
+      "fields": {
+        "password": "Password",
+        "email": "Email"
+      },
+      "title": "Sign In",
+      "submitBtn": "Sign in",
+      "forgotPassword": "Forgot password?"
     }
   }
 }

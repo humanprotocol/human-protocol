@@ -1,5 +1,3 @@
-import Box from '@mui/material/Box';
-import { Container } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,13 +7,13 @@ import {
   signUpDtoSchema,
   useSignUpMutation,
 } from '@/api/servieces/worker/sign-up';
-import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password';
+import { FormCard } from '@/components/ui/form-card';
 
-function formatedSignUpErrorMessage(unknownError: unknown) {
+function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
     unknownError instanceof FetchError &&
     (unknownError.status === 403 || unknownError.status === 401)
@@ -51,39 +49,37 @@ export function SignUpWorkerPage() {
   }
 
   return (
-    <Box>
-      <Container>
-        <FormProvider {...methods}>
-          <form
-            onSubmit={(event) =>
-              void methods.handleSubmit(handleWorkerSignUp)(event)
-            }
-          >
-            <Grid item xs={6}>
-              <Input label={t('worker.signUpForm.fields.email')} name="email" />
-            </Grid>
-            <Grid item xs={6}>
-              <Password
-                label={t('worker.signUpForm.fields.password')}
-                name="password"
-              />
-            </Grid>
+    <FormCard
+      alert={
+        isSignUpWorkerError
+          ? formattedSignUpErrorMessage(signUpWorkerError)
+          : undefined
+      }
+      title={t('worker.signInForm.title')}
+    >
+      <FormProvider {...methods}>
+        <form
+          onSubmit={(event) =>
+            void methods.handleSubmit(handleWorkerSignUp)(event)
+          }
+        >
+          <Grid container gap="2rem">
+            <Input label={t('worker.signUpForm.fields.email')} name="email" />
+            <Password
+              label={t('worker.signUpForm.fields.password')}
+              name="password"
+            />
             <Button
               disabled={isSignUpWorkerPending}
+              fullWidth
               type="submit"
               variant="contained"
             >
               {t('worker.signUpForm.submitBtn')}
             </Button>
-          </form>
-        </FormProvider>
-
-        {isSignUpWorkerError ? (
-          <Alert severity="error">
-            {formatedSignUpErrorMessage(signUpWorkerError)}
-          </Alert>
-        ) : null}
-      </Container>
-    </Box>
+          </Grid>
+        </form>
+      </FormProvider>
+    </FormCard>
   );
 }
