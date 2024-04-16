@@ -2,7 +2,11 @@
 
 ### Added
 
+- **Add Amoy network:** Add support for Polygon Amoy network.
+
 ### Changed
+
+- **Update getReputationNetworkOperators:** Add job types and url properties to returned objtect.
 
 ### Deprecated
 
