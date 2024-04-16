@@ -1,4 +1,11 @@
-import { Container, Grid, List, ListItemText, Typography } from '@mui/material';
+import {
+  Container,
+  Grid,
+  IconButton,
+  List,
+  ListItemText,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { BackArrowIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
@@ -38,7 +45,7 @@ export function AccountType({ setStep }: AccountType) {
       </Button>
       <Grid container spacing={4}>
         <Grid item xs={12}>
-          <Button
+          <IconButton
             onClick={() => {
               setStep(0);
             }}
@@ -48,10 +55,9 @@ export function AccountType({ setStep }: AccountType) {
               marginTop: isMobile ? 0 : 1,
               transform: isMobile ? 'scale(0.6)' : 'none',
             }}
-            variant="text"
           >
             <BackArrowIcon />
-          </Button>
+          </IconButton>
           <Typography variant="h4">
             {t('components.signUpPage.welcome')} 👋
           </Typography>

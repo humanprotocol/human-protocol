@@ -19,8 +19,7 @@ export function Footer() {
     >
       <Grid
         alignItems="flex-start"
-        container
-        direction="column"
+        item
         justifyContent="center"
         sx={{
           px: isMobile ? '32px' : 0,
@@ -71,7 +70,7 @@ export function Footer() {
       </Grid>
       <Grid
         alignItems="center"
-        container
+        item
         justifyContent="flex-end"
         sx={{
           position: isMobile ? 'absolute' : 'relative',

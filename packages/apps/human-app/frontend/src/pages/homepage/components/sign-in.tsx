@@ -28,7 +28,7 @@ export function SignIn({ setStep }: SignInProps) {
       }}
     >
       <Grid item justifyContent="flex-end" xs={isMobile ? 12 : 6}>
-        <Grid direction="column" item>
+        <Grid container direction="column">
           {isMobile ? (
             <Stack alignItems="center" direction="row" justifyContent="center">
               <MobileHeaderIcon />
