@@ -25,6 +25,8 @@ import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { ApiKeyRepository } from './apikey.repository';
 import { AuthError } from './auth.error';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { AuthConfigService } from '../../common/config/auth-config.service';
 
 jest.mock('@human-protocol/sdk');
 jest.mock('../../common/utils/hcaptcha', () => ({
@@ -57,6 +59,8 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         UserService,
+        ServerConfigService,
+        AuthConfigService,
         {
           provide: JwtService,
           useValue: {

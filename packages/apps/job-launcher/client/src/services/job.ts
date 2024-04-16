@@ -64,19 +64,21 @@ export const getJobList = async ({
   chainId?: ChainId;
   status?: JobStatus;
 }) => {
-  const { data } = await api.get(`/job/list`, {
-    params: {
-      networks: chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : chainId,
-      status,
-    },
-  });
+  const networks = chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : [chainId];
+  let queryString = networks.map((n) => `networks=${n}`).join('&');
+
+  if (status !== undefined) {
+    queryString += `&status=${status}`;
+  }
+  const { data } = await api.get(`/job/list?${queryString}`);
   return data;
 };
 
 export const getJobResult = async (jobId: number) => {
-  const { data } = await api.get<FortuneFinalResult[] | string>(`/job/result`, {
-    params: { jobId },
-  });
+  const { data } = await api.get<FortuneFinalResult[] | string>(
+    `/job/result/${jobId}`,
+    {},
+  );
   return data;
 };
 

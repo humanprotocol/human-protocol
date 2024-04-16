@@ -19,6 +19,7 @@ const LEADER_FRAGMENT = gql`
     publicKey
     webhookUrl
     url
+    jobTypes
   }
 `;
 
@@ -64,7 +65,9 @@ export const GET_REPUTATION_NETWORK_QUERY = (role?: string) => {
           ${WHERE_CLAUSE}
         ) {
           address,
-          role
+          role,
+          url,
+          jobTypes
         }
       }
     }

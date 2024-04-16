@@ -16,6 +16,8 @@ import {
   MOCK_MAX_RETRY_COUNT,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -28,6 +30,8 @@ describe('WebhookController', () => {
       controllers: [WebhookController],
       providers: [
         WebhookService,
+        ServerConfigService,
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {

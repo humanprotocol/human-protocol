@@ -16,7 +16,7 @@ export class CronJobController {
   constructor(private readonly cronJobService: CronJobService) {}
 
   @Public()
-  @Get('/wehbhook/pending')
+  @Get('/webhook/pending')
   @ApiOperation({
     summary: 'Process Pending Cron Job',
     description: 'Endpoint to process pending cron jobs that triggers payouts.',
@@ -33,7 +33,7 @@ export class CronJobController {
   }
 
   @Public()
-  @Get('/wehbhook/paid')
+  @Get('/webhook/paid')
   @ApiOperation({
     summary: 'Process Paid Cron Job',
     description:

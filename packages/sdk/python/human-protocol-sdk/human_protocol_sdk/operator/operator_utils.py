@@ -11,7 +11,7 @@ Code Example
 
     print(
         OperatorUtils.get_leaders(
-            LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
+            LeaderFilter(networks=[ChainId.POLYGON_AMOY], role="Job Launcher")
         )
     )
 
@@ -88,6 +88,7 @@ class LeaderData:
         public_key: Optional[str] = None,
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
+        job_types: Optional[str] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -109,6 +110,7 @@ class LeaderData:
         :param public_key: Public key
         :param webhook_url: Webhook url
         :param url: Url
+        :param job_types: Job types
         """
 
         self.chain_id = chain_id
@@ -128,6 +130,7 @@ class LeaderData:
         self.public_key = public_key
         self.webhook_url = webhook_url
         self.url = url
+        self.job_types = job_types
 
 
 class RewardData:
@@ -148,11 +151,7 @@ class RewardData:
 
 
 class Operator:
-    def __init__(
-        self,
-        address: str,
-        role: str,
-    ):
+    def __init__(self, address: str, role: str, url: str = "", job_types: str = ""):
         """
         Initializes an Operator instance.
 
@@ -162,6 +161,8 @@ class Operator:
 
         self.address = address
         self.role = role
+        self.url = url
+        self.job_types = job_types
 
 
 class OperatorUtils:
@@ -171,7 +172,7 @@ class OperatorUtils:
 
     @staticmethod
     def get_leaders(
-        filter: LeaderFilter = LeaderFilter(networks=[ChainId.POLYGON_MUMBAI]),
+        filter: LeaderFilter = LeaderFilter(networks=[ChainId.POLYGON_AMOY]),
     ) -> List[LeaderData]:
         """Get leaders data of the protocol
 
@@ -187,7 +188,7 @@ class OperatorUtils:
 
                 print(
                     OperatorUtils.get_leaders(
-                        LeaderFilter(networks=[ChainId.POLYGON_MUMBAI])
+                        LeaderFilter(networks=[ChainId.POLYGON_AMOY])
                     )
                 )
         """
@@ -204,6 +205,9 @@ class OperatorUtils:
                 params={"role": filter.role},
             )
             leaders_raw = leaders_data["data"]["leaders"]
+
+            if not leaders_raw:
+                continue
 
             leaders.extend(
                 [
@@ -227,6 +231,7 @@ class OperatorUtils:
                         public_key=leader.get("publicKey", None),
                         webhook_url=leader.get("webhookUrl", None),
                         url=leader.get("url", None),
+                        job_types=leader.get("jobTypes", None),
                     )
                     for leader in leaders_raw
                 ]
@@ -253,7 +258,7 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 leader = OperatorUtils.get_leader(
-                    ChainId.POLYGON_MUMBAI,
+                    ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
@@ -271,7 +276,7 @@ class OperatorUtils:
         leader_data = get_data_from_subgraph(
             network["subgraph_url"],
             query=get_leader_query,
-            params={"address": leader_address},
+            params={"address": leader_address.lower()},
         )
         leader = leader_data["data"]["leader"]
 
@@ -296,6 +301,7 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
+            job_types=leader.get("jobTypes", None),
         )
 
     @staticmethod
@@ -309,6 +315,7 @@ class OperatorUtils:
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
+        :parem job_types: (Optional) Job types of the operator
 
         :return: Returns an array of operator details
 
@@ -319,7 +326,7 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 leader = OperatorUtils.get_reputation_network_operators(
-                    ChainId.POLYGON_MUMBAI,
+                    ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
@@ -337,14 +344,20 @@ class OperatorUtils:
         reputation_network_data = get_data_from_subgraph(
             network["subgraph_url"],
             query=get_reputation_network_query(role),
-            params={"address": address, "role": role},
+            params={"address": address.lower(), "role": role},
         )
+
+        if not reputation_network_data["data"]["reputationNetwork"]:
+            return []
+
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
 
         return [
             Operator(
                 address=operator.get("address", ""),
                 role=operator.get("role", ""),
+                url=operator.get("url", ""),
+                job_types=operator.get("jobTypes", []),
             )
             for operator in operators
         ]
@@ -365,7 +378,7 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 rewards_info = OperatorUtils.get_rewards_info(
-                    ChainId.POLYGON_MUMBAI,
+                    ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
@@ -383,6 +396,10 @@ class OperatorUtils:
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},
         )
+
+        if not reward_added_events_data["data"]["rewardAddedEvents"]:
+            return []
+
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
 
         return [

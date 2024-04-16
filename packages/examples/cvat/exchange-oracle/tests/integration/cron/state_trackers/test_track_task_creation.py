@@ -3,7 +3,7 @@ import uuid
 from unittest.mock import Mock, patch
 
 import src.cvat.api_calls as cvat_api
-from src.core.types import ExchangeOracleEventType, JobStatuses
+from src.core.types import ExchangeOracleEventTypes, JobStatuses
 from src.crons.state_trackers import track_task_creation
 from src.db import SessionLocal
 from src.models.cvat import DataUpload, Job
@@ -81,34 +81,31 @@ class ServiceIntegrationTest(unittest.TestCase):
         data_upload = self.session.query(DataUpload).filter_by(id=upload_id).first()
         self.assertIsNone(data_upload)
 
-    # TODO:
-    # Fix "local variable 'project' referenced before assignment" error in src/crons/state_trackers.py and uncomment this test case
+    def test_track_track_completed_task_creation_error(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        (_, cvat_task, cvat_job) = create_project_task_and_job(self.session, escrow_address, 1)
+        upload = DataUpload(
+            id=str(uuid.uuid4()),
+            task_id=cvat_task.cvat_id,
+        )
+        self.session.add(upload)
+        self.session.commit()
 
-    # def test_track_track_completed_task_creation_error(self):
-    #     escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-    #     (_, cvat_task, cvat_job) = create_project_task_and_job(self.session, escrow_address, 1)
-    #     upload = DataUpload(
-    #         id=str(uuid.uuid4()),
-    #         task_id=cvat_task.cvat_id,
-    #     )
-    #     self.session.add(upload)
-    #     self.session.commit()
+        with (
+            patch(
+                "src.crons.state_trackers.cvat_api.get_task_upload_status"
+            ) as mock_get_task_upload_status,
+            patch(
+                "src.crons.state_trackers.cvat_api.fetch_task_jobs",
+                side_effect=cvat_api.exceptions.ApiException("Error"),
+            ),
+        ):
+            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
 
-    #     with (
-    #         patch(
-    #             "src.crons.state_trackers.cvat_api.get_task_upload_status"
-    #         ) as mock_get_task_upload_status,
-    #         patch(
-    #             "src.crons.state_trackers.cvat_api.fetch_task_jobs",
-    #             side_effect=cvat_api.exceptions.ApiException("Error"),
-    #         ),
-    #     ):
-    #         mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
+            track_task_creation()
 
-    #         track_task_creation()
+        self.session.commit()
 
-    #     self.session.commit()
-
-    #     webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
-    #     self.assertIsNotNone(webhook)
-    #     self.assertEqual(webhook.event_type, ExchangeOracleEventType.task_creation_failed)
+        webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
+        self.assertIsNotNone(webhook)
+        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_creation_failed)
