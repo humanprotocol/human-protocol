@@ -37,33 +37,33 @@
     "table": {
       "clearBtn": "clear"
     },
-    "signUpPage": {
-      "humanApp": "HUMAN App",
-      "completeJobs": "Complete jobs, earn HMT.",
-      "logIn": "Log In",
-      "signUp": "Sign Up",
-      "signIn": "Sign In",
-      "workerSignIn": "Worker Sign In",
-      "operatorSignIn": "Operator Sign In",
-      "welcome": "Welcome",
-      "howWillUse": "How will you use HUMAN App?",
-      "selectOption": "Please select an option below.",
-      "iWantToEarn": "I want to earn HMT",
-      "completeTask": "Complete simple tasks and get paid.",
-      "workAnywhere": "Work anywhere, any time.",
-      "signUpToComplete": "Sign Up to Complete Tasks",
-      "joinAsOperator": "I want to join as an operator",
-      "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
-      "becomePartner": "Become a HUMAN App partner.",
-      "signAsOperator": "Sign Up as an Operator",
-      "termsAndConditions": "Terms & conditions",
-      "cancel": "Cancel"
-    },
     "modal": {
       "header": {
         "closeBtn": "Cancel"
       }
     }
+  },
+  "homepage": {
+    "humanApp": "HUMAN App",
+    "completeJobs": "Complete jobs, earn HMT.",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "workerSignIn": "Worker Sign In",
+    "operatorSignIn": "Operator Sign In",
+    "welcome": "Welcome",
+    "howWillUse": "How will you use HUMAN App?",
+    "selectOption": "Please select an option below.",
+    "iWantToEarn": "I want to earn HMT",
+    "completeTask": "Complete simple tasks and get paid.",
+    "workAnywhere": "Work anywhere, any time.",
+    "signUpToComplete": "Sign Up to Complete Tasks",
+    "joinAsOperator": "I want to join as an operator",
+    "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
+    "becomePartner": "Become a HUMAN App partner.",
+    "signAsOperator": "Sign Up as an Operator",
+    "termsAndConditions": "Terms & conditions",
+    "cancel": "Cancel"
   },
   "worker": {
     "signUpForm": {

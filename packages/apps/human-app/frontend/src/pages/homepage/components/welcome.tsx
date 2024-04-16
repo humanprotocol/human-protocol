@@ -9,14 +9,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 
-interface SignInProps {
-  setStep: (step: number) => void;
+interface WelcomeProps {
+  setStage: (step: HomePageStageType) => void;
 }
 
-export function SignIn({ setStep }: SignInProps) {
+export function Welcome({ setStage }: WelcomeProps) {
   const { t } = useTranslation();
-  const logoText: string = t('components.signUpPage.humanApp');
+  const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('lg');
   return (
@@ -66,7 +67,7 @@ export function SignIn({ setStep }: SignInProps) {
             textAlign={isMobile ? 'center' : 'left'}
             variant="h5"
           >
-            {t('components.signUpPage.completeJobs')}
+            {t('homepage.completeJobs')}
           </Typography>
         </Grid>
       </Grid>
@@ -82,7 +83,7 @@ export function SignIn({ setStep }: SignInProps) {
           <Button
             fullWidth
             onClick={() => {
-              setStep(1);
+              setStage('chooseSignUpAccountType');
             }}
             size="large"
             sx={{
@@ -91,7 +92,7 @@ export function SignIn({ setStep }: SignInProps) {
             }}
             variant="contained"
           >
-            {t('components.signUpPage.signUp')}
+            {t('homepage.signUp')}
           </Button>
           <Divider
             component="div"
@@ -108,10 +109,10 @@ export function SignIn({ setStep }: SignInProps) {
             }}
             variant="contained"
           >
-            {t('components.signUpPage.workerSignIn')}
+            {t('homepage.workerSignIn')}
           </Button>
           <Button fullWidth size="large" variant="outlined">
-            {t('components.signUpPage.operatorSignIn')}
+            {t('homepage.operatorSignIn')}
           </Button>
         </Paper>
       </Grid>

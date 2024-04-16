@@ -2,9 +2,9 @@ import Box from '@mui/material/Box';
 import { Paper } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { SignUpPage } from './homepage/signup.page';
+import { HomeContainer } from './components/home-container';
 
-export function MainPage() {
+export function HomePage() {
   const isMobile = useIsMobile();
 
   return (
@@ -19,7 +19,7 @@ export function MainPage() {
           position: 'relative',
         }}
       >
-        <SignUpPage />
+        <HomeContainer />
       </Paper>
     </Box>
   );

@@ -11,14 +11,19 @@ import { BackArrowIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 
-interface AccountType {
-  setStep: (step: number) => void;
+interface ChooseSignUpAccountType {
+  setStage: (step: HomePageStageType) => void;
 }
 
-export function AccountType({ setStep }: AccountType) {
+export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
+
+  const backToWelcomeStage = () => {
+    setStage('welcome');
+  };
 
   return (
     <Container
@@ -29,9 +34,7 @@ export function AccountType({ setStep }: AccountType) {
       }}
     >
       <Button
-        onClick={() => {
-          setStep(0);
-        }}
+        onClick={backToWelcomeStage}
         size="medium"
         sx={{
           position: 'absolute',
@@ -39,16 +42,12 @@ export function AccountType({ setStep }: AccountType) {
           top: isMobile ? '21px' : '30px',
         }}
       >
-        <Typography variant="buttonMedium">
-          {t('components.signUpPage.cancel')}
-        </Typography>
+        <Typography variant="buttonMedium">{t('homepage.cancel')}</Typography>
       </Button>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <IconButton
-            onClick={() => {
-              setStep(0);
-            }}
+            onClick={backToWelcomeStage}
             sx={{
               position: isMobile ? 'relative' : 'absolute',
               marginLeft: isMobile ? '-20px' : -7,
@@ -58,18 +57,14 @@ export function AccountType({ setStep }: AccountType) {
           >
             <BackArrowIcon />
           </IconButton>
-          <Typography variant="h4">
-            {t('components.signUpPage.welcome')} 👋
-          </Typography>
+          <Typography variant="h4">{t('homepage.welcome')} 👋</Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h4">
-            {t('components.signUpPage.howWillUse')}
-          </Typography>
+          <Typography variant="h4">{t('homepage.howWillUse')}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle1">
-            {t('components.signUpPage.selectOption')}
+            {t('homepage.selectOption')}
           </Typography>
         </Grid>
         <Grid
@@ -80,11 +75,11 @@ export function AccountType({ setStep }: AccountType) {
           xs={isMobile ? 12 : 6}
         >
           <Typography color={colorPalette.primary.light} variant="h6">
-            {t('components.signUpPage.iWantToEarn')}
+            {t('homepage.iWantToEarn')}
           </Typography>
           <List sx={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
             <ListItemText
-              primary={t('components.signUpPage.completeTask')}
+              primary={t('homepage.completeTask')}
               primaryTypographyProps={{
                 variant: 'subtitle2',
                 sx: {
@@ -93,7 +88,7 @@ export function AccountType({ setStep }: AccountType) {
               }}
             />
             <ListItemText
-              primary={t('components.signUpPage.workAnywhere')}
+              primary={t('homepage.workAnywhere')}
               primaryTypographyProps={{
                 variant: 'subtitle2',
                 sx: {
@@ -111,11 +106,11 @@ export function AccountType({ setStep }: AccountType) {
           xs={isMobile ? 12 : 6}
         >
           <Typography color={colorPalette.primary.light} variant="h6">
-            {t('components.signUpPage.joinAsOperator')}
+            {t('homepage.joinAsOperator')}
           </Typography>
           <List sx={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
             <ListItemText
-              primary={t('components.signUpPage.runAsOracle')}
+              primary={t('homepage.runAsOracle')}
               primaryTypographyProps={{
                 variant: 'subtitle2',
                 sx: {
@@ -124,7 +119,7 @@ export function AccountType({ setStep }: AccountType) {
               }}
             />
             <ListItemText
-              primary={t('components.signUpPage.becomePartner')}
+              primary={t('homepage.becomePartner')}
               primaryTypographyProps={{
                 variant: 'subtitle2',
                 sx: {
@@ -136,12 +131,12 @@ export function AccountType({ setStep }: AccountType) {
         </Grid>
         <Grid item xs={isMobile ? 12 : 6}>
           <Button fullWidth size="large" variant="contained">
-            {t('components.signUpPage.signUpToComplete')}
+            {t('homepage.signUpToComplete')}
           </Button>
         </Grid>
         <Grid item xs={isMobile ? 12 : 6}>
           <Button fullWidth size="large" variant="contained">
-            {t('components.signUpPage.signAsOperator')}
+            {t('homepage.signAsOperator')}
           </Button>
         </Grid>
       </Grid>
