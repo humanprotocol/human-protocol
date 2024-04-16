@@ -21,7 +21,7 @@
     "jszip": "^3.10.1",
     "nft.storage": "^7.0.0",
     "numeral": "^2.0.6",
-    "openpgp": "^5.10.2",
+    "openpgp": "^5.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-gtm-module": "^2.0.11",
