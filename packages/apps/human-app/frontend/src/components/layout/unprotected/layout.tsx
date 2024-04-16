@@ -1,6 +1,8 @@
 import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { breakpoints } from '@/styles/theme';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { colorPalette } from '@/styles/color-palette';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -9,6 +11,9 @@ interface LayoutProps {
 }
 
 export function Layout({ withNavigation = true }: LayoutProps) {
+  const { backgroundColor } = useBackgroundColorStore();
+  const isMobile = useIsMobile();
+
   return (
     <Grid
       alignItems="center"
@@ -17,18 +22,16 @@ export function Layout({ withNavigation = true }: LayoutProps) {
       flexWrap="nowrap"
       justifyContent="space-between"
       sx={{
-        height: '100vh',
+        height: '100%',
+        minHeight: '100vh',
         width: '100%',
-        px: '44px',
-        pb: '44px',
         pt: '0',
-        [breakpoints.mobile]: {
-          px: '10px',
-        },
+        px: isMobile ? 0 : '120px',
+        backgroundColor: isMobile ? colorPalette.white : backgroundColor,
       }}
     >
       <Navbar withNavigation={withNavigation} />
-      <Container component="main" sx={{ p: '0' }}>
+      <Container component="main" maxWidth="xl" sx={{ p: '0' }}>
         <Outlet />
       </Container>
       <Footer />

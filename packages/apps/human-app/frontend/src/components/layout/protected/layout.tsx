@@ -52,7 +52,8 @@ export function Layout() {
       justifyContent="space-between"
       sx={{
         width: '100%',
-        height: '100vh',
+        height: '100%',
+        minHeight: '100vh',
         px: '44px',
         pb: '44px',
         pt: isMobile ? '32px' : '44px',
@@ -66,7 +67,7 @@ export function Layout() {
       <Main isMobile={isMobile} open={drawerOpen}>
         <Outlet />
       </Main>
-      <Footer sx={{ paddingLeft: isMobile ? '0' : `${drawerWidth}px` }} />
+      <Footer />
     </Grid>
   );
 }
