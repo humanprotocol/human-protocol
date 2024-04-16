@@ -63,7 +63,7 @@ t86lkzfAep9bfBxbaCBbUhJ1s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
   process.env.MINIO_ROOT_PASSWORD = 'secrets-key';
 
   process.env.STRIPE_SECRET_KEY =
-    'sk_test_GvCQRGFcSwDzNE9wBSaH6MbBzk6yUntQp5GSGjDU7VzMpkJpVq32kYx52EBP9t4Gin5UQ9nYwprq7ZRNPTQG4gvdUuTwYEGy7rp';
+    'sk_test_51MO1RkABE7VUdqB3hviLNxMYafYQYhvtWd3Jaj9ZEH3SvkxM4frJLz00FmC5J8xYbNGhmzwobaLkN0GKUbuhQDvx00NeZwI93C';
   process.env.STRIPE_API_VERSION = '2022-11-15';
   process.env.STRIPE_APP_NAME = 'Staging Launcher Server';
   process.env.STRIPE_APP_VERSION = '1.0.0';
