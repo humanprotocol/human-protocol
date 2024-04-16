@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/shared/router-paths';
 import { Alert } from '@/components/ui/alert';
+import { colorPalette } from '@/styles/color-palette';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -14,6 +15,7 @@ const IconWrapper = styled('div')(() => ({
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: '50%',
+  backgroundColor: colorPalette.paper.main,
   cursor: 'pointer',
   ':hover': {
     cursor: 'pointer',
@@ -62,7 +64,7 @@ export function FormCard({
         borderRadius: '20px',
         maxWidth: cardMaxWidth,
         width: '100%',
-        background: 'whitesmoke',
+        background: colorPalette.white,
         [breakpoints.mobile]: {
           borderRadius: '0',
         },
@@ -97,6 +99,7 @@ export function FormCard({
           container
           sx={{
             rowGap: '1rem',
+            columnGap: '1rem',
             [breakpoints.mobile]: {
               rowGap: '0.4rem',
             },
@@ -124,7 +127,7 @@ export function FormCard({
           <Grid item md={1} order={{ xs: 3, md: 1 }} xs={12} />
           <Grid
             item
-            md={11}
+            md={10}
             order={{ xs: 2, md: 2 }}
             sx={{
               height: '3rem',
@@ -156,11 +159,11 @@ export function FormCard({
               <ArrowBackIcon />
             </IconWrapper>
           </Grid>
-          <Grid item md={11} order={{ xs: 4, md: 4 }} xs={12}>
+          <Grid item md={10} order={{ xs: 4, md: 4 }} xs={12}>
             <Typography variant="h4">{title}</Typography>
           </Grid>
           <Grid item md={1} order={{ xs: 5, md: 5 }} xs={1} />
-          <Grid item md={11} order={{ xs: 6, md: 6 }} xs={12}>
+          <Grid item md={10} order={{ xs: 6, md: 6 }} xs={12}>
             {children}
           </Grid>
         </Grid>

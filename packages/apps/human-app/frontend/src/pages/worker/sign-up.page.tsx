@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,6 +27,7 @@ import {
 } from '@/shared/helpers/regex';
 import { routerPaths } from '@/shared/router-paths';
 import type { PasswordCheck } from '@/components/data-entry/password/password-check-label';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
@@ -67,6 +68,12 @@ const passwordChecks: PasswordCheck[] = [
 
 export function SignUpWorkerPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    setGrayBackground();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
 
   const methods = useForm<SignUpDto>({
     defaultValues: {
