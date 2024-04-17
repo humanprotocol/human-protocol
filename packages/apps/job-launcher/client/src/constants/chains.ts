@@ -13,7 +13,7 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
     SUPPORTED_CHAIN_IDS = [
       ChainId.BSC_TESTNET,
       ChainId.POLYGON_AMOY,
-      ChainId.GOERLI,
+      ChainId.SEPOLIA,
     ];
     break;
   case 'localhost':
@@ -25,7 +25,7 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
   'Polygon Amoy': ChainId.POLYGON_AMOY,
   'Binance Smart Chain': ChainId.BSC_MAINNET,
-  'Ethereum Goerli': ChainId.GOERLI,
+  'Ethereum Sepolia': ChainId.SEPOLIA,
   Localhost: ChainId.LOCALHOST,
 };
 
@@ -36,6 +36,8 @@ export const RPC_URLS: {
     'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
   [ChainId.GOERLI]:
     'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+  [ChainId.SEPOLIA]:
+    'https://eth-sepolia.g.alchemy.com/v2/sboTD6vQ1csb0uxeeh6ex3EqSLE-vMWh',
   [ChainId.BSC_MAINNET]: 'https://bsc-dataseed1.binance.org/',
   [ChainId.BSC_TESTNET]: 'https://bsc-testnet.publicnode.com',
   [ChainId.POLYGON]: 'https://polygon-rpc.com/',

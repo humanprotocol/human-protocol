@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: deploy-contracts
     env:
-      ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
+      ETH_SEPOLIA_TESTNET_URL: ${{ secrets.ETH_SEPOLIA_TESTNET_URL }}
       ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
       ETH_POLYGON_AMOY_URL: ${{ secrets.ETH_POLYGON_AMOY_URL }}
       ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
@@ -50,10 +50,10 @@ jobs:
         id: networks
         run: |
           case ${{ github.event.inputs.network }} in
-            "goerli")
-              echo "escrow_factory=0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c" >> $GITHUB_OUTPUT
-              echo "staking=0xf46B45Df3d956369726d8Bd93Ba33963Ab692920" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4" >> $GITHUB_OUTPUT
+            "sepolia")
+              echo "escrow_factory=0xD6D347ba6987519B4e42EcED43dF98eFf5465a23" >> $GITHUB_OUTPUT
+              echo "staking=0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203" >> $GITHUB_OUTPUT
+              echo "reward_pool=0xAFf5a986A530ff839d49325A5dF69F96627E8D29" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "polygon")

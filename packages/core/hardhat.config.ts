@@ -86,6 +86,13 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
+    sepolia: {
+      chainId: 11155111,
+      url: process.env.ETH_SEPOLIA_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
+    },
     polygon: {
       chainId: 137,
       url: process.env.ETH_POLYGON_URL || '',
@@ -208,6 +215,7 @@ const config: HardhatUserConfig = {
       // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
+      sepolia: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
       polygonAmoy: process.env.OKLINK_API_KEY || '',

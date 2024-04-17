@@ -3,6 +3,7 @@ import { ChainId } from '@human-protocol/sdk';
 export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.MAINNET,
   ChainId.GOERLI,
+  ChainId.SEPOLIA,
   ChainId.BSC_MAINNET,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON,
@@ -21,6 +22,7 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.MAINNET,
   ChainId.RINKEBY,
   ChainId.GOERLI,
+  ChainId.SEPOLIA,
   ChainId.BSC_MAINNET,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON,
@@ -46,6 +48,7 @@ export const L1_L2_CHAIN_IDS = [
 export const TESTNET_CHAIN_IDS = [
   ChainId.RINKEBY,
   ChainId.GOERLI,
+  ChainId.SEPOLIA,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,
   ChainId.POLYGON_AMOY,
@@ -56,6 +59,7 @@ export const TESTNET_CHAIN_IDS = [
 
 export const FAUCET_CHAIN_IDS = [
   ChainId.GOERLI,
+  ChainId.SEPOLIA,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,
   ChainId.POLYGON_AMOY,
@@ -72,6 +76,8 @@ export const RPC_URLS: {
     'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
   [ChainId.GOERLI]:
     'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+  [ChainId.SEPOLIA]:
+    'https://eth-sepolia.g.alchemy.com/v2/sboTD6vQ1csb0uxeeh6ex3EqSLE-vMWh',
   [ChainId.BSC_MAINNET]: 'https://bsc-dataseed1.binance.org/',
   [ChainId.BSC_TESTNET]: 'https://bsc-testnet.publicnode.com',
   [ChainId.POLYGON]: 'https://polygon-rpc.com/',
