@@ -75,6 +75,17 @@
         "email": "your@email.com"
       },
       "submitBtn": "Sign up"
+    },
+    "profile": {
+      "profileHeader": "Profile",
+      "email": "Email",
+      "password": "Password",
+      "resetPassword": "Reset Password",
+      "kycCompleted": "KYC Completed",
+      "walletConnected": "Wallet Connected ",
+      "kycInfoOnChainAdded": "KYC Info On-Chain Added ",
+      "emailNotifications": "Email Notifications",
+      "notificationsConsent": "I would like to be notified about News and Offers"
     }
   },
   "operator": {

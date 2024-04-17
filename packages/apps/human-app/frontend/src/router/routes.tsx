@@ -4,6 +4,7 @@ import { Playground } from '@/pages/playground/playground.page';
 import { ProtectedPage } from '@/pages/protected.page';
 import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
 import { OperatorProfilePage } from '@/pages/operator/profile.page';
+import { WorkerProfilePage } from '@/pages/worker/profile.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -26,7 +27,11 @@ export const protectedRoutes: RouteProps[] = [
     element: <ProtectedPage />,
   },
   {
-    path: '/operator/job-launcher',
+    path: '/operator/profile',
     element: <OperatorProfilePage />,
+  },
+  {
+    path: '/worker/profile',
+    element: <WorkerProfilePage />,
   },
 ];
