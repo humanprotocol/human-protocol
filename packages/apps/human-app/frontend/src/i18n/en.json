@@ -5,7 +5,12 @@
     "min": "Min {{count}} characters",
     "max": "Max {{count}} characters",
     "passwordWeak": "Password should be at least 8 characters long and contain at least one uppercase and one lowercase letter, one number and one special character",
-    "passwordMismatch": "Passwords are not the same"
+    "passwordMismatch": "Passwords are not the same",
+    "password8Chars": "8 characters",
+    "passwordUppercase": "1 uppercase (A-Z)",
+    "passwordLowercase": "1 lowercase (a-z)",
+    "passwordNumeric": "1 numeric (0-9)",
+    "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])"
   },
   "errors": {
     "unknown": "Unknown error"
@@ -71,10 +76,23 @@
     "signUpForm": {
       "fields": {
         "createPassword": "Create Password",
+        "password": "Password",
         "confirmPassword": "Confirm Password",
         "email": "your@email.com"
       },
-      "submitBtn": "Sign up"
+      "title": "Sign Up",
+      "submitBtn": "Sign up",
+      "passwordDetailedValidation": "Password must contain at least:",
+      "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>"
+    },
+    "signInForm": {
+      "fields": {
+        "password": "Password",
+        "email": "your@email.com"
+      },
+      "title": "Sign In",
+      "submitBtn": "Sign in",
+      "forgotPassword": "Forgot password?"
     }
   }
 }
