@@ -11,6 +11,9 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { ConfigModule } from '@nestjs/config';
 import { PayoutModule } from '../payout/payout.module';
 import { ReputationModule } from '../reputation/reputation.module';
+import { AbuseModule } from '../abuse/abuse.module';
+import { AbuseRepository } from '../abuse/abuse.repository';
+import { UserRepository } from '../user/user.repository';
 
 @Global()
 @Module({
@@ -21,8 +24,15 @@ import { ReputationModule } from '../reputation/reputation.module';
     WebhookModule,
     PayoutModule,
     ReputationModule,
+    AbuseModule,
   ],
-  providers: [CronJobService, CronJobRepository, WebhookRepository],
+  providers: [
+    CronJobService,
+    CronJobRepository,
+    WebhookRepository,
+    AbuseRepository,
+    UserRepository,
+  ],
   controllers: [CronJobController],
   exports: [CronJobService],
 })

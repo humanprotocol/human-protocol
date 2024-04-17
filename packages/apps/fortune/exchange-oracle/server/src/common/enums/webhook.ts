@@ -4,6 +4,8 @@ export enum EventType {
   TASK_CREATION_FAILED = 'task_creation_failed',
   SUBMISSION_REJECTED = 'submission_rejected',
   SUBMISSION_IN_REVIEW = 'submission_in_review',
+  ABUSE = 'abuse',
+  RESUME_ABUSE = 'resume_abuse',
 }
 
 export enum WebhookStatus {

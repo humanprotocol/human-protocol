@@ -137,6 +137,14 @@ export class JobService {
       throw new BadRequestException('Invalid address');
     }
 
+    const job = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      chainId,
+      escrowAddress,
+    );
+    if (!job || job.status !== JobStatus.ACTIVE) {
+      throw new BadRequestException('Invalid job');
+    }
+
     const assignment = await this.assignmentRepository.findOneByEscrowAndWorker(
       escrowAddress,
       workerAddress,
@@ -281,5 +289,35 @@ export class JobService {
 
       throw new NotFoundException('Unable to get manifest');
     } else return manifest;
+  }
+
+  public async pauseJob(webhook: WebhookDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
+    );
+    if (!jobEntity) {
+      throw new BadRequestException('Invalid job');
+    }
+    if (jobEntity.status !== JobStatus.ACTIVE) {
+      throw new BadRequestException('Invalid status');
+    }
+    jobEntity.status = JobStatus.PAUSED;
+    await this.jobRepository.updateOne(jobEntity);
+  }
+
+  public async resumeJob(webhook: WebhookDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
+    );
+    if (!jobEntity) {
+      throw new BadRequestException('Invalid job');
+    }
+    if (jobEntity.status !== JobStatus.PAUSED) {
+      throw new BadRequestException('Invalid status');
+    }
+    jobEntity.status = JobStatus.ACTIVE;
+    await this.jobRepository.updateOne(jobEntity);
   }
 }

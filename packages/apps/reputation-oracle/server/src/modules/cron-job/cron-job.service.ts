@@ -18,6 +18,11 @@ import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { WebhookDto } from '../webhook/webhook.dto';
+import { AbuseRepository } from '../abuse/abuse.repository';
+import { AbuseService } from '../abuse/abuse.service';
+import { AbuseDecision, AbuseStatus } from 'src/common/enums/abuse';
+import { ReputationEntityType } from 'src/common/enums';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class CronJobService {
@@ -28,8 +33,11 @@ export class CronJobService {
     private readonly webhookService: WebhookService,
     private readonly reputationService: ReputationService,
     private readonly webhookRepository: WebhookRepository,
+    private readonly abuseRepository: AbuseRepository,
+    private readonly abuseService: AbuseService,
     private readonly payoutService: PayoutService,
     private readonly web3Service: Web3Service,
+    private readonly userRepository: UserRepository,
   ) {}
 
   /**
@@ -213,6 +221,154 @@ export class CronJobService {
     }
 
     this.logger.log('Paid webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  /**
+   * Process a pending abuse request.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async processAbuseRequests(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessRequestedAbuse,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Proccess Abuse START');
+    const cronJob = await this.startCronJob(CronJobType.ProcessRequestedAbuse);
+
+    try {
+      const abuseEntities = await this.abuseRepository.findByStatus(
+        AbuseStatus.PENDING,
+      );
+
+      for (const abuseEntity of abuseEntities) {
+        try {
+          const signer = this.web3Service.getSigner(abuseEntity.chainId);
+          const escrowClient = await EscrowClient.build(signer);
+          const webhookBody: WebhookDto = {
+            chainId: abuseEntity.chainId,
+            escrowAddress: abuseEntity.escrowAddress,
+            eventType: EventType.ABUSE,
+          };
+          const webhookUrl = (
+            await OperatorUtils.getLeader(
+              abuseEntity.chainId,
+              await escrowClient.getExchangeOracleAddress(
+                abuseEntity.escrowAddress,
+              ),
+            )
+          ).webhookUrl;
+
+          if (!webhookUrl) {
+            this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
+            throw new NotFoundException(ErrorWebhook.UrlNotFound);
+          }
+
+          await this.webhookService.sendWebhook(webhookUrl, webhookBody);
+          await this.abuseService.sendSlackNotification(abuseEntity);
+        } catch (err) {
+          this.logger.error(`Error sending abuse: ${err.message}`);
+          await this.abuseService.handleAbuseError(abuseEntity);
+          continue;
+        }
+        abuseEntity.status = AbuseStatus.NOTIFIED;
+        await this.abuseRepository.updateOne(abuseEntity);
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Proccess Abuse STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  /**
+   * Process a classified abuse.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async processClassifiedAbuses(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessClassifiedAbuse,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Proccess classified abuses START');
+    const cronJob = await this.startCronJob(CronJobType.ProcessClassifiedAbuse);
+
+    try {
+      const abuseEntities = await this.abuseRepository.findClassified();
+      for (const abuseEntity of abuseEntities) {
+        try {
+          const { chainId, escrowAddress } = abuseEntity;
+
+          const signer = this.web3Service.getSigner(chainId);
+          const escrowClient = await EscrowClient.build(signer);
+          if (abuseEntity.decision === AbuseDecision.ACCEPTED) {
+            const webhookUrl = (
+              await OperatorUtils.getLeader(
+                chainId,
+                await escrowClient.getJobLauncherAddress(escrowAddress),
+              )
+            ).webhookUrl;
+            const webhookBody: WebhookDto = {
+              chainId,
+              escrowAddress,
+              eventType: EventType.ABUSE,
+            };
+            if (!webhookUrl) {
+              this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
+              throw new NotFoundException(ErrorWebhook.UrlNotFound);
+            }
+
+            await this.webhookService.sendWebhook(webhookUrl, webhookBody);
+          } else {
+            console.log(abuseEntity);
+            const user = await this.userRepository.findById(abuseEntity.userId);
+            await this.reputationService.decreaseReputation(
+              chainId,
+              user?.evmAddress as string,
+              ReputationEntityType.WORKER,
+            );
+            const webhookBody: WebhookDto = {
+              chainId: chainId,
+              escrowAddress: escrowAddress,
+              eventType: EventType.RESUME_ABUSE,
+            };
+            const webhookUrl = (
+              await OperatorUtils.getLeader(
+                chainId,
+                await escrowClient.getExchangeOracleAddress(escrowAddress),
+              )
+            ).webhookUrl;
+
+            if (!webhookUrl) {
+              this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
+              throw new NotFoundException(ErrorWebhook.UrlNotFound);
+            }
+
+            await this.webhookService.sendWebhook(webhookUrl, webhookBody);
+          }
+        } catch (err) {
+          this.logger.error(`Error sending abuse: ${err.message}`);
+          await this.abuseService.handleAbuseError(abuseEntity);
+          continue;
+        }
+        abuseEntity.status = AbuseStatus.COMPLETED;
+
+        await this.abuseRepository.updateOne(abuseEntity);
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Proccess classified abuses STOP');
     await this.completeCronJob(cronJob);
   }
 }

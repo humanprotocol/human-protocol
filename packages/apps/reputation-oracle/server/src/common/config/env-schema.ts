@@ -52,4 +52,7 @@ export const envValidator = Joi.object({
   // Synaps Kyc
   SYNAPS_API_KEY: Joi.string().required(),
   SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
+  // Slack notifications
+  SLACK_WEBHOOK_URL: Joi.string().required(),
+  SLACK_SIGNING_SECRET: Joi.string().required(),
 });

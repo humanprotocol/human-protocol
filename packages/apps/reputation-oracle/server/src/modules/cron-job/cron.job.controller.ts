@@ -49,4 +49,38 @@ export class CronJobController {
     await this.cronJobService.processPaidWebhooks();
     return;
   }
+
+  @Public()
+  @Get('/abuse/pending')
+  @ApiOperation({
+    summary: 'Process Abuse pending requests',
+    description: 'Endpoint to process Abuse pending requests',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Abuse requests processed successfully',
+  })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
+  public async processAbuseRequests(): Promise<void> {
+    await this.cronJobService.processAbuseRequests();
+    return;
+  }
+
+  @Public()
+  @Get('/abuse/classified')
+  @ApiOperation({
+    summary: 'Process Abuse classified requests',
+    description: 'Endpoint to process Abuse classified requests',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Abuse requests processed successfully',
+  })
+  @ApiBearerAuth()
+  @UseGuards(CronAuthGuard)
+  public async processClassifiedAbuses(): Promise<void> {
+    await this.cronJobService.processClassifiedAbuses();
+    return;
+  }
 }

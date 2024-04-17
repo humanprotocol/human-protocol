@@ -42,6 +42,7 @@
     "@nestjs/swagger": "^7.1.13",
     "@nestjs/terminus": "^10.2.1",
     "@nestjs/typeorm": "^10.0.1",
+    "@slack/bolt": "^3.17.1",
     "@types/passport-jwt": "^3.0.10",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",

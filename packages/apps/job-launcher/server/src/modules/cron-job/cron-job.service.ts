@@ -302,7 +302,10 @@ export class CronJobService {
             this.logger.log(ErrorJob.NotFound, JobService.name);
             throw new BadRequestException(ErrorJob.NotFound);
           }
-          if (jobEntity.escrowAddress) {
+          if (
+            jobEntity.escrowAddress &&
+            jobEntity.status !== JobStatus.CANCELED
+          ) {
             await this.jobService.processEscrowCancellation(jobEntity);
             jobEntity.status = JobStatus.CANCELED;
             await this.jobRepository.updateOne(jobEntity);
@@ -310,7 +313,7 @@ export class CronJobService {
           await this.paymentService.createSlash(jobEntity);
         } catch (err) {
           this.logger.error(
-            `Error slashing escrow (address: ${webhookEntity.id}, chainId: ${webhookEntity.chainId}: ${err.message}`,
+            `Error slashing escrow (address: ${webhookEntity.escrowAddress}, chainId: ${webhookEntity.chainId}: ${err.message}`,
           );
           await this.webhookService.handleWebhookError(webhookEntity);
           continue;
