@@ -16,11 +16,11 @@ export const signInDtoSchema = z.object({
 
 export type SignInDto = z.infer<typeof signInDtoSchema>;
 
-const signUpSuccessResponseSchema = z.unknown();
+const signInSuccessResponseSchema = z.unknown();
 
 function signInMutationFn(data: SignInDto) {
   return apiClient(apiPaths.worker.signIn.path, {
-    successSchema: signUpSuccessResponseSchema,
+    successSchema: signInSuccessResponseSchema,
     options: { body: JSON.stringify(data) },
   });
 }
