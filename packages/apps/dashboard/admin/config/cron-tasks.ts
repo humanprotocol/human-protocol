@@ -19,7 +19,7 @@ import { formatUnits, parseUnits } from 'viem/utils';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
-  [ChainId.GOERLI]: goerli,
+  // [ChainId.GOERLI]: goerli,
   [ChainId.BSC_MAINNET]: bsc,
   [ChainId.BSC_TESTNET]: bscTestnet,
   [ChainId.POLYGON]: polygon,
