@@ -1,23 +1,35 @@
-import { useState } from 'react';
-import Box from '@mui/material/Box';
-import { Container } from '@mui/material';
-import { Trans, useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
+import { z } from 'zod';
+import Typography from '@mui/material/Typography';
+import Link from '@mui/material/Link';
+import { t } from 'i18next';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
   useSignUpMutation,
 } from '@/api/servieces/worker/sign-up';
-import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
-import { Password } from '@/components/data-entry/password';
+import { Password } from '@/components/data-entry/password/password';
+import { FormCard } from '@/components/ui/form-card';
 import { Captcha } from '@/components/h-captcha';
+import {
+  password8Chars,
+  passwordLowercase,
+  passwordNumeric,
+  passwordSpecialCharacter,
+  passwordUppercase,
+} from '@/shared/helpers/regex';
+import type { PasswordCheck } from '@/components/data-entry/password/password-check-label';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { env } from '@/shared/env';
 
-function formatedSignUpErrorMessage(unknownError: unknown) {
+function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
     unknownError instanceof FetchError &&
     (unknownError.status === 403 || unknownError.status === 401)
@@ -31,9 +43,38 @@ function formatedSignUpErrorMessage(unknownError: unknown) {
   return <Trans>errors.unknown</Trans>;
 }
 
+const passwordChecks: PasswordCheck[] = [
+  {
+    requirementsLabel: t('validation.password8Chars'),
+    schema: z.string().regex(password8Chars),
+  },
+  {
+    requirementsLabel: t('validation.passwordUppercase'),
+    schema: z.string().regex(passwordUppercase),
+  },
+  {
+    requirementsLabel: t('validation.passwordLowercase'),
+    schema: z.string().regex(passwordLowercase),
+  },
+  {
+    requirementsLabel: t('validation.passwordNumeric'),
+    schema: z.string().regex(passwordNumeric),
+  },
+  {
+    requirementsLabel: t('validation.passwordSpecialCharacter'),
+    schema: z.string().regex(passwordSpecialCharacter),
+  },
+];
+
 export function SignUpWorkerPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    setGrayBackground();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
+
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
@@ -57,49 +98,55 @@ export function SignUpWorkerPage() {
   }
 
   return (
-    <Box>
-      <Container>
-        <FormProvider {...methods}>
-          <form
-            onSubmit={(event) =>
-              void methods.handleSubmit(handleWorkerSignUp)(event)
-            }
-          >
-            <Grid item xs={6}>
-              <Input
-                name="email"
-                placeholder={t('worker.signUpForm.fields.email')}
-              />
+    <FormCard
+      alert={
+        isSignUpWorkerError
+          ? formattedSignUpErrorMessage(signUpWorkerError)
+          : undefined
+      }
+      title={t('worker.signUpForm.title')}
+    >
+      <FormProvider {...methods}>
+        <form
+          onSubmit={(event) =>
+            void methods.handleSubmit(handleWorkerSignUp)(event)
+          }
+        >
+          <Grid container gap="2rem">
+            <Input label={t('worker.signUpForm.fields.email')} name="email" />
+            <Password
+              label={t('worker.signUpForm.fields.password')}
+              name="password"
+              passwordCheckHeader="Password must contain at least:"
+              passwordChecks={passwordChecks}
+            />
+            <Password
+              label={t('worker.signUpForm.fields.confirmPassword')}
+              name="confirmPassword"
+            />
+            <Grid width="100%">
+              <Captcha setCaptchaToken={setCaptchaToken} />
             </Grid>
-            <Grid item xs={6}>
-              <Password
-                name="password"
-                placeholder={t('worker.signUpForm.fields.createPassword')}
-              />
+            <Grid>
+              <Typography variant="textField">
+                <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
+                  Terms
+                  <Link href={env.VITE_TERMS_OF_SERVICE_URL} />
+                  <Link href={env.VITE_PRIVACY_POLICY_URL} />
+                </Trans>
+              </Typography>
             </Grid>
-            <Grid item xs={6}>
-              <Password
-                name="confirmPassword"
-                placeholder={t('worker.signUpForm.fields.confirmPassword')}
-              />
-            </Grid>
-            <Captcha setCaptchaToken={setCaptchaToken} />
             <Button
               disabled={isSignUpWorkerPending}
+              fullWidth
               type="submit"
               variant="contained"
             >
               {t('worker.signUpForm.submitBtn')}
             </Button>
-          </form>
-        </FormProvider>
-
-        {isSignUpWorkerError ? (
-          <Alert severity="error">
-            {formatedSignUpErrorMessage(signUpWorkerError)}
-          </Alert>
-        ) : null}
-      </Container>
-    </Box>
+          </Grid>
+        </form>
+      </FormProvider>
+    </FormCard>
   );
 }

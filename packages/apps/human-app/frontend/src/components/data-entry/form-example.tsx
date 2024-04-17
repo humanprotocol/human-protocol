@@ -11,7 +11,7 @@ import { RadioButton } from '@/components/data-entry/radio-button';
 import { Checkbox } from '@/components/data-entry/checkbox';
 import { Slider } from '@/components/data-entry/slider';
 import { MultiSelect } from '@/components/data-entry/multi-select';
-import { Password } from '@/components/data-entry/password';
+import { Password } from '@/components/data-entry/password/password';
 
 export interface Inputs {
   name: string;

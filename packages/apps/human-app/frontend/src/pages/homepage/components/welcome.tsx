@@ -1,5 +1,6 @@
 import { Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { HomePageStageType } from '@/pages/homepage/components/home-container';
+import { routerPaths } from '@/router/router-paths';
 
 interface WelcomeProps {
   setStage: (step: HomePageStageType) => void;
@@ -102,16 +104,24 @@ export function Welcome({ setStage }: WelcomeProps) {
             variant="middle"
           />
           <Button
+            component={Link}
             fullWidth
             size="large"
             sx={{
               mb: '1.5625rem',
             }}
+            to={routerPaths.worker.signIn}
             variant="contained"
           >
             {t('homepage.workerSignIn')}
           </Button>
-          <Button fullWidth size="large" variant="outlined">
+          <Button
+            component={Link}
+            fullWidth
+            size="large"
+            to={routerPaths.operator.signIn}
+            variant="outlined"
+          >
             {t('homepage.operatorSignIn')}
           </Button>
         </Paper>
