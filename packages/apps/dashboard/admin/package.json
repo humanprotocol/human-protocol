@@ -6,7 +6,7 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
-    "build": "strapi build",
+    "build": "strapi build --debug",
     "strapi": "strapi"
   },
   "devDependencies": {},
@@ -26,7 +26,7 @@
     "viem": "^2.9.17"
   },
   "author": {
-    "name": "HUMAN Protocol"
+    "name": "Tony Wen"
   },
   "strapi": {
     "uuid": "c9312fea-0fdd-4782-a77c-8484ae3a6abe"
