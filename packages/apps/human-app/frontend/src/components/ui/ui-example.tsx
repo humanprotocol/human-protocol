@@ -27,6 +27,7 @@ import {
   MobileHeaderIcon,
   ProfileIcon,
   CheckmarkIcon,
+  LockerIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
@@ -238,6 +239,9 @@ export function UiExample() {
         </Grid>
         <Grid>
           <CheckmarkIcon />
+        </Grid>
+        <Grid>
+          <LockerIcon />
         </Grid>
       </Stack>
 

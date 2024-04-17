@@ -1,9 +1,11 @@
 import {
   Container,
   List,
+  ListItem,
   ListItemText,
   Paper,
   Stack,
+  Switch,
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +37,9 @@ export function WorkerProfilePage() {
           height: '100%',
           boxShadow: 'none',
           padding: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <List>
@@ -74,7 +79,11 @@ export function WorkerProfilePage() {
               {t('worker.profile.resetPassword')}
             </Button>
           </ListItemText>
-          <ListItemText>
+          <ListItemText
+            sx={{
+              marginTop: '20px',
+            }}
+          >
             <Stack alignItems="center" flexDirection="row">
               <Typography
                 color={
@@ -98,7 +107,11 @@ export function WorkerProfilePage() {
               </Stack>
             </Stack>
           </ListItemText>
-          <ListItemText>
+          <ListItemText
+            sx={{
+              marginTop: '20px',
+            }}
+          >
             <Stack alignItems="center" flexDirection="row">
               <Typography
                 color={
@@ -126,7 +139,11 @@ export function WorkerProfilePage() {
               </Stack>
             </Stack>
           </ListItemText>
-          <ListItemText>
+          <ListItemText
+            sx={{
+              marginTop: '20px',
+            }}
+          >
             <Stack alignItems="center" flexDirection="row">
               <Typography
                 color={
@@ -154,6 +171,26 @@ export function WorkerProfilePage() {
               </Stack>
             </Stack>
           </ListItemText>
+          <ListItem
+            sx={{
+              paddingLeft: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              justifyContent: 'flex-start',
+              marginTop: '40px',
+            }}
+          >
+            <Typography variant="subtitle2">
+              {t('worker.profile.emailNotifications')}
+            </Typography>
+            <Stack alignItems="center" flexDirection="row">
+              <Typography variant="subtitle2">
+                {t('worker.profile.notificationsConsent')}
+              </Typography>
+              <Switch checked={mockedData.notificationsConsent} />
+            </Stack>
+          </ListItem>
         </List>
       </Paper>
     </Container>
