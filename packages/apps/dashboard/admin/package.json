@@ -6,13 +6,12 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
-    "prebuild": "yarn workspace @human-protocol/core install && yarn workspace @human-protocol/sdk install && yarn workspace @human-protocol/sdk build",
     "build": "strapi build",
     "strapi": "strapi"
   },
   "devDependencies": {},
   "dependencies": {
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "2.1.2",
     "@strapi/plugin-i18n": "4.16.2",
     "@strapi/plugin-users-permissions": "4.20.5",
     "@strapi/strapi": "4.15.5",
@@ -27,7 +26,7 @@
     "viem": "^2.9.17"
   },
   "author": {
-    "name": "Tony Wen"
+    "name": "HUMAN Protocol"
   },
   "strapi": {
     "uuid": "c9312fea-0fdd-4782-a77c-8484ae3a6abe"
