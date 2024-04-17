@@ -9,5 +9,8 @@ export const apiPaths = {
     signUp: {
       path: 'auth/sign-up',
     },
+    sendResetLink: {
+      path: 'auth/send',
+    },
   },
 } as const;

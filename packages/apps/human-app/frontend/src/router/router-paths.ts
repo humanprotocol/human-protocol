@@ -10,4 +10,5 @@ export const routerPaths = {
     signUp: '/operator/sign-up',
   },
   resetPassword: '/reset-password',
+  sendResetLink: '/send-reset-link',
 } as const;
