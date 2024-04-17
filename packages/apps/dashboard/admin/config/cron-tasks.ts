@@ -36,7 +36,7 @@ const addBigInts = (a: string, b: string, decimals = 18) => {
 };
 
 const formatBigNumber = (n: any, decimals = 18) => {
-  return formatUnits(n.toBigInt(), decimals);
+  return formatUnits(BigInt(n), decimals);
 };
 
 const fetchData = async () => {
