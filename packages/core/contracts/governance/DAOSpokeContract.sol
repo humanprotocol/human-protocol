@@ -302,6 +302,43 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         }
     }
 
+    function sendVoteResultToHub(uint256 proposalId) public payable {
+        require(
+            proposals[proposalId].voteFinished,
+            'DAOSpokeContract: vote is not finished'
+        );
+
+        ProposalVote storage votes = proposalVotes[proposalId];
+        bytes memory messageToSend = abi.encode(
+            0,
+            proposalId,
+            votes.forVotes,
+            votes.againstVotes,
+            votes.abstainVotes
+        );
+        bytes memory payloadToSend = abi.encode(
+            hubContractAddress,
+            hubContractChainId,
+            msg.sender,
+            messageToSend
+        );
+
+        // Send a message to other contracts
+        // Cost of requesting a message to be sent to
+        // chain 'targetChain' with a gasLimit of 'GAS_LIMIT'
+        uint256 cost = quoteCrossChainMessage(hubContractChainId);
+
+        wormholeRelayer.sendPayloadToEvm{value: cost}(
+            hubContractChainId,
+            address(uint160(uint256(hubContractAddress))),
+            payloadToSend,
+            0, // no receiver value needed
+            GAS_LIMIT,
+            hubContractChainId,
+            address(uint160(uint256(hubContractAddress)))
+        );
+    }
+
     /**
      * @dev Retrieves the quote for cross chain message delivery.
      *  @return cost Price, in units of current chain currency, that the delivery provider charges to perform the relay
