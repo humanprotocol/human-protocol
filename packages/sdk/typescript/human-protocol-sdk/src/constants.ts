@@ -104,8 +104,7 @@ export const NETWORKS: {
     kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
     subgraphUrl:
       'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api',
-    oldSubgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/sepolia',
+    oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
   [ChainId.BSC_MAINNET]: {
