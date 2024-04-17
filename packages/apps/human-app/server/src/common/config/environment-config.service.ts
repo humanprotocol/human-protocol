@@ -59,11 +59,8 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
     );
   }
-  get polygonKVStoreAddress(): string {
-    return this.configService.get<string>(
-      'POLYGON_KVSTORE_ADDRESS',
-      DEFAULT_KVSTORE_ADDRESS
-    )
+  get rpcUrl(): string {
+    return this.configService.get<string>('RPC_URL', '') // @TODO: add default
   }
 }
 

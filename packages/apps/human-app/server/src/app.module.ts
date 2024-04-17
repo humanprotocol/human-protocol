@@ -22,6 +22,7 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
+import { KvStoreModule } from './integrations/kv-store/kv-store.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-or
     CommonConfigModule,
     OracleDiscoveryModule,
     StatisticsModule,
+    KvStoreModule,
   ],
   controllers: [
     AppController,

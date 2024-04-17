@@ -1,12 +1,12 @@
 import {
   JobAssignmentCommand,
-  JobAssignmentData,
+  JobAssignmentData, JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
   JobsFetchParamsCommand,
-  JobsFetchParamsData,
+  JobsFetchParamsData, JobsFetchParamsDetails,
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
@@ -17,6 +17,7 @@ import {
   StatusEnum,
 } from '../../../common/enums/job-assignment';
 const EXCHANGE_ORACLE_URL = 'https://www.example.com/api';
+const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
 const JOB_TYPE = 'test_type';
@@ -36,7 +37,7 @@ const TOKEN = 'test_user_token';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
-  exchange_oracle_url: EXCHANGE_ORACLE_URL,
+  address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
 };
@@ -48,9 +49,13 @@ const jobAssignmentParams: JobAssignmentParams = {
 export const jobAssignmentCommandFixture: JobAssignmentCommand = {
   data: jobAssignmentParams,
   token: TOKEN,
+  address: EXCHANGE_ORACLE_ADDRESS,
+};
+export const jobAssignmentDetailsFixture: JobAssignmentDetails = {
+  data: jobAssignmentParams,
+  token: TOKEN,
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,
 };
-
 export const jobAssignmentDataFixture: JobAssignmentData = {
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
@@ -70,8 +75,8 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
   expires_at: EXPIRES_AT,
 };
 
-export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
-  exchange_oracle_url: EXCHANGE_ORACLE_URL,
+export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = { // @TODO: something is not yes: change with actual FetchParams in exchnge oracle
+  address: EXCHANGE_ORACLE_ADDRESS,
   assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
@@ -95,6 +100,11 @@ const jobsFetchParams: JobsFetchParams = {
   sortField: SORT_FIELD,
 };
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
+  data: jobsFetchParams,
+  address: EXCHANGE_ORACLE_ADDRESS,
+  token: TOKEN,
+};
+export const jobsFetchParamsDetailsFixture: JobsFetchParamsDetails = {
   data: jobsFetchParams,
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,
   token: TOKEN,

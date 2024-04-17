@@ -8,10 +8,14 @@ export class UserStatisticsResponse {
   assignments_expired: number;
 }
 export class UserStatisticsCommand {
-  exchangeOracleUrl: string;
+  address: string;
   token: string;
 }
 export class UserStatisticsDto {
   @ApiProperty({ example: 'string' })
-  exchange_oracle_url: string;
+  address: string;
+}
+export class UserStatisticsDetails {
+  exchangeOracleUrl: string;
+  token: string;
 }

@@ -2,28 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
-  UserStatisticsCommand,
+  UserStatisticsDetails,
   UserStatisticsResponse,
 } from '../../modules/statistics/model/user-statistics.model';
 import { HttpService } from '@nestjs/axios';
 import {
-  OracleStatisticsCommand,
+  OracleStatisticsDetails,
   OracleStatisticsResponse,
 } from '../../modules/statistics/model/oracle-statistics.model';
 import {
-  JobAssignmentCommand,
   JobAssignmentData,
+  JobAssignmentDetails,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
-  JobsFetchParamsCommand,
   JobsFetchParamsData,
+  JobsFetchParamsDetails,
   JobsFetchResponse,
 } from '../../modules/job-assignment/model/job-assignment.model';
 import {
   JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
+  JobsDiscoveryParamsDetails,
   JobsDiscoveryResponse,
 } from '../../modules/jobs-discovery/model/jobs-discovery.model';
 import { Mapper } from '@automapper/core';
@@ -54,72 +54,72 @@ export class ExchangeOracleGateway {
     return response.data;
   }
   async fetchUserStatistics(
-    command: UserStatisticsCommand,
+    details: UserStatisticsDetails,
   ): Promise<UserStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${command.exchangeOracleUrl}/stats/assignment`,
+      url: `${details.exchangeOracleUrl}/stats/assignment`,
       headers: {
-        Authorization: command.token,
+        Authorization: details.token,
       },
     };
     return this.callExternalHttpUtilRequest<UserStatisticsResponse>(options);
   }
   async fetchOracleStatistics(
-    command: OracleStatisticsCommand,
+    details: OracleStatisticsDetails,
   ): Promise<OracleStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${command.exchangeOracleUrl}/stats`,
+      url: `${details.exchangeOracleUrl}/stats`,
     };
     return this.callExternalHttpUtilRequest<OracleStatisticsResponse>(options);
   }
   async fetchAssignedJobs(
-    command: JobsFetchParamsCommand,
+    details: JobsFetchParamsDetails,
   ): Promise<JobsFetchResponse> {
     const jobFetchParamsData = this.mapper.map(
-      command.data,
+      details.data,
       JobsFetchParams,
       JobsFetchParamsData,
     );
     const reducedParams = this.toCleanObjParams(jobFetchParamsData);
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${command.exchangeOracleUrl}/assignment`,
+      url: `${details.exchangeOracleUrl}/assignment`,
       params: reducedParams,
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);
   }
   async postNewJobAssignment(
-    command: JobAssignmentCommand,
+    details: JobAssignmentDetails,
   ): Promise<JobAssignmentResponse> {
     const options: AxiosRequestConfig = {
       method: HttpMethod.POST,
-      url: `${command.exchangeOracleUrl}/assignment`,
+      url: `${details.exchangeOracleUrl}/assignment`,
       data: this.mapper.map(
-        command.data,
+        details.data,
         JobAssignmentParams,
         JobAssignmentData,
       ),
       headers: {
-        Authorization: command.token,
+        Authorization: details.token,
       },
     };
     return this.callExternalHttpUtilRequest<JobAssignmentResponse>(options);
   }
-  async fetchDiscoveredJobs(command: JobsDiscoveryParamsCommand) {
+  async fetchJobs(details: JobsDiscoveryParamsDetails) {
     const jobsDiscoveryParamsData = this.mapper.map(
-      command.data,
+      details.data,
       JobsDiscoveryParams,
       JobsDiscoveryParamsData,
     );
     const reducedParams = this.toCleanObjParams(jobsDiscoveryParamsData);
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${command.exchangeOracleUrl}/job`,
+      url: `${details.exchangeOracleUrl}/job`,
       params: reducedParams,
       headers: {
-        Authorization: command.token,
+        Authorization: details.token,
         Accept: 'application/json',
       },
     };

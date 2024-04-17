@@ -12,7 +12,11 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
   const envConfigService = new EnvironmentConfigService(configService);
-
+  app.enableCors({
+    origin: ['http://localhost', 'http://localhost:5173'], // TODO: do rework
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept',
+  });
   const config = new DocumentBuilder()
     .addBearerAuth(
       {
