@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';
 import { FormCard } from '@/components/ui/form-card';
-import { Captcha } from '@/components/h-captcha';
 import {
   password8Chars,
   passwordLowercase,
@@ -67,7 +66,6 @@ const passwordChecks: PasswordCheck[] = [
 ];
 
 export function SignUpWorkerPage() {
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const { setGrayBackground } = useBackgroundColorStore();
 
   useEffect(() => {
@@ -80,6 +78,9 @@ export function SignUpWorkerPage() {
       email: '',
       password: '',
       confirmPassword: '',
+      // TODO add hcaptcha token if backend available
+      token: 'token',
+      hCaptchaToken: 'token',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -91,11 +92,10 @@ export function SignUpWorkerPage() {
     isPending: isSignUpWorkerPending,
   } = useSignUpMutation();
 
-  function handleWorkerSignUp(data: SignUpDto) {
-    if (captchaToken) {
-      signUpWorkerMutate({ ...data, token: captchaToken });
-    }
-  }
+  const handleWorkerSignUp = (data: SignUpDto) => {
+    // TODO add hcaptcha token if backend available
+    signUpWorkerMutate({ ...data });
+  };
 
   return (
     <FormCard
@@ -108,9 +108,9 @@ export function SignUpWorkerPage() {
     >
       <FormProvider {...methods}>
         <form
-          onSubmit={(event) =>
-            void methods.handleSubmit(handleWorkerSignUp)(event)
-          }
+          onSubmit={(event) => {
+            void methods.handleSubmit(handleWorkerSignUp)(event);
+          }}
         >
           <Grid container gap="2rem">
             <Input label={t('worker.signUpForm.fields.email')} name="email" />
@@ -124,9 +124,10 @@ export function SignUpWorkerPage() {
               label={t('worker.signUpForm.fields.confirmPassword')}
               name="confirmPassword"
             />
-            <Grid width="100%">
-              <Captcha setCaptchaToken={setCaptchaToken} />
-            </Grid>
+            {/*TODO add hcaptcha token if backend available*/}
+            {/*<Grid width="100%">*/}
+            {/*  <Captcha setCaptchaToken={setCaptchaToken} />*/}
+            {/*</Grid>*/}
             <Grid>
               <Typography variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
