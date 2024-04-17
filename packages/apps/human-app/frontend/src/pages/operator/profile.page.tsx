@@ -31,7 +31,7 @@ const mockedData = {
 export function OperatorProfilePage() {
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile('lg');
 
   useEffect(() => {
     setGrayBackground();
