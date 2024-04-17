@@ -91,7 +91,7 @@ export function SendResetLinkWorkerPage() {
               name="password"
             />
             <Typography variant="body1">
-              <Link to={routerPaths.sendResetLink}>
+              <Link to={routerPaths.worker.sendResetLink}>
                 {t('worker.signInForm.forgotPassword')}
               </Link>
             </Typography>

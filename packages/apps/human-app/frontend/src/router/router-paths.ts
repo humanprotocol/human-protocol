@@ -4,11 +4,11 @@ export const routerPaths = {
   worker: {
     signIn: '/worker/sign-in',
     signUp: '/worker/sign-up',
+    resetPassword: '/worker/reset-password',
+    sendResetLink: '/worker/send-reset-link',
   },
   operator: {
     signIn: '/operator/sign-in',
     signUp: '/operator/sign-up',
   },
-  resetPassword: '/reset-password',
-  sendResetLink: '/send-reset-link',
 } as const;

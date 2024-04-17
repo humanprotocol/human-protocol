@@ -28,7 +28,7 @@ export function useSendResetLinkMutation() {
     mutationFn: sendResetLinkMutationFn,
     onSuccess: async () => {
       // TODO add correct path
-      navigate(routerPaths.resetPassword);
+      navigate(routerPaths.worker.sendResetLink);
       await queryClient.invalidateQueries();
     },
     onError: async () => {
