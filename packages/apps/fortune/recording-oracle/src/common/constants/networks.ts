@@ -17,7 +17,7 @@ export const networkMap: NetworkMapDto = {
       'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
   },
   sepolia: {
-    chainId: ChainId.SEPOLIA, 
+    chainId: ChainId.SEPOLIA,
     rpcUrl:
       'https://eth-sepolia.g.alchemy.com/v2/sboTD6vQ1csb0uxeeh6ex3EqSLE-vMWh',
   },
