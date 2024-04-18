@@ -8,7 +8,8 @@ import { JobsDiscoveryProfile } from '../jobs-discovery.mapper';
 import {
   jobsDiscoveryOracleUrlFixture,
   jobsDiscoveryParamsCommandFixture,
-  jobsDiscoveryParamsDetailsFixture, responseFixture, responseItemFixture,
+  jobsDiscoveryParamsDetailsFixture,
+  responseFixture,
 } from './jobs-discovery.fixtures';
 
 describe('JobsDiscoveryService', () => {
