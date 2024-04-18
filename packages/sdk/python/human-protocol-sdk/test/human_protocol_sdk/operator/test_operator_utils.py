@@ -73,6 +73,31 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].webhook_url, None)
             self.assertEqual(leaders[0].url, None)
 
+    def test_get_leaders_empty_data(self):
+        filter = LeaderFilter(networks=[ChainId.POLYGON], role="role")
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [
+                {
+                    "data": {
+                        "leaders": None,
+                    }
+                }
+            ]
+
+            leaders = OperatorUtils.get_leaders(filter)
+
+            mock_function.assert_any_call(
+                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                query=get_leaders_query(filter),
+                params={"role": filter.role},
+            )
+
+            self.assertEqual(leaders, [])
+
     def test_get_leader(self):
         staker_address = "0x1234567890123456789012345678901234567891"
 
@@ -132,10 +157,32 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
 
+    def test_get_leader_empty_data(self):
+        staker_address = "0x1234567890123456789012345678901234567891"
+
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [{"data": {"leader": None}}]
+
+            leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
+
+            mock_function.assert_any_call(
+                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                query=get_leader_query,
+                params={"address": staker_address},
+            )
+
+            self.assertEqual(leader, None)
+
     def test_get_reputation_network_operators(self):
         reputation_address = "0x1234567890123456789012345678901234567891"
         operator_address = "0x1234567890123456789012345678901234567891"
         role = "Job Launcher"
+        url = "https://example.com"
+        job_types = ["type1", "type2"]
 
         mock_function = MagicMock()
 
@@ -148,7 +195,14 @@ class TestOperatorUtils(unittest.TestCase):
                         "reputationNetwork": {
                             "id": reputation_address,
                             "address": reputation_address,
-                            "operators": [{"address": operator_address, "role": role}],
+                            "operators": [
+                                {
+                                    "address": operator_address,
+                                    "role": role,
+                                    "url": url,
+                                    "jobTypes": job_types,
+                                }
+                            ],
                         }
                     }
                 }
@@ -167,6 +221,30 @@ class TestOperatorUtils(unittest.TestCase):
         self.assertNotEqual(operators, [])
         self.assertEqual(operators[0].address, operator_address)
         self.assertEqual(operators[0].role, role)
+        self.assertEqual(operators[0].url, url)
+        self.assertEqual(operators[0].job_types, job_types)
+
+    def test_get_reputation_network_operators_empty_data(self):
+        reputation_address = "0x1234567890123456789012345678901234567891"
+
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [{"data": {"reputationNetwork": None}}]
+
+            operators = OperatorUtils.get_reputation_network_operators(
+                ChainId.POLYGON, reputation_address
+            )
+
+        mock_function.assert_any_call(
+            NETWORKS[ChainId.POLYGON]["subgraph_url"],
+            query=get_reputation_network_query(None),
+            params={"address": reputation_address, "role": None},
+        )
+
+        self.assertEqual(operators, [])
 
     def test_get_rewards_info(self):
         slasher = "0x1234567890123456789012345678901234567891"
@@ -202,6 +280,24 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(rewards_info[0].amount, 10)
             self.assertEqual(rewards_info[1].escrow_address.lower(), "escrow2")
             self.assertEqual(rewards_info[1].amount, 20)
+
+    def test_get_rewards_info_empty_data(self):
+        slasher = "0x1234567890123456789012345678901234567891"
+
+        mock_function = MagicMock()
+        with patch(
+            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.return_value = {"data": {"rewardAddedEvents": None}}
+            rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)
+
+            mock_function.assert_called_once_with(
+                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                query=get_reward_added_events_query,
+                params={"slasherAddress": slasher},
+            )
+
+            self.assertEqual(rewards_info, [])
 
 
 if __name__ == "__main__":

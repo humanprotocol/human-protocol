@@ -8,41 +8,35 @@ import {
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import {
-  S3ConfigType,
-  ServerConfigType,
-  s3ConfigKey,
-  serverConfigKey,
-} from '../../common/config';
 import { ISolution } from '../../common/interfaces/job';
 import crypto from 'crypto';
 import { SaveSolutionsDto } from '../job/job.dto';
 import { Web3Service } from '../web3/web3.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Injectable()
 export class StorageService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    @Inject(s3ConfigKey)
-    private s3Config: S3ConfigType,
-    @Inject(serverConfigKey)
-    private serverConfig: ServerConfigType,
+    private s3ConfigService: S3ConfigService,
+    private pgpConfigService: PGPConfigService,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
   ) {
     this.minioClient = new Minio.Client({
-      endPoint: this.s3Config.endPoint,
-      port: this.s3Config.port,
-      accessKey: this.s3Config.accessKey,
-      secretKey: this.s3Config.secretKey,
-      useSSL: this.s3Config.useSSL,
+      endPoint: this.s3ConfigService.endpoint,
+      port: this.s3ConfigService.port,
+      accessKey: this.s3ConfigService.accessKey,
+      secretKey: this.s3ConfigService.secretKey,
+      useSSL: this.s3ConfigService.useSSL,
     });
   }
   public getJobUrl(hash: string): string {
-    return `${this.s3Config.useSSL ? 'https' : 'http'}://${
-      this.s3Config.endPoint
-    }:${this.s3Config.port}/${this.s3Config.bucket}/${hash}.json`;
+    return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
+      this.s3ConfigService.endpoint
+    }:${this.s3ConfigService.port}/${this.s3ConfigService.bucket}/${hash}.json`;
   }
 
   public async download(url: string): Promise<any> {
@@ -55,8 +49,8 @@ export class StorageService {
       ) {
         try {
           const encryption = await Encryption.build(
-            this.serverConfig.encryptionPrivateKey,
-            this.serverConfig.encryptionPassphrase,
+            this.pgpConfigService.privateKey,
+            this.pgpConfigService.passphrase,
           );
 
           return JSON.parse(await encryption.decrypt(fileContent));
@@ -82,12 +76,12 @@ export class StorageService {
     chainId: ChainId,
     solutions: ISolution[],
   ): Promise<SaveSolutionsDto> {
-    if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
+    if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
       throw new BadRequestException('Bucket not found');
     }
 
     let fileToUpload = JSON.stringify(solutions);
-    if (this.serverConfig.pgpEncrypt as boolean) {
+    if (this.pgpConfigService.encrypt) {
       try {
         const signer = this.web3Service.getSigner(chainId);
         const escrowClient = await EscrowClient.build(signer);
@@ -125,7 +119,7 @@ export class StorageService {
     try {
       const hash = crypto.createHash('sha1').update(fileToUpload).digest('hex');
       await this.minioClient.putObject(
-        this.s3Config.bucket,
+        this.s3ConfigService.bucket,
         `${hash}.json`,
         fileToUpload,
         {

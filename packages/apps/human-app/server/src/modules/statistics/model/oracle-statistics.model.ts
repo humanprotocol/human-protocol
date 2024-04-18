@@ -10,10 +10,13 @@ export class OracleStatisticsResponse {
   assignments_expired: number;
 }
 export class OracleStatisticsCommand {
+  address: string;
+}
+export class OracleStatisticsDetails {
   exchangeOracleUrl: string;
 }
 
 export class OracleStatisticsDto {
   @ApiProperty({ example: 'string' })
-  exchange_oracle_url: string;
+  address: string;
 }

@@ -11,7 +11,6 @@ import { useJobDetails } from '../../../hooks/useJobDetails';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import * as jobService from '../../../services/job';
 import { JobStatus } from '../../../types';
-import { formatAmount } from '../../../utils/bignumber';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -103,7 +102,7 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Paid Out HMT"
-                  value={`${formatAmount(data.details.paidOut.toString())} HMT`}
+                  value={`${data.details.paidOut.toString()} HMT`}
                 />
                 <CardTextRow label="Amount of Jobs" value="" />
                 <CardTextRow label="Workers assigned" value="" />
@@ -124,13 +123,11 @@ export default function JobDetail() {
                 <CardTextRow label="Staker" value={data.staking.staker} />
                 <CardTextRow
                   label="Staked HMT"
-                  value={`${formatAmount(
-                    data.staking.allocated.toString(),
-                  )} HMT`}
+                  value={`${data.staking.allocated.toString()} HMT`}
                 />
                 <CardTextRow
                   label="Slashed HMT"
-                  value={`${formatAmount(data.staking.slashed.toString())} HMT`}
+                  value={`${data.staking.slashed.toString()} HMT`}
                 />
               </Stack>
             </CardContainer>
@@ -167,9 +164,7 @@ export default function JobDetail() {
                     />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${formatAmount(
-                        data.manifest.fundAmount.toString(),
-                      )} HMT`}
+                      value={`${data.manifest.fundAmount.toString()} HMT`}
                     />
                     <CardTextRow
                       label="Job Requester"

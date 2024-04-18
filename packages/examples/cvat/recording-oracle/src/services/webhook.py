@@ -18,14 +18,14 @@ from src.utils.enums import BetterEnumMeta
 from src.utils.time import utcnow
 
 
-class OracleWebhookDirectionTag(str, Enum, metaclass=BetterEnumMeta):
+class OracleWebhookDirectionTags(str, Enum, metaclass=BetterEnumMeta):
     incoming = "incoming"
     outgoing = "outgoing"
 
 
 @define
 class OracleWebhookQueue:
-    direction: OracleWebhookDirectionTag
+    direction: OracleWebhookDirectionTags
     default_sender: Optional[OracleWebhookTypes] = None
 
     def create_webhook(
@@ -48,7 +48,7 @@ class OracleWebhookQueue:
         ), f"'event' and 'event_type' cannot be used together. Please use only one of the fields"
 
         if event_type:
-            if self.direction == OracleWebhookDirectionTag.incoming:
+            if self.direction == OracleWebhookDirectionTags.incoming:
                 sender = type
             else:
                 assert self.default_sender
@@ -58,9 +58,9 @@ class OracleWebhookQueue:
             event_type = event.get_type()
             event_data = event.dict()
 
-        if self.direction == OracleWebhookDirectionTag.incoming and not signature:
+        if self.direction == OracleWebhookDirectionTags.incoming and not signature:
             raise ValueError("Webhook signature must be specified for incoming events")
-        elif self.direction == OracleWebhookDirectionTag.outgoing and signature:
+        elif self.direction == OracleWebhookDirectionTags.outgoing and signature:
             raise ValueError("Webhook signature must not be specified for outgoing events")
 
         if signature:
@@ -142,8 +142,8 @@ class OracleWebhookQueue:
         session.execute(upd)
 
 
-inbox = OracleWebhookQueue(direction=OracleWebhookDirectionTag.incoming)
+inbox = OracleWebhookQueue(direction=OracleWebhookDirectionTags.incoming)
 outbox = OracleWebhookQueue(
-    direction=OracleWebhookDirectionTag.outgoing,
+    direction=OracleWebhookDirectionTags.outgoing,
     default_sender=OracleWebhookTypes.recording_oracle,
 )

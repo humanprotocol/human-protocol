@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 
 import src.services.cvat as cvat_service
-from src.core.types import AssignmentStatus, PlatformType, ProjectStatuses
+from src.core.types import AssignmentStatuses, PlatformTypes, ProjectStatuses
 from src.db import SessionLocal
 from src.models.cvat import Assignment, User
 from src.schemas import exchange as service_api
@@ -53,7 +53,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsInstance(data.job_time_limit, int)
         self.assertIsInstance(data.job_size, int)
         self.assertEqual(data.job_type, cvat_project.job_type)
-        self.assertEqual(data.platform, PlatformType.CVAT)
+        self.assertEqual(data.platform, PlatformTypes.CVAT)
         self.assertEqual(data.status, cvat_project.status)
         self.assertIsNone(data.assignment)
         self.assertIsInstance(data, service_api.TaskResponse)
@@ -100,7 +100,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsInstance(data.job_time_limit, int)
         self.assertIsInstance(data.job_size, int)
         self.assertEqual(data.job_type, cvat_project.job_type)
-        self.assertEqual(data.platform, PlatformType.CVAT)
+        self.assertEqual(data.platform, PlatformTypes.CVAT)
         self.assertEqual(data.status, cvat_project.status)
         self.assertIsNotNone(data.assignment)
         self.assertIsInstance(data.assignment.assignment_url, str)
@@ -225,7 +225,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             self.assertEqual(assignment.cvat_job_id, cvat_job_1.cvat_id)
             self.assertEqual(assignment.user_wallet_address, user_address)
-            self.assertEqual(assignment.status, AssignmentStatus.created)
+            self.assertEqual(assignment.status, AssignmentStatuses.created)
 
     def test_create_assignment_invalid_user_address(self):
         cvat_project_1, _, _ = create_project_task_and_job(

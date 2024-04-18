@@ -5,7 +5,6 @@ import { ReputationController } from './reputation.controller';
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
-import { ConfigNames } from '../../common/config';
 import { ReputationDto } from './reputation.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
@@ -18,6 +17,9 @@ import {
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
+import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -32,17 +34,6 @@ describe('ReputationController', () => {
   };
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case ConfigNames.REPUTATION_LEVEL_LOW:
-            return 300;
-          case ConfigNames.REPUTATION_LEVEL_LOW:
-            return 700;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -73,10 +64,10 @@ describe('ReputationController', () => {
             findOne: jest.fn(),
           },
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        ReputationConfigService,
+        S3ConfigService,
+        PGPConfigService,
       ],
     }).compile();
 

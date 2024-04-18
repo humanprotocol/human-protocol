@@ -6,12 +6,12 @@ from sqlalchemy.exc import IntegrityError
 import src.services.webhook as webhook_service
 from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
 from src.core.types import (
-    ExchangeOracleEventType,
-    JobLauncherEventType,
+    ExchangeOracleEventTypes,
+    JobLauncherEventTypes,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
-    RecordingOracleEventType,
+    RecordingOracleEventTypes,
 )
 from src.db import SessionLocal
 from src.models.webhook import Webhook
@@ -35,7 +35,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             signature=signature,
             type=OracleWebhookTypes.job_launcher,
-            event_type=JobLauncherEventType.escrow_created.value,
+            event_type=JobLauncherEventTypes.escrow_created.value,
         )
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
@@ -45,7 +45,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.signature, signature)
         self.assertEqual(webhook.attempts, 0)
         self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
-        self.assertEqual(webhook.event_type, JobLauncherEventType.escrow_created.value)
+        self.assertEqual(webhook.event_type, JobLauncherEventTypes.escrow_created.value)
         self.assertEqual(webhook.event_data, None)
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
@@ -58,7 +58,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             signature=signature,
             type=OracleWebhookTypes.job_launcher,
-            event_type=JobLauncherEventType.escrow_created.value,
+            event_type=JobLauncherEventTypes.escrow_created.value,
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
@@ -72,7 +72,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=None,
             signature=signature,
             type=OracleWebhookTypes.job_launcher,
-            event_type=JobLauncherEventType.escrow_created.value,
+            event_type=JobLauncherEventTypes.escrow_created.value,
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
@@ -103,7 +103,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 escrow_address=escrow_address,
                 chain_id=chain_id,
                 type=OracleWebhookTypes.job_launcher,
-                event_type=JobLauncherEventType.escrow_created.value,
+                event_type=JobLauncherEventTypes.escrow_created.value,
             )
         self.assertEqual(
             str(error.exception), "Webhook signature must be specified for incoming events"
@@ -127,7 +127,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.attempts, 0)
         self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventType.task_finished.value)
+        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished.value)
         self.assertEqual(webhook.event_data, {})
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
@@ -198,8 +198,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=webhook_service.OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=webhook_service.OracleWebhookDirectionTags.incoming,
         )
         webhook2_id = str(uuid.uuid4())
         webhook2 = Webhook(
@@ -209,8 +209,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=webhook_service.OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=webhook_service.OracleWebhookDirectionTags.incoming,
         )
         webhook3_id = str(uuid.uuid4())
         webhook3 = Webhook(
@@ -220,8 +220,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.completed.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=webhook_service.OracleWebhookDirectionTag.incoming,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=webhook_service.OracleWebhookDirectionTags.incoming,
         )
 
         webhook4_id = str(uuid.uuid4())
@@ -232,8 +232,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_completed.value,
-            direction=webhook_service.OracleWebhookDirectionTag.incoming,
+            event_type=RecordingOracleEventTypes.task_completed.value,
+            direction=webhook_service.OracleWebhookDirectionTags.incoming,
         )
         webhook5_id = str(uuid.uuid4())
         webhook5 = Webhook(
@@ -242,8 +242,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.job_launcher.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventType.escrow_created.value,
-            direction=webhook_service.OracleWebhookDirectionTag.outgoing,
+            event_type=JobLauncherEventTypes.escrow_created.value,
+            direction=webhook_service.OracleWebhookDirectionTags.outgoing,
         )
 
         self.session.add(webhook1)
@@ -283,7 +283,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             signature=signature,
             type=OracleWebhookTypes.job_launcher,
-            event_type=JobLauncherEventType.escrow_created.value,
+            event_type=JobLauncherEventTypes.escrow_created.value,
         )
 
         webhook_service.inbox.update_webhook_status(
@@ -310,7 +310,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             signature=signature,
             type=OracleWebhookTypes.job_launcher,
-            event_type=JobLauncherEventType.escrow_created.value,
+            event_type=JobLauncherEventTypes.escrow_created.value,
         )
 
         webhook_service.inbox.handle_webhook_success(self.session, webhook_id)
@@ -335,7 +335,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             signature=signature,
             type=OracleWebhookTypes.job_launcher,
-            event_type=JobLauncherEventType.escrow_created.value,
+            event_type=JobLauncherEventTypes.escrow_created.value,
         )
 
         webhook_service.inbox.handle_webhook_fail(self.session, webhook_id)

@@ -5,17 +5,27 @@ import { StatisticsService } from '../statistics.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { Cache } from 'cache-manager';
-
+import { UserStatisticsCommand, UserStatisticsDetails } from '../model/user-statistics.model';
+import { KvStoreGateway } from '../../../integrations/kv-store/kv-store-gateway.service';
+import {
+  OracleStatisticsCommand,
+  OracleStatisticsDetails,
+  OracleStatisticsResponse,
+} from '../model/oracle-statistics.model';
+const EXCHANGE_ORACLE_URL = 'https://exchangeOracle.url'
+const EXCHANGE_ORACLE_ADDRESS = '0x8f238b21aa2056'
+const TOKEN = 'token1'
 describe('StatisticsService', () => {
   let service: StatisticsService;
   let cacheManager: Cache & { get: jest.Mock; set: jest.Mock }; // Explicitly type as jest.Mock
-  let gateway: ExchangeOracleGateway & {
+  let exchangeGateway: ExchangeOracleGateway & {
     fetchOracleStatistics: jest.Mock;
     fetchUserStatistics: jest.Mock;
-  }; // Explicitly type as jest.Mock
+  };
   let configService: EnvironmentConfigService;
+  let kvStoreGateway: KvStoreGateway;
+
   beforeEach(async () => {
-    // Mock the dependencies
     const cacheManagerMock = {
       get: jest.fn(),
       set: jest.fn(),
@@ -24,19 +34,26 @@ describe('StatisticsService', () => {
       cacheTtlOracleStats: 300,
       cacheTtlUserStats: 300,
     };
+    const kvStoreGatewayMock = {
+      getExchangeOracleUrlByAddress: jest
+        .fn()
+        .mockResolvedValue(EXCHANGE_ORACLE_URL),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         StatisticsService,
+        { provide: KvStoreGateway, useValue: kvStoreGatewayMock },
         { provide: CACHE_MANAGER, useValue: cacheManagerMock },
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
         { provide: EnvironmentConfigService, useValue: configServiceMock },
       ],
     }).compile();
 
+    kvStoreGateway = module.get<KvStoreGateway>(KvStoreGateway);
     service = module.get<StatisticsService>(StatisticsService);
     cacheManager = module.get(CACHE_MANAGER);
-    gateway = module.get(ExchangeOracleGateway);
+    exchangeGateway = module.get(ExchangeOracleGateway);
     configService = module.get(EnvironmentConfigService);
   });
 
@@ -49,26 +66,35 @@ describe('StatisticsService', () => {
       const cachedData = { some: 'data' };
       cacheManager.get.mockResolvedValue(cachedData);
 
-      const command = { exchangeOracleUrl: 'https://example.com' };
-      const result = await service.getOracleStats(command);
+      const command: OracleStatisticsCommand = { address: EXCHANGE_ORACLE_ADDRESS };
+      const result: OracleStatisticsResponse =
+        await service.getOracleStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(command.exchangeOracleUrl);
+      expect(cacheManager.get).toHaveBeenCalledWith(command.address);
       expect(result).toEqual(cachedData);
-      expect(gateway.fetchOracleStatistics).not.toHaveBeenCalled();
+      expect(exchangeGateway.fetchOracleStatistics).not.toHaveBeenCalled();
     });
 
     it('should fetch, cache, and return new data if not in cache', async () => {
       const newData = { newData: 'data' };
       cacheManager.get.mockResolvedValue(undefined);
-      gateway.fetchOracleStatistics.mockResolvedValue(newData);
+      exchangeGateway.fetchOracleStatistics.mockResolvedValue(newData);
 
-      const command = { exchangeOracleUrl: 'https://example.com' };
+      const command = { address: EXCHANGE_ORACLE_ADDRESS };
       const result = await service.getOracleStats(command);
+      const details: OracleStatisticsDetails = {
+        exchangeOracleUrl: EXCHANGE_ORACLE_URL,
+      };
 
-      expect(cacheManager.get).toHaveBeenCalledWith(command.exchangeOracleUrl);
-      expect(gateway.fetchOracleStatistics).toHaveBeenCalledWith(command);
+      expect(kvStoreGateway.getExchangeOracleUrlByAddress).toHaveBeenCalledWith(
+        command.address,
+      );
+      expect(cacheManager.get).toHaveBeenCalledWith(command.address);
+      expect(exchangeGateway.fetchOracleStatistics).toHaveBeenCalledWith(
+        details,
+      );
       expect(cacheManager.set).toHaveBeenCalledWith(
-        command.exchangeOracleUrl,
+        command.address,
         newData,
         configService.cacheTtlOracleStats,
       );
@@ -79,34 +105,40 @@ describe('StatisticsService', () => {
   describe('getUserStats', () => {
     it('should return cached data if available', async () => {
       const cachedData = { userData: 'data' };
-      const userCacheKey = 'https://example.comtoken';
+      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + TOKEN;
       cacheManager.get.mockResolvedValue(cachedData);
 
       const command = {
-        exchangeOracleUrl: 'https://example.com',
-        token: 'token',
+        address: EXCHANGE_ORACLE_ADDRESS,
+        token: TOKEN,
       };
       const result = await service.getUserStats(command);
 
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
       expect(result).toEqual(cachedData);
-      expect(gateway.fetchUserStatistics).not.toHaveBeenCalled();
+      expect(exchangeGateway.fetchUserStatistics).not.toHaveBeenCalled();
     });
 
     it('should fetch, cache, and return new data if not in cache', async () => {
       const newData = { newData: 'data' };
-      const userCacheKey = 'https://example.comtoken';
+      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + TOKEN;
       cacheManager.get.mockResolvedValue(undefined);
-      gateway.fetchUserStatistics.mockResolvedValue(newData);
+      exchangeGateway.fetchUserStatistics.mockResolvedValue(newData);
 
       const command = {
-        exchangeOracleUrl: 'https://example.com',
-        token: 'token',
-      };
+        address: EXCHANGE_ORACLE_ADDRESS,
+        token: TOKEN,
+      } as UserStatisticsCommand;
+      const details = {
+        exchangeOracleUrl: EXCHANGE_ORACLE_URL,
+        token: TOKEN,
+      } as UserStatisticsDetails;
       const result = await service.getUserStats(command);
-
+      expect(kvStoreGateway.getExchangeOracleUrlByAddress).toHaveBeenCalledWith(
+        command.address,
+      );
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
-      expect(gateway.fetchUserStatistics).toHaveBeenCalledWith(command);
+      expect(exchangeGateway.fetchUserStatistics).toHaveBeenCalledWith(details);
       expect(cacheManager.set).toHaveBeenCalledWith(
         userCacheKey,
         newData,

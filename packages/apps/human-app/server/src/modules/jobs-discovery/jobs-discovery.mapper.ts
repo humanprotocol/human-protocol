@@ -11,7 +11,7 @@ import {
 } from '@automapper/core';
 import {
   JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand,
+  JobsDiscoveryParamsCommand, JobsDiscoveryParamsDetails,
   JobsDiscoveryParamsDto,
 } from './model/jobs-discovery.model';
 
@@ -61,6 +61,7 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
           destination: new CamelCaseNamingConvention(),
         }),
       );
+      createMap(mapper, JobsDiscoveryParamsCommand, JobsDiscoveryParamsDetails);
     };
   }
 }

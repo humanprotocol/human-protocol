@@ -1,6 +1,12 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsObject, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
 import { EventType } from '../../common/enums/webhook';
 
@@ -54,5 +60,6 @@ export class WebhookDto {
     name: 'event_data',
   })
   @IsObject()
+  @IsOptional()
   public eventData?: EventData;
 }

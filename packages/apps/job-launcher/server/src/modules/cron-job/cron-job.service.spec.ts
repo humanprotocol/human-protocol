@@ -38,6 +38,11 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { HttpService } from '@nestjs/axios';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -95,6 +100,11 @@ describe('CronJobService', () => {
         JobService,
         WebhookService,
         Encryption,
+        ServerConfigService,
+        AuthConfigService,
+        Web3ConfigService,
+        CvatConfigService,
+        PGPConfigService,
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: PaymentRepository,

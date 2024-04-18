@@ -5,7 +5,6 @@ import { NS } from '../../common/constants';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { IUser } from '../../common/interfaces';
 import { BaseEntity } from '../../database/base.entity';
-import { AuthEntity } from '../auth/auth.entity';
 import { TokenEntity } from '../auth/token.entity';
 import { KycEntity } from '../kyc/kyc.entity';
 
@@ -32,9 +31,6 @@ export class UserEntity extends BaseEntity implements IUser {
     enum: UserStatus,
   })
   public status: UserStatus;
-
-  @OneToOne(() => AuthEntity)
-  public auth: AuthEntity;
 
   @OneToOne(() => TokenEntity)
   public token: TokenEntity;
