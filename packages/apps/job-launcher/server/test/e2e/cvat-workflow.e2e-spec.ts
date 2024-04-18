@@ -9,20 +9,13 @@ import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
 import setupE2eEnvironment from './env-setup';
 import {
-  MOCK_BUCKET_FILES,
   MOCK_CVAT_DATA,
-  MOCK_CVAT_DATA_DATASET,
   MOCK_CVAT_GT,
   MOCK_CVAT_LABELS,
   MOCK_FILE_URL,
   MOCK_REQUESTER_DESCRIPTION,
-  MOCK_STORAGE_DATA,
 } from '../constants';
-import {
-  JobCaptchaShapeType,
-  JobRequestType,
-  JobStatus,
-} from '../../src/common/enums/job';
+import { JobRequestType, JobStatus } from '../../src/common/enums/job';
 import { ErrorJob } from '../../src/common/constants/errors';
 import {
   Currency,
@@ -39,6 +32,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { StorageService } from '../../src/modules/storage/storage.service';
 import stringify from 'json-stable-stringify';
 import { delay, getFileNameFromURL } from './utils';
+import { PaymentService } from '../../src/modules/payment/payment.service';
 
 describe('CVAT E2E workflow', () => {
   let app: INestApplication;
@@ -47,9 +41,12 @@ describe('CVAT E2E workflow', () => {
   let jobRepository: JobRepository;
   let userService: UserService;
   let storageService: StorageService;
+  let paymentService: PaymentService;
 
   let userEntity: UserEntity;
   let accessToken: string;
+  let paidAmount = 0;
+  const initialBalance = 100;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
   const paymentIntentId = crypto.randomBytes(16).toString('hex');
@@ -68,6 +65,7 @@ describe('CVAT E2E workflow', () => {
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
     storageService = moduleFixture.get<StorageService>(StorageService);
+    paymentService = moduleFixture.get<PaymentService>(PaymentService);
 
     userEntity = await userService.create({
       email,
@@ -93,7 +91,7 @@ describe('CVAT E2E workflow', () => {
       userId: userEntity.id,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: 100,
+      amount: initialBalance,
       currency: Currency.USD,
       rate: 1,
       transaction: paymentIntentId,
@@ -112,6 +110,9 @@ describe('CVAT E2E workflow', () => {
   });
 
   it('should create an CVAT job with image boxes type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const groundTruthsData = MOCK_CVAT_GT;
 
     const groundTruthsHash = crypto
@@ -178,9 +179,16 @@ describe('CVAT E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an CVAT job with image points type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const groundTruthsData = MOCK_CVAT_GT;
 
     const groundTruthsHash = crypto
@@ -247,9 +255,16 @@ describe('CVAT E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an CVAT job with image boxes from points type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const datasetData = MOCK_CVAT_DATA;
 
     const datasetHash = crypto
@@ -331,6 +346,10 @@ describe('CVAT E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should handle when data does not exist while creating a CVAT job with image boxes from points type', async () => {
@@ -381,6 +400,9 @@ describe('CVAT E2E workflow', () => {
   });
 
   it('should create an CVAT job with image skeletons from boxes type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const datasetData = MOCK_CVAT_DATA;
 
     const datasetHash = crypto
@@ -462,9 +484,16 @@ describe('CVAT E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should handle when data does not exist while creating a CVAT job with image skeletons from boxes type', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const groundTruthsData = MOCK_CVAT_GT;
 
     const groundTruthsHash = crypto
