@@ -14,13 +14,13 @@ export const signInDtoSchema = z.object({
     .max(50, t('validation.max', { count: 50 })),
 });
 
-export type SignUpDto = z.infer<typeof signInDtoSchema>;
+export type SignInDto = z.infer<typeof signInDtoSchema>;
 
-const signUpSuccessResponseSchema = z.unknown();
+const signInSuccessResponseSchema = z.unknown();
 
-function signInMutationFn(data: SignUpDto) {
-  return apiClient(apiPaths.worker.signUp.path, {
-    successSchema: signUpSuccessResponseSchema,
+function signInMutationFn(data: SignInDto) {
+  return apiClient(apiPaths.worker.signIn.path, {
+    successSchema: signInSuccessResponseSchema,
     options: { body: JSON.stringify(data) },
   });
 }
