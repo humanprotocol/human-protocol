@@ -9,8 +9,8 @@ import { WorkerProfilePage } from '@/pages/worker/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { SignUpOperatorPage } from '@/pages/operator/sign-up.page';
 import { routerPaths } from '@/router/router-paths';
-import { SendResetLinkWorkerPage } from '@/pages/worker/reset-password/send-reset-link.page';
-import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/reset-password/send-reset-link-success.page';
+import { SendResetLinkWorkerPage } from '@/pages/worker/send-reset-link/send-reset-link.page';
+import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
