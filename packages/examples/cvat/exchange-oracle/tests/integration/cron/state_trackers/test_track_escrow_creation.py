@@ -6,7 +6,7 @@ from src.crons.state_trackers import track_escrow_creation
 from src.db import SessionLocal
 from src.models.cvat import EscrowCreation, Project
 
-from tests.utils.db_helper import create_project_task_and_job
+from tests.utils.db_helper import create_job, create_project, create_task
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -21,11 +21,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         cvat_project_ids = []
         for cvat_project_id in range(2):
-            (cvat_project, _, _) = create_project_task_and_job(
-                self.session, escrow_address, cvat_project_id
+            cvat_project = create_project(
+                self.session, escrow_address, cvat_project_id, status=ProjectStatuses.creation
             )
-            cvat_project.status = ProjectStatuses.creation.value
-            self.session.add(cvat_project)
+            create_task(self.session, cvat_project_id, cvat_project_id)
+            create_job(self.session, cvat_project_id, cvat_project_id, cvat_project_id)
+
             cvat_project_ids.append(cvat_project_id)
 
         escrow_creation = EscrowCreation(
