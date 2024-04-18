@@ -22,6 +22,7 @@ import {
 import { PaymentEntity } from '../../src/modules/payment/payment.entity';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
 import { JobRepository } from '../../src/modules/job/job.repository';
+import { PaymentService } from '../../src/modules/payment/payment.service';
 
 describe('Quick launch E2E workflow', () => {
   let app: INestApplication;
@@ -29,9 +30,11 @@ describe('Quick launch E2E workflow', () => {
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
+  let paymentService: PaymentService;
 
   let userEntity: UserEntity;
   let accessToken: string;
+  const initialBalance = 100;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
   const paymentIntentId = crypto.randomBytes(16).toString('hex');
@@ -49,6 +52,7 @@ describe('Quick launch E2E workflow', () => {
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
+    paymentService = moduleFixture.get<PaymentService>(PaymentService);
 
     userEntity = await userService.create({
       email,
@@ -74,7 +78,7 @@ describe('Quick launch E2E workflow', () => {
       userId: userEntity.id,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: 100,
+      amount: initialBalance,
       currency: Currency.USD,
       rate: 1,
       transaction: paymentIntentId,
@@ -88,6 +92,9 @@ describe('Quick launch E2E workflow', () => {
   });
 
   it('should create a job via quick launch successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance);
+
     const quickLaunchDto = {
       chain_id: ChainId.LOCALHOST,
       request_type: JobRequestType.HCAPTCHA,
@@ -121,6 +128,10 @@ describe('Quick launch E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    const paidAmount = paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should handle not enough funds error', async () => {

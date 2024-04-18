@@ -12,7 +12,6 @@ import {
   MOCK_BUCKET_FILES,
   MOCK_FILE_URL,
   MOCK_REQUESTER_DESCRIPTION,
-  MOCK_STORAGE_DATA,
 } from '../constants';
 import { JobCaptchaShapeType, JobStatus } from '../../src/common/enums/job';
 import { ErrorJob } from '../../src/common/constants/errors';
@@ -31,17 +30,21 @@ import { ChainId } from '@human-protocol/sdk';
 import { StorageService } from '../../src/modules/storage/storage.service';
 import stringify from 'json-stable-stringify';
 import { delay } from './utils';
+import { PaymentService } from '../../src/modules/payment/payment.service';
 
-describe.skip('hCaptcha E2E workflow', () => {
+describe('hCaptcha E2E workflow', () => {
   let app: INestApplication;
   let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
   let storageService: StorageService;
+  let paymentService: PaymentService;
 
   let userEntity: UserEntity;
   let accessToken: string;
+  let paidAmount = 0;
+  const initialBalance = 100;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
   const paymentIntentId = crypto.randomBytes(16).toString('hex');
@@ -60,6 +63,7 @@ describe.skip('hCaptcha E2E workflow', () => {
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
     storageService = moduleFixture.get<StorageService>(StorageService);
+    paymentService = moduleFixture.get<PaymentService>(PaymentService);
 
     userEntity = await userService.create({
       email,
@@ -104,6 +108,9 @@ describe.skip('hCaptcha E2E workflow', () => {
   });
 
   it('should create an hCaptcha job with comparison type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const hCaptchaDto = {
       chain_id: ChainId.LOCALHOST,
       data: {
@@ -156,9 +163,16 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an hCaptcha job with categorization type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const groundTruthsData = {
       'image_name_1.jpg': [['Dog']],
       'image_name_2.jpg': [['Cat']],
@@ -230,9 +244,16 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an hCaptcha job with polygon type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const hCaptchaDto = {
       chain_id: ChainId.LOCALHOST,
       data: {
@@ -289,9 +310,16 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an hCaptcha job with point type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const hCaptchaDto = {
       chain_id: ChainId.LOCALHOST,
       data: {
@@ -348,9 +376,16 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an hCaptcha job with bounding box type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const hCaptchaDto = {
       chain_id: ChainId.LOCALHOST,
       data: {
@@ -407,9 +442,16 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should create an hCaptcha job with immo type successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance + paidAmount);
+
     const hCaptchaDto = {
       chain_id: ChainId.LOCALHOST,
       data: {
@@ -466,6 +508,10 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    paidAmount += paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should handle not enough funds error', async () => {
