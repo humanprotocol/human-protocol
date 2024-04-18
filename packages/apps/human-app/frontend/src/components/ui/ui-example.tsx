@@ -25,6 +25,9 @@ import {
   DiscordIcon,
   HelpIcon,
   MobileHeaderIcon,
+  ProfileIcon,
+  CheckmarkIcon,
+  LockerIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
@@ -230,6 +233,15 @@ export function UiExample() {
       <Stack alignItems="center" direction="row" spacing={4}>
         <Grid>
           <MobileHeaderIcon />
+        </Grid>
+        <Grid>
+          <ProfileIcon />
+        </Grid>
+        <Grid>
+          <CheckmarkIcon />
+        </Grid>
+        <Grid>
+          <LockerIcon />
         </Grid>
       </Stack>
 
