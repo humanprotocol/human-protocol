@@ -3,7 +3,7 @@ import uuid
 
 from sqlalchemy.sql import select
 
-from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatus, TaskType
+from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatuses, TaskTypes
 from src.crons.state_trackers import track_completed_tasks
 from src.db import SessionLocal
 from src.models.cvat import Job, Project, Task
@@ -22,7 +22,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.annotation.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -33,7 +33,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=task_id,
             cvat_id=1,
             cvat_project_id=1,
-            status=TaskStatus.annotation.value,
+            status=TaskStatuses.annotation.value,
         )
 
         job = Job(
@@ -55,7 +55,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Task).where(Task.id == task_id)).scalars().first()
         )
 
-        self.assertEqual(updated_task.status, TaskStatus.completed.value)
+        self.assertEqual(updated_task.status, TaskStatuses.completed.value)
 
     def test_track_completed_tasks_with_unfinished_job(self):
         project = Project(
@@ -63,7 +63,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.annotation.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -74,7 +74,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=task_id,
             cvat_id=1,
             cvat_project_id=1,
-            status=TaskStatus.annotation.value,
+            status=TaskStatuses.annotation.value,
         )
 
         job_1 = Job(
@@ -104,4 +104,4 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Task).where(Task.id == task_id)).scalars().first()
         )
 
-        self.assertEqual(updated_task.status, TaskStatus.annotation.value)
+        self.assertEqual(updated_task.status, TaskStatuses.annotation.value)

@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from src.core.types import Networks, OracleWebhookStatuses, OracleWebhookTypes
 from src.db import SessionLocal
 from src.models.webhook import Webhook
-from src.services.webhook import OracleWebhookDirectionTag, inbox
+from src.services.webhook import OracleWebhookDirectionTags, inbox
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -30,7 +30,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         address = "0x" + "".join([str(random.randint(0, 9)) for _ in range(40)])
         return Webhook(
             id=str(uuid.uuid4()),
-            direction=OracleWebhookDirectionTag.incoming.value,
+            direction=OracleWebhookDirectionTags.incoming.value,
             signature=f"signature-{uuid.uuid4()}",
             escrow_address=address,
             chain_id=Networks.polygon_mainnet.value,

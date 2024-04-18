@@ -17,6 +17,9 @@ import HumanLogoNavbarIcon from '@/assets/icons/icons-navbar/human-logo-navbar.s
 import DiscordIcon from '@/assets/icons/icons-homepage/discord.svg';
 import HelpIcon from '@/assets/icons/help.svg';
 import MobileHeaderIcon from '@/assets/icons/icons-homepage/mobile-header.svg';
+import ProfileIcon from '@/assets/icons/profile-icon.svg';
+import CheckmarkIcon from '@/assets/icons/checkmark-icon.svg';
+import LockerIcon from '@/assets/icons/locker-icon.svg';
 
 export {
   HomepageLogoIcon,
@@ -38,4 +41,7 @@ export {
   DiscordIcon,
   HelpIcon,
   MobileHeaderIcon,
+  ProfileIcon,
+  CheckmarkIcon,
+  LockerIcon,
 };

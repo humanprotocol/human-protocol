@@ -11,14 +11,13 @@ export class UserCreateDto extends ValidatePasswordDto {
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
 
-  @ApiProperty({
-    enum: UserType,
-  })
-  @IsEnum(UserType)
-  public type: UserType;
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class UserDto extends UserCreateDto {
+  public type: UserType;
   public status: UserStatus;
 }
 
@@ -30,15 +29,10 @@ export class Web3UserCreateDto {
   @ApiProperty()
   @IsString()
   public nonce: string;
-
-  @ApiProperty({
-    enum: UserType,
-  })
-  @IsEnum(UserType)
-  public type: UserType;
 }
 
 export class Web3UserDto extends Web3UserCreateDto {
+  public type: UserType;
   public status: UserStatus;
 }
 
@@ -52,6 +46,7 @@ export class UserUpdateDto {
   @ApiPropertyOptional({
     enum: UserStatus,
   })
+  @IsOptional()
   @IsEnum(UserStatus)
   public status?: UserStatus;
 }

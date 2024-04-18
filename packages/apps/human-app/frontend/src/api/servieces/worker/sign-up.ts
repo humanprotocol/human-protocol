@@ -10,8 +10,8 @@ import { passwordRegex } from '@/shared/helpers/regex';
 export const signUpDtoSchema = z
   .object({
     email: z.string().email(),
-    token: z.string().nullable(),
-    hCaptchaToken: z.string().nullable(),
+    // eslint-disable-next-line camelcase -- export vite config
+    h_captcha_token: z.string().default('token'),
   })
   .and(
     z

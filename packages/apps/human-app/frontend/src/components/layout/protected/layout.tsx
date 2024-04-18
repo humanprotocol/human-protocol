@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { breakpoints } from '@/styles/theme';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { colorPalette } from '@/styles/color-palette';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
@@ -27,13 +28,14 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    paddingLeft: isMobile ? 0 : `${drawerWidth}px`,
+    paddingLeft: isMobile ? 0 : `140px`,
   }),
 }));
 
 export function Layout() {
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
+  const { backgroundColor } = useBackgroundColorStore();
 
   useEffect(() => {
     if (isMobile) {
@@ -51,15 +53,13 @@ export function Layout() {
       flexWrap="nowrap"
       justifyContent="space-between"
       sx={{
-        width: '100%',
         height: '100%',
         minHeight: '100vh',
-        px: '44px',
-        pb: '44px',
-        pt: isMobile ? '32px' : '44px',
-        [breakpoints.mobile]: {
-          px: '10px',
-        },
+        width: '100%',
+        pt: '0',
+        pl: isMobile ? 0 : '120px',
+        pr: isMobile ? 0 : '20px',
+        backgroundColor: isMobile ? colorPalette.white : backgroundColor,
       }}
     >
       <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
@@ -67,7 +67,7 @@ export function Layout() {
       <Main isMobile={isMobile} open={drawerOpen}>
         <Outlet />
       </Main>
-      <Footer />
+      <Footer isProtected />
     </Grid>
   );
 }

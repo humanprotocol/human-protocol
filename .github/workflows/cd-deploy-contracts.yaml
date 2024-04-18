@@ -24,7 +24,7 @@ jobs:
     env:
       ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
       ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
-      ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
+      ETH_POLYGON_AMOY_URL: ${{ secrets.ETH_POLYGON_AMOY_URL }}
       ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
       ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
       ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
@@ -62,10 +62,10 @@ jobs:
               echo "reward_pool=0x1371057BAec59944B924A7963F2EeCF43ff94CE4" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
-            "polygonMumbai")
-              echo "escrow_factory=0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d" >> $GITHUB_OUTPUT
-              echo "staking=0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac" >> $GITHUB_OUTPUT
-              echo "reward_pool=0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE" >> $GITHUB_OUTPUT
+            "polygonAmoy")
+              echo "escrow_factory=0xAFf5a986A530ff839d49325A5dF69F96627E8D29" >> $GITHUB_OUTPUT
+              echo "staking=0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60" >> $GITHUB_OUTPUT
+              echo "reward_pool=0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "bsc")

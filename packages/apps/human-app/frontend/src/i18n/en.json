@@ -48,6 +48,12 @@
       "header": {
         "closeBtn": "Cancel"
       }
+    },
+    "wallet": {
+      "connectBtn": {
+        "disconnect": "Disconnect",
+        "connect": "Connect"
+      }
     }
   },
   "homepage": {
@@ -109,6 +115,47 @@
       "paragraph3": "<1>Can’t find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Sign In",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+    },
+    "profile": {
+      "profileHeader": "Profile",
+      "email": "Email",
+      "password": "Password",
+      "resetPassword": "Reset Password",
+      "kycCompleted": "KYC Completed",
+      "walletConnected": "Wallet Connected ",
+      "kycInfoOnChainAdded": "KYC Info On-Chain Added ",
+      "emailNotifications": "Email Notifications",
+      "notificationsConsent": "I would like to be notified about News and Offers"
+    }
+  },
+  "operator": {
+    "profile": {
+      "profileHeader": "Profile",
+      "about": {
+        "header": "About",
+        "role": "Role",
+        "status": {
+          "statusHeader": "Status",
+          "statusActivated": "Active",
+          "statusDeactivated": "Deactivated",
+          "statusActivateButton": "Activate",
+          "statusDeactivateButton": "Deactivate"
+        },
+        "fee": "Fee",
+        "url": "URL",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job Types"
+      },
+      "statistics": {
+        "header": "Statistics",
+        "escrowsProcessed": "Escrows processed",
+        "escrowsActive": "Escrows active",
+        "escrowsCancelled": "Escrows cancelled",
+        "workersAmount": "Workers amount",
+        "assignmentsCompleted": "Assignments completed",
+        "assignmentsRejected": "Assignments rejected",
+        "assignmentsExpired": "Assignments expired"
+      }
     }
   }
 }

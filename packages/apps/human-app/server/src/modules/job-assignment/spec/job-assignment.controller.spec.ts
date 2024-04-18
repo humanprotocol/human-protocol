@@ -5,7 +5,6 @@ import { jobAssignmentServiceMock } from './job-assignment.service.mock';
 import {
   JobAssignmentCommand,
   JobAssignmentDto,
-  JobsFetchParamsCommand,
   JobsFetchParamsDto,
 } from '../model/job-assignment.model';
 import {
@@ -86,7 +85,7 @@ describe('JobAssignmentController', () => {
 
     it('should call service processGetAssignedJobs method with proper fields set', async () => {
       const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
-      const command: JobsFetchParamsCommand = jobsFetchParamsCommandFixture;
+      const command: JobAssignmentCommand = jobsFetchParamsCommandFixture;
       await controller.getAssignedJobs(dto, jobAssignmentToken);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,

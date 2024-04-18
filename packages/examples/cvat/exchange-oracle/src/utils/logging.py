@@ -6,6 +6,10 @@ from src.utils.stack import current_function_name
 LogLevel = NewType("LogLevel", int)
 
 
+TRACE = 5
+logging.addLevelName(TRACE, "TRACE")
+
+
 def parse_log_level(level: str) -> LogLevel:
     return logging._nameToLevel[level.upper()]
 
@@ -20,3 +24,9 @@ def get_function_logger(
 
     function_name = current_function_name(depth=2)
     return parent_logger.getChild(function_name)
+
+
+class NullLogger(logging.Logger):
+    def __init__(self, name: str = "", level=0) -> None:
+        super().__init__(name, level)
+        self.disabled = True

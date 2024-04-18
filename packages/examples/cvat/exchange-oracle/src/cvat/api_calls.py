@@ -1,11 +1,13 @@
 import io
+import json
 import logging
 import zipfile
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
+from io import BytesIO
 from time import sleep
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -102,21 +104,61 @@ def get_api_client() -> ApiClient:
 
 
 def create_cloudstorage(
-    provider: str, bucket_host: str, bucket_name: str
+    provider: str,
+    bucket_name: str,
+    *,
+    credentials: Optional[Dict[str, Any]] = None,
+    bucket_host: Optional[str] = None,
 ) -> models.CloudStorageRead:
+    # credentials: access_key | secret_key | service_account_key
+    # CVAT credentials: key | secret_key | key_file
+    def _to_cvat_credentials(credentials: Dict[str, Any]) -> Dict:
+        cvat_credentials = dict()
+        for cvat_field, field in {
+            "key": "access_key",
+            "secret_key": "secret_key",
+            "key_file": "service_account_key",
+        }.items():
+            if value := credentials.get(field):
+                if cvat_field == "key_file":
+                    key_file = BytesIO(json.dumps(value).encode("utf-8"))
+                    key_file.name = "key_file.json"
+                    key_file.seek(0)
+                    cvat_credentials[cvat_field] = key_file
+                else:
+                    cvat_credentials[cvat_field] = value
+        return cvat_credentials
+
+    request_kwargs = dict()
+
+    if credentials:
+        request_kwargs.update(_to_cvat_credentials(credentials))
+        credentials_type = (
+            models.CredentialsTypeEnum("KEY_SECRET_KEY_PAIR")
+            if provider == "AWS_S3_BUCKET"
+            else models.CredentialsTypeEnum("KEY_FILE_PATH")
+        )
+    else:
+        credentials_type = models.CredentialsTypeEnum("ANONYMOUS_ACCESS")
+
+    if bucket_host:
+        request_kwargs["specific_attributes"] = f"endpoint_url={bucket_host}"
+
     logger = logging.getLogger("app")
+
     with get_api_client() as api_client:
         cloud_storage_write_request = models.CloudStorageWriteRequest(
             provider_type=models.ProviderTypeEnum(provider),
             resource=bucket_name,
             display_name=bucket_name,
-            credentials_type=models.CredentialsTypeEnum("ANONYMOUS_ACCESS"),
+            credentials_type=credentials_type,
             description=bucket_name,
-            specific_attributes=f"endpoint_url={bucket_host}",
+            **request_kwargs,
         )  # CloudStorageWriteRequest
         try:
             (data, response) = api_client.cloudstorages_api.create(
                 cloud_storage_write_request,
+                _content_type="multipart/form-data",
             )
 
             return data
@@ -126,16 +168,18 @@ def create_cloudstorage(
 
 
 def create_project(
-    escrow_address: str, labels: list, *, user_guide: str = ""
+    name: str, *, labels: Optional[list] = None, user_guide: str = ""
 ) -> models.ProjectRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        kwargs = {}
+
+        if labels is not None:
+            kwargs["labels"] = labels
+
         try:
             (project, response) = api_client.projects_api.create(
-                models.ProjectWriteRequest(
-                    name=escrow_address,
-                    labels=labels,
-                )
+                models.ProjectWriteRequest(name=name, **kwargs)
             )
             if user_guide:
                 api_client.guides_api.create(
@@ -234,11 +278,11 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             raise
 
 
-def create_task(project_id: int, escrow_address: str) -> models.TaskRead:
+def create_task(project_id: int, name: str) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         task_write_request = models.TaskWriteRequest(
-            name=escrow_address,
+            name=name,
             project_id=project_id,
             overlap=0,
             segment_size=Config.cvat_config.cvat_job_segment_size,
