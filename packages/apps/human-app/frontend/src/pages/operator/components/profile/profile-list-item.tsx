@@ -8,13 +8,13 @@ import { colorPalette } from '@/styles/color-palette';
 interface ProfileListItemProps {
   header: string;
   paragraph: string | string[];
-  buttonBoolean?: boolean;
+  isStatusListItem?: boolean;
 }
 
 export function ProfileListItem({
   header,
   paragraph,
-  buttonBoolean,
+  isStatusListItem,
 }: ProfileListItemProps) {
   const { t } = useTranslation();
 
@@ -45,7 +45,7 @@ export function ProfileListItem({
           >
             <Typography
               color={
-                buttonBoolean === false
+                isStatusListItem === false
                   ? colorPalette.text.secondary
                   : colorPalette.text.primary
               }
@@ -53,7 +53,7 @@ export function ProfileListItem({
             >
               {paragraph}
             </Typography>
-            {buttonBoolean === true && (
+            {isStatusListItem === true && (
               <Stack
                 sx={{
                   marginLeft: '5px',
@@ -62,7 +62,7 @@ export function ProfileListItem({
                 <CheckmarkIcon />
               </Stack>
             )}
-            {buttonBoolean === false && (
+            {!isStatusListItem && (
               <Stack
                 sx={{
                   marginLeft: '5px',
@@ -73,12 +73,12 @@ export function ProfileListItem({
             )}
           </Stack>
         )}
-        {buttonBoolean === true && (
+        {isStatusListItem === true && (
           <Button variant="contained">
             {t('operator.profile.about.status.statusDeactivateButton')}
           </Button>
         )}
-        {buttonBoolean === false && (
+        {isStatusListItem === false && (
           <Button variant="contained">
             {t('operator.profile.about.status.statusActivateButton')}
           </Button>

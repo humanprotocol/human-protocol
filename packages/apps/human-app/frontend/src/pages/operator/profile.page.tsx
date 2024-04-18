@@ -69,8 +69,8 @@ export function OperatorProfilePage() {
                   paragraph={mockedData.profile.role}
                 />
                 <ProfileListItem
-                  buttonBoolean={mockedData.profile.active}
                   header={t('operator.profile.about.status.statusHeader')}
+                  isStatusListItem={mockedData.profile.active}
                   paragraph={
                     mockedData.profile.active
                       ? t('operator.profile.about.status.statusActivated')
