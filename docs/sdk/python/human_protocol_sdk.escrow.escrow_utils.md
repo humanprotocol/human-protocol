@@ -11,7 +11,7 @@ from human_protocol_sdk.escrow import EscrowUtils, EscorwFilter, Status
 print(
     EscrowUtils.get_escrows(
         EscrowFilter(
-            networks=[ChainId.POLYGON_MUMBAI],
+            networks=[ChainId.POLYGON_AMOY],
             status=Status.Pending,
             date_from=datetime.datetime(2023, 5, 8),
             date_to=datetime.datetime(2023, 6, 8),
@@ -78,7 +78,7 @@ Returns the escrow for a given address.
 
   print(
       EscrowUtils.get_escrow(
-          ChainId.POLYGON_MUMBAI,
+          ChainId.POLYGON_AMOY,
           "0x1234567890123456789012345678901234567890"
       )
   )
@@ -102,7 +102,7 @@ Get an array of escrow addresses based on the specified filter parameters.
   print(
       EscrowUtils.get_escrows(
           EscrowFilter(
-              networks=[ChainId.POLYGON_MUMBAI],
+              networks=[ChainId.POLYGON_AMOY],
               status=Status.Pending,
               date_from=datetime.datetime(2023, 5, 8),
               date_to=datetime.datetime(2023, 6, 8),

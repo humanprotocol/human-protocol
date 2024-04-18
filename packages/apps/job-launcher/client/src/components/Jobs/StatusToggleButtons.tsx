@@ -8,6 +8,7 @@ import { JobStatus } from '../../types';
 const RANGE_BUTTONS = [
   { label: 'Launched', value: JobStatus.LAUNCHED },
   { label: 'Pending', value: JobStatus.PENDING },
+  { label: 'Partial', value: JobStatus.PARTIAL },
   { label: 'Completed', value: JobStatus.COMPLETED },
   { label: 'Canceled', value: JobStatus.CANCELED },
   { label: 'Failed', value: JobStatus.FAILED },

@@ -1,4 +1,4 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Logger, NotFoundException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ErrorJob } from '../constants/errors';
@@ -16,13 +16,13 @@ export async function sendWebhook(
 ): Promise<boolean> {
   const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
   const signedBody = await signMessage(snake_case_body, privateKey);
-  const { data } = await firstValueFrom(
+  const { status } = await firstValueFrom(
     await httpService.post(webhookUrl, snake_case_body, {
       headers: { [HEADER_SIGNATURE_KEY]: signedBody },
     }),
   );
 
-  if (!data) {
+  if (status !== HttpStatus.CREATED) {
     logger.log(ErrorJob.WebhookWasNotSent, 'JobService');
     throw new NotFoundException(ErrorJob.WebhookWasNotSent);
   }

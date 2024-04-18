@@ -48,6 +48,8 @@ export interface IReputationNetwork {
 export interface IOperator {
   address: string;
   role?: string;
+  url?: string;
+  jobTypes?: string[];
 }
 
 export interface IEscrowsFilter {

@@ -5,40 +5,29 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../user/user.entity';
-import { ConfigNames } from '../../common/config';
 import { HttpService } from '@nestjs/axios';
 import { KycSessionDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
+import { SynapsConfigService } from '../../common/config/synaps-config.service';
+import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class KycService {
   private readonly logger = new Logger(KycService.name);
   private readonly synapsBaseURL: string;
-  private readonly synapsApiKey: string;
-  private readonly synapsWebhookSecret: string;
 
   constructor(
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
+    private readonly synapsConfigService: SynapsConfigService,
   ) {
     this.synapsBaseURL = 'https://api.synaps.io/v4';
-
-    this.synapsApiKey = this.configService.get<string>(
-      ConfigNames.SYNAPS_API_KEY,
-      '',
-    );
-
-    this.synapsWebhookSecret = this.configService.get<string>(
-      ConfigNames.SYNAPS_WEBHOOK_SECRET,
-      '',
-    );
   }
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
@@ -62,6 +51,19 @@ export class KycService {
       };
     }
 
+    if (this.synapsConfigService.apiKey === SYNAPS_API_KEY_DISABLED) {
+      const sessionId = uuidv4();
+      await this.kycRepository.create({
+        sessionId: sessionId,
+        status: KycStatus.NONE,
+        userId: userEntity.id,
+      });
+
+      return {
+        sessionId: sessionId,
+      };
+    }
+
     const { data } = await firstValueFrom(
       await this.httpService.post(
         'session/init',
@@ -71,7 +73,7 @@ export class KycService {
         {
           baseURL: this.synapsBaseURL,
           headers: {
-            'Api-Key': this.synapsApiKey,
+            'Api-Key': this.synapsConfigService.apiKey,
           },
         },
       ),
@@ -96,7 +98,7 @@ export class KycService {
     secret: string,
     data: KycStatusDto,
   ): Promise<void> {
-    if (secret !== this.synapsWebhookSecret) {
+    if (secret !== this.synapsConfigService.webhookSecret) {
       throw new UnauthorizedException(ErrorKyc.InvalidWebhookSecret);
     }
 
@@ -104,7 +106,7 @@ export class KycService {
       await this.httpService.get(`/individual/session/${data.sessionId}`, {
         baseURL: this.synapsBaseURL,
         headers: {
-          'Api-Key': this.synapsApiKey,
+          'Api-Key': this.synapsConfigService.apiKey,
         },
       }),
     );

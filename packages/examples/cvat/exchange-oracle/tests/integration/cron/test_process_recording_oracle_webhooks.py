@@ -6,15 +6,15 @@ from human_protocol_sdk.constants import ChainId
 from sqlalchemy.sql import select
 
 from src.core.types import (
-    ExchangeOracleEventType,
+    ExchangeOracleEventTypes,
     JobStatuses,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
     ProjectStatuses,
-    RecordingOracleEventType,
-    TaskStatus,
-    TaskType,
+    RecordingOracleEventTypes,
+    TaskStatuses,
+    TaskTypes,
 )
 from src.crons.process_recording_oracle_webhooks import (
     process_incoming_recording_oracle_webhooks,
@@ -23,9 +23,9 @@ from src.crons.process_recording_oracle_webhooks import (
 from src.db import SessionLocal
 from src.models.cvat import Job, Project, Task
 from src.models.webhook import Webhook
-from src.services.webhook import OracleWebhookDirectionTag
+from src.services.webhook import OracleWebhookDirectionTags
 
-from tests.utils.constants import DEFAULT_URL, RECORDING_ORACLE_ADDRESS
+from tests.utils.constants import DEFAULT_MANIFEST_URL, RECORDING_ORACLE_ADDRESS
 
 escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost.value
@@ -45,7 +45,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.validation.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -60,8 +60,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_completed.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=RecordingOracleEventTypes.task_completed.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -70,9 +70,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -90,7 +88,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -105,8 +103,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_completed.value,
-            direction=OracleWebhookDirectionTag.incoming,
+            event_type=RecordingOracleEventTypes.task_completed.value,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -115,9 +113,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -136,7 +132,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=cvat_id,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.validation.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -147,7 +143,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=task_id,
             cvat_id=cvat_id,
             cvat_project_id=cvat_project.cvat_id,
-            status=TaskStatus.completed.value,
+            status=TaskStatuses.completed.value,
         )
         self.session.add(cvat_task)
 
@@ -169,9 +165,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_rejected.value,
+            event_type=RecordingOracleEventTypes.task_rejected.value,
             event_data={"rejected_job_ids": [cvat_id]},
-            direction=OracleWebhookDirectionTag.incoming,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -180,9 +176,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -193,7 +187,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         db_task = self.session.query(Task).filter_by(id=task_id).first()
 
-        self.assertEqual(db_task.status, TaskStatus.annotation.value)
+        self.assertEqual(db_task.status, TaskStatuses.annotation.value)
 
         db_job = self.session.query(Job).filter_by(id=job_id).first()
 
@@ -210,7 +204,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=cvat_id,
             cvat_cloudstorage_id=1,
             status=ProjectStatuses.completed.value,
-            job_type=TaskType.image_label_binary.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
             bucket_url="https://test.storage.googleapis.com/",
@@ -225,9 +219,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_rejected.value,
+            event_type=RecordingOracleEventTypes.task_rejected.value,
             event_data={"rejected_job_ids": [cvat_id]},
-            direction=OracleWebhookDirectionTag.incoming,
+            direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
@@ -236,9 +230,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_incoming_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -259,8 +251,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=ExchangeOracleEventType.task_finished.value,
-            direction=OracleWebhookDirectionTag.outgoing,
+            event_type=ExchangeOracleEventTypes.task_finished.value,
+            direction=OracleWebhookDirectionTags.outgoing,
         )
 
         self.session.add(webhook)
@@ -273,9 +265,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             w3 = Mock()
             w3.eth.chain_id = ChainId.LOCALHOST.value
             mock_escrow_data = Mock()
-            mock_escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            mock_escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = mock_escrow_data
-            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_URL)
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response
@@ -283,9 +275,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_outgoing_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -303,8 +293,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_completed.value,
-            direction=OracleWebhookDirectionTag.outgoing,
+            event_type=RecordingOracleEventTypes.task_completed.value,
+            direction=OracleWebhookDirectionTags.outgoing,
         )
 
         self.session.add(webhook)
@@ -313,9 +303,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_outgoing_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)

@@ -19,10 +19,10 @@ export const networkMap: NetworkMapDto = {
     chainId: ChainId.BSC_MAINNET,
     rpcUrl: 'https://bsc-dataseed1.binance.org/',
   },
-  mumbai: {
-    chainId: ChainId.POLYGON_MUMBAI,
+  amoy: {
+    chainId: ChainId.POLYGON_AMOY,
     rpcUrl:
-      'https://polygon-mumbai.g.alchemy.com/v2/vKNSJzJf6SW2sdW-05bgFwoyFxUrMzii',
+      'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
   },
   goerli: {
     chainId: ChainId.GOERLI,
@@ -36,13 +36,17 @@ export const networkMap: NetworkMapDto = {
     chainId: ChainId.BSC_TESTNET,
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
+  localhost: {
+    chainId: ChainId.LOCALHOST,
+    rpcUrl: 'http://0.0.0.0:8545',
+  },
 };
 
 export const networks = Object.values(networkMap).map((network) => network);
 
 export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
-  ChainId.POLYGON_MUMBAI,
+  ChainId.POLYGON_AMOY,
   ChainId.GOERLI,
 ];
 
@@ -51,3 +55,5 @@ export const MAINNET_CHAIN_IDS = [
   ChainId.POLYGON,
   ChainId.MOONBEAM,
 ];
+
+export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];
