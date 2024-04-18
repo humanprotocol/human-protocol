@@ -5,7 +5,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper';
-import { jobAssignmentOracleUrl } from '../../job-assignment/spec/job-assignment.fixtures';
 import {
   jobsDiscoveryOracleUrlFixture,
   jobsDiscoveryParamsCommandFixture,

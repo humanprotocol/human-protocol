@@ -3,7 +3,7 @@ import {
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
   JobsDiscoveryParamsDetails,
-  JobsDiscoveryParamsDto, JobsDiscoveryResponse,
+  JobsDiscoveryParamsDto,
   JobsDiscoveryResponseItem,
 } from '../model/jobs-discovery.model';
 import {
@@ -27,7 +27,7 @@ const REWARD_TOKEN = 'ETH';
 const CREATED_AT = '2024-03-01T12:00:00Z';
 const JOB_TITLE = 'test job';
 const EXCHANGE_ORACLE_ADDRESS = '0x3dfa342';
-export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL
+export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL;
 export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
   address: EXCHANGE_ORACLE_ADDRESS,
