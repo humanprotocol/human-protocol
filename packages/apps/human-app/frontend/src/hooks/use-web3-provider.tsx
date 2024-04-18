@@ -3,7 +3,7 @@ import type { JsonRpcSigner } from 'ethers';
 import { BrowserProvider } from 'ethers';
 import { useEffect, useState } from 'react';
 
-export function useWalletConnection() {
+export function useWeb3Provider() {
   const { walletProvider } = useWeb3ModalProvider();
   const [provider, setProvider] = useState<BrowserProvider>();
   const [signer, setSigner] = useState<JsonRpcSigner>();
