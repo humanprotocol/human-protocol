@@ -14,7 +14,7 @@ export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];
 
 export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
-  ChainId.POLYGON_MUMBAI,
+  ChainId.POLYGON_AMOY,
   ChainId.GOERLI,
 ];
 export const MAINNET_CHAIN_IDS = [
@@ -25,12 +25,15 @@ export const MAINNET_CHAIN_IDS = [
 
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
+export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
+  JobRequestType.IMAGE_BOXES_FROM_POINTS,
+  JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
 ];
 
 export const CANCEL_JOB_STATUSES = [
@@ -62,3 +65,5 @@ export const HCAPTCHA_ORACLE_STAKE = 0.05;
 export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';
 
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+
+export const E2E_TEST_ENV = 'test-e2e';

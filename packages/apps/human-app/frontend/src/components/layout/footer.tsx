@@ -5,15 +5,29 @@ import { colorPalette } from '@/styles/color-palette';
 import { env } from '@/shared/env';
 import { ChatIcon } from '../ui/icons';
 
-export function Footer() {
+interface FooterProps {
+  isProtected?: boolean;
+}
+export function Footer({ isProtected }: FooterProps) {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile('lg');
+
+  const parseLeftPadding = () => {
+    if (isMobile) {
+      return '0';
+    }
+    if (isProtected) {
+      return '200px';
+    }
+    return '44px';
+  };
 
   return (
     <Grid
       container
       sx={{
-        px: isMobile ? 0 : '44px',
+        pr: isMobile ? 0 : '44px',
+        pl: parseLeftPadding(),
         pb: isMobile ? 0 : '44px',
         pt: '32px',
       }}

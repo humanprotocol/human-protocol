@@ -233,7 +233,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
-    escrowEntity.status = event.params._isPartial ? 'Partially Paid' : 'Paid';
+    escrowEntity.status = event.params._isPartial ? 'Partial' : 'Paid';
 
     // Read data on-chain
     const escrowContract = EscrowContract.bind(event.address);

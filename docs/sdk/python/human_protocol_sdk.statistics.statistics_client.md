@@ -8,7 +8,7 @@ This client enables to obtain statistical information from the subgraph.
 from human_protocol_sdk.constants import ChainId
 from human_protocol_sdk.statistics import StatisticsClient
 
-statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 ```
 
 ## Module
@@ -134,13 +134,13 @@ Initializes a PaymentStatistics instance.
 * **Parameters:**
   **daily_payments_data** (`List`[[`DailyPaymentData`](#human_protocol_sdk.statistics.statistics_client.DailyPaymentData)]) – Daily payments data
 
-### *class* human_protocol_sdk.statistics.statistics_client.StatisticsClient(chain_id=ChainId.POLYGON_MUMBAI)
+### *class* human_protocol_sdk.statistics.statistics_client.StatisticsClient(chain_id=ChainId.POLYGON_AMOY)
 
 Bases: `object`
 
 A client used to get statistical data.
 
-#### \_\_init_\_(chain_id=ChainId.POLYGON_MUMBAI)
+#### \_\_init_\_(chain_id=ChainId.POLYGON_AMOY)
 
 Initializes a Statistics instance
 
@@ -162,7 +162,7 @@ Get escrow statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_escrow_statistics())
   print(
@@ -190,7 +190,7 @@ Get HMT statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_hmt_statistics())
   print(
@@ -218,7 +218,7 @@ Get payment statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_payment_statistics())
   print(
@@ -246,7 +246,7 @@ Get worker statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_worker_statistics())
   print(

@@ -186,7 +186,7 @@ export const MOCK_ACCESS_TOKEN = 'access_token';
 export const MOCK_REFRESH_TOKEN = 'refresh_token';
 export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';
 export const MOCK_REFRESH_TOKEN_HASHED = 'refresh_token_hashed';
-export const MOCK_EXPIRES_IN = 1000000000000000;
+export const MOCK_EXPIRES_IN = 300000;
 export const MOCK_SENDGRID_API_KEY =
   'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
@@ -232,3 +232,5 @@ Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
 export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
+
+export const MOCK_HCAPTCHA_TOKEN = 'test-token';

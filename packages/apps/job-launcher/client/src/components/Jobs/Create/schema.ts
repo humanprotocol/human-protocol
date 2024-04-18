@@ -1,15 +1,16 @@
 import * as Yup from 'yup';
+import { CvatJobType } from '../../../types';
 
 export const CvatJobRequestValidationSchema = Yup.object().shape({
   labels: Yup.array().of(Yup.string()).min(1, 'At least one label is required'),
   description: Yup.string().required('Description is required'),
-  dataProvider: Yup.string().required('Data provider is required'),
-  dataRegion: Yup.string().required('Data region is required'),
-  dataBucketName: Yup.string().required('Data bucket name is required'),
+  dataProvider: Yup.string().required('Provider is required'),
+  dataRegion: Yup.string().required('Region is required'),
+  dataBucketName: Yup.string().required('Bucket name is required'),
   dataPath: Yup.string().optional(),
-  gtProvider: Yup.string().required('Ground truth provider is required'),
-  gtRegion: Yup.string().required('Ground truth region is required'),
-  gtBucketName: Yup.string().required('Ground truth bucket name is required'),
+  gtProvider: Yup.string().required('Provider is required'),
+  gtRegion: Yup.string().required('Region is required'),
+  gtBucketName: Yup.string().required('Bucket name is required'),
   gtPath: Yup.string().optional(),
   userGuide: Yup.string()
     .required('User Guide URL is required')
@@ -19,6 +20,38 @@ export const CvatJobRequestValidationSchema = Yup.object().shape({
     .moreThan(0, 'Accuracy target must be greater than 0')
     .max(100, 'Accuracy target must be less than or equal to 100'),
 });
+
+export const dataValidationSchema = (type: CvatJobType) => {
+  let schema;
+  if (
+    type === CvatJobType.IMAGE_BOXES_FROM_POINTS ||
+    type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES
+  ) {
+    schema = Yup.object().shape({
+      bpProvider: Yup.string().required('Provider is required'),
+      bpRegion: Yup.string().required('Region is required'),
+      bpBucketName: Yup.string().required('Bucket name is required'),
+      bpPath: Yup.string().optional(),
+    });
+    if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES) {
+      schema = schema.concat(
+        Yup.object().shape({
+          nodes: Yup.array()
+            .of(Yup.string())
+            .min(1, 'At least one node is required'),
+        }),
+      );
+    }
+  } else {
+    schema = Yup.object().shape({
+      bpProvider: Yup.string().optional(),
+      bpRegion: Yup.string().optional(),
+      bpBucketName: Yup.string().optional(),
+      bpPath: Yup.string().optional(),
+    });
+  }
+  return schema;
+};
 
 export const FortuneJobRequestValidationSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),

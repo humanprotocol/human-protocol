@@ -11,10 +11,10 @@ export const networkMap: NetworkMapDto = {
     chainId: ChainId.BSC_MAINNET,
     rpcUrl: 'https://bsc-dataseed1.binance.org/',
   },
-  mumbai: {
-    chainId: ChainId.POLYGON_MUMBAI,
+  amoy: {
+    chainId: ChainId.POLYGON_AMOY,
     rpcUrl:
-      'https://polygon-mumbai.g.alchemy.com/v2/vKNSJzJf6SW2sdW-05bgFwoyFxUrMzii',
+      'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
   },
   goerli: {
     chainId: ChainId.GOERLI,
@@ -30,7 +30,7 @@ export const networkMap: NetworkMapDto = {
   },
   localhost: {
     chainId: ChainId.LOCALHOST,
-    rpcUrl: 'http://localhost:8545',
+    rpcUrl: 'http://0.0.0.0:8545/',
   },
 };
 

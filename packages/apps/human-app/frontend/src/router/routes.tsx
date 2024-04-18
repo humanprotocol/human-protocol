@@ -4,6 +4,8 @@ import { Playground } from '@/pages/playground/playground.page';
 import { ProtectedPage } from '@/pages/protected.page';
 import { SignInWorkerPage } from '@/pages/worker/sign-in.page';
 import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
+import { OperatorProfilePage } from '@/pages/operator/profile.page';
+import { WorkerProfilePage } from '@/pages/worker/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { SignUpOperatorPage } from '@/pages/operator/sign-up.page';
 import { routerPaths } from '@/router/router-paths';
@@ -44,5 +46,13 @@ export const protectedRoutes: RouteProps[] = [
   {
     path: '/worker/jobs',
     element: <JobsPage />,
+  },
+  {
+    path: '/operator/profile',
+    element: <OperatorProfilePage />,
+  },
+  {
+    path: '/worker/profile',
+    element: <WorkerProfilePage />,
   },
 ];

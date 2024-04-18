@@ -22,6 +22,9 @@ class Task(Base):
     jobs: Mapped[List["Job"]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
+    gt_stats: Mapped[List["GtStats"]] = relationship(
+        back_populates="task", cascade="all, delete", passive_deletes=True
+    )
 
 
 class Job(Base):
@@ -45,3 +48,19 @@ class ValidationResult(Base):
     annotation_quality = Column(Float, nullable=False)
 
     job: Mapped["Job"] = relationship(back_populates="validation_results")
+
+
+class GtStats(Base):
+    __tablename__ = "gt_stats"
+
+    # A composite primary key is used
+    task_id = Column(
+        String, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True, nullable=False
+    )
+
+    # TODO: think how to store this better
+    gt_key = Column(String, index=True, primary_key=True, nullable=False)
+
+    failed_attempts = Column(Integer, default=0, nullable=False)
+
+    task: Mapped["Task"] = relationship(back_populates="gt_stats")

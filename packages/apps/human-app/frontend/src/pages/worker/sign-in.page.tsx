@@ -1,7 +1,6 @@
 import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -9,6 +8,7 @@ import { FormCard } from '@/components/ui/form-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
+import type { SignInDto } from '@/api/servieces/worker/sign-in';
 import {
   signInDtoSchema,
   useSignInMutation,
@@ -31,18 +31,6 @@ function formattedSignInErrorMessage(unknownError: unknown) {
   return <Trans>errors.unknown</Trans>;
 }
 
-export interface Inputs {
-  email: string;
-  password: string;
-}
-
-const signUpDtoSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
-
-type SignUpDto = z.infer<typeof signUpDtoSchema>;
-
 export function SignInWorkerPage() {
   const { t } = useTranslation();
   const { setGrayBackground } = useBackgroundColorStore();
@@ -52,7 +40,7 @@ export function SignInWorkerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
   }, []);
 
-  const methods = useForm<SignUpDto>({
+  const methods = useForm<SignInDto>({
     defaultValues: {
       email: '',
       password: '',
@@ -67,7 +55,7 @@ export function SignInWorkerPage() {
     isPending: isSignInWorkerPending,
   } = useSignInMutation();
 
-  function handleWorkerSignIn(data: SignUpDto) {
+  function handleWorkerSignIn(data: SignInDto) {
     signInWorkerMutate(data);
   }
 

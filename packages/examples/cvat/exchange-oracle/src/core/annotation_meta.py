@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-ANNOTATION_METAFILE_NAME = "annotation_meta.json"
+ANNOTATION_RESULTS_METAFILE_NAME = "annotation_meta.json"
 RESULTING_ANNOTATIONS_FILE = "resulting_annotations.zip"
 
 

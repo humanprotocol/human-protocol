@@ -25,9 +25,13 @@ import {
   DiscordIcon,
   HelpIcon,
   MobileHeaderIcon,
+  ProfileIcon,
+  CheckmarkIcon,
+  LockerIcon,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
+import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 
 export function UiExample() {
   const { openModal } = useModalStore();
@@ -157,6 +161,9 @@ export function UiExample() {
         </Button>
       </Stack>
 
+      <h2>Connect wallet button</h2>
+      <ConnectWalletBtn />
+
       <h2>Loader</h2>
       <Stack
         alignItems="center"
@@ -230,6 +237,15 @@ export function UiExample() {
       <Stack alignItems="center" direction="row" spacing={4}>
         <Grid>
           <MobileHeaderIcon />
+        </Grid>
+        <Grid>
+          <ProfileIcon />
+        </Grid>
+        <Grid>
+          <CheckmarkIcon />
+        </Grid>
+        <Grid>
+          <LockerIcon />
         </Grid>
       </Stack>
 

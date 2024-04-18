@@ -12,7 +12,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   SignupOperatorCommand,
   SignupOperatorDto,
-} from './interfaces/operator-registration.interface';
+} from './model/operator-registration.model';
 
 @Controller()
 export class OperatorController {

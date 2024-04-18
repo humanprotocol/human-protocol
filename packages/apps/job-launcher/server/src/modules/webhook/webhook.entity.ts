@@ -10,7 +10,7 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'webhook' })
-@Index(['chainId', 'escrowAddress'], { unique: true })
+@Index(['chainId', 'escrowAddress', 'eventType'], { unique: true })
 export class WebhookEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;

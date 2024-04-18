@@ -5,10 +5,10 @@ import {
 } from 'material-react-table';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { Box } from '@mui/material';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
+import { Chips } from '@/components/ui/chips';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import {
   getJobsTableData,
@@ -19,37 +19,37 @@ const columns: MRT_ColumnDef<AvailableJobs>[] = [
   {
     accessorKey: 'jobDescription',
     header: t('worker.jobs.jobDescription'),
-    size: 150,
+    size: 100,
     enableSorting: true,
   },
   {
     accessorKey: 'escrowAddress',
     header: 'Escrow address',
-    size: 150,
+    size: 100,
     enableSorting: true,
   },
   {
     accessorKey: 'network',
     header: 'Network',
-    size: 150,
+    size: 100,
     enableSorting: true,
   },
   {
     accessorKey: 'rewardAmount',
     header: 'Reward amount',
-    size: 150,
+    size: 100,
     enableSorting: true,
   },
   {
     accessorKey: 'jobTypeChips',
     header: 'Job type',
-    size: 150,
+    size: 200,
     enableSorting: true,
   },
   {
     accessorKey: 'buttonColumn',
     header: '',
-    size: 150,
+    size: 100,
     enableSorting: true,
   },
 ];
@@ -70,16 +70,7 @@ export function AvailableJobsTable() {
       ? []
       : data.map((job) => ({
           ...job,
-          jobTypeChips: job.jobType.map((j) => (
-            <Box
-              key={crypto.randomUUID()}
-              sx={{
-                marginRight: '5px',
-              }}
-            >
-              {j}
-            </Box>
-          )),
+          jobTypeChips: <Chips data={job.jobType} />,
           escrowAddress: shortenEscrowAddress(job.escrowAddress),
           buttonColumn: (
             <Button

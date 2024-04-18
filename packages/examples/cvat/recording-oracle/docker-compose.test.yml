@@ -80,11 +80,18 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'recording_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
-      ENDPOINT_URL: 'host.docker.internal:9000'
-      ACCESS_KEY: 'dev'
-      SECRET_KEY: 'devdevdev'
-      RESULTS_BUCKET_NAME: 'results'
-      USE_SSL: False
+      STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
+      STORAGE_ACCESS_KEY: 'dev'
+      STORAGE_SECRET_KEY: 'devdevdev'
+      STORAGE_RESULTS_BUCKET_NAME: 'results'
+      STORAGE_PROVIDER: 'aws'
+      STORAGE_USE_SSL: False
+      EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
+      EXCHANGE_ORACLE_STORAGE_ACCESS_KEY: 'dev'
+      EXCHANGE_ORACLE_STORAGE_SECRET_KEY: 'devdevdev'
+      EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: 'results'
+      EXCHANGE_ORACLE_STORAGE_USE_SSL: False
+      EXCHANGE_ORACLE_STORAGE_PROVIDER: 'aws'
     depends_on:
       postgres:
         condition: service_started

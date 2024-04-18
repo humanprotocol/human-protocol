@@ -55,6 +55,29 @@ const fortune: Chain = {
   },
 };
 
+const polygonAmoy: Chain = {
+  id: 80002,
+  name: 'Polygon Amoy',
+  network: 'Amoy',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Matic',
+    symbol: 'MATIC',
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
+      ],
+    },
+    public: {
+      http: [
+        'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
+      ],
+    },
+  },
+};
+
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
@@ -64,6 +87,7 @@ const { chains, provider, webSocketProvider } = configureChains(
     polygon,
     skaleHumanProtocol,
     polygonMumbai,
+    polygonAmoy,
     bsc,
     bscTestnet,
     fortune,

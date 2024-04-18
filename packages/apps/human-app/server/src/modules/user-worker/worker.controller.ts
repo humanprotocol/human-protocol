@@ -9,15 +9,15 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   SignupWorkerCommand,
   SignupWorkerDto,
-} from './interfaces/worker-registration.interface';
+} from './model/worker-registration.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { WorkerService } from './worker.service';
 import {
   SigninWorkerCommand,
   SigninWorkerDto,
-} from './interfaces/worker-signin.interface';
-import { SigninWorkerResponse } from './interfaces/worker-signin.interface';
+} from './model/worker-signin.model';
+import { SigninWorkerResponse } from './model/worker-signin.model';
 
 @Controller()
 export class WorkerController {

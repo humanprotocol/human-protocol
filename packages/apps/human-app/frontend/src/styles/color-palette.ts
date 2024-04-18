@@ -36,6 +36,9 @@ export const colorPalette = {
     text: '#CBCFE8',
     disabled: '#FBFBFE',
   },
+  chip: {
+    main: 'rgba(203, 207, 232, 0.28)',
+  },
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
 } as const;

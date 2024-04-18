@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
-import { SignupWorkerCommand } from './interfaces/worker-registration.interface';
-import { SigninWorkerCommand } from './interfaces/worker-signin.interface';
+import { SignupWorkerCommand } from './model/worker-registration.model';
+import { SigninWorkerCommand } from './model/worker-signin.model';
 
 @Injectable()
 export class WorkerService {

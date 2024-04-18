@@ -611,12 +611,7 @@ describe('Escrow', () => {
     );
 
     // Escrow
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
-      'status',
-      'Partially Paid'
-    );
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Partial');
 
     // Bulk 2
     const bulk2 = createBulkTransferEvent(

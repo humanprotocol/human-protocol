@@ -236,12 +236,12 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Get('/result')
+  @Get('/result/:id')
   public async getResult(
     @Request() req: RequestWithUser,
-    @Query('job_id') jobId: number,
+    @Param() params: JobIdDto,
   ): Promise<FortuneFinalResultDto[] | string> {
-    return this.jobService.getResult(req.user.id, jobId);
+    return this.jobService.getResult(req.user.id, params.id);
   }
 
   @ApiOperation({

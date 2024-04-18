@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { colorPalette } from '@/styles/color-palette';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
@@ -28,7 +28,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    paddingLeft: isMobile ? 0 : `${drawerWidth}px`,
+    paddingLeft: isMobile ? 0 : `140px`,
   }),
 }));
 
@@ -67,7 +67,7 @@ export function Layout() {
       <Main isMobile={isMobile} open={drawerOpen}>
         <Outlet />
       </Main>
-      <Footer />
+      <Footer isProtected />
     </Grid>
   );
 }

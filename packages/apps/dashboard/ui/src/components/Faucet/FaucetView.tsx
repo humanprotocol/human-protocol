@@ -19,7 +19,7 @@ export const FaucetView: FC = () => {
   const [step, setStep] = useState<number>(0);
   const [txHash, setTxHash] = useState<string>('');
   const [network, setNetwork] = useState<NetworkData>(
-    NETWORKS[ChainId.POLYGON_MUMBAI]!
+    NETWORKS[ChainId.POLYGON_AMOY]!
   );
 
   return (
