@@ -6,6 +6,7 @@ import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Env } from '../../common/enums/web3';
 import { Web3Service } from './web3.service';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from './../../../test/constants';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 describe('Web3Service', () => {
   let mockConfigService: Partial<ConfigService>;
@@ -18,7 +19,7 @@ describe('Web3Service', () => {
           case 'WEB3_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'WEB3_ENV':
-            return 'testnet';
+            return Web3Env.TESTNET;
           default:
             return defaultValue;
         }
@@ -28,6 +29,7 @@ describe('Web3Service', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         Web3Service,
+        Web3ConfigService,
         {
           provide: ConfigService,
           useValue: mockConfigService,
@@ -40,7 +42,7 @@ describe('Web3Service', () => {
 
   describe('getSigner', () => {
     it('should return a signer for a valid chainId on TESTNET', () => {
-      const validChainId = ChainId.POLYGON_MUMBAI;
+      const validChainId = ChainId.POLYGON_AMOY;
 
       const signer = web3Service.getSigner(validChainId);
       expect(signer).toBeDefined();
@@ -57,13 +59,13 @@ describe('Web3Service', () => {
 
   describe('getValidChains', () => {
     it('should get all valid chainIds on MAINNET', () => {
-      (web3Service as any).currentWeb3Env = Web3Env.MAINNET;
+      mockConfigService.get = jest.fn().mockReturnValue(Web3Env.MAINNET);
       const validChainIds = web3Service.getValidChains();
       expect(validChainIds).toBe(MAINNET_CHAIN_IDS);
     });
 
     it('should get all valid chainIds on TESTNET', () => {
-      (web3Service as any).currentWeb3Env = Web3Env.TESTNET;
+      mockConfigService.get = jest.fn().mockReturnValue(Web3Env.TESTNET);
       const validChainIds = web3Service.getValidChains();
       expect(validChainIds).toBe(TESTNET_CHAIN_IDS);
     });

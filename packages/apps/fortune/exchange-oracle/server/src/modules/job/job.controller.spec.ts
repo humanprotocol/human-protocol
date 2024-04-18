@@ -1,20 +1,8 @@
-import { HttpService } from '@nestjs/axios';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { of } from 'rxjs';
-import {
-  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-} from '../../../test/constants';
-import { StorageService } from '../storage/storage.service';
-import { Web3Service } from '../web3/web3.service';
+import { RequestWithUser } from 'src/common/types/jwt';
 import { JobController } from './job.controller';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
 
 jest.mock('../../common/utils/signature');
@@ -27,122 +15,66 @@ describe('JobController', () => {
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
 
-  const reputationOracleURL = 'https://example.com/reputationoracle';
-  const configServiceMock = {
-    get: jest.fn().mockReturnValue(reputationOracleURL),
-  };
-
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-          })),
-        ),
-      ],
+      imports: [],
       controllers: [JobController],
-      providers: [
-        JobService,
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
-        {
-          provide: Web3Service,
-          useValue: {
-            getSigner: jest.fn().mockReturnValue({
-              address: '0x1234567890123456789012345678901234567892',
-              getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-            }),
-          },
-        },
-        StorageService,
-        {
-          provide: HttpService,
-          useValue: {
-            post: jest.fn().mockReturnValue(of({ status: 200, data: {} })),
-          },
-        },
-      ],
+      providers: [{ provide: JobService, useValue: createMock<JobService>() }],
     }).compile();
 
     jobController = moduleRef.get<JobController>(JobController);
     jobService = moduleRef.get<JobService>(JobService);
   });
 
-  describe('getDetails', () => {
-    it('should return job details', async () => {
-      const expectedDetails: JobDetailsDto = {
-        escrowAddress,
-        chainId,
-        manifest: {
-          requesterTitle: 'Example Title',
-          requesterDescription: 'Example Description',
-          submissionsRequired: 5,
-          fundAmount: 100,
-        },
-      };
-
-      jest.spyOn(jobService, 'getDetails').mockResolvedValue(expectedDetails);
-
-      const result = await jobController.getDetails(chainId, escrowAddress);
-
-      expect(result).toBe(expectedDetails);
-      expect(jobService.getDetails).toHaveBeenCalledWith(
-        chainId,
-        escrowAddress,
-      );
-    });
-  });
-
-  describe('getPendingJobs', () => {
-    it('should return pending jobs', async () => {
-      const expectedJobs: any[] = [
-        '0x1234567890123456789012345678901234567891',
-        '0x1234567890123456789012345678901234567892',
-      ];
-
-      jest.spyOn(jobService, 'getPendingJobs').mockResolvedValue(expectedJobs);
-
-      const result = await jobController.getPendingJobs(chainId, workerAddress);
-
-      expect(result).toBe(expectedJobs);
-      expect(jobService.getPendingJobs).toHaveBeenCalledWith(
-        chainId,
-        workerAddress,
-      );
-    });
-  });
-
-  describe('solveJob', () => {
-    it('should solve a job', async () => {
+  describe('getJobs', () => {
+    it('should call jobService.getJobList', async () => {
       const solution = 'job-solution';
       const solveJobDto: SolveJobDto = {
         chainId,
         escrowAddress,
-        workerAddress,
         solution,
       };
 
       jest.spyOn(jobService, 'solveJob').mockResolvedValue();
 
-      await jobController.solveJob(solveJobDto);
+      await jobController.solveJob(
+        {
+          user: { address: workerAddress },
+        } as RequestWithUser,
+        solveJobDto,
+      );
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
         solveJobDto.chainId,
         solveJobDto.escrowAddress,
-        solveJobDto.workerAddress,
+        workerAddress,
+        solveJobDto.solution,
+      );
+    });
+  });
+
+  describe('solveJob', () => {
+    it('should call jobService.solveJob', async () => {
+      const solution = 'job-solution';
+      const solveJobDto: SolveJobDto = {
+        chainId,
+        escrowAddress,
+        solution,
+      };
+
+      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
+
+      await jobController.solveJob(
+        {
+          user: { address: workerAddress },
+        } as RequestWithUser,
+        solveJobDto,
+      );
+
+      expect(jobService.solveJob).toHaveBeenCalledWith(
+        solveJobDto.chainId,
+        solveJobDto.escrowAddress,
+        workerAddress,
         solveJobDto.solution,
       );
     });

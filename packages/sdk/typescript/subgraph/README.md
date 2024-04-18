@@ -17,13 +17,13 @@ npm install
 1. Generate & deploy on matic
 
 ```bash
-npm run quickstart:matic
+yarn quickstart:matic
 ```
 
 2. Generate & deploy on goerli
 
 ```bash
-npm run quickstart:goerli
+yarn quickstart:goerli
 ```
 
 You can access it on `http://localhost:8020/`
@@ -37,11 +37,11 @@ The deployment of the graph on each network is automatically triggered by the gi
 To run tests next commands should be executed:
 
 ```bash
-npm run codegen
+yarn codegen
 
-npm run build
+yarn build
 
-npm test
+yarn test
 ```
 
 ### Supported networks

@@ -11,13 +11,13 @@ import { WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
 import { EventType, WebhookStatus } from '../../common/enums';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 import { firstValueFrom } from 'rxjs';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { CaseConverter } from '../../common/utils/case-converter';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @Injectable()
 export class WebhookService {
@@ -25,7 +25,8 @@ export class WebhookService {
   constructor(
     private readonly httpService: HttpService,
     private readonly webhookRepository: WebhookRepository,
-    public readonly configService: ConfigService,
+    public readonly serverConfigService: ServerConfigService,
+    public readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   /**
@@ -41,13 +42,14 @@ export class WebhookService {
         throw new BadRequestException(ErrorWebhook.InvalidEventType);
       }
 
-      const webhookEntity = await this.webhookRepository.create({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        status: WebhookStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      });
+      let webhookEntity = new WebhookIncomingEntity();
+      webhookEntity.chainId = dto.chainId;
+      webhookEntity.escrowAddress = dto.escrowAddress;
+      webhookEntity.status = WebhookStatus.PENDING;
+      webhookEntity.waitUntil = new Date();
+      webhookEntity.retriesCount = 0;
+
+      webhookEntity = await this.webhookRepository.createUnique(webhookEntity);
 
       if (!webhookEntity) {
         this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
@@ -68,10 +70,7 @@ export class WebhookService {
   public async handleWebhookError(
     webhookEntity: WebhookIncomingEntity,
   ): Promise<void> {
-    if (
-      webhookEntity.retriesCount >=
-      this.configService.get(ConfigNames.MAX_RETRY_COUNT)
-    ) {
+    if (webhookEntity.retriesCount >= this.serverConfigService.maxRetryCount) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {
       webhookEntity.waitUntil = new Date();
@@ -87,7 +86,7 @@ export class WebhookService {
     const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
     const signedBody = await signMessage(
       snake_case_body,
-      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+      this.web3ConfigService.privateKey,
     );
     const { status } = await firstValueFrom(
       await this.httpService.post(webhookUrl, snake_case_body, {
@@ -95,7 +94,7 @@ export class WebhookService {
       }),
     );
 
-    if (status !== HttpStatus.OK) {
+    if (status !== HttpStatus.CREATED) {
       this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
       throw new NotFoundException(ErrorWebhook.NotSent);
     }

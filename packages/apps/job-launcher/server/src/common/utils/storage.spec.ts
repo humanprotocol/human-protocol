@@ -2,7 +2,7 @@ import { AWSRegions, StorageProviders } from '../enums/storage';
 import { JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { StorageDataDto } from '../../modules/job/job.dto';
-import { listObjectsInBucket } from './storage';
+import { generateBucketUrl, listObjectsInBucket } from './storage';
 
 jest.mock('axios');
 
@@ -15,7 +15,7 @@ describe('Storage utils', () => {
         bucketName: 'my-bucket',
         path: 'my-folder',
       };
-      const jobType: JobRequestType = JobRequestType.IMAGE_POINTS;
+      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
       const objects = ['object1', 'object2'];
       const response = {
         status: 200,
@@ -32,7 +32,7 @@ describe('Storage utils', () => {
       };
       axios.get = jest.fn().mockResolvedValueOnce(response);
 
-      const result = await listObjectsInBucket(storageData, jobType);
+      const result = await listObjectsInBucket(url);
 
       expect(result).toEqual(objects);
     });
@@ -44,7 +44,7 @@ describe('Storage utils', () => {
         bucketName: 'my-bucket',
         path: 'my-folder',
       };
-      const jobType: JobRequestType = JobRequestType.IMAGE_POINTS;
+      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
       const objects = Array.from({ length: 4 }, (_, i) => `object${i + 1}`);
       const response1 = {
         status: 200,
@@ -78,7 +78,7 @@ describe('Storage utils', () => {
         .mockResolvedValueOnce(response1)
         .mockResolvedValueOnce(response2);
 
-      const result = await listObjectsInBucket(storageData, jobType);
+      const result = await listObjectsInBucket(url);
 
       expect(result).toEqual(objects);
     });
@@ -90,7 +90,7 @@ describe('Storage utils', () => {
         bucketName: 'my-bucket',
         path: 'my-folder',
       };
-      const jobType: JobRequestType = JobRequestType.IMAGE_POINTS;
+      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
       const response = {
         status: 200,
         data: `
@@ -100,7 +100,7 @@ describe('Storage utils', () => {
       };
       axios.get = jest.fn().mockResolvedValueOnce(response);
 
-      const result = await listObjectsInBucket(storageData, jobType);
+      const result = await listObjectsInBucket(url);
 
       expect(result).toEqual([]);
     });
@@ -112,14 +112,14 @@ describe('Storage utils', () => {
         bucketName: 'non-existent-bucket',
         path: 'my-folder',
       };
-      const jobType: JobRequestType = JobRequestType.IMAGE_POINTS;
+      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
       const response = {
         status: 404,
         data: 'Bucket not found',
       };
       axios.get = jest.fn().mockResolvedValueOnce(response);
 
-      await expect(listObjectsInBucket(storageData, jobType)).rejects.toEqual(
+      await expect(listObjectsInBucket(url)).rejects.toEqual(
         'Failed to fetch bucket contents',
       );
     });
@@ -131,14 +131,14 @@ describe('Storage utils', () => {
         bucketName: 'private-bucket',
         path: 'my-folder',
       };
-      const jobType: JobRequestType = JobRequestType.IMAGE_POINTS;
+      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
       const response = {
         status: 403,
         data: 'Access denied',
       };
       axios.get = jest.fn().mockResolvedValueOnce(response);
 
-      await expect(listObjectsInBucket(storageData, jobType)).rejects.toEqual(
+      await expect(listObjectsInBucket(url)).rejects.toEqual(
         'Failed to fetch bucket contents',
       );
     });

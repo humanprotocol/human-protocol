@@ -100,6 +100,13 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
+    polygonAmoy: {
+      chainId: 80002,
+      url: process.env.ETH_POLYGON_AMOY_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
+    },
     bsc: {
       chainId: 56,
       url: process.env.ETH_BSC_URL || '',
@@ -203,6 +210,7 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
+      polygonAmoy: process.env.OKLINK_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
@@ -220,6 +228,15 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: process.env.SKALE_BROWSER_API_URL || '',
           browserURL: process.env.SKALE_BROWSER_URL || '',
+        },
+      },
+      {
+        network: 'polygonAmoy',
+        chainId: 80002,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/AMOY_TESTNET',
+          browserURL: 'https://www.oklink.com',
         },
       },
     ],

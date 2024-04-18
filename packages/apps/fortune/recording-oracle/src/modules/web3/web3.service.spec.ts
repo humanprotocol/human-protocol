@@ -1,22 +1,20 @@
-import { ConfigModule, registerAs } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { Web3Service } from './web3.service';
 import { MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { networkMap } from '../../common/constants/networks';
+import { Web3Service } from './web3.service';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
 
+  jest
+    .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
+    .mockReturnValue(MOCK_WEB3_PRIVATE_KEY);
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('web3', () => ({
-            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
-          })),
-        ),
-      ],
-      providers: [Web3Service],
+      providers: [Web3Service, ConfigService, Web3ConfigService],
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);

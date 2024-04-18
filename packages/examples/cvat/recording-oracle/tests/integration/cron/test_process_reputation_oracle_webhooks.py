@@ -11,12 +11,12 @@ from src.core.types import (
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
-    RecordingOracleEventType,
+    RecordingOracleEventTypes,
 )
 from src.crons.process_reputation_oracle_webhooks import process_outgoing_reputation_oracle_webhooks
 from src.db import SessionLocal
 from src.models.webhook import Webhook
-from src.services.webhook import OracleWebhookDirectionTag
+from src.services.webhook import OracleWebhookDirectionTags
 
 from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, SIGNATURE
 from tests.utils.setup_escrow import create_escrow
@@ -41,13 +41,13 @@ class ServiceIntegrationTest(unittest.TestCase):
     def get_webhook(self, escrow_address, chain_id, event_data):
         return Webhook(
             id=str(uuid.uuid4()),
-            direction=OracleWebhookDirectionTag.outgoing.value,
+            direction=OracleWebhookDirectionTags.outgoing.value,
             signature=SIGNATURE,
             escrow_address=escrow_address,
             chain_id=chain_id,
             type=OracleWebhookTypes.reputation_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventType.task_completed,
+            event_type=RecordingOracleEventTypes.task_completed,
             event_data=event_data,
         )
 
@@ -89,9 +89,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 expected_url,
                 headers={"human-signature": SIGNATURE},
                 json={
-                    "escrowAddress": escrow_address,
-                    "chainId": chain_id,
-                    "eventType": RecordingOracleEventType.task_completed.value,
+                    "escrow_address": escrow_address,
+                    "chain_id": chain_id,
+                    "event_type": RecordingOracleEventTypes.task_completed.value,
                 },
             )
             self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)

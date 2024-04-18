@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
 import { IsPassword } from '../../common/validators';
-import { UserEntity } from '../user/user.entity';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -47,7 +46,7 @@ export class ResendEmailVerificationDto {
 
 export class RestorePasswordDto extends ValidatePasswordDto {
   @ApiProperty()
-  @IsString()
+  @IsUUID()
   public token: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
@@ -57,7 +56,7 @@ export class RestorePasswordDto extends ValidatePasswordDto {
 
 export class VerifyEmailDto {
   @ApiProperty()
-  @IsString()
+  @IsUUID()
   public token: string;
 }
 

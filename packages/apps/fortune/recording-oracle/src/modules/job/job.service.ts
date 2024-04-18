@@ -13,8 +13,6 @@ import {
 } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
-
-import { Web3ConfigType, web3ConfigKey } from '../../common/config';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
 import { IManifest, ISolution } from '../../common/interfaces/job';
@@ -28,6 +26,7 @@ import {
   SolutionEventData,
   WebhookDto,
 } from '../webhook/webhook.dto';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @Injectable()
 export class JobService {
@@ -35,8 +34,7 @@ export class JobService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    @Inject(web3ConfigKey)
-    private web3Config: Web3ConfigType,
+    private web3ConfigService: Web3ConfigService,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     @Inject(StorageService)
@@ -181,17 +179,17 @@ export class JobService {
       jobSolutionUploaded.hash,
     );
 
-    const reputationOracleAddress =
-      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-    const reputationOracleWebhook = (await kvstoreClient.get(
-      reputationOracleAddress,
-      KVStoreKeys.webhookUrl,
-    )) as string;
-
     if (
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
       submissionsRequired
     ) {
+      const reputationOracleAddress =
+        await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+      const reputationOracleWebhook = (await kvstoreClient.get(
+        reputationOracleAddress,
+        KVStoreKeys.webhookUrl,
+      )) as string;
+
       await sendWebhook(
         this.httpService,
         this.logger,
@@ -199,9 +197,9 @@ export class JobService {
         {
           chainId: webhook.chainId,
           escrowAddress: webhook.escrowAddress,
-          eventType: EventType.ESCROW_RECORDED,
+          eventType: EventType.TASK_COMPLETED,
         },
-        this.web3Config.web3PrivateKey,
+        this.web3ConfigService.privateKey,
       );
 
       return 'The requested job is completed.';
@@ -231,7 +229,7 @@ export class JobService {
         this.logger,
         exchangeOracleURL,
         webhookBody,
-        this.web3Config.web3PrivateKey,
+        this.web3ConfigService.privateKey,
       );
     }
 

@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   postgres:
+    container_name: postgres
     image: postgres:latest
     restart: always
     logging:
@@ -11,11 +12,10 @@ services:
       - 5432:5432
     # volumes: 
     #   - ./db:/var/lib/postgresql/data
-    env_file:
-      - path: .env
-        required: true # default
     environment:
       POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
   minio:
     container_name: minio
     image: minio/minio:RELEASE.2022-05-26T05-48-41Z
@@ -30,9 +30,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
-    env_file:
-      - path: .env
-        required: true # default
   minio-mc:
     container_name: minio-mc
     image: minio/mc
@@ -45,9 +42,6 @@ services:
       /usr/bin/mc mb myminio/manifests;
       /usr/bin/mc anonymous set public myminio/manifests;
       "
-    env_file:
-      - path: .env
-        required: true # default
   # job-launcher:
   #   container_name: job-launcher
   #   restart: unless-stopped

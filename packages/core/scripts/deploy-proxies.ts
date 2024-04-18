@@ -14,7 +14,7 @@ async function main() {
     [hmtAddress, 1, 1],
     { initializer: 'initialize', kind: 'uups' }
   );
-  await stakingContract.deployed();
+  await stakingContract.waitForDeployment();
   console.log('Staking Proxy Address: ', await stakingContract.getAddress());
   console.log(
     'Staking Implementation Address: ',
@@ -31,7 +31,7 @@ async function main() {
     [await stakingContract.getAddress()],
     { initializer: 'initialize', kind: 'uups' }
   );
-  await escrowFactoryContract.deployed();
+  await escrowFactoryContract.waitForDeployment();
   console.log(
     'Escrow Factory Proxy Address: ',
     await escrowFactoryContract.getAddress()
@@ -54,7 +54,7 @@ async function main() {
     [hmtAddress, await stakingContract.getAddress(), 1],
     { initializer: 'initialize', kind: 'uups' }
   );
-  await rewardPoolContract.deployed();
+  await rewardPoolContract.waitForDeployment();
   console.log(
     'Reward Pool Proxy Address: ',
     await rewardPoolContract.getAddress()
