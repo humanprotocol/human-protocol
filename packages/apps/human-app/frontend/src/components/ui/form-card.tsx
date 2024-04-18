@@ -38,7 +38,7 @@ export function FormCard({
   alert,
   cardMaxWidth = '1200px',
   childrenMaxWidth = '486px',
-  backArrowPath = -1,
+  backArrowPath,
   cancelBtnPath = routerPaths.homePage,
 }: FormCardProps) {
   const navigate = useNavigate();
@@ -62,6 +62,7 @@ export function FormCard({
         alignItems: 'center',
         gap: '2rem',
         borderRadius: '20px',
+        minHeight: '70vh',
         maxWidth: cardMaxWidth,
         width: '100%',
         background: colorPalette.white,
@@ -115,9 +116,11 @@ export function FormCard({
               },
             }}
           >
-            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-              <ArrowBackIcon />
-            </IconWrapper>
+            {backArrowPath ? (
+              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+                <ArrowBackIcon />
+              </IconWrapper>
+            ) : null}
             <Button onClick={goBack.bind(null, cancelBtnPath)}>
               <Typography variant="buttonMedium">
                 {t('components.modal.header.closeBtn')}
@@ -155,9 +158,11 @@ export function FormCard({
             }}
             xs={12}
           >
-            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-              <ArrowBackIcon />
-            </IconWrapper>
+            {backArrowPath ? (
+              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+                <ArrowBackIcon />
+              </IconWrapper>
+            ) : null}
           </Grid>
           <Grid item md={10} order={{ xs: 4, md: 4 }} xs={12}>
             <Typography variant="h4">{title}</Typography>

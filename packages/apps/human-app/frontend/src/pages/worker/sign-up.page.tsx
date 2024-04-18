@@ -27,6 +27,7 @@ import {
 import type { PasswordCheck } from '@/components/data-entry/password/password-check-label';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { env } from '@/shared/env';
+import { routerPaths } from '@/router/router-paths';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (
@@ -94,7 +95,7 @@ export function SignUpWorkerPage() {
 
   const handleWorkerSignUp = (data: SignUpDto) => {
     // TODO add hcaptcha token if backend available
-    signUpWorkerMutate({ ...data });
+    signUpWorkerMutate(data);
   };
 
   return (
@@ -104,6 +105,7 @@ export function SignUpWorkerPage() {
           ? formattedSignUpErrorMessage(signUpWorkerError)
           : undefined
       }
+      backArrowPath={routerPaths.homePage}
       title={t('worker.signUpForm.title')}
     >
       <FormProvider {...methods}>

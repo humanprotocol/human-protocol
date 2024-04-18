@@ -66,6 +66,7 @@ export function SignInWorkerPage() {
           ? formattedSignInErrorMessage(signInWorkerError)
           : undefined
       }
+      backArrowPath={routerPaths.homePage}
       title={t('worker.signInForm.title')}
     >
       <FormProvider {...methods}>

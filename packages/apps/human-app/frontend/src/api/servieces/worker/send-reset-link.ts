@@ -14,7 +14,7 @@ export type SendResetLinkDto = z.infer<typeof sendResetLinkDtoSchema>;
 const SendResetLinkSuccessResponseSchema = z.unknown();
 
 function sendResetLinkMutationFn(data: SendResetLinkDto) {
-  return apiClient(apiPaths.worker.signUp.path, {
+  return apiClient(apiPaths.worker.sendResetLink.path, {
     successSchema: SendResetLinkSuccessResponseSchema,
     options: { body: JSON.stringify(data) },
   });
@@ -26,9 +26,8 @@ export function useSendResetLinkMutation() {
 
   return useMutation({
     mutationFn: sendResetLinkMutationFn,
-    onSuccess: async () => {
-      // TODO add correct path
-      navigate(routerPaths.worker.sendResetLink);
+    onSuccess: async (_, { email }) => {
+      navigate(routerPaths.worker.sendResetLinkSuccess, { state: { email } });
       await queryClient.invalidateQueries();
     },
     onError: async () => {
