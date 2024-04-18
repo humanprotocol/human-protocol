@@ -20,12 +20,16 @@ type PasswordProps =
       passwordChecks: PasswordCheck[];
     });
 
-export function Password(props: PasswordProps) {
+export function Password({
+  passwordCheckHeader,
+  passwordChecks,
+  ...rest
+}: PasswordProps) {
   const [showPassword, setShowPassword] = useState(false);
   const { getValues, watch } = useFormContext();
   const { isSubmitted } = useFormState();
-  watch(props.name);
-  const password = getValues()[props.name] as unknown;
+  watch(rest.name);
+  const password = getValues()[rest.name] as unknown;
 
   const handleClickShowPassword = () => {
     setShowPassword((show) => !show);
@@ -37,11 +41,11 @@ export function Password(props: PasswordProps) {
     event.preventDefault();
   };
 
-  const customError = props.passwordCheckHeader ? (
+  const customError = passwordCheckHeader ? (
     <Grid container gap={1}>
-      <Typography variant="helperText">{props.passwordCheckHeader}</Typography>
+      <Typography variant="helperText">{passwordCheckHeader}</Typography>
       <Grid columnGap="1rem" container flexWrap="wrap" width="100%">
-        {props.passwordChecks.map((checks) => {
+        {passwordChecks.map((checks) => {
           return (
             <PasswordCheckLabel
               isSubmitted={isSubmitted}
@@ -57,7 +61,7 @@ export function Password(props: PasswordProps) {
 
   return (
     <Input
-      {...props}
+      {...rest}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">

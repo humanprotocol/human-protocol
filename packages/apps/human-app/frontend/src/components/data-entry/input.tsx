@@ -25,12 +25,14 @@ export function Input({
       render={({ field, fieldState }) => (
         <TextField
           {...field}
+          FormHelperTextProps={{ component: 'div' }}
           autoComplete={autoComplete || name}
           error={Boolean(fieldState.error)}
           fullWidth
           helperText={
             <Typography
               color={customError ? undefined : colorPalette.error.main}
+              component="div"
               variant="helperText"
             >
               {customError ? customError : fieldState.error?.message}
