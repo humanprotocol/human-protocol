@@ -7,6 +7,7 @@ import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { SignUpOperatorPage } from '@/pages/operator/sign-up.page';
 import { routerPaths } from '@/router/router-paths';
+import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -39,5 +40,9 @@ export const protectedRoutes: RouteProps[] = [
   {
     path: '/protected',
     element: <ProtectedPage />,
+  },
+  {
+    path: '/worker/jobs',
+    element: <JobsPage />,
   },
 ];

@@ -17,6 +17,7 @@ import HumanLogoNavbarIcon from '@/assets/icons/icons-navbar/human-logo-navbar.s
 import DiscordIcon from '@/assets/icons/icons-homepage/discord.svg';
 import HelpIcon from '@/assets/icons/help.svg';
 import MobileHeaderIcon from '@/assets/icons/icons-homepage/mobile-header.svg';
+import ProfileWorkIcon from '@/assets/icons/icons-profile/profile-work-icon.svg';
 
 export {
   HomepageLogoIcon,
@@ -38,4 +39,5 @@ export {
   DiscordIcon,
   HelpIcon,
   MobileHeaderIcon,
+  ProfileWorkIcon,
 };

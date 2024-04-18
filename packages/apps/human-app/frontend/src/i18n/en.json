@@ -93,6 +93,57 @@
       "title": "Sign In",
       "submitBtn": "Sign in",
       "forgotPassword": "Forgot password?"
+    },
+    "profile": {
+      "profileHeader": "Profile",
+      "email": "Email",
+      "password": "Password",
+      "resetPassword": "Reset Password",
+      "kycCompleted": "KYC Completed",
+      "walletConnected": "Wallet Connected ",
+      "kycInfoOnChainAdded": "KYC Info On-Chain Added ",
+      "emailNotifications": "Email Notifications",
+      "notificationsConsent": "I would like to be notified about News and Offers"
+    },
+    "jobs": {
+      "availableJobs": "Available Jobs",
+      "myJobs": "My Jobs",
+      "jobsDiscovery": "Jobs Discovery",
+      "jobDescription": "Job description",
+      "escrowAddress": "Escrow address",
+      "network": "Network",
+      "rewardAmount": "Reward amount",
+      "jobType": "Job type"
+    }
+  },
+  "operator": {
+    "profile": {
+      "profileHeader": "Profile",
+      "about": {
+        "header": "About",
+        "role": "Role",
+        "status": {
+          "statusHeader": "Status",
+          "statusActivated": "Active",
+          "statusDeactivated": "Deactivated",
+          "statusActivateButton": "Activate",
+          "statusDeactivateButton": "Deactivate"
+        },
+        "fee": "Fee",
+        "url": "URL",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job Types"
+      },
+      "statistics": {
+        "header": "Statistics",
+        "escrowsProcessed": "Escrows processed",
+        "escrowsActive": "Escrows active",
+        "escrowsCancelled": "Escrows cancelled",
+        "workersAmount": "Workers amount",
+        "assignmentsCompleted": "Assignments completed",
+        "assignmentsRejected": "Assignments rejected",
+        "assignmentsExpired": "Assignments expired"
+      }
     }
   }
 }
