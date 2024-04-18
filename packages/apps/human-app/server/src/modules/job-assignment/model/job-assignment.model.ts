@@ -119,6 +119,7 @@ export class JobsFetchParams {
   sortField: SortField;
 }
 export class JobsFetchParamsCommand {
+  @AutoMap()
   address: string;
   @AutoMap()
   data: JobsFetchParams;

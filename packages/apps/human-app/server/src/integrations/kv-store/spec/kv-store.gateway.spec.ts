@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { KVStoreClient } from '@human-protocol/sdk';
 import { KvStoreGateway } from '../kv-store-gateway.service';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { ethers } from 'ethers';
 
 jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
@@ -13,7 +14,7 @@ jest.mock('@human-protocol/sdk', () => ({
   },
 }));
 
-describe('KvstoreGateway', () => {
+describe('KvStoreGateway', () => {
   let service: KvStoreGateway;
   let mockEnvironmentConfigService: EnvironmentConfigService;
   let mockKVStoreClient: any;
@@ -23,9 +24,9 @@ describe('KvstoreGateway', () => {
       rpcUrl: 'https://localhost:8545',
     } as any;
 
-    mockKVStoreClient = {
-      get: jest.fn(),
-    };
+    mockKVStoreClient = await KVStoreClient.build(
+      new ethers.JsonRpcProvider('test'),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -40,7 +41,6 @@ describe('KvstoreGateway', () => {
         },
       ],
     }).compile();
-
     service = module.get<KvStoreGateway>(KvStoreGateway);
     await service.onModuleInit();
   });

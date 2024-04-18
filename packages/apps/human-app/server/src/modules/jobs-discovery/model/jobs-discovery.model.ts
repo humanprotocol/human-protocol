@@ -79,6 +79,7 @@ export class JobsDiscoveryParamsData {
 export class JobsDiscoveryParamsCommand {
   @AutoMap()
   address: string;
+  @AutoMap()
   token: string;
   @AutoMap()
   data: JobsDiscoveryParams;
