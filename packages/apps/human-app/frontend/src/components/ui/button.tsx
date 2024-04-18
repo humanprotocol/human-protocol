@@ -3,7 +3,7 @@ import type { ButtonProps } from '@mui/material/Button';
 import { Button as ButtonMui } from '@mui/material';
 import { forwardRef } from 'react';
 
-export type CustomButtonProps = ButtonProps &
+type CustomButtonProps = ButtonProps &
   Partial<LinkProps> & {
     component?: typeof Link;
   };
