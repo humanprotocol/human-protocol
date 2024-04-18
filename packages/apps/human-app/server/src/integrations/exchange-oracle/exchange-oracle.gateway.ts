@@ -87,6 +87,9 @@ export class ExchangeOracleGateway {
       method: HttpMethod.GET,
       url: `${details.exchangeOracleUrl}/assignment`,
       params: reducedParams,
+      headers: {
+        Authorization: details.token,
+      },
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);
   }
