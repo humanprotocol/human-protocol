@@ -16,7 +16,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    def test_track_track_completed_task_creation(self):
+    def test_track_track_successful_escrow_creation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
         cvat_project_ids = []
