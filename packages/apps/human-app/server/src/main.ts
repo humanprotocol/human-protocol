@@ -14,7 +14,14 @@ async function bootstrap() {
   const envConfigService = new EnvironmentConfigService(configService);
 
   const config = new DocumentBuilder()
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access-token',
+    )
     .setTitle('Human APP API')
     .setDescription('Swagger Human APP API')
     .setVersion('1.0')

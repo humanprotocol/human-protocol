@@ -1,11 +1,11 @@
 import {
   UserStatisticsCommand,
   UserStatisticsResponse,
-} from '../interfaces/user-statistics.interface';
+} from '../model/user-statistics.model';
 import {
   OracleStatisticsCommand,
   OracleStatisticsResponse,
-} from '../interfaces/oracle-statistics.interface';
+} from '../model/oracle-statistics.model';
 import { AxiosRequestConfig } from 'axios';
 
 const ASSIGNMENTS_AMOUNT = 2137;
