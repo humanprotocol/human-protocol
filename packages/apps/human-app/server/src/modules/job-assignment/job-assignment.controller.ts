@@ -1,7 +1,8 @@
 import {
   Body,
   Controller,
-  Get, Headers,
+  Get,
+  Headers,
   Post,
   Query,
   UsePipes,

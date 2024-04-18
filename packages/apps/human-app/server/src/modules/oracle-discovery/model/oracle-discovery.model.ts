@@ -5,10 +5,10 @@ import { optional } from 'joi';
 
 export class OracleDiscoveryDto {
   @AutoMap()
-  @ApiProperty({ example: 80001, required: false })
+  @ApiProperty({ example: 80002, required: false })
   chainId: ChainId;
   @AutoMap()
-  @ApiProperty({ example: '0x1a23b23432cf23f09f3f' })
+  @ApiProperty({ example: '0x4708354213453af0cdC33eb75d94fBC00045841E' })
   address: string;
   constructor(chainId: ChainId, address: string) {
     this.chainId = chainId;
