@@ -8,16 +8,21 @@ import helmet from 'helmet';
 
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { ServerConfigType, serverConfigKey } from './common/config';
 import { GlobalExceptionsFilter } from './common/filter';
+import { ServerConfigService } from './common/config/server-config.service';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
   });
 
-  const { sessionSecret, host, port }: ServerConfigType =
-    app.get(serverConfigKey);
+  const configService: ConfigService = app.get(ConfigService);
+  const serverConfigService = new ServerConfigService(configService);
+
+  const host = serverConfigService.host;
+  const port = serverConfigService.port;
+  const sessionSecret = serverConfigService.sessionSecret;
 
   app.useGlobalFilters(new GlobalExceptionsFilter());
 

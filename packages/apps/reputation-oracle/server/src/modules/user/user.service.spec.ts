@@ -19,6 +19,7 @@ import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../web3/web3.dto';
 import { SignatureType } from '../../common/enums/web3';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -31,23 +32,11 @@ jest.mock('@human-protocol/sdk', () => ({
 }));
 
 describe('UserService', () => {
-  let mockConfigService: Partial<ConfigService>;
   let userService: UserService;
   let userRepository: UserRepository;
   let web3Service: Web3Service;
 
   beforeEach(async () => {
-    mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'WEB3_ENV':
-            return 'testnet';
-          default:
-            return defaultValue;
-        }
-      }),
-    };
-
     const signerMock = {
       address: MOCK_ADDRESS,
       getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
@@ -65,10 +54,8 @@ describe('UserService', () => {
             prepareSignatureBody: jest.fn(),
           },
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        Web3ConfigService,
       ],
     }).compile();
 
@@ -170,7 +157,7 @@ describe('UserService', () => {
 
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        { chainId: ChainId.POLYGON_MUMBAI, address },
+        { chainId: ChainId.POLYGON_AMOY, address },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -188,7 +175,7 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_MUMBAI,
+          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(BadRequestException);
@@ -208,7 +195,7 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_MUMBAI,
+          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(BadRequestException);
@@ -258,9 +245,7 @@ describe('UserService', () => {
         SignatureType.DISABLE_OPERATOR,
         MOCK_ADDRESS,
       );
-      expect(web3Service.getSigner).toHaveBeenCalledWith(
-        ChainId.POLYGON_MUMBAI,
-      );
+      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
       expect(kvstoreClientMock.get).toHaveBeenCalledWith(
         MOCK_ADDRESS,
@@ -268,7 +253,7 @@ describe('UserService', () => {
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
         MOCK_ADDRESS,
-        'ACTIVE',
+        OperatorStatus.INACTIVE,
       );
     });
 

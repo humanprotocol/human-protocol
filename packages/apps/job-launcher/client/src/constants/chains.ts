@@ -12,7 +12,7 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
   case 'testnet':
     SUPPORTED_CHAIN_IDS = [
       ChainId.BSC_TESTNET,
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       ChainId.GOERLI,
     ];
     break;
@@ -23,7 +23,7 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
 }
 
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
-  'Polygon Mumbai': ChainId.POLYGON_MUMBAI,
+  'Polygon Amoy': ChainId.POLYGON_AMOY,
   'Binance Smart Chain': ChainId.BSC_MAINNET,
   'Ethereum Goerli': ChainId.GOERLI,
   Localhost: ChainId.LOCALHOST,
@@ -40,6 +40,8 @@ export const RPC_URLS: {
   [ChainId.BSC_TESTNET]: 'https://bsc-testnet.publicnode.com',
   [ChainId.POLYGON]: 'https://polygon-rpc.com/',
   [ChainId.POLYGON_MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
+  [ChainId.POLYGON_AMOY]:
+    'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
   [ChainId.MOONBEAM]: 'https://rpc.api.moonbeam.network',
   [ChainId.MOONBASE_ALPHA]: 'https://rpc.api.moonbase.moonbeam.network',
   [ChainId.AVALANCHE_TESTNET]: 'https://api.avax-test.network/ext/C/rpc',

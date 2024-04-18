@@ -1,0 +1,35 @@
+{
+  "network": "polygon-amoy",
+  "description": "HUMAN subgraph on Amoy Testnet",
+  "EscrowFactory": {
+    "address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+    "startBlock": 5773000,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+    "startBlock": 5769546,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "KVStore": {
+    "address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+    "startBlock": 5773002,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "Staking": {
+    "address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+    "startBlock": 5772993,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "RewardPool": {
+    "address": "0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7",
+    "startBlock": 5773007,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

@@ -100,6 +100,13 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
+    polygonAmoy: {
+      chainId: 80002,
+      url: process.env.ETH_POLYGON_AMOY_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
+    },
     bsc: {
       chainId: 56,
       url: process.env.ETH_BSC_URL || '',
@@ -210,6 +217,7 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
+      polygonAmoy: process.env.OKLINK_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
@@ -219,7 +227,7 @@ const config: HardhatUserConfig = {
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
-      xlayer: process.env.OKT_API_KEY || '',
+      xlayer: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
       {
@@ -234,8 +242,18 @@ const config: HardhatUserConfig = {
         network: 'xlayer',
         chainId: 195,
         urls: {
-          apiURL: process.env.OKT_API_URL || '',
-          browserURL: process.env.OKT_BROWSER_URL || '',
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET',
+          browserURL: 'https://www.oklink.com/xlayer-test',
+        },
+      },
+      {
+        network: 'polygonAmoy',
+        chainId: 80002,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/AMOY_TESTNET',
+          browserURL: 'https://www.oklink.com',
         },
       },
     ],

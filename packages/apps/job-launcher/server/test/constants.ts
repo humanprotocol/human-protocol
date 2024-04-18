@@ -105,6 +105,7 @@ export const MOCK_HCAPTCHA_ORACLE_ADDRESS =
 export const MOCK_CVAT_JOB_SIZE = '10';
 export const MOCK_CVAT_MAX_TIME = '300';
 export const MOCK_CVAT_VAL_SIZE = '2';
+export const MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER = '6';
 export const MOCK_HCAPTCHA_SITE_KEY = '1234';
 export const MOCK_HCAPTCHA_IMAGE_URL =
   'http://mockedFileUrl.test/bucket/img_1.jpg';
@@ -118,9 +119,20 @@ export const MOCK_STORAGE_DATA: StorageDataDto = {
   bucketName: 'bucket',
   path: 'folder/test',
 };
-export const MOCK_CVAT_DATA: CvatDataDto = {
+export const MOCK_CVAT_DATA_DATASET: CvatDataDto = {
   dataset: MOCK_STORAGE_DATA,
 };
+
+export const MOCK_CVAT_DATA_POINTS: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+  points: MOCK_STORAGE_DATA,
+};
+
+export const MOCK_CVAT_DATA_BOXES: CvatDataDto = {
+  dataset: MOCK_STORAGE_DATA,
+  boxes: MOCK_STORAGE_DATA,
+};
+
 export const MOCK_CVAT_LABELS: Label[] = [
   {
     name: 'label1',
@@ -129,5 +141,73 @@ export const MOCK_CVAT_LABELS: Label[] = [
     name: 'label2',
   },
 ];
+
+export const MOCK_CVAT_LABELS_WITH_NODES: Label[] = [
+  {
+    name: 'label1',
+    nodes: ['node 1', 'node 2', 'node 3', 'node 4'],
+  },
+  {
+    name: 'label2',
+    nodes: ['node 1', 'node 2', 'node 3', 'node 4'],
+  },
+];
+
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
+
+export const MOCK_CVAT_DATA = {
+  images: [
+    {
+      id: 1,
+      file_name: '1.jpg',
+    },
+    {
+      id: 2,
+      file_name: '2.jpg',
+    },
+    {
+      id: 3,
+      file_name: '3.jpg',
+    },
+    {
+      id: 4,
+      file_name: '4.jpg',
+    },
+    {
+      id: 5,
+      file_name: '5.jpg',
+    },
+  ],
+  annotations: [
+    {
+      image_id: 1,
+    },
+    {
+      image_id: 2,
+    },
+    {
+      image_id: 3,
+    },
+    {
+      image_id: 4,
+    },
+    {
+      image_id: 5,
+    },
+  ],
+};
+
+export const MOCK_CVAT_GT = {
+  images: [
+    {
+      file_name: '1.jpg',
+    },
+    {
+      file_name: '2.jpg',
+    },
+    {
+      file_name: '3.jpg',
+    },
+  ],
+};

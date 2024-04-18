@@ -63,6 +63,10 @@ export function handleDataSaved(event: DataSaved): void {
     leader.webhookUrl = event.params.value;
   } else if (key == 'url') {
     leader.url = event.params.value;
+  } else if (key == 'jobtypes' || key == 'job_types') {
+    leader.jobTypes = event.params.value
+      .split(',')
+      .map<string>((type) => type.trim());
   } else if (
     isValidEthAddress(event.params.key) &&
     leader.role == 'Reputation Oracle'

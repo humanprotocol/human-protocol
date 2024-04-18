@@ -37,7 +37,7 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const leader = await OperatorUtils.getLeader(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   public static async getLeader(
@@ -82,7 +82,7 @@ export class OperatorUtils {
    * ```
    */
   public static async getLeaders(
-    filter: ILeadersFilter = { networks: [ChainId.POLYGON_MUMBAI] }
+    filter: ILeadersFilter = { networks: [ChainId.POLYGON_AMOY] }
   ): Promise<ILeader[]> {
     try {
       let leaders_data: ILeader[] = [];
@@ -117,7 +117,7 @@ export class OperatorUtils {
    * ```typescript
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   public static async getReputationNetworkOperators(
@@ -134,7 +134,7 @@ export class OperatorUtils {
       const { reputationNetwork } = await gqlFetch<{
         reputationNetwork: IReputationNetwork;
       }>(networkData.subgraphUrl, GET_REPUTATION_NETWORK_QUERY(role), {
-        address: address,
+        address: address.toLowerCase(),
         role: role,
       });
 
@@ -156,7 +156,7 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   public static async getRewards(

@@ -2,27 +2,17 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  KVStoreClient,
   EscrowClient,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { ConfigModule, registerAs } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import {
-  MOCK_ADDRESS,
-  MOCK_ENCRYPTION_PASSPHRASE,
-  MOCK_ENCRYPTION_PRIVATE_KEY,
-  MOCK_FILE_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-} from '../../../test/constants';
-import { StorageService } from './storage.service';
+import { MOCK_ADDRESS, MOCK_FILE_URL } from '../../../test/constants';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
 import { Web3Service } from '../web3/web3.service';
-import { ServerConfigType, serverConfigKey } from '@/common/config';
+import { StorageService } from './storage.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -61,7 +51,8 @@ jest.mock('minio', () => {
 
 describe('StorageService', () => {
   let storageService: StorageService;
-  let serverConfig: ServerConfigType;
+  let pgpConfigService: PGPConfigService;
+  let s3ConfigService: S3ConfigService;
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -70,24 +61,6 @@ describe('StorageService', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
-            encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
-          })),
-        ),
-      ],
       providers: [
         StorageService,
         {
@@ -96,11 +69,15 @@ describe('StorageService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        ConfigService,
+        PGPConfigService,
+        S3ConfigService,
       ],
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
-    serverConfig = moduleRef.get<ServerConfigType>(serverConfigKey);
+    pgpConfigService = moduleRef.get<PGPConfigService>(PGPConfigService);
+    s3ConfigService = moduleRef.get<S3ConfigService>(S3ConfigService);
   });
 
   describe('uploadJobSolutions', () => {
@@ -125,7 +102,7 @@ describe('StorageService', () => {
       (KVStoreClient.build as jest.Mock).mockResolvedValue({
         getPublicKey: jest.fn().mockResolvedValue('publicKey'),
       });
-      serverConfig.pgpEncrypt = true;
+      jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
 
       const jobSolution = {
         workerAddress,
@@ -138,11 +115,11 @@ describe('StorageService', () => {
       );
 
       expect(fileData).toEqual({
-        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${hash}.json`,
+        url: `http://${s3ConfigService.endpoint}:${s3ConfigService.port}/${s3ConfigService.bucket}/${hash}.json`,
         hash,
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
-        MOCK_S3_BUCKET,
+        s3ConfigService.bucket,
         `${hash}.json`,
         'encrypted',
         {
@@ -185,7 +162,7 @@ describe('StorageService', () => {
       storageService.minioClient.putObject = jest
         .fn()
         .mockRejectedValue('Network error');
-      serverConfig.pgpEncrypt = false;
+      jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(false);
       const jobSolution = {
         workerAddress,
         solution,
@@ -211,7 +188,7 @@ describe('StorageService', () => {
       (KVStoreClient.build as jest.Mock).mockResolvedValue({
         getPublicKey: jest.fn().mockResolvedValue(''),
       });
-      serverConfig.pgpEncrypt = true;
+      jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
       const jobSolution = {
         workerAddress,
         solution,

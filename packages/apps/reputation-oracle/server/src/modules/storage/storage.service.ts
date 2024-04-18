@@ -6,38 +6,37 @@ import {
   KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { FortuneFinalResult } from '../../common/dto/result';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Injectable()
 export class StorageService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    @Inject(s3ConfigKey)
-    private s3Config: S3ConfigType,
-    public readonly configService: ConfigService,
+    public readonly s3ConfigService: S3ConfigService,
+    public readonly pgpConfigService: PGPConfigService,
     private readonly web3Service: Web3Service,
   ) {
     this.minioClient = new Minio.Client({
-      endPoint: this.s3Config.endPoint,
-      port: this.s3Config.port,
-      accessKey: this.s3Config.accessKey,
-      secretKey: this.s3Config.secretKey,
-      useSSL: this.s3Config.useSSL,
+      endPoint: this.s3ConfigService.endpoint,
+      port: this.s3ConfigService.port,
+      accessKey: this.s3ConfigService.accessKey,
+      secretKey: this.s3ConfigService.secretKey,
+      useSSL: this.s3ConfigService.useSSL,
     });
   }
   public getUrl(key: string): string {
-    return `${this.s3Config.useSSL ? 'https' : 'http'}://${
-      this.s3Config.endPoint
-    }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
+    return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
+      this.s3ConfigService.endpoint
+    }:${this.s3ConfigService.port}/${this.s3ConfigService.bucket}/${key}`;
   }
 
   private async encryptFile(
@@ -45,7 +44,7 @@ export class StorageService {
     chainId: ChainId,
     content: any,
   ) {
-    if (!this.configService.get<boolean>(ConfigNames.PGP_ENCRYPT)) {
+    if (!this.pgpConfigService.encrypt) {
       return content;
     }
 
@@ -78,8 +77,8 @@ export class StorageService {
       EncryptionUtils.isEncrypted(fileContent)
     ) {
       const encryption = await Encryption.build(
-        this.configService.get<string>(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
-        this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
+        this.pgpConfigService.privateKey,
+        this.pgpConfigService.passphrase,
       );
 
       return await encryption.decrypt(fileContent);
@@ -104,7 +103,7 @@ export class StorageService {
     chainId: ChainId,
     solutions: FortuneFinalResult[],
   ): Promise<UploadedFile> {
-    if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
+    if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
       throw new BadRequestException('Bucket not found');
     }
 
@@ -117,10 +116,15 @@ export class StorageService {
 
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `${hash}.json`;
-      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      });
+      await this.minioClient.putObject(
+        this.s3ConfigService.bucket,
+        key,
+        content,
+        {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      );
 
       return { url: this.getUrl(key), hash };
     } catch (error) {
@@ -156,10 +160,15 @@ export class StorageService {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
 
-      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      });
+      await this.minioClient.putObject(
+        this.s3ConfigService.bucket,
+        key,
+        content,
+        {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      );
 
       return {
         url: this.getUrl(key),

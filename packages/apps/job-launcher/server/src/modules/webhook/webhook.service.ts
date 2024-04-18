@@ -12,15 +12,12 @@ import {
   KVStoreClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { signMessage } from '../../common/utils/signature';
 import { WebhookRepository } from './webhook.repository';
 import { firstValueFrom } from 'rxjs';
-import {
-  DEFAULT_MAX_RETRY_COUNT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookStatus } from '../../common/enums/webhook';
@@ -40,7 +37,8 @@ export class WebhookService {
     private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
-    public readonly configService: ConfigService,
+    public readonly commonConfigSerice: ServerConfigService,
+    public readonly web3ConfigService: Web3ConfigService,
     public readonly httpService: HttpService,
   ) {}
 
@@ -75,7 +73,7 @@ export class WebhookService {
     if (webhook.hasSignature) {
       const signedBody = await signMessage(
         webhookData,
-        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+        this.web3ConfigService.privateKey,
       );
 
       config = {
@@ -131,13 +129,7 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   public async handleWebhookError(webhookEntity: WebhookEntity): Promise<void> {
-    if (
-      webhookEntity.retriesCount >=
-      this.configService.get(
-        ConfigNames.MAX_RETRY_COUNT,
-        DEFAULT_MAX_RETRY_COUNT,
-      )
-    ) {
+    if (webhookEntity.retriesCount >= this.commonConfigSerice.maxRetryCount) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {
       webhookEntity.waitUntil = new Date();

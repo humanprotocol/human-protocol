@@ -1,26 +1,18 @@
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { of } from 'rxjs';
+import { MOCK_FILE_URL } from '../../../test/constants';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { EventType } from '../../common/enums/webhook';
+import { JobService } from '../job/job.service';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
-import { JobService } from '../job/job.service';
-import { ConfigModule, registerAs } from '@nestjs/config';
-import {
-  MOCK_ENCRYPTION_PASSPHRASE,
-  MOCK_ENCRYPTION_PRIVATE_KEY,
-  MOCK_FILE_URL,
-  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-  MOCK_WEB3_PRIVATE_KEY,
-} from '../../../test/constants';
-import { Web3Service } from '../web3/web3.service';
-import { of } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { StorageService } from '../storage/storage.service';
 
 describe('WebhookService', () => {
   let webhookService: WebhookService, jobService: JobService;
@@ -39,34 +31,15 @@ describe('WebhookService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('web3', () => ({
-            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-            encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
-            encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
-          })),
-        ),
-      ],
       providers: [
         WebhookService,
         JobService,
         StorageService,
+        ConfigService,
+        Web3ConfigService,
+        PGPConfigService,
+        S3ConfigService,
+        ServerConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -130,11 +103,11 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_RECORDED,
+        eventType: EventType.TASK_COMPLETED,
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: escrow_recorded',
+        'Invalid webhook event type: task_completed',
       );
     });
   });

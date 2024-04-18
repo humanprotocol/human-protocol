@@ -3,34 +3,22 @@ import { Test } from '@nestjs/testing';
 import { SendGridService } from './sendgrid.service';
 import { MailService } from '@sendgrid/mail';
 import { ErrorSendGrid } from '../../common/constants/errors';
-import {
-  MOCK_SENDGRID_API_KEY,
-  MOCK_SENDGRID_FROM_EMAIL,
-  MOCK_SENDGRID_FROM_NAME,
-} from '../../../test/constants';
+import { MOCK_SENDGRID_API_KEY } from '../../../test/constants';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
   let mailService: MailService;
-  let mockConfigService: Partial<ConfigService>;
+  let sendgridConfigService: SendgridConfigService;
+
+  jest
+    .spyOn(SendgridConfigService.prototype, 'apiKey', 'get')
+    .mockReturnValue(MOCK_SENDGRID_API_KEY);
 
   beforeAll(async () => {
     const mockMailService = {
       send: jest.fn(),
       setApiKey: jest.fn(),
-    };
-
-    mockConfigService = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'SENDGRID_API_KEY':
-            return MOCK_SENDGRID_API_KEY;
-          case 'SENDGRID_FROM_EMAIL':
-            return MOCK_SENDGRID_FROM_EMAIL;
-          case 'SENDGRID_FROM_NAME':
-            return MOCK_SENDGRID_FROM_NAME;
-        }
-      }),
     };
 
     const app = await Test.createTestingModule({
@@ -40,14 +28,13 @@ describe('SendGridService', () => {
           provide: MailService,
           useValue: mockMailService,
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        SendgridConfigService,
       ],
     }).compile();
     sendGridService = app.get<SendGridService>(SendGridService);
     mailService = app.get(MailService);
+    sendgridConfigService = app.get(SendgridConfigService);
   });
 
   describe('sendEmail', () => {
@@ -83,7 +70,7 @@ describe('SendGridService', () => {
       expect(mock).toHaveBeenCalledWith(
         expect.objectContaining({
           from: expect.objectContaining({
-            email: 'info@hmt.ai',
+            email: 'reputation-oracle@hmt.ai',
           }),
         }),
       );
@@ -107,28 +94,21 @@ describe('SendGridService', () => {
 
   describe('constructor', () => {
     it('should initialize SendGridService with valid API key', () => {
-      sendGridService = new SendGridService(
-        mailService,
-        mockConfigService as any,
-      );
+      sendGridService = new SendGridService(mailService, sendgridConfigService);
 
       expect(mailService.setApiKey).toHaveBeenCalledWith(MOCK_SENDGRID_API_KEY);
-      expect(sendGridService['defaultFromEmail']).toEqual(
-        MOCK_SENDGRID_FROM_EMAIL,
-      );
-      expect(sendGridService['defaultFromName']).toEqual(
-        MOCK_SENDGRID_FROM_NAME,
-      );
     });
 
     it('should throw an error with invalid API key', async () => {
       const invalidApiKey = 'invalid-api-key';
-      mockConfigService.get = jest.fn().mockReturnValue(invalidApiKey);
+      jest
+        .spyOn(sendgridConfigService, 'apiKey', 'get')
+        .mockReturnValue(invalidApiKey);
 
       expect(() => {
         sendGridService = new SendGridService(
           mailService,
-          mockConfigService as any,
+          sendgridConfigService,
         );
       }).toThrowError(ErrorSendGrid.InvalidApiKey);
     });

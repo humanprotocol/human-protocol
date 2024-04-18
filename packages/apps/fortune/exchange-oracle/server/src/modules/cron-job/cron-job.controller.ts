@@ -7,7 +7,9 @@ import {
 } from '@nestjs/swagger';
 import { CronJobService } from './cron-job.service';
 import { CronAuthGuard } from '../../common/guards/cron.auth';
+import { Public } from '../../common/decorators';
 
+@Public()
 @UseGuards(CronAuthGuard)
 @ApiTags('Cron')
 @Controller('/cron')
@@ -27,8 +29,8 @@ export class CronJobController {
     description: 'Bad Request. Invalid input parameters.',
   })
   @ApiBearerAuth()
-  @Get('/wehbhook/process')
-  public async processPendingWebhooks(): Promise<any> {
+  @Get('/webhook/process')
+  public async processPendingWebhooks(): Promise<void> {
     await this.cronJobService.processPendingWebhooks();
     return;
   }

@@ -29,6 +29,10 @@ export class SignInDto {
   @ApiProperty()
   @IsString()
   public password: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class RefreshDto {

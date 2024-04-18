@@ -10,7 +10,6 @@ import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { WebhookService } from '../webhook/webhook.service';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
@@ -179,12 +178,13 @@ export class CronJobService {
                 await escrowClient.getJobLauncherAddress(escrowAddress),
               )
             ).webhookUrl,
-            (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getRecordingOracleAddress(escrowAddress),
-              )
-            ).webhookUrl,
+            // Temporarily disable sending webhook to Recoring Oracle
+            // (
+            //   await OperatorUtils.getLeader(
+            //     chainId,
+            //     await escrowClient.getRecordingOracleAddress(escrowAddress),
+            //   )
+            // ).webhookUrl,
           ];
           const webhookBody: WebhookDto = {
             chainId,

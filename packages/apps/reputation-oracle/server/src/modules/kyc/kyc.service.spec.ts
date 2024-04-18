@@ -1,5 +1,4 @@
 import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 import { Test } from '@nestjs/testing';
 import { KycService } from './kyc.service';
 import { HttpService } from '@nestjs/axios';
@@ -11,24 +10,15 @@ import { KycRepository } from './kyc.repository';
 import { KycEntity } from './kyc.entity';
 import { of } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
+import { SynapsConfigService } from '../../common/config/synaps-config.service';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
   let httpService: HttpService;
   let kycRepository: KycRepository;
+  let synapsConfigService: SynapsConfigService;
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case ConfigNames.SYNAPS_API_KEY:
-            return 'synaps-api-key';
-          case ConfigNames.SYNAPS_WEBHOOK_SECRET:
-            return 'synaps-webhook-secret';
-        }
-      }),
-    };
-
     const mockHttpService: DeepPartial<HttpService> = {
       axiosRef: {
         request: jest.fn(),
@@ -38,10 +28,8 @@ describe('Kyc Service', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         KycService,
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        SynapsConfigService,
         {
           provide: HttpService,
           useValue: mockHttpService,
@@ -53,6 +41,12 @@ describe('Kyc Service', () => {
     httpService = moduleRef.get<HttpService>(HttpService);
     kycService = moduleRef.get<KycService>(KycService);
     kycRepository = moduleRef.get<KycRepository>(KycRepository);
+    synapsConfigService =
+      moduleRef.get<SynapsConfigService>(SynapsConfigService);
+
+    jest
+      .spyOn(SynapsConfigService.prototype, 'apiKey', 'get')
+      .mockReturnValue('test');
   });
 
   describe('initSession', () => {
@@ -211,7 +205,7 @@ describe('Kyc Service', () => {
         { alias: 'test@example.com' },
         {
           baseURL: 'https://api.synaps.io/v4',
-          headers: { 'Api-Key': 'synaps-api-key' },
+          headers: { 'Api-Key': synapsConfigService.apiKey },
         },
       );
       expect(kycRepository.create).toHaveBeenCalledWith({
@@ -246,7 +240,10 @@ describe('Kyc Service', () => {
       });
 
       await expect(
-        kycService.updateKycStatus('synaps-webhook-secret', mockKycUpdate),
+        kycService.updateKycStatus(
+          synapsConfigService.webhookSecret,
+          mockKycUpdate,
+        ),
       ).rejects.toThrow();
     });
 
@@ -264,7 +261,10 @@ describe('Kyc Service', () => {
         });
       });
 
-      await kycService.updateKycStatus('synaps-webhook-secret', mockKycUpdate);
+      await kycService.updateKycStatus(
+        synapsConfigService.webhookSecret,
+        mockKycUpdate,
+      );
 
       expect(kycRepository.updateOne).toHaveBeenCalledWith(
         { sessionId: '123' },

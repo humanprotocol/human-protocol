@@ -46,6 +46,7 @@ export class UserUpdateDto {
   @ApiPropertyOptional({
     enum: UserStatus,
   })
+  @IsOptional()
   @IsEnum(UserStatus)
   public status?: UserStatus;
 }
@@ -64,4 +65,10 @@ export class RegisterAddressResponseDto {
   @ApiProperty({ name: 'signed_address' })
   @IsString()
   public signedAddress: string;
+}
+
+export class DisableOperatorDto {
+  @ApiProperty()
+  @IsString()
+  public signature: string;
 }

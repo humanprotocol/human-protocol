@@ -235,6 +235,7 @@ export type JobRequest = {
 export enum JobStatus {
   LAUNCHED = 'LAUNCHED',
   PENDING = 'PENDING',
+  PARTIAL = 'PARTIAL',
   CANCELED = 'CANCELED',
   FAILED = 'FAILED',
   COMPLETED = 'COMPLETED',

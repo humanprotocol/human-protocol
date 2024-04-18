@@ -9,7 +9,7 @@ Code Example
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.statistics import StatisticsClient
 
-    statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
 Module
 ------
@@ -278,7 +278,7 @@ class StatisticsClient:
     A client used to get statistical data.
     """
 
-    def __init__(self, chain_id: ChainId = ChainId.POLYGON_MUMBAI):
+    def __init__(self, chain_id: ChainId = ChainId.POLYGON_AMOY):
         """Initializes a Statistics instance
 
         :param chain_id: Chain ID to get statistical data from
@@ -308,7 +308,7 @@ class StatisticsClient:
                 from human_protocol_sdk.contants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_escrow_statistics())
                 print(
@@ -382,7 +382,7 @@ class StatisticsClient:
                 from human_protocol_sdk.contants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_worker_statistics())
                 print(
@@ -435,7 +435,7 @@ class StatisticsClient:
                 from human_protocol_sdk.contants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_payment_statistics())
                 print(
@@ -496,7 +496,7 @@ class StatisticsClient:
                 from human_protocol_sdk.contants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_hmt_statistics())
                 print(
