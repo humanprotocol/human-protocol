@@ -7,6 +7,7 @@ import { z } from 'zod';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { t } from 'i18next';
+import omit from 'lodash/omit';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
@@ -78,9 +79,8 @@ export function SignUpWorkerPage() {
       email: '',
       password: '',
       confirmPassword: '',
-      // TODO add hcaptcha token if backend available
-      token: 'token',
-      hCaptchaToken: 'token',
+      // eslint-disable-next-line camelcase -- export vite config
+      h_captcha_token: 'token',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -94,7 +94,7 @@ export function SignUpWorkerPage() {
 
   const handleWorkerSignUp = (data: SignUpDto) => {
     // TODO add hcaptcha token if backend available
-    signUpWorkerMutate({ ...data });
+    signUpWorkerMutate(omit(data, ['confirmPassword']));
   };
 
   return (
