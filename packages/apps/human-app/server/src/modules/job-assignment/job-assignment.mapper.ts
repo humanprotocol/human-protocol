@@ -11,11 +11,13 @@ import {
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import {
-  JobAssignmentCommand, JobAssignmentDetails,
+  JobAssignmentCommand,
+  JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobsFetchParams,
-  JobsFetchParamsCommand, JobsFetchParamsDetails,
+  JobsFetchParamsCommand,
+  JobsFetchParamsDetails,
   JobsFetchParamsDto,
 } from './model/job-assignment.model';
 
@@ -82,16 +84,8 @@ export class JobAssignmentProfile extends AutomapperProfile {
           destination: new CamelCaseNamingConvention(),
         }),
       );
-      createMap(
-        mapper,
-        JobAssignmentCommand,
-        JobAssignmentDetails,
-      );
-      createMap(
-        mapper,
-        JobsFetchParamsCommand,
-        JobsFetchParamsDetails,
-      )
+      createMap(mapper, JobAssignmentCommand, JobAssignmentDetails);
+      createMap(mapper, JobsFetchParamsCommand, JobsFetchParamsDetails);
     };
   }
 }

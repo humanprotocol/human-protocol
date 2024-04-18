@@ -85,7 +85,7 @@ describe('JobAssignmentController', () => {
 
     it('should call service processGetAssignedJobs method with proper fields set', async () => {
       const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
-      const command = jobsFetchParamsCommandFixture;
+      const command: JobAssignmentCommand = jobsFetchParamsCommandFixture;
       await controller.getAssignedJobs(dto, jobAssignmentToken);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,

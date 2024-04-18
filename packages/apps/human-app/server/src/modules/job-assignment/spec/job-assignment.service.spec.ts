@@ -5,11 +5,13 @@ import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exc
 import {
   jobAssignmentCommandFixture,
   jobAssignmentDetailsFixture,
+  jobAssignmentOracleUrl,
   jobsFetchParamsCommandFixture,
   jobsFetchParamsDetailsFixture,
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
+import { JobAssignmentProfile } from '../job-assignment.mapper';
 
 describe('JobAssignmentService', () => {
   let service: JobAssignmentService;
@@ -32,6 +34,7 @@ describe('JobAssignmentService', () => {
       ],
       providers: [
         JobAssignmentService,
+        JobAssignmentProfile,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
         { provide: KvStoreGateway, useValue: kvStoreGatewayMock },
       ],
@@ -51,7 +54,7 @@ describe('JobAssignmentService', () => {
 
       (
         kvStoreGatewayMock.getExchangeOracleUrlByAddress as jest.Mock
-      ).mockResolvedValue('https://example.com');
+      ).mockResolvedValue(jobAssignmentOracleUrl);
       (
         exchangeOracleGatewayMock.postNewJobAssignment as jest.Mock
       ).mockResolvedValue({
@@ -77,7 +80,7 @@ describe('JobAssignmentService', () => {
 
       (
         kvStoreGatewayMock.getExchangeOracleUrlByAddress as jest.Mock
-      ).mockResolvedValue(details.exchangeOracleUrl);
+      ).mockResolvedValue(jobAssignmentOracleUrl);
       (
         exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
       ).mockResolvedValue({

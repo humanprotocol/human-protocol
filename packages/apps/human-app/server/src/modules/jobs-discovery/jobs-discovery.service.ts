@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
-  JobsDiscoveryParamsCommand, JobsDiscoveryParamsDetails,
+  JobsDiscoveryParamsCommand,
+  JobsDiscoveryParamsDetails,
   JobsDiscoveryResponse,
 } from './model/jobs-discovery.model';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';

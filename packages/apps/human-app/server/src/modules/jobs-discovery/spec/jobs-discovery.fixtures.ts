@@ -11,7 +11,7 @@ import {
   SortField,
   SortOrder,
 } from '../../../common/enums/jobs-discovery';
-const EXCHANGE_ORACLE_URL = 'test_url';
+const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
 const PAGE_SIZE = 10;
@@ -27,6 +27,7 @@ const REWARD_TOKEN = 'ETH';
 const CREATED_AT = '2024-03-01T12:00:00Z';
 const JOB_TITLE = 'test job';
 const EXCHANGE_ORACLE_ADDRESS = '0x3dfa342';
+export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL;
 export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
   address: EXCHANGE_ORACLE_ADDRESS,
