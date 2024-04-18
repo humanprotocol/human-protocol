@@ -7,7 +7,7 @@ export const TOKEN = 'HMT';
 export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];
 
 export const TESTNET_CHAIN_IDS = [
-  ChainId.POLYGON_MUMBAI,
+  ChainId.POLYGON_AMOY,
   ChainId.BSC_TESTNET,
   ChainId.GOERLI,
 ];

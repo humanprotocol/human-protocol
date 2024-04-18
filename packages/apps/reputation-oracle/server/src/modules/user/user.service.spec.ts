@@ -157,7 +157,7 @@ describe('UserService', () => {
 
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        { chainId: ChainId.POLYGON_MUMBAI, address },
+        { chainId: ChainId.POLYGON_AMOY, address },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -175,7 +175,7 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_MUMBAI,
+          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(BadRequestException);
@@ -195,7 +195,7 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_MUMBAI,
+          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(BadRequestException);
@@ -245,9 +245,7 @@ describe('UserService', () => {
         SignatureType.DISABLE_OPERATOR,
         MOCK_ADDRESS,
       );
-      expect(web3Service.getSigner).toHaveBeenCalledWith(
-        ChainId.POLYGON_MUMBAI,
-      );
+      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
       expect(kvstoreClientMock.get).toHaveBeenCalledWith(
         MOCK_ADDRESS,

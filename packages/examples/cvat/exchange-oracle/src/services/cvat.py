@@ -172,13 +172,8 @@ def get_projects_by_assignee(
             Project.jobs.any(
                 Job.assignments.any(
                     (Assignment.user_wallet_address == wallet_address)
-                    & Assignment.status.in_(
-                        [
-                            AssignmentStatuses.created,
-                            AssignmentStatuses.completed,
-                            AssignmentStatuses.canceled,
-                        ]
-                    )
+                    & (Assignment.status == AssignmentStatuses.created)
+                    & (utcnow() < Assignment.expires_at)
                 )
             )
         )

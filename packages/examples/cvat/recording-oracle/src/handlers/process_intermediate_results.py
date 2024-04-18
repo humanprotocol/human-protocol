@@ -510,6 +510,10 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
         return job_gt_dataset
 
+    def _prepare_merged_dataset(self):
+        super()._parse_gt()  # We need to download the original GT dataset
+        return super()._prepare_merged_dataset()
+
 
 class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
     def __init__(self, *args, **kwargs):
@@ -845,6 +849,10 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
 
         return updated_gt_stats
 
+    def _prepare_merged_dataset(self):
+        super()._parse_gt()  # We need to download the original GT dataset
+        return super()._prepare_merged_dataset()
+
 
 def _compute_gt_stats_update(
     initial_gt_stats: _FailedGtAttempts, validation_gt_stats: _UpdatedFailedGtStats
@@ -894,8 +902,7 @@ def process_intermediate_results(
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("process_intermediate_results for escrow %s", escrow_address)
-        logger.debug("Task id %s", task_id)
-        logger.debug("Task %s %s", task, getattr(task, "__dict__", None))
+        logger.debug("Task id %s, %s", getattr(task, 'id', None), getattr(task, "__dict__", None))
 
     initial_gt_stats = {
         gt_image_stat.gt_key: gt_image_stat.failed_attempts

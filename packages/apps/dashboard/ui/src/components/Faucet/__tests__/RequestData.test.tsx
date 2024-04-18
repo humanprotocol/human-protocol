@@ -11,7 +11,7 @@ describe('when rendered AfterConnect component', () => {
       render(
         <RequestData
           {...({} as RequestDataProps)}
-          network={NETWORKS[ChainId.POLYGON_MUMBAI]!}
+          network={NETWORKS[ChainId.POLYGON_AMOY]!}
         />,
         { wrapper: MemoryRouter }
       );
@@ -25,7 +25,7 @@ it('AfterConnect component renders correctly, corresponds to the snapshot', () =
     <MemoryRouter>
       <RequestData
         {...({} as RequestDataProps)}
-        network={NETWORKS[ChainId.POLYGON_MUMBAI]!}
+        network={NETWORKS[ChainId.POLYGON_AMOY]!}
       />
     </MemoryRouter>
   ).toJSON();

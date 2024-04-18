@@ -391,7 +391,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address=wallet_address_1,
             cvat_job_id=cvat_id_1,
-            expires_at=datetime.now(),
+            expires_at=datetime.now() + timedelta(days=1),
         )
 
         wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
@@ -418,8 +418,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_2)
 
-        self.assertEqual(len(projects), 1)
-        self.assertEqual(projects[0].cvat_id, cvat_id_2)
+        self.assertEqual(
+            len(projects), 0
+        )  # expired should not be shown, https://github.com/humanprotocol/human-protocol/pull/1879
 
     def test_update_project_status(self):
         cvat_id = 1

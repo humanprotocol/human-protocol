@@ -49,7 +49,7 @@ export const CreateJobPageUIProvider = ({
         ? chain?.id
         : !IS_MAINNET
           ? !chain?.id
-            ? ChainId.POLYGON_MUMBAI
+            ? ChainId.POLYGON_AMOY
             : undefined
           : undefined,
   });
