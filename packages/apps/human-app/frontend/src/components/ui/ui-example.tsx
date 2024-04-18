@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
+import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 
 export function UiExample() {
   const { openModal } = useModalStore();
@@ -156,6 +157,9 @@ export function UiExample() {
           Full width
         </Button>
       </Stack>
+
+      <h2>Connect wallet button</h2>
+      <ConnectWalletBtn />
 
       <h2>Loader</h2>
       <Stack

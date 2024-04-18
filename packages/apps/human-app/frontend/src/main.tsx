@@ -14,6 +14,7 @@ import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/800.css';
+import { WalletConnectProvider } from '@/contexts/wallet-connect';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -26,13 +27,15 @@ createRoot(root).render(
   <StrictMode>
     <ThemeProvider theme={themes}>
       <CssBaseline />
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Router />
-        </AuthProvider>
-        <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
-        <DisplayModal />
-      </QueryClientProvider>
+      <WalletConnectProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <Router />
+          </AuthProvider>
+          <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
+          <DisplayModal />
+        </QueryClientProvider>
+      </WalletConnectProvider>
     </ThemeProvider>
   </StrictMode>
 );

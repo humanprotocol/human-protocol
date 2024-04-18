@@ -48,6 +48,12 @@
       "header": {
         "closeBtn": "Cancel"
       }
+    },
+    "wallet": {
+      "connectBtn": {
+        "disconnect": "Disconnect",
+        "connect": "Connect"
+      }
     }
   },
   "homepage": {
