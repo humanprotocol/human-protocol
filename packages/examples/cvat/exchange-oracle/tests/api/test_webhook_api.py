@@ -77,7 +77,7 @@ def test_incoming_webhook_400_missing_field(client: TestClient) -> None:
 def test_incoming_webhook_400_invalid_address(client: TestClient) -> None:
     data = {
         "escrow_address": "bad_address",
-        "chain_id": 80001,
+        "chain_id": 1338,
         "event_type": "escrow_created",
     }
 

@@ -1,11 +1,12 @@
 import uuid
 
+from sqlalchemy.orm import Session
+
 from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatuses, TaskTypes
-from src.db import SessionLocal
 from src.models.cvat import Job, Project, Task
 
 
-def create_project(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
+def create_project(session: Session, escrow_address: str, cvat_id: int) -> tuple:
     cvat_project = Project(
         id=str(uuid.uuid4()),
         cvat_id=cvat_id,
@@ -21,7 +22,7 @@ def create_project(session: SessionLocal, escrow_address: str, cvat_id: int) -> 
     return cvat_project
 
 
-def create_project_and_task(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
+def create_project_and_task(session: Session, escrow_address: str, cvat_id: int) -> tuple:
     cvat_project = create_project(session, escrow_address, cvat_id)
     cvat_task = Task(
         id=str(uuid.uuid4()),
@@ -34,7 +35,7 @@ def create_project_and_task(session: SessionLocal, escrow_address: str, cvat_id:
     return cvat_project, cvat_task
 
 
-def create_project_task_and_job(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
+def create_project_task_and_job(session: Session, escrow_address: str, cvat_id: int) -> tuple:
     cvat_project, cvat_task = create_project_and_task(session, escrow_address, cvat_id)
 
     cvat_job = Job(

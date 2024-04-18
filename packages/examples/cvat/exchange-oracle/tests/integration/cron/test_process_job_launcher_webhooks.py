@@ -9,7 +9,6 @@ from sqlalchemy.sql import select
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobLauncherEventTypes,
-    JobStatuses,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
@@ -22,7 +21,7 @@ from src.crons.process_job_launcher_webhooks import (
     process_outgoing_job_launcher_webhooks,
 )
 from src.db import SessionLocal
-from src.models.cvat import Job, Project, Task
+from src.models.cvat import EscrowCreation, Project
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
 
@@ -67,19 +66,26 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Pending.name
             mock_escrow.return_value = mock_escrow_data
-            mock_cvat_id = Mock()
-            mock_cvat_id.id = 1
-            mock_cvat_api.create_project.return_value = mock_cvat_id
-            mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_id
-            mock_cvat_api.create_cloudstorage.return_value = mock_cvat_id
-            filenames = [
+            mock_cvat_object = Mock()
+            mock_cvat_object.id = 1
+            mock_cvat_api.create_project.return_value = mock_cvat_object
+
+            mock_cvat_task = Mock()
+            mock_cvat_task.id = 42
+            mock_cvat_task.status = TaskStatuses.annotation.value
+            mock_cvat_api.create_task.return_value = mock_cvat_task
+
+            mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_object
+            mock_cvat_api.create_cloudstorage.return_value = mock_cvat_object
+
+            gt_filenames = [
                 "image1.jpg",
                 "image2.jpg",
             ]
-            mock_gt_filenames.return_value = filenames
+            mock_gt_filenames.return_value = gt_filenames
 
             mock_cloud_client = Mock()
-            mock_cloud_client.list_files.return_value = filenames
+            mock_cloud_client.list_files.return_value = gt_filenames + ["image3.jpg", "image4.png"]
             mock_make_cloud_client.return_value = mock_cloud_client
 
             process_incoming_job_launcher_webhooks()
@@ -90,13 +96,21 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
         self.assertEqual(updated_webhook.attempts, 1)
+
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
+        self.assertEqual(db_project.status, ProjectStatuses.creation.value)
 
-        self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
+        db_escrow_creation_tracker = (
+            self.session.query(EscrowCreation)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
+            .first()
+        )
+        self.assertListEqual(db_escrow_creation_tracker.projects, [db_project])
+        self.assertEqual(db_escrow_creation_tracker.total_jobs, 1)
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_invalid_escrow_status(
         self,
