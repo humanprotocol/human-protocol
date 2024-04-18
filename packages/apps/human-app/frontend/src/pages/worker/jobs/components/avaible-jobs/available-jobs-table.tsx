@@ -9,8 +9,11 @@ import { Box } from '@mui/material';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
-import { getJobsTableData, type AvailableJobs } from './jobs-table-service';
-import { shortenEscrowAddress } from './utils/shorten-address';
+import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
+import {
+  getJobsTableData,
+  type AvailableJobs,
+} from './available-jobs-table-service';
 
 const columns: MRT_ColumnDef<AvailableJobs>[] = [
   {
@@ -51,7 +54,7 @@ const columns: MRT_ColumnDef<AvailableJobs>[] = [
   },
 ];
 
-export function JobsTable() {
+export function AvailableJobsTable() {
   const {
     fields: { sorting, pagination },
   } = useTableQuery();
@@ -69,7 +72,7 @@ export function JobsTable() {
           ...job,
           jobTypeChips: job.jobType.map((j) => (
             <Box
-              key={j}
+              key={crypto.randomUUID()}
               sx={{
                 marginRight: '5px',
               }}

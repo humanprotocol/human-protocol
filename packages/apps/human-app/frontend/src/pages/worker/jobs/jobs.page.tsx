@@ -6,7 +6,8 @@ import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { ProfileWorkIcon } from '@/components/ui/icons';
-import { JobsTable } from './components/jobs-table';
+import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
+import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -94,10 +95,10 @@ export function JobsPage() {
                   </Tabs>
                 </Box>
                 <CustomTabPanel index={0} value={value}>
-                  <JobsTable />
+                  <AvailableJobsTable />
                 </CustomTabPanel>
                 <CustomTabPanel index={1} value={value}>
-                  <JobsTable />
+                  <MyJobsTable />
                 </CustomTabPanel>
               </Box>
             </TableQueryContextProvider>

@@ -113,7 +113,9 @@
       "escrowAddress": "Escrow address",
       "network": "Network",
       "rewardAmount": "Reward amount",
-      "jobType": "Job type"
+      "jobType": "Job type",
+      "expiresAt": "Expires at",
+      "status": "Status"
     }
   },
   "operator": {
