@@ -1110,28 +1110,25 @@ class BoxesFromPointsTaskBuilder:
                 ],
             )
 
-        for job_filenames in self._job_layout:
-            cvat_task = cvat_api.create_task(cvat_project.id, self.escrow_address)
+            for job_filenames in self._job_layout:
+                cvat_task = cvat_api.create_task(cvat_project.id, self.escrow_address)
 
-            with SessionLocal.begin() as session:
                 task_id = db_service.create_task(
                     session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
                 )
-
-            # Actual task creation in CVAT takes some time, so it's done in an async process.
-            # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
-            cvat_api.put_task_data(
-                cvat_task.id,
-                cvat_cloud_storage.id,
-                filenames=[
-                    compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
-                    for fn in job_filenames
-                ],
-                sort_images=False,
-            )
-
-            with SessionLocal.begin() as session:
                 db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
+
+                # Actual task creation in CVAT takes some time, so it's done in an async process.
+                cvat_api.put_task_data(
+                    cvat_task.id,
+                    cvat_cloud_storage.id,
+                    filenames=[
+                        compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
+                        for fn in job_filenames
+                    ],
+                    sort_images=False,
+                )
+
                 db_service.create_data_upload(session, cvat_task.id)
 
     @classmethod
@@ -2086,37 +2083,36 @@ class SkeletonsFromBoxesTaskBuilder:
                 total_jobs=total_jobs,
             )
 
-        for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
-            # Each skeleton point uses the same file layout in jobs
-            skeleton_label_filenames = []
-            for skeleton_label_job in skeleton_label_jobs:
-                skeleton_label_filenames.append(
-                    [
-                        compose_data_bucket_filename(
-                            self.escrow_address, self.chain_id, self._roi_filenames[roi_id]
-                        )
-                        for roi_id in skeleton_label_job.roi_ids
-                    ]
-                )
+            for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
+                # Each skeleton point uses the same file layout in jobs
+                skeleton_label_filenames = []
+                for skeleton_label_job in skeleton_label_jobs:
+                    skeleton_label_filenames.append(
+                        [
+                            compose_data_bucket_filename(
+                                self.escrow_address, self.chain_id, self._roi_filenames[roi_id]
+                            )
+                            for roi_id in skeleton_label_job.roi_ids
+                        ]
+                    )
 
-            for point_label_spec in label_specs_by_skeleton[skeleton_label_id]:
-                # Create a project for each point label.
-                # CVAT doesn't support tasks with different labels in a project.
-                cvat_project = cvat_api.create_project(
-                    name="{} ({} {})".format(
-                        self.escrow_address,
-                        self.manifest.annotation.labels[skeleton_label_id].name,
-                        point_label_spec["name"],
-                    ),
-                    user_guide=self.manifest.annotation.user_guide,
-                    labels=[point_label_spec],
-                    # TODO: improve guide handling - split for different points
-                )
+                for point_label_spec in label_specs_by_skeleton[skeleton_label_id]:
+                    # Create a project for each point label.
+                    # CVAT doesn't support tasks with different labels in a project.
+                    cvat_project = cvat_api.create_project(
+                        name="{} ({} {})".format(
+                            self.escrow_address,
+                            self.manifest.annotation.labels[skeleton_label_id].name,
+                            point_label_spec["name"],
+                        ),
+                        user_guide=self.manifest.annotation.user_guide,
+                        labels=[point_label_spec],
+                        # TODO: improve guide handling - split for different points
+                    )
 
-                # Setup webhooks for a project (update:task, update:job)
-                cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
+                    # Setup webhooks for a project (update:task, update:job)
+                    cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
-                with SessionLocal.begin() as session:
                     project_id = db_service.create_project(
                         session,
                         cvat_project.id,
@@ -2141,25 +2137,23 @@ class SkeletonsFromBoxesTaskBuilder:
                         list(set(chain.from_iterable(skeleton_label_filenames))),
                     )
 
-                for point_label_filenames in skeleton_label_filenames:
-                    cvat_task = cvat_api.create_task(cvat_project.id, name=cvat_project.name)
+                    for point_label_filenames in skeleton_label_filenames:
+                        cvat_task = cvat_api.create_task(cvat_project.id, name=cvat_project.name)
 
-                    with SessionLocal.begin() as session:
                         task_id = db_service.create_task(
                             session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
                         )
-
-                    # Actual task creation in CVAT takes some time, so it's done in an async process.
-                    # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
-                    cvat_api.put_task_data(
-                        cvat_task.id,
-                        cvat_cloud_storage.id,
-                        filenames=point_label_filenames,
-                        sort_images=False,
-                    )
-
-                    with SessionLocal.begin() as session:
                         db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
+
+                        # Actual task creation in CVAT takes some time, so it's done in an async process.
+                        # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                        cvat_api.put_task_data(
+                            cvat_task.id,
+                            cvat_cloud_storage.id,
+                            filenames=point_label_filenames,
+                            sort_images=False,
+                        )
+
                         db_service.create_data_upload(session, cvat_task.id)
 
     @classmethod
@@ -2358,25 +2352,23 @@ def create_task(escrow_address: str, chain_id: int) -> None:
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(session, cvat_project.id, data_filenames)
 
-        for job_filenames in job_configuration:
-            cvat_task = cvat_api.create_task(cvat_project.id, escrow_address)
+            for job_filenames in job_configuration:
+                cvat_task = cvat_api.create_task(cvat_project.id, escrow_address)
 
-            with SessionLocal.begin() as session:
                 task_id = db_service.create_task(
                     session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
                 )
-
-            # Actual task creation in CVAT takes some time, so it's done in an async process.
-            # The task will be created in DB once 'update:task' or 'update:job' webhook is received.
-            cvat_api.put_task_data(
-                cvat_task.id,
-                cloud_storage.id,
-                filenames=[os.path.join(data_bucket.path, fn) for fn in job_filenames],
-                sort_images=False,
-            )
-
-            with SessionLocal.begin() as session:
                 db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
+
+                # Actual task creation in CVAT takes some time, so it's done in an async process.
+                # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                cvat_api.put_task_data(
+                    cvat_task.id,
+                    cloud_storage.id,
+                    filenames=[os.path.join(data_bucket.path, fn) for fn in job_filenames],
+                    sort_images=False,
+                )
+
                 db_service.create_data_upload(session, cvat_task.id)
 
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:

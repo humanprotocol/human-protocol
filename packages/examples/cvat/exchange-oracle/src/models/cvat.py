@@ -54,6 +54,14 @@ class Project(Base):
     escrow_creation: Mapped["EscrowCreation"] = relationship(
         back_populates="projects",
         passive_deletes=True,
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowCreation.escrow_address, "
+            "Project.chain_id == EscrowCreation.chain_id"
+            ")"
+        ),
+        foreign_keys=[escrow_address, chain_id],
     )
 
     def __repr__(self):
@@ -100,7 +108,17 @@ class EscrowCreation(Base):
 
     total_jobs = Column(Integer, nullable=False)
 
-    projects: Mapped[List["Project"]] = relationship(back_populates="escrow_creation")
+    projects: Mapped[List["Project"]] = relationship(
+        back_populates="escrow_creation",
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowCreation.escrow_address, "
+            "Project.chain_id == EscrowCreation.chain_id"
+            ")"
+        ),
+        foreign_keys=[Project.escrow_address, Project.chain_id],
+    )
 
     def __repr__(self):
         return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"

@@ -144,6 +144,7 @@ def handle_create_job_event(payload: dict) -> None:
                 return
 
             created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+                session,
                 escrow_address=escrow_creation.escrow_address,
                 chain_id=escrow_creation.chain_id,
                 status=JobStatuses.new,

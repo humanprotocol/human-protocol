@@ -205,6 +205,9 @@ def track_task_creation() -> None:
                 for_update=ForUpdateParams(skip_locked=True),
             )
 
+            if not uploads:
+                return
+
             logger.debug(
                 "Checking the data uploading status of CVAT tasks: {}".format(
                     ", ".join(str(u.task_id) for u in uploads)
@@ -260,9 +263,9 @@ def track_task_creation() -> None:
                             event=ExchangeOracleEvent_TaskCreationFailed(reason=str(e)),
                         )
 
-            cvat_service.finish_data_uploads(session, failed + completed)
-
             if completed or failed:
+                cvat_service.finish_data_uploads(session, failed + completed)
+
                 logger.info(
                     "Updated creation status of CVAT tasks: {}".format(
                         "; ".join(
@@ -294,6 +297,9 @@ def track_escrow_creation() -> None:
                 for_update=ForUpdateParams(skip_locked=True),
             )
 
+            if not creations:
+                return
+
             logger.debug(
                 "Checking escrow creation statuses for escrows: {}".format(
                     ", ".join(str(c.escrow_address) for c in creations)
@@ -303,6 +309,7 @@ def track_escrow_creation() -> None:
             finished: List[cvat_models.EscrowCreation] = []
             for creation in creations:
                 created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+                    session,
                     escrow_address=creation.escrow_address,
                     chain_id=creation.chain_id,
                     status=JobStatuses.new,
@@ -320,9 +327,9 @@ def track_escrow_creation() -> None:
                     )
                     finished.append(creation)
 
-            cvat_service.finish_escrow_creations(session, finished)
-
             if finished:
+                cvat_service.finish_escrow_creations(session, finished)
+
                 logger.info(
                     "Updated creation status of escrows: {}".format(
                         ", ".join(c.escrow_address for c in finished)
