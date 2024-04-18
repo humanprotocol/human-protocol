@@ -3,6 +3,7 @@ import { WorkerService } from '../worker.service';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { reputationOracleGatewayMock } from '../../../integrations/reputation-oracle/spec/reputation-oracle.gateway.mock';
 import { UserType } from '../../../common/enums/user';
+import { SignupWorkerCommand } from '../model/worker-registration.model';
 
 describe('WorkerService', () => {
   let service: WorkerService;
@@ -28,9 +29,10 @@ describe('WorkerService', () => {
 
   describe('signupWorker', () => {
     it('should call reputation oracle gateway without doing anything else', async () => {
-      const command = {
+      const command: SignupWorkerCommand = {
         email: 'email@example.com',
         password: 'Pa55word!',
+        hCaptchaToken: 'hcaptchatkn',
         type: UserType.WORKER,
       };
       await service.signupWorker(command);

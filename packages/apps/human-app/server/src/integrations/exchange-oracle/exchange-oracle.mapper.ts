@@ -14,11 +14,11 @@ import {
   JobAssignmentParams,
   JobsFetchParams,
   JobsFetchParamsData,
-} from '../../modules/job-assignment/interfaces/job-assignment.interface';
+} from '../../modules/job-assignment/model/job-assignment.model';
 import {
   JobsDiscoveryParams,
   JobsDiscoveryParamsData,
-} from '../../modules/jobs-discovery/interfaces/jobs-discovery.interface';
+} from '../../modules/jobs-discovery/model/jobs-discovery.model';
 
 @Injectable()
 export class ExchangeOracleProfile extends AutomapperProfile {

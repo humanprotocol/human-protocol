@@ -10,7 +10,8 @@ import { passwordRegex } from '@/shared/helpers/regex';
 export const signUpDtoSchema = z
   .object({
     email: z.string().email(),
-    token: z.string(),
+    token: z.string().nullable(),
+    hCaptchaToken: z.string().nullable(),
   })
   .and(
     z
@@ -37,7 +38,7 @@ const signUpSuccessResponseSchema = z.unknown();
 function signUpMutationFn(data: Omit<SignUpDto, 'confirmPassword'>) {
   return apiClient(apiPaths.worker.signUp.path, {
     successSchema: signUpSuccessResponseSchema,
-    options: { body: JSON.stringify(data) },
+    options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
 

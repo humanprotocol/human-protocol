@@ -3,10 +3,10 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { generateWorkerSignupRequestBody } from './fixtures/user-worker.fixture';
-import { SignupWorkerData } from '../src/modules/user-worker/interfaces/worker-registration.interface';
+import { SignupWorkerData } from '../src/modules/user-worker/model/worker-registration.model';
 import { beforeAll } from '@jest/globals';
 import { generateOperatorSignupRequestBody } from './fixtures/user-operator.fixture';
-import { SignupOperatorData } from '../src/modules/user-operator/interfaces/operator-registration.interface';
+import { SignupOperatorData } from '../src/modules/user-operator/model/operator-registration.model';
 import { ConfigService } from '@nestjs/config';
 import {
   TestEnvironmentConfigService,

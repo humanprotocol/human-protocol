@@ -4,7 +4,7 @@ import {
   JobAssignmentResponse,
   JobAssignmentCommand,
   JobsFetchResponse,
-} from './interfaces/job-assignment.interface';
+} from './model/job-assignment.model';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 @Injectable()
 export class JobAssignmentService {

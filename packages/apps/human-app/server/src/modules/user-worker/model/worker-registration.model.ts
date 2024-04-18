@@ -13,6 +13,10 @@ export class SignupWorkerDto {
   @ApiProperty({ example: 'string' })
   @IsString()
   password: string;
+  @AutoMap()
+  @ApiProperty({example: 'string'})
+  @IsString()
+  h_captcha_token: string;
 }
 
 export class SignupWorkerCommand {
@@ -22,11 +26,14 @@ export class SignupWorkerCommand {
   password: string;
   @AutoMap()
   type: UserType;
+  @AutoMap()
+  hCaptchaToken: string;
 
-  constructor(email: string, password: string) {
+  constructor(email: string, password: string, token: string) {
     this.email = email;
     this.password = password;
     this.type = UserType.WORKER;
+    this.hCaptchaToken = token;
   }
 }
 
@@ -37,4 +44,6 @@ export class SignupWorkerData {
   password: string;
   @AutoMap()
   type: string;
+  @AutoMap()
+  h_captcha_token: string;
 }

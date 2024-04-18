@@ -1,7 +1,7 @@
 import {
-  Body,
   Controller,
   Get,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -13,7 +13,7 @@ import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
   OracleDiscoveryDto,
-} from './interface/oracle-discovery.interface';
+} from './model/oracle-discovery.model';
 
 @Controller()
 export class OracleDiscoveryController {
@@ -26,7 +26,7 @@ export class OracleDiscoveryController {
   @ApiOperation({ summary: 'Oracles discovery' })
   @UsePipes(new ValidationPipe())
   public getOracles(
-    @Body() oracleDiscoveryDto: OracleDiscoveryDto,
+    @Query() oracleDiscoveryDto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryResponse[]> {
     const oracleDiscoveryCommand = this.mapper.map(
       oracleDiscoveryDto,

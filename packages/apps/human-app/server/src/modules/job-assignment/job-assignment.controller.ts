@@ -7,7 +7,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { JobAssignmentService } from './job-assignment.service';
@@ -18,7 +18,7 @@ import {
   JobsFetchParamsDto,
   JobsFetchParamsCommand,
   JobsFetchResponse,
-} from './interfaces/job-assignment.interface';
+} from './model/job-assignment.model';
 
 @Controller()
 export class JobAssignmentController {
@@ -32,6 +32,7 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
+  @ApiBearerAuth('access-token')
   @UsePipes(new ValidationPipe())
   public async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
@@ -48,17 +49,20 @@ export class JobAssignmentController {
 
   @ApiTags('Job-Assignment')
   @Get('/assignment/job')
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Request to get a jobs assigned to a logged user',
   })
   public async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
+    @Headers('authorization') token: string,
   ): Promise<JobsFetchResponse> {
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,
       JobsFetchParamsDto,
       JobsFetchParamsCommand,
     );
+    jobsAssignmentParamsCommand.token = token;
     return this.jobAssignmentService.processGetAssignedJobs(
       jobsAssignmentParamsCommand,
     );

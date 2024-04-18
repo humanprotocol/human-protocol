@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class UserStatisticsResponse {
   assignments_amount: number;
   submissions_sent: number;
@@ -8,4 +10,8 @@ export class UserStatisticsResponse {
 export class UserStatisticsCommand {
   exchangeOracleUrl: string;
   token: string;
+}
+export class UserStatisticsDto {
+  @ApiProperty({ example: 'string' })
+  exchange_oracle_url: string;
 }

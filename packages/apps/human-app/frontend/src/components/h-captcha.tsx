@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { env } from '@/shared/env';
 
 interface CaptchaProps {
   setCaptchaToken: (token: string) => void;
@@ -23,8 +24,7 @@ export function Captcha({ setCaptchaToken }: CaptchaProps) {
       onLoad={onLoad}
       onVerify={setCaptchaToken}
       ref={captchaRef}
-      // TODO add correct sitekey
-      sitekey="10000000-ffff-ffff-ffff-000000000001"
+      sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
     />
   );
 }

@@ -4,10 +4,10 @@ export const apiPaths = {
   },
   worker: {
     signIn: {
-      path: 'auth/sign-in',
+      path: '/auth/signin',
     },
     signUp: {
-      path: 'auth/sign-up',
+      path: '/auth/signup',
     },
     sendResetLink: {
       path: 'auth/send',
