@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 export class StripeConfigService {
   constructor(private configService: ConfigService) {}
   get secretKey(): string {
-    return this.configService.get<string>('STRIPE_SECRET_KEY', '127.0.0.1');
+    return this.configService.get<string>('STRIPE_SECRET_KEY', '');
   }
   get apiVersion(): string {
     return this.configService.get<string>('STRIPE_API_VERSION', '2022-11-15');
