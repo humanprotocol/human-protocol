@@ -49,5 +49,5 @@ export const RPC_URLS: {
   [ChainId.SKALE]: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
   [ChainId.CELO_ALFAJORES]: 'https://alfajores-forno.celo-testnet.org',
   [ChainId.CELO]: 'https://forno.celo.org',
-  [ChainId.X_LAYER]: 'https://x1testrpc.okx.com/',
+  [ChainId.X_LAYER_TESTNET]: 'https://testrpc.xlayer.tech/',
 };

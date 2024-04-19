@@ -11,7 +11,7 @@ export enum ChainId {
   CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
   SKALE = 1273227453,
-  X_LAYER = 195,
+  X_LAYER_TESTNET = 195,
 }
 
 export interface IHmtNetwork {
@@ -87,11 +87,11 @@ export const FAUCET_NETWORKS: {
     rpcUrl: 'https://alfajores-forno.celo-testnet.org',
     hmtAddress: '0x2736B33455A872dC478E1E004106D04c35472468',
   },
-  [ChainId.X_LAYER]: {
-    chainId: ChainId.X_LAYER,
-    title: 'X Layer',
-    rpcUrl: 'https://x1testrpc.okx.com/',
-    hmtAddress: '0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8',
+  [ChainId.X_LAYER_TESTNET]: {
+    chainId: ChainId.X_LAYER_TESTNET,
+    title: 'X Layer Testnet',
+    rpcUrl: 'https://testrpc.xlayer.tech/',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
   },
   [ChainId.SKALE]: {
     chainId: ChainId.SKALE,

@@ -171,9 +171,9 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     xlayer: {
-      chainId: 196,
-      timeout: 2000000,
-      url: process.env.ETH_OKT_URL || '',
+      chainId: 195,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },

@@ -20,7 +20,7 @@ class ChainId(Enum):
     SKALE = 1273227453
     CELO = 42220
     CELO_ALFAJORES = 44787
-    X_LAYER = 195
+    X_LAYER_TESTNET = 195
     LOCALHOST = 1338
 
 
@@ -215,13 +215,13 @@ NETWORKS = {
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
-    ChainId.X_LAYER: {
+    ChainId.X_LAYER_TESTNET: {
         "title": "X Layer",
         "scan_url": "https://www.oklink.com/oktc-test",
         "subgraph_url": (
             "https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet"
         ),
-        "hmt_address": "0x28838a007Bd1CF731fE0ca41d07E1fd02aB133e8",
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc",
         "staking_address": "0x703936A24DFaDcD34008Db338FDB087c43C8c56a",
         "reward_pool_address": "0x44FAd6e8d616AD460cf8eEf503FC101170E7De73",

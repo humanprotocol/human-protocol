@@ -12,7 +12,7 @@ export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER,
+  ChainId.X_LAYER_TESTNET,
   // ChainId.SKALE,
   // ChainId.AVALANCHE,
   // ChainId.AVALANCHE_TESTNET,
@@ -34,7 +34,7 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.AVALANCHE,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER,
+  ChainId.X_LAYER_TESTNET,
 ];
 
 export const L1_L2_CHAIN_IDS = [
@@ -43,7 +43,7 @@ export const L1_L2_CHAIN_IDS = [
   ChainId.SKALE,
   ChainId.MOONBEAM,
   ChainId.AVALANCHE,
-  ChainId.X_LAYER,
+  ChainId.X_LAYER_TESTNET,
 ];
 
 export const TESTNET_CHAIN_IDS = [
@@ -55,7 +55,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER,
+  ChainId.X_LAYER_TESTNET,
 ];
 
 export const FAUCET_CHAIN_IDS = [
@@ -67,7 +67,7 @@ export const FAUCET_CHAIN_IDS = [
   ChainId.AVALANCHE_TESTNET,
   ChainId.SKALE,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER,
+  ChainId.X_LAYER_TESTNET,
 ];
 
 export const RPC_URLS: {
@@ -90,7 +90,7 @@ export const RPC_URLS: {
   [ChainId.SKALE]: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
   [ChainId.CELO_ALFAJORES]: 'https://alfajores-forno.celo-testnet.org',
   [ChainId.CELO]: 'https://forno.celo.org',
-  [ChainId.X_LAYER]: 'https://www.okx.com/explorer/xlayer-test',
+  [ChainId.X_LAYER_TESTNET]: 'https://www.okx.com/explorer/xlayer-test',
 };
 
 export const FAST_INTERVAL = 10_000;
