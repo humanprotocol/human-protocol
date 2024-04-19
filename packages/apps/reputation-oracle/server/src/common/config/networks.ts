@@ -24,9 +24,10 @@ export const networkMap: NetworkMapDto = {
     rpcUrl:
       'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
   },
-  goerli: {
-    chainId: ChainId.GOERLI,
-    rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+  sepolia: {
+    chainId: ChainId.SEPOLIA,
+    rpcUrl:
+      'https://eth-sepolia.g.alchemy.com/v2/sboTD6vQ1csb0uxeeh6ex3EqSLE-vMWh',
   },
   moonbeam: {
     chainId: ChainId.MOONBEAM,
@@ -47,7 +48,7 @@ export const networks = Object.values(networkMap).map((network) => network);
 export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_AMOY,
-  ChainId.GOERLI,
+  ChainId.SEPOLIA,
 ];
 
 export const MAINNET_CHAIN_IDS = [

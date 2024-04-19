@@ -5,6 +5,8 @@ import { createPublicClient, http } from 'viem';
 import {
   bsc,
   bscTestnet,
+  goerli,
+  sepolia,
   mainnet,
   polygon,
   polygonAmoy,
@@ -17,6 +19,8 @@ import { formatUnits, parseUnits } from 'viem/utils';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
+  [ChainId.GOERLI]: goerli,
+  [ChainId.SEPOLIA]: sepolia,
   [ChainId.BSC_MAINNET]: bsc,
   [ChainId.BSC_TESTNET]: bscTestnet,
   [ChainId.POLYGON]: polygon,

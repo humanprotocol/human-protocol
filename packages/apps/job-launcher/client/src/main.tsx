@@ -11,6 +11,7 @@ import { Provider } from 'react-redux';
 import { WagmiConfig, createClient, configureChains, Chain } from 'wagmi';
 import {
   goerli,
+  sepolia,
   mainnet,
   polygon,
   polygonMumbai,
@@ -83,6 +84,7 @@ const polygonAmoy: Chain = {
 const { chains, provider, webSocketProvider } = configureChains(
   [
     goerli,
+    sepolia,
     mainnet,
     polygon,
     skaleHumanProtocol,
