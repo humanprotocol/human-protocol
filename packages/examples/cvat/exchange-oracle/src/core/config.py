@@ -88,6 +88,9 @@ class CronConfig:
     rejected_projects_chunk_size = os.environ.get("REJECTED_PROJECTS_CHUNK_SIZE", 20)
     accepted_projects_chunk_size = os.environ.get("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
 
+    track_escrow_creation_chunk_size = os.environ.get("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20)
+    track_escrow_creation_int = int(os.environ.get("TRACK_ESCROW_CREATION_INT", 300))
+
 
 class CvatConfig:
     cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
