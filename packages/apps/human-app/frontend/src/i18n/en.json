@@ -13,7 +13,10 @@
     "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])"
   },
   "errors": {
-    "unknown": "Unknown error"
+    "generalErrorMessage": "An error occurred, please try again.",
+    "errorWithMessage": "Error with message: {{message}}",
+    "errorWithStatusCode": "Error with status code: {{code}}",
+    "unknown": "An error occurred, please try again."
   },
   "components": {
     "multiSelect": {
@@ -86,6 +89,9 @@
         "confirmPassword": "Confirm Password",
         "email": "your@email.com"
       },
+      "errors": {
+        "emailTaken": "Email is already taken. Please sign in."
+      },
       "title": "Sign Up",
       "submitBtn": "Sign up",
       "passwordDetailedValidation": "Password must contain at least:",
@@ -95,6 +101,9 @@
       "fields": {
         "password": "Password",
         "email": "your@email.com"
+      },
+      "errors": {
+        "invalidCredentials": "Incorrect email or password!"
       },
       "title": "Sign In",
       "submitBtn": "Sign in",

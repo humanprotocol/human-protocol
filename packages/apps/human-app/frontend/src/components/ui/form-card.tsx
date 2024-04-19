@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
-import { Alert } from '@/components/ui/alert';
 import { colorPalette } from '@/styles/color-palette';
 
 const IconWrapper = styled('div')(() => ({
@@ -133,19 +132,16 @@ export function FormCard({
             md={10}
             order={{ xs: 2, md: 2 }}
             sx={{
-              height: '3rem',
+              minHeight: '3rem',
               width: '100%',
               [breakpoints.mobile]: {
                 height: 'auto',
+                minHeight: 'unset',
               },
             }}
             xs={12}
           >
-            {alert ? (
-              <Alert color="error" severity="error" sx={{ width: '100%' }}>
-                {alert}
-              </Alert>
-            ) : null}
+            {alert ? <>{alert}</> : null}
           </Grid>
           <Grid
             item

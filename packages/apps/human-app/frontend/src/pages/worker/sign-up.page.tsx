@@ -29,19 +29,13 @@ import type { PasswordCheck } from '@/components/data-entry/password/password-ch
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { env } from '@/shared/env';
 import { routerPaths } from '@/router/router-paths';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { Alert } from '@/components/ui/alert';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
-  if (
-    unknownError instanceof FetchError &&
-    (unknownError.status === 403 || unknownError.status === 401)
-  ) {
-    return <Trans>auth.login.errors.unauthorized</Trans>;
+  if (unknownError instanceof FetchError && unknownError.status === 409) {
+    return t('worker.signUpForm.errors.emailTaken');
   }
-
-  if (unknownError instanceof Error) {
-    return <Trans>errors.withInfoCode</Trans>;
-  }
-  return <Trans>errors.unknown</Trans>;
 }
 
 const passwordChecks: PasswordCheck[] = [
@@ -101,9 +95,14 @@ export function SignUpWorkerPage() {
   return (
     <FormCard
       alert={
-        isSignUpWorkerError
-          ? formattedSignUpErrorMessage(signUpWorkerError)
-          : undefined
+        isSignUpWorkerError ? (
+          <Alert color="error" severity="error" sx={{ width: '100%' }}>
+            {defaultErrorMessage(
+              signUpWorkerError,
+              formattedSignUpErrorMessage
+            )}
+          </Alert>
+        ) : undefined
       }
       backArrowPath={routerPaths.homePage}
       title={t('worker.signUpForm.title')}

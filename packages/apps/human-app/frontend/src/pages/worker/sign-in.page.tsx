@@ -1,7 +1,8 @@
 import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { t as i18NextT } from 'i18next';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { FormCard } from '@/components/ui/form-card';
@@ -16,19 +17,13 @@ import {
 } from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { Alert } from '@/components/ui/alert';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
-  if (
-    unknownError instanceof FetchError &&
-    (unknownError.status === 403 || unknownError.status === 401)
-  ) {
-    return <Trans>auth.login.errors.unauthorized</Trans>;
+  if (unknownError instanceof FetchError && unknownError.status === 400) {
+    return i18NextT('worker.signInForm.errors.invalidCredentials');
   }
-
-  if (unknownError instanceof Error) {
-    return <Trans>errors.withInfoCode</Trans>;
-  }
-  return <Trans>errors.unknown</Trans>;
 }
 
 export function SignInWorkerPage() {
@@ -62,9 +57,14 @@ export function SignInWorkerPage() {
   return (
     <FormCard
       alert={
-        isSignInWorkerError
-          ? formattedSignInErrorMessage(signInWorkerError)
-          : undefined
+        isSignInWorkerError ? (
+          <Alert color="error" severity="error" sx={{ width: '100%' }}>
+            {defaultErrorMessage(
+              signInWorkerError,
+              formattedSignInErrorMessage
+            )}
+          </Alert>
+        ) : undefined
       }
       backArrowPath={routerPaths.homePage}
       title={t('worker.signInForm.title')}

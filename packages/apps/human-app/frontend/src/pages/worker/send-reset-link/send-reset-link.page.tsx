@@ -1,32 +1,19 @@
 import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import { FormCard } from '@/components/ui/form-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
-import { FetchError } from '@/api/fetcher';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { SendResetLinkDto } from '@/api/servieces/worker/send-reset-link';
 import {
   sendResetLinkDtoSchema,
   useSendResetLinkMutation,
 } from '@/api/servieces/worker/send-reset-link';
-
-function formattedSendResetLinkErrorMessage(unknownError: unknown) {
-  if (
-    unknownError instanceof FetchError &&
-    (unknownError.status === 403 || unknownError.status === 401)
-  ) {
-    return <Trans>auth.login.errors.unauthorized</Trans>;
-  }
-
-  if (unknownError instanceof Error) {
-    return <Trans>errors.withInfoCode</Trans>;
-  }
-  return <Trans>errors.unknown</Trans>;
-}
+import { Alert } from '@/components/ui/alert';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
@@ -58,9 +45,11 @@ export function SendResetLinkWorkerPage() {
   return (
     <FormCard
       alert={
-        isSendResetLinkWorkerError
-          ? formattedSendResetLinkErrorMessage(sendResetLinkWorkerError)
-          : undefined
+        isSendResetLinkWorkerError ? (
+          <Alert color="error" severity="error" sx={{ width: '100%' }}>
+            {defaultErrorMessage(sendResetLinkWorkerError)}
+          </Alert>
+        ) : undefined
       }
       backArrowPath={-1}
       title={t('worker.sendResetLinkForm.title')}
