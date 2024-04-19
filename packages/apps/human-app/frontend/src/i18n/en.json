@@ -13,7 +13,8 @@
     "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])"
   },
   "errors": {
-    "unknown": "Unknown error"
+    "unknown": "Unknown error",
+    "withInfoCode": "An error has occurred - error code {{code}}"
   },
   "components": {
     "multiSelect": {

@@ -13,7 +13,6 @@ import {
   signUpDtoSchema,
   useSignUpMutation,
 } from '@/api/servieces/worker/sign-up';
-import { FetchError } from '@/api/fetcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';
@@ -30,17 +29,10 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { env } from '@/shared/env';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
-  if (
-    unknownError instanceof FetchError &&
-    (unknownError.status === 403 || unknownError.status === 401)
-  ) {
-    return <Trans>auth.login.errors.unauthorized</Trans>;
-  }
-
   if (unknownError instanceof Error) {
-    return <Trans>errors.withInfoCode</Trans>;
+    return <div>{t('errors.withInfoCode', { code: unknownError.name })}</div>;
   }
-  return <Trans>errors.unknown</Trans>;
+  return <div>{t('errors.unknown')}</div>;
 }
 
 const passwordChecks: PasswordCheck[] = [
