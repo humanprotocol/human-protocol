@@ -295,6 +295,76 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.canceled.value)
 
+    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_with_multiple_creating_projects(
+        self,
+    ):
+        project_ids = []
+        for i in range(3):
+            cvat_project = Project(
+                id=str(uuid.uuid4()),
+                cvat_id=i,
+                cvat_cloudstorage_id=i,
+                status=ProjectStatuses.creation.value,
+                job_type=TaskTypes.image_skeletons_from_boxes.value,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+                bucket_url="https://test.storage.googleapis.com/",
+            )
+            project_ids.append(cvat_project.id)
+            self.session.add(cvat_project)
+
+        escrow_creation = EscrowCreation(
+            id=str(uuid.uuid4()),
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            total_jobs=10,
+        )
+        self.session.add(escrow_creation)
+
+        webhok_id = str(uuid.uuid4())
+        webhook = Webhook(
+            id=webhok_id,
+            signature="signature",
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            status=OracleWebhookStatuses.pending.value,
+            event_type=JobLauncherEventTypes.escrow_canceled.value,
+            direction=OracleWebhookDirectionTags.incoming,
+        )
+        self.session.add(webhook)
+
+        self.session.commit()
+
+        with patch("src.chain.escrow.get_escrow") as mock_escrow:
+            mock_escrow_data = Mock()
+            mock_escrow_data.status = Status.Pending.name
+            mock_escrow_data.balance = 1
+            mock_escrow.return_value = mock_escrow_data
+
+            process_incoming_job_launcher_webhooks()
+
+        updated_webhook = (
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+        )
+
+        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
+        self.assertEqual(updated_webhook.attempts, 1)
+        db_project = (
+            self.session.query(Project)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
+            .first()
+        )
+
+        self.assertEqual(db_project.status, ProjectStatuses.canceled.value)
+
+        db_escrow_creation_tracker = (
+            self.session.query(EscrowCreation)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
+            .first()
+        )
+        self.assertTrue(bool(db_escrow_creation_tracker.finished_at))
+
     def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_status(
         self,
     ):
