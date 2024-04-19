@@ -150,6 +150,9 @@ class FeaturesConfig:
 class CoreConfig:
     default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
 
+    skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
+    "Assignment size multiplier for IMAGE_SKELETONS_FROM_BOXES tasks"
+
 
 class HumanAppConfig:
     signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
