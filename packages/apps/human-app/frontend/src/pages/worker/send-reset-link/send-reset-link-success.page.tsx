@@ -11,7 +11,7 @@ import { useLocationState } from '@/hooks/use-location-state';
 export function SendResetLinkWorkerSuccessPage() {
   const { t } = useTranslation();
   const { field: email } = useLocationState({
-    field: 'email',
+    keyInStorage: 'email',
     schema: z.string().email(),
   });
 
