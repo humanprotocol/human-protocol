@@ -37,8 +37,14 @@ const columns: MRT_ColumnDef<MyJobs>[] = [
           popoverContent={
             <Filtering
               filteringOptions={[
-                { value: 'Ethereum', text: 'Ethereum' },
-                { value: 'Polygon', text: 'Polygon' },
+                {
+                  value: t('worker.jobs.Ethereum'),
+                  text: t('worker.jobs.Ethereum'),
+                },
+                {
+                  value: t('worker.jobs.Polygon'),
+                  text: t('worker.jobs.Polygon'),
+                },
               ]}
               label="Filter"
             />

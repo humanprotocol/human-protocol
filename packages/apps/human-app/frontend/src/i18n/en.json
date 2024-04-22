@@ -126,7 +126,9 @@
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
-      "escrowAddressColumnId": "escrowAddress"
+      "escrowAddressColumnId": "escrowAddress",
+      "Ethereum": "Ethereum",
+      "Polygon": "Polygon"
     }
   },
   "operator": {
