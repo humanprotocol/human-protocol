@@ -41,6 +41,14 @@ export const unprotectedRoutes: RouteProps[] = [
     path: routerPaths.operator.signUp,
     element: <SignUpOperatorPage />,
   },
+  {
+    path: routerPaths.worker.emailVerification,
+    element: <EmailVerificationWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendEmailVerification,
+    element: <SendEmailVerificationWorkerPage />,
+  },
 ];
 
 export const protectedRoutes: RouteProps[] = [
@@ -55,14 +63,6 @@ export const protectedRoutes: RouteProps[] = [
   {
     path: '/worker/profile',
     element: <WorkerProfilePage />,
-  },
-  {
-    path: routerPaths.worker.emailVerification,
-    element: <EmailVerificationWorkerPage />,
-  },
-  {
-    path: routerPaths.worker.sendEmailVerification,
-    element: <SendEmailVerificationWorkerPage />,
   },
   {
     path: routerPaths.worker.sendResetLink,

@@ -52,8 +52,7 @@ export function useSignUpMutation() {
       navigate(routerPaths.worker.sendEmailVerification, { state: { email } });
       await queryClient.invalidateQueries();
     },
-    onError: async (_, { email }) => {
-      navigate(routerPaths.worker.sendEmailVerification, { state: { email } });
+    onError: async () => {
       await queryClient.invalidateQueries();
     },
   });
