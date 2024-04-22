@@ -13,7 +13,6 @@ import {
   signUpDtoSchema,
   useSignUpMutation,
 } from '@/api/servieces/worker/sign-up';
-import { FetchError } from '@/api/fetcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';
@@ -31,6 +30,7 @@ import { env } from '@/shared/env';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
+import { FetchError } from '@/api/fetcher';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {

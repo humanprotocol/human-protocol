@@ -13,7 +13,6 @@
     "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])"
   },
   "errors": {
-    "generalErrorMessage": "An error occurred, please try again.",
     "errorWithMessage": "Error with message: {{message}}",
     "errorWithStatusCode": "Error with status code: {{code}}",
     "unknown": "An error occurred, please try again."
