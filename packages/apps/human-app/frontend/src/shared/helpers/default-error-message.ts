@@ -5,7 +5,6 @@ type CustomErrorHandler = (unknownError: unknown) => string | undefined;
 
 export function defaultErrorMessage(
   unknownError: unknown,
-
   customErrorHandler?: CustomErrorHandler
 ): string {
   let customError: string | undefined;

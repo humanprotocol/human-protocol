@@ -24,32 +24,32 @@ const IconWrapper = styled('div')(() => ({
 }));
 
 interface FormCardProps {
-  title: string;
   children: React.JSX.Element;
+  title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
   cardMaxWidth?: string;
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
-  changeLayoutBackGround?: boolean;
+  withLayoutBackground?: boolean;
 }
 
 export function PageCard({
-  title,
   children,
+  title,
   alert,
   cardMaxWidth = '1200px',
   childrenMaxWidth = '486px',
   backArrowPath,
   cancelBtnPath = routerPaths.homePage,
-  changeLayoutBackGround = true,
+  withLayoutBackground = true,
 }: FormCardProps) {
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (changeLayoutBackGround) {
+    if (withLayoutBackground) {
       setGrayBackground();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
@@ -123,7 +123,7 @@ export function PageCard({
               [breakpoints.mobile]: {
                 display: 'flex',
                 width: '100%',
-                justifyContent: 'space-between',
+                justifyContent: backArrowPath ? 'space-between' : 'flex-end',
               },
             }}
           >

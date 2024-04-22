@@ -1,39 +1,33 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 
-export const signInDtoSchema = z.object({
+export const sendResetLinkDtoSchema = z.object({
   email: z.string().email(),
-  password: z
-    .string()
-    .min(1, t('validation.required'))
-    .max(50, t('validation.max', { count: 50 })),
 });
 
-export type SignInDto = z.infer<typeof signInDtoSchema>;
+export type SendResetLinkDto = z.infer<typeof sendResetLinkDtoSchema>;
 
-const signInSuccessResponseSchema = z.unknown();
+const SendResetLinkSuccessResponseSchema = z.unknown();
 
-function signInMutationFn(data: SignInDto) {
-  return apiClient(apiPaths.worker.signIn.path, {
-    successSchema: signInSuccessResponseSchema,
+function sendResetLinkMutationFn(data: SendResetLinkDto) {
+  return apiClient(apiPaths.worker.sendResetLink.path, {
+    successSchema: SendResetLinkSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
 
-export function useSignInMutation() {
+export function useSendResetLinkMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: signInMutationFn,
-    onSuccess: async () => {
-      // TODO add correct path
-      navigate(routerPaths.homePage);
+    mutationFn: sendResetLinkMutationFn,
+    onSuccess: async (_, { email }) => {
+      navigate(routerPaths.worker.sendResetLinkSuccess, { state: { email } });
       await queryClient.invalidateQueries();
     },
     onError: async () => {

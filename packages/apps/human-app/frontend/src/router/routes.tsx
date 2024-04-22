@@ -10,6 +10,12 @@ import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
 import { routerPaths } from '@/router/router-paths';
 import { AddStakeOperatorPage } from '@/pages/operator/sign-up/add-stake.page';
+import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
+import { ResetPasswordWorkerPage } from '@/pages/worker/reset-password/reset-password.page';
+import { SendResetLinkWorkerPage } from '@/pages/worker/send-reset-link/send-reset-link.page';
+import { ResetPasswordWorkerSuccessPage } from '@/pages/worker/reset-password/reset-password-success.page';
+import { EmailVerificationWorkerPage } from '@/pages/worker/email-verification/email-verification.page';
+import { SendEmailVerificationWorkerPage } from '@/pages/worker/email-verification/send-email-verification.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -40,6 +46,14 @@ export const unprotectedRoutes: RouteProps[] = [
     path: routerPaths.operator.addStake,
     element: <AddStakeOperatorPage />,
   },
+  {
+    path: routerPaths.worker.emailVerification,
+    element: <EmailVerificationWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendEmailVerification,
+    element: <SendEmailVerificationWorkerPage />,
+  },
 ];
 
 export const protectedRoutes: RouteProps[] = [
@@ -54,5 +68,21 @@ export const protectedRoutes: RouteProps[] = [
   {
     path: '/worker/profile',
     element: <WorkerProfilePage />,
+  },
+  {
+    path: routerPaths.worker.sendResetLink,
+    element: <SendResetLinkWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendResetLinkSuccess,
+    element: <SendResetLinkWorkerSuccessPage />,
+  },
+  {
+    path: routerPaths.worker.resetPassword,
+    element: <ResetPasswordWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.resetPasswordSuccess,
+    element: <ResetPasswordWorkerSuccessPage />,
   },
 ];
