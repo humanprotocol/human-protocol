@@ -14,7 +14,9 @@
   },
   "errors": {
     "unknown": "Unknown error",
-    "withInfoCode": "An error has occurred - error code {{code}}"
+    "withInfoCode": "An error has occurred - error code {{code}}",
+    "errorWithMessage": "Error with message: {{message}}",
+    "errorWithStatusCode": "Error with status code: {{code}}"
   },
   "components": {
     "multiSelect": {
@@ -52,8 +54,8 @@
     },
     "wallet": {
       "connectBtn": {
-        "disconnect": "Disconnect",
-        "connect": "Connect"
+        "disconnect": "Disconnect Wallet",
+        "connect": "Connect Wallet"
       }
     }
   },
@@ -141,6 +143,22 @@
         "assignmentsRejected": "Assignments rejected",
         "assignmentsExpired": "Assignments expired"
       }
+    },
+    "connectWallet": {
+      "title": "Setup Operator",
+      "description": "Please use the button bellow to connect your wallet and sign up as an operator.",
+      "connect": "Connect Wallet",
+      "disconnect": "Disconnect",
+      "successAlert": "Wallet successfully connected",
+      "setupOperator": "Setup Operator"
+    },
+    "addStake": {
+      "title": "Setup Operator",
+      "formHeader": "Stake",
+      "label": "Staked amount",
+      "description": "Please add bellow the amount to stake",
+      "actionBtn": "Add Stake",
+      "nextBtn": "Next"
     }
   }
 }

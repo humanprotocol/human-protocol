@@ -7,8 +7,9 @@ import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
 import { OperatorProfilePage } from '@/pages/operator/profile.page';
 import { WorkerProfilePage } from '@/pages/worker/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
-import { SignUpOperatorPage } from '@/pages/operator/sign-up.page';
+import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
 import { routerPaths } from '@/router/router-paths';
+import { AddStakeOperatorPage } from '@/pages/operator/sign-up/add-stake.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -32,8 +33,12 @@ export const unprotectedRoutes: RouteProps[] = [
     element: <SignInOperatorPage />,
   },
   {
-    path: routerPaths.operator.signUp,
-    element: <SignUpOperatorPage />,
+    path: routerPaths.operator.connectWallet,
+    element: <ConnectWalletOperatorPage />,
+  },
+  {
+    path: routerPaths.operator.addStake,
+    element: <AddStakeOperatorPage />,
   },
 ];
 

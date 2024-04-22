@@ -27,15 +27,15 @@ createRoot(root).render(
   <StrictMode>
     <ThemeProvider theme={themes}>
       <CssBaseline />
-      <WalletConnectProvider>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <WalletConnectProvider>
           <AuthProvider>
             <Router />
           </AuthProvider>
           <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
           <DisplayModal />
-        </QueryClientProvider>
-      </WalletConnectProvider>
+        </WalletConnectProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>
 );

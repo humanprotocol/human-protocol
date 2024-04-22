@@ -4,10 +4,12 @@ import {
   useWeb3Modal,
   useWeb3ModalAccount,
 } from '@web3modal/ethers/react';
-import type { JsonRpcSigner, BrowserProvider } from 'ethers';
+import type { JsonRpcSigner, BrowserProvider, Eip1193Provider } from 'ethers';
 import React, { createContext } from 'react';
+import type { UseMutationResult } from '@tanstack/react-query';
 import { useWeb3Provider } from '@/hooks/use-web3-provider';
 import { env } from '@/shared/env';
+import type { ResponseError } from '@/shared/types/global.type';
 
 const projectId = env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -42,8 +44,14 @@ export interface WalletConnectContext {
   isConnected: boolean;
   chainId?: number;
   address?: `0x${string}`;
-  provider?: BrowserProvider;
-  signer?: JsonRpcSigner;
+  web3ProviderMutation: UseMutationResult<
+    {
+      provider: BrowserProvider;
+      signer: JsonRpcSigner;
+    },
+    ResponseError,
+    Eip1193Provider
+  >;
 }
 
 export const WalletConnectContext = createContext<WalletConnectContext | null>(
@@ -55,7 +63,7 @@ export function WalletConnectProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { provider, signer } = useWeb3Provider();
+  const web3ProviderMutation = useWeb3Provider();
   const { open } = useWeb3Modal();
   const { address, chainId, isConnected } = useWeb3ModalAccount();
 
@@ -68,8 +76,7 @@ export function WalletConnectProvider({
         isConnected,
         chainId,
         address,
-        provider,
-        signer,
+        web3ProviderMutation,
       }}
     >
       {children}
