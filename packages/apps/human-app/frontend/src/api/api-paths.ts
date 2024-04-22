@@ -15,5 +15,8 @@ export const apiPaths = {
     resetPassword: {
       path: '/auth/reset-password',
     },
+    verifyEmail: {
+      path: '/auth/verify',
+    },
   },
 } as const;

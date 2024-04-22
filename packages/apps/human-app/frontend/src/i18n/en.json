@@ -108,6 +108,17 @@
       "submitBtn": "Sign in",
       "forgotPassword": "Forgot password?"
     },
+    "sendEmailVerification": {
+      "title": "Verify Email",
+      "paragraph1": "We’ve sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
+      "paragraph2": "The verification link is valid for 24 hours.",
+      "paragraph3": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+    },
+    "emailVerification": {
+      "title": "Email Verified",
+      "description": "You are ready to go. Your email has been successfully verified!",
+      "btn": "Sign In"
+    },
     "sendResetLinkForm": {
       "fields": {
         "email": "your@email.com"
@@ -123,6 +134,20 @@
       "paragraph3": "<1>Can’t find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Sign In",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+    },
+    "resetPassword": {
+      "fields": {
+        "createNewPassword": "Create New Password",
+        "confirm": "Confirm New Password"
+      },
+      "title": "Reset password",
+      "description": "Please enter your new password below.",
+      "btn": "Reset password"
+    },
+    "resetPasswordSuccess": {
+      "title": "Password changed",
+      "description": "Your password has been changed successfully.",
+      "btn": "Sign In"
     },
     "profile": {
       "profileHeader": "Profile",

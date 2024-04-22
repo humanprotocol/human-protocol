@@ -24,8 +24,8 @@ const IconWrapper = styled('div')(() => ({
 }));
 
 interface FormCardProps {
-  title: string;
   children: React.JSX.Element;
+  title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
   cardMaxWidth?: string;
   childrenMaxWidth?: string;
@@ -35,8 +35,8 @@ interface FormCardProps {
 }
 
 export function PageCard({
-  title,
   children,
+  title,
   alert,
   cardMaxWidth = '1200px',
   childrenMaxWidth = '486px',
@@ -123,7 +123,7 @@ export function PageCard({
               [breakpoints.mobile]: {
                 display: 'flex',
                 width: '100%',
-                justifyContent: 'space-between',
+                justifyContent: backArrowPath ? 'space-between' : 'flex-end',
               },
             }}
           >
