@@ -31,7 +31,7 @@ interface FormCardProps {
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
-  changeLayoutBackGround?: boolean;
+  withLayoutBackground?: boolean;
 }
 
 export function PageCard({
@@ -42,14 +42,14 @@ export function PageCard({
   childrenMaxWidth = '486px',
   backArrowPath,
   cancelBtnPath = routerPaths.homePage,
-  changeLayoutBackGround = true,
+  withLayoutBackground = true,
 }: FormCardProps) {
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (changeLayoutBackGround) {
+    if (withLayoutBackground) {
       setGrayBackground();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
