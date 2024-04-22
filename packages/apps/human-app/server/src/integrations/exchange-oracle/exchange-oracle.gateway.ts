@@ -77,6 +77,7 @@ export class ExchangeOracleGateway {
   async fetchAssignedJobs(
     details: JobsFetchParamsDetails,
   ): Promise<JobsFetchResponse> {
+    console.log("Details: ", details);
     const jobFetchParamsData = this.mapper.map(
       details.data,
       JobsFetchParams,
@@ -89,6 +90,7 @@ export class ExchangeOracleGateway {
       params: reducedParams,
       headers: {
         Authorization: details.token,
+        Accept: 'application/json',
       },
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);

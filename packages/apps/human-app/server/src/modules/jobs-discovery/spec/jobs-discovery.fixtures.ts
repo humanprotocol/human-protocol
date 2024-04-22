@@ -7,19 +7,20 @@ import {
   JobsDiscoveryResponseItem,
 } from '../model/jobs-discovery.model';
 import {
-  JobFields,
-  SortField,
+  JobDiscoveryFieldName,
+  JobType,
+  JobDiscoverySortField,
   SortOrder,
-} from '../../../common/enums/jobs-discovery';
+} from '../../../common/enums/global-common.interface';
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
 const PAGE_SIZE = 10;
 const PAGE = 1;
 const SORT = SortOrder.ASC;
-const SORT_FIELD = SortField.CREATED_AT;
-const JOB_TYPE = 'type';
-const FIELDS = [JobFields.JOB_TITLE, JobFields.REWARD_AMOUNT];
+const SORT_FIELD = JobDiscoverySortField.CREATED_AT;
+const JOB_TYPE = JobType.FORTUNE;
+const FIELDS = [JobDiscoveryFieldName.CreatedAt, JobDiscoveryFieldName.JobDescription];
 const TOKEN = 'test-token';
 const JOB_DESCRIPTION = 'Description of the test job';
 const REWARD_AMOUNT = '100';

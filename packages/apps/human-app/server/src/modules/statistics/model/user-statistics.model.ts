@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class UserStatisticsResponse {
   assignments_amount: number;
@@ -13,6 +14,7 @@ export class UserStatisticsCommand {
 }
 export class UserStatisticsDto {
   @ApiProperty({ example: 'string' })
+  @IsString()
   address: string;
 }
 export class UserStatisticsDetails {

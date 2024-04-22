@@ -1,31 +1,34 @@
 import {
   JobAssignmentCommand,
-  JobAssignmentData, JobAssignmentDetails,
+  JobAssignmentData,
+  JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
   JobsFetchParamsCommand,
-  JobsFetchParamsData, JobsFetchParamsDetails,
+  JobsFetchParamsData,
+  JobsFetchParamsDetails,
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
 } from '../model/job-assignment.model';
 import {
-  SortField,
+  AssignmentSortField,
+  AssignmentStatus,
+  JobType,
   SortOrder,
-  StatusEnum,
-} from '../../../common/enums/job-assignment';
+} from '../../../common/enums/global-common.interface';
 const EXCHANGE_ORACLE_URL = 'https://www.example.com/api';
 const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
-const JOB_TYPE = 'test_type';
-const STATUS = StatusEnum.ACTIVE;
+const JOB_TYPE = JobType.FORTUNE;
+const STATUS = AssignmentStatus.ACTIVE;
 const PAGE_SIZE = 5;
 const PAGE = 0;
 const SORT = SortOrder.ASC;
-const SORT_FIELD = SortField.CREATED_AT;
+const SORT_FIELD = AssignmentSortField.CREATED_AT;
 const ASSIGNMENT_ID = 'test_id';
 const REWARD_AMOUNT = 'test_amount';
 const REWARD_TOKEN = 'test';
@@ -75,9 +78,8 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
   expires_at: EXPIRES_AT,
 };
 
-export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = { // @TODO: something is not yes: change with actual FetchParams in exchnge oracle
+export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
   address: EXCHANGE_ORACLE_ADDRESS,
-  assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
@@ -89,7 +91,6 @@ export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = { // @TODO: somethi
 };
 
 const jobsFetchParams: JobsFetchParams = {
-  assignmentId: ASSIGNMENT_ID,
   escrowAddress: ESCROW_ADDRESS,
   chainId: CHAIN_ID,
   jobType: JOB_TYPE,
@@ -111,7 +112,6 @@ export const jobsFetchParamsDetailsFixture: JobsFetchParamsDetails = {
 };
 
 export const jobsFetchParamsDataFixture: JobsFetchParamsData = {
-  assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,

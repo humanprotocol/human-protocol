@@ -18,14 +18,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Accept',
   });
   const config = new DocumentBuilder()
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-      'access-token',
-    )
+    .addBearerAuth()
     .setTitle('Human APP API')
     .setDescription('Swagger Human APP API')
     .setVersion('1.0')

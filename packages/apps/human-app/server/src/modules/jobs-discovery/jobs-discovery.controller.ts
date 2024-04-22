@@ -1,4 +1,8 @@
-import { Controller, Get, Headers, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -8,6 +12,7 @@ import {
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponse,
 } from './model/jobs-discovery.model';
+import { Authorization } from '../../common/config/params-decorators';
 
 @Controller()
 export class JobsDiscoveryController {
@@ -18,14 +23,14 @@ export class JobsDiscoveryController {
 
   @ApiTags('Jobs-Discovery')
   @Get('/jobs')
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth()
   @ApiOperation({
     summary:
       'Retrieve a list of filtered available jobs for passed Exchange Oracle url',
   })
   public async getJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<JobsDiscoveryResponse> {
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(

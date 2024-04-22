@@ -20,6 +20,7 @@ import {
   JobsFetchParamsCommand,
   JobsFetchResponse,
 } from './model/job-assignment.model';
+import { Authorization } from '../../common/config/params-decorators';
 
 @Controller()
 export class JobAssignmentController {
@@ -33,11 +34,11 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth()
   @UsePipes(new ValidationPipe())
   public async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<JobAssignmentResponse> {
     const jobAssignmentCommand = this.mapper.map(
       jobAssignmentDto,
@@ -50,13 +51,13 @@ export class JobAssignmentController {
 
   @ApiTags('Job-Assignment')
   @Get('/assignment/job')
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Request to get a jobs assigned to a logged user',
   })
   public async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<JobsFetchResponse> {
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,

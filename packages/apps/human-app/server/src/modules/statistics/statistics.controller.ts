@@ -18,6 +18,7 @@ import {
   UserStatisticsDto,
   UserStatisticsResponse,
 } from './model/user-statistics.model';
+import { Authorization } from '../../common/config/params-decorators';
 
 @Controller()
 export class StatisticsController {
@@ -38,11 +39,11 @@ export class StatisticsController {
   @ApiTags('Statistics')
   @Get('stats/assignment')
   @ApiOperation({ summary: 'Statistics for requesting user' })
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth()
   @UsePipes(new ValidationPipe())
   public getUserStatistics(
     @Query() dto: UserStatisticsDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<UserStatisticsResponse> {
     const command: UserStatisticsCommand = {
       address: dto.address,

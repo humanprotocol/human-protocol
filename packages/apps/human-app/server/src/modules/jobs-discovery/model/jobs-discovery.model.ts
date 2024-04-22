@@ -1,80 +1,72 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 import {
-  JobFields,
-  SortField,
-  SortOrder,
-} from '../../../common/enums/jobs-discovery';
+  JobDiscoveryFieldName,
+  JobDiscoverySortField,
+  JobType,
+} from '../../../common/enums/global-common.interface';
+import {
+  PageableData,
+  PageableDto,
+  PageableParams,
+} from '../../../common/interfaces/pageable.interface';
 
-export class JobsDiscoveryParamsDto {
+export class JobsDiscoveryParamsDto extends PageableDto {
   @AutoMap()
-  @ApiProperty({ example: 'string', required: false })
-  address: string;
+  @IsString()
+  @ApiProperty()
+  address?: string;
   @AutoMap()
-  @ApiProperty({ example: 'string', required: false })
-  escrow_address: string;
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  escrow_address?: string;
   @AutoMap()
-  @ApiProperty({ example: 0, required: false })
-  chain_id: number;
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  @ApiPropertyOptional()
+  chain_id?: number;
   @AutoMap()
-  @ApiProperty({ example: 5, default: 5, maximum: 10, required: false })
-  page_size: number;
+  @IsEnum(JobDiscoverySortField)
+  @ApiPropertyOptional({ enum: JobDiscoverySortField })
+  sort_field?: JobDiscoverySortField;
   @AutoMap()
-  @ApiProperty({ example: 0, default: 0, required: false })
-  page: number;
+  @IsEnum(JobType)
+  @ApiPropertyOptional({ enum: JobType })
+  job_type?: JobType;
   @AutoMap()
-  @ApiProperty({ example: 'ASC', default: 'ASC', required: false })
-  sort: SortOrder;
-  @AutoMap()
-  @ApiProperty({
-    example: 'created_at',
-    default: 'created_at',
-    required: false,
-  })
-  sort_field: SortField;
-  @AutoMap()
-  @ApiProperty({ example: 'job type', required: false })
-  job_type: string;
-  @AutoMap()
-  @ApiProperty({ example: ['job_title'], required: false })
-  fields: JobFields[];
+  @IsOptional()
+  @IsEnum(JobDiscoveryFieldName, { each: true })
+  @ApiPropertyOptional({ enum: JobDiscoveryFieldName, isArray: true })
+  fields: JobDiscoveryFieldName[];
 }
 
-export class JobsDiscoveryParams {
+export class JobsDiscoveryParams extends PageableParams {
   @AutoMap()
-  escrowAddress: string;
+  escrowAddress?: string;
   @AutoMap()
-  chainId: number;
+  chainId?: number;
   @AutoMap()
-  pageSize: number;
+  sortField?: JobDiscoverySortField;
   @AutoMap()
-  page: number;
+  jobType?: JobType;
   @AutoMap()
-  sort: SortOrder;
-  @AutoMap()
-  sortField: SortField;
-  @AutoMap()
-  jobType: string;
-  @AutoMap()
-  fields: JobFields[];
+  fields: JobDiscoveryFieldName[];
 }
-export class JobsDiscoveryParamsData {
+export class JobsDiscoveryParamsData extends PageableData {
   @AutoMap()
-  escrow_address: string;
+  escrow_address?: string;
   @AutoMap()
-  chain_id: number;
+  chain_id?: number;
   @AutoMap()
-  page_size: number;
+  sort_field?: JobDiscoverySortField;
   @AutoMap()
-  page: number;
+  job_type?: JobType;
   @AutoMap()
-  sort: SortOrder;
-  @AutoMap()
-  sort_field: SortField;
-  @AutoMap()
-  job_type: string;
-  @AutoMap()
-  fields: JobFields[];
+  fields: JobDiscoveryFieldName[];
 }
 export class JobsDiscoveryParamsCommand {
   @AutoMap()

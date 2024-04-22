@@ -1,23 +1,27 @@
-import { ChainId, IOperator } from '@human-protocol/sdk';
+import { IOperator } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
-import { ApiProperty } from '@nestjs/swagger';
-import { optional } from 'joi';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class OracleDiscoveryDto {
   @AutoMap()
-  @ApiProperty({ example: 80002, required: false })
-  chainId: ChainId;
+  @IsNumber()
+  @IsOptional()
+  @ApiPropertyOptional({ example: 80002, required: false })
+  chainId: number;
   @AutoMap()
+  @Type(() => Number)
   @ApiProperty({ example: '0x4708354213453af0cdC33eb75d94fBC00045841E' })
   address: string;
-  constructor(chainId: ChainId, address: string) {
+  constructor(chainId: number, address: string) {
     this.chainId = chainId;
     this.address = address;
   }
 }
 export class OracleDiscoveryCommand {
   @AutoMap()
-  chainId: ChainId;
+  chainId: number;
   @AutoMap()
   address: string;
 }

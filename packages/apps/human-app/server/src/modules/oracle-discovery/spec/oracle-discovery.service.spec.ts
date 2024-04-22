@@ -7,10 +7,7 @@ import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
 } from '../model/oracle-discovery.model';
-import {
-  EnvironmentConfigService,
-  envValidator,
-} from '../../../common/config/environment-config.service';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 
