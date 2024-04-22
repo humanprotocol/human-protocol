@@ -1,45 +1,27 @@
 import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FormCard } from '@/components/ui/form-card';
+import { Link } from 'react-router-dom';
+import { z } from 'zod';
+import { PageCard } from '@/components/ui/page-card';
 import { Button } from '@/components/ui/button';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
-import { sendResetLinkDtoSchema } from '@/api/servieces/worker/send-reset-link';
 import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
-
-function getEmail(locationState: unknown) {
-  try {
-    const result = sendResetLinkDtoSchema.parse(locationState);
-    return result.email;
-  } catch {
-    return undefined;
-  }
-}
+import { useLocationState } from '@/hooks/use-location-state';
 
 export function SendResetLinkWorkerSuccessPage() {
   const { t } = useTranslation();
-  const { setGrayBackground } = useBackgroundColorStore();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    setGrayBackground();
-    const email = getEmail(location.state);
-    if (!email) {
-      navigate(routerPaths.homePage, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
+  const { field: email } = useLocationState({
+    field: 'email',
+    schema: z.string().email(),
+  });
 
   return (
-    <FormCard title={t('worker.sendResetLinkForm.title')}>
+    <PageCard title={t('worker.sendResetLinkForm.title')}>
       <Grid container gap="2rem">
         <Typography>
           <Trans
             i18nKey="worker.sendResetLinkSuccess.paragraph1"
-            values={{ email: getEmail(location.state) }}
+            values={{ email }}
           >
             Strong <Typography variant="buttonMedium" />
           </Trans>
@@ -50,7 +32,7 @@ export function SendResetLinkWorkerSuccessPage() {
         <Typography variant="body1">
           <Trans
             i18nKey="worker.sendResetLinkSuccess.paragraph3"
-            values={{ email: getEmail(location.state) }}
+            values={{ email }}
           >
             Strong <Typography variant="buttonMedium" />
           </Trans>
@@ -67,7 +49,7 @@ export function SendResetLinkWorkerSuccessPage() {
         <Typography variant="body1">
           <Trans
             i18nKey="worker.sendResetLinkSuccess.paragraph4"
-            values={{ email: getEmail(location.state) }}
+            values={{ email }}
           >
             Strong
             <Typography variant="buttonMedium" />
@@ -75,6 +57,6 @@ export function SendResetLinkWorkerSuccessPage() {
           </Trans>
         </Typography>
       </Grid>
-    </FormCard>
+    </PageCard>
   );
 }

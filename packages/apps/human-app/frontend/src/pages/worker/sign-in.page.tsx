@@ -4,12 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { t as i18NextT } from 'i18next';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
-import { FormCard } from '@/components/ui/form-card';
+import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { SignInDto } from '@/api/servieces/worker/sign-in';
 import {
   signInDtoSchema,
@@ -28,12 +26,6 @@ function formattedSignInErrorMessage(unknownError: unknown) {
 
 export function SignInWorkerPage() {
   const { t } = useTranslation();
-  const { setGrayBackground } = useBackgroundColorStore();
-
-  useEffect(() => {
-    setGrayBackground();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
 
   const methods = useForm<SignInDto>({
     defaultValues: {
@@ -55,7 +47,7 @@ export function SignInWorkerPage() {
   }
 
   return (
-    <FormCard
+    <PageCard
       alert={
         isSignInWorkerError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
@@ -102,6 +94,6 @@ export function SignInWorkerPage() {
           </Grid>
         </form>
       </FormProvider>
-    </FormCard>
+    </PageCard>
   );
 }

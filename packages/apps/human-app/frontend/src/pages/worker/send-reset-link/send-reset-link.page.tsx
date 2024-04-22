@@ -2,11 +2,9 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
-import { FormCard } from '@/components/ui/form-card';
+import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { SendResetLinkDto } from '@/api/servieces/worker/send-reset-link';
 import {
   sendResetLinkDtoSchema,
@@ -17,12 +15,6 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
-  const { setGrayBackground } = useBackgroundColorStore();
-
-  useEffect(() => {
-    setGrayBackground();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
 
   const methods = useForm<SendResetLinkDto>({
     defaultValues: {
@@ -43,7 +35,7 @@ export function SendResetLinkWorkerPage() {
   }
 
   return (
-    <FormCard
+    <PageCard
       alert={
         isSendResetLinkWorkerError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
@@ -80,6 +72,6 @@ export function SendResetLinkWorkerPage() {
           </Grid>
         </form>
       </FormProvider>
-    </FormCard>
+    </PageCard>
   );
 }

@@ -16,7 +16,7 @@ const SendResetLinkSuccessResponseSchema = z.unknown();
 function sendResetLinkMutationFn(data: SendResetLinkDto) {
   return apiClient(apiPaths.worker.sendResetLink.path, {
     successSchema: SendResetLinkSuccessResponseSchema,
-    options: { body: JSON.stringify(data) },
+    options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
 

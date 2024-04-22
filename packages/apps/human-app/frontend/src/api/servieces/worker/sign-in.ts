@@ -21,7 +21,7 @@ const signInSuccessResponseSchema = z.unknown();
 function signInMutationFn(data: SignInDto) {
   return apiClient(apiPaths.worker.signIn.path, {
     successSchema: signInSuccessResponseSchema,
-    options: { body: JSON.stringify(data) },
+    options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
 

@@ -2,10 +2,12 @@ import { Box, Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -29,9 +31,10 @@ interface FormCardProps {
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
+  changeLayoutBackGround?: boolean;
 }
 
-export function FormCard({
+export function PageCard({
   title,
   children,
   alert,
@@ -39,9 +42,18 @@ export function FormCard({
   childrenMaxWidth = '486px',
   backArrowPath,
   cancelBtnPath = routerPaths.homePage,
+  changeLayoutBackGround = true,
 }: FormCardProps) {
+  const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (changeLayoutBackGround) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
 
   const goBack = (path: string | -1) => {
     if (typeof path === 'string') {
