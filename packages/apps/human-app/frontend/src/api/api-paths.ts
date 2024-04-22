@@ -10,10 +10,10 @@ export const apiPaths = {
       path: '/auth/signup',
     },
     sendResetLink: {
-      path: 'auth/reset-link',
+      path: '/auth/reset-link',
     },
     resetPassword: {
-      path: 'auth/reset-password',
+      path: '/auth/reset-password',
     },
   },
 } as const;
