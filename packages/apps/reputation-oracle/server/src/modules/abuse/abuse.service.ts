@@ -16,6 +16,7 @@ import { ServerConfigService } from 'src/common/config/server-config.service';
 export class AbuseService {
   private readonly logger = new Logger(AbuseService.name);
   private readonly synapsBaseURL: string;
+  private localStorage: { [key: string]: string } = {};
 
   constructor(
     private abuseRepository: AbuseRepository,
@@ -81,15 +82,23 @@ export class AbuseService {
               actions: [
                 {
                   name: 'accept',
-                  text: 'Accept',
+                  text: 'Slash',
                   type: 'button',
+                  style: 'primary',
                   value: AbuseDecision.ACCEPTED,
                 },
                 {
                   name: 'reject',
                   text: 'Reject',
                   type: 'button',
+                  style: 'danger',
                   value: AbuseDecision.REJECTED,
+                  confirm: {
+                    title: 'Cancel abuse',
+                    text: `Are you sure you want to cancel slash for escrow ${abuseEntity.escrowAddress}?`,
+                    ok_text: 'Yes',
+                    dismiss_text: 'No',
+                  },
                 },
               ],
             },
@@ -99,8 +108,83 @@ export class AbuseService {
     }
   }
 
+  private async sendAbuseReportModal(abuseEntity: any, trigger_id: string) {
+    try {
+      // TODO Get staked token amount
+      const maxAmount = 10;
+      await firstValueFrom(
+        this.httpService.post(
+          'https://slack.com/api/views.open',
+          {
+            trigger_id: trigger_id,
+            view: {
+              type: 'modal',
+              callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
+              title: {
+                type: 'plain_text',
+                text: 'Confirm slash',
+              },
+              blocks: [
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `Max amount: ${maxAmount}`,
+                  },
+                },
+                {
+                  type: 'input',
+                  block_id: 'quantity_input',
+                  element: {
+                    type: 'plain_text_input',
+                    action_id: 'quantity',
+                  },
+                  label: {
+                    type: 'plain_text',
+                    text: 'Please enter the quantity (in HMT):',
+                  },
+                },
+              ],
+              submit: {
+                type: 'plain_text',
+                text: 'Submit',
+              },
+              close: {
+                type: 'plain_text',
+                text: 'Cancel',
+              },
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.slackConfigService.oauthToken}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+    } catch (error) {
+      console.error('Error sending abuse report modal:', error);
+    }
+  }
+
+  private async updateInteractiveMessage(responseUrl: string, text: string) {
+    try {
+      await firstValueFrom(
+        this.httpService.post(responseUrl, {
+          text: text,
+        }),
+      );
+    } catch (error) {
+      console.error('Error updating interactive message:', error);
+    }
+  }
+
   public async receiveSlackInteraction(data: any): Promise<string> {
-    const callbackId = (data.callback_id as string).split('-');
+    const callback_id = data.callback_id
+      ? data.callback_id
+      : data.view.callback_id;
+    const callbackId = (callback_id as string).split('-');
     const escrowAddress = callbackId[0];
     const chainId = Number(callbackId[1]);
 
@@ -111,12 +195,30 @@ export class AbuseService {
       );
     if (!abuseEntity) throw new BadRequestException(ErrorSlack.AbuseNotFound);
 
-    abuseEntity.decision = data.actions[0].value;
-    abuseEntity.retriesCount = 0;
-
-    await this.abuseRepository.updateOne(abuseEntity);
-
-    return `Abuse ${(data.actions[0].value as string).toLowerCase()}. Escrow: ${escrowAddress}, ChainId: ${chainId}`;
+    if (
+      data.type === 'interactive_message' &&
+      data.actions[0].value === AbuseDecision.ACCEPTED
+    ) {
+      this.localStorage[callback_id] = data.response_url;
+      await this.sendAbuseReportModal(abuseEntity, data.trigger_id);
+      return '';
+    } else if (data.type === 'view_submission') {
+      abuseEntity.decision = AbuseDecision.ACCEPTED;
+      abuseEntity.retriesCount = 0;
+      // TODO Save amount to slash job launcher
+      // console.log(data.view.state.values.quantity_input.quantity.value);
+      await this.updateInteractiveMessage(
+        this.localStorage[callback_id],
+        `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${escrowAddress}, ChainId: ${chainId}`,
+      );
+      await this.abuseRepository.updateOne(abuseEntity);
+      return '';
+    } else {
+      abuseEntity.decision = data.actions[0].value;
+      abuseEntity.retriesCount = 0;
+      await this.abuseRepository.updateOne(abuseEntity);
+      return `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${escrowAddress}, ChainId: ${chainId}`;
+    }
   }
 
   /**

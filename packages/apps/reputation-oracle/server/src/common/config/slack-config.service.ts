@@ -10,4 +10,7 @@ export class SlackConfigService {
   get signingSecret(): string {
     return this.configService.get<string>('SLACK_SIGNING_SECRET', '');
   }
+  get oauthToken(): string {
+    return this.configService.get<string>('SLACK_OAUTH_TOKEN', '');
+  }
 }
