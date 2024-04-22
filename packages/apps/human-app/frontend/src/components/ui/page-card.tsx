@@ -2,11 +2,12 @@ import { Box, Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
-import { Alert } from '@/components/ui/alert';
 import { colorPalette } from '@/styles/color-palette';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -30,19 +31,29 @@ interface FormCardProps {
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
+  withLayoutBackground?: boolean;
 }
 
-export function FormCard({
+export function PageCard({
   title,
   children,
   alert,
   cardMaxWidth = '1200px',
   childrenMaxWidth = '486px',
-  backArrowPath = -1,
+  backArrowPath,
   cancelBtnPath = routerPaths.homePage,
+  withLayoutBackground = true,
 }: FormCardProps) {
+  const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (withLayoutBackground) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
 
   const goBack = (path: string | -1) => {
     if (typeof path === 'string') {
@@ -62,6 +73,7 @@ export function FormCard({
         alignItems: 'center',
         gap: '2rem',
         borderRadius: '20px',
+        minHeight: '70vh',
         maxWidth: cardMaxWidth,
         width: '100%',
         background: colorPalette.white,
@@ -115,9 +127,11 @@ export function FormCard({
               },
             }}
           >
-            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-              <ArrowBackIcon />
-            </IconWrapper>
+            {backArrowPath ? (
+              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+                <ArrowBackIcon />
+              </IconWrapper>
+            ) : null}
             <Button onClick={goBack.bind(null, cancelBtnPath)}>
               <Typography variant="buttonMedium">
                 {t('components.modal.header.closeBtn')}
@@ -130,19 +144,16 @@ export function FormCard({
             md={10}
             order={{ xs: 2, md: 2 }}
             sx={{
-              height: '3rem',
+              minHeight: '3rem',
               width: '100%',
               [breakpoints.mobile]: {
                 height: 'auto',
+                minHeight: 'unset',
               },
             }}
             xs={12}
           >
-            {alert ? (
-              <Alert color="error" severity="error" sx={{ width: '100%' }}>
-                {alert}
-              </Alert>
-            ) : null}
+            {alert ? <>{alert}</> : null}
           </Grid>
           <Grid
             item
@@ -155,9 +166,11 @@ export function FormCard({
             }}
             xs={12}
           >
-            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-              <ArrowBackIcon />
-            </IconWrapper>
+            {backArrowPath ? (
+              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+                <ArrowBackIcon />
+              </IconWrapper>
+            ) : null}
           </Grid>
           <Grid item md={10} order={{ xs: 4, md: 4 }} xs={12}>
             <Typography variant="h4">{title}</Typography>

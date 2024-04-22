@@ -9,6 +9,8 @@ import { WorkerProfilePage } from '@/pages/worker/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { SignUpOperatorPage } from '@/pages/operator/sign-up.page';
 import { routerPaths } from '@/router/router-paths';
+import { SendResetLinkWorkerPage } from '@/pages/worker/send-reset-link/send-reset-link.page';
+import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -26,6 +28,14 @@ export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.worker.signUp,
     element: <SignUpWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendResetLink,
+    element: <SendResetLinkWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendResetLinkSuccess,
+    element: <SendResetLinkWorkerSuccessPage />,
   },
   {
     path: routerPaths.operator.signIn,

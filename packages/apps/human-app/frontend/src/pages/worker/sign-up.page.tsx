@@ -1,9 +1,7 @@
-import { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
-import { z } from 'zod';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { t } from 'i18next';
@@ -16,56 +14,21 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';
-import { FormCard } from '@/components/ui/form-card';
-import {
-  password8Chars,
-  passwordLowercase,
-  passwordNumeric,
-  passwordSpecialCharacter,
-  passwordUppercase,
-} from '@/shared/helpers/regex';
-import type { PasswordCheck } from '@/components/data-entry/password/password-check-label';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { PageCard } from '@/components/ui/page-card';
 import { env } from '@/shared/env';
+import { routerPaths } from '@/router/router-paths';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { Alert } from '@/components/ui/alert';
+import { FetchError } from '@/api/fetcher';
+import { passwordChecks } from '@/components/data-entry/password/password-checks';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
-  if (unknownError instanceof Error) {
-    return <div>{t('errors.withInfoCode', { code: unknownError.name })}</div>;
+  if (unknownError instanceof FetchError && unknownError.status === 409) {
+    return t('worker.signUpForm.errors.emailTaken');
   }
-  return <div>{t('errors.unknown')}</div>;
 }
 
-const passwordChecks: PasswordCheck[] = [
-  {
-    requirementsLabel: t('validation.password8Chars'),
-    schema: z.string().regex(password8Chars),
-  },
-  {
-    requirementsLabel: t('validation.passwordUppercase'),
-    schema: z.string().regex(passwordUppercase),
-  },
-  {
-    requirementsLabel: t('validation.passwordLowercase'),
-    schema: z.string().regex(passwordLowercase),
-  },
-  {
-    requirementsLabel: t('validation.passwordNumeric'),
-    schema: z.string().regex(passwordNumeric),
-  },
-  {
-    requirementsLabel: t('validation.passwordSpecialCharacter'),
-    schema: z.string().regex(passwordSpecialCharacter),
-  },
-];
-
 export function SignUpWorkerPage() {
-  const { setGrayBackground } = useBackgroundColorStore();
-
-  useEffect(() => {
-    setGrayBackground();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
-
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
@@ -90,12 +53,18 @@ export function SignUpWorkerPage() {
   };
 
   return (
-    <FormCard
+    <PageCard
       alert={
-        isSignUpWorkerError
-          ? formattedSignUpErrorMessage(signUpWorkerError)
-          : undefined
+        isSignUpWorkerError ? (
+          <Alert color="error" severity="error" sx={{ width: '100%' }}>
+            {defaultErrorMessage(
+              signUpWorkerError,
+              formattedSignUpErrorMessage
+            )}
+          </Alert>
+        ) : undefined
       }
+      backArrowPath={routerPaths.homePage}
       title={t('worker.signUpForm.title')}
     >
       <FormProvider {...methods}>
@@ -140,6 +109,6 @@ export function SignUpWorkerPage() {
           </Grid>
         </form>
       </FormProvider>
-    </FormCard>
+    </PageCard>
   );
 }
