@@ -4,15 +4,21 @@ import React from 'react';
 interface PageHeaderProps {
   headerIcon: React.ReactNode;
   headerText: string;
+  backgroundColor?: string;
 }
 
-export function PageHeader({ headerIcon, headerText }: PageHeaderProps) {
+export function PageHeader({
+  headerIcon,
+  headerText,
+  backgroundColor,
+}: PageHeaderProps) {
   return (
     <Grid
       alignContent="center"
       container
       sx={{
         paddingTop: '70px',
+        backgroundColor: backgroundColor ? backgroundColor : 'transparent',
       }}
     >
       <Grid item>{headerIcon}</Grid>

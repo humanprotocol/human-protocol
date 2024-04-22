@@ -38,8 +38,8 @@ const data: MyJobs[] = [
   },
   {
     escrowAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-    network: 'Polygon',
-    rewardAmount: '5 HMT',
+    network: 'Ethereum',
+    rewardAmount: '3 HMT',
     jobType: ['Image labeling', 'Image labeling'],
     expiresAt: '2024-05-08T00:00:00Z',
     status: 'Complited',
@@ -48,7 +48,7 @@ const data: MyJobs[] = [
   {
     escrowAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
     network: 'Polygon',
-    rewardAmount: '5 HMT',
+    rewardAmount: '4 HMT',
     jobType: ['Image labeling', 'Image labeling'],
     expiresAt: '2024-05-08T00:00:00Z',
     status: 'Deactivated',

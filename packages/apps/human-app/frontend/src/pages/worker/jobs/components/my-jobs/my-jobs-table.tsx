@@ -29,7 +29,6 @@ const columns: MRT_ColumnDef<MyJobs>[] = [
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
-    enableSorting: true,
     muiTableHeadCellProps: () => ({
       component: (props) => (
         <TableHeaderCell
@@ -160,7 +159,7 @@ export function MyJobsTable() {
   } = useTableQuery();
 
   const { data, isLoading, isError, isRefetching } = useQuery<MyJobs[]>({
-    queryKey: ['example', [sorting, pagination]],
+    queryKey: ['MyJobs', [sorting, pagination]],
     queryFn: () => getJobsTableData(),
   });
 
@@ -193,7 +192,7 @@ export function MyJobsTable() {
       showAlertBanner: isError,
       showProgressBars: isRefetching,
     },
-    enableColumnActions: false,
+    enableColumnActions: true,
     enableColumnFilters: false,
     enableSorting: false,
     renderTopToolbar: ({ table: tab }) => (

@@ -121,7 +121,9 @@
       "rewardAmount": "Reward amount",
       "jobType": "Job type",
       "expiresAt": "Expires at",
-      "status": "Status"
+      "status": "Status",
+      "selectJob": "Select job",
+      "searchEscrowAddress": "Search escrow address"
     }
   },
   "operator": {

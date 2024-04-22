@@ -2,11 +2,14 @@ import Search from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { MRT_RowData, MRT_TableInstance } from 'material-react-table';
+import type { Dispatch, SetStateAction } from 'react';
 import { Input } from '@/components/data-entry/input';
 import { colorPalette } from '@/styles/color-palette';
 
 interface SearchFormProps<T extends MRT_RowData> {
-  updater: MRT_TableInstance<T>['setColumnFilters'];
+  updater:
+    | MRT_TableInstance<T>['setColumnFilters']
+    | Dispatch<SetStateAction<{ id: string; value: string }[]>>;
   label: string;
   name: string;
   placeholder: string;

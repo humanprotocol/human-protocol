@@ -16,17 +16,17 @@ const data: AvailableJobs[] = [
   },
   {
     jobDescription: 'Job description',
-    escrowAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    escrowAddress: 'test!',
     network: 'Polygon',
     rewardAmount: '5 HMT',
-    jobType: ['Image labeling', 'Image labeling'],
+    jobType: ['Image labeling'],
   },
   {
     jobDescription: 'Job description',
     escrowAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
     network: 'Polygon',
     rewardAmount: '5 HMT',
-    jobType: ['Image labeling', 'Image labeling'],
+    jobType: ['Image labeling'],
   },
 ];
 

@@ -11,14 +11,10 @@ interface ChipComponentProps {
   backgroundColor?: string;
 }
 
-export function ChipComponent({
-  label,
-  key,
-  backgroundColor,
-}: ChipComponentProps) {
+export function ChipComponent({ label, backgroundColor }: ChipComponentProps) {
   return (
     <Box
-      key={key}
+      key={crypto.randomUUID()}
       sx={{
         backgroundColor: backgroundColor
           ? backgroundColor

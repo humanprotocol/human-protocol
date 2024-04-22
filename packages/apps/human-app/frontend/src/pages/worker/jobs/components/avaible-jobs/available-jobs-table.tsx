@@ -79,7 +79,7 @@ export function AvailableJobsTable() {
               type="button"
               variant="contained"
             >
-              Click
+              {t('worker.jobs.selectJob')}
             </Button>
           ),
         })),

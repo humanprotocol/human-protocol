@@ -62,7 +62,7 @@ export function ProfileListItem({
                 <CheckmarkIcon />
               </Stack>
             )}
-            {!isStatusListItem && (
+            {isStatusListItem === false && (
               <Stack
                 sx={{
                   marginLeft: '5px',

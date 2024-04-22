@@ -6,8 +6,10 @@ import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { ProfileWorkIcon } from '@/components/ui/icons';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { MyJobsTable } from './components/my-jobs/my-jobs-table';
+import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,6 +48,7 @@ export function JobsPage() {
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [value, setValue] = useState(0);
+  const isMobile = useIsMobile();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -59,6 +62,7 @@ export function JobsPage() {
     <Grid alignItems="center" container justifyContent="center">
       <Grid item xs={12}>
         <PageHeader
+          backgroundColor={colorPalette.paper.main}
           headerIcon={<ProfileWorkIcon />}
           headerText={t('worker.jobs.jobsDiscovery')}
         />
@@ -66,7 +70,9 @@ export function JobsPage() {
       <Grid item xs={12}>
         <Paper
           sx={{
-            backgroundColor: colorPalette.white,
+            backgroundColor: isMobile
+              ? colorPalette.paper.main
+              : colorPalette.white,
             height: '100%',
             boxShadow: 'none',
             padding: '40px',
@@ -95,7 +101,11 @@ export function JobsPage() {
                   </Tabs>
                 </Box>
                 <CustomTabPanel index={0} value={value}>
-                  <AvailableJobsTable />
+                  {isMobile ? (
+                    <AvailableJobsTableMobile />
+                  ) : (
+                    <AvailableJobsTable />
+                  )}
                 </CustomTabPanel>
                 <CustomTabPanel index={1} value={value}>
                   <MyJobsTable />
