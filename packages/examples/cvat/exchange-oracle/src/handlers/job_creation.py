@@ -88,6 +88,10 @@ class InvalidCoordinates(DatasetValidationError):
     pass
 
 
+class InvisibleSkeletonError(DatasetValidationError):
+    pass
+
+
 T = TypeVar("T")
 
 
@@ -113,7 +117,7 @@ class _ExcludedAnnotationsInfo:
     messages: List[_ExcludedAnnotationInfo] = field(default_factory=list)
 
     excluded_count: int = 0
-    "The number of excluded annotations. Can be different from len(error_messages)"
+    "The number of excluded annotations. Can be different from len(messages)"
 
     total_count: int = 0
 
@@ -1334,6 +1338,13 @@ class SkeletonsFromBoxesTaskBuilder:
             if skeleton.id in visited_ids:
                 raise DatasetValidationError(f"repeated annotation id {skeleton.id}")
 
+            if all(
+                v == dm.Points.Visibility.absent for p in skeleton.elements for v in p.visibility
+            ):
+                # Handle fully absent skeletons
+                # It's not the same as with all occluded points
+                raise InvisibleSkeletonError("no visible points")
+
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
                 assert len(element.points) == 2 and len(element.visibility) == 1
@@ -1360,15 +1371,6 @@ class SkeletonsFromBoxesTaskBuilder:
             for skeleton in sample_skeletons:
                 try:
                     _validate_skeleton(skeleton, sample_bbox=sample_bbox)
-                except InvalidCoordinates as error:
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - {}".format(
-                            gt_sample.id, skeleton.id, label_cat[skeleton.label].name, error
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    continue
                 except DatasetValidationError as error:
                     excluded_gt_info.add_message(
                         "Sample '{}': GT skeleton #{} ({}) skipped - {}".format(
@@ -1563,26 +1565,30 @@ class SkeletonsFromBoxesTaskBuilder:
         return bbox_iou(a, b) > 0
 
     def _prepare_gt(self):
-        def _filter_ambiguous_boxes(
+        def _find_unambiguous_matches(
             input_boxes: List[dm.Bbox],
             gt_skeletons: List[dm.Skeleton],
-        ) -> List[dm.Bbox]:
-            filtered_boxes: List[dm.Bbox] = []
-            for input_bbox in input_boxes:
-                matched_skeletons: List[dm.Skeleton] = []
-                for gt_skeleton in gt_skeletons:
-                    if input_bbox.label != gt_skeleton.label:
-                        continue
+        ) -> List[Tuple[dm.Bbox, dm.Skeleton]]:
+            matches = [
+                [
+                    (input_bbox.label == gt_skeleton.label)
+                    and (self._match_boxes(input_bbox.get_bbox(), gt_skeleton.get_bbox()))
+                    for gt_skeleton in gt_skeletons
+                ]
+                for input_bbox in input_boxes
+            ]
 
-                    if not self._match_boxes(input_bbox.get_bbox(), gt_skeleton.get_bbox()):
-                        continue
-
-                    matched_skeletons.append(gt_skeleton)
+            ambiguous_boxes: list[int] = set()
+            ambiguous_skeletons: list[int] = set()
+            for bbox_idx, input_bbox in enumerate(input_boxes):
+                matched_skeletons: List[dm.Skeleton] = [
+                    gt_skeletons[j] for j in range(len(gt_skeletons)) if matches[bbox_idx][j]
+                ]
 
                 if len(matched_skeletons) > 1:
                     # Handle ambiguous matches
                     excluded_boxes_info.add_message(
-                        "Sample '{}': bbox #{} ({}) skipped - "
+                        "Sample '{}': bbox #{} ({}) and overlapping skeletons skipped - "
                         "too many matching skeletons ({}) found".format(
                             boxes_sample.id,
                             input_bbox.id,
@@ -1592,96 +1598,99 @@ class SkeletonsFromBoxesTaskBuilder:
                         sample_id=boxes_sample.id,
                         sample_subset=boxes_sample.subset,
                     )
-                    # Don't need to count as excluded, because it's not an error in annotations
+                    # not an error, should not be counted as excluded for an error
+                    ambiguous_boxes.add(input_bbox.id)
+                    ambiguous_skeletons.update(s.id for s in matched_skeletons)
                     continue
-                elif len(matched_skeletons) == 1:
-                    filtered_boxes.append(input_bbox)
 
-            return filtered_boxes
+            for skeleton_idx, gt_skeleton in enumerate(gt_skeletons):
+                matched_boxes: List[dm.Bbox] = [
+                    input_boxes[i] for i in range(len(input_boxes)) if matches[i][skeleton_idx]
+                ]
+
+                if len(matched_boxes) > 1:
+                    # Handle ambiguous matches
+                    excluded_gt_info.add_message(
+                        "Sample '{}': GT skeleton #{} ({}) and overlapping boxes skipped - "
+                        "too many matching boxes ({}) found".format(
+                            gt_sample.id,
+                            gt_skeleton.id,
+                            gt_label_cat[gt_skeleton.label].name,
+                            self._format_list([f"#{a.id}" for a in matched_boxes]),
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
+                    )
+                    # not an error, should not be counted as excluded for an error
+                    ambiguous_skeletons.add(gt_skeleton.id)
+                    ambiguous_boxes.update(b.id for b in matched_boxes)
+                    continue
+                elif not matched_boxes:
+                    # Handle unmatched skeletons
+                    excluded_gt_info.add_message(
+                        "Sample '{}': GT skeleton #{} ({}) skipped - "
+                        "no matching boxes found".format(
+                            gt_sample.id,
+                            gt_skeleton.id,
+                            gt_label_cat[gt_skeleton.label].name,
+                        ),
+                        sample_id=gt_sample.id,
+                        sample_subset=gt_sample.subset,
+                    )
+                    excluded_gt_info.excluded_count += 1  # an error
+                    continue
+
+            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            for bbox_idx, input_bbox in enumerate(input_boxes):
+                if input_bbox.id in ambiguous_boxes:
+                    continue
+
+                matched_skeleton = None
+                for gt_idx, gt_skeleton in enumerate(gt_skeletons):
+                    if gt_skeleton.id in ambiguous_skeletons:
+                        continue
+
+                    if matches[bbox_idx][gt_idx]:
+                        matched_skeleton = gt_skeleton
+                        break
+
+                if matched_skeleton:
+                    unambiguous_matches.append((input_bbox, matched_skeleton))
+
+            return unambiguous_matches
 
         def _find_good_gt_skeletons(
             input_boxes: List[dm.Bbox], gt_skeletons: List[dm.Skeleton]
         ) -> List[dm.Bbox]:
-            # Exclude from further matching all the boxes matching more than 1 GT bbox
-            input_boxes = _filter_ambiguous_boxes(input_boxes, gt_skeletons)
+            matches = _find_unambiguous_matches(input_boxes, gt_skeletons)
 
-            # Find unambiguous gt skeleton - input bbox pairs
             matched_skeletons = []
-            visited_boxes = set()
-            for gt_skeleton in gt_skeletons:
-                gt_skeleton_id = gt_skeleton.id
-
+            for input_bbox, gt_skeleton in matches:
                 if all(
                     v != dm.Points.Visibility.visible
                     for p in gt_skeleton.elements
                     for v in p.visibility
                 ):
-                    # Handle fully hidden skeletons
+                    # Handle skeletons without visible points
                     excluded_gt_info.add_message(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
                         "no visible points".format(
-                            gt_sample.id, gt_skeleton_id, gt_label_cat[gt_skeleton.label].name
+                            gt_sample.id, gt_skeleton.id, gt_label_cat[gt_skeleton.label].name
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
-                    excluded_gt_info.excluded_count += 1
+                    # not an error, should not be counted as excluded for an error
+                    # we skip it as we can't reliably annotate and validate occluded now.
+                    # TODO: figure out how to handle this, specifically is how to validate
                     continue
-
-                matched_boxes: List[dm.Bbox] = []
-                for input_bbox in input_boxes:
-                    box_id = input_bbox.id
-                    if box_id in visited_boxes:
-                        continue
-
-                    if input_bbox.label != gt_skeleton.label:
-                        continue
-
-                    if not self._match_boxes(input_bbox.get_bbox(), gt_skeleton.get_bbox()):
-                        continue
-
-                    matched_boxes.append(input_bbox)
-                    visited_boxes.add(box_id)
-
-                if len(matched_boxes) > 1:
-                    # Handle ambiguous matches
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - "
-                        "too many matching boxes ({}) found".format(
-                            gt_sample.id,
-                            gt_skeleton_id,
-                            gt_label_cat[gt_skeleton.label].name,
-                            len(matched_boxes),
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    # Don't need to count as excluded, because it's not an error in annotations
-                    continue
-                elif len(matched_boxes) == 0:
-                    # Handle unmatched boxes
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - "
-                        "no matching boxes found".format(
-                            gt_sample.id,
-                            gt_skeleton_id,
-                            gt_label_cat[gt_skeleton.label].name,
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    excluded_gt_info.excluded_count += 1
-                    continue
-
-                # TODO: maybe check if the top match is good enough
-                # (high thresholds may lead to matching issues for small objects)
 
                 gt_count_per_class[gt_skeleton.label] = (
                     gt_count_per_class.get(gt_skeleton.label, 0) + 1
                 )
 
                 matched_skeletons.append(gt_skeleton)
-                skeleton_bbox_mapping[gt_skeleton_id] = matched_boxes[0].id
+                skeleton_bbox_mapping[gt_skeleton.id] = input_bbox.id
 
             return matched_skeletons
 
@@ -1762,6 +1771,17 @@ class SkeletonsFromBoxesTaskBuilder:
                     excluded_gt_info.total_count,
                 )
             )
+
+        self.logger.info(
+            "GT counts per class to be used for validation: {}".format(
+                self._format_list(
+                    [
+                        f"{gt_label_cat[label_id].name}: {count}"
+                        for label_id, count in gt_count_per_class.items()
+                    ]
+                )
+            )
+        )
 
         labels_with_few_gt = [
             gt_label_cat[label_id]
