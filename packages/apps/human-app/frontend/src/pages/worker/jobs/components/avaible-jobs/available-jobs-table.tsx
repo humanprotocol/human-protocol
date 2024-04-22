@@ -5,6 +5,7 @@ import {
 } from 'material-react-table';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
+import { useMemo } from 'react';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
@@ -64,25 +65,29 @@ export function AvailableJobsTable() {
     queryFn: () => getJobsTableData(),
   });
 
+  const memoizedData = useMemo(() => {
+    if (!data) return [];
+
+    return data.map((job) => ({
+      ...job,
+      jobTypeChips: <Chips data={job.jobType} />,
+      escrowAddress: shortenEscrowAddress(job.escrowAddress),
+      buttonColumn: (
+        <Button
+          color="secondary"
+          size="small"
+          type="button"
+          variant="contained"
+        >
+          {t('worker.jobs.selectJob')}
+        </Button>
+      ),
+    }));
+  }, [data]);
+
   const table = useMaterialReactTable({
     columns,
-    data: !data
-      ? []
-      : data.map((job) => ({
-          ...job,
-          jobTypeChips: <Chips data={job.jobType} />,
-          escrowAddress: shortenEscrowAddress(job.escrowAddress),
-          buttonColumn: (
-            <Button
-              color="secondary"
-              size="small"
-              type="button"
-              variant="contained"
-            >
-              {t('worker.jobs.selectJob')}
-            </Button>
-          ),
-        })),
+    data: memoizedData,
     state: {
       isLoading,
       showAlertBanner: isError,
