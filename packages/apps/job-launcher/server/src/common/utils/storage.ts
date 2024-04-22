@@ -77,7 +77,13 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
               : ''
           }${url.pathname ? `&prefix=${url.pathname}` : ''}`;
         } else {
-          requestOptions += url.pathname ? url.pathname : '';
+          requestOptions += `${url.pathname ? `${url.pathname}` : ''}?list-type=2${
+            nextContinuationToken
+              ? `&continuation-token=${encodeURIComponent(
+                  nextContinuationToken,
+                )}`
+              : ''
+          }`;
         }
 
         const response = await axios.get(requestOptions);
