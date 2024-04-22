@@ -11,11 +11,12 @@ import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
 import { formatDate } from '@/shared/utils/format-date';
-import { ChipComponent, Chips } from '@/components/ui/chips';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
+import { ChipComponent } from '@/components/ui/chip-component';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
+import { JobTypesChips } from '../ui/job-types-chips';
 import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
 
 const columns: MRT_ColumnDef<MyJobs>[] = [
@@ -123,14 +124,14 @@ function MyJobsButton({ status, isActivated }: MyJobsButtonProps) {
   if (isActivated && status === 'Active') {
     return (
       <Button color="primary" size="small" type="button" variant="contained">
-        Resign
+        {t('worker.jobs.resign')}
       </Button>
     );
   }
   if (!isActivated && status === 'Active') {
     return (
       <Button color="secondary" size="small" type="button" variant="contained">
-        Solve
+        {t('worker.jobs.solve')}
       </Button>
     );
   }
@@ -148,7 +149,7 @@ function MyJobsButton({ status, isActivated }: MyJobsButtonProps) {
       type="button"
       variant="contained"
     >
-      Solve
+      {t('worker.jobs.solve')}
     </Button>
   );
 }
@@ -168,8 +169,8 @@ export function MyJobsTable() {
 
     return data.map((job) => ({
       ...job,
-      expiresAt: `${formatDate(job.expiresAt)}`,
-      jobTypeChips: <Chips data={job.jobType} />,
+      expiresAt: formatDate(job.expiresAt),
+      jobTypeChips: <JobTypesChips data={job.jobType} />,
       statusChip: (
         <ChipComponent
           backgroundColor={parseJobStatusChipColor(job.status)}
@@ -197,10 +198,10 @@ export function MyJobsTable() {
     enableSorting: false,
     renderTopToolbar: ({ table: tab }) => (
       <SearchForm
-        columnId="escrowAddress"
-        label="Search escrow address"
-        name="Search escrow address"
-        placeholder="Search escrow address"
+        columnId={t('worker.jobs.escrowAddressColumnId')}
+        label={t('worker.jobs.searchEscrowAddress')}
+        name={t('worker.jobs.searchEscrowAddress')}
+        placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={tab.setColumnFilters}
       />
     ),

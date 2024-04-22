@@ -1,12 +1,12 @@
+import React, { useState, useEffect } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
 import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { PageHeader } from '@/components/layout/protected/page-header';
-import { ProfileWorkIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { HomepageWorkIcon } from '@/components/ui/icons';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
@@ -14,21 +14,18 @@ import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jo
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
-  value: number;
+  activeTab: number;
 }
 
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({ children, index, activeTab }: TabPanelProps) {
   return (
     <div
-      aria-labelledby={`simple-tab-${index}`}
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`tabpanel-${index}`}
+      hidden={activeTab !== index}
+      id={`jobs-tabpanel-${index}`}
       role="tabpanel"
-      {...other}
     >
-      {value === index && (
+      {activeTab === index && (
         <Box sx={{ py: 3 }}>
           <Typography>{children}</Typography>
         </Box>
@@ -37,21 +34,21 @@ function CustomTabPanel(props: TabPanelProps) {
   );
 }
 
-function a11yProps(index: number) {
+function generateTabA11yProps(index: number) {
   return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    id: `tab-${index}`,
+    'aria-controls': `jobs-tabpanel-${index}`,
   };
 }
 
 export function JobsPage() {
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
-  const [value, setValue] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
   };
 
   useEffect(() => {
@@ -63,7 +60,7 @@ export function JobsPage() {
       <Grid item xs={12}>
         <PageHeader
           backgroundColor={colorPalette.paper.main}
-          headerIcon={<ProfileWorkIcon />}
+          headerIcon={<HomepageWorkIcon />}
           headerText={t('worker.jobs.jobsDiscovery')}
         />
       </Grid>
@@ -89,27 +86,30 @@ export function JobsPage() {
                   }}
                 >
                   <Tabs
-                    aria-label="basic tabs example"
-                    onChange={handleChange}
-                    value={value}
+                    aria-label="jobs-tabs"
+                    onChange={handleTabChange}
+                    value={activeTab}
                   >
                     <Tab
                       label={t('worker.jobs.availableJobs')}
-                      {...a11yProps(0)}
+                      {...generateTabA11yProps(0)}
                     />
-                    <Tab label={t('worker.jobs.myJobs')} {...a11yProps(1)} />
+                    <Tab
+                      label={t('worker.jobs.myJobs')}
+                      {...generateTabA11yProps(1)}
+                    />
                   </Tabs>
                 </Box>
-                <CustomTabPanel index={0} value={value}>
+                <TabPanel activeTab={activeTab} index={0}>
                   {isMobile ? (
                     <AvailableJobsTableMobile />
                   ) : (
                     <AvailableJobsTable />
                   )}
-                </CustomTabPanel>
-                <CustomTabPanel index={1} value={value}>
+                </TabPanel>
+                <TabPanel activeTab={activeTab} index={1}>
                   <MyJobsTable />
-                </CustomTabPanel>
+                </TabPanel>
               </Box>
             </TableQueryContextProvider>
           </Stack>

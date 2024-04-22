@@ -1,9 +1,9 @@
 import { ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Chips } from '@/components/ui/chips';
 import { Button } from '@/components/ui/button';
 import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
+import { JobTypesChips } from '@/pages/worker/jobs/components/ui/job-types-chips';
 
 interface ProfileListItemProps {
   header: string;
@@ -34,7 +34,7 @@ export function ProfileListItem({
           {header}
         </Typography>
         {Array.isArray(paragraph) ? (
-          <Chips data={paragraph} />
+          <JobTypesChips data={paragraph} />
         ) : (
           <Stack
             alignItems="center"

@@ -47,7 +47,7 @@ export function AvailableJobsTableMobile() {
     <>
       {error ? <>{error}</> : null}
       <SearchForm
-        columnId="escrowAddress"
+        columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
         name={t('worker.jobs.searchEscrowAddress')}
         placeholder="Example address search"

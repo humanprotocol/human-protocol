@@ -9,8 +9,8 @@ import { useMemo } from 'react';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
-import { Chips } from '@/components/ui/chips';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
+import { JobTypesChips } from '../ui/job-types-chips';
 import {
   getJobsTableData,
   type AvailableJobs,
@@ -70,7 +70,7 @@ export function AvailableJobsTable() {
 
     return data.map((job) => ({
       ...job,
-      jobTypeChips: <Chips data={job.jobType} />,
+      jobTypeChips: <JobTypesChips data={job.jobType} />,
       escrowAddress: shortenEscrowAddress(job.escrowAddress),
       buttonColumn: (
         <Button
@@ -98,7 +98,7 @@ export function AvailableJobsTable() {
     enableSorting: false,
     renderTopToolbar: ({ table: tab }) => (
       <SearchForm
-        columnId="escrowAddress"
+        columnId={t('worker.jobs.escrowAddressColumnId')}
         label="Search escrow address"
         name="Search escrow address"
         placeholder="Search escrow address"

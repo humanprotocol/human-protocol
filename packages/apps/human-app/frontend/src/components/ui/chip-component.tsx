@@ -1,16 +1,11 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
-
-interface ChipsProps {
-  data: string[];
-}
 
 interface ChipComponentProps {
   label: string;
   key: string;
   backgroundColor?: string;
 }
-
 export function ChipComponent({ label, backgroundColor }: ChipComponentProps) {
   return (
     <Box
@@ -32,15 +27,5 @@ export function ChipComponent({ label, backgroundColor }: ChipComponentProps) {
         {label}
       </Typography>
     </Box>
-  );
-}
-
-export function Chips({ data }: ChipsProps) {
-  return (
-    <Stack direction="row" spacing={1}>
-      {data.map((jobType) => (
-        <ChipComponent key={crypto.randomUUID()} label={jobType} />
-      ))}
-    </Stack>
   );
 }
