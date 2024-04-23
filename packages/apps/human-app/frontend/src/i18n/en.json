@@ -128,7 +128,14 @@
       "solve": "Solve",
       "escrowAddressColumnId": "escrowAddress",
       "Ethereum": "Ethereum",
-      "Polygon": "Polygon"
+      "Polygon": "Polygon",
+      "mobileFilterDrawer": {
+        "sortBy": "Sort by",
+        "filters": "Filters",
+        "statusActive": "Active",
+        "statusOverdue": "Overdue",
+        "statusDisactivated": "Disactivated"
+      }
     }
   },
   "operator": {

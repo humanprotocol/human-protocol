@@ -14,6 +14,7 @@ interface SearchFormProps<T extends MRT_RowData> {
   name: string;
   placeholder: string;
   columnId: string;
+  fullWidth?: boolean;
 }
 
 export function SearchForm<T extends MRT_RowData>({
@@ -22,6 +23,7 @@ export function SearchForm<T extends MRT_RowData>({
   name,
   placeholder,
   columnId,
+  fullWidth = false,
 }: SearchFormProps<T>) {
   const methods = useForm<{ searchValue: string }>({
     defaultValues: {
@@ -46,7 +48,10 @@ export function SearchForm<T extends MRT_RowData>({
           updater([{ id: columnId, value: e.target.value }]);
         }}
         placeholder={placeholder}
-        sx={{ width: '15rem', margin: '1rem' }}
+        sx={{
+          width: fullWidth ? '100%' : '15rem',
+          margin: fullWidth ? '0' : '1rem',
+        }}
       />
     </FormProvider>
   );
