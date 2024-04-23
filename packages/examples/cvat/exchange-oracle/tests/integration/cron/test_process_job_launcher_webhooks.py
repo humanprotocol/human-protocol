@@ -26,6 +26,7 @@ from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
 
 from tests.utils.constants import DEFAULT_MANIFEST_URL, JOB_LAUNCHER_ADDRESS
+from tests.utils.dataset_helpers import build_gt_dataset
 
 escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost.value
@@ -59,7 +60,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
             patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
-            patch("src.handlers.job_creation.get_gt_filenames") as mock_gt_filenames,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -78,13 +78,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_object
             mock_cvat_api.create_cloudstorage.return_value = mock_cvat_object
 
-            gt_filenames = [
-                "image1.jpg",
-                "image2.jpg",
-            ]
-            mock_gt_filenames.return_value = gt_filenames
+            gt_filenames = ["image1.jpg", "image2.png"]
+            gt_dataset = build_gt_dataset(gt_filenames).encode()
 
             mock_cloud_client = Mock()
+            mock_cloud_client.download_file.return_value = gt_dataset
             mock_cloud_client.list_files.return_value = gt_filenames + ["image3.jpg", "image4.png"]
             mock_make_cloud_client.return_value = mock_cloud_client
 
@@ -211,8 +209,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             open("tests/utils/manifest.json") as data,
             patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
-            patch("src.handlers.job_creation.cloud_service"),
-            patch("src.handlers.job_creation.get_gt_filenames"),
+            patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
             patch(
                 "src.handlers.job_creation.db_service.add_project_images",
                 side_effect=Exception("Error"),
@@ -228,6 +225,14 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_cvat_api.create_project.return_value = mock_cvat_id
             mock_cvat_api.create_cloudstorage.return_value = mock_cvat_id
             mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_id
+
+            gt_filenames = ["image1.jpg", "image2.png"]
+            gt_dataset = build_gt_dataset(gt_filenames).encode()
+
+            mock_cloud_client = Mock()
+            mock_cloud_client.download_file.return_value = gt_dataset
+            mock_cloud_client.list_files.return_value = gt_filenames + ["image3.jpg", "image4.png"]
+            mock_make_cloud_client.return_value = mock_cloud_client
 
             process_incoming_job_launcher_webhooks()
 
