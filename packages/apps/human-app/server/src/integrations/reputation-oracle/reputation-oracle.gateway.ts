@@ -31,6 +31,15 @@ import {
   ResendEmailVerificationData,
   ResendEmailVerificationParams,
 } from '../../modules/email-confirmation/model/resend-email-verification.model';
+import {
+  ForgotPasswordCommand,
+  ForgotPasswordData,
+} from '../../modules/password-reset/model/forgot-password.model';
+import { options } from 'joi';
+import {
+  RestorePasswordCommand,
+  RestorePasswordData,
+} from '../../modules/password-reset/model/restore-password.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -136,6 +145,32 @@ export class ReputationOracleGateway {
       EndpointName.RESEND_EMAIL_VERIFICATION,
       resendEmailVerificationData,
       resendEmailVerificationCommand.token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async sendForgotPassword(forgotPasswordCommand: ForgotPasswordCommand) {
+    const forgotPasswordData = this.mapper.map(
+      forgotPasswordCommand,
+      ForgotPasswordCommand,
+      ForgotPasswordData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.FORGOT_PASSWORD,
+      forgotPasswordData,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async sendRestorePassword(restorePasswordCommand: RestorePasswordCommand) {
+    const restorePasswordDto = this.mapper.map(
+      restorePasswordCommand,
+      RestorePasswordCommand,
+      RestorePasswordData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.RESTORE_PASSWORD,
+      restorePasswordDto,
     );
     return this.handleRequestToReputationOracle<void>(options);
   }

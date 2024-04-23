@@ -43,6 +43,16 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [EndpointName.FORGOT_PASSWORD]: {
+              endpoint: '/auth/forgot-password',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.RESTORE_PASSWORD]: {
+              endpoint: '/auth/restore-password',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
           },
         },
       },
