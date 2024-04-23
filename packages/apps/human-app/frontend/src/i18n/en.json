@@ -1,4 +1,10 @@
 {
+  "humanCurrencySymbol": "HMT",
+  "inputMasks": {
+    "humanCurrencySuffix": " HMT",
+    "percentSuffix": " %",
+    "plusPrefix": "+"
+  },
   "dashboard": {},
   "validation": {
     "required": "Required",

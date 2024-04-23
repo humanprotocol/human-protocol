@@ -12,6 +12,7 @@ import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import type { ResponseError } from '@/shared/types/global.type';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
+import { HumanCurrencyInputMask } from '@/components/data-entry/input-masks';
 
 interface StakeFormProps {
   useAddStakeMutationResult: UseMutationResult<
@@ -56,8 +57,8 @@ export function StakeForm({
             <Input
               fullWidth
               label={t('operator.stakeForm.label')}
+              mask={HumanCurrencyInputMask}
               name="amount"
-              type="number"
             />
             <Grid
               container

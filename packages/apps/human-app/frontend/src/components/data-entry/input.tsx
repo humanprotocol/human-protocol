@@ -3,6 +3,7 @@ import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
+import type { InputMaskComponent } from '@/components/data-entry/input-masks';
 
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
@@ -10,6 +11,7 @@ export interface InputProps
   label?: string;
   autoComplete?: string;
   customError?: React.ReactNode;
+  mask?: InputMaskComponent;
 }
 
 export function Input({
@@ -17,6 +19,7 @@ export function Input({
   autoComplete,
   label,
   customError,
+  mask,
   ...rest
 }: InputProps) {
   return (
@@ -26,6 +29,14 @@ export function Input({
         <TextField
           {...field}
           FormHelperTextProps={{ component: 'div' }}
+          InputProps={
+            mask
+              ? {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any -- disable
+                  inputComponent: mask as any,
+                }
+              : undefined
+          }
           autoComplete={autoComplete || name}
           error={Boolean(fieldState.error)}
           fullWidth
