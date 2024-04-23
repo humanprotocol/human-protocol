@@ -13,6 +13,7 @@ import numpy as np
 from sqlalchemy.orm import Session
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
+import src.core.tasks.simple as simple_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
@@ -146,19 +147,18 @@ class _TaskValidator:
         return gt_key
 
     def _parse_gt(self):
-        tempdir = self._require_field(self._temp_dir)
-        manifest = self._require_field(self.manifest)
+        layout = simple_task.TaskMetaLayout()
+        serializer = simple_task.TaskMetaSerializer()
 
-        bucket_info = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
-        bucket_client = make_cloud_client(bucket_info)
+        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
+        storage_client = make_cloud_client(oracle_data_bucket)
 
-        gt_annotations = io.BytesIO(bucket_client.download_file(bucket_info.path))
-
-        gt_dataset_path = tempdir / "gt.json"
-        gt_dataset_path.write_bytes(gt_annotations.read())
-        self._gt_dataset = dm.Dataset.import_from(
-            os.fspath(gt_dataset_path),
-            format=DM_GT_DATASET_FORMAT_MAPPING[manifest.annotation.type],
+        self._gt_dataset = serializer.parse_gt_annotations(
+            storage_client.download_file(
+                compose_data_bucket_filename(
+                    self.escrow_address, self.chain_id, layout.GT_FILENAME
+                ),
+            )
         )
 
     def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
@@ -902,7 +902,7 @@ def process_intermediate_results(
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("process_intermediate_results for escrow %s", escrow_address)
-        logger.debug("Task id %s, %s", getattr(task, 'id', None), getattr(task, "__dict__", None))
+        logger.debug("Task id %s, %s", getattr(task, "id", None), getattr(task, "__dict__", None))
 
     initial_gt_stats = {
         gt_image_stat.gt_key: gt_image_stat.failed_attempts
