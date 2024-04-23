@@ -23,6 +23,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
+import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { KvStoreModule } from './integrations/kv-store/kv-store.module';
     OracleDiscoveryModule,
     StatisticsModule,
     KvStoreModule,
+    EmailConfirmationModule,
   ],
   controllers: [
     AppController,

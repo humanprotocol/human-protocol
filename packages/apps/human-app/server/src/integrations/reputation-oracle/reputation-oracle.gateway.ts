@@ -22,6 +22,15 @@ import {
   SigninWorkerData,
   SigninWorkerResponse,
 } from '../../modules/user-worker/model/worker-signin.model';
+import {
+  EmailVerificationCommand,
+  EmailVerificationData,
+} from '../../modules/email-confirmation/model/email-verification.model';
+import {
+  ResendEmailVerificationCommand,
+  ResendEmailVerificationData,
+  ResendEmailVerificationParams,
+} from '../../modules/email-confirmation/model/resend-email-verification.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -38,13 +47,18 @@ export class ReputationOracleGateway {
   private getEndpointOptions(
     endpointName: EndpointName,
     data: RequestDataType,
+    token?: string,
   ) {
     const { method, endpoint, headers } =
       this.reputationOracleConfig.endpoints[endpointName];
+    const authHeader = token ? { Authorization: token } : {};
     return {
       method: method,
       url: `${this.reputationOracleConfig.url}${endpoint}`,
-      headers: headers,
+      headers: {
+        ...authHeader,
+        ...headers,
+      },
       data: data,
     };
   }
@@ -93,5 +107,36 @@ export class ReputationOracleGateway {
       signinWorkerData,
     );
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
+  }
+
+  async sendEmailVerification(
+    emailVerificationCommand: EmailVerificationCommand,
+  ) {
+    const emailVerificationData = this.mapper.map(
+      emailVerificationCommand,
+      EmailVerificationCommand,
+      EmailVerificationData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.EMAIL_VERIFICATION,
+      emailVerificationData,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async resendSendEmailVerification(
+    resendEmailVerificationCommand: ResendEmailVerificationCommand,
+  ) {
+    const resendEmailVerificationData = this.mapper.map(
+      resendEmailVerificationCommand.data,
+      ResendEmailVerificationParams,
+      ResendEmailVerificationData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.RESEND_EMAIL_VERIFICATION,
+      resendEmailVerificationData,
+      resendEmailVerificationCommand.token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
   }
 }

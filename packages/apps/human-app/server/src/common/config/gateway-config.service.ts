@@ -33,6 +33,16 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [EndpointName.EMAIL_VERIFICATION]: {
+              endpoint: '/auth/email-verification',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.RESEND_EMAIL_VERIFICATION]: {
+              endpoint: '/auth/resend-email-verification',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
           },
         },
       },
