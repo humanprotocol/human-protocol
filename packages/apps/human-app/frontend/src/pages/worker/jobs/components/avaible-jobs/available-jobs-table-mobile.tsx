@@ -35,8 +35,12 @@ export function AvailableJobsTableMobile() {
     queryFn: () => getJobsTableData(),
   });
   const [filteredData, setFilteredData] = useState(data);
-  const { openMobileFilterDrawer, setUniqueValues, uniqueValues } =
-    useMobileDrawerFilterStore();
+  const {
+    openMobileFilterDrawer,
+    setUniqueValues,
+    uniqueValues,
+    availableJobsFilters,
+  } = useMobileDrawerFilterStore();
 
   useEffect(() => {
     if (
@@ -46,15 +50,50 @@ export function AvailableJobsTableMobile() {
     ) {
       setUniqueValues(parseUniqueValues(data));
     }
-    const filtered = data?.filter((item) => {
-      return item.escrowAddress.includes(searchEscrowAddress[0].value);
-    });
+
+    let filtered = data;
+
+    //filter by checkboxes
+
+    if (availableJobsFilters.network.length > 0) {
+      filtered = filtered?.filter((item) =>
+        availableJobsFilters.network.includes(item.network)
+      );
+    }
+
+    if (availableJobsFilters.jobType.length > 0) {
+      filtered = filtered?.filter((item) =>
+        availableJobsFilters.jobType.some((type) => item.jobType.includes(type))
+      );
+    }
+
+    // filter by search
+    const escrowSearchValue = searchEscrowAddress[0].value.trim();
+    if (escrowSearchValue) {
+      filtered = filtered?.filter((item) =>
+        item.escrowAddress.includes(escrowSearchValue)
+      );
+    }
+    //sorting
+    if (availableJobsFilters.sortingOrder.sortingColumn) {
+      const { sortingColumn, sortingOrder } = availableJobsFilters.sortingOrder;
+      filtered?.sort((a, b) => {
+        const valueA = a[sortingColumn as keyof AvailableJobs].toString();
+        const valueB = b[sortingColumn as keyof AvailableJobs].toString();
+
+        if (sortingOrder === 'DESC') {
+          return valueB.localeCompare(valueA);
+        }
+        return valueA.localeCompare(valueB);
+      });
+    }
+
     setFilteredData(filtered);
   }, [
-    searchEscrowAddress,
     data,
-    uniqueValues.network.length,
-    uniqueValues.jobType.length,
+    uniqueValues,
+    availableJobsFilters,
+    searchEscrowAddress,
     setUniqueValues,
   ]);
 

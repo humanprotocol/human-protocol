@@ -9,8 +9,10 @@ interface MobileFilterStore {
     jobType: string[];
   };
   availableJobsFilters: {
-    jobDescriptionOrder: string;
-    rewardAmountOrder: string;
+    sortingOrder: {
+      sortingColumn: string;
+      sortingOrder: string;
+    };
     network: string[];
     jobType: string[];
   };
@@ -33,8 +35,10 @@ export const useMobileDrawerFilterStore = create<MobileFilterStore>((set) => ({
     jobType: [],
   },
   availableJobsFilters: {
-    jobDescriptionOrder: '',
-    rewardAmountOrder: '',
+    sortingOrder: {
+      sortingColumn: 'jobDescription',
+      sortingOrder: 'ASC',
+    },
     network: [],
     jobType: [],
   },

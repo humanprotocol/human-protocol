@@ -76,6 +76,15 @@ export function AvaibleJobsDrawerMobile({
           {t('worker.jobs.jobDescription')}
         </Typography>
         <Button
+          onClick={() => {
+            setAvailableJobsFilters({
+              ...availableJobsFilters,
+              sortingOrder: {
+                sortingColumn: 'jobDescription',
+                sortingOrder: 'ASC',
+              },
+            });
+          }}
           size="small"
           sx={{
             marginLeft: '16px',
@@ -94,6 +103,15 @@ export function AvaibleJobsDrawerMobile({
           </Typography>
         </Button>
         <Button
+          onClick={() => {
+            setAvailableJobsFilters({
+              ...availableJobsFilters,
+              sortingOrder: {
+                sortingColumn: 'jobDescription',
+                sortingOrder: 'DESC',
+              },
+            });
+          }}
           size="small"
           sx={{
             marginLeft: '16px',
@@ -130,6 +148,15 @@ export function AvaibleJobsDrawerMobile({
         >
           <SortArrow />{' '}
           <Typography
+            onClick={() => {
+              setAvailableJobsFilters({
+                ...availableJobsFilters,
+                sortingOrder: {
+                  sortingColumn: 'rewardAmount',
+                  sortingOrder: 'DESC',
+                },
+              });
+            }}
             sx={{
               marginLeft: '10px',
             }}
@@ -155,6 +182,15 @@ export function AvaibleJobsDrawerMobile({
             <SortArrow />
           </Box>{' '}
           <Typography
+            onClick={() => {
+              setAvailableJobsFilters({
+                ...availableJobsFilters,
+                sortingOrder: {
+                  sortingColumn: 'rewardAmount',
+                  sortingOrder: 'ASC',
+                },
+              });
+            }}
             sx={{
               marginLeft: '10px',
             }}
