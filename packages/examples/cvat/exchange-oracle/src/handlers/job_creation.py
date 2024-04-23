@@ -9,7 +9,7 @@ from itertools import chain, groupby
 from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Sequence, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import cv2
 import datumaro as dm
@@ -19,6 +19,7 @@ from datumaro.util.annotation_util import BboxCoords, bbox_iou
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
+import src.core.tasks.simple as simple_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
@@ -123,6 +124,221 @@ class _ExcludedAnnotationsInfo:
                 message=message, sample_id=sample_id, sample_subset=sample_subset
             )
         )
+
+
+class SimpleTaskBuilder:
+    """
+    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
+    """
+
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+        self.exit_stack = ExitStack()
+        self.manifest = manifest
+        self.escrow_address = escrow_address
+        self.chain_id = chain_id
+
+        self.logger: Logger = NullLogger()
+
+        self._oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.close()
+
+    def close(self):
+        self.exit_stack.close()
+
+    def set_logger(self, logger: Logger):
+        # TODO: add escrow info into messages
+        self.logger = logger
+        return self
+
+    @classmethod
+    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
+        return cloud_service.make_client(bucket_info)
+
+    def _upload_task_meta(self, gt_dataset: dm.Dataset):
+        layout = simple_task.TaskMetaLayout()
+        serializer = simple_task.TaskMetaSerializer()
+
+        file_list = []
+        file_list.append(
+            (
+                serializer.serialize_gt_annotations(gt_dataset),
+                layout.GT_FILENAME,
+            )
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        for file_data, filename in file_list:
+            storage_client.create_file(
+                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
+                file_data,
+            )
+
+    def _parse_gt_dataset(
+        self, gt_file_data: bytes, *, add_prefix: Optional[str] = None
+    ) -> dm.Dataset:
+        with TemporaryDirectory() as gt_temp_dir:
+            gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
+            with open(gt_filename, "wb") as f:
+                f.write(gt_file_data)
+
+            gt_dataset = dm.Dataset.import_from(
+                gt_filename,
+                format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
+            )
+
+            if add_prefix:
+                gt_dataset = dm.Dataset.from_iterable(
+                    [s.wrap(id=os.path.join(add_prefix, s.id)) for s in gt_dataset],
+                    categories=gt_dataset.categories(),
+                    media_type=gt_dataset.media_type(),
+                )
+
+            gt_dataset.init_cache()
+
+            return gt_dataset
+
+    def _get_gt_filenames(
+        self, gt_dataset: dm.Dataset, data_filenames: List[str], *, manifest: TaskManifest
+    ) -> List[str]:
+        gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
+
+        known_data_filenames = set(data_filenames)
+        matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
+
+        if len(gt_filenames) != len(matched_gt_filenames):
+            missing_gt = gt_filenames - matched_gt_filenames
+            missing_gt_display_threshold = 10
+            remainder = len(missing_gt) - missing_gt_display_threshold
+            raise DatasetValidationError(
+                "Failed to find several validation samples in the dataset files: {}{}".format(
+                    ", ".join(missing_gt[:missing_gt_display_threshold]),
+                    f"(and {remainder} more)" if remainder else "",
+                )
+            )
+
+        if len(gt_filenames) < manifest.validation.val_size:
+            raise TooFewSamples(
+                f"Too few validation samples provided ({len(gt_filenames)}), "
+                f"at least {manifest.validation.val_size} required."
+            )
+
+        return matched_gt_filenames
+
+    def _make_job_configuration(
+        self,
+        data_filenames: List[str],
+        gt_filenames: List[str],
+        *,
+        manifest: TaskManifest,
+    ) -> List[List[str]]:
+        # Make job layouts wrt. manifest params, 1 job per task (CVAT can't repeat images in jobs)
+        gt_filenames_index = set(gt_filenames)
+        data_filenames = [fn for fn in data_filenames if not fn in gt_filenames_index]
+        random.shuffle(data_filenames)
+
+        job_layout = []
+        for data_samples in take_by(data_filenames, manifest.annotation.job_size):
+            gt_samples = random.sample(gt_filenames, k=manifest.validation.val_size)
+            job_samples = list(data_samples) + list(gt_samples)
+            random.shuffle(job_samples)
+            job_layout.append(job_samples)
+
+        return job_layout
+
+    def build(self):
+        manifest = self.manifest
+        escrow_address = self.escrow_address
+        chain_id = self.chain_id
+
+        data_bucket = BucketAccessInfo.parse_obj(manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(manifest.validation.gt_url)
+
+        data_bucket_client = cloud_service.make_client(data_bucket)
+        gt_bucket_client = cloud_service.make_client(gt_bucket)
+
+        # Task configuration creation
+        data_filenames = data_bucket_client.list_files(prefix=data_bucket.path)
+        data_filenames = filter_image_files(data_filenames)
+
+        gt_file_data = gt_bucket_client.download_file(gt_bucket.path)
+
+        # Validate and parse GT
+        gt_dataset = self._parse_gt_dataset(gt_file_data, add_prefix=data_bucket.path)
+
+        # Create task configuration
+        gt_filenames = self._get_gt_filenames(gt_dataset, data_filenames, manifest=manifest)
+        job_configuration = self._make_job_configuration(
+            data_filenames, gt_filenames, manifest=manifest
+        )
+        label_configuration = make_label_configuration(manifest)
+
+        self._upload_task_meta(gt_dataset)
+
+        # Register cloud storage on CVAT to pass user dataset
+        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
+
+        # Create a project
+        cvat_project = cvat_api.create_project(
+            escrow_address,
+            labels=label_configuration,
+            user_guide=manifest.annotation.user_guide,
+        )
+
+        # Setup webhooks for a project (update:task, update:job)
+        cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
+
+        with SessionLocal.begin() as session:
+            total_jobs = len(job_configuration)
+            self.logger.info(
+                "Task creation for escrow '%s': will create %s assignments",
+                escrow_address,
+                total_jobs,
+            )
+            db_service.create_escrow_creation(
+                session, escrow_address=escrow_address, chain_id=chain_id, total_jobs=total_jobs
+            )
+
+            project_id = db_service.create_project(
+                session,
+                cvat_project.id,
+                cloud_storage.id,
+                manifest.annotation.type,
+                escrow_address,
+                chain_id,
+                compose_bucket_url(
+                    data_bucket.bucket_name,
+                    bucket_host=data_bucket.host_url,
+                    provider=data_bucket.provider,
+                ),
+                cvat_webhook_id=cvat_webhook.id,
+            )
+
+            db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
+            db_service.add_project_images(session, cvat_project.id, data_filenames)
+
+            for job_filenames in job_configuration:
+                cvat_task = cvat_api.create_task(cvat_project.id, escrow_address)
+
+                task_id = db_service.create_task(
+                    session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
+                )
+                db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
+
+                # Actual task creation in CVAT takes some time, so it's done in an async process.
+                # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                cvat_api.put_task_data(
+                    cvat_task.id,
+                    cloud_storage.id,
+                    filenames=job_filenames,
+                    sort_images=False,
+                )
+
+                db_service.create_data_upload(session, cvat_task.id)
 
 
 class BoxesFromPointsTaskBuilder:
@@ -2180,65 +2396,6 @@ class SkeletonsFromBoxesTaskBuilder:
         self._create_on_cvat()
 
 
-def get_gt_filenames(
-    gt_file_data: bytes, data_filenames: List[str], *, manifest: TaskManifest
-) -> List[str]:
-    with TemporaryDirectory() as gt_temp_dir:
-        gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
-        with open(gt_filename, "wb") as f:
-            f.write(gt_file_data)
-
-        gt_dataset = dm.Dataset.import_from(
-            gt_filename,
-            format=DM_GT_DATASET_FORMAT_MAPPING[manifest.annotation.type],
-        )
-
-        gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
-
-    known_data_filenames = set(data_filenames)
-    matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
-
-    if len(gt_filenames) != len(matched_gt_filenames):
-        missing_gt = gt_filenames - matched_gt_filenames
-        missing_gt_display_threshold = 10
-        remainder = len(missing_gt) - missing_gt_display_threshold
-        raise DatasetValidationError(
-            "Failed to find several validation samples in the dataset files: {}{}".format(
-                ", ".join(missing_gt[:missing_gt_display_threshold]),
-                f"(and {remainder} more)" if remainder else "",
-            )
-        )
-
-    if len(gt_filenames) < manifest.validation.val_size:
-        raise TooFewSamples(
-            f"Too few validation samples provided ({len(gt_filenames)}), "
-            f"at least {manifest.validation.val_size} required."
-        )
-
-    return matched_gt_filenames
-
-
-def make_job_configuration(
-    data_filenames: List[str],
-    gt_filenames: List[str],
-    *,
-    manifest: TaskManifest,
-) -> List[List[str]]:
-    # Make job layouts wrt. manifest params, 1 job per task (CVAT can't repeat images in jobs)
-    gt_filenames_index = set(gt_filenames)
-    data_filenames = [fn for fn in data_filenames if not fn in gt_filenames_index]
-    random.shuffle(data_filenames)
-
-    job_layout = []
-    for data_samples in take_by(data_filenames, manifest.annotation.job_size):
-        gt_samples = random.sample(gt_filenames, k=manifest.validation.val_size)
-        job_samples = list(data_samples) + list(gt_samples)
-        random.shuffle(job_samples)
-        job_layout.append(job_samples)
-
-    return job_layout
-
-
 def is_image(path: str) -> bool:
     trunk, ext = os.path.splitext(os.path.basename(path))
     return trunk and ext.lower() in IMAGE_EXTENSIONS
@@ -2290,98 +2447,17 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         TaskTypes.image_points,
         TaskTypes.image_label_binary,
     ]:
-        data_bucket = BucketAccessInfo.parse_obj(manifest.data.data_url)
-        gt_bucket = BucketAccessInfo.parse_obj(manifest.validation.gt_url)
-
-        data_bucket_client = cloud_service.make_client(data_bucket)
-        gt_bucket_client = cloud_service.make_client(gt_bucket)
-
-        # Task configuration creation
-        data_filenames = data_bucket_client.list_files(prefix=data_bucket.path)
-        data_filenames = strip_bucket_prefix(data_filenames, prefix=data_bucket.path)
-        data_filenames = filter_image_files(data_filenames)
-
-        gt_file_data = gt_bucket_client.download_file(gt_bucket.path)
-
-        # Validate and parse GT
-        gt_filenames = get_gt_filenames(gt_file_data, data_filenames, manifest=manifest)
-
-        job_configuration = make_job_configuration(data_filenames, gt_filenames, manifest=manifest)
-        label_configuration = make_label_configuration(manifest)
-
-        # Register cloud storage on CVAT to pass user dataset
-        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
-
-        # Create a project
-        cvat_project = cvat_api.create_project(
-            escrow_address,
-            labels=label_configuration,
-            user_guide=manifest.annotation.user_guide,
-        )
-
-        # Setup webhooks for a project (update:task, update:job)
-        cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
-
-        with SessionLocal.begin() as session:
-            total_jobs = len(job_configuration)
-            logger.info(
-                "Task creation for escrow '%s': will create %s assignments",
-                escrow_address,
-                total_jobs,
-            )
-            db_service.create_escrow_creation(
-                session, escrow_address=escrow_address, chain_id=chain_id, total_jobs=total_jobs
-            )
-
-            project_id = db_service.create_project(
-                session,
-                cvat_project.id,
-                cloud_storage.id,
-                manifest.annotation.type,
-                escrow_address,
-                chain_id,
-                compose_bucket_url(
-                    data_bucket.bucket_name,
-                    bucket_host=data_bucket.host_url,
-                    provider=data_bucket.provider,
-                ),
-                cvat_webhook_id=cvat_webhook.id,
-            )
-
-            db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
-            db_service.add_project_images(session, cvat_project.id, data_filenames)
-
-            for job_filenames in job_configuration:
-                cvat_task = cvat_api.create_task(cvat_project.id, escrow_address)
-
-                task_id = db_service.create_task(
-                    session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
-                )
-                db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
-
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
-                # The task is fully created once 'update:task' or 'update:job' webhook is received.
-                cvat_api.put_task_data(
-                    cvat_task.id,
-                    cloud_storage.id,
-                    filenames=[os.path.join(data_bucket.path, fn) for fn in job_filenames],
-                    sort_images=False,
-                )
-
-                db_service.create_data_upload(session, cvat_task.id)
-
+        builder_type = SimpleTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
-        with BoxesFromPointsTaskBuilder(manifest, escrow_address, chain_id) as task_builder:
-            task_builder.set_logger(logger)
-            task_builder.build()
-
+        builder_type = BoxesFromPointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
-        with SkeletonsFromBoxesTaskBuilder(manifest, escrow_address, chain_id) as task_builder:
-            task_builder.set_logger(logger)
-            task_builder.build()
-
+        builder_type = SkeletonsFromBoxesTaskBuilder
     else:
         raise Exception(f"Unsupported task type {manifest.annotation.type}")
+
+    with builder_type(manifest, escrow_address, chain_id) as task_builder:
+        task_builder.set_logger(logger)
+        task_builder.build()
 
 
 def remove_task(escrow_address: str) -> None:
