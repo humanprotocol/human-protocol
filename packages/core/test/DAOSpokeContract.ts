@@ -575,4 +575,48 @@ describe.only('DAOSpokeContract', function () {
       );
     });
   });
+  describe('sendVoteResultToHub', async () => {
+    it('should revert when not finished', async () => {
+      const proposalId = await createProposalOnSpoke(
+        daoSpoke,
+        wormholeMockForDaoSpoke,
+        1,
+        await governor.getAddress()
+      );
+
+      await expect(daoSpoke.sendVoteResultToHub(proposalId)).to.be.revertedWith(
+        'DAOSpokeContract: vote is not finished'
+      );
+    });
+
+    it('should send vote result to hub', async () => {
+      const proposalId = await createProposalOnSpoke(
+        daoSpoke,
+        wormholeMockForDaoSpoke,
+        1,
+        await governor.getAddress()
+      );
+
+      await finishProposal(
+        daoSpoke,
+        wormholeMockForDaoSpoke,
+        proposalId,
+        await governor.getAddress()
+      );
+
+      const proposal = await daoSpoke.proposals(proposalId);
+      expect(proposal.voteFinished).to.be.true;
+
+      // get quote from wormhole mock with mock values as they are not important for this test
+      const mockWormholeQuote =
+        await wormholeMockForDaoSpoke.quoteEVMDeliveryPrice(0, 0, 0);
+
+      await expect(
+        daoSpoke.sendVoteResultToHub(proposalId)
+      ).to.changeEtherBalances(
+        [daoSpoke, wormholeMockForDaoSpoke],
+        [-mockWormholeQuote[0], mockWormholeQuote[0]]
+      );
+    });
+  });
 });
