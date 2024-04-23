@@ -227,7 +227,9 @@ class _TaskValidator:
         self._put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
 
         updated_merged_dataset_path = tempdir / "merged_updated"
-        merged_dataset.export(updated_merged_dataset_path, merged_dataset_format, save_media=False)
+        merged_dataset.export(
+            updated_merged_dataset_path, merged_dataset_format, save_media=False, reindex=True
+        )
 
         updated_merged_dataset_archive = io.BytesIO()
         write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
@@ -247,14 +249,27 @@ class _TaskValidator:
             case TaskTypes.image_boxes.value:
                 merged_dataset.update(gt_dataset)
             case TaskTypes.image_points.value:
+                merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
+                    dm.AnnotationType.label
+                ]
+                skeleton_label_id = next(
+                    i for i, label in enumerate(merged_label_cat) if not label.parent
+                )
+                point_label_id = next(i for i, label in enumerate(merged_label_cat) if label.parent)
+
                 for sample in gt_dataset:
                     annotations = [
-                        # Put a point in the center of each GT bbox
-                        # Not ideal, but it's the target for now
-                        dm.Points(
-                            [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
-                            label=bbox.label,
-                            attributes=bbox.attributes,
+                        dm.Skeleton(
+                            elements=[
+                                # Put a point in the center of each GT bbox
+                                # Not ideal, but it's the target for now
+                                dm.Points(
+                                    [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
+                                    label=point_label_id,
+                                    attributes=bbox.attributes,
+                                )
+                            ],
+                            label=skeleton_label_id,
                         )
                         for bbox in sample.annotations
                         if isinstance(bbox, dm.Bbox)
