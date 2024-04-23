@@ -1,29 +1,41 @@
 import { z } from 'zod';
+import type { MutationKey, UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getStackedAmount } from '@/smart-contracts/get-staked-amount';
+import { addStake } from '@/smart-contracts/add-stake';
 
-export const getStakedAmountCallArgumentsSchema = z.object({
+export const addStakeCallArgumentsSchema = z.object({
+  amount: z.coerce.number().min(1).max(1_000_000_000),
   address: z.string(),
 });
 
-export type GetStackedAmountCallArguments = z.infer<
-  typeof getStakedAmountCallArgumentsSchema
->;
+export type AddStakeCallArguments = z.infer<typeof addStakeCallArgumentsSchema>;
 
-function getStackedAmountMutationFn(data: GetStackedAmountCallArguments) {
-  return getStackedAmount(data);
+function addStakeMutationFn(data: AddStakeCallArguments) {
+  return addStake(data);
 }
+type OnSuccess = UseMutationOptions<
+  void,
+  unknown,
+  AddStakeCallArguments
+>['onSuccess'];
 
-export function useGetStakedAmountMutation() {
+export function useAddStakeMutation(useMutationOptions?: {
+  onSuccess?: OnSuccess;
+  mutationKey?: MutationKey | undefined;
+}) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: getStackedAmountMutationFn,
-    onSuccess: async () => {
+    mutationFn: addStakeMutationFn,
+    onSuccess: async (...onSuccessArgs) => {
+      if (useMutationOptions?.onSuccess) {
+        useMutationOptions.onSuccess(...onSuccessArgs);
+      }
       await queryClient.invalidateQueries();
     },
     onError: async () => {
       await queryClient.invalidateQueries();
     },
+    mutationKey: useMutationOptions?.mutationKey,
   });
 }

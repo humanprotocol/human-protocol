@@ -13,7 +13,6 @@ export const routerPaths = {
   },
   operator: {
     signIn: '/operator/sign-in',
-    signUp: '/operator/sign-up',
     connectWallet: '/operator/connect-wallet',
     addStake: '/operator/add-stake',
   },

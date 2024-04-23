@@ -1,5 +1,7 @@
-export async function getStackedAmount({ address }: { address: string }) {
+import { FakeSmartContract } from '@/smart-contracts/fake-smart-contract';
+
+export function getStackedAmount({ address }: { address: string }) {
   // TODO add smart contract integration
   address;
-  return Promise.resolve(100);
+  return FakeSmartContract.getInstance().getStack();
 }

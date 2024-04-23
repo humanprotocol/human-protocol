@@ -22,7 +22,8 @@ export function useWeb3Provider() {
     if (walletProvider) {
       mutationResult.mutate(walletProvider);
     }
-  }, [mutationResult, walletProvider]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- not nesseccary
+  }, [walletProvider]);
 
   return mutationResult;
 }

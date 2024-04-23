@@ -1,3 +1,4 @@
+import type { SxProps, Theme } from '@mui/material';
 import { Box, Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +9,10 @@ import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { Loader } from '@/components/ui/loader';
+import { Alert } from '@/components/ui/alert';
+
+const DEFAULT_CARD_MAX_WIDTH = '1200px';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -23,6 +28,26 @@ const IconWrapper = styled('div')(() => ({
   },
 }));
 
+const getCommonStyles: (cardMaxWidth: string) => SxProps<Theme> = (
+  cardMaxWidth
+) => {
+  return {
+    padding: '2rem 2rem 6rem 2rem',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '2rem',
+    borderRadius: '20px',
+    minHeight: '70vh',
+    maxWidth: cardMaxWidth,
+    width: '100%',
+    background: colorPalette.white,
+    [breakpoints.mobile]: {
+      borderRadius: '0',
+    },
+  };
+};
+
 interface FormCardProps {
   children: React.JSX.Element;
   title?: React.JSX.Element | string;
@@ -32,13 +57,14 @@ interface FormCardProps {
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
   withLayoutBackground?: boolean;
+  loader?: boolean;
 }
 
 export function PageCard({
   children,
   title,
   alert,
-  cardMaxWidth = '1200px',
+  cardMaxWidth = DEFAULT_CARD_MAX_WIDTH,
   childrenMaxWidth = '486px',
   backArrowPath,
   cancelBtnPath = routerPaths.homePage,
@@ -64,24 +90,7 @@ export function PageCard({
   };
 
   return (
-    <Grid
-      container
-      sx={{
-        padding: '2rem 2rem 6rem 2rem',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '2rem',
-        borderRadius: '20px',
-        minHeight: '70vh',
-        maxWidth: cardMaxWidth,
-        width: '100%',
-        background: colorPalette.white,
-        [breakpoints.mobile]: {
-          borderRadius: '0',
-        },
-      }}
-    >
+    <Grid container sx={getCommonStyles(cardMaxWidth)}>
       <Grid
         sx={{
           display: 'flex',
@@ -181,6 +190,63 @@ export function PageCard({
           </Grid>
         </Grid>
       </Box>
+    </Grid>
+  );
+}
+
+export function PageCardLoader({
+  cardMaxWidth = DEFAULT_CARD_MAX_WIDTH,
+  withLayoutBackground = true,
+}: {
+  cardMaxWidth?: string;
+  withLayoutBackground?: boolean;
+}) {
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    if (withLayoutBackground) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
+  return (
+    <Grid container sx={getCommonStyles(cardMaxWidth)}>
+      <Loader size={90} />
+    </Grid>
+  );
+}
+export function PageCardError({
+  errorMessage,
+  cardMaxWidth = DEFAULT_CARD_MAX_WIDTH,
+  withLayoutBackground,
+}: {
+  errorMessage: string;
+  cardMaxWidth?: string;
+  withLayoutBackground?: boolean;
+}) {
+  const navigate = useNavigate();
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    if (withLayoutBackground) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
+  return (
+    <Grid container sx={getCommonStyles(cardMaxWidth)}>
+      <Alert color="error" severity="error">
+        {errorMessage}
+      </Alert>
+      <Button onClick={navigate.bind(null, 0)} variant="contained">
+        Reload
+      </Button>
+      <Button
+        onClick={navigate.bind(null, routerPaths.homePage)}
+        variant="outlined"
+      >
+        Go Home
+      </Button>
     </Grid>
   );
 }
