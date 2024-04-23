@@ -211,6 +211,23 @@ class _TaskValidator:
         self._job_results = job_results
         self._rejected_jobs = rejected_jobs
 
+    def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
+        class RemoveCommonPrefix(dm.ItemTransform):
+            def __init__(self, extractor: dm.IExtractor, *, prefix: str):
+                super().__init__(extractor)
+                self._prefix = prefix
+
+            def transform_item(self, item: dm.DatasetItem) -> dm.DatasetItem:
+                if item.id.startswith(self._prefix):
+                    item = item.wrap(id=item.id[len(self._prefix) :])
+                return item
+
+        prefix = self.manifest.data.data_url.path.lstrip("/\\") + "/"
+        if all(sample.id.startswith(prefix) for sample in merged_dataset):
+            merged_dataset.transform(RemoveCommonPrefix, prefix=prefix)
+
+        return merged_dataset
+
     def _prepare_merged_dataset(self):
         tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
@@ -225,9 +242,12 @@ class _TaskValidator:
             os.fspath(merged_dataset_path), format=merged_dataset_format
         )
         self._put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
+        self._restore_original_image_paths(merged_dataset)
 
         updated_merged_dataset_path = tempdir / "merged_updated"
-        merged_dataset.export(updated_merged_dataset_path, merged_dataset_format, save_media=False)
+        merged_dataset.export(
+            updated_merged_dataset_path, merged_dataset_format, save_media=False, reindex=True
+        )
 
         updated_merged_dataset_archive = io.BytesIO()
         write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
@@ -247,14 +267,27 @@ class _TaskValidator:
             case TaskTypes.image_boxes.value:
                 merged_dataset.update(gt_dataset)
             case TaskTypes.image_points.value:
+                merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
+                    dm.AnnotationType.label
+                ]
+                skeleton_label_id = next(
+                    i for i, label in enumerate(merged_label_cat) if not label.parent
+                )
+                point_label_id = next(i for i, label in enumerate(merged_label_cat) if label.parent)
+
                 for sample in gt_dataset:
                     annotations = [
-                        # Put a point in the center of each GT bbox
-                        # Not ideal, but it's the target for now
-                        dm.Points(
-                            [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
-                            label=bbox.label,
-                            attributes=bbox.attributes,
+                        dm.Skeleton(
+                            elements=[
+                                # Put a point in the center of each GT bbox
+                                # Not ideal, but it's the target for now
+                                dm.Points(
+                                    [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
+                                    label=point_label_id,
+                                    attributes=bbox.attributes,
+                                )
+                            ],
+                            label=skeleton_label_id,
                         )
                         for bbox in sample.annotations
                         if isinstance(bbox, dm.Bbox)
