@@ -14,6 +14,15 @@ contract VHMToken is ERC20, ERC20Permit, ERC20Votes, ERC20Wrapper {
         ERC20Wrapper(wrappedToken)
     {}
 
+    function clock() public view override returns (uint48) {
+        return uint48(block.timestamp);
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function CLOCK_MODE() public pure override returns (string memory) {
+        return 'mode=timestamp';
+    }
+
     // The functions below are overrides required by Solidity.
 
     function _afterTokenTransfer(
