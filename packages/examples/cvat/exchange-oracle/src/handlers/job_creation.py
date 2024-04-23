@@ -141,6 +141,9 @@ class SimpleTaskBuilder:
 
         self._oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
 
+        self.list_display_threshold = 5
+        "The maximum number of rendered list items in a message"
+
     def __enter__(self):
         return self
 
@@ -154,6 +157,18 @@ class SimpleTaskBuilder:
         # TODO: add escrow info into messages
         self.logger = logger
         return self
+
+    def _format_list(
+        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+    ) -> str:
+        if max_items is None:
+            max_items = self.list_display_threshold
+
+        remainder_count = len(items) - max_items
+        return "{}{}".format(
+            separator.join(items[:max_items]),
+            f" (and {remainder_count} more)" if remainder_count > 0 else "",
+        )
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
@@ -206,18 +221,14 @@ class SimpleTaskBuilder:
         self, gt_dataset: dm.Dataset, data_filenames: List[str], *, manifest: TaskManifest
     ) -> List[str]:
         gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
-
         known_data_filenames = set(data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
 
         if len(gt_filenames) != len(matched_gt_filenames):
             missing_gt = gt_filenames - matched_gt_filenames
-            missing_gt_display_threshold = 10
-            remainder = len(missing_gt) - missing_gt_display_threshold
             raise DatasetValidationError(
-                "Failed to find several validation samples in the dataset files: {}{}".format(
-                    ", ".join(missing_gt[:missing_gt_display_threshold]),
-                    f"(and {remainder} more)" if remainder else "",
+                "Failed to find several validation samples in the dataset files: {}".format(
+                    self._format_list(list(missing_gt))
                 )
             )
 
@@ -380,7 +391,7 @@ class BoxesFromPointsTaskBuilder:
         self.roi_file_ext = ".png"  # supposed to be lossless and reasonably compressing
         "File extension for RoI images, with leading dot (.) included"
 
-        self.sample_error_display_threshold = 5
+        self.list_display_threshold = 5
         "The maximum number of rendered list items in a message"
 
         self.roi_size_mult = 1.1
@@ -595,7 +606,7 @@ class BoxesFromPointsTaskBuilder:
         self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
     ) -> str:
         if max_items is None:
-            max_items = self.sample_error_display_threshold
+            max_items = self.list_display_threshold
 
         remainder_count = len(items) - max_items
         return "{}{}".format(
