@@ -6,7 +6,6 @@ import { WorkerModule } from './modules/user-worker/worker.module';
 import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { envValidator } from './common/config/environment-config.service';
 import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
@@ -22,13 +21,13 @@ import { JobAssignmentModule } from './modules/job-assignment/job-assignment.mod
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
+import { KvStoreModule } from './integrations/kv-store/kv-store.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
-      validationSchema: envValidator,
     }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
@@ -44,6 +43,7 @@ import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-or
     CommonConfigModule,
     OracleDiscoveryModule,
     StatisticsModule,
+    KvStoreModule,
   ],
   controllers: [
     AppController,

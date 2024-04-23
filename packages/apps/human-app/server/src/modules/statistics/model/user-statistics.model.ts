@@ -1,3 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
+
 export class UserStatisticsResponse {
   assignments_amount: number;
   submissions_sent: number;
@@ -6,6 +9,15 @@ export class UserStatisticsResponse {
   assignments_expired: number;
 }
 export class UserStatisticsCommand {
+  address: string;
+  token: string;
+}
+export class UserStatisticsDto {
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  address: string;
+}
+export class UserStatisticsDetails {
   exchangeOracleUrl: string;
   token: string;
 }

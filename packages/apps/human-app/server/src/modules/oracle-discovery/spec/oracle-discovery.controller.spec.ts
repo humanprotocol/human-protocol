@@ -9,7 +9,7 @@ import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
   OracleDiscoveryDto,
-} from '../interface/oracle-discovery.interface';
+} from '../model/oracle-discovery.model';
 import { ChainId } from '@human-protocol/sdk';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 
@@ -46,14 +46,12 @@ describe('OracleDiscoveryController', () => {
       const dto: OracleDiscoveryDto = {
         chainId: 80001,
         address: '0x4708354213453af0cdC33eb75d94fBC00045841E',
-        role: 'Exchange Oracle',
       };
       const result: OracleDiscoveryResponse[] =
         await controller.getOracles(dto);
       const expectedCommand = {
         chainId: ChainId.POLYGON_MUMBAI,
         address: dto.address,
-        role: 'Exchange Oracle',
       } as OracleDiscoveryCommand;
       expect(service.processOracleDiscovery).toHaveBeenCalledWith(
         expectedCommand,

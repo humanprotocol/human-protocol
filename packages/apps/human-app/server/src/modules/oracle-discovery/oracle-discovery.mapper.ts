@@ -4,7 +4,7 @@ import { createMap, Mapper } from '@automapper/core';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,
-} from './interface/oracle-discovery.interface';
+} from './model/oracle-discovery.model';
 
 @Injectable()
 export class OracleDiscoveryProfile extends AutomapperProfile {

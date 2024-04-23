@@ -5,11 +5,13 @@ import { statisticsServiceMock } from './statistics.service.mock';
 import {
   oracleStatsCommandFixture,
   oracleStatsResponseFixture,
-  statisticsExchangeOracleUrl,
+  statisticsExchangeOracleAddress, statisticsExchangeOracleUrl,
   statisticsToken,
   userStatsCommandFixture,
   userStatsResponseFixture,
 } from './statistics.fixtures';
+import { OracleStatisticsDto } from '../model/oracle-statistics.model';
+import { UserStatisticsDto } from '../model/user-statistics.model';
 
 describe('StatisticsController', () => {
   let controller: StatisticsController;
@@ -35,9 +37,10 @@ describe('StatisticsController', () => {
 
   describe('getOracleStatistics', () => {
     it('should call getOracleStats service method with correct parameters', async () => {
-      const result = await controller.getOracleStatistics(
-        statisticsExchangeOracleUrl,
-      );
+      const dto: OracleStatisticsDto = {
+        address: statisticsExchangeOracleAddress,
+      };
+      const result = await controller.getOracleStatistics(dto);
 
       expect(statisticsServiceMock.getOracleStats).toHaveBeenCalledWith(
         oracleStatsCommandFixture,
@@ -48,10 +51,10 @@ describe('StatisticsController', () => {
 
   describe('getUserStatistics', () => {
     it('should call getUserStats service method with correct parameters', async () => {
-      const result = await controller.getUserStatistics(
-        statisticsExchangeOracleUrl,
-        statisticsToken,
-      );
+      const dto: UserStatisticsDto = {
+        address: statisticsExchangeOracleAddress,
+      };
+      const result = await controller.getUserStatistics(dto, statisticsToken);
 
       expect(statisticsServiceMock.getUserStats).toHaveBeenCalledWith(
         userStatsCommandFixture,

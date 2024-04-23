@@ -2,20 +2,23 @@ import {
   Controller,
   Get,
   Headers,
-  Param,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StatisticsService } from './statistics.service';
 import {
   OracleStatisticsCommand,
+  OracleStatisticsDto,
   OracleStatisticsResponse,
-} from './interfaces/oracle-statistics.interface';
+} from './model/oracle-statistics.model';
 import {
   UserStatisticsCommand,
+  UserStatisticsDto,
   UserStatisticsResponse,
-} from './interfaces/user-statistics.interface';
+} from './model/user-statistics.model';
+import { Authorization } from '../../common/config/params-decorators';
 
 @Controller()
 export class StatisticsController {
@@ -25,22 +28,25 @@ export class StatisticsController {
   @ApiOperation({ summary: 'General Oracle Statistics' })
   @UsePipes(new ValidationPipe())
   public getOracleStatistics(
-    @Param('url') oracleUrl: string,
+    @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
-    const command = { exchangeOracleUrl: oracleUrl } as OracleStatisticsCommand;
+    const command = {
+      address: dto.address,
+    } as OracleStatisticsCommand;
     return this.service.getOracleStats(command);
   }
 
   @ApiTags('Statistics')
   @Get('stats/assignment')
   @ApiOperation({ summary: 'Statistics for requesting user' })
+  @ApiBearerAuth()
   @UsePipes(new ValidationPipe())
   public getUserStatistics(
-    @Param('url') oracleUrl: string,
-    @Headers('authorization') token: string,
+    @Query() dto: UserStatisticsDto,
+    @Authorization() token: string,
   ): Promise<UserStatisticsResponse> {
     const command: UserStatisticsCommand = {
-      exchangeOracleUrl: oracleUrl,
+      address: dto.address,
       token: token,
     } as UserStatisticsCommand;
     return this.service.getUserStats(command);

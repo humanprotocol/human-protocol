@@ -2,32 +2,34 @@ import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
-  UserStatisticsCommand,
+  UserStatisticsDetails,
   UserStatisticsResponse,
-} from '../../modules/statistics/interfaces/user-statistics.interface';
+} from '../../modules/statistics/model/user-statistics.model';
 import { HttpService } from '@nestjs/axios';
 import {
-  OracleStatisticsCommand,
+  OracleStatisticsDetails,
   OracleStatisticsResponse,
-} from '../../modules/statistics/interfaces/oracle-statistics.interface';
+} from '../../modules/statistics/model/oracle-statistics.model';
 import {
-  JobAssignmentCommand,
   JobAssignmentData,
+  JobAssignmentDetails,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
-  JobsFetchParamsCommand,
   JobsFetchParamsData,
+  JobsFetchParamsDetails,
   JobsFetchResponse,
-} from '../../modules/job-assignment/interfaces/job-assignment.interface';
+} from '../../modules/job-assignment/model/job-assignment.model';
 import {
   JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
+  JobsDiscoveryParamsDetails,
   JobsDiscoveryResponse,
-} from '../../modules/jobs-discovery/interfaces/jobs-discovery.interface';
+} from '../../modules/jobs-discovery/model/jobs-discovery.model';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
+import { instanceToPlain } from 'class-transformer';
+import { HttpMethod } from '../../common/enums/http-method';
 
 @Injectable()
 export class ExchangeOracleGateway {
@@ -35,6 +37,16 @@ export class ExchangeOracleGateway {
     private httpService: HttpService,
     @InjectMapper() private mapper: Mapper,
   ) {}
+
+  private cleanParams(obj: any): any {
+    return Object.entries(obj)
+      .filter(([_, v]) => v != null)
+      .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {});
+  }
+  private toCleanObjParams(params: any): any {
+    const plainParams = instanceToPlain(params);
+    return this.cleanParams(plainParams);
+  }
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
@@ -42,68 +54,78 @@ export class ExchangeOracleGateway {
     return response.data;
   }
   async fetchUserStatistics(
-    command: UserStatisticsCommand,
+    details: UserStatisticsDetails,
   ): Promise<UserStatisticsResponse> {
     const options: AxiosRequestConfig = {
-      method: 'GET',
-      url: `${command.exchangeOracleUrl}/stats/assignment`,
+      method: HttpMethod.GET,
+      url: `${details.exchangeOracleUrl}/stats/assignment`,
       headers: {
-        Authorization: `Bearer ${command.token}`,
+        Authorization: details.token,
       },
     };
     return this.callExternalHttpUtilRequest<UserStatisticsResponse>(options);
   }
   async fetchOracleStatistics(
-    command: OracleStatisticsCommand,
+    details: OracleStatisticsDetails,
   ): Promise<OracleStatisticsResponse> {
     const options: AxiosRequestConfig = {
-      method: 'GET',
-      url: `${command.exchangeOracleUrl}/stats`,
+      method: HttpMethod.GET,
+      url: `${details.exchangeOracleUrl}/stats`,
     };
     return this.callExternalHttpUtilRequest<OracleStatisticsResponse>(options);
   }
   async fetchAssignedJobs(
-    command: JobsFetchParamsCommand,
+    details: JobsFetchParamsDetails,
   ): Promise<JobsFetchResponse> {
+    console.log("Details: ", details);
+    const jobFetchParamsData = this.mapper.map(
+      details.data,
+      JobsFetchParams,
+      JobsFetchParamsData,
+    );
+    const reducedParams = this.toCleanObjParams(jobFetchParamsData);
     const options: AxiosRequestConfig = {
-      method: 'GET',
-      url: `${command.exchangeOracleUrl}/assignment`,
-      params: this.mapper.map(
-        command.data,
-        JobsFetchParams,
-        JobsFetchParamsData,
-      ),
+      method: HttpMethod.GET,
+      url: `${details.exchangeOracleUrl}/assignment`,
+      params: reducedParams,
+      headers: {
+        Authorization: details.token,
+        Accept: 'application/json',
+      },
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);
   }
   async postNewJobAssignment(
-    command: JobAssignmentCommand,
+    details: JobAssignmentDetails,
   ): Promise<JobAssignmentResponse> {
     const options: AxiosRequestConfig = {
-      method: 'POST',
-      url: `${command.exchangeOracleUrl}/assignment`,
+      method: HttpMethod.POST,
+      url: `${details.exchangeOracleUrl}/assignment`,
       data: this.mapper.map(
-        command.data,
+        details.data,
         JobAssignmentParams,
         JobAssignmentData,
       ),
       headers: {
-        Authorization: `Bearer ${command.token}`,
+        Authorization: details.token,
       },
     };
     return this.callExternalHttpUtilRequest<JobAssignmentResponse>(options);
   }
-  async fetchDiscoveredJobs(command: JobsDiscoveryParamsCommand) {
+  async fetchJobs(details: JobsDiscoveryParamsDetails) {
+    const jobsDiscoveryParamsData = this.mapper.map(
+      details.data,
+      JobsDiscoveryParams,
+      JobsDiscoveryParamsData,
+    );
+    const reducedParams = this.toCleanObjParams(jobsDiscoveryParamsData);
     const options: AxiosRequestConfig = {
-      method: 'GET',
-      url: `${command.exchangeOracleUrl}/jobs`,
-      params: this.mapper.map(
-        command.data,
-        JobsDiscoveryParams,
-        JobsDiscoveryParamsData,
-      ),
+      method: HttpMethod.GET,
+      url: `${details.exchangeOracleUrl}/job`,
+      params: reducedParams,
       headers: {
-        Authorization: `Bearer ${command.token}`,
+        Authorization: details.token,
+        Accept: 'application/json',
       },
     };
     return this.callExternalHttpUtilRequest<JobsDiscoveryResponse>(options);

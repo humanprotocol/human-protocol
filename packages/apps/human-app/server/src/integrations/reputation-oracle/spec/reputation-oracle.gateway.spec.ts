@@ -3,13 +3,13 @@ import { HttpService } from '@nestjs/axios';
 import { GatewayConfigService } from '../../../common/config/gateway-config.service';
 import { of, throwError } from 'rxjs';
 import { ReputationOracleGateway } from '../reputation-oracle.gateway';
-import { SignupWorkerCommand } from '../../../modules/user-worker/interfaces/worker-registration.interface';
+import { SignupWorkerCommand } from '../../../modules/user-worker/model/worker-registration.model';
 import nock from 'nock';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SignupOperatorCommand } from '../../../modules/user-operator/interfaces/operator-registration.interface';
+import { SignupOperatorCommand } from '../../../modules/user-operator/model/operator-registration.model';
 import { gatewayConfigServiceMock } from '../../../common/config/gateway-config.service.mock';
 import { ethers } from 'ethers';
-import { SigninWorkerCommand } from '../../../modules/user-worker/interfaces/worker-signin.interface';
+import { SigninWorkerCommand } from '../../../modules/user-worker/model/worker-signin.model';
 
 describe('ReputationOracleGateway', () => {
   let service: ReputationOracleGateway;
@@ -54,6 +54,7 @@ describe('ReputationOracleGateway', () => {
       const command = new SignupWorkerCommand(
         'asfdsafdd@asdf.cvd',
         'asdfasdf2133!!dasfA',
+        'Bearer sadf234efaddasf234sadgv43rz89al',
       );
       const expectedData = {
         email: 'asfdsafdd@asdf.cvd',
@@ -81,7 +82,7 @@ describe('ReputationOracleGateway', () => {
           ),
         );
 
-      const command = new SignupWorkerCommand('', '');
+      const command = new SignupWorkerCommand('', '', '');
       await expect(service.sendWorkerSignup(command)).rejects.toThrow(
         new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
       );
@@ -95,6 +96,7 @@ describe('ReputationOracleGateway', () => {
       const command = new SignupWorkerCommand(
         'asfdsafdd@asdf.cvd',
         'asdfasdf2133!!dasfA',
+        'Bearer sadf234efaddasf234sadgv43rz89al',
       );
 
       await expect(service.sendWorkerSignup(command)).rejects.toThrow(
@@ -138,10 +140,12 @@ describe('ReputationOracleGateway', () => {
       const command: SigninWorkerCommand = {
         email: 'johndoe@example.com',
         password: 's3cr3tP@ssw0rd',
+        hCaptchaToken: 'token',
       };
       const expectedData = {
         email: 'johndoe@example.com',
         password: 's3cr3tP@ssw0rd',
+        h_captcha_token: 'token',
       };
 
       nock('https://expample.com')
@@ -168,6 +172,7 @@ describe('ReputationOracleGateway', () => {
       const command: SigninWorkerCommand = {
         email: '',
         password: '',
+        hCaptchaToken: '',
       };
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(
         new HttpException({ message: 'Bad request' }, 400),
@@ -181,6 +186,7 @@ describe('ReputationOracleGateway', () => {
       const command: SigninWorkerCommand = {
         email: 'johndoe@example.com',
         password: 's3cr3tP@ssw0rd',
+        hCaptchaToken: 'token',
       };
 
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(

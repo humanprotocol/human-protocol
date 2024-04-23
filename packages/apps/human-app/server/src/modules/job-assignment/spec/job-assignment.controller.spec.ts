@@ -7,14 +7,15 @@ import {
   JobAssignmentDto,
   JobsFetchParamsCommand,
   JobsFetchParamsDto,
-} from '../interfaces/job-assignment.interface';
+} from '../model/job-assignment.model';
 import {
   jobAssignmentDtoFixture,
   jobAssignmentCommandFixture,
   jobAssignmentResponseFixture,
   jobsFetchParamsDtoFixture,
   jobsFetchParamsCommandFixture,
-  jobsFetchResponseFixture, jobAssignmentToken,
+  jobsFetchResponseFixture,
+  jobAssignmentToken,
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -86,9 +87,8 @@ describe('JobAssignmentController', () => {
 
     it('should call service processGetAssignedJobs method with proper fields set', async () => {
       const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
-      const command: JobsFetchParamsCommand =
-        jobsFetchParamsCommandFixture;
-      await controller.getAssignedJobs(dto);
+      const command: JobsFetchParamsCommand = jobsFetchParamsCommandFixture;
+      await controller.getAssignedJobs(dto, jobAssignmentToken);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,
       );

@@ -6,11 +6,8 @@ import { OperatorUtils } from '@human-protocol/sdk';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
-} from '../interface/oracle-discovery.interface';
-import {
-  EnvironmentConfigService,
-  envValidator,
-} from '../../../common/config/environment-config.service';
+} from '../model/oracle-discovery.model';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 
@@ -21,6 +18,7 @@ jest.mock('@human-protocol/sdk', () => ({
 }));
 
 describe('OracleDiscoveryService', () => {
+  const EXCHANGE_ORACLE = 'Exchange Oracle';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
   let configService: EnvironmentConfigService;
@@ -65,7 +63,6 @@ describe('OracleDiscoveryService', () => {
     const command: OracleDiscoveryCommand = {
       address: 'mockAddress',
       chainId: 80001,
-      role: 'validator',
     };
     jest.spyOn(cacheManager, 'get').mockResolvedValue(mockData);
 
@@ -84,7 +81,6 @@ describe('OracleDiscoveryService', () => {
     const command: OracleDiscoveryCommand = {
       address: 'mockAddress',
       chainId: 80001,
-      role: 'validator',
     };
     jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
     jest
@@ -103,7 +99,7 @@ describe('OracleDiscoveryService', () => {
     expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
       command.chainId,
       command.address,
-      command.role,
+      EXCHANGE_ORACLE,
     );
   });
 });

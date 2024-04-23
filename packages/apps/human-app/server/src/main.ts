@@ -12,7 +12,13 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
   const envConfigService = new EnvironmentConfigService(configService);
-
+  envConfigService.checkMandatoryConfig();
+  if (envConfigService.isCorsEnabled) {
+    app.enableCors({
+      origin: envConfigService.corsEnabledOrigin,
+      allowedHeaders: envConfigService.corsAllowedHeaders,
+    });
+  }
   const config = new DocumentBuilder()
     .addBearerAuth()
     .setTitle('Human APP API')
