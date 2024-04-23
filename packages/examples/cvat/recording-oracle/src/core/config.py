@@ -134,7 +134,7 @@ class FeaturesConfig:
 
 class ValidationConfig:
     default_point_validity_relative_radius = float(
-        os.environ.get("DEFAULT_POINT_VALIDITY_RELATIVE_RADIUS", 0.8)
+        os.environ.get("DEFAULT_POINT_VALIDITY_RELATIVE_RADIUS", 0.9)
     )
 
     default_oks_sigma = float(
