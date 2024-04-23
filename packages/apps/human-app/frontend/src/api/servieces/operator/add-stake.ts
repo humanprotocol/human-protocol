@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { MutationKey, UseMutationOptions } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addStake } from '@/smart-contracts/add-stake';
 
@@ -21,7 +21,6 @@ type OnSuccess = UseMutationOptions<
 
 export function useAddStakeMutation(useMutationOptions?: {
   onSuccess?: OnSuccess;
-  mutationKey?: MutationKey | undefined;
 }) {
   const queryClient = useQueryClient();
 
@@ -36,6 +35,5 @@ export function useAddStakeMutation(useMutationOptions?: {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
-    mutationKey: useMutationOptions?.mutationKey,
   });
 }
