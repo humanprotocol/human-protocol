@@ -31,6 +31,8 @@ export function SignInWorkerPage() {
     defaultValues: {
       email: '',
       password: '',
+      // eslint-disable-next-line camelcase -- export vite config
+      h_captcha_token: 'token',
     },
     resolver: zodResolver(signInDtoSchema),
   });
