@@ -32,6 +32,8 @@ pip install human-protocol-sdk[agreement]
       * [Submodules](human_protocol_sdk.escrow.md#submodules)
     * [human_protocol_sdk.kvstore package](human_protocol_sdk.kvstore.md)
       * [Submodules](human_protocol_sdk.kvstore.md#submodules)
+    * [human_protocol_sdk.operator package](human_protocol_sdk.operator.md)
+      * [Submodules](human_protocol_sdk.operator.md#submodules)
     * [human_protocol_sdk.staking package](human_protocol_sdk.staking.md)
       * [Submodules](human_protocol_sdk.staking.md#submodules)
     * [human_protocol_sdk.statistics package](human_protocol_sdk.statistics.md)
