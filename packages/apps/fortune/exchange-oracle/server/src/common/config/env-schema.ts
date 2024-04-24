@@ -18,6 +18,14 @@ export const envValidator = Joi.object({
   // Web3
   WEB3_ENV: Joi.string(),
   WEB3_PRIVATE_KEY: Joi.string().required(),
+  POLYGON_RPC_URL: Joi.string(),
+  BSC_RPC_URL: Joi.string(),
+  AMOY_RPC_URL: Joi.string(),
+  GOERLI_RPC_URL: Joi.string(),
+  SEPOLIA_RPC_URL: Joi.string(),
+  MOONBEAM_RPC_URL: Joi.string(),
+  BSC_TESTNET_RPC_URL: Joi.string(),
+  LOCALHOST_RPC_URL: Joi.string(),
   // S3
   S3_ENDPOINT: Joi.string(),
   S3_PORT: Joi.string(),
