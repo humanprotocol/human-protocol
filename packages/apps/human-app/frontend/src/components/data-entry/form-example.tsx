@@ -12,10 +12,6 @@ import { Checkbox } from '@/components/data-entry/checkbox';
 import { Slider } from '@/components/data-entry/slider';
 import { MultiSelect } from '@/components/data-entry/multi-select';
 import { Password } from '@/components/data-entry/password/password';
-import {
-  HumanCurrencyInputMask,
-  PercentsInputMask,
-} from '@/components/data-entry/input-masks';
 
 export interface Inputs {
   name: string;
@@ -110,14 +106,14 @@ export function FormExample() {
             <Grid item xs={6}>
               <Input
                 label="Percents"
-                mask={PercentsInputMask}
+                mask="PercentsInputMask"
                 name="percents"
               />
             </Grid>
             <Grid item xs={6}>
               <Input
                 label="Human currency"
-                mask={HumanCurrencyInputMask}
+                mask="HumanCurrencyInputMask"
                 name="percents"
               />
             </Grid>

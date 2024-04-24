@@ -37,26 +37,3 @@ export const HumanCurrencyInputMask = forwardRef<
     />
   );
 });
-
-export const PercentsInputMask = forwardRef<NumericFormatProps, CustomProps>(
-  function NumericFormatCustom(props, ref) {
-    const { onChange, ...other } = props;
-
-    return (
-      <NumericFormat
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values) => {
-          onChange({
-            target: {
-              name: props.name,
-              value: values.value,
-            },
-          });
-        }}
-        suffix={t('inputMasks.percentSuffix')}
-        valueIsNumericString
-      />
-    );
-  }
-);

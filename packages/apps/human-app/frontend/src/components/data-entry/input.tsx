@@ -3,7 +3,8 @@ import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
-import type { InputMaskComponent } from '@/components/data-entry/input-masks';
+import type { InputMask } from '@/components/data-entry/input-masks/input-masks';
+import { InputMasks } from '@/components/data-entry/input-masks/input-masks';
 
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
@@ -11,7 +12,7 @@ export interface InputProps
   label?: string;
   autoComplete?: string;
   customError?: React.ReactNode;
-  mask?: InputMaskComponent;
+  mask?: InputMask;
 }
 
 export function Input({
@@ -33,7 +34,7 @@ export function Input({
             mask
               ? {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any -- disable
-                  inputComponent: mask as any,
+                  inputComponent: InputMasks[mask] as any,
                 }
               : undefined
           }

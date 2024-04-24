@@ -5,7 +5,6 @@ import { colorPalette } from '@/styles/color-palette';
 import type { UseFormResult } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { Input } from '@/components/data-entry/input';
 import { MultiSelect } from '@/components/data-entry/multi-select';
-import { PercentsInputMask } from '@/components/data-entry/input-masks';
 
 export function EditKeysForm({
   closeEditMode,
@@ -30,7 +29,7 @@ export function EditKeysForm({
       <Input
         fullWidth
         label={t('operator.addKeysPage.editKeysForm.fee')}
-        mask={PercentsInputMask}
+        mask="PercentsInputMask"
         name="fee"
       />
       <Input
