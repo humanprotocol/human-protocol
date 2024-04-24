@@ -40,6 +40,15 @@ import {
   RestorePasswordCommand,
   RestorePasswordData,
 } from '../../modules/password-reset/model/restore-password.model';
+import {
+  PrepareSignatureCommand,
+  PrepareSignatureData,
+  PrepareSignatureResponse,
+} from '../../modules/disable-operator/model/prepare-signature.model';
+import {
+  DisableOperatorCommand, DisableOperatorData,
+  DisableOperatorParams,
+} from '../../modules/disable-operator/model/disable-operator.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -171,6 +180,35 @@ export class ReputationOracleGateway {
     const options = this.getEndpointOptions(
       EndpointName.RESTORE_PASSWORD,
       restorePasswordDto,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async sendPrepareSignature(prepareSignatureCommand: PrepareSignatureCommand) {
+    const prepareSignatureData = this.mapper.map(
+      prepareSignatureCommand,
+      PrepareSignatureCommand,
+      PrepareSignatureData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.PREPARE_SIGNATURE,
+      prepareSignatureData,
+    );
+    return this.handleRequestToReputationOracle<PrepareSignatureResponse>(
+      options,
+    );
+  }
+
+  async sendDisableOperator(disableOperatorCommand: DisableOperatorCommand) {
+    const disableOperatorData = this.mapper.map(
+      disableOperatorCommand.data,
+      DisableOperatorParams,
+      DisableOperatorData,
+    );
+    const options = this.getEndpointOptions(
+      EndpointName.DISABLE_OPERATOR,
+      disableOperatorData,
+      disableOperatorCommand.token,
     );
     return this.handleRequestToReputationOracle<void>(options);
   }

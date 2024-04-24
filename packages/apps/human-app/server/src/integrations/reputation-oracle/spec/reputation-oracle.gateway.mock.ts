@@ -6,4 +6,6 @@ export const reputationOracleGatewayMock = {
   resendSendEmailVerification: jest.fn(),
   sendForgotPassword: jest.fn(),
   sendRestorePassword: jest.fn(),
+  sendPrepareSignature: jest.fn(),
+  sendDisableOperator: jest.fn(),
 };

@@ -16,7 +16,6 @@ export class ResendEmailVerificationParams {
 export class ResendEmailVerificationCommand {
   @AutoMap()
   data: ResendEmailVerificationParams;
-  @AutoMap()
   token: string;
 }
 
