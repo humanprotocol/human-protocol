@@ -35,7 +35,6 @@ import {
   ForgotPasswordCommand,
   ForgotPasswordData,
 } from '../../modules/password-reset/model/forgot-password.model';
-import { options } from 'joi';
 import {
   RestorePasswordCommand,
   RestorePasswordData,

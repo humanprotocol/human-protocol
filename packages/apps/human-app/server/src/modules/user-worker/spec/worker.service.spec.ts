@@ -33,7 +33,6 @@ describe('WorkerService', () => {
         email: 'email@example.com',
         password: 'Pa55word!',
         hCaptchaToken: 'hcaptchatkn',
-        type: UserType.WORKER,
       };
       await service.signupWorker(command);
       expect(reputationOracleGateway.sendWorkerSignup).toHaveBeenCalledWith(
@@ -47,6 +46,7 @@ describe('WorkerService', () => {
       const command = {
         email: 'email@example.com',
         password: 'Pa55word!',
+        hCaptchaToken: 'token',
       };
       await service.signinWorker(command);
       expect(reputationOracleGateway.sendWorkerSignin).toHaveBeenCalledWith(

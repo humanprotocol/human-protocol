@@ -140,10 +140,12 @@ describe('ReputationOracleGateway', () => {
       const command: SigninWorkerCommand = {
         email: 'johndoe@example.com',
         password: 's3cr3tP@ssw0rd',
+        hCaptchaToken: 'token',
       };
       const expectedData = {
         email: 'johndoe@example.com',
         password: 's3cr3tP@ssw0rd',
+        h_captcha_token: 'token',
       };
 
       nock('https://expample.com')
@@ -170,6 +172,7 @@ describe('ReputationOracleGateway', () => {
       const command: SigninWorkerCommand = {
         email: '',
         password: '',
+        hCaptchaToken: '',
       };
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(
         new HttpException({ message: 'Bad request' }, 400),
@@ -183,6 +186,7 @@ describe('ReputationOracleGateway', () => {
       const command: SigninWorkerCommand = {
         email: 'johndoe@example.com',
         password: 's3cr3tP@ssw0rd',
+        hCaptchaToken: 'token',
       };
 
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(

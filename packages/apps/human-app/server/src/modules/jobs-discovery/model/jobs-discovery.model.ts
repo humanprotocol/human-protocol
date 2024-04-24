@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import {
   JobDiscoveryFieldName,
   JobDiscoverySortField,
-  JobType,
+  JobStatus,
 } from '../../../common/enums/global-common.interface';
 import {
   PageableData,
@@ -34,14 +34,19 @@ export class JobsDiscoveryParamsDto extends PageableDto {
   @ApiPropertyOptional({ enum: JobDiscoverySortField })
   sort_field?: JobDiscoverySortField;
   @AutoMap()
-  @IsEnum(JobType)
-  @ApiPropertyOptional({ enum: JobType })
-  job_type?: JobType;
+  @IsString()
+  @ApiPropertyOptional()
+  job_type?: string;
   @AutoMap()
   @IsOptional()
   @IsEnum(JobDiscoveryFieldName, { each: true })
   @ApiPropertyOptional({ enum: JobDiscoveryFieldName, isArray: true })
   fields: JobDiscoveryFieldName[];
+  @AutoMap()
+  @ApiPropertyOptional({ enum: JobStatus })
+  @IsEnum(JobStatus)
+  @IsOptional()
+  status: JobStatus;
 }
 
 export class JobsDiscoveryParams extends PageableParams {
@@ -52,9 +57,11 @@ export class JobsDiscoveryParams extends PageableParams {
   @AutoMap()
   sortField?: JobDiscoverySortField;
   @AutoMap()
-  jobType?: JobType;
+  jobType?: string;
   @AutoMap()
   fields: JobDiscoveryFieldName[];
+  @AutoMap()
+  status: JobStatus;
 }
 export class JobsDiscoveryParamsData extends PageableData {
   @AutoMap()
@@ -64,9 +71,11 @@ export class JobsDiscoveryParamsData extends PageableData {
   @AutoMap()
   sort_field?: JobDiscoverySortField;
   @AutoMap()
-  job_type?: JobType;
+  job_type?: string;
   @AutoMap()
   fields: JobDiscoveryFieldName[];
+  @AutoMap()
+  status: JobStatus;
 }
 export class JobsDiscoveryParamsCommand {
   @AutoMap()

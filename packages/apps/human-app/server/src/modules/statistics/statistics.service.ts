@@ -20,7 +20,7 @@ export class StatisticsService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
-    private readonly kvstoreGateway: KvStoreGateway,
+    private readonly kvStoreGateway: KvStoreGateway,
     private readonly configService: EnvironmentConfigService,
   ) {}
   async getOracleStats(
@@ -33,7 +33,7 @@ export class StatisticsService {
       return cachedStatistics;
     }
     const exchangeOracleUrl =
-      await this.kvstoreGateway.getExchangeOracleUrlByAddress(command.address);
+      await this.kvStoreGateway.getExchangeOracleUrlByAddress(command.address);
     const details = {
       exchangeOracleUrl: exchangeOracleUrl,
     } as OracleStatisticsDetails;
@@ -56,7 +56,7 @@ export class StatisticsService {
       return cachedStatistics;
     }
     const exchangeOracleUrl =
-      await this.kvstoreGateway.getExchangeOracleUrlByAddress(command.address);
+      await this.kvStoreGateway.getExchangeOracleUrlByAddress(command.address);
     const details = {
       exchangeOracleUrl: exchangeOracleUrl,
       token: command.token,

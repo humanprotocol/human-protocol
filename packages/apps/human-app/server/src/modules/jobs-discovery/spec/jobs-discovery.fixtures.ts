@@ -8,8 +8,7 @@ import {
 } from '../model/jobs-discovery.model';
 import {
   JobDiscoveryFieldName,
-  JobType,
-  JobDiscoverySortField,
+  JobDiscoverySortField, JobStatus,
   SortOrder,
 } from '../../../common/enums/global-common.interface';
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
@@ -19,8 +18,11 @@ const PAGE_SIZE = 10;
 const PAGE = 1;
 const SORT = SortOrder.ASC;
 const SORT_FIELD = JobDiscoverySortField.CREATED_AT;
-const JOB_TYPE = JobType.FORTUNE;
-const FIELDS = [JobDiscoveryFieldName.CreatedAt, JobDiscoveryFieldName.JobDescription];
+const JOB_TYPE = 'FORTUNE';
+const FIELDS = [
+  JobDiscoveryFieldName.CreatedAt,
+  JobDiscoveryFieldName.JobDescription,
+];
 const TOKEN = 'test-token';
 const JOB_DESCRIPTION = 'Description of the test job';
 const REWARD_AMOUNT = '100';
@@ -28,6 +30,7 @@ const REWARD_TOKEN = 'ETH';
 const CREATED_AT = '2024-03-01T12:00:00Z';
 const JOB_TITLE = 'test job';
 const EXCHANGE_ORACLE_ADDRESS = '0x3dfa342';
+const STATUS = JobStatus.ACTIVE;
 export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL;
 export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
@@ -40,6 +43,7 @@ export const dtoFixture: JobsDiscoveryParamsDto = {
   sort_field: SORT_FIELD,
   job_type: JOB_TYPE,
   fields: FIELDS,
+  status: STATUS,
 };
 
 const dataFixture: JobsDiscoveryParams = {
@@ -51,6 +55,7 @@ const dataFixture: JobsDiscoveryParams = {
   sortField: SORT_FIELD,
   jobType: JOB_TYPE,
   fields: FIELDS,
+  status: STATUS,
 };
 const paramsDataFixture: JobsDiscoveryParamsData = {
   escrow_address: ESCROW_ADDRESS,
@@ -61,6 +66,7 @@ const paramsDataFixture: JobsDiscoveryParamsData = {
   sort_field: SORT_FIELD,
   job_type: JOB_TYPE,
   fields: FIELDS,
+  status: STATUS,
 };
 export const paramsDataFixtureAsString = `?escrow_address=${paramsDataFixture.escrow_address}&chain_id=${paramsDataFixture.chain_id}&page_size=${paramsDataFixture.page_size}&page=${paramsDataFixture.page}&sort=${paramsDataFixture.sort}&sort_field=${paramsDataFixture.sort_field}&job_type=${paramsDataFixture.job_type}&fields=${paramsDataFixture.fields.join(',')}`;
 export const jobsDiscoveryParamsCommandFixture: JobsDiscoveryParamsCommand = {

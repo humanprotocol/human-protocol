@@ -2,7 +2,8 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
-  createMap, forMember,
+  createMap,
+  forMember,
   mapFrom,
   Mapper,
   namingConventions,
@@ -43,7 +44,19 @@ export class ReputationOracleProfile extends AutomapperProfile {
         }),
       );
       createMap(mapper, SignupOperatorCommand, SignupOperatorData);
-      createMap(mapper, SigninWorkerCommand, SigninWorkerData);
+      createMap(
+        mapper,
+        SigninWorkerCommand,
+        SigninWorkerData,
+        forMember(
+          (destination) => destination.h_captcha_token,
+          mapFrom((source) => source.hCaptchaToken),
+        ),
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
     };
   }
 }

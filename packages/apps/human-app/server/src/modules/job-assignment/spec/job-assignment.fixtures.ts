@@ -16,14 +16,13 @@ import {
 import {
   AssignmentSortField,
   AssignmentStatus,
-  JobType,
   SortOrder,
 } from '../../../common/enums/global-common.interface';
 const EXCHANGE_ORACLE_URL = 'https://www.example.com/api';
 const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
-const JOB_TYPE = JobType.FORTUNE;
+const JOB_TYPE = 'FORTUNE';
 const STATUS = AssignmentStatus.ACTIVE;
 const PAGE_SIZE = 5;
 const PAGE = 0;
@@ -35,6 +34,7 @@ const REWARD_TOKEN = 'test';
 const CREATED_AT = 'test_date_1';
 const UPDATED_AT = 'test_date_2';
 const EXPIRES_AT = 'test_date_3';
+const JOB_ASSIGNMENT_ID = 1;
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
 export const jobAssignmentToken = TOKEN;
@@ -81,6 +81,7 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
 export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
   address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
+  assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: STATUS,
@@ -92,6 +93,7 @@ export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
 
 const jobsFetchParams: JobsFetchParams = {
   escrowAddress: ESCROW_ADDRESS,
+  assignmentId: JOB_ASSIGNMENT_ID,
   chainId: CHAIN_ID,
   jobType: JOB_TYPE,
   status: STATUS,
@@ -113,6 +115,7 @@ export const jobsFetchParamsDetailsFixture: JobsFetchParamsDetails = {
 
 export const jobsFetchParamsDataFixture: JobsFetchParamsData = {
   escrow_address: ESCROW_ADDRESS,
+  assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: STATUS,

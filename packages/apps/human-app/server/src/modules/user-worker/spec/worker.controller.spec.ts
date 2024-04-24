@@ -6,7 +6,6 @@ import {
   SignupWorkerDto,
 } from '../model/worker-registration.model';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserType } from '../../../common/enums/user';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { WorkerProfile } from '../worker.mapper';
@@ -16,7 +15,6 @@ import { SigninWorkerDto } from '../model/worker-signin.model';
 describe('WorkerController', () => {
   let controller: WorkerController;
   let workerService: WorkerService;
-  let mapper: Mapper;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -52,7 +50,6 @@ describe('WorkerController', () => {
         email: dto.email,
         password: dto.password,
         hCaptchaToken: dto.h_captcha_token,
-        type: UserType.WORKER,
       } as SignupWorkerCommand;
       expect(workerService.signupWorker).toHaveBeenCalledWith(expectedCommand);
     });
@@ -63,11 +60,13 @@ describe('WorkerController', () => {
       const dto: SigninWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',
+        h_captcha_token: 'hcaptchatonsdkfa',
       };
       await controller.signinWorker(dto);
       const expectedCommand = {
         email: dto.email,
         password: dto.password,
+        hCaptchaToken: dto.h_captcha_token,
       };
       expect(workerService.signinWorker).toHaveBeenCalledWith(expectedCommand);
     });

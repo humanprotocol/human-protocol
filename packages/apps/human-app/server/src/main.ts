@@ -12,11 +12,13 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
   const envConfigService = new EnvironmentConfigService(configService);
-  app.enableCors({
-    origin: ['http://localhost', 'http://localhost:5173'], // TODO: do rework
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept',
-  });
+  envConfigService.checkMandatoryConfig();
+  if (envConfigService.isCorsEnabled) {
+    app.enableCors({
+      origin: envConfigService.corsEnabledOrigin,
+      allowedHeaders: envConfigService.corsAllowedHeaders,
+    });
+  }
   const config = new DocumentBuilder()
     .addBearerAuth()
     .setTitle('Human APP API')

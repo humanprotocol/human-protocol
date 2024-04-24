@@ -1,7 +1,3 @@
-// @TODO: should JobType be enum?
-export enum JobType {
-  FORTUNE = 'FORTUNE',
-}
 export enum JobDiscoveryFieldName {
   JobDescription = 'job_description',
   RewardAmount = 'reward_amount',
@@ -39,7 +35,6 @@ export enum AssignmentSortField {
   CREATED_AT = 'created_at',
   EXPIRES_AT = 'expires_at',
 }
-
 export enum PrepareSignatureType {
   SIGNUP = 'SIGNUP',
   DISABLE_OPERATOR = 'DISABLE_OPERATOR',

@@ -6,7 +6,6 @@ import { WorkerModule } from './modules/user-worker/worker.module';
 import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { envValidator } from './common/config/environment-config.service';
 import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
@@ -30,7 +29,6 @@ import { EmailConfirmationModule } from './modules/email-confirmation/email-conf
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
-      validationSchema: envValidator,
     }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),

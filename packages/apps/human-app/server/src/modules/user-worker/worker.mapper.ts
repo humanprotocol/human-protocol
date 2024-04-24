@@ -39,7 +39,19 @@ export class WorkerProfile extends AutomapperProfile {
           destination: new CamelCaseNamingConvention(),
         }),
       );
-      createMap(mapper, SigninWorkerDto, SigninWorkerCommand);
+      createMap(
+        mapper,
+        SigninWorkerDto,
+        SigninWorkerCommand,
+        forMember(
+          (destination) => destination.hCaptchaToken,
+          mapFrom((source) => source.h_captcha_token),
+        ),
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
+      );
     };
   }
 }
