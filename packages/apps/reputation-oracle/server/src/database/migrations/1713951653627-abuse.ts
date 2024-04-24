@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Abuse1713367468270 implements MigrationInterface {
-  name = 'Abuse1713367468270';
+export class Abuse1713951653627 implements MigrationInterface {
+  name = 'Abuse1713951653627';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -11,7 +11,7 @@ export class Abuse1713367468270 implements MigrationInterface {
       `CREATE TYPE "hmt"."abuses_decision_enum" AS ENUM('REJECTED', 'ACCEPTED')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "hmt"."abuses" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "chain_id" integer NOT NULL, "escrow_address" character varying NOT NULL, "status" "hmt"."abuses_status_enum" NOT NULL, "decision" "hmt"."abuses_decision_enum", "user_id" integer NOT NULL, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_8cfbf5b6d26e83e4fd5955c8c8b" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "hmt"."abuses" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "chain_id" integer NOT NULL, "escrow_address" character varying NOT NULL, "status" "hmt"."abuses_status_enum" NOT NULL, "decision" "hmt"."abuses_decision_enum", "amount" numeric(30,18), "user_id" integer NOT NULL, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_8cfbf5b6d26e83e4fd5955c8c8b" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE UNIQUE INDEX "IDX_023d33d90733aa64f612995657" ON "hmt"."abuses" ("chain_id", "escrow_address") `,

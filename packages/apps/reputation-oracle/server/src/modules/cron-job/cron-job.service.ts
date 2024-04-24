@@ -307,15 +307,23 @@ export class CronJobService {
       for (const abuseEntity of abuseEntities) {
         try {
           const { chainId, escrowAddress } = abuseEntity;
-
           const signer = this.web3Service.getSigner(chainId);
           const escrowClient = await EscrowClient.build(signer);
+
+          const user = await this.userRepository.findById(abuseEntity.userId);
+
           if (abuseEntity.decision === AbuseDecision.ACCEPTED) {
+            const jobLauncherAddress =
+              await escrowClient.getJobLauncherAddress(escrowAddress);
+            this.abuseService.slashAccount(
+              user?.evmAddress as string,
+              jobLauncherAddress,
+              abuseEntity.chainId,
+              abuseEntity.escrowAddress,
+              abuseEntity.amount as number,
+            );
             const webhookUrl = (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getJobLauncherAddress(escrowAddress),
-              )
+              await OperatorUtils.getLeader(chainId, jobLauncherAddress)
             ).webhookUrl;
             const webhookBody: WebhookDto = {
               chainId,
@@ -329,8 +337,6 @@ export class CronJobService {
 
             await this.webhookService.sendWebhook(webhookUrl, webhookBody);
           } else {
-            console.log(abuseEntity);
-            const user = await this.userRepository.findById(abuseEntity.userId);
             await this.reputationService.decreaseReputation(
               chainId,
               user?.evmAddress as string,

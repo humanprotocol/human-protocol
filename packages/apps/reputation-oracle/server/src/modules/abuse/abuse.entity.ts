@@ -28,6 +28,9 @@ export class AbuseEntity extends BaseEntity {
   })
   public decision?: AbuseDecision;
 
+  @Column({ type: 'decimal', precision: 30, scale: 18, nullable: true })
+  public amount?: number;
+
   @JoinColumn()
   @ManyToOne(() => UserEntity, (user) => user.abuse)
   public user: UserEntity;

@@ -11,6 +11,10 @@ import { ErrorManifest, ErrorSlack } from 'src/common/constants/errors';
 import { AbuseDecision, AbuseStatus } from 'src/common/enums/abuse';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from 'src/common/config/server-config.service';
+import { OperatorUtils } from '@human-protocol/sdk';
+import { StakingClient } from '@human-protocol/sdk';
+import { ethers } from 'ethers';
+import { ChainId } from '@human-protocol/sdk';
 
 @Injectable()
 export class AbuseService {
@@ -110,9 +114,16 @@ export class AbuseService {
 
   private async sendAbuseReportModal(abuseEntity: any, trigger_id: string) {
     try {
-      // TODO Get staked token amount
-      const maxAmount = 10;
-      await firstValueFrom(
+      const signer = this.web3Service.getSigner(abuseEntity.chainId);
+      const escrowClient = await EscrowClient.build(signer);
+      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
+        abuseEntity.escrowAddress,
+      );
+      const maxAmount = (
+        await OperatorUtils.getLeader(abuseEntity.chainId, jobLauncherAddress)
+      ).amountStaked;
+
+      const result = await firstValueFrom(
         this.httpService.post(
           'https://slack.com/api/views.open',
           {
@@ -136,8 +147,11 @@ export class AbuseService {
                   type: 'input',
                   block_id: 'quantity_input',
                   element: {
-                    type: 'plain_text_input',
                     action_id: 'quantity',
+                    type: 'number_input',
+                    is_decimal_allowed: true,
+                    min_value: '0',
+                    max_value: maxAmount,
                   },
                   label: {
                     type: 'plain_text',
@@ -163,6 +177,9 @@ export class AbuseService {
           },
         ),
       );
+      if (!result.data.ok) {
+        console.error('Error sending abuse report modal:', result.data);
+      }
     } catch (error) {
       console.error('Error sending abuse report modal:', error);
     }
@@ -178,6 +195,24 @@ export class AbuseService {
     } catch (error) {
       console.error('Error updating interactive message:', error);
     }
+  }
+
+  public async slashAccount(
+    slasher: string,
+    staker: string,
+    chainId: ChainId,
+    escrowAddress: string,
+    amount: number,
+  ) {
+    const signer = this.web3Service.getSigner(chainId);
+    const stakingClient = await StakingClient.build(signer);
+
+    await stakingClient.slash(
+      slasher,
+      staker,
+      escrowAddress,
+      BigInt(ethers.parseUnits(amount.toString(), 'ether')),
+    );
   }
 
   public async receiveSlackInteraction(data: any): Promise<string> {
@@ -204,12 +239,11 @@ export class AbuseService {
       return '';
     } else if (data.type === 'view_submission') {
       abuseEntity.decision = AbuseDecision.ACCEPTED;
+      abuseEntity.amount = data.view.state.values.quantity_input.quantity.value;
       abuseEntity.retriesCount = 0;
-      // TODO Save amount to slash job launcher
-      // console.log(data.view.state.values.quantity_input.quantity.value);
       await this.updateInteractiveMessage(
         this.localStorage[callback_id],
-        `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${escrowAddress}, ChainId: ${chainId}`,
+        `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${escrowAddress}, ChainId: ${chainId}, Slashed amount: ${abuseEntity.amount} HMT`,
       );
       await this.abuseRepository.updateOne(abuseEntity);
       return '';
