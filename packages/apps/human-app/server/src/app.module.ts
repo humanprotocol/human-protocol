@@ -23,6 +23,9 @@ import { StatisticsController } from './modules/statistics/statistics.controller
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
 import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
+import { PasswordResetModule } from './modules/password-reset/password-reset.module';
+import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
+import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
 
 @Module({
   imports: [
@@ -46,6 +49,9 @@ import { EmailConfirmationModule } from './modules/email-confirmation/email-conf
     StatisticsModule,
     KvStoreModule,
     EmailConfirmationModule,
+    PasswordResetModule,
+    DisableOperatorModule,
+    KycProcedureModule,
   ],
   controllers: [
     AppController,
