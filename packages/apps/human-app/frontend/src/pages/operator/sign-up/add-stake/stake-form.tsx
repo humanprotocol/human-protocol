@@ -1,34 +1,23 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { UseMutationResult } from '@tanstack/react-query';
 import Button from '@mui/material/Button';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
-import type { AddStakeCallArguments } from '@/api/servieces/operator/add-stake';
-import { addStakeCallArgumentsSchema } from '@/api/servieces/operator/add-stake';
+import {
+  addStakeCallArgumentsSchema,
+  useAddStakeMutation,
+  type AddStakeCallArguments,
+} from '@/api/servieces/operator/add-stake';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
-import type { ResponseError } from '@/shared/types/global.type';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
 import { HumanCurrencyInputMask } from '@/components/data-entry/input-masks';
 
-interface StakeFormProps {
-  useAddStakeMutationResult: UseMutationResult<
-    void,
-    ResponseError,
-    AddStakeCallArguments
-  >;
-}
-
-export function StakeForm({
-  useAddStakeMutationResult: {
-    mutate: addStakeOperatorMutation,
-    isPending: isAddStakeOperatorPending,
-  },
-}: StakeFormProps) {
+export function StakeForm() {
   const { address } = useWalletConnect();
+  const addStakeMutation = useAddStakeMutation();
 
   const methods = useForm<AddStakeCallArguments>({
     defaultValues: {
@@ -39,7 +28,7 @@ export function StakeForm({
   });
 
   const addStake = (data: AddStakeCallArguments) => {
-    addStakeOperatorMutation(data);
+    addStakeMutation.mutate(data);
   };
 
   return (
@@ -72,7 +61,7 @@ export function StakeForm({
               }}
             >
               <Button
-                disabled={isAddStakeOperatorPending}
+                disabled={addStakeMutation.isPending}
                 fullWidth
                 type="submit"
                 variant="contained"
