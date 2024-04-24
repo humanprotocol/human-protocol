@@ -13,7 +13,6 @@ import {
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
-import { HumanCurrencyInputMask } from '@/components/data-entry/input-masks';
 
 export function StakeForm() {
   const { address } = useWalletConnect();
@@ -46,7 +45,7 @@ export function StakeForm() {
             <Input
               fullWidth
               label={t('operator.stakeForm.label')}
-              mask={HumanCurrencyInputMask}
+              mask="HumanCurrencyInputMask"
               name="amount"
             />
             <Grid

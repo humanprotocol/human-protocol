@@ -2,7 +2,7 @@
   "humanCurrencySymbol": "HMT",
   "inputMasks": {
     "humanCurrencySuffix": " HMT",
-    "percentSuffix": " %",
+    "percentSuffix": "%",
     "plusPrefix": "+"
   },
   "dashboard": {},
