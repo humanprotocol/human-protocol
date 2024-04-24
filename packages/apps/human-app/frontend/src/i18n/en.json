@@ -221,6 +221,7 @@
     },
     "addKeysPage": {
       "title": "Setup Operator",
+      "btn": " Add New Keys to KVStore",
       "pendingKeys": {
         "title": "Pending Keys",
         "role": "Role",
@@ -240,6 +241,12 @@
         "jobTypes": "Job Types",
         "btn": "Save"
       }
+    },
+    "editExistingKeysSuccess": {
+      "title": "Setup Operator",
+      "paragraph1": "Congratulations 🎉!",
+      "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
+      "btn": "Finish"
     }
   }
 }

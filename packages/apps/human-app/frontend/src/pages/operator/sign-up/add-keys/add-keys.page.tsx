@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,64 +9,39 @@ import {
   PageCardError,
   PageCardLoader,
 } from '@/components/ui/page-card';
-import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
-import { useGetKeysMutation } from '@/api/servieces/operator/get-keys';
+import { useGetKeys } from '@/api/servieces/operator/get-keys';
 import { PendingKeys } from '@/pages/operator/sign-up/add-keys/pending-keys';
 import type { EditExistingKeysCallArguments } from '@/api/servieces/operator/edit-existing-keys';
 import {
   editExistingKeysCallArgumentsSchema,
   useEditExistingKeysMutation,
+  useEditExistingKeysMutationState,
 } from '@/api/servieces/operator/edit-existing-keys';
 import type {
   ExistingKeys as IExistingKeys,
   PendingKeys as IPendingKeys,
 } from '@/smart-contracts/keys/fake-keys-smart-contract';
 import { Button } from '@/components/ui/button';
-import { EditKeysForm } from '@/pages/operator/sign-up/add-keys/edit-keys-form';
 import { ExistingKeys } from '@/pages/operator/sign-up/add-keys/existing-keys';
+import { EditExistingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-form';
 
 export function AddKeysOperatorPage() {
-  const { address } = useWalletConnect();
+  const getKeys = useGetKeys();
+  const editExistingKeysMutationState = useEditExistingKeysMutationState();
 
-  const {
-    mutate: getKeysOperatorMutate,
-    error: getKeysOperatorError,
-    isError: isGetKeysOperatorError,
-    data: keysData,
-    isPending: isGetKeysOperatorPending,
-  } = useGetKeysMutation();
-
-  const errorAlert = isGetKeysOperatorError ? (
+  const errorAlert = editExistingKeysMutationState?.error ? (
     <Alert color="error" severity="error">
-      {defaultErrorMessage(isGetKeysOperatorError)}
+      {defaultErrorMessage(editExistingKeysMutationState.error)}
     </Alert>
   ) : undefined;
 
-  const handleAddressChange = (_address: string) => {
-    getKeysOperatorMutate({ address: _address });
-  };
-
-  useEffect(() => {
-    if (address) {
-      handleAddressChange(address);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- no nesseccary
-  }, [address]);
-
-  useEffect(() => {
-    getKeysOperatorMutate({ address: address || '' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- use once
-  }, []);
-
-  if (getKeysOperatorError) {
-    return (
-      <PageCardError errorMessage={defaultErrorMessage(getKeysOperatorError)} />
-    );
+  if (getKeys.isError) {
+    return <PageCardError errorMessage={defaultErrorMessage(getKeys.error)} />;
   }
 
-  if (isGetKeysOperatorPending || !keysData) {
+  if (getKeys.isPending) {
     return <PageCardLoader />;
   }
 
@@ -76,7 +51,7 @@ export function AddKeysOperatorPage() {
       backArrowPath={-1}
       title={t('operator.addKeysPage.title')}
     >
-      <Form address={address} keysData={keysData} />
+      <Form keysData={getKeys.data} />
     </PageCard>
   );
 }
@@ -91,21 +66,14 @@ export function Form({
     pendingKeys,
     existingKeys: { jobTypes, webhookUrl, fee },
   },
-  address,
 }: {
   keysData: {
     pendingKeys: IPendingKeys;
     existingKeys: IExistingKeys;
   };
-  address: `0x${string}` | undefined;
 }) {
   const [editMode, setEditMode] = useState(false);
-  const {
-    mutate: editExistingKeysOperatorMutate,
-    // error: editExistingKeysOperatorError,
-    // isError: isEditExistingKeysOperatorError,
-    isPending: isEditExistingKeysPending,
-  } = useEditExistingKeysMutation();
+  const editExistingKeys = useEditExistingKeysMutation();
 
   const methods = useForm<EditExistingKeysCallArguments>({
     defaultValues: {
@@ -117,7 +85,7 @@ export function Form({
   });
 
   const handleEdit = (data: EditExistingKeysCallArguments) => {
-    editExistingKeysOperatorMutate({ ...data, address: address || '' });
+    editExistingKeys.mutate(data);
   };
 
   return (
@@ -133,7 +101,7 @@ export function Form({
           }}
         >
           {editMode ? (
-            <EditKeysForm
+            <EditExistingKeysForm
               closeEditMode={setEditMode.bind(null, false)}
               useFormResult={methods}
             />
@@ -145,12 +113,12 @@ export function Form({
           )}
           <PendingKeys pendingKeys={pendingKeys} />
           <Button
-            disabled={isEditExistingKeysPending}
+            disabled={editExistingKeys.isPending}
             fullWidth
             type="submit"
             variant="contained"
           >
-            Add New Keys to KVStore
+            {t('operator.addKeysPage.btn')}
           </Button>
         </form>
       </FormProvider>

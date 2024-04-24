@@ -1,9 +1,10 @@
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   getExistingKeys,
   getPendingKeys,
 } from '@/smart-contracts/keys/get-keys';
+import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 export const getKeysCallArgumentsSchema = z.object({
   address: z.string(),
@@ -11,23 +12,18 @@ export const getKeysCallArgumentsSchema = z.object({
 
 export type GetKeysCallArguments = z.infer<typeof getKeysCallArgumentsSchema>;
 
-async function getKeysMutationFn(data: GetKeysCallArguments) {
+async function getKeysFn(data: GetKeysCallArguments) {
   const existingKeys = await getExistingKeys(data);
   const pendingKeys = await getPendingKeys(data);
 
   return { existingKeys, pendingKeys };
 }
 
-export function useGetKeysMutation() {
-  const queryClient = useQueryClient();
+export function useGetKeys() {
+  const { address } = useWalletConnect();
 
-  return useMutation({
-    mutationFn: getKeysMutationFn,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries();
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries();
-    },
+  return useQuery({
+    queryFn: () => getKeysFn({ address: address || '' }),
+    queryKey: ['getKeys', address],
   });
 }

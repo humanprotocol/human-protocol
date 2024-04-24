@@ -16,5 +16,6 @@ export const routerPaths = {
     connectWallet: '/operator/connect-wallet',
     addStake: '/operator/add-stake',
     addKeys: '/operator/add-keys',
+    editExistingKeysSuccess: '/operator/edit-existing-keys-success',
   },
 } as const;

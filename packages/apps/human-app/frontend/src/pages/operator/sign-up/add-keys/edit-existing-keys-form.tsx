@@ -6,20 +6,21 @@ import type { UseFormResult } from '@/pages/operator/sign-up/add-keys/add-keys.p
 import { Input } from '@/components/data-entry/input';
 import { MultiSelect } from '@/components/data-entry/multi-select';
 
-export function EditKeysForm({
+const JOB_TYPES_OPTIONS = ['Image Labelling', 'BBox', 'Testing'];
+
+export function EditExistingKeysForm({
   closeEditMode,
   useFormResult,
 }: {
   useFormResult: UseFormResult;
   closeEditMode: () => void;
 }) {
-  const { watch, getValues, trigger, formState } = useFormResult;
-  watch(['jobTypes']);
-  const jobTypes = getValues('jobTypes');
+  const { trigger } = useFormResult;
 
   const save = async () => {
-    await trigger();
-    if (formState.isValid) {
+    const valid = await trigger();
+
+    if (valid) {
       closeEditMode();
     }
   };
@@ -40,11 +41,10 @@ export function EditKeysForm({
       <MultiSelect
         label={t('operator.addKeysPage.editKeysForm.jobTypes')}
         name="jobTypes"
-        options={jobTypes}
+        options={JOB_TYPES_OPTIONS}
       />
       <div>
         <Button
-          fullWidth={false}
           onClick={() => {
             void save();
           }}
