@@ -6,7 +6,10 @@ import { ResendEmailVerificationData } from '../../modules/email-confirmation/mo
 import { PrepareSignatureData } from '../../modules/disable-operator/model/prepare-signature.model';
 import { DisableOperatorData } from '../../modules/disable-operator/model/disable-operator.model';
 
+export class EmptyData {}
+
 export type RequestDataType =
+  | EmptyData
   | SignupWorkerData
   | SignupOperatorData
   | SigninWorkerData

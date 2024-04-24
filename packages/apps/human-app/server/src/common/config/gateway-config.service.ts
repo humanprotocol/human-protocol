@@ -63,6 +63,11 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [EndpointName.KYC_PROCEDURE_START]: {
+              endpoint: '/kyc/start',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
           },
         },
       },

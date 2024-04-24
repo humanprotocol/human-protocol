@@ -16,7 +16,7 @@ import { GatewayConfig } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';
 import { EndpointName } from '../../common/enums/endpoint-name';
 import { AxiosRequestConfig } from 'axios';
-import { RequestDataType } from './reputation-oracle.interface';
+import { EmptyData, RequestDataType } from './reputation-oracle.interface';
 import {
   SigninWorkerCommand,
   SigninWorkerData,
@@ -46,9 +46,11 @@ import {
   PrepareSignatureResponse,
 } from '../../modules/disable-operator/model/prepare-signature.model';
 import {
-  DisableOperatorCommand, DisableOperatorData,
+  DisableOperatorCommand,
+  DisableOperatorData,
   DisableOperatorParams,
 } from '../../modules/disable-operator/model/disable-operator.model';
+import { KycProcedureStartResponse } from '../../modules/kyc-procedure/model/kyc-start.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -211,5 +213,15 @@ export class ReputationOracleGateway {
       disableOperatorCommand.token,
     );
     return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async sendKycProcedureStart() {
+    const options = this.getEndpointOptions(
+      EndpointName.KYC_PROCEDURE_START,
+      EmptyData,
+    );
+    return this.handleRequestToReputationOracle<KycProcedureStartResponse>(
+      options,
+    );
   }
 }
