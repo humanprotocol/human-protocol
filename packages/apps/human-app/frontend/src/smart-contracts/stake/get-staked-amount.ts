@@ -1,4 +1,4 @@
-import { FakeSmartContract } from '@/smart-contracts/fake-smart-contract';
+import { FakeSmartContract } from '@/smart-contracts/stake/fake-stake-smart-contract';
 
 export function getStackedAmount({ address }: { address: string }) {
   // TODO add smart contract integration

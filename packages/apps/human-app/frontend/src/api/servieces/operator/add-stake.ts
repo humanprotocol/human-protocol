@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addStake } from '@/smart-contracts/add-stake';
+import { addStake } from '@/smart-contracts/stake/add-stake';
 
 export const addStakeCallArgumentsSchema = z.object({
   amount: z.coerce.number().min(1).max(1_000_000_000),

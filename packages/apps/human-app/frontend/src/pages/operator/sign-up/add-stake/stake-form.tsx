@@ -12,6 +12,7 @@ import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import type { ResponseError } from '@/shared/types/global.type';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
+import { routerPaths } from '@/router/router-paths';
 import { HumanCurrencyInputMask } from '@/components/data-entry/input-masks';
 
 interface StakeFormProps {
@@ -82,7 +83,7 @@ export function StakeForm({
               <Button
                 component={Link}
                 fullWidth
-                to="/next-page"
+                to={routerPaths.operator.addKeys}
                 variant="outlined"
               >
                 {t('operator.stakeForm.backBtn')}

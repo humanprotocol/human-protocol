@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getStackedAmount } from '@/smart-contracts/get-staked-amount';
+import { getStackedAmount } from '@/smart-contracts/stake/get-staked-amount';
 
 export const getStakedAmountCallArgumentsSchema = z.object({
   address: z.string(),

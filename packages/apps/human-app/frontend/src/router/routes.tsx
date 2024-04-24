@@ -16,6 +16,7 @@ import { SendResetLinkWorkerPage } from '@/pages/worker/send-reset-link/send-res
 import { ResetPasswordWorkerSuccessPage } from '@/pages/worker/reset-password/reset-password-success.page';
 import { EmailVerificationWorkerPage } from '@/pages/worker/email-verification/email-verification.page';
 import { SendEmailVerificationWorkerPage } from '@/pages/worker/email-verification/send-email-verification.page';
+import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -45,6 +46,10 @@ export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.operator.addStake,
     element: <AddStakeOperatorPage />,
+  },
+  {
+    path: routerPaths.operator.addKeys,
+    element: <AddKeysOperatorPage />,
   },
   {
     path: routerPaths.worker.emailVerification,
