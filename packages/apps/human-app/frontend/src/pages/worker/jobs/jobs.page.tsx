@@ -10,6 +10,7 @@ import { HomepageWorkIcon } from '@/components/ui/icons';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
+import { MyJobsTableMobile } from './components/my-jobs/my-jobs-table-mobile';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -108,7 +109,7 @@ export function JobsPage() {
                   )}
                 </TabPanel>
                 <TabPanel activeTab={activeTab} index={1}>
-                  <MyJobsTable />
+                  {isMobile ? <MyJobsTableMobile /> : <MyJobsTable />}
                 </TabPanel>
               </Box>
             </TableQueryContextProvider>

@@ -1,4 +1,4 @@
-import { Grid, List, Paper, Stack } from '@mui/material';
+import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -8,21 +8,22 @@ import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
+import { ChipComponent } from '@/components/ui/chip-component';
+import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
+import { formatDate } from '@/shared/utils/format-date';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import {
-  getJobsTableData,
-  type AvailableJobs,
-} from './available-jobs-table-service';
+import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
 
-const parseUniqueValues = (data: AvailableJobs[]) => {
+const parseUniqueValues = (data: MyJobs[]) => {
   const uniqueValues = {
     network: [...new Set(data.map((item) => item.network))],
     jobType: [...new Set(data.flatMap((item) => item.jobType))],
+    status: [...new Set(data.flatMap((item) => item.status))],
   };
   return uniqueValues;
 };
 
-export function AvailableJobsTableMobile() {
+export function MyJobsTableMobile() {
   const { t } = useTranslation();
   const [searchEscrowAddress, setSearchEscrowAddress] = useState([
     {
@@ -30,7 +31,7 @@ export function AvailableJobsTableMobile() {
       value: '',
     },
   ]);
-  const { data, isLoading } = useQuery<AvailableJobs[]>({
+  const { data, isLoading } = useQuery<MyJobs[]>({
     queryKey: ['example', []],
     queryFn: () => getJobsTableData(),
   });
@@ -68,26 +69,25 @@ export function AvailableJobsTableMobile() {
     }
 
     // filter by search
-    const escrowSearchValue = searchEscrowAddress[0].value.trim();
-    if (escrowSearchValue) {
-      filtered = filtered?.filter((item) =>
-        item.escrowAddress.includes(escrowSearchValue)
-      );
-    }
+    // const escrowSearchValue = searchEscrowAddress[0].value.trim();
+    // if (escrowSearchValue) {
+    //   filtered = filtered?.filter((item) =>
+    //     item.escrowAddress.includes(escrowSearchValue)
+    //   );
+    // }
     //sorting
-    if (availableJobsFilters.sortingOrder.sortingColumn) {
-      const { sortingColumn, sortingOrder } = availableJobsFilters.sortingOrder;
+    // if (availableJobsFilters.sortingOrder.sortingColumn) {
+    //   const { sortingColumn, sortingOrder } = availableJobsFilters.sortingOrder;
+    //   filtered?.sort((a, b) => {
+    //     const valueA = a[sortingColumn as keyof AvailableJobs].toString();
+    //     const valueB = b[sortingColumn as keyof AvailableJobs].toString();
 
-      filtered?.sort((a, b) => {
-        const valueA = a[sortingColumn as keyof AvailableJobs].toString();
-        const valueB = b[sortingColumn as keyof AvailableJobs].toString();
-
-        if (sortingOrder === 'DESC') {
-          return valueB.localeCompare(valueA);
-        }
-        return valueA.localeCompare(valueB);
-      });
-    }
+    //     if (sortingOrder === 'DESC') {
+    //       return valueB.localeCompare(valueA);
+    //     }
+    //     return valueA.localeCompare(valueB);
+    //   });
+    // }
 
     setFilteredData(filtered);
   }, [
@@ -137,15 +137,15 @@ export function AvailableJobsTableMobile() {
               }}
             >
               <List>
-                <ProfileListItem
-                  header={t('worker.jobs.jobDescription')}
-                  paragraph={d.jobDescription}
-                />
                 <Grid container>
                   <Grid item xs={6}>
                     <ProfileListItem
                       header={t('worker.jobs.escrowAddress')}
                       paragraph={shortenEscrowAddress(d.escrowAddress)}
+                    />
+                    <ProfileListItem
+                      header={t('worker.jobs.expiresAt')}
+                      paragraph={d.expiresAt ? formatDate(d.expiresAt) : ''}
                     />
                     <ProfileListItem
                       header={t('worker.jobs.rewardAmount')}
@@ -157,6 +157,28 @@ export function AvailableJobsTableMobile() {
                       header={t('worker.jobs.network')}
                       paragraph={d.network}
                     />
+                    <Typography
+                      component="div"
+                      sx={{
+                        marginTop: '15px',
+                      }}
+                      variant="subtitle2"
+                    >
+                      {t('worker.jobs.status')}
+                    </Typography>
+                    <Stack
+                      alignItems="center"
+                      direction="row"
+                      sx={{
+                        marginBottom: '10px',
+                      }}
+                    >
+                      <ChipComponent
+                        backgroundColor={parseJobStatusChipColor(d.status)}
+                        key={d.status}
+                        label={d.status}
+                      />
+                    </Stack>
                     <ProfileListItem
                       header={t('worker.jobs.jobType')}
                       paragraph={d.jobType}

@@ -16,8 +16,9 @@ export function ChipComponent({ label, backgroundColor }: ChipComponentProps) {
           : colorPalette.chip.main,
         width: 'fit-content',
         px: '10px',
-        py: '5px',
+        py: '2px',
         borderRadius: '16px',
+        display: 'flex',
       }}
     >
       <Typography

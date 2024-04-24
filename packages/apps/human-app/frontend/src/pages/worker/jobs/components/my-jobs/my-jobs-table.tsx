@@ -15,6 +15,7 @@ import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
 import { ChipComponent } from '@/components/ui/chip-component';
+import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import { JobTypesChips } from '../ui/job-types-chips';
 import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
@@ -112,19 +113,6 @@ interface MyJobsButtonProps {
   status: MyJobs['status'];
   isActivated: boolean;
 }
-
-const parseJobStatusChipColor = (status: string) => {
-  if (status === 'Overdue') {
-    return colorPalette.error.main.toString();
-  }
-  if (status === 'Deactivated') {
-    return colorPalette.error.dark.toString();
-  }
-  if (status === 'Complited') {
-    return colorPalette.success.main.toString();
-  }
-  return colorPalette.primary.main.toString();
-};
 
 function MyJobsButton({ status, isActivated }: MyJobsButtonProps) {
   if (isActivated && status === 'Active') {

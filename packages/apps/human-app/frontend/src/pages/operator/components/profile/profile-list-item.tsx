@@ -26,6 +26,7 @@ export function ProfileListItem({
     >
       <ListItemText>
         <Typography
+          component="span"
           sx={{
             marginBottom: '10px',
           }}
@@ -49,6 +50,7 @@ export function ProfileListItem({
                   ? colorPalette.text.secondary
                   : colorPalette.text.primary
               }
+              component="span"
               variant="subtitle1"
             >
               {paragraph}
