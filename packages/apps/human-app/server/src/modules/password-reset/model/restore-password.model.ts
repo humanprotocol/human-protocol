@@ -23,7 +23,7 @@ export class RestorePasswordCommand {
   @AutoMap()
   token: string;
   @AutoMap()
-  h_captcha_token: string;
+  hCaptchaToken: string;
 }
 
 export class RestorePasswordData {
