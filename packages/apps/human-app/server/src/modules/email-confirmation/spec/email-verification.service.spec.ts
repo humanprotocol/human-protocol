@@ -4,7 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { reputationOracleGatewayMock } from '../../../integrations/reputation-oracle/spec/reputation-oracle.gateway.mock';
 import { expect, it } from '@jest/globals';
 import { EmailVerificationCommand } from '../model/email-verification.model';
-import { resendEmailVerificationCommandFixture } from './email-verification.fixtures';
+import {
+  emailVerificationCommandFixture,
+  resendEmailVerificationCommandFixture,
+} from './email-verification.fixtures';
 
 describe('EmailConfirmationService', () => {
   let service: EmailConfirmationService;
@@ -30,9 +33,7 @@ describe('EmailConfirmationService', () => {
 
   describe('processEmailVerification', () => {
     it('should call sendEmailVerification method of reputationOracleGateway', async () => {
-      const command: EmailVerificationCommand = {
-        token: 'token',
-      };
+      const command: EmailVerificationCommand = emailVerificationCommandFixture;
       await service.processEmailVerification(command);
       expect(
         reputationOracleGateway.sendEmailVerification,

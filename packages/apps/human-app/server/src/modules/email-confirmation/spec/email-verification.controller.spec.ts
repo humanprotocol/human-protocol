@@ -14,6 +14,8 @@ import {
   emailVerificationToken,
   resendEmailVerificationCommandFixture,
   resendEmailVerificationDtoFixture,
+  emailVerificationCommandFixture,
+  emailVerificationDtoFixture,
 } from './email-verification.fixtures';
 
 describe('EmailConfirmationController', () => {
@@ -46,12 +48,9 @@ describe('EmailConfirmationController', () => {
 
   describe('verifyEmail', () => {
     it('should call the processEmailVerification method of the service with the correct arguments', async () => {
-      const dto: EmailVerificationDto = {
-        token: 'token',
-      };
-      const expectedCommand: EmailVerificationCommand = {
-        token: dto.token,
-      };
+      const dto: EmailVerificationDto = emailVerificationDtoFixture;
+      const expectedCommand: EmailVerificationCommand =
+        emailVerificationCommandFixture;
       await controller.verifyEmail(dto);
       expect(service.processEmailVerification).toHaveBeenCalledWith(
         expectedCommand,

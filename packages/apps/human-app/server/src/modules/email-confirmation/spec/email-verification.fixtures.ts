@@ -3,9 +3,20 @@ import {
   ResendEmailVerificationDto,
   ResendEmailVerificationParams,
 } from '../model/resend-email-verification.model';
+import {
+  EmailVerificationCommand,
+  EmailVerificationDto,
+} from '../model/email-verification.model';
 
 const TOKEN = 'test_user_token';
 const EMAIL = 'test_user@email.com';
+
+export const emailVerificationDtoFixture: EmailVerificationDto = {
+  token: TOKEN,
+};
+export const emailVerificationCommandFixture: EmailVerificationCommand = {
+  token: TOKEN,
+};
 
 export const emailVerificationToken = TOKEN;
 export const resendEmailVerificationDtoFixture: ResendEmailVerificationDto = {
