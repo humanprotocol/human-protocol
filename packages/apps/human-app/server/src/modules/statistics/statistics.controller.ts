@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Headers,
   Query,
   UsePipes,
   ValidationPipe,

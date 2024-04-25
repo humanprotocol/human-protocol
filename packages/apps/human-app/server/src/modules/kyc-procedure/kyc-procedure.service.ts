@@ -4,9 +4,9 @@ import { KycProcedureStartResponse } from './model/kyc-start.model';
 
 @Injectable()
 export class KycProcedureService {
-  constructor(private reputationOracleService: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   async processStartKycProcedure(): Promise<KycProcedureStartResponse> {
-    return this.reputationOracleService.sendKycProcedureStart();
+    return this.gateway.sendKycProcedureStart();
   }
 }

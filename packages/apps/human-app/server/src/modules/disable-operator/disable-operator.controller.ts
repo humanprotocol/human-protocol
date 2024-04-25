@@ -23,7 +23,7 @@ import {
 @Controller()
 export class DisableOperatorController {
   constructor(
-    private readonly disableOperatorService: DisableOperatorService,
+    private readonly service: DisableOperatorService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -42,9 +42,7 @@ export class DisableOperatorController {
       PrepareSignatureDto,
       PrepareSignatureCommand,
     );
-    return this.disableOperatorService.processPrepareSignature(
-      prepareSignatureCommand,
-    );
+    return this.service.processPrepareSignature(prepareSignatureCommand);
   }
 
   @ApiTags('Disable-Operator')
@@ -64,8 +62,6 @@ export class DisableOperatorController {
       DisableOperatorCommand,
     );
     disableOperatorCommand.token = token;
-    return this.disableOperatorService.processDisableOperator(
-      disableOperatorCommand,
-    );
+    return this.service.processDisableOperator(disableOperatorCommand);
   }
 }

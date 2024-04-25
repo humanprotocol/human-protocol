@@ -1,16 +1,28 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { EmailConfirmationService } from './email-confirmation.service';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { EmailVerificationCommand, EmailVerificationDto } from './model/email-verification.model';
-import { ResendEmailVerificationCommand, ResendEmailVerificationDto } from './model/resend-email-verification.model';
+import {
+  EmailVerificationCommand,
+  EmailVerificationDto,
+} from './model/email-verification.model';
+import {
+  ResendEmailVerificationCommand,
+  ResendEmailVerificationDto,
+} from './model/resend-email-verification.model';
 import { Authorization } from '../../common/config/params-decorators';
 
 @Controller()
 export class EmailConfirmationController {
   constructor(
-    private readonly emailConfirmationService: EmailConfirmationService,
+    private readonly service: EmailConfirmationService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -21,16 +33,14 @@ export class EmailConfirmationController {
   })
   @UsePipes(new ValidationPipe())
   public async verifyEmail(
-    @Body() emailVerificationDto: EmailVerificationDto
+    @Body() emailVerificationDto: EmailVerificationDto,
   ): Promise<void> {
     const emailVerificationCommand = this.mapper.map(
       emailVerificationDto,
       EmailVerificationDto,
       EmailVerificationCommand,
     );
-    return this.emailConfirmationService.processEmailVerification(
-      emailVerificationCommand,
-    );
+    return this.service.processEmailVerification(emailVerificationCommand);
   }
 
   @ApiTags('Email-Confirmation')
@@ -50,7 +60,7 @@ export class EmailConfirmationController {
       ResendEmailVerificationCommand,
     );
     resendEmailVerificationCommand.token = token;
-    return this.emailConfirmationService.processResendEmailVerification(
+    return this.service.processResendEmailVerification(
       resendEmailVerificationCommand,
     );
   }

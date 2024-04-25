@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Post,
   Query,
   UsePipes,
@@ -25,7 +24,7 @@ import { Authorization } from '../../common/config/params-decorators';
 @Controller()
 export class JobAssignmentController {
   constructor(
-    private readonly jobAssignmentService: JobAssignmentService,
+    private readonly service: JobAssignmentService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -46,7 +45,7 @@ export class JobAssignmentController {
       JobAssignmentCommand,
     );
     jobAssignmentCommand.token = token;
-    return this.jobAssignmentService.processJobAssignment(jobAssignmentCommand);
+    return this.service.processJobAssignment(jobAssignmentCommand);
   }
 
   @ApiTags('Job-Assignment')
@@ -65,8 +64,6 @@ export class JobAssignmentController {
       JobsFetchParamsCommand,
     );
     jobsAssignmentParamsCommand.token = token;
-    return this.jobAssignmentService.processGetAssignedJobs(
-      jobsAssignmentParamsCommand,
-    );
+    return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
   }
 }

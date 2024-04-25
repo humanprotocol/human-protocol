@@ -21,7 +21,7 @@ import {
 @Controller()
 export class PasswordResetController {
   constructor(
-    private readonly passwordResetService: PasswordResetService,
+    private readonly service: PasswordResetService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -39,9 +39,7 @@ export class PasswordResetController {
       ForgotPasswordDto,
       ForgotPasswordCommand,
     );
-    return await this.passwordResetService.processForgotPassword(
-      forgotPasswordCommand,
-    );
+    return await this.service.processForgotPassword(forgotPasswordCommand);
   }
 
   @ApiTags('Password-Reset')
@@ -58,8 +56,6 @@ export class PasswordResetController {
       RestorePasswordDto,
       RestorePasswordCommand,
     );
-    return await this.passwordResetService.processRestorePassword(
-      restorePasswordCommand,
-    );
+    return await this.service.processRestorePassword(restorePasswordCommand);
   }
 }
