@@ -19,7 +19,7 @@ import {
 } from './model/resend-email-verification.model';
 import { Authorization } from '../../common/config/params-decorators';
 
-@Controller()
+@Controller('/email-confirmation')
 export class EmailConfirmationController {
   constructor(
     private readonly service: EmailConfirmationService,
@@ -27,7 +27,7 @@ export class EmailConfirmationController {
   ) {}
 
   @ApiTags('Email-Confirmation')
-  @Post('/email-confirmation/email-verification')
+  @Post('/email-verification')
   @ApiOperation({
     summary: 'Endpoint to verify the user email address',
   })
@@ -44,7 +44,7 @@ export class EmailConfirmationController {
   }
 
   @ApiTags('Email-Confirmation')
-  @Post('/email-confirmation/resend-email-verification')
+  @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Endpoint to resend the email verification link',
   })

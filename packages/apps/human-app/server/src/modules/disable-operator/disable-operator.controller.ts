@@ -20,7 +20,7 @@ import {
   DisableOperatorDto,
 } from './model/disable-operator.model';
 
-@Controller()
+@Controller('/disable-operator')
 export class DisableOperatorController {
   constructor(
     private readonly service: DisableOperatorService,
@@ -28,7 +28,7 @@ export class DisableOperatorController {
   ) {}
 
   @ApiTags('Disable-Operator')
-  @Post('/disable-operator/prepare-signature')
+  @Post('/prepare-signature')
   @ApiOperation({
     summary:
       'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms',
@@ -46,7 +46,7 @@ export class DisableOperatorController {
   }
 
   @ApiTags('Disable-Operator')
-  @Post('/disable-operator')
+  @Post('/')
   @ApiOperation({
     summary: 'Endpoint to disable an operator',
   })

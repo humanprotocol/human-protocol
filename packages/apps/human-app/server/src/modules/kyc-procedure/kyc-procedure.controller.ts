@@ -3,12 +3,12 @@ import { KycProcedureService } from './kyc-procedure.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KycProcedureStartResponse } from './model/kyc-start.model';
 
-@Controller()
+@Controller('/kyc')
 export class KycProcedureController {
   constructor(private readonly service: KycProcedureService) {}
 
   @ApiTags('Kyc-Procedure')
-  @Post('/kyc/start')
+  @Post('/start')
   @ApiOperation({
     summary: 'Endpoint to start Kyc process for the user',
   })

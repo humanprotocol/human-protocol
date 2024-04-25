@@ -21,7 +21,7 @@ import {
 } from './model/job-assignment.model';
 import { Authorization } from '../../common/config/params-decorators';
 
-@Controller()
+@Controller('/assignment')
 export class JobAssignmentController {
   constructor(
     private readonly service: JobAssignmentService,
@@ -29,7 +29,7 @@ export class JobAssignmentController {
   ) {}
 
   @ApiTags('Job-Assignment')
-  @Post('/assignment/job')
+  @Post('/job')
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
@@ -49,7 +49,7 @@ export class JobAssignmentController {
   }
 
   @ApiTags('Job-Assignment')
-  @Get('/assignment/job')
+  @Get('/job')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Request to get a jobs assigned to a logged user',

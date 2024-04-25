@@ -18,7 +18,7 @@ import {
   RestorePasswordDto,
 } from './model/restore-password.model';
 
-@Controller()
+@Controller('/password-reset')
 export class PasswordResetController {
   constructor(
     private readonly service: PasswordResetService,
@@ -26,7 +26,7 @@ export class PasswordResetController {
   ) {}
 
   @ApiTags('Password-Reset')
-  @Post('/password-reset/forgot-password')
+  @Post('/forgot-password')
   @ApiOperation({
     summary: 'Endpoint to initiate the password reset process',
   })
@@ -43,7 +43,7 @@ export class PasswordResetController {
   }
 
   @ApiTags('Password-Reset')
-  @Post('/password-reset/restore-password')
+  @Post('/restore-password')
   @ApiOperation({
     summary: 'Endpoint to restore the user password after reset',
   })
