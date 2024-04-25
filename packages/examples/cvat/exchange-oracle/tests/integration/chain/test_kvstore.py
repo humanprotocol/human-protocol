@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, Mock, patch
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
-from human_protocol_sdk.staking import LeaderData
 
 from src.chain.kvstore import get_job_launcher_url, get_recording_oracle_url
 
