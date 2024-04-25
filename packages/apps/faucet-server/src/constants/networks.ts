@@ -11,9 +11,6 @@ export const FAUCET_NETWORKS: {
   [ChainId.MAINNET]: {
     rpcUrl: process.env.RPC_URL_MAINNET || '',
   },
-  [ChainId.GOERLI]: {
-    rpcUrl: process.env.RPC_URL_GOERLI || '',
-  },
   [ChainId.SEPOLIA]: {
     rpcUrl: process.env.RPC_URL_SEPOLIA || '',
   },
@@ -25,9 +22,6 @@ export const FAUCET_NETWORKS: {
   },
   [ChainId.POLYGON]: {
     rpcUrl: process.env.RPC_URL_POLYGON || '',
-  },
-  [ChainId.POLYGON_MUMBAI]: {
-    rpcUrl: process.env.RPC_URL_POLYGON_MUMBAI || '',
   },
   [ChainId.POLYGON_AMOY]: {
     rpcUrl: process.env.RPC_URL_POLYGON_AMOY || '',
