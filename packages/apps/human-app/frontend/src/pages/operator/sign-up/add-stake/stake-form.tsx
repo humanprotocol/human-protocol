@@ -10,18 +10,15 @@ import {
   useAddStakeMutation,
   type AddStakeCallArguments,
 } from '@/api/servieces/operator/add-stake';
-import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
 
 export function StakeForm() {
-  const { address } = useWalletConnect();
   const addStakeMutation = useAddStakeMutation();
 
   const methods = useForm<AddStakeCallArguments>({
     defaultValues: {
       amount: 0,
-      address: address || '',
     },
     resolver: zodResolver(addStakeCallArgumentsSchema),
   });

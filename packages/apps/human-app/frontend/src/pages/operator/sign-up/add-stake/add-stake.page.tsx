@@ -17,41 +17,53 @@ import { useAddStakeMutationState } from '@/api/servieces/operator/add-stake';
 
 export function AddStakeOperatorPage() {
   const [displayForm, setDisplayForm] = useState(false);
-  const getStakedAmountQuery = useGetStakedAmount();
+  const {
+    data: stakedAmount,
+    isError: isGetStakedAmountError,
+    error: getStackedAmountError,
+    isPending: isGetStakedAmountPending,
+  } = useGetStakedAmount();
   const addStakeMutationState = useAddStakeMutationState();
 
-  const errorAlert = addStakeMutationState?.error ? (
-    <Alert color="error" severity="error">
-      {defaultErrorMessage(addStakeMutationState.error)}
-    </Alert>
-  ) : undefined;
+  const getAlert = () => {
+    switch (true) {
+      case Boolean(addStakeMutationState?.error):
+        return (
+          <Alert color="error" severity="error">
+            {defaultErrorMessage(addStakeMutationState?.error)}
+          </Alert>
+        );
+      case addStakeMutationState?.status === 'success':
+        return (
+          <Alert color="success" severity="success">
+            {t('operator.stakeForm.successAlert', {
+              amount: addStakeMutationState.variables?.amount
+                ? addStakeMutationState.variables.amount
+                : -1,
+            })}
+          </Alert>
+        );
 
-  const successAlert =
-    addStakeMutationState?.status === 'success' ? (
-      <Alert color="success" severity="success">
-        {t('operator.stakeForm.successAlert', {
-          amount: addStakeMutationState.variables?.amount
-            ? addStakeMutationState.variables.amount
-            : -1,
-        })}
-      </Alert>
-    ) : undefined;
+      default:
+        return undefined;
+    }
+  };
 
-  if (getStakedAmountQuery.isError) {
+  if (isGetStakedAmountError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(getStakedAmountQuery.error)}
+        errorMessage={defaultErrorMessage(getStackedAmountError)}
       />
     );
   }
 
-  if (getStakedAmountQuery.isPending) {
+  if (isGetStakedAmountPending) {
     return <PageCardLoader />;
   }
 
   return (
     <PageCard
-      alert={errorAlert || successAlert}
+      alert={getAlert()}
       backArrowPath={-1}
       title={t('operator.addStake.title')}
     >
@@ -66,7 +78,7 @@ export function AddStakeOperatorPage() {
           {t('operator.addStake.label')}
         </Typography>
         <Typography color={colorPalette.primary.light} variant="subtitle2">
-          {getStakedAmountQuery.data}
+          {stakedAmount}
         </Typography>
         {displayForm ? (
           <StakeForm />
