@@ -1,12 +1,12 @@
 import { z } from 'zod';
+import last from 'lodash/last';
 import type { MutationState } from '@tanstack/react-query';
 import {
   useMutation,
   useMutationState,
   useQueryClient,
 } from '@tanstack/react-query';
-import last from 'lodash/last';
-import { addStake } from '@/smart-contracts/add-stake';
+import { addStake } from '@/smart-contracts/stake/add-stake';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 

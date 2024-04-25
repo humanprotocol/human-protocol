@@ -1,4 +1,10 @@
 {
+  "humanCurrencySymbol": "HMT",
+  "inputMasks": {
+    "humanCurrencySuffix": " HMT",
+    "percentSuffix": "%",
+    "plusPrefix": "+"
+  },
   "dashboard": {},
   "validation": {
     "required": "Required",
@@ -216,6 +222,35 @@
       "label": "Stake amount",
       "description": "Please add bellow the amount to stake",
       "successAlert": "You have successfully staked {{amount}} HMT"
+    },
+    "addKeysPage": {
+      "title": "Setup Operator",
+      "btn": " Add New Keys to KVStore",
+      "pendingKeys": {
+        "title": "Pending Keys",
+        "role": "Role",
+        "annotationUrl": "Annotation URL",
+        "url": "URL"
+      },
+      "existingKeys": {
+        "title": "Existing keys",
+        "fee": "Fee",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job types",
+        "editBtn": "Edit"
+      },
+      "editKeysForm": {
+        "fee": "Fee",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job Types",
+        "btn": "Save"
+      }
+    },
+    "editExistingKeysSuccess": {
+      "title": "Setup Operator",
+      "paragraph1": "Congratulations 🎉!",
+      "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
+      "btn": "Finish"
     }
   }
 }

@@ -6,6 +6,7 @@ declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     textField: true;
     body3: true;
+    body4: true;
     buttonLarge: true;
     buttonMedium: true;
     buttonSmall: true;
@@ -23,6 +24,7 @@ declare module '@mui/material/styles' {
   interface TypographyVariants {
     textField: CSSProperties;
     body3: CSSProperties;
+    body4: CSSProperties;
     buttonLarge: CSSProperties;
     buttonMedium: CSSProperties;
     buttonSmall: CSSProperties;
@@ -39,6 +41,7 @@ declare module '@mui/material/styles' {
   interface TypographyVariantsOptions {
     textField?: CSSProperties;
     body3?: CSSProperties;
+    body4?: CSSProperties;
     buttonLarge?: CSSProperties;
     buttonMedium?: CSSProperties;
     buttonSmall?: CSSProperties;
@@ -145,6 +148,11 @@ export const theme: ThemeOptions = {
     body3: {
       fontSize: 16,
       fontWeight: 500,
+      letterSpacing: 0.15,
+    },
+    body4: {
+      fontSize: 24,
+      fontWeight: 600,
       letterSpacing: 0.15,
     },
     buttonLarge: {

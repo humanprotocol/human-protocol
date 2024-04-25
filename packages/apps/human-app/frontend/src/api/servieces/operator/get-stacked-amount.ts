@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { getStackedAmount } from '@/smart-contracts/get-staked-amount';
+import { getStackedAmount } from '@/smart-contracts/stake/get-staked-amount';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 
 export const getStakedAmountCallArgumentsSchema = z.object({

@@ -3,6 +3,7 @@ import Grid from '@mui/material/Grid';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { breakpoints } from '@/styles/theme';
+import { routerPaths } from '@/router/router-paths';
 
 export function Buttons({ openForm }: { openForm: () => void }) {
   return (
@@ -26,8 +27,12 @@ export function Buttons({ openForm }: { openForm: () => void }) {
       >
         {t('operator.addStake.actionBtn')}
       </Button>
-      {/* TODO add correct path */}
-      <Button component={Link} fullWidth to="/next-page" variant="outlined">
+      <Button
+        component={Link}
+        fullWidth
+        to={routerPaths.operator.addKeys}
+        variant="outlined"
+      >
         {t('operator.addStake.nextBtn')}
       </Button>
     </Grid>
