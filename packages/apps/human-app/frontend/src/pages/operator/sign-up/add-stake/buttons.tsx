@@ -26,6 +26,7 @@ export function Buttons({ openForm }: { openForm: () => void }) {
       >
         {t('operator.addStake.actionBtn')}
       </Button>
+      {/* TODO add correct path */}
       <Button component={Link} fullWidth to="/next-page" variant="outlined">
         {t('operator.addStake.nextBtn')}
       </Button>

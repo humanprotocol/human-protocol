@@ -8,15 +8,17 @@ import {
 import last from 'lodash/last';
 import { addStake } from '@/smart-contracts/add-stake';
 import type { ResponseError } from '@/shared/types/global.type';
+import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 
 export const addStakeCallArgumentsSchema = z.object({
   amount: z.coerce.number().min(1).max(1_000_000_000),
-  address: z.string(),
 });
 
 export type AddStakeCallArguments = z.infer<typeof addStakeCallArgumentsSchema>;
 
-async function addStakeMutationFn(data: AddStakeCallArguments) {
+async function addStakeMutationFn(
+  data: AddStakeCallArguments & { address: string }
+) {
   await addStake(data);
   return data;
 }
@@ -24,10 +26,12 @@ async function addStakeMutationFn(data: AddStakeCallArguments) {
 export const addStakeMutationKey = ['addStake'];
 
 export function useAddStakeMutation() {
+  const { address } = useConnectedWallet();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: addStakeMutationFn,
+    mutationFn: (data: AddStakeCallArguments) =>
+      addStakeMutationFn({ ...data, address }),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },
@@ -43,8 +47,8 @@ export function useAddStakeMutationState() {
     filters: { mutationKey: addStakeMutationKey },
     select: (mutation) => mutation.state,
   });
-  const result = last(state) as
+
+  return last(state) as
     | MutationState<unknown, ResponseError, AddStakeCallArguments>
     | undefined;
-  return result;
 }
