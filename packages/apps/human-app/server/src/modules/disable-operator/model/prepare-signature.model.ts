@@ -1,6 +1,7 @@
 import { AutoMap } from '@automapper/classes';
 import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PrepareSignatureType } from '../../../common/enums/global-common.interface';
 
 export class PrepareSignatureDto {
   @AutoMap()
@@ -10,21 +11,21 @@ export class PrepareSignatureDto {
   @AutoMap()
   @IsString()
   @ApiProperty({ example: 'SIGNUP' })
-  type: string;
+  type: PrepareSignatureType;
 }
 
 export class PrepareSignatureCommand {
   @AutoMap()
   address: string;
   @AutoMap()
-  type: string;
+  type: PrepareSignatureType;
 }
 
 export class PrepareSignatureData {
   @AutoMap()
   address: string;
   @AutoMap()
-  type: string;
+  type: PrepareSignatureType;
 }
 
 export class PrepareSignatureResponse {
