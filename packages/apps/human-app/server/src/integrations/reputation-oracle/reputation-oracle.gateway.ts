@@ -173,14 +173,14 @@ export class ReputationOracleGateway {
   }
 
   async sendRestorePassword(restorePasswordCommand: RestorePasswordCommand) {
-    const restorePasswordDto = this.mapper.map(
+    const restorePasswordData = this.mapper.map(
       restorePasswordCommand,
       RestorePasswordCommand,
       RestorePasswordData,
     );
     const options = this.getEndpointOptions(
       EndpointName.RESTORE_PASSWORD,
-      restorePasswordDto,
+      restorePasswordData,
     );
     return this.handleRequestToReputationOracle<void>(options);
   }
