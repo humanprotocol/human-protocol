@@ -50,6 +50,13 @@ app.get('/stats', async (_request: Request, response: Response) => {
       message: 'Invalid Chain Id',
     });
 
+  if (!network.rpcUrl?.length) {
+    return response.status(200).json({
+      status: false,
+      message: 'Faucet is disabled',
+    });
+  }
+
   const web3 = getWeb3(network.rpcUrl);
   response.send({
     account: web3.eth.defaultAccount,
