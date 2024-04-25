@@ -1,4 +1,5 @@
-import { FakeSmartContract } from '@/smart-contracts/fake-smart-contract';
+// TODO replace by smart contract instance created with ethers.js
+import { FakeSmartContract } from '@/smart-contracts/stake/fake-stake-smart-contract';
 
 export function addStake({
   address,

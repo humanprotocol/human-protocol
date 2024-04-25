@@ -12,6 +12,7 @@ import {
 } from '@/api/servieces/operator/add-stake';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
+import { routerPaths } from '@/router/router-paths';
 
 export function StakeForm() {
   const addStakeMutation = useAddStakeMutation();
@@ -67,7 +68,7 @@ export function StakeForm() {
               <Button
                 component={Link}
                 fullWidth
-                to="/next-page"
+                to={routerPaths.operator.addKeys}
                 variant="outlined"
               >
                 {t('operator.stakeForm.backBtn')}

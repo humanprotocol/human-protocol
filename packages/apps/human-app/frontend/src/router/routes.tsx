@@ -16,6 +16,8 @@ import { SendResetLinkWorkerPage } from '@/pages/worker/send-reset-link/send-res
 import { ResetPasswordWorkerSuccessPage } from '@/pages/worker/reset-password/reset-password-success.page';
 import { EmailVerificationWorkerPage } from '@/pages/worker/email-verification/email-verification.page';
 import { SendEmailVerificationWorkerPage } from '@/pages/worker/email-verification/send-email-verification.page';
+import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.page';
+import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -87,5 +89,13 @@ export const protectedWeb3Routes: RouteProps[] = [
   {
     path: routerPaths.operator.addStake,
     element: <AddStakeOperatorPage />,
+  },
+  {
+    path: routerPaths.operator.addKeys,
+    element: <AddKeysOperatorPage />,
+  },
+  {
+    path: routerPaths.operator.editExistingKeysSuccess,
+    element: <EditExistingKeysSuccessPage />,
   },
 ];
