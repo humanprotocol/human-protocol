@@ -1,3 +1,5 @@
+// TODO remove when actual smart contract will be integrated
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
