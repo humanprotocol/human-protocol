@@ -4,9 +4,9 @@ import { ReputationOracleGateway } from '../../integrations/reputation-oracle/re
 
 @Injectable()
 export class OperatorService {
-  constructor(private reputationOracleGateway: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   signupOperator(command: SignupOperatorCommand) {
-    return this.reputationOracleGateway.sendOperatorSignup(command);
+    return this.gateway.sendOperatorSignup(command);
   }
 }

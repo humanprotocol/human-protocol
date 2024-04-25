@@ -5,13 +5,13 @@ import { RestorePasswordCommand } from './model/restore-password.model';
 
 @Injectable()
 export class PasswordResetService {
-  constructor(private reputationOracleService: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   async processForgotPassword(command: ForgotPasswordCommand): Promise<void> {
-    return this.reputationOracleService.sendForgotPassword(command);
+    return this.gateway.sendForgotPassword(command);
   }
 
   async processRestorePassword(command: RestorePasswordCommand): Promise<void> {
-    return this.reputationOracleService.sendRestorePassword(command);
+    return this.gateway.sendRestorePassword(command);
   }
 }

@@ -5,17 +5,17 @@ import { ResendEmailVerificationCommand } from './model/resend-email-verificatio
 
 @Injectable()
 export class EmailConfirmationService {
-  constructor(private reputationOracleService: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   async processEmailVerification(
     command: EmailVerificationCommand,
   ): Promise<void> {
-    return this.reputationOracleService.sendEmailVerification(command);
+    return this.gateway.sendEmailVerification(command);
   }
 
   async processResendEmailVerification(
     command: ResendEmailVerificationCommand,
   ): Promise<void> {
-    return this.reputationOracleService.resendSendEmailVerification(command);
+    return this.gateway.resendSendEmailVerification(command);
   }
 }

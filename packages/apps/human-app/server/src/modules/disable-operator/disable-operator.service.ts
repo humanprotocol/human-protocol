@@ -8,16 +8,14 @@ import { DisableOperatorCommand } from './model/disable-operator.model';
 
 @Injectable()
 export class DisableOperatorService {
-  constructor(private reputationOracleService: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   async processPrepareSignature(
     command: PrepareSignatureCommand,
   ): Promise<PrepareSignatureResponse> {
-    return this.reputationOracleService.sendPrepareSignature(command);
+    return this.gateway.sendPrepareSignature(command);
   }
-  async processDisableOperator(
-    command: DisableOperatorCommand,
-  ): Promise<void> {
-    return this.reputationOracleService.sendDisableOperator(command);
+  async processDisableOperator(command: DisableOperatorCommand): Promise<void> {
+    return this.gateway.sendDisableOperator(command);
   }
 }
