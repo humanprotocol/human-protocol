@@ -28,7 +28,12 @@ import { ExistingKeys } from '@/pages/operator/sign-up/add-keys/existing-keys';
 import { EditExistingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-form';
 
 export function AddKeysOperatorPage() {
-  const getKeys = useGetKeys();
+  const {
+    data: keysData,
+    isError: isGetKeysError,
+    error: getKeysError,
+    isPending: isGetKeysPending,
+  } = useGetKeys();
   const editExistingKeysMutationState = useEditExistingKeysMutationState();
 
   const errorAlert = editExistingKeysMutationState?.error ? (
@@ -37,11 +42,11 @@ export function AddKeysOperatorPage() {
     </Alert>
   ) : undefined;
 
-  if (getKeys.isError) {
-    return <PageCardError errorMessage={defaultErrorMessage(getKeys.error)} />;
+  if (isGetKeysError) {
+    return <PageCardError errorMessage={defaultErrorMessage(getKeysError)} />;
   }
 
-  if (getKeys.isPending) {
+  if (isGetKeysPending) {
     return <PageCardLoader />;
   }
 
@@ -51,7 +56,7 @@ export function AddKeysOperatorPage() {
       backArrowPath={-1}
       title={t('operator.addKeysPage.title')}
     >
-      <Form keysData={getKeys.data} />
+      <Form keysData={keysData} />
     </PageCard>
   );
 }

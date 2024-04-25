@@ -7,8 +7,8 @@ import {
 import last from 'lodash/last';
 import { useNavigate } from 'react-router-dom';
 import { editExistingKeys } from '@/smart-contracts/keys/edit-existing-keys';
-import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { routerPaths } from '@/router/router-paths';
+import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 
 export const editExistingKeysCallArgumentsSchema = z.object({
   fee: z.coerce.number().min(1).max(100).step(1),
@@ -29,13 +29,13 @@ function editExistingKeysMutationFn(
 export const editKeysMutationKey = ['editKeys'];
 
 export function useEditExistingKeysMutation() {
-  const { address } = useWalletConnect();
+  const { address } = useConnectedWallet();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (data: EditExistingKeysCallArguments) =>
-      editExistingKeysMutationFn({ ...data, address: address || '' }),
+      editExistingKeysMutationFn({ ...data, address }),
     onSuccess: async () => {
       navigate(routerPaths.operator.editExistingKeysSuccess);
       await queryClient.invalidateQueries();

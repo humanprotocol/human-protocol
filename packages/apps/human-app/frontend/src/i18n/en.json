@@ -62,6 +62,10 @@
         "disconnect": "Disconnect Wallet",
         "connect": "Connect Wallet"
       }
+    },
+    "pageCardError": {
+      "reload": "Reload",
+      "goHome": "Back to home page"
     }
   },
   "homepage": {

@@ -38,12 +38,8 @@ createWeb3Modal({
   projectId,
   enableAnalytics: true,
 });
-
-export interface WalletConnectContext {
+export interface CommonWalletConnectContext {
   openModal: () => Promise<void>;
-  isConnected: boolean;
-  chainId?: number;
-  address?: `0x${string}`;
   web3ProviderMutation: UseMutationResult<
     {
       provider: BrowserProvider;
@@ -54,9 +50,27 @@ export interface WalletConnectContext {
   >;
 }
 
-export const WalletConnectContext = createContext<WalletConnectContext | null>(
-  null
-);
+interface ConnectedAccount {
+  isConnected: true;
+  chainId: number;
+  address: `0x${string}`;
+}
+
+interface DisconnectedAccount {
+  isConnected: false;
+}
+
+export type WalletConnectContextConnectedAccount = CommonWalletConnectContext &
+  ConnectedAccount;
+
+type WalletConnectContextDisconnectedAccount = CommonWalletConnectContext &
+  DisconnectedAccount;
+
+export const WalletConnectContext = createContext<
+  | WalletConnectContextConnectedAccount
+  | WalletConnectContextDisconnectedAccount
+  | null
+>(null);
 
 export function WalletConnectProvider({
   children,
@@ -67,17 +81,27 @@ export function WalletConnectProvider({
   const { open } = useWeb3Modal();
   const { address, chainId, isConnected } = useWeb3ModalAccount();
 
+  const openModal = async () => {
+    await open();
+  };
+
   return (
     <WalletConnectContext.Provider
-      value={{
-        openModal: async () => {
-          await open();
-        },
-        isConnected,
-        chainId,
-        address,
-        web3ProviderMutation,
-      }}
+      value={
+        isConnected && address && chainId
+          ? {
+              isConnected: true,
+              address,
+              chainId,
+              web3ProviderMutation,
+              openModal,
+            }
+          : {
+              isConnected: false,
+              web3ProviderMutation,
+              openModal,
+            }
+      }
     >
       {children}
     </WalletConnectContext.Provider>

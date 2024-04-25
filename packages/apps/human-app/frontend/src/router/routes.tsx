@@ -45,18 +45,6 @@ export const unprotectedRoutes: RouteProps[] = [
     element: <ConnectWalletOperatorPage />,
   },
   {
-    path: routerPaths.operator.addStake,
-    element: <AddStakeOperatorPage />,
-  },
-  {
-    path: routerPaths.operator.addKeys,
-    element: <AddKeysOperatorPage />,
-  },
-  {
-    path: routerPaths.operator.editExistingKeysSuccess,
-    element: <EditExistingKeysSuccessPage />,
-  },
-  {
     path: routerPaths.worker.emailVerification,
     element: <EmailVerificationWorkerPage />,
   },
@@ -94,5 +82,20 @@ export const protectedRoutes: RouteProps[] = [
   {
     path: routerPaths.worker.resetPasswordSuccess,
     element: <ResetPasswordWorkerSuccessPage />,
+  },
+];
+
+export const protectedWeb3Routes: RouteProps[] = [
+  {
+    path: routerPaths.operator.addStake,
+    element: <AddStakeOperatorPage />,
+  },
+  {
+    path: routerPaths.operator.addKeys,
+    element: <AddKeysOperatorPage />,
+  },
+  {
+    path: routerPaths.operator.editExistingKeysSuccess,
+    element: <EditExistingKeysSuccessPage />,
   },
 ];

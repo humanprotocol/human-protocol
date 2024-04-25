@@ -4,7 +4,7 @@ import {
   getExistingKeys,
   getPendingKeys,
 } from '@/smart-contracts/keys/get-keys';
-import { useWalletConnect } from '@/hooks/use-wallet-connect';
+import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 
 export const getKeysCallArgumentsSchema = z.object({
   address: z.string(),
@@ -20,10 +20,10 @@ async function getKeysFn(data: GetKeysCallArguments) {
 }
 
 export function useGetKeys() {
-  const { address } = useWalletConnect();
+  const { address } = useConnectedWallet();
 
   return useQuery({
-    queryFn: () => getKeysFn({ address: address || '' }),
+    queryFn: () => getKeysFn({ address }),
     queryKey: ['getKeys', address],
   });
 }

@@ -13,26 +13,35 @@ export function ConnectWalletOperatorPage() {
   const { t } = useTranslation();
   const {
     isConnected,
-    web3ProviderMutation: { error },
+    web3ProviderMutation: {
+      error: web3ProviderError,
+      status: web3ProviderStatus,
+    },
   } = useWalletConnect();
 
-  const errorAlert = error ? (
-    <Alert color="error" severity="error" sx={{ width: '100%' }}>
-      {defaultErrorMessage(error)}
-    </Alert>
-  ) : undefined;
+  const getAlert = () => {
+    switch (true) {
+      case web3ProviderStatus === 'error':
+        return (
+          <Alert color="error" severity="error" sx={{ width: '100%' }}>
+            {defaultErrorMessage(web3ProviderError)}
+          </Alert>
+        );
+      case isConnected:
+        return (
+          <Alert color="success" severity="success" sx={{ width: '100%' }}>
+            {t('operator.connectWallet.successAlert')}
+          </Alert>
+        );
 
-  const alert = isConnected ? (
-    <Alert color="success" severity="success" sx={{ width: '100%' }}>
-      {t('operator.connectWallet.successAlert')}
-    </Alert>
-  ) : (
-    errorAlert
-  );
+      default:
+        return undefined;
+    }
+  };
 
   return (
     <PageCard
-      alert={alert}
+      alert={getAlert()}
       backArrowPath={-1}
       title={t('operator.connectWallet.title')}
     >

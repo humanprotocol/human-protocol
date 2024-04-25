@@ -13,8 +13,7 @@ export function ExistingKeys({
   useFormResult: UseFormResult;
   openEditMode: () => void;
 }) {
-  const { watch, getValues } = useFormResult;
-  watch(['fee', 'jobTypes', 'webhookUrl']);
+  const { getValues } = useFormResult;
   const fee = getValues('fee');
   const jobTypes = getValues('jobTypes');
   const webhookUrl = getValues('webhookUrl');

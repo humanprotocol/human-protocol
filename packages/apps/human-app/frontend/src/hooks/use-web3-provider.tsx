@@ -4,7 +4,7 @@ import type { Eip1193Provider } from 'ethers';
 import { BrowserProvider } from 'ethers';
 import { useEffect } from 'react';
 
-const setWallet = async (walletProvider: Eip1193Provider) => {
+const getSignerAndProvider = async (walletProvider: Eip1193Provider) => {
   const provider = new BrowserProvider(walletProvider);
   const signer = await provider.getSigner();
 
@@ -16,14 +16,16 @@ const setWallet = async (walletProvider: Eip1193Provider) => {
 
 export function useWeb3Provider() {
   const { walletProvider } = useWeb3ModalProvider();
-  const mutationResult = useMutation({ mutationFn: setWallet });
+  const useSignerAndProviderMutation = useMutation({
+    mutationFn: getSignerAndProvider,
+  });
 
   useEffect(() => {
     if (walletProvider) {
-      mutationResult.mutate(walletProvider);
+      useSignerAndProviderMutation.mutate(walletProvider);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- not nesseccary
   }, [walletProvider]);
 
-  return mutationResult;
+  return useSignerAndProviderMutation;
 }
