@@ -2,7 +2,7 @@ import json
 import unittest
 from unittest.mock import patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import ChainId
 from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 
@@ -80,9 +80,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 DEFAULT_GAS_PAYER_PRIV,
             ):
                 mock_function.return_value = self.w3
-                signature, serialized_message = sign_message(
-                    ChainId.POLYGON_AMOY.value, "message"
-                )
+                signature, serialized_message = sign_message(ChainId.POLYGON_AMOY.value, "message")
             self.assertEqual(signature, SIGNATURE)
             self.assertEqual(serialized_message, json.dumps("message"))
 
