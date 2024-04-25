@@ -34,6 +34,8 @@ import { verifySignature } from '../../common/utils/signature';
 import { ConflictException } from '@nestjs/common';
 import { DatabaseError } from '../../database/database.error';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { PaymentInfoRepository } from './payment-info.repository';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -84,12 +86,17 @@ describe('PaymentService', () => {
           useValue: createMock<PaymentRepository>(),
         },
         {
+          provide: PaymentInfoRepository,
+          useValue: createMock<PaymentInfoRepository>(),
+        },
+        {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             validateChainId: jest.fn(),
           },
         },
+        ServerConfigService,
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
@@ -144,7 +151,13 @@ describe('PaymentService', () => {
         currency: Currency.USD,
       };
 
-      const userId = 1;
+      const user = {
+        id: 1,
+        paymentInfo: {
+          customerId: 'test',
+          paymentMethodId: 'test',
+        },
+      };
 
       const paymentIntent = {
         client_secret: 'clientSecret123',
@@ -153,11 +166,14 @@ describe('PaymentService', () => {
       createPaymentIntentMock.mockResolvedValue(paymentIntent);
       findOneMock.mockResolvedValue(null);
 
-      const result = await paymentService.createFiatPayment(userId, dto);
+      const result = await paymentService.createFiatPayment(user as any, dto);
 
       expect(createPaymentIntentMock).toHaveBeenCalledWith({
         amount: dto.amount * 100,
         currency: dto.currency,
+        customer: 'test',
+        off_session: false,
+        payment_method: 'test',
       });
       expect(result).toEqual(paymentIntent.client_secret);
     });
@@ -169,7 +185,13 @@ describe('PaymentService', () => {
         currency: Currency.USD,
       };
 
-      const userId = 1;
+      const user = {
+        id: 1,
+        paymentInfo: {
+          customerId: 'test',
+          paymentMethodId: 'test',
+        },
+      };
 
       const paymentIntent = {
         client_secret: 'clientSecret123',
@@ -181,7 +203,7 @@ describe('PaymentService', () => {
       } as PaymentEntity);
 
       await expect(
-        paymentService.createFiatPayment(userId, dto),
+        paymentService.createFiatPayment(user as any, dto),
       ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
     });
 
@@ -192,12 +214,18 @@ describe('PaymentService', () => {
         currency: Currency.USD,
       };
 
-      const userId = 1;
+      const user = {
+        id: 1,
+        paymentInfo: {
+          customerId: 'test',
+          paymentMethodId: 'test',
+        },
+      };
 
       createPaymentIntentMock.mockRejectedValue(new Error());
 
       await expect(
-        paymentService.createFiatPayment(userId, dto),
+        paymentService.createFiatPayment(user as any, dto),
       ).rejects.toThrowError();
     });
   });

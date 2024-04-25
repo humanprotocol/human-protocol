@@ -820,7 +820,7 @@ describe('CronJobService', () => {
       };
 
       jest
-        .spyOn(webhookRepository, 'findByStatus')
+        .spyOn(webhookRepository, 'findByStatusAndType')
         .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
       sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');

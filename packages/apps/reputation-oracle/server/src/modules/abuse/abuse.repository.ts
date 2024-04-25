@@ -5,7 +5,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { BaseRepository } from '../../database/base.repository';
 import { AbuseEntity } from './abuse.entity';
 import { ChainId } from '@human-protocol/sdk';
-import { AbuseStatus } from 'src/common/enums/abuse';
+import { AbuseStatus } from '../../common/enums/abuse';
 
 @Injectable()
 export class AbuseRepository extends BaseRepository<AbuseEntity> {

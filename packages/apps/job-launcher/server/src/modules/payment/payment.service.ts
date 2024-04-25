@@ -41,7 +41,7 @@ import { UserEntity } from '../user/user.entity';
 import { PaymentInfoRepository } from './payment-info.repository';
 import { PaymentInfoEntity } from './payment-info.entity';
 import { JobEntity } from '../job/job.entity';
-import { ServerConfigService } from 'src/common/config/server-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class PaymentService {

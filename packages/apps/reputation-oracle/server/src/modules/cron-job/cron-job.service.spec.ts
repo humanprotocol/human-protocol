@@ -27,6 +27,10 @@ import { HttpService } from '@nestjs/axios';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { AbuseRepository } from '../abuse/abuse.repository';
+import { AbuseService } from '../abuse/abuse.service';
+import { UserRepository } from '../user/user.repository';
+import { SlackConfigService } from '../../common/config/slack-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -75,6 +79,14 @@ describe('CronJobService', () => {
           useValue: createMock<CronJobRepository>(),
         },
         {
+          provide: AbuseRepository,
+          useValue: createMock<AbuseRepository>(),
+        },
+        {
+          provide: UserRepository,
+          useValue: createMock<UserRepository>(),
+        },
+        {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
@@ -82,6 +94,7 @@ describe('CronJobService', () => {
             calculateGasPrice: jest.fn().mockReturnValue(1000n),
           },
         },
+        AbuseService,
         WebhookService,
         PayoutService,
         ReputationService,
@@ -89,6 +102,7 @@ describe('CronJobService', () => {
         ServerConfigService,
         Web3ConfigService,
         ReputationConfigService,
+        SlackConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
         {
           provide: WebhookRepository,

@@ -4,7 +4,7 @@ import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { ChainId } from '@human-protocol/sdk';
-import { AbuseDecision, AbuseStatus } from 'src/common/enums/abuse';
+import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
 
 @Entity({ schema: NS, name: 'abuses' })
 @Index(['chainId', 'escrowAddress'], { unique: true })

@@ -20,8 +20,8 @@ import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { AbuseRepository } from '../abuse/abuse.repository';
 import { AbuseService } from '../abuse/abuse.service';
-import { AbuseDecision, AbuseStatus } from 'src/common/enums/abuse';
-import { ReputationEntityType } from 'src/common/enums';
+import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
+import { ReputationEntityType } from '../../common/enums';
 import { UserRepository } from '../user/user.repository';
 
 @Injectable()
