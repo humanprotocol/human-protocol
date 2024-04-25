@@ -14,10 +14,7 @@ import {
   prepareSignatureResponseFixture,
 } from './disable-operator.fixtures';
 import { serviceMock } from './disable-operator.service.mock';
-import {
-  PrepareSignatureCommand,
-  PrepareSignatureResponse,
-} from '../model/prepare-signature.model';
+import { PrepareSignatureResponse } from '../model/prepare-signature.model';
 
 describe('DisableOperatorController', () => {
   let controller: DisableOperatorController;
@@ -56,12 +53,11 @@ describe('DisableOperatorController', () => {
     });
   });
 
-  it('should return the proper response from processPrepareSignature', async () => {
-    const command: PrepareSignatureCommand = prepareSignatureCommandFixture;
+  it('should return the proper response from prepareSignature method in controller', async () => {
+    const dto = prepareSignatureDtoFixture;
     const expectedResponse: PrepareSignatureResponse =
       prepareSignatureResponseFixture;
-
-    const response = await service.processPrepareSignature(command);
+    const response = await controller.prepareSignature(dto);
     expect(response).toEqual(expectedResponse);
   });
 

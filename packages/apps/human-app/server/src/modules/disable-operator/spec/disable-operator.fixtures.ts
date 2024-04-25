@@ -16,6 +16,14 @@ const ADDRESS = 'test_address';
 const TYPE: PrepareSignatureType = PrepareSignatureType.SIGNUP;
 const SIGNATURE = 'test_signature';
 const TOKEN = 'test_user_token';
+const RESPONSE_FROM = 'test_response_from';
+const RESPONSE_TO = 'test_response_to';
+const RESPONSE_CONTENTS = 'test_response_contents';
+const RESPONSE = {
+  from: RESPONSE_FROM,
+  to: RESPONSE_TO,
+  contents: RESPONSE_CONTENTS,
+};
 
 export const prepareSignatureDtoFixture: PrepareSignatureDto = {
   address: ADDRESS,
@@ -32,11 +40,8 @@ export const prepareSignatureDataFixture: PrepareSignatureData = {
   type: TYPE,
 };
 
-export const prepareSignatureResponseFixture: PrepareSignatureResponse = {
-  from: 'string',
-  to: 'string',
-  contents: 'string',
-};
+export const prepareSignatureResponseFixture: PrepareSignatureResponse =
+  RESPONSE;
 
 export const disableOperatorTokenFixture = TOKEN;
 
