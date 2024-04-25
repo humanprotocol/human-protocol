@@ -147,7 +147,7 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
             component={Link}
             fullWidth
             size="large"
-            to={routerPaths.operator.signUp}
+            to={routerPaths.operator.connectWallet}
             variant="contained"
           >
             {t('homepage.signAsOperator')}

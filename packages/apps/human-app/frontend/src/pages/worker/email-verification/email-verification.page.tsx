@@ -7,11 +7,14 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { useVerifyEmailMutation } from '@/api/servieces/worker/email-verification';
-import { Loader } from '@/components/ui/loader';
-import { EmailVerificationWorkerErrorPage } from '@/pages/worker/email-verification/email-verification-error.page';
 import { SuccessLabel } from '@/components/ui/success-label';
-import { PageCard } from '@/components/ui/page-card';
+import {
+  PageCard,
+  PageCardError,
+  PageCardLoader,
+} from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 const tokenSchema = z.string().transform((value, ctx) => {
   const token = value.split('=')[1];
@@ -47,25 +50,14 @@ export function EmailVerificationWorkerPage() {
 
   if (isEmailVerificationWorkerError) {
     return (
-      <EmailVerificationWorkerErrorPage error={emailVerificationWorkerError} />
+      <PageCardError
+        errorMessage={defaultErrorMessage(emailVerificationWorkerError)}
+      />
     );
   }
 
   if (isEmailVerificationWorkerPending || !emailVerificationData) {
-    return (
-      <PageCard>
-        <Grid
-          container
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-          }}
-        >
-          <Loader size={90} />
-        </Grid>
-      </PageCard>
-    );
+    return <PageCardLoader />;
   }
 
   return (

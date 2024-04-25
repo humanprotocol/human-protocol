@@ -1,4 +1,10 @@
 {
+  "humanCurrencySymbol": "HMT",
+  "inputMasks": {
+    "humanCurrencySuffix": " HMT",
+    "percentSuffix": "%",
+    "plusPrefix": "+"
+  },
   "dashboard": {},
   "validation": {
     "required": "Required",
@@ -53,9 +59,13 @@
     },
     "wallet": {
       "connectBtn": {
-        "disconnect": "Disconnect",
-        "connect": "Connect"
+        "disconnect": "Disconnect Wallet",
+        "connect": "Connect Wallet"
       }
+    },
+    "pageCardError": {
+      "reload": "Reload",
+      "goHome": "Back to home page"
     }
   },
   "homepage": {
@@ -189,6 +199,58 @@
         "assignmentsRejected": "Assignments rejected",
         "assignmentsExpired": "Assignments expired"
       }
+    },
+    "connectWallet": {
+      "title": "Setup Operator",
+      "description": "Please use the button bellow to connect your wallet and sign up as an operator.",
+      "connect": "Connect Wallet",
+      "disconnect": "Disconnect",
+      "successAlert": "Wallet successfully connected",
+      "setupOperator": "Setup Operator"
+    },
+    "addStake": {
+      "title": "Setup Operator",
+      "formHeader": "Stake",
+      "label": "Staked amount",
+      "description": "Please add bellow the amount to stake",
+      "actionBtn": "Add Stake",
+      "nextBtn": "Next"
+    },
+    "stakeForm": {
+      "formBtn": "Stake",
+      "backBtn": "Skip",
+      "label": "Stake amount",
+      "description": "Please add bellow the amount to stake",
+      "successAlert": "You have successfully staked {{amount}} HMT"
+    },
+    "addKeysPage": {
+      "title": "Setup Operator",
+      "btn": " Add New Keys to KVStore",
+      "pendingKeys": {
+        "title": "Pending Keys",
+        "role": "Role",
+        "annotationUrl": "Annotation URL",
+        "url": "URL"
+      },
+      "existingKeys": {
+        "title": "Existing keys",
+        "fee": "Fee",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job types",
+        "editBtn": "Edit"
+      },
+      "editKeysForm": {
+        "fee": "Fee",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job Types",
+        "btn": "Save"
+      }
+    },
+    "editExistingKeysSuccess": {
+      "title": "Setup Operator",
+      "paragraph1": "Congratulations 🎉!",
+      "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
+      "btn": "Finish"
     }
   }
 }

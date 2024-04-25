@@ -13,6 +13,9 @@ export const routerPaths = {
   },
   operator: {
     signIn: '/operator/sign-in',
-    signUp: '/operator/sign-up',
+    connectWallet: '/operator/connect-wallet',
+    addStake: '/operator/add-stake',
+    addKeys: '/operator/add-keys',
+    editExistingKeysSuccess: '/operator/edit-existing-keys-success',
   },
 } as const;
