@@ -88,13 +88,10 @@ class _CompletedEscrowsHandler:
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[project.job_type]
                 job_annotations: Dict[int, FileDescriptor] = {}
 
-                # Request dataset preparation beforehand
-                for job in jobs:
-                    cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
-
                 # Collect raw annotations from CVAT, validate and convert them
                 # into a recording oracle suitable format
                 for job in jobs:
+                    cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
                     job_annotations_file = cvat_api.get_job_annotations(
                         job.cvat_id, format_name=annotation_format
                     )
@@ -259,17 +256,14 @@ class _CompletedEscrowsHandler:
                     )
                 )
 
-                # Request dataset preparation beforehand
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
-                for cvat_job in cvat_jobs:
-                    cvat_api.request_job_annotations(
-                        cvat_job.cvat_id, format_name=annotation_format
-                    )
-
                 # Collect raw annotations from CVAT, validate and convert them
                 # into a recording oracle suitable format
                 job_annotations: Dict[int, FileDescriptor] = {}
                 for cvat_job in cvat_jobs:
+                    cvat_api.request_job_annotations(
+                        cvat_job.cvat_id, format_name=annotation_format
+                    )
                     job_annotations_file = cvat_api.get_job_annotations(
                         cvat_job.cvat_id, format_name=annotation_format
                     )
