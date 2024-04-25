@@ -4,10 +4,18 @@ export const routerPaths = {
   worker: {
     signIn: '/worker/sign-in',
     signUp: '/worker/sign-up',
+    resetPassword: '/worker/reset-password/:token',
+    resetPasswordSuccess: '/worker/reset-password-success',
+    sendResetLink: '/worker/send-reset-link',
+    sendResetLinkSuccess: '/worker/send-reset-link-success',
+    emailVerification: '/verify',
+    sendEmailVerification: '/worker/send-email-verification',
   },
   operator: {
     signIn: '/operator/sign-in',
-    signUp: '/operator/sign-up',
+    connectWallet: '/operator/connect-wallet',
+    addStake: '/operator/add-stake',
+    addKeys: '/operator/add-keys',
+    editExistingKeysSuccess: '/operator/edit-existing-keys-success',
   },
-  resetPassword: '/reset-password',
 } as const;

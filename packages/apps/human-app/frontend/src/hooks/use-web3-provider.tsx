@@ -1,28 +1,31 @@
+import { useMutation } from '@tanstack/react-query';
 import { useWeb3ModalProvider } from '@web3modal/ethers/react';
-import type { JsonRpcSigner } from 'ethers';
+import type { Eip1193Provider } from 'ethers';
 import { BrowserProvider } from 'ethers';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+
+const getSignerAndProvider = async (walletProvider: Eip1193Provider) => {
+  const provider = new BrowserProvider(walletProvider);
+  const signer = await provider.getSigner();
+
+  return {
+    provider,
+    signer,
+  };
+};
 
 export function useWeb3Provider() {
   const { walletProvider } = useWeb3ModalProvider();
-  const [provider, setProvider] = useState<BrowserProvider>();
-  const [signer, setSigner] = useState<JsonRpcSigner>();
+  const useSignerAndProviderMutation = useMutation({
+    mutationFn: getSignerAndProvider,
+  });
 
   useEffect(() => {
-    void (async () => {
-      try {
-        if (walletProvider) {
-          const _provider = new BrowserProvider(walletProvider);
-          const _signer = await _provider.getSigner();
-
-          setProvider(_provider);
-          setSigner(_signer);
-        }
-      } catch {
-        /* empty */
-      }
-    })();
+    if (walletProvider) {
+      useSignerAndProviderMutation.mutate(walletProvider);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- not nesseccary
   }, [walletProvider]);
 
-  return { provider, signer };
+  return useSignerAndProviderMutation;
 }

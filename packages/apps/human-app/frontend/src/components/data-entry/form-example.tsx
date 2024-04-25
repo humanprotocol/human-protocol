@@ -104,6 +104,20 @@ export function FormExample() {
               <Input label="Email" name="email" />
             </Grid>
             <Grid item xs={6}>
+              <Input
+                label="Percents"
+                mask="PercentsInputMask"
+                name="percents"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Input
+                label="Human currency"
+                mask="HumanCurrencyInputMask"
+                name="percents"
+              />
+            </Grid>
+            <Grid item xs={6}>
               <Password label="Password" name="password" />
             </Grid>
 

@@ -1,12 +1,16 @@
+import type { SxProps, Theme } from '@mui/material';
 import { Box, Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+import { t } from 'i18next';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
-import { Alert } from '@/components/ui/alert';
 import { colorPalette } from '@/styles/color-palette';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
+import { Loader } from '@/components/ui/loader';
+import { Alert } from '@/components/ui/alert';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -22,27 +26,51 @@ const IconWrapper = styled('div')(() => ({
   },
 }));
 
+const commonStyles: SxProps<Theme> = {
+  padding: '2rem 2rem 6rem 2rem',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: '2rem',
+  borderRadius: '20px',
+  minHeight: '70vh',
+  maxWidth: '1200px',
+  width: '100%',
+  background: colorPalette.white,
+  [breakpoints.mobile]: {
+    borderRadius: '0',
+  },
+};
+
 interface FormCardProps {
-  title: string;
   children: React.JSX.Element;
+  title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
-  cardMaxWidth?: string;
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
+  withLayoutBackground?: boolean;
+  loader?: boolean;
 }
 
-export function FormCard({
-  title,
+export function PageCard({
   children,
+  title,
   alert,
-  cardMaxWidth = '1200px',
   childrenMaxWidth = '486px',
-  backArrowPath = -1,
+  backArrowPath,
   cancelBtnPath = routerPaths.homePage,
+  withLayoutBackground = true,
 }: FormCardProps) {
+  const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (withLayoutBackground) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
 
   const goBack = (path: string | -1) => {
     if (typeof path === 'string') {
@@ -53,23 +81,7 @@ export function FormCard({
   };
 
   return (
-    <Grid
-      container
-      sx={{
-        padding: '2rem 2rem 6rem 2rem',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '2rem',
-        borderRadius: '20px',
-        maxWidth: cardMaxWidth,
-        width: '100%',
-        background: colorPalette.white,
-        [breakpoints.mobile]: {
-          borderRadius: '0',
-        },
-      }}
-    >
+    <Grid container sx={commonStyles}>
       <Grid
         sx={{
           display: 'flex',
@@ -111,13 +123,15 @@ export function FormCard({
               [breakpoints.mobile]: {
                 display: 'flex',
                 width: '100%',
-                justifyContent: 'space-between',
+                justifyContent: backArrowPath ? 'space-between' : 'flex-end',
               },
             }}
           >
-            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-              <ArrowBackIcon />
-            </IconWrapper>
+            {backArrowPath ? (
+              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+                <ArrowBackIcon />
+              </IconWrapper>
+            ) : null}
             <Button onClick={goBack.bind(null, cancelBtnPath)}>
               <Typography variant="buttonMedium">
                 {t('components.modal.header.closeBtn')}
@@ -130,19 +144,16 @@ export function FormCard({
             md={10}
             order={{ xs: 2, md: 2 }}
             sx={{
-              height: '3rem',
+              minHeight: '3rem',
               width: '100%',
               [breakpoints.mobile]: {
                 height: 'auto',
+                minHeight: 'unset',
               },
             }}
             xs={12}
           >
-            {alert ? (
-              <Alert color="error" severity="error" sx={{ width: '100%' }}>
-                {alert}
-              </Alert>
-            ) : null}
+            {alert ? <>{alert}</> : null}
           </Grid>
           <Grid
             item
@@ -155,9 +166,11 @@ export function FormCard({
             }}
             xs={12}
           >
-            <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-              <ArrowBackIcon />
-            </IconWrapper>
+            {backArrowPath ? (
+              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+                <ArrowBackIcon />
+              </IconWrapper>
+            ) : null}
           </Grid>
           <Grid item md={10} order={{ xs: 4, md: 4 }} xs={12}>
             <Typography variant="h4">{title}</Typography>
@@ -168,6 +181,61 @@ export function FormCard({
           </Grid>
         </Grid>
       </Box>
+    </Grid>
+  );
+}
+
+export function PageCardLoader({
+  withLayoutBackground = true,
+}: {
+  cardMaxWidth?: string;
+  withLayoutBackground?: boolean;
+}) {
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    if (withLayoutBackground) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
+  return (
+    <Grid container sx={commonStyles}>
+      <Loader size={90} />
+    </Grid>
+  );
+}
+export function PageCardError({
+  errorMessage,
+  withLayoutBackground,
+}: {
+  errorMessage: string;
+  cardMaxWidth?: string;
+  withLayoutBackground?: boolean;
+}) {
+  const navigate = useNavigate();
+  const { setGrayBackground } = useBackgroundColorStore();
+
+  useEffect(() => {
+    if (withLayoutBackground) {
+      setGrayBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
+  }, []);
+  return (
+    <Grid container sx={commonStyles}>
+      <Alert color="error" severity="error">
+        {errorMessage}
+      </Alert>
+      <Button onClick={navigate.bind(null, 0)} variant="contained">
+        {t('components.pageCardError.reload')}
+      </Button>
+      <Button
+        onClick={navigate.bind(null, routerPaths.homePage)}
+        variant="outlined"
+      >
+        {t('components.pageCardError.goHome')}
+      </Button>
     </Grid>
   );
 }
