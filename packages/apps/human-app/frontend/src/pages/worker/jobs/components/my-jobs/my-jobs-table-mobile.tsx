@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
-import { ChipComponent } from '@/components/ui/chip-component';
+import { Chip } from '@/components/ui/chip';
 import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { formatDate } from '@/shared/utils/format-date';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
@@ -181,7 +181,7 @@ export function MyJobsTableMobile() {
                         marginBottom: '10px',
                       }}
                     >
-                      <ChipComponent
+                      <Chip
                         backgroundColor={parseJobStatusChipColor(d.status)}
                         key={d.status}
                         label={d.status}

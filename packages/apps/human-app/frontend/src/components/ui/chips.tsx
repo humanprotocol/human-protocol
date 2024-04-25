@@ -5,7 +5,7 @@ interface JobTypesChipsProps {
   data: string[];
 }
 
-export function JobTypesChips({ data }: JobTypesChipsProps) {
+export function Chips({ data }: JobTypesChipsProps) {
   return (
     <Stack direction="row" spacing={1}>
       {data.map((jobType) => (

@@ -14,8 +14,8 @@ import { formatDate } from '@/shared/utils/format-date';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
-import { ChipComponent } from '@/components/ui/chip-component';
 import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
+import { Chip } from '@/components/ui/chip';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import { JobTypesChips } from '../ui/job-types-chips';
 import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
@@ -166,7 +166,7 @@ export function MyJobsTable() {
       expiresAt: formatDate(job.expiresAt),
       jobTypeChips: <JobTypesChips data={job.jobType} />,
       statusChip: (
-        <ChipComponent
+        <Chip
           backgroundColor={parseJobStatusChipColor(job.status)}
           key={job.status}
           label={job.status}

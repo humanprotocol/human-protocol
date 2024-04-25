@@ -1,12 +1,12 @@
 import { Box, Typography } from '@mui/material';
 import { colorPalette } from '@/styles/color-palette';
 
-interface ChipComponentProps {
+interface ChipProps {
   label: string;
   key: string;
   backgroundColor?: string;
 }
-export function ChipComponent({ label, backgroundColor }: ChipComponentProps) {
+export function Chip({ label, backgroundColor }: ChipProps) {
   return (
     <Box
       key={crypto.randomUUID()}
