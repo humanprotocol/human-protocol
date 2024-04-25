@@ -25,7 +25,7 @@ SIGNATURE = "0xa0c5626301e3c198cb91356e492890c0c28db8c37044846134939246911a693c4
 
 WEBHOOK_MESSAGE = {
     "escrow_address": "0x12E66A452f95bff49eD5a30b0d06Ebc37C5A94B6",
-    "chain_id": 80001,
+    "chain_id": 80002,
     "event_type": "escrow_created",
     "event_data": {},
 }
