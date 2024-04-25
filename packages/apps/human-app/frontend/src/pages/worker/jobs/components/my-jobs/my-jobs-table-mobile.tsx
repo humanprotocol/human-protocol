@@ -14,13 +14,14 @@ import { formatDate } from '@/shared/utils/format-date';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
 
-const parseUniqueValues = (data: MyJobs[]) => {
-  const uniqueValues = {
+const parseMyJobsUniqueValues = (data: MyJobs[]) => {
+  const statusSet = new Set(data.map((item) => item.status));
+  const statusArray = Array.from(statusSet);
+  return {
     network: [...new Set(data.map((item) => item.network))],
     jobType: [...new Set(data.flatMap((item) => item.jobType))],
-    status: [...new Set(data.flatMap((item) => item.status))],
+    status: statusArray.length > 0 ? statusArray[0] : undefined,
   };
-  return uniqueValues;
 };
 
 export function MyJobsTableMobile() {
@@ -38,64 +39,71 @@ export function MyJobsTableMobile() {
   const [filteredData, setFilteredData] = useState(data);
   const {
     openMobileFilterDrawer,
-    setUniqueValues,
-    uniqueValues,
-    availableJobsFilters,
+    setMyJobsUniqueValues,
+    myJobsUniqueValues,
+    myJobsFilters,
   } = useMobileDrawerFilterStore();
 
   useEffect(() => {
     if (
       data &&
-      uniqueValues.network.length === 0 &&
-      uniqueValues.jobType.length === 0
+      myJobsUniqueValues.network.length === 0 &&
+      myJobsUniqueValues.jobType.length === 0 &&
+      myJobsUniqueValues.status.length === 0
     ) {
-      setUniqueValues(parseUniqueValues(data));
+      setMyJobsUniqueValues(parseMyJobsUniqueValues(data));
     }
 
     let filtered = data;
 
     //filter by checkboxes
-
-    if (availableJobsFilters.network.length > 0) {
+    if (myJobsFilters.network.length > 0) {
       filtered = filtered?.filter((item) =>
-        availableJobsFilters.network.includes(item.network)
+        myJobsFilters.network.includes(item.network)
       );
     }
 
-    if (availableJobsFilters.jobType.length > 0) {
+    if (myJobsFilters.jobType.length > 0) {
       filtered = filtered?.filter((item) =>
-        availableJobsFilters.jobType.some((type) => item.jobType.includes(type))
+        myJobsFilters.jobType.some((type) => item.jobType.includes(type))
+      );
+    }
+
+    if (myJobsFilters.status.length > 0) {
+      filtered = filtered?.filter((item) =>
+        myJobsFilters.status.includes(item.status)
       );
     }
 
     // filter by search
-    // const escrowSearchValue = searchEscrowAddress[0].value.trim();
-    // if (escrowSearchValue) {
-    //   filtered = filtered?.filter((item) =>
-    //     item.escrowAddress.includes(escrowSearchValue)
-    //   );
-    // }
-    //sorting
-    // if (availableJobsFilters.sortingOrder.sortingColumn) {
-    //   const { sortingColumn, sortingOrder } = availableJobsFilters.sortingOrder;
-    //   filtered?.sort((a, b) => {
-    //     const valueA = a[sortingColumn as keyof AvailableJobs].toString();
-    //     const valueB = b[sortingColumn as keyof AvailableJobs].toString();
+    const escrowSearchValue = searchEscrowAddress[0].value.trim();
+    if (escrowSearchValue) {
+      filtered = filtered?.filter((item) =>
+        item.escrowAddress.includes(escrowSearchValue)
+      );
+    }
 
-    //     if (sortingOrder === 'DESC') {
-    //       return valueB.localeCompare(valueA);
-    //     }
-    //     return valueA.localeCompare(valueB);
-    //   });
-    // }
+    if (myJobsFilters.sortingOrder.sortingColumn) {
+      const { sortingColumn, sortingOrder } = myJobsFilters.sortingOrder;
+
+      filtered?.sort((a, b) => {
+        const valueA = (a[sortingColumn as keyof MyJobs] || '').toString();
+        const valueB = (b[sortingColumn as keyof MyJobs] || '').toString();
+
+        if (sortingOrder === 'DESC') {
+          return valueB.localeCompare(valueA);
+        }
+        return valueA.localeCompare(valueB);
+      });
+    }
 
     setFilteredData(filtered);
   }, [
     data,
-    uniqueValues,
-    availableJobsFilters,
+    myJobsUniqueValues,
+    myJobsFilters,
     searchEscrowAddress,
-    setUniqueValues,
+    setMyJobsUniqueValues,
   ]);
 
   return (

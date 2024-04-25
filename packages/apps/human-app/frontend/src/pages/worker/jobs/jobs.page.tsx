@@ -7,6 +7,7 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { HomepageWorkIcon } from '@/components/ui/icons';
+import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
@@ -47,9 +48,16 @@ export function JobsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
+  const { setActiveJobsTab } = useMobileDrawerFilterStore();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    if (newValue === 0) {
+      setActiveJobsTab('availableJobs');
+    }
+    if (newValue === 1) {
+      setActiveJobsTab('myJobs');
+    }
   };
 
   useEffect(() => {

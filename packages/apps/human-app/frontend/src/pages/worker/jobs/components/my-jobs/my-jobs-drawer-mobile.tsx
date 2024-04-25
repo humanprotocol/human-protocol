@@ -20,7 +20,7 @@ export function MyJobsDrawerMobile({
 }: DrawerNavigationProps) {
   const isMobile = useIsMobile();
   const { t } = useTranslation();
-  const { uniqueValues, availableJobsFilters, setAvailableJobsFilters } =
+  const { myJobsUniqueValues, myJobsFilters, setMyJobsFilters } =
     useMobileDrawerFilterStore();
 
   const isValueInArray = (value: string, array: string[]) =>
@@ -28,15 +28,15 @@ export function MyJobsDrawerMobile({
 
   const updateFilters = (value: string, parameter: string) => {
     const { [parameter]: currentParameterFilters, ...otherFilters } =
-      availableJobsFilters as unknown as Record<string, string[]>;
+      myJobsFilters as unknown as Record<string, string[]>;
 
     if (isValueInArray(value, currentParameterFilters)) {
-      setAvailableJobsFilters({
+      setMyJobsFilters({
         ...otherFilters,
         [parameter]: currentParameterFilters.filter((item) => item !== value),
       });
     } else {
-      setAvailableJobsFilters({
+      setMyJobsFilters({
         ...otherFilters,
         [parameter]: [...currentParameterFilters, value],
       });
@@ -77,8 +77,8 @@ export function MyJobsDrawerMobile({
         </Typography>
         <Button
           onClick={() => {
-            setAvailableJobsFilters({
-              ...availableJobsFilters,
+            setMyJobsFilters({
+              ...myJobsFilters,
               sortingOrder: {
                 sortingColumn: 'jobDescription',
                 sortingOrder: 'ASC',
@@ -104,8 +104,8 @@ export function MyJobsDrawerMobile({
         </Button>
         <Button
           onClick={() => {
-            setAvailableJobsFilters({
-              ...availableJobsFilters,
+            setMyJobsFilters({
+              ...myJobsFilters,
               sortingOrder: {
                 sortingColumn: 'jobDescription',
                 sortingOrder: 'DESC',
@@ -149,8 +149,8 @@ export function MyJobsDrawerMobile({
           <SortArrow />{' '}
           <Typography
             onClick={() => {
-              setAvailableJobsFilters({
-                ...availableJobsFilters,
+              setMyJobsFilters({
+                ...myJobsFilters,
                 sortingOrder: {
                   sortingColumn: 'rewardAmount',
                   sortingOrder: 'DESC',
@@ -183,8 +183,8 @@ export function MyJobsDrawerMobile({
           </Box>{' '}
           <Typography
             onClick={() => {
-              setAvailableJobsFilters({
-                ...availableJobsFilters,
+              setMyJobsFilters({
+                ...myJobsFilters,
                 sortingOrder: {
                   sortingColumn: 'rewardAmount',
                   sortingOrder: 'ASC',
@@ -210,14 +210,14 @@ export function MyJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.network')}
         </Typography>
-        {uniqueValues.network.map((v) => (
+        {myJobsUniqueValues.network.map((v) => (
           <Stack
             alignItems="center"
             flexDirection="row"
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={isValueInArray(v, availableJobsFilters.network)}
+              checked={isValueInArray(v, myJobsFilters.network)}
               onClick={() => {
                 updateFilters(v, 'network');
               }}
@@ -233,14 +233,29 @@ export function MyJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.jobType')}
         </Typography>
-        {uniqueValues.jobType.map((v) => (
+        {myJobsUniqueValues.jobType.map((v) => (
           <Stack
             alignItems="center"
             flexDirection="row"
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={isValueInArray(v, availableJobsFilters.jobType)}
+              checked={isValueInArray(v, myJobsFilters.jobType)}
+              onClick={() => {
+                updateFilters(v, 'jobType');
+              }}
+            />
+            <Typography>{v}</Typography>
+          </Stack>
+        ))}
+        {myJobsUniqueValues.jobType.map((v) => (
+          <Stack
+            alignItems="center"
+            flexDirection="row"
+            key={crypto.randomUUID()}
+          >
+            <Checkbox
+              checked={isValueInArray(v, myJobsFilters.jobType)}
               onClick={() => {
                 updateFilters(v, 'jobType');
               }}

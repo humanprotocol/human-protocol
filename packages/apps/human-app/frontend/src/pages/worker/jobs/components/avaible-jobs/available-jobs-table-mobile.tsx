@@ -79,8 +79,12 @@ export function AvailableJobsTableMobile() {
       const { sortingColumn, sortingOrder } = availableJobsFilters.sortingOrder;
 
       filtered?.sort((a, b) => {
-        const valueA = a[sortingColumn as keyof AvailableJobs].toString();
-        const valueB = b[sortingColumn as keyof AvailableJobs].toString();
+        const valueA = (
+          a[sortingColumn as keyof AvailableJobs] || ''
+        ).toString();
+        const valueB = (
+          b[sortingColumn as keyof AvailableJobs] || ''
+        ).toString();
 
         if (sortingOrder === 'DESC') {
           return valueB.localeCompare(valueA);

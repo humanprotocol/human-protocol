@@ -7,6 +7,7 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { colorPalette } from '@/styles/color-palette';
 import { AvaibleJobsDrawerMobile } from '@/pages/worker/jobs/components/avaible-jobs/available-jobs-drawer-mobile';
 import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
+import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/my-jobs-drawer-mobile';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
@@ -38,7 +39,8 @@ export function Layout() {
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const { backgroundColor } = useBackgroundColorStore();
-  const { isMobileFilterDrawerOpen } = useMobileDrawerFilterStore();
+  const { isMobileFilterDrawerOpen, activeJobsTab } =
+    useMobileDrawerFilterStore();
 
   useEffect(() => {
     if (isMobile) {
@@ -74,6 +76,17 @@ export function Layout() {
         drawerWidth={drawerWidth}
         open={isMobileFilterDrawerOpen}
       />
+      {activeJobsTab === 'availableJobs' ? (
+        <AvaibleJobsDrawerMobile
+          drawerWidth={drawerWidth}
+          open={isMobileFilterDrawerOpen}
+        />
+      ) : (
+        <MyJobsDrawerMobile
+          drawerWidth={drawerWidth}
+          open={isMobileFilterDrawerOpen}
+        />
+      )}
       <Main isMobile={isMobile} open={drawerOpen}>
         <Outlet />
       </Main>
