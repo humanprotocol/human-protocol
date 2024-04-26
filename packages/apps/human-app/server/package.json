@@ -29,7 +29,7 @@
     "@nestjs/core": "^10.2.8",
     "@nestjs/platform-express": "^10.3.8",
     "@nestjs/swagger": "^7.1.13",
-    "ethers": "^6.11.0",
+    "ethers": "^6.12.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },
