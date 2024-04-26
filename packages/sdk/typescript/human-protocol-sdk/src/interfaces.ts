@@ -32,6 +32,11 @@ export interface ILeader {
   publicKey?: string;
   webhookUrl?: string;
   url?: string;
+  jobTypes?: string[];
+}
+
+export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+  jobTypes?: string;
 }
 
 export interface ILeadersFilter {
@@ -45,11 +50,20 @@ export interface IReputationNetwork {
   operators: IOperator[];
 }
 
+export interface IReputationNetworkSubgraph
+  extends Omit<IReputationNetwork, 'operators'> {
+  operators: IOperatorSubgraph[];
+}
+
 export interface IOperator {
   address: string;
   role?: string;
   url?: string;
   jobTypes?: string[];
+}
+
+export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {
+  jobTypes?: string;
 }
 
 export interface IEscrowsFilter {

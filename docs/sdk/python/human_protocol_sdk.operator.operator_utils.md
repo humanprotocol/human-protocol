@@ -43,7 +43,7 @@ Initializes an LeaderData instance.
   * **public_key** (`Optional`[`str`]) – Public key
   * **webhook_url** (`Optional`[`str`]) – Webhook url
   * **url** (`Optional`[`str`]) – Url
-  * **job_types** (`Optional`[`str`]) – Job types
+  * **job_types** (`Optional`[`List`[`str`]]) – Job types
 
 ### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(networks, role=None)
 
@@ -59,11 +59,11 @@ Initializes a LeaderFilter instance.
   * **networks** (`List`[[`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)]) – Networks to request data
   * **role** (`Optional`[`str`]) – Leader role
 
-### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types='')
+### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[])
 
 Bases: `object`
 
-#### \_\_init_\_(address, role, url='', job_types='')
+#### \_\_init_\_(address, role, url='', job_types=[])
 
 Initializes an Operator instance.
 

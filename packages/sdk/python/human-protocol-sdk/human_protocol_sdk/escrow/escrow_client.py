@@ -77,9 +77,9 @@ class EscrowCancel:
     def __init__(self, tx_hash: str, amount_refunded: any):
         """
         Represents the result of an escrow cancellation transaction.
-        Args:
-            tx_hash (str): The hash of the transaction that cancelled the escrow.
-            amount_refunded (Any): The amount refunded during the escrow cancellation.
+
+        :param tx_hash: The hash of the transaction that cancelled the escrow.
+        :param amount_refunded: The amount refunded during the escrow cancellation.
         """
         self.txHash = tx_hash
         self.amountRefunded = amount_refunded
