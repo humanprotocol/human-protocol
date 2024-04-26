@@ -1,11 +1,11 @@
 import { Stack } from '@mui/material';
 import { Chip } from '@/components/ui/chip';
 
-interface JobTypesChipsProps {
+interface ChipsProps {
   data: string[];
 }
 
-export function Chips({ data }: JobTypesChipsProps) {
+export function Chips({ data }: ChipsProps) {
   return (
     <Stack direction="row" spacing={1}>
       {data.map((jobType) => (

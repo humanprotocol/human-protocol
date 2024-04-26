@@ -2,13 +2,13 @@ import { colorPalette } from '@/styles/color-palette';
 
 export const parseJobStatusChipColor = (status: string) => {
   if (status === 'OVERDUE') {
-    return colorPalette.error.main.toString();
+    return colorPalette.error.main;
   }
   if (status === 'DEACTIVATED') {
-    return colorPalette.error.dark.toString();
+    return colorPalette.error.dark;
   }
   if (status === 'COMPLITED') {
-    return colorPalette.success.main.toString();
+    return colorPalette.success.main;
   }
-  return colorPalette.primary.light.toString();
+  return colorPalette.primary.light;
 };
