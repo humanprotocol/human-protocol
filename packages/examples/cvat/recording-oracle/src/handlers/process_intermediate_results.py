@@ -1021,7 +1021,7 @@ def process_intermediate_results(
             )
         )
         should_complete = True
-    elif not rejected_jobs:
+    elif len(rejected_jobs) == len(unverifiable_jobs_count):
         should_complete = True
 
     if not should_complete:
