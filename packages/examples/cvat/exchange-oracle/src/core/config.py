@@ -84,6 +84,15 @@ class CronConfig:
         "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
         os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
     )
+    track_completed_escrows_max_downloading_retries = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
+    )
+    "Maximum number of downloading attempts per job during results downloading"
+
+    track_completed_escrows_jobs_downloading_batch_size = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
+    )
+    "Maximum number of parallel downloading requests during results downloading"
 
     rejected_projects_chunk_size = os.environ.get("REJECTED_PROJECTS_CHUNK_SIZE", 20)
     accepted_projects_chunk_size = os.environ.get("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
