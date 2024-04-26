@@ -91,6 +91,9 @@ T = TypeVar("T")
 
 
 class _TaskValidator:
+    UNKNOWN_QUALITY = -1
+    "The value to be used when job quality cannot be computed (e.g. no GT images available)"
+
     def __init__(
         self,
         escrow_address: str,
@@ -193,6 +196,7 @@ class _TaskValidator:
             try:
                 job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
             except TooFewGtError as e:
+                job_results[job_cvat_id] = self.self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
 
@@ -392,6 +396,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
             try:
                 job_mean_accuracy = comparator.compare(job_gt_dataset, job_dataset)
             except TooFewGtError as e:
+                job_results[job_cvat_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
 
@@ -1050,7 +1055,10 @@ def process_intermediate_results(
     return ValidationSuccess(
         validation_meta=validation_meta,
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
-        average_quality=np.mean(list(job_results.values())) if job_results else 0,
+        average_quality=np.mean(
+            list(v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0)
+            or [0]
+        ),
     )
 
 
