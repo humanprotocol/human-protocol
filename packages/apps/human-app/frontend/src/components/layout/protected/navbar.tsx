@@ -3,7 +3,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { HumanLogoIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
 
 interface NavbarProps {
   open: boolean;
@@ -12,7 +11,6 @@ interface NavbarProps {
 
 export function Navbar({ setOpen, open }: NavbarProps) {
   const isMobile = useIsMobile();
-  const { closeMobileFilterDrawer } = useMobileDrawerFilterStore();
 
   return (
     <Stack
@@ -37,15 +35,7 @@ export function Navbar({ setOpen, open }: NavbarProps) {
 
       <IconButton
         onClick={() => {
-          if (open) {
-            setOpen(false);
-            closeMobileFilterDrawer();
-          } else {
-            setOpen(true);
-          }
-        }}
-        sx={{
-          zIndex: '9999',
+          setOpen(!open);
         }}
       >
         {open ? <CloseIcon /> : <MenuIcon />}

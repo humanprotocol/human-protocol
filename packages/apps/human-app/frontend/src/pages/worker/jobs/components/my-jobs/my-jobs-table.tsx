@@ -8,8 +8,6 @@ import { t } from 'i18next';
 import { useMemo } from 'react';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
-import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { formatDate } from '@/shared/utils/format-date';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
@@ -17,10 +15,12 @@ import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
 import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { Chip } from '@/components/ui/chip';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { JobTypesChips } from '../ui/job-types-chips';
+import type { JobsArray } from '../avaible-jobs/available-jobs-table-service';
+import { parseNetworkName } from '../utils/parse-network-label';
 import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
+import { MyJobsButton } from './my-jobs-button';
 
-const columns: MRT_ColumnDef<MyJobs>[] = [
+const columns: MRT_ColumnDef<JobsArray>[] = [
   {
     accessorKey: 'escrowAddress',
     header: t('worker.jobs.escrowAddress'),
@@ -39,12 +39,12 @@ const columns: MRT_ColumnDef<MyJobs>[] = [
             <Filtering
               filteringOptions={[
                 {
-                  value: t('worker.jobs.Ethereum'),
-                  text: t('worker.jobs.Ethereum'),
+                  value: t('worker.jobs.mobileFilterDrawer.network.matic'),
+                  text: t('worker.jobs.mobileFilterDrawer.network.matic'),
                 },
                 {
-                  value: t('worker.jobs.Polygon'),
-                  text: t('worker.jobs.Polygon'),
+                  value: t('worker.jobs.mobileFilterDrawer.network.polygon'),
+                  text: t('worker.jobs.mobileFilterDrawer.network.polygon'),
                 },
               ]}
               label="Filter"
@@ -55,7 +55,7 @@ const columns: MRT_ColumnDef<MyJobs>[] = [
     }),
   },
   {
-    accessorKey: 'rewardAmount',
+    accessorKey: 'reward_amount',
     header: t('worker.jobs.rewardAmount'),
     size: 100,
     enableSorting: true,
@@ -90,7 +90,7 @@ const columns: MRT_ColumnDef<MyJobs>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: 'expiresAt',
+    accessorKey: 'expires_at',
     header: t('worker.jobs.expiresAt'),
     size: 100,
     enableSorting: true,
@@ -109,51 +109,12 @@ const columns: MRT_ColumnDef<MyJobs>[] = [
   },
 ];
 
-interface MyJobsButtonProps {
-  status: MyJobs['status'];
-  isActivated: boolean;
-}
-
-function MyJobsButton({ status, isActivated }: MyJobsButtonProps) {
-  if (isActivated && status === 'Active') {
-    return (
-      <Button color="primary" size="small" type="button" variant="contained">
-        {t('worker.jobs.resign')}
-      </Button>
-    );
-  }
-  if (!isActivated && status === 'Active') {
-    return (
-      <Button color="secondary" size="small" type="button" variant="contained">
-        {t('worker.jobs.solve')}
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      size="small"
-      sx={{
-        backgroundColor: colorPalette.paper.disabled,
-        color: colorPalette.paper.text,
-        boxShadow: 'none',
-        px: '10px',
-        py: '4px',
-      }}
-      type="button"
-      variant="contained"
-    >
-      {t('worker.jobs.solve')}
-    </Button>
-  );
-}
-
 export function MyJobsTable() {
   const {
     fields: { sorting, pagination },
   } = useTableQuery();
 
-  const { data, isLoading, isError, isRefetching } = useQuery<MyJobs[]>({
+  const { data, isLoading, isError, isRefetching } = useQuery<MyJobs>({
     queryKey: ['MyJobs', [sorting, pagination]],
     queryFn: () => getJobsTableData(),
   });
@@ -161,10 +122,12 @@ export function MyJobsTable() {
   const memoizedData = useMemo(() => {
     if (!data) return [];
 
-    return data.map((job) => ({
+    return data.results.map((job) => ({
       ...job,
-      expiresAt: formatDate(job.expiresAt),
-      jobTypeChips: <JobTypesChips data={job.jobType} />,
+      // eslint-disable-next-line camelcase -- output from api
+      expires_at: formatDate(job.expires_at),
+      jobTypeChips: <Chip label={job.job_type} />,
+      network: parseNetworkName(job.chain_id),
       statusChip: (
         <Chip
           backgroundColor={parseJobStatusChipColor(job.status)}
@@ -172,10 +135,8 @@ export function MyJobsTable() {
           label={job.status}
         />
       ),
-      escrowAddress: shortenEscrowAddress(job.escrowAddress),
-      buttonColumn: (
-        <MyJobsButton isActivated={job.isActivated} status={job.status} />
-      ),
+      escrowAddress: shortenEscrowAddress(job.escrow_address),
+      buttonColumn: <MyJobsButton status={job.status} />,
     }));
   }, [data]);
 
@@ -187,7 +148,7 @@ export function MyJobsTable() {
       showAlertBanner: isError,
       showProgressBars: isRefetching,
     },
-    enableColumnActions: true,
+    enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
     renderTopToolbar: ({ table: tab }) => (

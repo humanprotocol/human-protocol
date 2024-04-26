@@ -1,110 +1,34 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ProfileListItem } from '@/pages/operator/components/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
-import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
+import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Chip } from '@/components/ui/chip';
 import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { formatDate } from '@/shared/utils/format-date';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
+import { parseNetworkName } from '../utils/parse-network-label';
 import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
-
-const parseMyJobsUniqueValues = (data: MyJobs[]) => {
-  const statusSet = new Set(data.map((item) => item.status));
-  const statusArray = Array.from(statusSet);
-  return {
-    network: [...new Set(data.map((item) => item.network))],
-    jobType: [...new Set(data.flatMap((item) => item.jobType))],
-    status: statusArray.length > 0 ? statusArray[0] : undefined,
-  };
-};
+import { MyJobsButton } from './my-jobs-button';
 
 export function MyJobsTableMobile() {
   const { t } = useTranslation();
-  const [searchEscrowAddress, setSearchEscrowAddress] = useState([
-    {
-      id: '',
-      value: '',
-    },
-  ]);
-  const { data, isLoading } = useQuery<MyJobs[]>({
+
+  const { data, isLoading } = useQuery<MyJobs>({
     queryKey: ['example', []],
     queryFn: () => getJobsTableData(),
   });
-  const [filteredData, setFilteredData] = useState(data);
-  const {
-    openMobileFilterDrawer,
-    setMyJobsUniqueValues,
-    myJobsUniqueValues,
-    myJobsFilters,
-  } = useMobileDrawerFilterStore();
+  const { setMobileFilterDrawer, setSearchEscrowAddress, setFilterParams } =
+    useJobsFilterStore();
 
   useEffect(() => {
-    if (
-      data &&
-      myJobsUniqueValues.network.length === 0 &&
-      myJobsUniqueValues.jobType.length === 0 &&
-      myJobsUniqueValues.status.length === 0
-    ) {
-      setMyJobsUniqueValues(parseMyJobsUniqueValues(data));
-    }
-
-    let filtered = data;
-
-    //filter by checkboxes
-    if (myJobsFilters.network.length > 0) {
-      filtered = filtered?.filter((item) =>
-        myJobsFilters.network.includes(item.network)
-      );
-    }
-
-    if (myJobsFilters.jobType.length > 0) {
-      filtered = filtered?.filter((item) =>
-        myJobsFilters.jobType.some((type) => item.jobType.includes(type))
-      );
-    }
-
-    if (myJobsFilters.status.length > 0) {
-      filtered = filtered?.filter((item) =>
-        myJobsFilters.status.includes(item.status)
-      );
-    }
-
-    // filter by search
-    const escrowSearchValue = searchEscrowAddress[0].value.trim();
-    if (escrowSearchValue) {
-      filtered = filtered?.filter((item) =>
-        item.escrowAddress.includes(escrowSearchValue)
-      );
-    }
-
-    if (myJobsFilters.sortingOrder.sortingColumn) {
-      const { sortingColumn, sortingOrder } = myJobsFilters.sortingOrder;
-
-      filtered?.sort((a, b) => {
-        const valueA = (a[sortingColumn as keyof MyJobs] || '').toString();
-        const valueB = (b[sortingColumn as keyof MyJobs] || '').toString();
-
-        if (sortingOrder === 'DESC') {
-          return valueB.localeCompare(valueA);
-        }
-        return valueA.localeCompare(valueB);
-      });
-    }
-
-    setFilteredData(filtered);
-  }, [
-    data,
-    myJobsUniqueValues,
-    myJobsFilters,
-    searchEscrowAddress,
-    setMyJobsUniqueValues,
-  ]);
+    setFilterParams({});
+  }, [setFilterParams]);
 
   return (
     <>
@@ -119,7 +43,7 @@ export function MyJobsTableMobile() {
       <Button
         fullWidth
         onClick={() => {
-          openMobileFilterDrawer();
+          setMobileFilterDrawer(true);
         }}
         sx={{
           marginBottom: '32px',
@@ -134,7 +58,7 @@ export function MyJobsTableMobile() {
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          filteredData?.map((d) => (
+          data?.results.map((d) => (
             <Paper
               key={crypto.randomUUID()}
               sx={{
@@ -149,21 +73,21 @@ export function MyJobsTableMobile() {
                   <Grid item xs={6}>
                     <ProfileListItem
                       header={t('worker.jobs.escrowAddress')}
-                      paragraph={shortenEscrowAddress(d.escrowAddress)}
+                      paragraph={shortenEscrowAddress(d.escrow_address)}
                     />
                     <ProfileListItem
                       header={t('worker.jobs.expiresAt')}
-                      paragraph={d.expiresAt ? formatDate(d.expiresAt) : ''}
+                      paragraph={d.expires_at ? formatDate(d.expires_at) : ''}
                     />
                     <ProfileListItem
                       header={t('worker.jobs.rewardAmount')}
-                      paragraph={d.rewardAmount}
+                      paragraph={`${d.reward_amount}`}
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <ProfileListItem
                       header={t('worker.jobs.network')}
-                      paragraph={d.network}
+                      paragraph={parseNetworkName(d.chain_id)}
                     />
                     <Typography
                       component="div"
@@ -178,7 +102,7 @@ export function MyJobsTableMobile() {
                       alignItems="center"
                       direction="row"
                       sx={{
-                        marginBottom: '10px',
+                        marginBottom: '25px',
                       }}
                     >
                       <Chip
@@ -189,20 +113,16 @@ export function MyJobsTableMobile() {
                     </Stack>
                     <ProfileListItem
                       header={t('worker.jobs.jobType')}
-                      paragraph={d.jobType}
+                      paragraph={[d.job_type]}
                     />
                   </Grid>
-                  <Grid item xs={12}>
-                    <Button
-                      color="secondary"
-                      fullWidth
-                      size="small"
-                      type="button"
-                      variant="contained"
-                    >
-                      {t('worker.jobs.selectJob')}
-                    </Button>
-                  </Grid>
+                  <Stack
+                    sx={{
+                      width: '100%',
+                    }}
+                  >
+                    <MyJobsButton status={d.status} />
+                  </Stack>
                 </Grid>
               </List>
             </Paper>

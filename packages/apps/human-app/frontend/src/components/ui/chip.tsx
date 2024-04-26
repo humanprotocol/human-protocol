@@ -3,7 +3,7 @@ import { colorPalette } from '@/styles/color-palette';
 
 interface ChipProps {
   label: string;
-  key: string;
+  key?: string;
   backgroundColor?: string;
 }
 export function Chip({ label, backgroundColor }: ChipProps) {

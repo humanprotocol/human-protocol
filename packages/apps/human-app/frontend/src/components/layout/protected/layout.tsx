@@ -5,14 +5,11 @@ import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { colorPalette } from '@/styles/color-palette';
-import { AvaibleJobsDrawerMobile } from '@/pages/worker/jobs/components/avaible-jobs/available-jobs-drawer-mobile';
-import { useMobileDrawerFilterStore } from '@/hooks/use-mobile-drawer-filter-store';
-import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/my-jobs-drawer-mobile';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
 
-const drawerWidth = 240;
+export const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -39,8 +36,6 @@ export function Layout() {
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const { backgroundColor } = useBackgroundColorStore();
-  const { isMobileFilterDrawerOpen, activeJobsTab } =
-    useMobileDrawerFilterStore();
 
   useEffect(() => {
     if (isMobile) {
@@ -67,26 +62,8 @@ export function Layout() {
         backgroundColor: isMobile ? colorPalette.white : backgroundColor,
       }}
     >
-      <Navbar
-        open={drawerOpen || isMobileFilterDrawerOpen}
-        setOpen={setDrawerOpen}
-      />
+      <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
       <DrawerNavigation drawerWidth={drawerWidth} open={drawerOpen} />
-      <AvaibleJobsDrawerMobile
-        drawerWidth={drawerWidth}
-        open={isMobileFilterDrawerOpen}
-      />
-      {activeJobsTab === 'availableJobs' ? (
-        <AvaibleJobsDrawerMobile
-          drawerWidth={drawerWidth}
-          open={isMobileFilterDrawerOpen}
-        />
-      ) : (
-        <MyJobsDrawerMobile
-          drawerWidth={drawerWidth}
-          open={isMobileFilterDrawerOpen}
-        />
-      )}
       <Main isMobile={isMobile} open={drawerOpen}>
         <Outlet />
       </Main>

@@ -9,20 +9,13 @@ import { useMemo } from 'react';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
+import { Chip } from '@/components/ui/chip';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { JobTypesChips } from '../ui/job-types-chips';
-import {
-  getJobsTableData,
-  type AvailableJobs,
-} from './available-jobs-table-service';
+import { parseNetworkName } from '../utils/parse-network-label';
+import type { AvailableJobs, JobsArray } from './available-jobs-table-service';
+import { getJobsTableData } from './available-jobs-table-service';
 
-const columns: MRT_ColumnDef<AvailableJobs>[] = [
-  {
-    accessorKey: 'jobDescription',
-    header: t('worker.jobs.jobDescription'),
-    size: 100,
-    enableSorting: true,
-  },
+const columns: MRT_ColumnDef<JobsArray>[] = [
   {
     accessorKey: 'escrowAddress',
     header: 'Escrow address',
@@ -32,12 +25,6 @@ const columns: MRT_ColumnDef<AvailableJobs>[] = [
   {
     accessorKey: 'network',
     header: 'Network',
-    size: 100,
-    enableSorting: true,
-  },
-  {
-    accessorKey: 'rewardAmount',
-    header: 'Reward amount',
     size: 100,
     enableSorting: true,
   },
@@ -60,18 +47,19 @@ export function AvailableJobsTable() {
     fields: { sorting, pagination },
   } = useTableQuery();
 
-  const { data, isLoading, isError, isRefetching } = useQuery<AvailableJobs[]>({
-    queryKey: ['example', [sorting, pagination]],
+  const { data, isLoading, isError, isRefetching } = useQuery<AvailableJobs>({
+    queryKey: ['AvailableJobs', [sorting, pagination]],
     queryFn: () => getJobsTableData(),
   });
 
   const memoizedData = useMemo(() => {
     if (!data) return [];
 
-    return data.map((job) => ({
+    return data.results.map((job) => ({
       ...job,
-      jobTypeChips: <JobTypesChips data={job.jobType} />,
-      escrowAddress: shortenEscrowAddress(job.escrowAddress),
+      network: parseNetworkName(job.chain_id),
+      jobTypeChips: <Chip label={job.job_type} />,
+      escrowAddress: shortenEscrowAddress(job.escrow_address),
       buttonColumn: (
         <Button
           color="secondary"

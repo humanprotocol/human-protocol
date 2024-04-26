@@ -191,9 +191,21 @@
       "mobileFilterDrawer": {
         "sortBy": "Sort by",
         "filters": "Filters",
-        "statusActive": "Active",
-        "statusOverdue": "Overdue",
-        "statusDisactivated": "Disactivated"
+        "jobsStatus": {
+          "active": "Active",
+          "validation": "Validation",
+          "completed": "Completed",
+          "expired": "Expired",
+          "canceled": "Canceled",
+          "rejected": "Rejected"
+        },
+        "network": {
+          "matic": "Matic",
+          "polygon": "Polygon"
+        },
+        "jobType": {
+          "fortune": "Fortune"
+        }
       }
     }
   },

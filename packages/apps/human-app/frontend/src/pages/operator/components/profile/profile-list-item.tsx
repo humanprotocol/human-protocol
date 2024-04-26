@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
-import { JobTypesChips } from '@/pages/worker/jobs/components/ui/job-types-chips';
+import { Chips } from '@/components/ui/chips';
 
 interface ProfileListItemProps {
   header: string;
@@ -35,7 +35,7 @@ export function ProfileListItem({
           {header}
         </Typography>
         {Array.isArray(paragraph) ? (
-          <JobTypesChips data={paragraph} />
+          <Chips data={paragraph} />
         ) : (
           <Stack
             alignItems="center"
