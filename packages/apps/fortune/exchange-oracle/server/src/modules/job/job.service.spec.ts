@@ -475,4 +475,52 @@ describe('JobService', () => {
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });
   });
+
+  describe('pauseJob', () => {
+    const webhook: WebhookDto = {
+      chainId,
+      escrowAddress,
+      eventType: EventType.ABUSE,
+    };
+
+    it('should create a new job in the database', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          chainId: chainId,
+          escrowAddress: escrowAddress,
+          status: JobStatus.ACTIVE,
+        } as JobEntity);
+      const result = await jobService.pauseJob(webhook);
+
+      expect(result).toEqual(undefined);
+      expect(jobRepository.updateOne).toHaveBeenCalledWith({
+        chainId: chainId,
+        escrowAddress: escrowAddress,
+        status: JobStatus.PAUSED,
+      });
+    });
+
+    it('should fail if job not exists', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(null);
+
+      await expect(jobService.pauseJob(webhook)).rejects.toThrow('Invalid job');
+    });
+
+    it('should fail if job is not in Active status', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          chainId: chainId,
+          escrowAddress: escrowAddress,
+          status: JobStatus.CANCELED,
+        } as JobEntity);
+
+      await expect(jobService.pauseJob(webhook)).rejects.toThrow(
+        'Invalid status',
+      );
+    });
+  });
 });
