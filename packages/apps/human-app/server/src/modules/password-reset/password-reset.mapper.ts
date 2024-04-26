@@ -3,8 +3,6 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import {
   CamelCaseNamingConvention,
   createMap,
-  forMember,
-  mapFrom,
   Mapper,
   namingConventions,
   SnakeCaseNamingConvention,
@@ -35,10 +33,6 @@ export class PasswordResetProfile extends AutomapperProfile {
         mapper,
         RestorePasswordDto,
         RestorePasswordCommand,
-        forMember(
-          (destination) => destination.hCaptchaToken,
-          mapFrom((source) => source.h_captcha_token),
-        ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),
@@ -48,10 +42,6 @@ export class PasswordResetProfile extends AutomapperProfile {
         mapper,
         RestorePasswordCommand,
         RestorePasswordData,
-        forMember(
-          (destination) => destination.h_captcha_token,
-          mapFrom((source) => source.hCaptchaToken),
-        ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),
