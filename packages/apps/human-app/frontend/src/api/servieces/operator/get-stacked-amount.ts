@@ -1,22 +1,22 @@
-import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { getStackedAmount } from '@/smart-contracts/stake/get-staked-amount';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 
-export const getStakedAmountCallArgumentsSchema = z.object({
-  address: z.string(),
-});
-
-export type GetStackedAmountCallArguments = z.infer<
-  typeof getStakedAmountCallArgumentsSchema
->;
-
 export function useGetStakedAmount() {
-  const { address } = useConnectedWallet();
+  const {
+    address,
+    chainId,
+    web3ProviderMutation: { data },
+  } = useConnectedWallet();
 
   return useQuery({
-    queryFn: () => getStackedAmount({ address }),
-    queryKey: ['getStackedAmount', address],
+    queryFn: () =>
+      getStackedAmount({
+        stakerAddress: address,
+        chainId,
+        signer: data?.signer,
+      }),
+    queryKey: ['getStackedAmount', address, chainId, data?.signer],
     refetchInterval: 0,
   });
 }

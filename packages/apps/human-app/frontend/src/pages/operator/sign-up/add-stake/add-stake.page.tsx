@@ -78,7 +78,7 @@ export function AddStakeOperatorPage() {
           {t('operator.addStake.label')}
         </Typography>
         <Typography color={colorPalette.primary.light} variant="subtitle2">
-          {stakedAmount}
+          {stakedAmount.toString()}
         </Typography>
         {displayForm ? (
           <StakeForm />
