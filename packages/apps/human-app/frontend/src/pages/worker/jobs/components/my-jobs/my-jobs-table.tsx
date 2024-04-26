@@ -5,7 +5,7 @@ import {
 } from 'material-react-table';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { formatDate } from '@/shared/utils/format-date';
@@ -14,6 +14,7 @@ import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering
 import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
 import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { Chip } from '@/components/ui/chip';
+import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import type { JobsArray } from '../avaible-jobs/available-jobs-table-service';
 import { parseNetworkName } from '../utils/parse-network-label';
@@ -110,6 +111,26 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
 ];
 
 export function MyJobsTable() {
+  const { setFilterParams, filterParams } = useJobsFilterStore();
+
+  useEffect(() => {
+    setFilterParams({});
+  }, [setFilterParams]);
+
+  const [paginationState, setPaginationState] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  useEffect(() => {
+    setFilterParams({
+      ...filterParams,
+      page: paginationState.pageIndex,
+      pageSize: paginationState.pageSize,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
+  }, [paginationState]);
+
   const {
     fields: { sorting, pagination },
   } = useTableQuery();
@@ -147,7 +168,10 @@ export function MyJobsTable() {
       isLoading,
       showAlertBanner: isError,
       showProgressBars: isRefetching,
+      pagination: paginationState,
     },
+    manualPagination: true,
+    onPaginationChange: setPaginationState,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,

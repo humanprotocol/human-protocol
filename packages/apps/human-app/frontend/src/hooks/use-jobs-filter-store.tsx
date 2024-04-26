@@ -16,7 +16,9 @@ interface JobsFilterStoreProps {
       | 'EXPIRED'
       | 'REJECTED';
     escrow_address?: string;
-    [key: string]: string | undefined;
+    page?: number;
+    page_size?: number;
+    [key: string]: string | number | undefined;
   };
 
   setFilterParams: (

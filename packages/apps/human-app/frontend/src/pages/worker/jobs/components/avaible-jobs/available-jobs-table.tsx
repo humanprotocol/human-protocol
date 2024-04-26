@@ -5,11 +5,12 @@ import {
 } from 'material-react-table';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
+import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import { parseNetworkName } from '../utils/parse-network-label';
 import type { AvailableJobs, JobsArray } from './available-jobs-table-service';
@@ -43,6 +44,26 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
 ];
 
 export function AvailableJobsTable() {
+  const { setFilterParams, filterParams } = useJobsFilterStore();
+
+  useEffect(() => {
+    setFilterParams({});
+  }, [setFilterParams]);
+
+  const [paginationState, setPaginationState] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  useEffect(() => {
+    setFilterParams({
+      ...filterParams,
+      page: paginationState.pageIndex,
+      pageSize: paginationState.pageSize,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
+  }, [paginationState]);
+
   const {
     fields: { sorting, pagination },
   } = useTableQuery();
@@ -80,7 +101,10 @@ export function AvailableJobsTable() {
       isLoading,
       showAlertBanner: isError,
       showProgressBars: isRefetching,
+      pagination: paginationState,
     },
+    manualPagination: true,
+    onPaginationChange: setPaginationState,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
