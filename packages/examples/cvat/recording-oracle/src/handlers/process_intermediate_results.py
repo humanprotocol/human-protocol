@@ -1021,7 +1021,16 @@ def process_intermediate_results(
             )
         )
         should_complete = True
-    elif len(rejected_jobs) == len(unverifiable_jobs_count):
+    elif len(rejected_jobs) == unverifiable_jobs_count:
+        if unverifiable_jobs_count:
+            logger.info(
+                "Validation for escrow_address={}: "
+                "only unverifiable assignments left ({}), stopping annotation".format(
+                    escrow_address,
+                    unverifiable_jobs_count,
+                )
+            )
+
         should_complete = True
 
     if not should_complete:
