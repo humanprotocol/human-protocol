@@ -89,7 +89,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.CardNotAssigned);
     }
 
-    if (!setupIntent.client_secret) {
+    if (!setupIntent?.client_secret) {
       this.logger.log(
         ErrorPayment.ClientSecretDoesNotExist,
         PaymentService.name,
@@ -379,7 +379,7 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    if (!paymentIntent.client_secret) {
+    if (!paymentIntent?.client_secret) {
       this.logger.log(
         ErrorPayment.ClientSecretDoesNotExist,
         PaymentService.name,
