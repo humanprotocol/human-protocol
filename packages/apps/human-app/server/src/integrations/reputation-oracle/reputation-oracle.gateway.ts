@@ -143,7 +143,7 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<void>(options);
   }
 
-  async resendSendEmailVerification(
+  async sendResendEmailVerification(
     resendEmailVerificationCommand: ResendEmailVerificationCommand,
   ) {
     const resendEmailVerificationData = this.mapper.map(

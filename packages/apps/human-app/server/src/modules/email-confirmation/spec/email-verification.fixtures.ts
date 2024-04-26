@@ -4,7 +4,7 @@ import {
   ResendEmailVerificationParams,
 } from '../model/resend-email-verification.model';
 import {
-  EmailVerificationCommand,
+  EmailVerificationCommand, EmailVerificationData,
   EmailVerificationDto,
 } from '../model/email-verification.model';
 
@@ -15,6 +15,10 @@ export const emailVerificationDtoFixture: EmailVerificationDto = {
   token: TOKEN,
 };
 export const emailVerificationCommandFixture: EmailVerificationCommand = {
+  token: TOKEN,
+};
+
+export const emailVerificationDataFixture: EmailVerificationData = {
   token: TOKEN,
 };
 

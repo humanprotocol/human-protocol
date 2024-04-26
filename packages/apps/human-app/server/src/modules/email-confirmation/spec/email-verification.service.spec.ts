@@ -45,7 +45,7 @@ describe('EmailConfirmationService', () => {
       const command = resendEmailVerificationCommandFixture;
       await service.processResendEmailVerification(command);
       expect(
-        reputationOracleGateway.resendSendEmailVerification,
+        reputationOracleGateway.sendResendEmailVerification,
       ).toHaveBeenCalledWith(command);
     });
   });

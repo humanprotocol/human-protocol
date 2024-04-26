@@ -16,6 +16,6 @@ export class EmailConfirmationService {
   async processResendEmailVerification(
     command: ResendEmailVerificationCommand,
   ): Promise<void> {
-    return this.gateway.resendSendEmailVerification(command);
+    return this.gateway.sendResendEmailVerification(command);
   }
 }
