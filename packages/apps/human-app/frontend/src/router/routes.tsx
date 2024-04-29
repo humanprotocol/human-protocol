@@ -61,15 +61,15 @@ export const protectedRoutes: RouteProps[] = [
     element: <ProtectedPage />,
   },
   {
-    path: '/worker/jobs',
+    path: routerPaths.worker.jobs,
     element: <JobsPage />,
   },
   {
-    path: '/operator/profile',
+    path: routerPaths.operator.profile,
     element: <OperatorProfilePage />,
   },
   {
-    path: '/worker/profile',
+    path: routerPaths.worker.profile,
     element: <WorkerProfilePage />,
   },
   {

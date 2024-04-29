@@ -8,8 +8,8 @@ interface ChipsProps {
 export function Chips({ data }: ChipsProps) {
   return (
     <Stack direction="row" spacing={1}>
-      {data.map((jobType) => (
-        <Chip key={crypto.randomUUID()} label={jobType} />
+      {data.map((chipLabel) => (
+        <Chip key={crypto.randomUUID()} label={chipLabel} />
       ))}
     </Stack>
   );

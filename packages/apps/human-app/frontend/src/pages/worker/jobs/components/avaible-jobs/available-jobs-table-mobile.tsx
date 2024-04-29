@@ -1,6 +1,5 @@
 import { Grid, List, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
 import { ProfileListItem } from '@/pages/operator/components/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
@@ -9,32 +8,27 @@ import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import type { AvailableJobs } from '@/api/servieces/worker/available-jobs-data';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { parseNetworkName } from '../utils/parse-network-label';
+import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
+import type { AvailableJobs } from './available-jobs-table-service';
 
 interface AvailableJobsTableMobileProps {
   data?: AvailableJobs;
   isLoading: boolean;
   isError: boolean;
+  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function AvailableJobsTableMobile({
   data,
   isLoading,
   isError,
+  setIsMobileFilterDrawerOpen,
 }: AvailableJobsTableMobileProps) {
   const { t } = useTranslation();
 
-  const { setMobileFilterDrawer, setSearchEscrowAddress, resetFilterParams } =
-    useJobsFilterStore();
+  const { setSearchEscrowAddress } = useJobsFilterStore();
 
-  useEffect(() => {
-    return () => {
-      resetFilterParams();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
-  }, []);
   return (
     <>
       <SearchForm
@@ -48,7 +42,7 @@ export function AvailableJobsTableMobile({
       <Button
         fullWidth
         onClick={() => {
-          setMobileFilterDrawer(true);
+          setIsMobileFilterDrawerOpen(true);
         }}
         sx={{
           marginBottom: '32px',

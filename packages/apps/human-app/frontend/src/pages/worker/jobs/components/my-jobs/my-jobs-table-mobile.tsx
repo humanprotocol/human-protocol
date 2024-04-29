@@ -1,6 +1,5 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
 import { ProfileListItem } from '@/pages/operator/components/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { formatDate } from '@/shared/utils/format-date';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { parseNetworkName } from '../utils/parse-network-label';
+import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
 import { type MyJobs } from './my-jobs-table-service';
 import { MyJobsButton } from './my-jobs-button';
 
@@ -21,23 +20,17 @@ interface MyJobsTableMobileProps {
   data?: MyJobs;
   isLoading: boolean;
   isError: boolean;
+  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function MyJobsTableMobile({
   data,
   isLoading,
   isError,
+  setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
   const { t } = useTranslation();
-  const { setMobileFilterDrawer, setSearchEscrowAddress, resetFilterParams } =
-    useJobsFilterStore();
-
-  useEffect(() => {
-    return () => {
-      resetFilterParams();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
-  }, []);
+  const { setSearchEscrowAddress } = useJobsFilterStore();
 
   return (
     <>
@@ -52,7 +45,7 @@ export function MyJobsTableMobile({
       <Button
         fullWidth
         onClick={() => {
-          setMobileFilterDrawer(true);
+          setIsMobileFilterDrawerOpen(true);
         }}
         sx={{
           marginBottom: '32px',

@@ -15,7 +15,7 @@ import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import type { JobsArray } from '../avaible-jobs/available-jobs-table-service';
-import { parseNetworkName } from '../utils/parse-network-label';
+import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
 import { type MyJobs } from './my-jobs-table-service';
 import { MyJobsButton } from './my-jobs-button';
 
@@ -121,15 +121,7 @@ export function MyJobsTable({
   isError,
   isRefetching,
 }: MyJobsTableProps) {
-  const { setFilterParams, filterParams, resetFilterParams } =
-    useJobsFilterStore();
-
-  useEffect(() => {
-    return () => {
-      resetFilterParams();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
-  }, []);
+  const { setFilterParams, filterParams } = useJobsFilterStore();
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,

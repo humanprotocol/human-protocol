@@ -10,25 +10,25 @@ import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { parseNetworkName } from '../utils/parse-network-label';
+import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
 import type { AvailableJobs, JobsArray } from './available-jobs-table-service';
 
 const columns: MRT_ColumnDef<JobsArray>[] = [
   {
     accessorKey: 'escrowAddress',
-    header: 'Escrow address',
+    header: t('worker.jobs.escrowAddress'),
     size: 100,
     enableSorting: true,
   },
   {
     accessorKey: 'network',
-    header: 'Network',
+    header: t('worker.jobs.network'),
     size: 100,
     enableSorting: true,
   },
   {
     accessorKey: 'jobTypeChips',
-    header: 'Job type',
+    header: t('worker.jobs.jobType'),
     size: 200,
     enableSorting: true,
   },
@@ -53,15 +53,7 @@ export function AvailableJobsTable({
   isError,
   isRefetching,
 }: AvailableJobsTableProps) {
-  const { setFilterParams, filterParams, resetFilterParams } =
-    useJobsFilterStore();
-
-  useEffect(() => {
-    return () => {
-      resetFilterParams();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
-  }, []);
+  const { setFilterParams, filterParams } = useJobsFilterStore();
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -115,9 +107,9 @@ export function AvailableJobsTable({
     renderTopToolbar: ({ table: tab }) => (
       <SearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
-        label="Search escrow address"
-        name="Search escrow address"
-        placeholder="Search escrow address"
+        label={t('worker.jobs.searchEscrowAddress')}
+        name={t('worker.jobs.searchEscrowAddress')}
+        placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={tab.setColumnFilters}
       />
     ),

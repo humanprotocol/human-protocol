@@ -7,7 +7,6 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { HomepageWorkIcon } from '@/components/ui/icons';
-import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Modal } from '@/components/ui/modal/modal';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
@@ -30,8 +29,9 @@ export function JobsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
-  const { isMobileFilterDrawerOpen } = useJobsFilterStore();
   const [selectedTab, setSelectedTab] = useState('availableJobs');
+  const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
+    useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -50,7 +50,10 @@ export function JobsPage() {
   return (
     <>
       <Modal isOpen={isMobileFilterDrawerOpen}>
-        <DrawerMobile selectedTab={selectedTab} />
+        <DrawerMobile
+          selectedTab={selectedTab}
+          setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
+        />
       </Modal>
       <Grid alignItems="center" container justifyContent="center">
         <Grid item xs={12}>
@@ -105,6 +108,9 @@ export function JobsPage() {
                               data={data}
                               isError={isError}
                               isLoading={isLoading}
+                              setIsMobileFilterDrawerOpen={
+                                setIsMobileFilterDrawerOpen
+                              }
                             />
                           ) : null}
                           {!isMobile ? (
@@ -128,6 +134,9 @@ export function JobsPage() {
                               data={data}
                               isError={isError}
                               isLoading={isLoading}
+                              setIsMobileFilterDrawerOpen={
+                                setIsMobileFilterDrawerOpen
+                              }
                             />
                           ) : null}
                           {!isMobile ? (

@@ -19,7 +19,7 @@ const MyJobsSchema = z.object({
   results: z.array(AvailableJobsSchema),
 });
 
-export type AvailableJobs = z.infer<typeof MyJobsSchema>;
+type AvailableJobs = z.infer<typeof MyJobsSchema>;
 
 export function useGetAvailableJobsData() {
   const {

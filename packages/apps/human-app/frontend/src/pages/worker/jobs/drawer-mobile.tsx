@@ -18,11 +18,14 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 
 interface DrawerMobileProps {
   selectedTab: string;
+  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
+export function DrawerMobile({
+  selectedTab,
+  setIsMobileFilterDrawerOpen,
+}: DrawerMobileProps) {
   const { t } = useTranslation();
-  const { setMobileFilterDrawer, setFilterParams, filterParams } =
-    useJobsFilterStore();
+  const { setFilterParams, filterParams } = useJobsFilterStore();
 
   const handleCheckboxClick = (paramName: string, paramValue: string) => {
     if (filterParams && filterParams[paramName] === paramValue) {
@@ -76,7 +79,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
 
           <IconButton
             onClick={() => {
-              setMobileFilterDrawer(false);
+              setIsMobileFilterDrawerOpen(false);
             }}
             sx={{
               zIndex: '99999999',
