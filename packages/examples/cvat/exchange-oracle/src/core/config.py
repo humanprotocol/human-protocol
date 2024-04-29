@@ -32,11 +32,11 @@ class PolygonMainnetConfig:
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
 
-class PolygonMumbaiConfig:
-    chain_id = 80001
-    rpc_api = os.environ.get("POLYGON_MUMBAI_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_MUMBAI_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_MUMBAI_ADDR")
+class PolygonAmoyConfig:
+    chain_id = 80002
+    rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
+    private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
+    addr = os.environ.get("POLYGON_AMOY_ADDR")
 
 
 class LocalhostConfig:
@@ -46,7 +46,7 @@ class LocalhostConfig:
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get("LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = os.environ.get("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     job_launcher_url = os.environ.get("LOCALHOST_JOB_LAUNCHER_URL")
 
@@ -185,7 +185,7 @@ class Config:
     loglevel = parse_log_level(os.environ.get("LOGLEVEL", "info"))
 
     polygon_mainnet = PolygonMainnetConfig
-    polygon_mumbai = PolygonMumbaiConfig
+    polygon_amoy = PolygonAmoyConfig
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig

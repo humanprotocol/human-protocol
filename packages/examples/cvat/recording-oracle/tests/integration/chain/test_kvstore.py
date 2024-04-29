@@ -37,7 +37,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.kvstore.get_web3") as mock_get_web3,
             patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
-            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
         ):
             mock_get_web3.return_value = self.w3
             mock_escrow = Mock()
@@ -60,7 +60,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.kvstore.get_web3") as mock_get_web3,
             patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
-            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
         ):
             mock_get_web3.return_value = self.w3
             mock_escrow = Mock()
