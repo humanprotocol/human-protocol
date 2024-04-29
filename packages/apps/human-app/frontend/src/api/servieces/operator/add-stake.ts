@@ -6,6 +6,7 @@ import {
   useMutationState,
   useQueryClient,
 } from '@tanstack/react-query';
+import type { BrowserProvider, JsonRpcSigner } from 'ethers';
 import { addStake } from '@/smart-contracts/stake/add-stake';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
@@ -17,7 +18,12 @@ export const addStakeCallArgumentsSchema = z.object({
 export type AddStakeCallArguments = z.infer<typeof addStakeCallArgumentsSchema>;
 
 async function addStakeMutationFn(
-  data: AddStakeCallArguments & { address: string }
+  data: AddStakeCallArguments & {
+    address: string;
+    provider?: BrowserProvider;
+    signer?: JsonRpcSigner;
+    chainId: number;
+  }
 ) {
   await addStake(data);
   return data;
@@ -26,25 +32,37 @@ async function addStakeMutationFn(
 export const addStakeMutationKey = ['addStake'];
 
 export function useAddStakeMutation() {
-  const { address } = useConnectedWallet();
+  const {
+    chainId,
+    address,
+    web3ProviderMutation: { data: web3data },
+  } = useConnectedWallet();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: AddStakeCallArguments) =>
-      addStakeMutationFn({ ...data, address }),
+      addStakeMutationFn({
+        ...data,
+        address,
+        provider: web3data?.provider,
+        signer: web3data?.signer,
+        chainId,
+      }),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },
     onError: async () => {
       await queryClient.invalidateQueries();
     },
-    mutationKey: addStakeMutationKey,
+    mutationKey: ['addStake', address],
   });
 }
 
 export function useAddStakeMutationState() {
+  const { address } = useConnectedWallet();
+
   const state = useMutationState({
-    filters: { mutationKey: addStakeMutationKey },
+    filters: { mutationKey: ['addStake', address] },
     select: (mutation) => mutation.state,
   });
 
