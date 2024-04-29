@@ -10,6 +10,7 @@ export const routerPaths = {
     sendResetLinkSuccess: '/worker/send-reset-link-success',
     emailVerification: '/verify',
     sendEmailVerification: '/worker/send-email-verification',
+    profile: '/worker/profile',
   },
   operator: {
     signIn: '/operator/sign-in',

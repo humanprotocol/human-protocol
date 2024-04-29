@@ -13,17 +13,18 @@ import { PageHeader } from '@/components/layout/protected/page-header';
 import { CheckmarkIcon, LockerIcon, ProfileIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
+import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 const mockedData = {
-  email: 'johndoe@hmt.ai',
-  kycCompleted: true,
-  walletConnected: true,
-  kycInfoOnChainAdded: true,
   notificationsConsent: false,
+  kycInfoOnChainAdded: false,
 };
 
 export function WorkerProfilePage() {
   const { t } = useTranslation();
+  const { user } = useAuthenticatedUser();
+  const { isConnected: isWalletConnected } = useWalletConnect();
 
   return (
     <Container maxWidth="xl">
@@ -53,7 +54,7 @@ export function WorkerProfilePage() {
               {t('worker.profile.email')}
             </Typography>
             <Typography color={colorPalette.text.primary} variant="subtitle1">
-              {mockedData.email}
+              {user.email}
             </Typography>
           </ListItemText>
           <ListItemText
@@ -87,7 +88,7 @@ export function WorkerProfilePage() {
             <Stack alignItems="center" flexDirection="row">
               <Typography
                 color={
-                  !mockedData.kycCompleted
+                  user.kyc_status !== 'APPROVED'
                     ? colorPalette.text.secondary
                     : colorPalette.text.primary
                 }
@@ -103,7 +104,11 @@ export function WorkerProfilePage() {
                   marginLeft: '10px',
                 }}
               >
-                {mockedData.kycCompleted ? <CheckmarkIcon /> : <LockerIcon />}
+                {user.kyc_status === 'APPROVED' ? (
+                  <CheckmarkIcon />
+                ) : (
+                  <LockerIcon />
+                )}
               </Stack>
             </Stack>
           </ListItemText>
@@ -115,7 +120,7 @@ export function WorkerProfilePage() {
             <Stack alignItems="center" flexDirection="row">
               <Typography
                 color={
-                  !mockedData.walletConnected
+                  !isWalletConnected
                     ? colorPalette.text.secondary
                     : colorPalette.text.primary
                 }
@@ -131,11 +136,7 @@ export function WorkerProfilePage() {
                   marginLeft: '10px',
                 }}
               >
-                {mockedData.walletConnected ? (
-                  <CheckmarkIcon />
-                ) : (
-                  <LockerIcon />
-                )}
+                {isWalletConnected ? <CheckmarkIcon /> : <LockerIcon />}
               </Stack>
             </Stack>
           </ListItemText>

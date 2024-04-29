@@ -9,6 +9,10 @@ export const apiPaths = {
     signUp: {
       path: '/auth/signup',
     },
+    obtainAccessToken: {
+      // TODO add correct path
+      path: '/auth/refresh',
+    },
     sendResetLink: {
       path: '/auth/reset-link',
     },
