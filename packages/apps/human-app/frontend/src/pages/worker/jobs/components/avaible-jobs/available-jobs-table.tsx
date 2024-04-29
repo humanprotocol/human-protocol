@@ -53,11 +53,12 @@ export function AvailableJobsTable({
   isError,
   isRefetching,
 }: AvailableJobsTableProps) {
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+  const { setFilterParams, filterParams, resetFilterParams } =
+    useJobsFilterStore();
 
   useEffect(() => {
     return () => {
-      setFilterParams(null);
+      resetFilterParams();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
   }, []);
