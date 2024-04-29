@@ -64,7 +64,7 @@ export const protectedRoutes: RouteProps[] = [
     element: <OperatorProfilePage />,
   },
   {
-    path: '/worker/profile',
+    path: routerPaths.worker.profile,
     element: <WorkerProfilePage />,
   },
   {

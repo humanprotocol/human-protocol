@@ -3,7 +3,8 @@ import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { t as i18NextT } from 'i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
+import { useAuth } from '@/auth/use-auth';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -26,6 +28,14 @@ function formattedSignInErrorMessage(unknownError: unknown) {
 
 export function SignInWorkerPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate(routerPaths.worker.profile);
+    }
+  }, [navigate, user]);
 
   const methods = useForm<SignInDto>({
     defaultValues: {

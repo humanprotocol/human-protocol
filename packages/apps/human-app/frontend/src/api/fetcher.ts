@@ -1,6 +1,28 @@
 import merge from 'lodash/merge';
 import type { ZodType, ZodTypeDef } from 'zod';
 import type { ResponseError } from '@/shared/types/global.type';
+// eslint-disable-next-line import/no-cycle -- cause by refresh token retry
+import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
+import { apiClient } from '@/api/api-client';
+import { apiPaths } from '@/api/api-paths';
+import { browserAuthProvider } from '@/auth/browser-auth-provider';
+
+const appendHeader = (
+  fetcherOptionsWithDefaults: RequestInit | undefined,
+  newHeader: Headers
+) => {
+  const headers = fetcherOptionsWithDefaults?.headers
+    ? merge(
+        { headers: fetcherOptionsWithDefaults.headers },
+        { headers: newHeader }
+      )
+    : { headers: newHeader };
+
+  return {
+    ...fetcherOptionsWithDefaults,
+    ...headers,
+  };
+};
 
 export class FetchError extends Error {
   status: number;
@@ -26,11 +48,13 @@ export type FetcherOptionsWithValidation<SuccessInput, SuccessOutput> =
     options?: RequestInit;
     successSchema: ZodType<SuccessOutput, ZodTypeDef, SuccessInput>;
     skipValidation?: false | undefined;
+    authenticated?: boolean;
   }>;
 
 export type FetcherOptionsWithoutValidation = Readonly<{
   options?: RequestInit;
   skipValidation: true;
+  authenticated?: boolean;
 }>;
 
 export type FetcherOptions<SuccessInput, SuccessOutput> =
@@ -58,7 +82,7 @@ export function createFetcher(defaultFetcherConfig?: {
     fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- required unknown for correct type intellisense
   ): Promise<SuccessOutput | unknown> {
-    const fetcherOptionsWithDefaults = defaultFetcherConfig?.options
+    let fetcherOptionsWithDefaults = defaultFetcherConfig?.options
       ? merge(
           {},
           (() => {
@@ -69,6 +93,15 @@ export function createFetcher(defaultFetcherConfig?: {
           fetcherOptions.options
         )
       : fetcherOptions.options;
+
+    if (fetcherOptions.authenticated) {
+      fetcherOptionsWithDefaults = appendHeader(
+        fetcherOptionsWithDefaults,
+        new Headers({
+          Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
+        })
+      );
+    }
 
     const baseUrl = (() => {
       const currentUrl = defaultFetcherConfig?.baseUrl;
@@ -98,7 +131,41 @@ export function createFetcher(defaultFetcherConfig?: {
       return `${normalizedBaseUrl}/${normalizedUrl}`;
     })();
 
-    const response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
+    let response: Response | undefined;
+
+    response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
+
+    if (
+      !response.ok &&
+      response.status === 401 &&
+      fetcherOptions.authenticated
+    ) {
+      const obtainAccessTokenSuccess = await apiClient(
+        apiPaths.worker.obtainAccessToken.path,
+        {
+          successSchema: signInSuccessResponseSchema,
+          options: {
+            method: 'POST',
+            body: JSON.stringify({
+              // eslint-disable-next-line camelcase -- camel case defined by api
+              refresh_token: browserAuthProvider.getRefreshToken(),
+            }),
+          },
+        }
+      );
+
+      appendHeader(
+        fetcherOptionsWithDefaults,
+        new Headers({
+          Authorization: `Bearer ${obtainAccessTokenSuccess.access_token}`,
+        })
+      );
+      response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
+
+      if (!response.ok) {
+        browserAuthProvider.signOut();
+      }
+    }
 
     let data: unknown = null;
     try {
