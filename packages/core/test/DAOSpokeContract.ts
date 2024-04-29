@@ -17,6 +17,7 @@ import {
   createProposalMessage,
   callReceiveMessageWithWormholeMock,
   createMessageWithPayload,
+  increaseTime,
 } from './GovernanceUtils';
 
 describe.only('DAOSpokeContract', function () {
@@ -95,8 +96,8 @@ describe.only('DAOSpokeContract', function () {
       await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
       12,
-      1,
-      20 * 15,
+      15,
+      4500,
       0,
       4
     )) as MetaHumanGovernor;
@@ -199,7 +200,7 @@ describe.only('DAOSpokeContract', function () {
         await governor.getAddress()
       );
 
-      await mineNBlocks(3);
+      await increaseTime(40);
 
       await expect(daoSpoke.connect(user1).castVote(proposalId, 0))
         .to.emit(daoSpoke, 'VoteCast')

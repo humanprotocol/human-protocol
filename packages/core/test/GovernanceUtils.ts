@@ -20,6 +20,20 @@ export const mineNBlocks = async (n: number) => {
   await mine(n);
 };
 
+/**
+ * Increases the EVM time by a given number of seconds and mines a new block to apply the time change.
+ * @param {number} seconds - The number of seconds to increase time by.
+ */
+export const increaseTime = async (seconds: number) => {
+  try {
+    await ethers.provider.send('evm_increaseTime', [seconds]);
+    await ethers.provider.send('evm_mine');
+  } catch (error) {
+    console.error('Failed to increase time:', error);
+    throw new Error(`Failed to increase time by ${seconds} seconds`);
+  }
+};
+
 export async function createMockUserWithVotingPower(
   voteToken: VHMToken,
   user: Signer
@@ -376,8 +390,11 @@ export async function updateVotingDelay(
 
   const proposalId = decodedData[0];
 
+  // wait with seconds
+  await increaseTime(100);
+
   // wait for next block
-  await mineNBlocks(2);
+  // await mineNBlocks(2);
   //cast vote
   await governor.connect(executer).castVote(proposalId, 1);
 
