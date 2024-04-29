@@ -19,21 +19,24 @@ interface JobsFilterStoreProps {
     page?: number;
     page_size?: number;
     [key: string]: string | number | undefined;
-  };
+  } | null;
 
   setFilterParams: (
     partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => void;
   searchEscrowAddress?: string;
   setSearchEscrowAddress: (address: string) => void;
+  resetFilterParams: () => void;
 }
+
+const initialFiltersState = null;
 
 export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
   isMobileFilterDrawerOpen: false,
   setMobileFilterDrawer: (isOpen) => {
     set((state) => ({ ...state, isMobileFilterDrawerOpen: isOpen }));
   },
-  filterParams: {},
+  filterParams: initialFiltersState,
   setFilterParams: (
     partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => {
@@ -44,6 +47,9 @@ export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
         ...partialParams,
       },
     }));
+  },
+  resetFilterParams: () => {
+    set({ filterParams: initialFiltersState });
   },
   searchEscrowAddress: undefined,
   setSearchEscrowAddress: (address: string) => {

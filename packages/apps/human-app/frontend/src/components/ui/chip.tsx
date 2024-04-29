@@ -9,6 +9,7 @@ interface ChipProps {
 export function Chip({ label, backgroundColor }: ChipProps) {
   return (
     <Box
+      component="span"
       key={crypto.randomUUID()}
       sx={{
         backgroundColor: backgroundColor

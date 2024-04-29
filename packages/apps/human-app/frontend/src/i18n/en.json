@@ -171,6 +171,7 @@
       "notificationsConsent": "I would like to be notified about News and Offers"
     },
     "jobs": {
+      "errorFetchingData": "There was an error while fetching data, please try again",
       "availableJobs": "Available Jobs",
       "myJobs": "My Jobs",
       "jobsDiscovery": "Jobs Discovery",
@@ -185,9 +186,14 @@
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
+      "filter": "Filter",
       "escrowAddressColumnId": "escrowAddress",
       "Ethereum": "Ethereum",
       "Polygon": "Polygon",
+      "sortDirection": {
+        "fromHighest": "From highest",
+        "fromLowest": "From lowest"
+      },
       "mobileFilterDrawer": {
         "sortBy": "Sort by",
         "filters": "Filters",

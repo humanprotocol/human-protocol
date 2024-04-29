@@ -22,16 +22,13 @@ export function Navbar({ setOpen, open }: NavbarProps) {
         display: { xs: 'flex', md: 'none' },
         width: '100%',
         px: isMobile ? '44px' : 0,
-        pt: isMobile ? '32px' : 0,
+        py: isMobile ? '32px' : 0,
+        zIndex: '1300',
+        position: open ? 'sticky' : 'relative',
+        top: open ? '0' : 'unset',
       }}
     >
-      <Stack
-        sx={{
-          zIndex: '9999',
-        }}
-      >
-        <HumanLogoIcon />
-      </Stack>
+      <HumanLogoIcon />
 
       <IconButton
         onClick={() => {

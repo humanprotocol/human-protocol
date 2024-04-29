@@ -9,9 +9,11 @@ import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
 
-export const drawerWidth = 240;
+const drawerWidth = 240;
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
+const Main = styled('main', {
+  shouldForwardProp: (prop) => prop !== 'open' && prop !== 'isMobile',
+})<{
   open?: boolean;
   isMobile?: boolean;
 }>(({ theme, open, isMobile }) => ({

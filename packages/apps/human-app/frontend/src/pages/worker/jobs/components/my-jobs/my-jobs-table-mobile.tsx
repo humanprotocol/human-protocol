@@ -1,7 +1,6 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { ProfileListItem } from '@/pages/operator/components/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
@@ -11,24 +10,34 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Chip } from '@/components/ui/chip';
 import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { formatDate } from '@/shared/utils/format-date';
+import { Loader } from '@/components/ui/loader';
+import { Alert } from '@/components/ui/alert';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import { parseNetworkName } from '../utils/parse-network-label';
-import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
+import { type MyJobs } from './my-jobs-table-service';
 import { MyJobsButton } from './my-jobs-button';
 
-export function MyJobsTableMobile() {
-  const { t } = useTranslation();
+interface MyJobsTableMobileProps {
+  data?: MyJobs;
+  isLoading: boolean;
+  isError: boolean;
+}
 
-  const { data, isLoading } = useQuery<MyJobs>({
-    queryKey: ['example', []],
-    queryFn: () => getJobsTableData(),
-  });
-  const { setMobileFilterDrawer, setSearchEscrowAddress, setFilterParams } =
+export function MyJobsTableMobile({
+  data,
+  isLoading,
+  isError,
+}: MyJobsTableMobileProps) {
+  const { t } = useTranslation();
+  const { setMobileFilterDrawer, setSearchEscrowAddress, resetFilterParams } =
     useJobsFilterStore();
 
   useEffect(() => {
-    setFilterParams({});
-  }, [setFilterParams]);
+    return () => {
+      resetFilterParams();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
+  }, []);
 
   return (
     <>
@@ -55,79 +64,87 @@ export function MyJobsTableMobile() {
         <FiltersButtonIcon />
       </Button>
       <Stack flexDirection="column">
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          data?.results.map((d) => (
-            <Paper
-              key={crypto.randomUUID()}
-              sx={{
-                px: '16px',
-                py: '32px',
-                backgroundColor: colorPalette.white,
-                marginBottom: '20px',
-              }}
-            >
-              <List>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <ProfileListItem
-                      header={t('worker.jobs.escrowAddress')}
-                      paragraph={shortenEscrowAddress(d.escrow_address)}
-                    />
-                    <ProfileListItem
-                      header={t('worker.jobs.expiresAt')}
-                      paragraph={d.expires_at ? formatDate(d.expires_at) : ''}
-                    />
-                    <ProfileListItem
-                      header={t('worker.jobs.rewardAmount')}
-                      paragraph={`${d.reward_amount}`}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <ProfileListItem
-                      header={t('worker.jobs.network')}
-                      paragraph={parseNetworkName(d.chain_id)}
-                    />
-                    <Typography
-                      component="div"
-                      sx={{
-                        marginTop: '15px',
-                      }}
-                      variant="subtitle2"
-                    >
-                      {t('worker.jobs.status')}
-                    </Typography>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      sx={{
-                        marginBottom: '25px',
-                      }}
-                    >
-                      <Chip
-                        backgroundColor={parseJobStatusChipColor(d.status)}
-                        key={d.status}
-                        label={d.status}
+        {isError ? (
+          <Alert color="error" severity="error">
+            {t('worker.jobs.errorFetchingData')}
+          </Alert>
+        ) : null}
+        {isLoading && !isError ? (
+          <Stack alignItems="center" justifyContent="center">
+            <Loader size={90} />
+          </Stack>
+        ) : null}
+        {!isLoading && !isError && data
+          ? data.results.map((d) => (
+              <Paper
+                key={crypto.randomUUID()}
+                sx={{
+                  px: '16px',
+                  py: '32px',
+                  backgroundColor: colorPalette.white,
+                  marginBottom: '20px',
+                }}
+              >
+                <List>
+                  <Grid container>
+                    <Grid item xs={6}>
+                      <ProfileListItem
+                        header={t('worker.jobs.escrowAddress')}
+                        paragraph={shortenEscrowAddress(d.escrow_address)}
                       />
+                      <ProfileListItem
+                        header={t('worker.jobs.expiresAt')}
+                        paragraph={d.expires_at ? formatDate(d.expires_at) : ''}
+                      />
+                      <ProfileListItem
+                        header={t('worker.jobs.rewardAmount')}
+                        paragraph={`${d.reward_amount}`}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <ProfileListItem
+                        header={t('worker.jobs.network')}
+                        paragraph={parseNetworkName(d.chain_id)}
+                      />
+                      <Typography
+                        component="div"
+                        sx={{
+                          marginTop: '15px',
+                        }}
+                        variant="subtitle2"
+                      >
+                        {t('worker.jobs.status')}
+                      </Typography>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        sx={{
+                          marginBottom: '25px',
+                        }}
+                      >
+                        <Chip
+                          backgroundColor={parseJobStatusChipColor(d.status)}
+                          key={d.status}
+                          label={d.status}
+                        />
+                      </Stack>
+                      <ProfileListItem
+                        header={t('worker.jobs.jobType')}
+                        paragraph={[d.job_type]}
+                      />
+                    </Grid>
+                    <Stack
+                      sx={{
+                        width: '100%',
+                      }}
+                    >
+                      <MyJobsButton status={d.status} />
                     </Stack>
-                    <ProfileListItem
-                      header={t('worker.jobs.jobType')}
-                      paragraph={[d.job_type]}
-                    />
                   </Grid>
-                  <Stack
-                    sx={{
-                      width: '100%',
-                    }}
-                  >
-                    <MyJobsButton status={d.status} />
-                  </Stack>
-                </Grid>
-              </List>
-            </Paper>
-          ))
-        )}
+                </List>
+              </Paper>
+            ))
+          : null}
       </Stack>
     </>
   );

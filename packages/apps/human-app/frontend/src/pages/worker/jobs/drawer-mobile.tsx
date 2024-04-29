@@ -25,7 +25,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
     useJobsFilterStore();
 
   const handleCheckboxClick = (paramName: string, paramValue: string) => {
-    if (filterParams[paramName] === paramValue) {
+    if (filterParams && filterParams[paramName] === paramValue) {
       setFilterParams({
         ...filterParams,
         [paramName]: undefined,
@@ -69,15 +69,10 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
             width: '100%',
             px: '44px',
             pt: '32px',
+            zIndex: '999999',
           }}
         >
-          <Stack
-            sx={{
-              zIndex: '9999',
-            }}
-          >
-            <HumanLogoIcon />
-          </Stack>
+          <HumanLogoIcon />
 
           <IconButton
             onClick={() => {
@@ -129,7 +124,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
             }}
             variant="subtitle1"
           >
-            From highest
+            {t('worker.jobs.sortDirection.fromHighest')}
           </Typography>
         </Button>
         <Button
@@ -182,7 +177,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
           key={crypto.randomUUID()}
         >
           <Checkbox
-            checked={filterParams.network === 'MATIC'}
+            checked={filterParams?.network === 'MATIC'}
             onClick={() => {
               handleCheckboxClick('network', 'MATIC');
             }}
@@ -207,7 +202,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
           key={crypto.randomUUID()}
         >
           <Checkbox
-            checked={filterParams.job_type === 'FORTUNE'}
+            checked={filterParams?.job_type === 'FORTUNE'}
             onClick={() => {
               handleCheckboxClick('job_type', 'FORTUNE');
             }}
@@ -232,7 +227,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={filterParams.status === 'ACTIVE'}
+              checked={filterParams?.status === 'ACTIVE'}
               onClick={() => {
                 handleCheckboxClick('status', 'ACTIVE');
               }}
@@ -247,7 +242,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={filterParams.status === 'COMPLETED'}
+              checked={filterParams?.status === 'COMPLETED'}
               onClick={() => {
                 handleCheckboxClick('status', 'COMPLETED');
               }}
@@ -262,7 +257,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={filterParams.status === 'CANCELED'}
+              checked={filterParams?.status === 'CANCELED'}
               onClick={() => {
                 handleCheckboxClick('status', 'CANCELED');
               }}
@@ -279,7 +274,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'VALIDATION'}
+                  checked={filterParams?.status === 'VALIDATION'}
                   onClick={() => {
                     handleCheckboxClick('status', 'VALIDATION');
                   }}
@@ -294,7 +289,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'EXPIRED'}
+                  checked={filterParams?.status === 'EXPIRED'}
                   onClick={() => {
                     handleCheckboxClick('status', 'EXPIRED');
                   }}
@@ -309,7 +304,7 @@ export function DrawerMobile({ selectedTab }: DrawerMobileProps) {
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'REJECTED'}
+                  checked={filterParams?.status === 'REJECTED'}
                   onClick={() => {
                     handleCheckboxClick('status', 'REJECTED');
                   }}

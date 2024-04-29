@@ -3,10 +3,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
-import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
@@ -14,7 +12,6 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import { parseNetworkName } from '../utils/parse-network-label';
 import type { AvailableJobs, JobsArray } from './available-jobs-table-service';
-import { getJobsTableData } from './available-jobs-table-service';
 
 const columns: MRT_ColumnDef<JobsArray>[] = [
   {
@@ -43,12 +40,27 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
   },
 ];
 
-export function AvailableJobsTable() {
+interface AvailableJobsTableProps {
+  data?: AvailableJobs;
+  isLoading: boolean;
+  isError: boolean;
+  isRefetching: boolean;
+}
+
+export function AvailableJobsTable({
+  data,
+  isLoading,
+  isError,
+  isRefetching,
+}: AvailableJobsTableProps) {
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
   useEffect(() => {
-    setFilterParams({});
-  }, [setFilterParams]);
+    return () => {
+      setFilterParams(null);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
+  }, []);
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -63,15 +75,6 @@ export function AvailableJobsTable() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
   }, [paginationState]);
-
-  const {
-    fields: { sorting, pagination },
-  } = useTableQuery();
-
-  const { data, isLoading, isError, isRefetching } = useQuery<AvailableJobs>({
-    queryKey: ['AvailableJobs', [sorting, pagination]],
-    queryFn: () => getJobsTableData(),
-  });
 
   const memoizedData = useMemo(() => {
     if (!data) return [];

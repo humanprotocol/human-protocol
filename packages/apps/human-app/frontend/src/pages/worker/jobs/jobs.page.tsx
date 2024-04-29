@@ -1,17 +1,6 @@
-import React, { useState, useEffect, forwardRef } from 'react';
-import {
-  Box,
-  Dialog,
-  Grid,
-  Paper,
-  Slide,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Grid, Paper, Stack, Tab, Tabs } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import type { TransitionProps } from '@mui/material/transitions';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
 import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
@@ -19,34 +8,15 @@ import { PageHeader } from '@/components/layout/protected/page-header';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { HomepageWorkIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
+import { Modal } from '@/components/ui/modal/modal';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
-import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
 import { MyJobsTableMobile } from './components/my-jobs/my-jobs-table-mobile';
 import { DrawerMobile } from './drawer-mobile';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  activeTab: number;
-}
-
-function TabPanel({ children, index, activeTab }: TabPanelProps) {
-  return (
-    <div
-      aria-labelledby={`tabpanel-${index}`}
-      hidden={activeTab !== index}
-      id={`jobs-tabpanel-${index}`}
-      role="tabpanel"
-    >
-      {activeTab === index && (
-        <Box sx={{ py: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
+import { TabPanel } from './components/ui/jobs-tab-panel';
+import { MyJobsDataProvider } from './components/my-jobs/my-jobs-data-provider';
+import { MyJobsTable } from './components/my-jobs/my-jobs-table';
+import { AvailableJobsDataProvider } from './components/avaible-jobs/available-jobs-data-provider';
 
 function generateTabA11yProps(index: number) {
   return {
@@ -54,22 +24,13 @@ function generateTabA11yProps(index: number) {
     'aria-controls': `jobs-tabpanel-${index}`,
   };
 }
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 export function JobsPage() {
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
-  const { isMobileFilterDrawerOpen, setMobileFilterDrawer } =
-    useJobsFilterStore();
+  const { isMobileFilterDrawerOpen } = useJobsFilterStore();
   const [selectedTab, setSelectedTab] = useState('availableJobs');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -88,16 +49,9 @@ export function JobsPage() {
 
   return (
     <>
-      <Dialog
-        TransitionComponent={Transition}
-        fullScreen
-        onClose={() => {
-          setMobileFilterDrawer(false);
-        }}
-        open={isMobileFilterDrawerOpen}
-      >
+      <Modal isOpen={isMobileFilterDrawerOpen}>
         <DrawerMobile selectedTab={selectedTab} />
-      </Dialog>
+      </Modal>
       <Grid alignItems="center" container justifyContent="center">
         <Grid item xs={12}>
           <PageHeader
@@ -143,14 +97,50 @@ export function JobsPage() {
                     </Tabs>
                   </Box>
                   <TabPanel activeTab={activeTab} index={0}>
-                    {isMobile ? (
-                      <AvailableJobsTableMobile />
-                    ) : (
-                      <AvailableJobsTable />
-                    )}
+                    <AvailableJobsDataProvider>
+                      {({ data, isLoading, isError, isRefetching }) => (
+                        <>
+                          {isMobile ? (
+                            <AvailableJobsTableMobile
+                              data={data}
+                              isError={isError}
+                              isLoading={isLoading}
+                            />
+                          ) : null}
+                          {!isMobile ? (
+                            <AvailableJobsTable
+                              data={data}
+                              isError={isError}
+                              isLoading={isLoading}
+                              isRefetching={isRefetching}
+                            />
+                          ) : null}
+                        </>
+                      )}
+                    </AvailableJobsDataProvider>
                   </TabPanel>
                   <TabPanel activeTab={activeTab} index={1}>
-                    {isMobile ? <MyJobsTableMobile /> : <MyJobsTable />}
+                    <MyJobsDataProvider>
+                      {({ data, isLoading, isError, isRefetching }) => (
+                        <>
+                          {isMobile ? (
+                            <MyJobsTableMobile
+                              data={data}
+                              isError={isError}
+                              isLoading={isLoading}
+                            />
+                          ) : null}
+                          {!isMobile ? (
+                            <MyJobsTable
+                              data={data}
+                              isError={isError}
+                              isLoading={isLoading}
+                              isRefetching={isRefetching}
+                            />
+                          ) : null}
+                        </>
+                      )}
+                    </MyJobsDataProvider>
                   </TabPanel>
                 </Box>
               </TableQueryContextProvider>

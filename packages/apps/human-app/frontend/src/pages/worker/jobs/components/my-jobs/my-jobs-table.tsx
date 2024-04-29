@@ -3,10 +3,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
-import { useTableQuery } from '@/components/ui/table/table-query-hook';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { formatDate } from '@/shared/utils/format-date';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
@@ -18,7 +16,7 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
 import type { JobsArray } from '../avaible-jobs/available-jobs-table-service';
 import { parseNetworkName } from '../utils/parse-network-label';
-import { getJobsTableData, type MyJobs } from './my-jobs-table-service';
+import { type MyJobs } from './my-jobs-table-service';
 import { MyJobsButton } from './my-jobs-button';
 
 const columns: MRT_ColumnDef<JobsArray>[] = [
@@ -35,6 +33,7 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
     muiTableHeadCellProps: () => ({
       component: (props) => (
         <TableHeaderCell
+          itemRef={props.itemRef}
           {...props}
           popoverContent={
             <Filtering
@@ -48,7 +47,7 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
                   text: t('worker.jobs.mobileFilterDrawer.network.polygon'),
                 },
               ]}
-              label="Filter"
+              label={t('worker.jobs.filter')}
             />
           }
         />
@@ -71,11 +70,11 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
               sortingOption={[
                 {
                   sort: 'ASC',
-                  text: 'From highest',
+                  text: t('worker.jobs.sortDirection.fromHighest'),
                 },
                 {
                   sort: 'DESC',
-                  text: 'From lowest',
+                  text: t('worker.jobs.sortDirection.fromLowest'),
                 },
               ]}
             />
@@ -109,13 +108,28 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
     enableSorting: true,
   },
 ];
+interface MyJobsTableProps {
+  data?: MyJobs;
+  isLoading: boolean;
+  isError: boolean;
+  isRefetching: boolean;
+}
 
-export function MyJobsTable() {
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+export function MyJobsTable({
+  data,
+  isLoading,
+  isError,
+  isRefetching,
+}: MyJobsTableProps) {
+  const { setFilterParams, filterParams, resetFilterParams } =
+    useJobsFilterStore();
 
   useEffect(() => {
-    setFilterParams({});
-  }, [setFilterParams]);
+    return () => {
+      resetFilterParams();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
+  }, []);
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -130,15 +144,6 @@ export function MyJobsTable() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
   }, [paginationState]);
-
-  const {
-    fields: { sorting, pagination },
-  } = useTableQuery();
-
-  const { data, isLoading, isError, isRefetching } = useQuery<MyJobs>({
-    queryKey: ['MyJobs', [sorting, pagination]],
-    queryFn: () => getJobsTableData(),
-  });
 
   const memoizedData = useMemo(() => {
     if (!data) return [];
