@@ -17,10 +17,10 @@ import {
   createProposalMessage,
   callReceiveMessageWithWormholeMock,
   createMessageWithPayload,
-  increaseTime,
+  SECONDS_PER_BLOCK,
 } from './GovernanceUtils';
 
-describe.only('DAOSpokeContract', function () {
+describe('DAOSpokeContract', function () {
   let owner: Signer;
   let user1: Signer;
   let wormholeMockForDaoSpoke: WormholeMock;
@@ -32,7 +32,6 @@ describe.only('DAOSpokeContract', function () {
   let token: HMToken;
   let timelockController: TimelockController;
   let daoSpoke: DAOSpokeContract;
-  const secondsPerBlock = 12;
 
   beforeEach(async () => {
     [owner, user1] = await ethers.getSigners();
@@ -95,9 +94,9 @@ describe.only('DAOSpokeContract', function () {
       0,
       await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
-      12,
-      15,
-      4500,
+      SECONDS_PER_BLOCK,
+      SECONDS_PER_BLOCK * 1,
+      SECONDS_PER_BLOCK * 20 * 15,
       0,
       4
     )) as MetaHumanGovernor;
@@ -122,7 +121,7 @@ describe.only('DAOSpokeContract', function () {
       ethers.zeroPadBytes(await governor.getAddress(), 32),
       5, // hubChainId
       voteToken.getAddress(),
-      secondsPerBlock, // voting period
+      SECONDS_PER_BLOCK, // voting period
       6, // spokeChainId
       await wormholeMockForDaoSpoke.getAddress(),
       owner.getAddress() // admin address
@@ -200,7 +199,7 @@ describe.only('DAOSpokeContract', function () {
         await governor.getAddress()
       );
 
-      await increaseTime(40);
+      await mineNBlocks(3);
 
       await expect(daoSpoke.connect(user1).castVote(proposalId, 0))
         .to.emit(daoSpoke, 'VoteCast')
@@ -389,9 +388,9 @@ describe.only('DAOSpokeContract', function () {
         [
           0,
           proposalId,
-          latestBlock.timestamp - secondsPerBlock * 2,
-          latestBlock.timestamp - secondsPerBlock * 2,
-          latestBlock.timestamp + secondsPerBlock * 10,
+          latestBlock.timestamp - SECONDS_PER_BLOCK * 2,
+          latestBlock.timestamp - SECONDS_PER_BLOCK * 2,
+          latestBlock.timestamp + SECONDS_PER_BLOCK * 10,
         ]
       );
 
@@ -417,13 +416,13 @@ describe.only('DAOSpokeContract', function () {
       const proposal = await daoSpoke.proposals(proposalId);
 
       expect(proposal.proposalCreation).to.equal(
-        latestBlock.timestamp - secondsPerBlock * 2
+        latestBlock.timestamp - SECONDS_PER_BLOCK * 2
       );
       expect(proposal.localVoteStart).to.equal(
-        latestBlock.timestamp - secondsPerBlock * 2
+        latestBlock.timestamp - SECONDS_PER_BLOCK * 2
       );
       expect(proposal.localVoteEnd).to.equal(
-        latestBlock.timestamp + secondsPerBlock * 10
+        latestBlock.timestamp + SECONDS_PER_BLOCK * 10
       );
       expect(proposal.localVoteStartBlock).to.equal(latestBlock.number - 1);
     });
@@ -446,9 +445,9 @@ describe.only('DAOSpokeContract', function () {
         [
           0,
           proposalId,
-          latestBlock.timestamp + secondsPerBlock * 2,
-          latestBlock.timestamp + secondsPerBlock * 2,
-          latestBlock.timestamp + secondsPerBlock * 10,
+          latestBlock.timestamp + SECONDS_PER_BLOCK * 2,
+          latestBlock.timestamp + SECONDS_PER_BLOCK * 2,
+          latestBlock.timestamp + SECONDS_PER_BLOCK * 10,
         ]
       );
 
@@ -474,13 +473,13 @@ describe.only('DAOSpokeContract', function () {
       const proposal = await daoSpoke.proposals(proposalId);
 
       expect(proposal.proposalCreation).to.equal(
-        latestBlock.timestamp + secondsPerBlock * 2
+        latestBlock.timestamp + SECONDS_PER_BLOCK * 2
       );
       expect(proposal.localVoteStart).to.equal(
-        latestBlock.timestamp + secondsPerBlock * 2
+        latestBlock.timestamp + SECONDS_PER_BLOCK * 2
       );
       expect(proposal.localVoteEnd).to.equal(
-        latestBlock.timestamp + secondsPerBlock * 10
+        latestBlock.timestamp + SECONDS_PER_BLOCK * 10
       );
       expect(proposal.localVoteStartBlock).to.equal(latestBlock.number + 2);
     });

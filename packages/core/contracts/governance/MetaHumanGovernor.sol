@@ -317,7 +317,7 @@ contract MetaHumanGovernor is
      *  @param proposalId The ID of the proposal.
      */
     function requestCollections(uint256 proposalId) public payable {
-        if (block.number < proposalDeadline(proposalId)) {
+        if (block.timestamp < proposalDeadline(proposalId)) {
             revert RequestAfterVotePeriodOver();
         }
 
