@@ -120,9 +120,11 @@
     },
     "sendEmailVerification": {
       "title": "Verify Email",
+      "btn": "Resend Verification Email",
       "paragraph1": "We’ve sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
-      "paragraph3": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+      "paragraph3": "<1>Cant find our email?</1> If you can’t find the inbox in your email please check the spam folder or click below and we will send you a new one.",
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
     "emailVerification": {
       "title": "Email Verified",

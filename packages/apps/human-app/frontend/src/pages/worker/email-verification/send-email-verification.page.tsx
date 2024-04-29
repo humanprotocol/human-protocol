@@ -4,8 +4,12 @@ import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
-import { PageCard } from '@/components/ui/page-card';
+import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
+import { Button } from '@/components/ui/button';
+import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
+import { Alert } from '@/components/ui/alert';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 export function SendEmailVerificationWorkerPage() {
   const { t } = useTranslation();
@@ -13,9 +17,34 @@ export function SendEmailVerificationWorkerPage() {
     keyInStorage: 'email',
     schema: z.string().email(),
   });
+  const {
+    mutate: resendEmailVerificationWorkerMutation,
+    error: emailVerificationWorkerError,
+    isError: isEmailVerificationWorkerError,
+    isPending: isEmailVerificationWorkerPending,
+  } = useResendEmailVerificationWorkerMutation();
+
+  const sendEmailVerificationMutation = () => {
+    if (email) {
+      resendEmailVerificationWorkerMutation({ email });
+    }
+  };
+
+  if (isEmailVerificationWorkerPending) {
+    return <PageCardLoader />;
+  }
 
   return (
-    <PageCard title={t('worker.sendEmailVerification.title')}>
+    <PageCard
+      alert={
+        isEmailVerificationWorkerError ? (
+          <Alert color="error" severity="error">
+            {defaultErrorMessage(emailVerificationWorkerError)}
+          </Alert>
+        ) : undefined
+      }
+      title={t('worker.sendEmailVerification.title')}
+    >
       <Grid container gap="2rem">
         <Typography>
           <Trans
@@ -29,8 +58,21 @@ export function SendEmailVerificationWorkerPage() {
           {t('worker.sendEmailVerification.paragraph2')}
         </Typography>
         <Typography variant="body1">
+          <Trans i18nKey="worker.sendEmailVerification.paragraph3">
+            Strong <Typography variant="buttonMedium" />
+          </Trans>
+        </Typography>
+        <Button
+          disabled={isEmailVerificationWorkerPending}
+          fullWidth
+          onClick={sendEmailVerificationMutation}
+          variant="outlined"
+        >
+          {t('worker.sendEmailVerification.btn')}
+        </Button>
+        <Typography variant="body1">
           <Trans
-            i18nKey="worker.sendEmailVerification.paragraph3"
+            i18nKey="worker.sendEmailVerification.paragraph4"
             values={{ email }}
           >
             Strong
