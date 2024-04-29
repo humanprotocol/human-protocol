@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
@@ -21,6 +23,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
+import { useAuth } from '@/auth/use-auth';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -29,6 +32,15 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 }
 
 export function SignUpWorkerPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate(routerPaths.worker.profile);
+    }
+  }, [navigate, user]);
+
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',

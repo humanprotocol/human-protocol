@@ -6,6 +6,8 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 import { passwordRegex } from '@/shared/helpers/regex';
+import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
+import { browserAuthProvider } from '@/auth/browser-auth-provider';
 
 export const signUpDtoSchema = z
   .object({
@@ -35,10 +37,18 @@ export type SignUpDto = z.infer<typeof signUpDtoSchema>;
 
 const signUpSuccessResponseSchema = z.unknown();
 
-function signUpMutationFn(data: Omit<SignUpDto, 'confirmPassword'>) {
-  return apiClient(apiPaths.worker.signUp.path, {
+async function signUpMutationFn(data: Omit<SignUpDto, 'confirmPassword'>) {
+  await apiClient(apiPaths.worker.signUp.path, {
     successSchema: signUpSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
+  });
+
+  return apiClient(apiPaths.worker.signIn.path, {
+    successSchema: signInSuccessResponseSchema,
+    options: {
+      method: 'POST',
+      body: JSON.stringify(data),
+    },
   });
 }
 
@@ -48,7 +58,8 @@ export function useSignUpMutation() {
 
   return useMutation({
     mutationFn: signUpMutationFn,
-    onSuccess: async (_, { email }) => {
+    onSuccess: async (successSignInData, { email }) => {
+      browserAuthProvider.signIn(successSignInData);
       navigate(routerPaths.worker.sendEmailVerification, { state: { email } });
       await queryClient.invalidateQueries();
     },

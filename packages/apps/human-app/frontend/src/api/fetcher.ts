@@ -9,18 +9,18 @@ import { browserAuthProvider } from '@/auth/browser-auth-provider';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,
-  newHeader: Headers
+  newHeaders: Record<string, string>
 ) => {
-  const headers = fetcherOptionsWithDefaults?.headers
-    ? merge(
-        { headers: fetcherOptionsWithDefaults.headers },
-        { headers: newHeader }
-      )
-    : { headers: newHeader };
+  const mergedHeaders = {
+    ...Object.fromEntries(
+      new Headers(fetcherOptionsWithDefaults?.headers).entries()
+    ),
+    ...newHeaders,
+  };
 
   return {
     ...fetcherOptionsWithDefaults,
-    ...headers,
+    headers: new Headers(mergedHeaders),
   };
 };
 
@@ -95,12 +95,9 @@ export function createFetcher(defaultFetcherConfig?: {
       : fetcherOptions.options;
 
     if (fetcherOptions.authenticated) {
-      fetcherOptionsWithDefaults = appendHeader(
-        fetcherOptionsWithDefaults,
-        new Headers({
-          Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
-        })
-      );
+      fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
+        Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
+      });
     }
 
     const baseUrl = (() => {
@@ -154,12 +151,9 @@ export function createFetcher(defaultFetcherConfig?: {
         }
       );
 
-      appendHeader(
-        fetcherOptionsWithDefaults,
-        new Headers({
-          Authorization: `Bearer ${obtainAccessTokenSuccess.access_token}`,
-        })
-      );
+      appendHeader(fetcherOptionsWithDefaults, {
+        Authorization: `Bearer ${obtainAccessTokenSuccess.access_token}`,
+      });
       response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
 
       if (!response.ok) {

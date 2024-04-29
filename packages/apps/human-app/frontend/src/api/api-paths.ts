@@ -20,7 +20,10 @@ export const apiPaths = {
       path: '/auth/reset-password',
     },
     verifyEmail: {
-      path: '/auth/verify',
+      path: '/email-confirmation/email-verification',
+    },
+    resendEmailVerification: {
+      path: '/email-confirmation/resend-email-verification',
     },
   },
 } as const;
