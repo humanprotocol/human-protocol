@@ -14,10 +14,10 @@ export const apiPaths = {
       path: '/auth/refresh',
     },
     sendResetLink: {
-      path: '/auth/reset-link',
+      path: '/password-reset/forgot-password',
     },
     resetPassword: {
-      path: '/auth/reset-password',
+      path: '/password-reset/restore-password',
     },
     verifyEmail: {
       path: '/email-confirmation/email-verification',

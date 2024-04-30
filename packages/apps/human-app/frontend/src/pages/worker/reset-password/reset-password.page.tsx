@@ -4,7 +4,8 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
 import { PageCard } from '@/components/ui/page-card';
@@ -19,7 +20,8 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
 
 export function ResetPasswordWorkerPage() {
-  const { token } = useParams();
+  const location = useLocation();
+  const { token } = queryString.parse(location.search);
 
   const methods = useForm<ResetPasswordDto>({
     defaultValues: {
@@ -38,7 +40,11 @@ export function ResetPasswordWorkerPage() {
 
   const handleWorkerResetPassword = (data: ResetPasswordDto) => {
     resetPasswordWorkerMutate(
-      omit({ ...data, token: token || '' }, ['confirmPassword'])
+      omit(
+        // eslint-disable-next-line camelcase -- api request
+        { ...data, token: token?.toString() || '', h_captcha_token: 'token' },
+        ['confirmPassword']
+      )
     );
   };
 
@@ -80,7 +86,7 @@ export function ResetPasswordWorkerPage() {
               type="submit"
               variant="contained"
             >
-              {t('worker.signUpForm.submitBtn')}
+              {t('worker.profile.resetPassword')}
             </Button>
           </Grid>
         </form>
