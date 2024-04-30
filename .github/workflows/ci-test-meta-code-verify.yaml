@@ -8,7 +8,7 @@ on:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/meta-code-verify/**'
+      - 'packages/apps/dashboard/ui/meta-code-verify/**'
   workflow_dispatch:
 
 jobs:
