@@ -1,6 +1,7 @@
 import merge from 'lodash/merge';
 import type { ZodType, ZodTypeDef } from 'zod';
 import type { ResponseError } from '@/shared/types/global.type';
+import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 // eslint-disable-next-line import/no-cycle -- cause by refresh token retry
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { apiClient } from '@/api/api-client';
@@ -137,27 +138,34 @@ export function createFetcher(defaultFetcherConfig?: {
       response.status === 401 &&
       fetcherOptions.authenticated
     ) {
-      const obtainAccessTokenSuccess = await apiClient(
-        apiPaths.worker.obtainAccessToken.path,
-        {
-          successSchema: signInSuccessResponseSchema,
-          options: {
-            method: 'POST',
-            body: JSON.stringify({
-              // eslint-disable-next-line camelcase -- camel case defined by api
-              refresh_token: browserAuthProvider.getRefreshToken(),
-            }),
-          },
-        }
-      );
+      let refetchAccessTokenSuccess: SignInSuccessResponse | undefined;
+      try {
+        refetchAccessTokenSuccess = await apiClient(
+          apiPaths.worker.obtainAccessToken.path,
+          {
+            successSchema: signInSuccessResponseSchema,
+            options: {
+              method: 'POST',
+              body: JSON.stringify({
+                // eslint-disable-next-line camelcase -- camel case defined by api
+                refresh_token: browserAuthProvider.getRefreshToken(),
+              }),
+            },
+          }
+        );
+      } catch {
+        browserAuthProvider.signOut();
+        return;
+      }
 
       appendHeader(fetcherOptionsWithDefaults, {
-        Authorization: `Bearer ${obtainAccessTokenSuccess.access_token}`,
+        Authorization: `Bearer ${refetchAccessTokenSuccess.access_token}`,
       });
       response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
 
       if (!response.ok) {
         browserAuthProvider.signOut();
+        return;
       }
     }
 

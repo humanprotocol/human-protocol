@@ -7,7 +7,7 @@ import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 import { passwordRegex } from '@/shared/helpers/regex';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
-import { browserAuthProvider } from '@/auth/browser-auth-provider';
+import { useAuth } from '@/auth/use-auth';
 
 export const signUpDtoSchema = z
   .object({
@@ -55,11 +55,12 @@ async function signUpMutationFn(data: Omit<SignUpDto, 'confirmPassword'>) {
 export function useSignUpMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   return useMutation({
     mutationFn: signUpMutationFn,
     onSuccess: async (successSignInData, { email }) => {
-      browserAuthProvider.signIn(successSignInData);
+      signIn(successSignInData);
       navigate(routerPaths.worker.sendEmailVerification, { state: { email } });
       await queryClient.invalidateQueries();
     },
