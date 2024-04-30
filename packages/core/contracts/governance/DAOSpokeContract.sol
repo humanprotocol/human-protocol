@@ -130,7 +130,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
 
         uint256 weight = token.getPastVotes(
             msg.sender,
-            proposal.localVoteStartBlock
+            proposal.localVoteStart
         );
         _countVote(proposalId, msg.sender, support, weight);
 

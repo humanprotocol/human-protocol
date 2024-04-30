@@ -67,13 +67,17 @@ contract MetaHumanGovernor is
         address _wormholeRelayerAddress,
         address _magistrateAddress,
         uint256 _secondsPerBlock,
-        uint48 _votingDelay,
-        uint32 _votingPeriod,
+        uint48 _votingDelayInSeconds,
+        uint32 _votingPeriodInSeconds,
         uint256 _proposalThreshold,
         uint256 _quorumFraction
     )
         Governor('MetaHumanGovernor')
-        GovernorSettings(_votingDelay, _votingPeriod, _proposalThreshold)
+        GovernorSettings(
+            _votingDelayInSeconds,
+            _votingPeriodInSeconds,
+            _proposalThreshold
+        )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(_quorumFraction)
         GovernorTimelockControl(_timelock)
@@ -313,7 +317,7 @@ contract MetaHumanGovernor is
      *  @param proposalId The ID of the proposal.
      */
     function requestCollections(uint256 proposalId) public payable {
-        if (block.number < proposalDeadline(proposalId)) {
+        if (block.timestamp < proposalDeadline(proposalId)) {
             revert RequestAfterVotePeriodOver();
         }
 
@@ -493,7 +497,7 @@ contract MetaHumanGovernor is
 
     /**
      * @dev Retrieves the voting delay period.
-     *  @return The duration of the voting delay in blocks.
+     *  @return The duration of voting delay in seconds.
      */
     function votingDelay()
         public
@@ -501,12 +505,12 @@ contract MetaHumanGovernor is
         override(IGovernor, GovernorSettings)
         returns (uint256)
     {
-        return super.votingDelay();
+        return super.votingDelay(); // Ensure this returns time in seconds
     }
 
     /**
      * @dev Retrieves the voting period duration.
-     *  @return The duration of the voting period in blocks.
+     *  @return The duration of the voting period in seconds
      */
     function votingPeriod()
         public
@@ -514,7 +518,7 @@ contract MetaHumanGovernor is
         override(IGovernor, GovernorSettings)
         returns (uint256)
     {
-        return super.votingPeriod();
+        return super.votingPeriod(); // Ensure this returns time in seconds
     }
 
     /**
