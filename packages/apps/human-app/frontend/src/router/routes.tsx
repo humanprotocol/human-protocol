@@ -52,6 +52,22 @@ export const unprotectedRoutes: RouteProps[] = [
     path: routerPaths.worker.sendEmailVerification,
     element: <SendEmailVerificationWorkerPage />,
   },
+  {
+    path: routerPaths.worker.sendResetLink,
+    element: <SendResetLinkWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.resetPassword,
+    element: <ResetPasswordWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendResetLinkSuccess,
+    element: <SendResetLinkWorkerSuccessPage />,
+  },
+  {
+    path: routerPaths.worker.resetPasswordSuccess,
+    element: <ResetPasswordWorkerSuccessPage />,
+  },
 ];
 
 export const protectedRoutes: RouteProps[] = [
@@ -66,22 +82,6 @@ export const protectedRoutes: RouteProps[] = [
   {
     path: '/worker/profile',
     element: <WorkerProfilePage />,
-  },
-  {
-    path: routerPaths.worker.sendResetLink,
-    element: <SendResetLinkWorkerPage />,
-  },
-  {
-    path: routerPaths.worker.sendResetLinkSuccess,
-    element: <SendResetLinkWorkerSuccessPage />,
-  },
-  {
-    path: routerPaths.worker.resetPassword,
-    element: <ResetPasswordWorkerPage />,
-  },
-  {
-    path: routerPaths.worker.resetPasswordSuccess,
-    element: <ResetPasswordWorkerSuccessPage />,
   },
 ];
 
