@@ -133,7 +133,7 @@ NETWORKS = {
         "title": "Polygon Amoy",
         "scan_url": "https://www.oklink.com/amoy",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2"
+            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
