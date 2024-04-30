@@ -123,6 +123,7 @@ import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
+import { listObjectsInBucket } from '../../common/utils/storage';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -1105,21 +1106,6 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly for image boxes from points type', async () => {
-      const storageDatasetMock: any = {
-        dataset: {
-          provider: StorageProviders.AWS,
-          region: AWSRegions.EU_CENTRAL_1,
-          bucketName: 'bucket',
-          path: 'folder/test',
-        },
-        points: {
-          provider: StorageProviders.AWS,
-          region: AWSRegions.EU_CENTRAL_1,
-          bucketName: 'bucket',
-          path: 'folder/test',
-        },
-      };
-
       jest
         .spyOn(storageService, 'download')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
@@ -1220,6 +1206,18 @@ describe('JobService', () => {
         .mockImplementation(() => ({
           getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      (listObjectsInBucket as any).mockResolvedValueOnce([
+        '1.jpg',
+        '2.jpg',
+        '3.jpg',
+        '4.jpg',
+        '5.jpg',
+      ]);
 
       await jobService.createJob(
         userId,
@@ -1435,7 +1433,7 @@ describe('JobService', () => {
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
 
-    it('should create a fortune job successfully on network selected from round robin logic', async () => {
+    it('should create a image label job successfully on network selected from round robin logic', async () => {
       const fundAmount = imageLabelBinaryJobDto.fundAmount;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -1453,6 +1451,18 @@ describe('JobService', () => {
         .mockImplementation(() => ({
           getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
         }));
+
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValueOnce(MOCK_CVAT_GT);
+
+      (listObjectsInBucket as any).mockResolvedValueOnce([
+        '1.jpg',
+        '2.jpg',
+        '3.jpg',
+        '4.jpg',
+        '5.jpg',
+      ]);
 
       await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
         ...imageLabelBinaryJobDto,
