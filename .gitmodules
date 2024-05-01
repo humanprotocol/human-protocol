@@ -1,3 +1,0 @@
-[submodule "packages/apps/dashboard/ui/meta-code-verify"]
-	path = packages/apps/dashboard/ui/meta-code-verify
-	url = https://github.com/humanprotocol/meta-code-verify

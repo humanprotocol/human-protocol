@@ -1,4 +1,3 @@
 build/
 dist/
 node_modules/
-/packages/apps/dashboard/ui/meta-code-verify/
