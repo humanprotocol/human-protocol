@@ -124,6 +124,7 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
+import { Web3Env } from 'src/common/enums/web3';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -1871,9 +1872,15 @@ describe('JobService', () => {
     });
   });
 
-  describe('requestToCancelJob', () => {
+  describe('requestToCancelJob by job id', () => {
     const jobId = 1;
     const userId = 123;
+
+    beforeEach(() => {
+      web3Service.getValidChains = jest
+        .fn()
+        .mockReturnValue([ChainId.LOCALHOST]);
+    });
 
     it('should cancel the job when status is Launched', async () => {
       const escrowAddress = MOCK_ADDRESS;
@@ -1957,6 +1964,124 @@ describe('JobService', () => {
 
       await expect(
         jobService.requestToCancelJob(userId, jobId),
+      ).rejects.toThrow(
+        new ConflictException(ErrorJob.InvalidStatusCancellation),
+      );
+    });
+  });
+
+  describe('requestToCancelJob by chain id and escrowAddress', () => {
+    const jobId = 1;
+    const chainId = ChainId.LOCALHOST;
+    const escrowAddress = MOCK_ADDRESS;
+    const userId = 123;
+
+    beforeEach(() => {
+      web3Service.getValidChains = jest
+        .fn()
+        .mockReturnValue([ChainId.LOCALHOST]);
+    });
+
+    it('should cancel the job when status is Launched', async () => {
+      const escrowAddress = MOCK_ADDRESS;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: 1,
+        userId,
+        status: JobStatus.LAUNCHED,
+        escrowAddress,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.requestToCancelJob(userId, chainId, escrowAddress);
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(jobRepository.updateOne).toHaveBeenCalled();
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
+    });
+
+    it('should cancel the job when status is Pending', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.PENDING,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.requestToCancelJob(userId, chainId, escrowAddress);
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
+        jobId,
+        userId,
+        refundAmount: fundAmount,
+      });
+      expect(jobRepository.updateOne).toHaveBeenCalled();
+    });
+
+    it('should throw not found exception if job not found', async () => {
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await expect(
+        jobService.requestToCancelJob(userId, chainId, escrowAddress),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw not found exception if job not found when an invalid chain id', async () => {
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await expect(
+        jobService.requestToCancelJob(userId, 123, escrowAddress),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw not found exception if job not found when an escrow address is not valid', async () => {
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await expect(
+        jobService.requestToCancelJob(userId, chainId, '0x123'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw an error if status is invalid', async () => {
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.COMPLETED,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await expect(
+        jobService.requestToCancelJob(userId, chainId, escrowAddress),
       ).rejects.toThrow(
         new ConflictException(ErrorJob.InvalidStatusCancellation),
       );

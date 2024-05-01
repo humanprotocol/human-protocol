@@ -31,6 +31,8 @@ import {
   FortuneFinalResultDto,
   JobCaptchaDto,
   JobQuickLaunchDto,
+  JobCancelByIdDto,
+  JobCancelByChainIdAndEscrowAddressDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
@@ -246,7 +248,7 @@ export class JobController {
 
   @ApiOperation({
     summary: 'Cancel a job',
-    description: 'Endpoint to cancel a specified job.',
+    description: 'Endpoint to cancel a specified job by its unique identifier.',
   })
   @ApiResponse({
     status: 200,
@@ -267,9 +269,43 @@ export class JobController {
   @Patch('/cancel/:id')
   public async cancelJob(
     @Request() req: RequestWithUser,
-    @Param() params: JobCancelDto,
+    @Param() params: JobCancelByIdDto,
   ): Promise<void> {
     await this.jobService.requestToCancelJob(req.user.id, params.id);
+    return;
+  }
+
+  @ApiOperation({
+    summary: 'Cancel a job',
+    description:
+      'Endpoint to cancel a specified job by its associated chain ID and escrow address.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cancellation request for the specified job accepted',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
+  @Patch('/cancel/:chainId/:escrowAddress')
+  public async cancelJobByChainIdAndEscrowAddress(
+    @Request() req: RequestWithUser,
+    @Param() params: JobCancelByChainIdAndEscrowAddressDto,
+  ): Promise<void> {
+    await this.jobService.requestToCancelJob(
+      req.user.id,
+      params.chainId,
+      params.escrowAddress,
+    );
     return;
   }
 

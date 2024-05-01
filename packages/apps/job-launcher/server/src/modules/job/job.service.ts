@@ -952,10 +952,24 @@ export class JobService {
     return jobEntity;
   }
 
-  public async requestToCancelJob(userId: number, id: number): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
+  public async requestToCancelJob(
+    userId: number,
+    id: number,
+    escrowAddress?: string,
+  ): Promise<void> {
+    let jobEntity;
+    const validChains = this.web3Service.getValidChains();
 
-    if (!jobEntity) {
+    if (validChains.includes(id) && ethers.isAddress(escrowAddress)) {
+      jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+        id,
+        escrowAddress,
+      );
+    } else {
+      jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
+    }
+
+    if (!jobEntity || (jobEntity && jobEntity.userId !== userId)) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
     }
