@@ -218,7 +218,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
-      polygonAmoy: process.env.OKLINK_API_KEY || '',
+      polygonAmoy: process.env.AMOY_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
@@ -242,9 +242,8 @@ const config: HardhatUserConfig = {
         network: 'polygonAmoy',
         chainId: 80002,
         urls: {
-          apiURL:
-            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/AMOY_TESTNET',
-          browserURL: 'https://www.oklink.com',
+          apiURL: 'https://api-amoy.polygonscan.com/api',
+          browserURL: 'https://amoy.polygonscan.com',
         },
       },
     ],
