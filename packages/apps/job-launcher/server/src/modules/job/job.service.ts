@@ -960,13 +960,13 @@ export class JobService {
     let jobEntity;
     const validChains = this.web3Service.getValidChains();
 
-    if (validChains.includes(id) && ethers.isAddress(escrowAddress)) {
+    if (id && !escrowAddress) {
+      jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
+    } else if (validChains.includes(id) && ethers.isAddress(escrowAddress)) {
       jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
         id,
         escrowAddress,
       );
-    } else {
-      jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
     }
 
     if (!jobEntity || (jobEntity && jobEntity.userId !== userId)) {

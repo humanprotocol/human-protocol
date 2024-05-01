@@ -197,20 +197,10 @@ export class JobCvatDto extends JobDto {
   public fundAmount: number;
 }
 
-export class JobCancelByIdDto {
+export class JobCancelDto {
   @ApiProperty()
   @IsNumberString()
   public id: number;
-}
-
-export class JobCancelByChainIdAndEscrowAddressDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @ApiProperty({ name: 'escrow_address' })
-  @IsString()
-  public escrowAddress: string;
 }
 
 export class JobIdDto {
