@@ -27,7 +27,9 @@ export async function signMessage(
   }
 
   const wallet = new ethers.Wallet(privateKey);
+  console.log('wallet', wallet);
   const signature = await wallet.signMessage(message);
+  console.log('signature', signature);
 
   return signature;
 }
@@ -38,6 +40,7 @@ export function recoverSigner(
 ): string {
   if (typeof message !== 'string') {
     message = JSON.stringify(message);
+    console.log('message', message);
   }
 
   try {

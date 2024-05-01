@@ -6,11 +6,13 @@ import {
   Query,
   UseGuards,
   Request,
+  Headers,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
+  ApiHeader,
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
@@ -18,6 +20,7 @@ import { SignatureAuthGuard } from '../../common/guards/signature.auth';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { GetJobsDto, JobDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
 
@@ -57,6 +60,11 @@ export class JobController {
     summary: 'Solve Job',
     description: 'Endpoint to solve a job.',
   })
+  @ApiHeader({
+    name: HEADER_SIGNATURE_KEY,
+    description: 'Signature header for authenticating the webhook request.',
+    required: true,
+  })
   @ApiBody({
     description: 'Details required to solve the job.',
     type: SolveJobDto,
@@ -77,6 +85,7 @@ export class JobController {
   @UseGuards(SignatureAuthGuard)
   solveJob(
     @Request() req: RequestWithUser,
+    @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: SolveJobDto,
   ): Promise<void> {
     return this.jobService.solveJob(
