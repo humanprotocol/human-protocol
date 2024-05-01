@@ -48,9 +48,6 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 │   │   ├── fortune                          # Fortune application
 │   │   ├── job-launcher                     # Job launcher server, and UI
 │   │   ├── human-app                        # Human App server
-│   │   ├── meta-code-verify                 # Browser extensions to verify code
-│   │   │                                      running in the browser against a
-│   │   │                                      published manifest
 │   │   ├── reputation-oracle                # Reputation Oracle server
 │   ├── core                                 # EVM compatible smart contracts for HUMAN
 │   ├── examples
