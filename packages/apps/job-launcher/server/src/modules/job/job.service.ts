@@ -512,8 +512,16 @@ export class JobService {
       generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      getElementsCount: async (urls: GenerateUrls) =>
-        (await listObjectsInBucket(urls.dataUrl)).length,
+      getElementsCount: async (urls: GenerateUrls) => {
+        const gt = await this.storageService.download(
+          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
+        );
+        const data = await listObjectsInBucket(urls.dataUrl);
+
+        await this.checkImageConsistency(gt.images, data);
+
+        return data.length - gt.images.length;
+      },
       generateUrls: (
         data: CvatDataDto,
         groundTruth: StorageDataDto,
@@ -527,8 +535,16 @@ export class JobService {
       },
     },
     [JobRequestType.IMAGE_POINTS]: {
-      getElementsCount: async (urls: GenerateUrls) =>
-        (await listObjectsInBucket(urls.dataUrl)).length,
+      getElementsCount: async (urls: GenerateUrls) => {
+        const gt = await this.storageService.download(
+          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
+        );
+        const data = await listObjectsInBucket(urls.dataUrl);
+
+        await this.checkImageConsistency(gt.images, data);
+
+        return data.length - gt.images.length;
+      },
       generateUrls: (
         data: CvatDataDto,
         groundTruth: StorageDataDto,
@@ -645,6 +661,23 @@ export class JobService {
       },
     },
   };
+
+  private async checkImageConsistency(
+    gtImages: any[],
+    dataFiles: string[],
+  ): Promise<void> {
+    const gtFileNames = gtImages.map((image: any) => image.file_name);
+    const baseFileNames = dataFiles.map((fileName) =>
+      fileName.split('/').pop(),
+    );
+    const missingFileNames = gtFileNames.filter(
+      (fileName: any) => !baseFileNames.includes(fileName),
+    );
+
+    if (missingFileNames.length !== 0) {
+      throw new BadRequestException(ErrorJob.ImageConsistency);
+    }
+  }
 
   public async createJob(
     userId: number,

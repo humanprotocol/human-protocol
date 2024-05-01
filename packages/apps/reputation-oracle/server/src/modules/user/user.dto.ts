@@ -66,3 +66,9 @@ export class RegisterAddressResponseDto {
   @IsString()
   public signedAddress: string;
 }
+
+export class DisableOperatorDto {
+  @ApiProperty()
+  @IsString()
+  public signature: string;
+}

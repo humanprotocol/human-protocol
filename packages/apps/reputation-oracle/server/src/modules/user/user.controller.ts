@@ -14,8 +14,8 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { Public } from '../../common/decorators';
 import {
+  DisableOperatorDto,
   RegisterAddressRequestDto,
   RegisterAddressResponseDto,
 } from './user.dto';
@@ -25,11 +25,10 @@ import { UserService } from './user.service';
 
 @ApiTags('User')
 @Controller('/user')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Public()
   @Post('/register-address')
   @HttpCode(200)
   @ApiOperation({
@@ -72,7 +71,7 @@ export class UserController {
     summary: 'Disable an operator',
     description: 'Endpoint to disable an operator.',
   })
-  @ApiBody({ type: String })
+  @ApiBody({ type: DisableOperatorDto })
   @ApiResponse({
     status: 204,
     description: 'Operator disabled succesfully',
@@ -82,9 +81,9 @@ export class UserController {
     description: 'Not Found. Could not find the requested content.',
   })
   public disableOperator(
-    @Body() signature: string,
+    @Body() data: DisableOperatorDto,
     @Request() req: RequestWithUser,
   ): Promise<void> {
-    return this.userService.disableOperator(req.user, signature);
+    return this.userService.disableOperator(req.user, data.signature);
   }
 }
