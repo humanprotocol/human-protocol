@@ -67,14 +67,10 @@ const polygonAmoy: Chain = {
   },
   rpcUrls: {
     default: {
-      http: [
-        'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
-      ],
+      http: [import.meta.env.VITE_APP_RPC_URL_POLYGON_AMOY],
     },
     public: {
-      http: [
-        'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
-      ],
+      http: [import.meta.env.VITE_APP_RPC_URL_POLYGON_AMOY],
     },
   },
 };
