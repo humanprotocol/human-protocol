@@ -857,7 +857,7 @@ describe('MetaHumanGovernor', function () {
     //cast vote
     await governor.connect(user1).castVote(proposalId, 1);
 
-    await mineNBlocks(5041);
+    await mineNBlocks(50410);
 
     const state = await governor.state(proposalId);
     const expectedState = 3; // we ensure it's not in pending state
@@ -1220,7 +1220,7 @@ describe('MetaHumanGovernor', function () {
     expect(abstainVotes).to.equal(0);
   });
 
-  it('Should revert when voting on a non-pending proposal with reason and params', async function () {
+  it('Should revert when voting on a non-active proposal with reason and params', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
     await updateVotingDelay(
