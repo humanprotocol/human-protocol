@@ -97,6 +97,6 @@ services:
 databases:
   # A database that allows only private network connections
   - name: job-launcher
-    databaseName: job-launcher
+    databaseName: job_launcher
     ipAllowList: [] # No entries in the IP allow list
 version: "1"
