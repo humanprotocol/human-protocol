@@ -1,4 +1,4 @@
-previewsEnabled: true
+# previewsEnabled: true
 services:
 - type: web
   name: job-launcher-server
@@ -21,10 +21,10 @@ services:
     value: true
   - key: POSTGRES_LOGGING
     value: info
-    previewValue: all
+    # previewValue: all
   - key: WEB3_ENV
     value: mainnet
-    previewValue: testnet
+    # previewValue: testnet
   - key: WEB3_PRIVATE_KEY
     sync: false
   - key: GAS_PRICE_MULTIPLIER
@@ -75,7 +75,7 @@ services:
     value: '2022-11-15'
   - key: STRIPE_APP_NAME
     value: Production Launcher Sever
-    previewValue: Staging Launcher Server
+    # previewValue: Staging Launcher Server
   - key: STRIPE_APP_VERSION
     value: 1.0.0
   - key: STRIPE_APP_INFO_URL
@@ -92,7 +92,7 @@ services:
   domains:
   - job-launcher-server.humanprotocol.org
   rootDir: packages/apps/job-launcher/server
-  pullRequestPreviewsEnabled: true
+  # pullRequestPreviewsEnabled: true
 
 databases:
   # A database that allows only private network connections
