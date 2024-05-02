@@ -21,57 +21,71 @@ export class NetworkConfigService {
 
   constructor(private configService: ConfigService) {
     this.networkMap = {
-      sepolia: {
-        chainId: ChainId.SEPOLIA,
-        rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
-        tokens: {
-          hmt: NETWORKS[ChainId.SEPOLIA]?.hmtAddress,
+      ...(this.configService.get<string>('RPC_URL_SEPOLIA') && {
+        sepolia: {
+          chainId: ChainId.SEPOLIA,
+          rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
+          tokens: {
+            hmt: NETWORKS[ChainId.SEPOLIA]?.hmtAddress,
+          },
         },
-      },
-      polygon: {
-        chainId: ChainId.POLYGON,
-        rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
-        tokens: {
-          hmt: NETWORKS[ChainId.POLYGON]?.hmtAddress,
-          usdt: '0x170a18b9190669cda08965562745a323c907e5ec',
+      }),
+      ...(this.configService.get<string>('RPC_URL_POLYGON') && {
+        polygon: {
+          chainId: ChainId.POLYGON,
+          rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
+          tokens: {
+            hmt: NETWORKS[ChainId.POLYGON]?.hmtAddress,
+            usdt: '0x170a18b9190669cda08965562745a323c907e5ec',
+          },
         },
-      },
-      amoy: {
-        chainId: ChainId.POLYGON_AMOY,
-        rpcUrl: this.configService.get<string>('RPC_URL_POLYGON_AMOY'),
-        tokens: {
-          hmt: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress,
+      }),
+      ...(this.configService.get<string>('RPC_URL_POLYGON_AMOY') && {
+        amoy: {
+          chainId: ChainId.POLYGON_AMOY,
+          rpcUrl: this.configService.get<string>('RPC_URL_POLYGON_AMOY'),
+          tokens: {
+            hmt: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress,
+          },
         },
-      },
-      bsc: {
-        chainId: ChainId.BSC_MAINNET,
-        rpcUrl: this.configService.get<string>('RPC_URL_BSC_MAINNET'),
-        tokens: {
-          hmt: NETWORKS[ChainId.BSC_MAINNET]?.hmtAddress,
-          usdt: '0x55d398326f99059fF775485246999027B3197955',
+      }),
+      ...(this.configService.get<string>('RPC_URL_BSC_MAINNET') && {
+        bsc: {
+          chainId: ChainId.BSC_MAINNET,
+          rpcUrl: this.configService.get<string>('RPC_URL_BSC_MAINNET'),
+          tokens: {
+            hmt: NETWORKS[ChainId.BSC_MAINNET]?.hmtAddress,
+            usdt: '0x55d398326f99059fF775485246999027B3197955',
+          },
         },
-      },
-      bsctest: {
-        chainId: ChainId.BSC_TESTNET,
-        rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
-        tokens: {
-          hmt: NETWORKS[ChainId.BSC_TESTNET]?.hmtAddress,
+      }),
+      ...(this.configService.get<string>('RPC_URL_BSC_TESTNET') && {
+        bsctest: {
+          chainId: ChainId.BSC_TESTNET,
+          rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
+          tokens: {
+            hmt: NETWORKS[ChainId.BSC_TESTNET]?.hmtAddress,
+          },
         },
-      },
-      moonbeam: {
-        chainId: ChainId.MOONBEAM,
-        rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
-        tokens: {
-          hmt: NETWORKS[ChainId.MOONBEAM]?.hmtAddress,
+      }),
+      ...(this.configService.get<string>('RPC_URL_MOONBEAM') && {
+        moonbeam: {
+          chainId: ChainId.MOONBEAM,
+          rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
+          tokens: {
+            hmt: NETWORKS[ChainId.MOONBEAM]?.hmtAddress,
+          },
         },
-      },
-      localhost: {
-        chainId: ChainId.LOCALHOST,
-        rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
-        tokens: {
-          hmt: NETWORKS[ChainId.LOCALHOST]?.hmtAddress,
+      }),
+      ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
+        localhost: {
+          chainId: ChainId.LOCALHOST,
+          rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
+          tokens: {
+            hmt: NETWORKS[ChainId.LOCALHOST]?.hmtAddress,
+          },
         },
-      },
+      }),
     };
 
     // Remove networks without RPC URLs
