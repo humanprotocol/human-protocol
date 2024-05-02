@@ -101,4 +101,5 @@ databases:
   - name: job-launcher
     databaseName: job_launcher
     ipAllowList: [] # No entries in the IP allow list
+    region: frankfurt
 version: "1"
