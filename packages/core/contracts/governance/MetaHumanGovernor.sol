@@ -538,9 +538,11 @@ contract MetaHumanGovernor is
     }
 
     /**
-     * @dev Retrieves the state of a proposal.
-     *  @param proposalId The ID of the proposal.
-     *  @return The current state of the proposal.
+     * @dev Retrieves the state of a proposal, ensuring that once the main voting period ends,
+     * the proposal cannot be canceled regardless of the collection status from spoke chains.
+     *
+     * @param proposalId The ID of the proposal.
+     * @return The current state of the proposal.
      */
     function state(
         uint256 proposalId
@@ -551,13 +553,23 @@ contract MetaHumanGovernor is
         returns (ProposalState)
     {
         ProposalState calculatedState = super.state(proposalId);
+
+        // Check if the main voting period has ended
         if (
-            (calculatedState == ProposalState.Succeeded ||
-                calculatedState == ProposalState.Defeated) &&
+            calculatedState == ProposalState.Succeeded ||
+            calculatedState == ProposalState.Defeated
+        ) {
+            return calculatedState;
+        }
+
+        // Check if the collection phase has finished
+        if (
+            block.timestamp > proposalDeadline(proposalId) &&
             !collectionFinished[proposalId]
         ) {
             return ProposalState.Pending;
         }
+
         return calculatedState;
     }
 
@@ -624,6 +636,7 @@ contract MetaHumanGovernor is
         bytes[] memory calldatas,
         bytes32 descriptionHash
     ) internal override(Governor, GovernorTimelockControl) {
+        require(collectionFinished[proposalId]);
         super._execute(proposalId, targets, values, calldatas, descriptionHash);
     }
 
