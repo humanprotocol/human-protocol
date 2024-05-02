@@ -1,34 +1,43 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+* **Add Sepolia network:** Add support for Ethereum Sepolia network.
+* **Add job types:**&#x20;
+  * Add job types to getLeader.
+  * Add job types to getReputationNetworkOperators.
 
-### Removed
+#### Changed
 
-### Fixed
+#### Deprecated
 
-### Security
+#### Removed
 
-# How to upgrade
+#### Fixed
 
-## Typescript
+* **Fix Amoy subgraph**: Fix Amoy subgraph url in Python SDK.
 
-### yarn
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
