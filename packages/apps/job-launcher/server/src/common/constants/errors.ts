@@ -19,6 +19,7 @@ export enum ErrorJob {
   GroundThuthValidationFailed = 'Ground thuth validation failed',
   ManifestHashNotExist = 'Manifest hash does not exist',
   DataNotExist = 'Data does not exist',
+  ImageConsistency = 'Ground Truth images not found in dataset',
 }
 
 /**

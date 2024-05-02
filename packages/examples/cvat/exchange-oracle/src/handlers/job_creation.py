@@ -401,6 +401,12 @@ class BoxesFromPointsTaskBuilder:
         self.roi_size_mult = 1.1
         "Additional point ROI size multiplier"
 
+        self.min_roi_size = (
+            Config.core_config.min_roi_size_w,
+            Config.core_config.min_roi_size_h,
+        )
+        "Minimum absolute ROI size, (w, h)"
+
         self.points_format = "coco_person_keypoints"
 
         self.embed_point_in_roi_image = True
@@ -1064,6 +1070,8 @@ class BoxesFromPointsTaskBuilder:
                 roi_est_w, roi_est_h = self._roi_size_estimations[point_label_id]
                 roi_est_w *= image_w
                 roi_est_h *= image_h
+                roi_est_w = max(roi_est_w, self.min_roi_size[0])
+                roi_est_h = max(roi_est_h, self.min_roi_size[1])
 
                 roi_left = max(0, original_point_x - int(roi_est_w / 2))
                 roi_top = max(0, original_point_y - int(roi_est_h / 2))
@@ -1453,6 +1461,12 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self.roi_size_mult = 1.1
         "Additional point ROI size multiplier"
+
+        self.min_roi_size = (
+            Config.core_config.min_roi_size_w,
+            Config.core_config.min_roi_size_h,
+        )
+        "Minimum absolute ROI size, (w, h)"
 
         self.boxes_format = "coco_instances"
 
@@ -2063,6 +2077,8 @@ class SkeletonsFromBoxesTaskBuilder:
 
                 roi_w = ceil(bbox.w * self.roi_size_mult)
                 roi_h = ceil(bbox.h * self.roi_size_mult)
+                roi_w = max(roi_w, self.min_roi_size[0])
+                roi_h = max(roi_h, self.min_roi_size[1])
 
                 roi_x = original_bbox_cx - int(roi_w / 2)
                 roi_y = original_bbox_cy - int(roi_h / 2)
