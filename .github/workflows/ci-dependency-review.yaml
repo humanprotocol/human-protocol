@@ -12,5 +12,3 @@ jobs:
         uses: actions/checkout@v4.1.1
       - name: "Dependency Review"
         uses: actions/dependency-review-action@V4.3.0
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
