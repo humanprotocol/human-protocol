@@ -4,7 +4,7 @@ services:
   name: job-launcher-server
   runtime: node
   repo: https://github.com/humanprotocol/human-protocol
-  branch: main
+  branch: feat/render
   plan: free
   envVars:
   - key: NODE_VERSION
