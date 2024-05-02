@@ -7,6 +7,8 @@ services:
   branch: main
   plan: free
   envVars:
+  - key: NODE_VERSION
+    value: 18
   - key: NODE_ENV
     value: development
   - key: HOST
