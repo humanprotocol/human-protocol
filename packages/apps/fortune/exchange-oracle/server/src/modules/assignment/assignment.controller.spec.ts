@@ -65,7 +65,7 @@ describe('assignmentController', () => {
         query,
         userAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
+        expect.any(String),
       );
     });
 

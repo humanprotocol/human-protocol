@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, Mock, patch
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
-from human_protocol_sdk.staking import LeaderData
 
 from src.chain.kvstore import get_job_launcher_url, get_recording_oracle_url
 
@@ -42,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_job_launcher_url(self):
         with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.StakingUtils.get_leader"
+            "src.chain.kvstore.OperatorUtils.get_leader"
         ) as mock_leader:
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
@@ -56,7 +55,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_job_launcher_url_invalid_recording_address(self):
         with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.StakingUtils.get_leader"
+            "src.chain.kvstore.OperatorUtils.get_leader"
         ) as mock_leader:
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")
@@ -65,7 +64,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_recording_oracle_url(self):
         with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.StakingUtils.get_leader"
+            "src.chain.kvstore.OperatorUtils.get_leader"
         ) as mock_leader:
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
@@ -80,7 +79,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
         with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.StakingUtils.get_leader"
+            "src.chain.kvstore.OperatorUtils.get_leader"
         ) as mock_leader:
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data

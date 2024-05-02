@@ -87,6 +87,7 @@ def get_tasks_by_assignee(
                 cvat_projects=[p.cvat_id for p in cvat_projects],
             )
             if assignment.status == AssignmentStatuses.created
+            if not assignment.is_finished
         }
 
         for project in cvat_projects:

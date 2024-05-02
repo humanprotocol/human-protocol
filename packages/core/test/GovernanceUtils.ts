@@ -16,8 +16,24 @@ import {
 
 let owner: Signer;
 
+export const SECONDS_PER_BLOCK = 12;
+
 export const mineNBlocks = async (n: number) => {
-  await mine(n);
+  await increaseTime(SECONDS_PER_BLOCK * n);
+  await mine(n - 1);
+};
+
+/**
+ * Increases the EVM time by a given number of seconds and mines a new block to apply the time change.
+ * @param {number} seconds - The number of seconds to increase time by.
+ */
+export const increaseTime = async (seconds: number) => {
+  try {
+    await ethers.provider.send('evm_increaseTime', [seconds]);
+    await ethers.provider.send('evm_mine');
+  } catch (error) {
+    throw new Error(`Failed to increase time by ${seconds} seconds`);
+  }
 };
 
 export async function createMockUserWithVotingPower(
@@ -378,11 +394,13 @@ export async function updateVotingDelay(
 
   // wait for next block
   await mineNBlocks(2);
+
   //cast vote
   await governor.connect(executer).castVote(proposalId, 1);
 
   // wait for voting block to end
   await mineNBlocks(50410);
+
   await governor.requestCollections(proposalId, { value: 100 });
   await collectVotesFromSpoke(
     daoSpoke,

@@ -55,10 +55,10 @@ Bases: `object`
 #### \_\_init_\_(tx_hash, amount_refunded)
 
 Represents the result of an escrow cancellation transaction.
-Args:
 
-> tx_hash (str): The hash of the transaction that cancelled the escrow.
-> amount_refunded (Any): The amount refunded during the escrow cancellation.
+* **Parameters:**
+  * **tx_hash** (`str`) – The hash of the transaction that cancelled the escrow.
+  * **amount_refunded** (`any`) – The amount refunded during the escrow cancellation.
 
 ### *class* human_protocol_sdk.escrow.escrow_client.EscrowClient(web3)
 

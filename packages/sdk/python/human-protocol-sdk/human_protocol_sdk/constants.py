@@ -8,6 +8,7 @@ class ChainId(Enum):
     MAINNET = 1
     RINKEBY = 4
     GOERLI = 5
+    SEPOLIA = 11155111
     BSC_MAINNET = 56
     BSC_TESTNET = 97
     POLYGON = 137
@@ -53,6 +54,20 @@ NETWORKS = {
             "https://api.thegraph.com/subgraphs/name/humanprotocol/goerli"
         ),
         "old_factory_address": "0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F",
+    },
+    ChainId.SEPOLIA: {
+        "title": "Sepolia",
+        "scan_url": "https://sepolia.etherscan.io",
+        "subgraph_url": (
+            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api"
+        ),
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+        "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
+        "staking_address": "0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203",
+        "reward_pool_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+        "kvstore_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+        "old_subgraph_url": (""),
+        "old_factory_address": "0x98108c28B7767a52BE38B4860832dd4e11A7ecad",
     },
     ChainId.BSC_MAINNET: {
         "title": "Binance Smart Chain",
@@ -118,7 +133,7 @@ NETWORKS = {
         "title": "Polygon Amoy",
         "scan_url": "https://www.oklink.com/amoy",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2"
+            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",

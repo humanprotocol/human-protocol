@@ -125,11 +125,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
-=======
-[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
->>>>>>> develop
+[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
 
 ## Properties
 
@@ -139,11 +135,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
-=======
-[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
->>>>>>> develop
+[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
 
 ___
 
@@ -157,11 +149,7 @@ ___
 
 #### Defined in
 
-<<<<<<< HEAD
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> develop
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -175,11 +163,7 @@ ___
 
 #### Defined in
 
-<<<<<<< HEAD
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> develop
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -220,11 +204,7 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
-=======
-[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
->>>>>>> develop
+[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
 
 ___
 
@@ -267,11 +247,7 @@ const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
-=======
-[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
->>>>>>> develop
+[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
 
 ___
 
@@ -309,11 +285,7 @@ const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB882
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:398](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L398)
-=======
-[kvstore.ts:398](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L398)
->>>>>>> develop
+[kvstore.ts:398](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L398)
 
 ___
 
@@ -357,11 +329,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
-=======
-[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
->>>>>>> develop
+[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
 
 ___
 
@@ -407,11 +375,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
-=======
-[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
->>>>>>> develop
+[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
 
 ___
 
@@ -454,11 +418,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
-=======
-[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
->>>>>>> develop
+[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
 
 ___
 
@@ -490,8 +450,4 @@ Creates an instance of KVStoreClient from a runner.
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)
-=======
-[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)
->>>>>>> develop
+[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)
