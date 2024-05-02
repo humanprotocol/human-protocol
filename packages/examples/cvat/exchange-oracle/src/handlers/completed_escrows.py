@@ -314,6 +314,7 @@ class _CompletedEscrowsHandler:
                 )
 
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
+                job_annotations: Dict[int, FileDescriptor] = {}
 
                 # Collect raw annotations from CVAT, validate and convert them
                 # into a recording oracle suitable format
@@ -324,7 +325,6 @@ class _CompletedEscrowsHandler:
                     for job in jobs_batch:
                         cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
 
-                    job_annotations: Dict[int, FileDescriptor] = {}
                     for job in jobs_batch:
                         job_annotations_file = self._download_with_retries(
                             download_callback=partial(
