@@ -220,8 +220,8 @@ export class PayoutService {
         (result) => result.id === job.final_result_id,
       );
       if (
-        finalResult &&
-        finalResult.annotation_quality >= manifest.validation.min_quality
+        finalResult
+        // && finalResult.annotation_quality >= manifest.validation.min_quality
       ) {
         const existingValue =
           accMap.get(finalResult.annotator_wallet_address) || 0n;
