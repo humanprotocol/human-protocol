@@ -1,4 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
+import { ERROR_MESSAGES } from './index';
 
 export const IS_MAINNET =
   import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase() === 'mainnet';
@@ -22,9 +23,7 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
     break;
 }
 
-export const RPC_URLS: {
-  [chainId in ChainId]?: string;
-} = {
+export const RPC_URLS: Partial<Record<ChainId, string | undefined>> = {
   [ChainId.MAINNET]: import.meta.env.VITE_APP_RPC_URL_MAINNET || '',
   [ChainId.SEPOLIA]: import.meta.env.VITE_APP_RPC_URL_SEPOLIA || '',
   [ChainId.BSC_MAINNET]: import.meta.env.VITE_APP_RPC_URL_BSC_MAINNET || '',
@@ -47,7 +46,11 @@ export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(
   (chainId) => Boolean(RPC_URLS[chainId]),
 );
 
-export const CHAIN_ID_BY_NAME: Record<string, number> = {
+if (SUPPORTED_CHAIN_IDS.length === 0) {
+  throw new Error(ERROR_MESSAGES.noRpcUrl);
+}
+
+export const CHAIN_ID_BY_NAME: Record<string, ChainId> = {
   'Polygon Amoy': ChainId.POLYGON_AMOY,
   'Binance Smart Chain': ChainId.BSC_MAINNET,
   'Ethereum Sepolia': ChainId.SEPOLIA,
