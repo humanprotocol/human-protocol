@@ -46,6 +46,7 @@ export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(
   (chainId) => Boolean(RPC_URLS[chainId]),
 );
 
+// it no rpc set, throw error
 if (SUPPORTED_CHAIN_IDS.length === 0) {
   throw new Error(ERROR_MESSAGES.noRpcUrl);
 }
