@@ -7,7 +7,7 @@ services:
   repo: https://github.com/humanprotocol/human-protocol
   branch: feat/render
   plan: starter
-  previewPlan: free
+  previewPlan: starter
   envVars:
   - key: NODE_VERSION
     value: 18
@@ -102,7 +102,7 @@ databases:
   - name: job-launcher
     databaseName: job_launcher
     plan: starter
-    previewPlan: free
+    previewPlan: starter
     ipAllowList: [] # No entries in the IP allow list
     region: frankfurt
 version: "1"
