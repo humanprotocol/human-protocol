@@ -486,7 +486,7 @@ export class EscrowClient extends BaseEthersClient {
       );
       await (
         await tokenContract.transfer(escrowAddress, amount, txOptions)
-      ).wait;
+      ).wait();
 
       return;
     } catch (e) {

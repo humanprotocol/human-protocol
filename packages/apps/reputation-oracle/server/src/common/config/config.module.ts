@@ -10,6 +10,7 @@ import { SendgridConfigService } from './sendgrid-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { ReputationConfigService } from './reputation-config.service';
 import { SynapsConfigService } from './synaps-config.service';
+import { NetworkConfigService } from './network-config.service';
 
 @Global()
 @Module({
@@ -24,6 +25,7 @@ import { SynapsConfigService } from './synaps-config.service';
     SendgridConfigService,
     SynapsConfigService,
     PGPConfigService,
+    NetworkConfigService,
   ],
   exports: [
     ConfigService,
@@ -36,6 +38,7 @@ import { SynapsConfigService } from './synaps-config.service';
     SendgridConfigService,
     SynapsConfigService,
     PGPConfigService,
+    NetworkConfigService,
   ],
 })
 export class EnvConfigModule {}
