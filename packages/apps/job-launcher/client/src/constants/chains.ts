@@ -1,16 +1,17 @@
 import { ChainId } from '@human-protocol/sdk';
+import { ERROR_MESSAGES } from './index';
 
 export const IS_MAINNET =
   import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase() === 'mainnet';
 export const IS_TESTNET = !IS_MAINNET;
 
-export let SUPPORTED_CHAIN_IDS: ChainId[];
+let initialSupportedChainIds: ChainId[];
 switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
   case 'mainnet':
-    SUPPORTED_CHAIN_IDS = [ChainId.POLYGON];
+    initialSupportedChainIds = [ChainId.POLYGON];
     break;
   case 'testnet':
-    SUPPORTED_CHAIN_IDS = [
+    initialSupportedChainIds = [
       ChainId.BSC_TESTNET,
       ChainId.POLYGON_AMOY,
       ChainId.SEPOLIA,
@@ -18,20 +19,11 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
     break;
   case 'localhost':
   default:
-    SUPPORTED_CHAIN_IDS = [ChainId.LOCALHOST];
+    initialSupportedChainIds = [ChainId.LOCALHOST];
     break;
 }
 
-export const CHAIN_ID_BY_NAME: Record<string, number> = {
-  'Polygon Amoy': ChainId.POLYGON_AMOY,
-  'Binance Smart Chain': ChainId.BSC_MAINNET,
-  'Ethereum Sepolia': ChainId.SEPOLIA,
-  Localhost: ChainId.LOCALHOST,
-};
-
-export const RPC_URLS: {
-  [chainId in ChainId]?: string;
-} = {
+export const RPC_URLS: Partial<Record<ChainId, string | undefined>> = {
   [ChainId.MAINNET]: import.meta.env.VITE_APP_RPC_URL_MAINNET || '',
   [ChainId.SEPOLIA]: import.meta.env.VITE_APP_RPC_URL_SEPOLIA || '',
   [ChainId.BSC_MAINNET]: import.meta.env.VITE_APP_RPC_URL_BSC_MAINNET || '',
@@ -48,4 +40,20 @@ export const RPC_URLS: {
   [ChainId.CELO_ALFAJORES]:
     import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
   [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
+};
+
+export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(
+  (chainId) => Boolean(RPC_URLS[chainId]),
+);
+
+// it no rpc set, throw error
+if (SUPPORTED_CHAIN_IDS.length === 0) {
+  throw new Error(ERROR_MESSAGES.noRpcUrl);
+}
+
+export const CHAIN_ID_BY_NAME: Record<string, ChainId> = {
+  'Polygon Amoy': ChainId.POLYGON_AMOY,
+  'Binance Smart Chain': ChainId.BSC_MAINNET,
+  'Ethereum Sepolia': ChainId.SEPOLIA,
+  Localhost: ChainId.LOCALHOST,
 };
