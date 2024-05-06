@@ -19,7 +19,7 @@ export function StakeForm() {
 
   const methods = useForm<AddStakeCallArguments>({
     defaultValues: {
-      amount: 0,
+      amount: '0',
     },
     resolver: zodResolver(addStakeCallArgumentsSchema),
   });
@@ -45,6 +45,7 @@ export function StakeForm() {
               label={t('operator.stakeForm.label')}
               mask="HumanCurrencyInputMask"
               name="amount"
+              type="text"
             />
             <Grid
               container

@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getStackedAmount } from '@/smart-contracts/stake/get-staked-amount';
+import { ethers } from 'ethers';
+import { getStakedTokens } from '@/smart-contracts/Staking/get-staked-tokens';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
+import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
 export function useGetStakedAmount() {
   const {
@@ -10,12 +12,20 @@ export function useGetStakedAmount() {
   } = useConnectedWallet();
 
   return useQuery({
-    queryFn: () =>
-      getStackedAmount({
+    queryFn: async () => {
+      const contractAddress = getContractAddress({
+        chainId,
+        contractName: 'Staking',
+      });
+      const stakeAmount = await getStakedTokens({
+        contractAddress,
         stakerAddress: address,
         chainId,
         signer: data?.signer,
-      }),
+      });
+
+      return ethers.formatEther(stakeAmount);
+    },
     queryKey: ['getStackedAmount', address, chainId, data?.signer],
     refetchInterval: 0,
   });
