@@ -10,8 +10,7 @@ export type Mainnet = 'Polygon' | 'Ethereum';
 export const TestnetContracts: Record<Testnet, ContractsAddresses> = {
   Amoy: {
     Staking: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
-    // HMToken: '0x4a6935564A774140f443f9cEd3dd9d2D7Ec878Df', // copy for development
-    HMToken: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33', // address from docs that works
+    HMToken: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
   },
   EthereumGoerli: {
     Staking: '0xe0Ccc2f17b72F9A1e23f0C8dD5DDfB7484b54aB3',
