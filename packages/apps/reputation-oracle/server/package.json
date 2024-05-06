@@ -73,7 +73,7 @@
     "@types/node": "20.12.7",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^9.0.6",
-    "@types/zxcvbn": "4.4.1",
+    "@types/zxcvbn": "4.4.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.55.0",
