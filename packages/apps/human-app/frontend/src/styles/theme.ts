@@ -17,6 +17,8 @@ declare module '@mui/material/Typography' {
     tooltip: true;
     inputUnderline: true;
     chip: true;
+    mobileHeaderLarge: true;
+    mobileHeaderMid: true;
   }
 }
 
@@ -35,6 +37,8 @@ declare module '@mui/material/styles' {
     tooltip: CSSProperties;
     inputUnderline: CSSProperties;
     chip: CSSProperties;
+    mobileHeaderLarge: CSSProperties;
+    mobileHeaderMid: CSSProperties;
   }
 
   // allow configuration using `createTheme`
@@ -52,6 +56,8 @@ declare module '@mui/material/styles' {
     tooltip?: CSSProperties;
     inputUnderline?: CSSProperties;
     chip?: CSSProperties;
+    mobileHeaderLarge?: CSSProperties;
+    mobileHeaderMid?: CSSProperties;
   }
 }
 
@@ -97,6 +103,11 @@ export const theme: ThemeOptions = {
         letterSpacing: 0.15,
       },
     },
+    mobileHeaderLarge: {
+      fontSize: 26,
+      fontWeight: 500,
+      letterSpacing: 0.15,
+    },
     h5: {
       fontSize: 24,
       fontWeight: 400,
@@ -104,6 +115,11 @@ export const theme: ThemeOptions = {
       [breakpoints.mobile]: {
         fontSize: 24,
       },
+    },
+    mobileHeaderMid: {
+      fontSize: 22,
+      fontWeight: 500,
+      letterSpacing: 0.58,
     },
     h6: {
       fontSize: 20,
