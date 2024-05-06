@@ -1,4 +1,4 @@
-import { chains } from '@/smart-contracts/chains';
+import { chainsWithSCAddresses } from '@/smart-contracts/chains';
 import type { ContractsAddresses } from '@/smart-contracts/contracts';
 
 export const getContractAddress = ({
@@ -8,7 +8,7 @@ export const getContractAddress = ({
   chainId: number;
   contractName: keyof ContractsAddresses;
 }): string => {
-  const contractAddress = chains.find(
+  const contractAddress = chainsWithSCAddresses.find(
     ({ chainId: _chainId }) => _chainId === chainId
   )?.addresses[contractName];
 

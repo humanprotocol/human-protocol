@@ -16,5 +16,9 @@ export const env = z
       const iconsArray = value.split(',');
       return iconsArray;
     }),
+    VITE_TESTNET_AMOY_STAKING_CONTRACT: z.string(),
+    VITE_TESTNET_AMOY_HMTOKEN_STAKING_CONTRACT: z.string(),
+    VITE_MAINNET_POLYGON_STAKING_CONTRACT: z.string(),
+    VITE_MAINNET_POLYGON_HMTOKEN_CONTRACT: z.string(),
   })
   .parse(import.meta.env);

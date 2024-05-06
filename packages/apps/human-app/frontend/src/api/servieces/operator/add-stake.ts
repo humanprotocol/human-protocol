@@ -14,27 +14,35 @@ import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import { approve } from '@/smart-contracts/HMToken/approve';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 
-const HMT_DECIMALS = 18;
+type AmountValidation = z.ZodEffects<
+  z.ZodEffects<z.ZodString, string, string>,
+  string,
+  string
+>;
+type AmountField = z.infer<AmountValidation>;
 
-export const addStakeCallArgumentsSchema = z.object({
-  amount: z
+export const addStakeAmountCallArgumentsSchema = (
+  decimals: number
+): AmountValidation =>
+  z
     .string()
     .refine((amount) => !amount.startsWith('-'))
     .refine(
       (amount) => {
         const decimalPart = amount.toString().split('.')[1];
         if (!decimalPart) return true;
-        return decimalPart.length <= HMT_DECIMALS;
+        return decimalPart.length <= decimals;
       },
       {
         message: t('operator.stakeForm.invalidDecimals', {
-          decimals: HMT_DECIMALS,
+          decimals,
         }),
       }
-    ),
-});
+    );
 
-export type AddStakeCallArguments = z.infer<typeof addStakeCallArgumentsSchema>;
+export interface AddStakeCallArguments {
+  amount: AmountField;
+}
 
 async function addStakeMutationFn(
   data: AddStakeCallArguments & {

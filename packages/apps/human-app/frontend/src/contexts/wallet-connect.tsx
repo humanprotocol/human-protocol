@@ -25,13 +25,9 @@ const ethersConfig = defaultConfig({
   metadata,
 });
 
-const chainsWithoutSCAddresses = chains.map(
-  ({ addresses: _, ...chainData }) => chainData
-);
-
 createWeb3Modal({
   ethersConfig,
-  chains: chainsWithoutSCAddresses,
+  chains,
   projectId,
   enableAnalytics: true,
 });

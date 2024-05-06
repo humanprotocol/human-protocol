@@ -1,8 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { ethers } from 'ethers';
+import { t } from 'i18next';
 import { getStakedTokens } from '@/smart-contracts/Staking/get-staked-tokens';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
+
+const stakedAmountFormatter = (amount: bigint) => {
+  const amountAsString = ethers.formatEther(amount);
+
+  if (amountAsString.split('.')[1] === '0') {
+    // decimals part should be omitted
+    return `${amountAsString.replace('.0', '')} ${t('inputMasks.humanCurrencySuffix')}`;
+  }
+  return `${ethers.formatEther(amount)} ${t('inputMasks.humanCurrencySuffix')}`;
+};
 
 export function useGetStakedAmount() {
   const {
@@ -24,7 +35,7 @@ export function useGetStakedAmount() {
         signer: data?.signer,
       });
 
-      return ethers.formatEther(stakeAmount);
+      return stakedAmountFormatter(stakeAmount);
     },
     queryKey: ['getStackedAmount', address, chainId, data?.signer],
     refetchInterval: 0,
