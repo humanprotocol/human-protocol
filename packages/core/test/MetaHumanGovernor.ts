@@ -782,7 +782,7 @@ describe('MetaHumanGovernor', function () {
 
     await expect(
       governor.execute(targets, values, calldatas, ethers.id('test1'))
-    ).to.be.revertedWith('Governor: proposal not successful');
+    ).to.be.revertedWithCustomError(governor, 'CollectionPhaseUnfinished');
   });
 
   it('Should get voting delay', async function () {
@@ -825,7 +825,7 @@ describe('MetaHumanGovernor', function () {
     expect(state).to.equal(expectedState);
   });
 
-  it('Should get proposal state when not succeeded and collection not finished', async function () {
+  it('Should get proposal state when not succeeded', async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -837,11 +837,11 @@ describe('MetaHumanGovernor', function () {
     await mineNBlocks(50410);
 
     const state = await governor.state(proposalId);
-    const expectedState = 0;
+    const expectedState = 3;
     expect(state).to.equal(expectedState);
   });
 
-  it('Should get proposal state when succeded and collection not finished', async function () {
+  it('Should get proposal state when collection not finished', async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -860,7 +860,7 @@ describe('MetaHumanGovernor', function () {
     await mineNBlocks(50410);
 
     const state = await governor.state(proposalId);
-    const expectedState = 0;
+    const expectedState = 3; // we ensure it's not in pending state
     expect(state).to.equal(expectedState);
   });
 
@@ -1244,7 +1244,6 @@ describe('MetaHumanGovernor', function () {
     const params = defaultAbiCoder.encode(['string'], ['test params']);
 
     // Cast vote
-
     await expect(
       governor
         .connect(user1)

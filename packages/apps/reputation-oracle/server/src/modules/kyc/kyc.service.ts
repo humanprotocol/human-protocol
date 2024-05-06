@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
@@ -16,6 +10,8 @@ import { ErrorKyc } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
 import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
 import { v4 as uuidv4 } from 'uuid';
+import { KycEntity } from './kyc.entity';
+import { KycError } from './kyc.error';
 
 @Injectable()
 export class KycService {
@@ -33,15 +29,15 @@ export class KycService {
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
       if (userEntity.kyc.status === KycStatus.APPROVED) {
-        throw new BadRequestException(ErrorKyc.AlreadyApproved);
+        throw new KycError(ErrorKyc.AlreadyApproved);
       }
 
       if (userEntity.kyc.status === KycStatus.PENDING_VERIFICATION) {
-        throw new BadRequestException(ErrorKyc.VerificationInProgress);
+        throw new KycError(ErrorKyc.VerificationInProgress);
       }
 
       if (userEntity.kyc.status === KycStatus.REJECTED) {
-        throw new BadRequestException(
+        throw new KycError(
           `${ErrorKyc.Rejected}. Reason: ${userEntity.kyc.message}`,
         );
       }
@@ -53,11 +49,12 @@ export class KycService {
 
     if (this.synapsConfigService.apiKey === SYNAPS_API_KEY_DISABLED) {
       const sessionId = uuidv4();
-      await this.kycRepository.create({
-        sessionId: sessionId,
-        status: KycStatus.NONE,
-        userId: userEntity.id,
-      });
+      const kycEntity = new KycEntity();
+      kycEntity.sessionId = sessionId;
+      kycEntity.status = KycStatus.NONE;
+      kycEntity.userId = userEntity.id;
+
+      await this.kycRepository.createUnique(kycEntity);
 
       return {
         sessionId: sessionId,
@@ -80,14 +77,15 @@ export class KycService {
     );
 
     if (!data?.session_id) {
-      throw new InternalServerErrorException(ErrorKyc.InvalidSynapsAPIResponse);
+      throw new KycError(ErrorKyc.InvalidSynapsAPIResponse);
     }
 
-    await this.kycRepository.create({
-      sessionId: data.session_id,
-      status: KycStatus.NONE,
-      userId: userEntity.id,
-    });
+    const kycEntity = new KycEntity();
+    kycEntity.sessionId = data.session_id;
+    kycEntity.status = KycStatus.NONE;
+    kycEntity.userId = userEntity.id;
+
+    await this.kycRepository.createUnique(kycEntity);
 
     return {
       sessionId: data.session_id,
@@ -115,17 +113,18 @@ export class KycService {
       !sessionData?.session?.status ||
       sessionData.session.status !== data.state
     ) {
-      throw new InternalServerErrorException(ErrorKyc.InvalidSynapsAPIResponse);
+      throw new KycError(ErrorKyc.InvalidSynapsAPIResponse);
     }
 
-    await this.kycRepository.updateOne(
-      {
-        sessionId: data.sessionId,
-      },
-      {
-        status: data.state,
-        message: data.reason,
-      },
+    const kycEntity = await this.kycRepository.findOneBySessionId(
+      data.sessionId,
     );
+    if (!kycEntity) {
+      throw new KycError(ErrorKyc.NotFound);
+    }
+    kycEntity.status = data.state;
+    kycEntity.message = data.reason;
+
+    await this.kycRepository.updateOne(kycEntity);
   }
 }
