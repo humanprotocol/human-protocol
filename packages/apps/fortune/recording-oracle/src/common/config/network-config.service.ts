@@ -19,31 +19,31 @@ export class NetworkConfigService {
     this.networkMap = {
       polygon: {
         chainId: ChainId.POLYGON,
-        rpcUrl: this.configService.get<string>('POLYGON_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
       },
       bsc: {
         chainId: ChainId.BSC_MAINNET,
-        rpcUrl: this.configService.get<string>('BSC_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_BSC'),
       },
       amoy: {
         chainId: ChainId.POLYGON_AMOY,
-        rpcUrl: this.configService.get<string>('AMOY_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_AMOY'),
       },
       sepolia: {
         chainId: ChainId.SEPOLIA,
-        rpcUrl: this.configService.get<string>('SEPOLIA_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
       },
       moonbeam: {
         chainId: ChainId.MOONBEAM,
-        rpcUrl: this.configService.get<string>('MOONBEAM_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
       },
       bsctest: {
         chainId: ChainId.BSC_TESTNET,
-        rpcUrl: this.configService.get<string>('BSC_TESTNET_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
       },
       localhost: {
         chainId: ChainId.LOCALHOST,
-        rpcUrl: this.configService.get<string>('LOCALHOST_RPC_URL'),
+        rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
       },
     };
 

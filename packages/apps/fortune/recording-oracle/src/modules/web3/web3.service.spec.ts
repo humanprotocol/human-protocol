@@ -18,7 +18,7 @@ describe('Web3Service', () => {
     mockConfigService = {
       get: jest.fn((key: string, defaultValue?: any) => {
         switch (key) {
-          case 'LOCALHOST_RPC_URL':
+          case 'RPC_URL_LOCALHOST':
             return 'http://localhost:8545/';
           case 'WEB3_ENV':
             return 'localhost';
