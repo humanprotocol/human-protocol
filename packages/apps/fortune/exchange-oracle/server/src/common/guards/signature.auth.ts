@@ -22,10 +22,6 @@ export class SignatureAuthGuard implements CanActivate {
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
     try {
-      console.log(
-        'Checking if role includes Worker:',
-        this.role.includes(Role.Worker),
-      );
       if (this.role.includes(Role.Worker)) {
         return verifySignature(data, signature, [data.senderAddress]);
       }

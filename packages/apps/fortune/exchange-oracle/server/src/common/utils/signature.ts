@@ -4,12 +4,11 @@ import { ethers } from 'ethers';
 export function verifySignature(
   message: object | string,
   signature: string,
-  addresses: string[] = [],
+  addresses: string[],
 ): boolean {
   const signer = recoverSigner(message, signature);
 
   if (
-    addresses.length > 0 &&
     !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
   ) {
     throw new ConflictException('Signature not verified');
@@ -27,9 +26,7 @@ export async function signMessage(
   }
 
   const wallet = new ethers.Wallet(privateKey);
-  console.log('wallet', wallet);
   const signature = await wallet.signMessage(message);
-  console.log('signature', signature);
 
   return signature;
 }
@@ -40,8 +37,8 @@ export function recoverSigner(
 ): string {
   if (typeof message !== 'string') {
     message = JSON.stringify(message);
-    console.log('message', message);
   }
+
   try {
     return ethers.verifyMessage(message, signature);
   } catch (e) {
