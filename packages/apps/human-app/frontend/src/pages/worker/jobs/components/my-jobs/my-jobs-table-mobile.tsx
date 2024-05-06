@@ -1,26 +1,27 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { ProfileListItem } from '@/pages/operator/components/profile/profile-list-item';
+import type { Dispatch, SetStateAction } from 'react';
+import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Chip } from '@/components/ui/chip';
-import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
-import { formatDate } from '@/shared/utils/format-date';
+import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
-import { type MyJobs } from './my-jobs-table-service';
+import { parseNetworkName } from '@/shared/helpers/parse-network-label';
+import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
+import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
+import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
 interface MyJobsTableMobileProps {
   data?: MyJobs;
   isLoading: boolean;
   isError: boolean;
-  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function MyJobsTableMobile({

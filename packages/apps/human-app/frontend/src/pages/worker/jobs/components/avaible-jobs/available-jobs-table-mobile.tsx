@@ -1,6 +1,7 @@
 import { Grid, List, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { ProfileListItem } from '@/pages/operator/components/profile/profile-list-item';
+import type { Dispatch, SetStateAction } from 'react';
+import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
@@ -8,15 +9,15 @@ import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
-import type { AvailableJobs } from './available-jobs-table-service';
+import { parseNetworkName } from '@/shared/helpers/parse-network-label';
+import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
+import type { AvailableJobs } from '@/api/servieces/worker/available-jobs-table-service-mock';
 
 interface AvailableJobsTableMobileProps {
   data?: AvailableJobs;
   isLoading: boolean;
   isError: boolean;
-  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function AvailableJobsTableMobile({

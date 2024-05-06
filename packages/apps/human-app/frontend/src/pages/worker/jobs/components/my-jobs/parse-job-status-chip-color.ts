@@ -7,7 +7,7 @@ export const parseJobStatusChipColor = (status: string) => {
   if (status === 'DEACTIVATED') {
     return colorPalette.error.dark;
   }
-  if (status === 'COMPLITED') {
+  if (status === 'COMPLETED') {
     return colorPalette.success.main;
   }
   return colorPalette.primary.light;

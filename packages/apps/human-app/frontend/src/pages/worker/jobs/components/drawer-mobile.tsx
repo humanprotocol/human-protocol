@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
+import type { Dispatch, SetStateAction } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
@@ -18,7 +19,7 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 
 interface DrawerMobileProps {
   selectedTab: string;
-  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 export function DrawerMobile({
   selectedTab,

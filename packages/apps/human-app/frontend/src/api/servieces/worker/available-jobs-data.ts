@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
-import { getJobsTableData } from '@/pages/worker/jobs/components/avaible-jobs/available-jobs-table-service';
+import { getJobsTableData } from './available-jobs-table-service-mock';
 
 const AvailableJobsSchema = z.object({
   escrow_address: z.string(),

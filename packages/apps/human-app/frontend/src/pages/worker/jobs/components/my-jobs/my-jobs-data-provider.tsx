@@ -1,10 +1,10 @@
 import { useEffect, type ReactNode } from 'react';
 import { useGetMyJobsData } from '@/api/servieces/worker/my-jobs-data';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { type MyJobs } from './my-jobs-table-service';
+import { type MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
 
 interface MyJobsDataProviderProps {
-  children: (data: {
+  children?: (data: {
     data: MyJobs | undefined;
     isLoading: boolean;
     isError: boolean;
@@ -12,9 +12,7 @@ interface MyJobsDataProviderProps {
   }) => ReactNode;
 }
 
-export const MyJobsDataProvider: React.FC<MyJobsDataProviderProps> = ({
-  children,
-}) => {
+export function MyJobsDataProvider({ children }: MyJobsDataProviderProps) {
   const { data, isLoading, isError, isRefetching } = useGetMyJobsData();
   const { resetFilterParams } = useJobsFilterStore();
 
@@ -25,5 +23,9 @@ export const MyJobsDataProvider: React.FC<MyJobsDataProviderProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
   }, []);
 
-  return children({ data, isLoading, isError, isRefetching });
-};
+  return (
+    <>
+      {children ? children({ data, isLoading, isError, isRefetching }) : null}
+    </>
+  );
+}

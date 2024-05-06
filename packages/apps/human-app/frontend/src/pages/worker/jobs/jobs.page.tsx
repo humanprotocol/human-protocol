@@ -11,8 +11,8 @@ import { Modal } from '@/components/ui/modal/modal';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
 import { MyJobsTableMobile } from './components/my-jobs/my-jobs-table-mobile';
-import { DrawerMobile } from './drawer-mobile';
-import { TabPanel } from './components/ui/jobs-tab-panel';
+import { DrawerMobile } from './components/drawer-mobile';
+import { TabPanel } from './components/jobs-tab-panel';
 import { MyJobsDataProvider } from './components/my-jobs/my-jobs-data-provider';
 import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 import { AvailableJobsDataProvider } from './components/avaible-jobs/available-jobs-data-provider';
@@ -33,7 +33,7 @@ export function JobsPage() {
   const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
     useState(false);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
     if (newValue === 0) {
       setSelectedTab('availableJobs');

@@ -9,9 +9,12 @@ import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
-import type { AvailableJobs, JobsArray } from './available-jobs-table-service';
+import { parseNetworkName } from '@/shared/helpers/parse-network-label';
+import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
+import type {
+  AvailableJobs,
+  JobsArray,
+} from '@/api/servieces/worker/available-jobs-table-service-mock';
 
 const columns: MRT_ColumnDef<JobsArray>[] = [
   {

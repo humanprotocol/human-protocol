@@ -1,8 +1,8 @@
 /* eslint-disable camelcase -- api response*/
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { getJobsTableData } from '@/pages/worker/jobs/components/my-jobs/my-jobs-table-service';
 import { useTableQuery } from '@/components/ui/table/table-query-hook';
+import { getJobsTableData } from './my-jobs-table-service-mock';
 
 const JobsSchema = z.object({
   assignment_id: z.number(),

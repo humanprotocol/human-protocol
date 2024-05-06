@@ -6,17 +6,17 @@ import {
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
-import { formatDate } from '@/shared/utils/format-date';
+import { formatDate } from '@/shared/helpers/format-date';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
-import { parseJobStatusChipColor } from '@/shared/utils/parse-chip-color';
 import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { shortenEscrowAddress } from '../utils/shorten-escrow-address';
-import type { JobsArray } from '../avaible-jobs/available-jobs-table-service';
-import { parseNetworkName } from '../../../../../shared/helpers/parse-network-label';
-import { type MyJobs } from './my-jobs-table-service';
+import { parseNetworkName } from '@/shared/helpers/parse-network-label';
+import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
+import type { JobsArray } from '@/api/servieces/worker/available-jobs-table-service-mock';
+import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
+import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
 const columns: MRT_ColumnDef<JobsArray>[] = [
