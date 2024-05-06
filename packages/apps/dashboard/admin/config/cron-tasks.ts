@@ -6,9 +6,10 @@ import {
   bsc,
   bscTestnet,
   goerli,
+  sepolia,
   mainnet,
   polygon,
-  polygonMumbai,
+  polygonAmoy,
   moonbeam,
   moonbaseAlpha,
   celo,
@@ -19,10 +20,11 @@ import { formatUnits, parseUnits } from 'viem/utils';
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
   [ChainId.GOERLI]: goerli,
+  [ChainId.SEPOLIA]: sepolia,
   [ChainId.BSC_MAINNET]: bsc,
   [ChainId.BSC_TESTNET]: bscTestnet,
   [ChainId.POLYGON]: polygon,
-  [ChainId.POLYGON_MUMBAI]: polygonMumbai,
+  [ChainId.POLYGON_AMOY]: polygonAmoy,
   [ChainId.MOONBEAM]: moonbeam,
   [ChainId.MOONBASE_ALPHA]: moonbaseAlpha,
   [ChainId.CELO]: celo,
@@ -34,7 +36,7 @@ const addBigInts = (a: string, b: string, decimals = 18) => {
 };
 
 const formatBigNumber = (n: any, decimals = 18) => {
-  return formatUnits(n.toBigInt(), decimals);
+  return formatUnits(BigInt(n), decimals);
 };
 
 const fetchData = async () => {

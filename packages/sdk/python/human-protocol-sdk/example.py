@@ -2,9 +2,8 @@ import datetime
 import json
 
 from human_protocol_sdk.constants import ChainId
-from human_protocol_sdk.escrow import EscrowUtils, Status
+from human_protocol_sdk.escrow import EscrowUtils
 from human_protocol_sdk.filter import EscrowFilter
-from human_protocol_sdk.staking import StakingUtils, LeaderFilter
 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 from human_protocol_sdk.storage import StorageClient
 from human_protocol_sdk.agreement import agreement
@@ -114,12 +113,4 @@ if __name__ == "__main__":
 
     # Run single example while testing, and remove comments before commit
 
-    get_escrow_statistics(statistics_client)
-    get_worker_statistics(statistics_client)
-    get_payment_statistics(statistics_client)
-    get_hmt_statistics(statistics_client)
-
-    agreement_example()
-
-    get_escrows()
-    get_leaders()
+    get_rep()

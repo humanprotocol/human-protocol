@@ -8,10 +8,12 @@ class ChainId(Enum):
     MAINNET = 1
     RINKEBY = 4
     GOERLI = 5
+    SEPOLIA = 11155111
     BSC_MAINNET = 56
     BSC_TESTNET = 97
     POLYGON = 137
     POLYGON_MUMBAI = 80001
+    POLYGON_AMOY = 80002
     MOONBEAM = 1284
     MOONBASE_ALPHA = 1287
     AVALANCHE_TESTNET = 43113
@@ -52,6 +54,20 @@ NETWORKS = {
             "https://api.thegraph.com/subgraphs/name/humanprotocol/goerli"
         ),
         "old_factory_address": "0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F",
+    },
+    ChainId.SEPOLIA: {
+        "title": "Sepolia",
+        "scan_url": "https://sepolia.etherscan.io",
+        "subgraph_url": (
+            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api"
+        ),
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+        "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
+        "staking_address": "0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203",
+        "reward_pool_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+        "kvstore_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+        "old_subgraph_url": (""),
+        "old_factory_address": "0x98108c28B7767a52BE38B4860832dd4e11A7ecad",
     },
     ChainId.BSC_MAINNET: {
         "title": "Binance Smart Chain",
@@ -112,6 +128,20 @@ NETWORKS = {
             "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai"
         ),
         "old_factory_address": "0x558cd800f9F0B02f3B149667bDe003284c867E94",
+    },
+    ChainId.POLYGON_AMOY: {
+        "title": "Polygon Amoy",
+        "scan_url": "https://www.oklink.com/amoy",
+        "subgraph_url": (
+            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api"
+        ),
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+        "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+        "staking_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+        "reward_pool_address": "0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7",
+        "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
     },
     ChainId.MOONBEAM: {
         "title": "Moonbeam",
@@ -216,7 +246,7 @@ NETWORKS = {
     ChainId.LOCALHOST: {
         "title": "Localhost",
         "scan_url": "",
-        "subgraph_url": "subgraph_url",
+        "subgraph_url": "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
         "hmt_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         "factory_address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
         "staking_address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
@@ -262,3 +292,4 @@ class KVStoreKeys(Enum):
     public_key = "public_key"
     webhook_url = "webhook_url"
     url = "url"
+    job_types = "job_types"

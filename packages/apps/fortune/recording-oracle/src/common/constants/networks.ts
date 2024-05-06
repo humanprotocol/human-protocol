@@ -11,14 +11,15 @@ export const networkMap: NetworkMapDto = {
     chainId: ChainId.BSC_MAINNET,
     rpcUrl: 'https://bsc-dataseed1.binance.org/',
   },
-  mumbai: {
-    chainId: ChainId.POLYGON_MUMBAI,
+  amoy: {
+    chainId: ChainId.POLYGON_AMOY,
     rpcUrl:
-      'https://polygon-mumbai.g.alchemy.com/v2/vKNSJzJf6SW2sdW-05bgFwoyFxUrMzii',
+      'https://polygon-amoy.g.alchemy.com/v2/Jomagi_shxwCUrKtZfgZepvngWRuO8-e',
   },
-  goerli: {
-    chainId: ChainId.GOERLI,
-    rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+  sepolia: {
+    chainId: ChainId.SEPOLIA,
+    rpcUrl:
+      'https://eth-sepolia.g.alchemy.com/v2/sboTD6vQ1csb0uxeeh6ex3EqSLE-vMWh',
   },
   moonbeam: {
     chainId: ChainId.MOONBEAM,

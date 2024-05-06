@@ -83,7 +83,10 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
-      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
+      const jobEntities = await this.jobRepository.findByStatus(
+        JobStatus.PAID,
+        3,
+      );
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
@@ -115,6 +118,7 @@ export class CronJobService {
     try {
       const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.CREATED,
+        3,
       );
 
       for (const jobEntity of jobEntities) {
@@ -148,6 +152,7 @@ export class CronJobService {
     try {
       const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.SET_UP,
+        3,
       );
 
       for (const jobEntity of jobEntities) {
@@ -181,6 +186,7 @@ export class CronJobService {
     try {
       const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.TO_CANCEL,
+        3,
       );
 
       for (const jobEntity of jobEntities) {

@@ -30,9 +30,13 @@ Enum for chain IDs.
 
 #### POLYGON *= 137*
 
+#### POLYGON_AMOY *= 80002*
+
 #### POLYGON_MUMBAI *= 80001*
 
 #### RINKEBY *= 4*
+
+#### SEPOLIA *= 11155111*
 
 #### SKALE *= 1273227453*
 
@@ -43,6 +47,8 @@ Bases: `Enum`
 Enum for KVStore keys
 
 #### fee *= 'fee'*
+
+#### job_types *= 'job_types'*
 
 #### public_key *= 'public_key'*
 
