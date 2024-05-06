@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/layout/protected/page-header';
 import { ProfileIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { ProfileListItem } from './components/profile/profile-list-item';
+import { ProfileListItem } from './profile-list-item';
 
 const mockedData = {
   profile: {

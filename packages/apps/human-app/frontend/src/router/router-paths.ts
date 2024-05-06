@@ -10,6 +10,8 @@ export const routerPaths = {
     sendResetLinkSuccess: '/worker/send-reset-link-success',
     emailVerification: '/verify',
     sendEmailVerification: '/worker/send-email-verification',
+    profile: '/worker/profile',
+    jobs: '/worker/jobs',
   },
   operator: {
     signIn: '/operator/sign-in',
@@ -17,5 +19,6 @@ export const routerPaths = {
     addStake: '/operator/add-stake',
     addKeys: '/operator/add-keys',
     editExistingKeysSuccess: '/operator/edit-existing-keys-success',
+    profile: '/operator/profile',
   },
 } as const;

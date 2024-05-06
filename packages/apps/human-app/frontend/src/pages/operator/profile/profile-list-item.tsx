@@ -1,9 +1,9 @@
 import { ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Chips } from '@/components/ui/chips';
 import { Button } from '@/components/ui/button';
 import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
+import { Chips } from '@/components/ui/chips';
 
 interface ProfileListItemProps {
   header: string;
@@ -26,6 +26,7 @@ export function ProfileListItem({
     >
       <ListItemText>
         <Typography
+          component="span"
           sx={{
             marginBottom: '10px',
           }}
@@ -49,6 +50,7 @@ export function ProfileListItem({
                   ? colorPalette.text.secondary
                   : colorPalette.text.primary
               }
+              component="span"
               variant="subtitle1"
             >
               {paragraph}
@@ -62,7 +64,7 @@ export function ProfileListItem({
                 <CheckmarkIcon />
               </Stack>
             )}
-            {!isStatusListItem && (
+            {isStatusListItem === false && (
               <Stack
                 sx={{
                   marginLeft: '5px',
