@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
@@ -6,7 +5,7 @@ import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
-import { useVerifyEmailMutation } from '@/api/servieces/worker/email-verification';
+import { useVerifyEmailQuery } from '@/api/servieces/worker/email-verification';
 import { SuccessLabel } from '@/components/ui/success-label';
 import {
   PageCard,
@@ -35,18 +34,19 @@ export function EmailVerificationWorkerPage() {
     locationStorage: 'search',
   });
 
+  if (token === undefined) {
+    return <PageCardLoader />;
+  }
+
+  return <EmailVerificationWorker token={token} />;
+}
+
+export function EmailVerificationWorker({ token }: { token: string }) {
   const {
-    mutate: emailVerificationWorkerMutate,
     error: emailVerificationWorkerError,
     isError: isEmailVerificationWorkerError,
     isPending: isEmailVerificationWorkerPending,
-    data: emailVerificationData,
-  } = useVerifyEmailMutation();
-
-  useEffect(() => {
-    emailVerificationWorkerMutate({ token: token || '' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
+  } = useVerifyEmailQuery({ token });
 
   if (isEmailVerificationWorkerError) {
     return (
@@ -56,7 +56,7 @@ export function EmailVerificationWorkerPage() {
     );
   }
 
-  if (isEmailVerificationWorkerPending || !emailVerificationData) {
+  if (isEmailVerificationWorkerPending) {
     return <PageCardLoader />;
   }
 
