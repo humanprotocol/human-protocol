@@ -85,6 +85,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                       disableTypography
                       primary={
                         <Typography
+                          component="span"
                           fontWeight={index === 0 ? '600' : '500'}
                           variant="body2"
                         >
@@ -125,7 +126,9 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                     <ListItemText
                       disableTypography
                       primary={
-                        <Typography variant="body1">{t(text)}</Typography>
+                        <Typography component="span" variant="body1">
+                          {t(text)}
+                        </Typography>
                       }
                       sx={{
                         textAlign: 'center',

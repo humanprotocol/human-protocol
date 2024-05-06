@@ -10,7 +10,7 @@ interface FooterProps {
 }
 export function Footer({ isProtected }: FooterProps) {
   const { t } = useTranslation();
-  const isMobile = useIsMobile('lg');
+  const isMobile = useIsMobile('md');
 
   const parseLeftPadding = () => {
     if (isMobile) {

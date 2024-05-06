@@ -5,12 +5,20 @@ import type { MRT_RowData, MRT_TableInstance } from 'material-react-table';
 import { Input } from '@/components/data-entry/input';
 import { colorPalette } from '@/styles/color-palette';
 
+interface ColumnValue {
+  id: string;
+  value: string;
+}
+
 interface SearchFormProps<T extends MRT_RowData> {
-  updater: MRT_TableInstance<T>['setColumnFilters'];
+  updater:
+    | MRT_TableInstance<T>['setColumnFilters']
+    | ((searchParams: ColumnValue[]) => void);
   label: string;
   name: string;
   placeholder: string;
   columnId: string;
+  fullWidth?: boolean;
 }
 
 export function SearchForm<T extends MRT_RowData>({
@@ -19,6 +27,7 @@ export function SearchForm<T extends MRT_RowData>({
   name,
   placeholder,
   columnId,
+  fullWidth = false,
 }: SearchFormProps<T>) {
   const methods = useForm<{ searchValue: string }>({
     defaultValues: {
@@ -43,7 +52,10 @@ export function SearchForm<T extends MRT_RowData>({
           updater([{ id: columnId, value: e.target.value }]);
         }}
         placeholder={placeholder}
-        sx={{ width: '15rem', margin: '1rem' }}
+        sx={{
+          width: fullWidth ? '100%' : '15rem',
+          margin: fullWidth ? '0' : '1rem',
+        }}
       />
     </FormProvider>
   );
