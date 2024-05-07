@@ -231,7 +231,7 @@ NETWORKS = {
         "old_factory_address": "",
     },
     ChainId.X_LAYER_TESTNET: {
-        "title": "X Layer",
+        "title": "X Layer Testnet",
         "scan_url": "https://www.oklink.com/oktc-test",
         "subgraph_url": (
             "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93"

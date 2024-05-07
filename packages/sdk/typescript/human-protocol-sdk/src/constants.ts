@@ -281,7 +281,7 @@ export const NETWORKS: {
   },
   [ChainId.X_LAYER_TESTNET]: {
     chainId: ChainId.X_LAYER_TESTNET,
-    title: 'X Layer',
+    title: 'X Layer Testnet',
     scanUrl: 'https://www.okx.com/explorer/xlayer-test',
     factoryAddress: '0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc',
     hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
