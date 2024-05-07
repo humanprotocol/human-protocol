@@ -179,6 +179,12 @@ describe('ReputationService', () => {
           MOCK_ADDRESS,
           ReputationEntityType.RECORDING_ORACLE,
         );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.CREDENTIAL_VALIDATOR,
+        );
       });
     });
 
@@ -293,6 +299,12 @@ describe('ReputationService', () => {
           chainId,
           MOCK_ADDRESS,
           ReputationEntityType.RECORDING_ORACLE,
+        );
+
+        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+          chainId,
+          MOCK_ADDRESS,
+          ReputationEntityType.CREDENTIAL_VALIDATOR,
         );
       });
     });
