@@ -22,6 +22,7 @@ export class Web3Service {
     public readonly networkConfigService: NetworkConfigService,
   ) {
     const privateKey = this.web3ConfigService.privateKey;
+
     const validChains = this.getValidChains();
     const validNetworks = networkConfigService.networks.filter((network) =>
       validChains.includes(network.chainId),

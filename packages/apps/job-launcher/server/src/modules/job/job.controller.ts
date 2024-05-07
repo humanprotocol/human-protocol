@@ -25,12 +25,12 @@ import {
   JobFortuneDto,
   JobCvatDto,
   JobListDto,
-  JobCancelDto,
   JobDetailsDto,
   JobIdDto,
   FortuneFinalResultDto,
   JobCaptchaDto,
   JobQuickLaunchDto,
+  JobCancelDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
@@ -246,7 +246,42 @@ export class JobController {
 
   @ApiOperation({
     summary: 'Cancel a job',
-    description: 'Endpoint to cancel a specified job.',
+    description:
+      'Endpoint to cancel a specified job by its associated chain ID and escrow address.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cancellation request for the specified job accepted',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
+  @Patch('/cancel/:chain_id/:escrow_address')
+  public async cancelJobByChainIdAndEscrowAddress(
+    @Request() req: RequestWithUser,
+    @Param('chain_id') chainId: ChainId,
+    @Param('escrow_address') escrowAddress: string,
+  ): Promise<void> {
+    await this.jobService.requestToCancelJobByAddress(
+      req.user.id,
+      chainId,
+      escrowAddress,
+    );
+    return;
+  }
+
+  @ApiOperation({
+    summary: 'Cancel a job',
+    description: 'Endpoint to cancel a specified job by its unique identifier.',
   })
   @ApiResponse({
     status: 200,
@@ -265,11 +300,11 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Patch('/cancel/:id')
-  public async cancelJob(
+  public async cancelJobById(
     @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
   ): Promise<void> {
-    await this.jobService.requestToCancelJob(req.user.id, params.id);
+    await this.jobService.requestToCancelJobById(req.user.id, params.id);
     return;
   }
 
