@@ -15,6 +15,18 @@ function EmptyPlaceholder() {
   );
 }
 
+function ExistingKeyText({ text }: { text?: string }) {
+  if (!text) {
+    return <EmptyPlaceholder />;
+  }
+
+  return (
+    <Grid sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }} width="100%">
+      {text}
+    </Grid>
+  );
+}
+
 export function ExistingKeys({
   openEditMode,
   useFormResult,
@@ -23,10 +35,10 @@ export function ExistingKeys({
   openEditMode: () => void;
 }) {
   const { getValues } = useFormResult;
-  const publicKey = getValues('Public Key');
-  const webhookUrl = getValues('Webhook Url');
-  const role = getValues('Role');
-  const recordingOracle = getValues('Recording Oracle');
+  const publicKey = getValues(EthKVStoreKeys.PublicKey);
+  const webhookUrl = getValues(EthKVStoreKeys.WebhookUrl);
+  const role = getValues(EthKVStoreKeys.Role);
+  const recordingOracle = getValues(EthKVStoreKeys.RecordingOracle);
 
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
@@ -38,16 +50,7 @@ export function ExistingKeys({
           {EthKVStoreKeys.PublicKey}
         </Typography>
         <Typography variant="body1" width="100%">
-          {publicKey ? (
-            <Grid
-              sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-              width="100%"
-            >
-              {publicKey}
-            </Grid>
-          ) : (
-            <EmptyPlaceholder />
-          )}
+          <ExistingKeyText text={publicKey} />
         </Typography>
       </Grid>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
@@ -55,16 +58,7 @@ export function ExistingKeys({
           {EthKVStoreKeys.WebhookUrl}
         </Typography>
         <Typography variant="body1" width="100%">
-          {webhookUrl ? (
-            <Grid
-              sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-              width="100%"
-            >
-              {webhookUrl}
-            </Grid>
-          ) : (
-            <EmptyPlaceholder />
-          )}
+          <ExistingKeyText text={webhookUrl} />
         </Typography>
       </Grid>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
@@ -78,16 +72,7 @@ export function ExistingKeys({
           {EthKVStoreKeys.RecordingOracle}
         </Typography>
         <Typography variant="body1">
-          {recordingOracle ? (
-            <Grid
-              sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-              width="100%"
-            >
-              {recordingOracle}
-            </Grid>
-          ) : (
-            <EmptyPlaceholder />
-          )}
+          <ExistingKeyText text={recordingOracle} />
         </Typography>
       </Grid>
       <div>
