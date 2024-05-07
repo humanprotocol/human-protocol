@@ -338,6 +338,39 @@ export class AuthService {
     return this.hashToken(token) === hashedToken;
   }
 
+  public async signupCredentialValidator(
+    data: SignInDto,
+    ip?: string,
+  ): Promise<UserEntity> {
+    const userEntity =
+      await this.userService.createCredentialValidatorUser(data);
+
+    const tokenEntity = new TokenEntity();
+    tokenEntity.type = TokenType.EMAIL;
+    tokenEntity.user = userEntity;
+    const date = new Date();
+    tokenEntity.expiresAt = new Date(
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+    );
+
+    await this.tokenRepository.createUnique(tokenEntity);
+
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.signup,
+    });
+
+    return userEntity;
+  }
+
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
     const preSignUpData = this.web3Service.prepareSignatureBody(
       SignatureType.SIGNUP,

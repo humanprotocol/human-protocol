@@ -140,6 +140,30 @@ export class AuthJwtController {
   }
 
   @Public()
+  @Post('/signup-credential-validator')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Credential Validator Signup',
+    description: 'Endpoint to register a new Credential Validator.',
+  })
+  @ApiBody({ type: UserCreateDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Credential Validator registered successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  public async signupCredentialValidator(
+    @Body() data: UserCreateDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    this.authService.signupCredentialValidator(data, ip);
+    return;
+  }
+
+  @Public()
   @Post('/web3/signin')
   @HttpCode(200)
   @ApiOperation({

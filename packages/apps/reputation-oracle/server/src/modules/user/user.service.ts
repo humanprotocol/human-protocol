@@ -53,6 +53,18 @@ export class UserService {
     return newUser;
   }
 
+  public async createCredentialValidatorUser(
+    dto: UserCreateDto,
+  ): Promise<UserEntity> {
+    const newUser = new UserEntity();
+    newUser.email = dto.email;
+    newUser.password = bcrypt.hashSync(dto.password, this.HASH_ROUNDS);
+    newUser.type = UserType.CREDENTIAL_VALIDATOR;
+    newUser.status = UserStatus.PENDING;
+    await this.userRepository.createUnique(newUser);
+    return newUser;
+  }
+
   public async getByCredentials(
     email: string,
     password: string,
