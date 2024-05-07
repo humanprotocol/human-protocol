@@ -71,13 +71,13 @@ export function AddStakeOperatorPage() {
         container
         sx={{ flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}
       >
-        <Typography variant="h5">
+        <Typography variant="body4">
           {t('operator.addStake.formHeader')}
         </Typography>
         <Typography variant="subtitle2">
           {t('operator.addStake.label')}
         </Typography>
-        <Typography color={colorPalette.primary.light} variant="subtitle2">
+        <Typography color={colorPalette.primary.light} variant="body5">
           {stakedAmount}
         </Typography>
         {displayForm ? (
