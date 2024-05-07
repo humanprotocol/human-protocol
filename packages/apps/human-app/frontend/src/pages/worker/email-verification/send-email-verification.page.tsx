@@ -63,8 +63,8 @@ export function SendEmailVerificationWorkerPage() {
           </Trans>
         </Typography>
         <Button
-          disabled={isEmailVerificationWorkerPending}
           fullWidth
+          loading={isEmailVerificationWorkerPending}
           onClick={sendEmailVerificationMutation}
           variant="outlined"
         >

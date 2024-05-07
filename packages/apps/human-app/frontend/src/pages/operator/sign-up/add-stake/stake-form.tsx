@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import { FormProvider, useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
@@ -13,6 +12,7 @@ import {
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
+import { Button } from '@/components/ui/button';
 
 export function StakeForm() {
   const addStakeMutation = useAddStakeMutation();
@@ -58,8 +58,8 @@ export function StakeForm() {
               }}
             >
               <Button
-                disabled={addStakeMutation.isPending}
                 fullWidth
+                loading={addStakeMutation.isPending}
                 type="submit"
                 variant="contained"
               >

@@ -96,8 +96,8 @@ export function SignInWorkerPage() {
               </Link>
             </Typography>
             <Button
-              disabled={isSignInWorkerPending}
               fullWidth
+              loading={isSignInWorkerPending}
               type="submit"
               variant="contained"
             >

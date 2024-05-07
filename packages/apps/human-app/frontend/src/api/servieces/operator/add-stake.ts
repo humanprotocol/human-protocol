@@ -23,8 +23,6 @@ async function addStakeMutationFn(
   return data;
 }
 
-export const addStakeMutationKey = ['addStake'];
-
 export function useAddStakeMutation() {
   const { address } = useConnectedWallet();
   const queryClient = useQueryClient();
@@ -38,13 +36,15 @@ export function useAddStakeMutation() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
-    mutationKey: addStakeMutationKey,
+    mutationKey: ['addStake', address],
   });
 }
 
 export function useAddStakeMutationState() {
+  const { address } = useConnectedWallet();
+
   const state = useMutationState({
-    filters: { mutationKey: addStakeMutationKey },
+    filters: { mutationKey: ['addStake', address] },
     select: (mutation) => mutation.state,
   });
 

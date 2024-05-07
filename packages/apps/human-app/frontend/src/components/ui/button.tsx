@@ -1,9 +1,9 @@
 import type { Link, LinkProps } from 'react-router-dom';
-import type { ButtonProps } from '@mui/material/Button';
-import { Button as ButtonMui } from '@mui/material';
 import { forwardRef } from 'react';
+import type { LoadingButtonProps } from '@mui/lab';
+import { LoadingButton } from '@mui/lab';
 
-export type CustomButtonProps = ButtonProps &
+export type CustomButtonProps = LoadingButtonProps &
   Partial<LinkProps> & {
     component?: typeof Link;
   };
@@ -11,9 +11,9 @@ export type CustomButtonProps = ButtonProps &
 export const Button = forwardRef<HTMLButtonElement, CustomButtonProps>(
   ({ children, ...props }, ref) => {
     return (
-      <ButtonMui ref={ref} {...props}>
+      <LoadingButton ref={ref} {...props}>
         {children}
-      </ButtonMui>
+      </LoadingButton>
     );
   }
 );

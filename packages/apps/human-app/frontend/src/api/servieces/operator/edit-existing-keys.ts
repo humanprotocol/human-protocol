@@ -26,8 +26,6 @@ function editExistingKeysMutationFn(
   return editExistingKeys(data);
 }
 
-export const editKeysMutationKey = ['editKeys'];
-
 export function useEditExistingKeysMutation() {
   const { address } = useConnectedWallet();
   const queryClient = useQueryClient();
@@ -43,13 +41,15 @@ export function useEditExistingKeysMutation() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
-    mutationKey: editKeysMutationKey,
+    mutationKey: ['editKeys', address],
   });
 }
 
 export function useEditExistingKeysMutationState() {
+  const { address } = useConnectedWallet();
+
   const state = useMutationState({
-    filters: { mutationKey: editKeysMutationKey },
+    filters: { mutationKey: ['editKeys', address] },
     select: (mutation) => mutation.state,
   });
 
