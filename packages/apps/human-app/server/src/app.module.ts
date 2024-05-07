@@ -26,6 +26,7 @@ import { EmailConfirmationModule } from './modules/email-confirmation/email-conf
 import { PasswordResetModule } from './modules/password-reset/password-reset.module';
 import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
 import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
+import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module
     PasswordResetModule,
     DisableOperatorModule,
     KycProcedureModule,
+    PrepareSignatureModule,
   ],
   controllers: [
     AppController,

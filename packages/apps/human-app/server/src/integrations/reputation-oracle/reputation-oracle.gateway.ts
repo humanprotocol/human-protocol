@@ -43,7 +43,7 @@ import {
   PrepareSignatureCommand,
   PrepareSignatureData,
   PrepareSignatureResponse,
-} from '../../modules/disable-operator/model/prepare-signature.model';
+} from '../../modules/prepare-signature/model/prepare-signature.model';
 import {
   DisableOperatorCommand,
   DisableOperatorData,
