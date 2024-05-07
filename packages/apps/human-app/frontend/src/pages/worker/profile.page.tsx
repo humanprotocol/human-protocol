@@ -9,12 +9,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { CheckmarkIcon, LockerIcon, ProfileIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
+import { routerPaths } from '@/router/router-paths';
 
 const mockedData = {
   notificationsConsent: false,
@@ -72,9 +74,9 @@ export function WorkerProfilePage() {
             </Typography>
             <Button
               color="secondary"
-              sx={{
-                paddingLeft: 0,
-              }}
+              component={Link}
+              sx={{ ':hover': { backgroundColor: 'inherit' }, padding: '0' }}
+              to={routerPaths.worker.resetPassword}
               variant="text"
             >
               {t('worker.profile.resetPassword')}
