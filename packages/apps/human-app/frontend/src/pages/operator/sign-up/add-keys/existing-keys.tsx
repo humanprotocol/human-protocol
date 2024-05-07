@@ -38,13 +38,19 @@ export function ExistingKeys({
   const publicKey = getValues(EthKVStoreKeys.PublicKey);
   const webhookUrl = getValues(EthKVStoreKeys.WebhookUrl);
   const role = getValues(EthKVStoreKeys.Role);
-  const recordingOracle = getValues(EthKVStoreKeys.RecordingOracle);
+  const fee = getValues(EthKVStoreKeys.Fee);
 
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
       <Typography variant="body4">
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
+      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+        <Typography variant="subtitle2">{EthKVStoreKeys.Fee}</Typography>
+        <Typography variant="body1">
+          <ExistingKeyText text={fee?.toString()} />
+        </Typography>
+      </Grid>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
         <Typography variant="subtitle2" width="100%">
           {EthKVStoreKeys.PublicKey}
@@ -66,14 +72,6 @@ export function ExistingKeys({
           {EthKVStoreKeys.Role}
         </Typography>
         {role.length ? <Chips data={role} /> : <EmptyPlaceholder />}
-      </Grid>
-      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2">
-          {EthKVStoreKeys.RecordingOracle}
-        </Typography>
-        <Typography variant="body1">
-          <ExistingKeyText text={recordingOracle} />
-        </Typography>
       </Grid>
       <div>
         <Button

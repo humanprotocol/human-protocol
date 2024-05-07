@@ -15,7 +15,22 @@ export const getEthKVStoreValuesSuccessSchema = z.object({
       if (!role) return [];
       return [role];
     }),
-  [EthKVStoreKeys.RecordingOracle]: z.string().optional(),
+  [EthKVStoreKeys.Fee]: z
+    .string()
+    .transform((fee, ctx) => {
+      const feeAsNumber = Number(fee);
+      try {
+        return z.number().parse(feeAsNumber);
+      } catch (error) {
+        ctx.addIssue({
+          path: [EthKVStoreKeys.Fee],
+          message: 'Invalid input',
+          code: 'custom',
+        });
+        return false;
+      }
+    })
+    .optional(),
 });
 
 export type GetEthKVStoreValuesSuccessResponse = z.infer<

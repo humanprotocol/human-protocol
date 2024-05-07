@@ -26,7 +26,7 @@ export const editEthKVStoreValuesMutationSchema = z.object({
       ])
     )
     .length(1),
-  [EthKVStoreKeys.RecordingOracle]: z.string().min(1),
+  [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
 });
 
 export type EditEthKVStoreValuesMutationData = z.infer<
@@ -50,13 +50,13 @@ function editExistingKeysMutationFn(
       EthKVStoreKeys.PublicKey,
       EthKVStoreKeys.WebhookUrl,
       EthKVStoreKeys.Role,
-      EthKVStoreKeys.RecordingOracle,
+      EthKVStoreKeys.Fee,
     ],
     values: [
       data[EthKVStoreKeys.PublicKey],
       data[EthKVStoreKeys.WebhookUrl],
       data.Role[0],
-      data[EthKVStoreKeys.RecordingOracle],
+      data[EthKVStoreKeys.Fee].toString(),
     ],
     contractAddress,
     chainId: data.chainId,

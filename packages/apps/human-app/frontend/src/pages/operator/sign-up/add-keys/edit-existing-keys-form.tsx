@@ -35,6 +35,12 @@ export function EditExistingKeysForm({
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
       <Input
         fullWidth
+        label={EthKVStoreKeys.Fee}
+        mask="PercentsInputMask"
+        name={EthKVStoreKeys.Fee}
+      />
+      <Input
+        fullWidth
         label={EthKVStoreKeys.PublicKey}
         name={EthKVStoreKeys.PublicKey}
       />
@@ -48,11 +54,6 @@ export function EditExistingKeysForm({
         name={EthKVStoreKeys.Role}
         options={OPTIONS}
         singleValue
-      />
-      <Input
-        fullWidth
-        label={EthKVStoreKeys.RecordingOracle}
-        name={EthKVStoreKeys.RecordingOracle}
       />
       <div>
         <Button

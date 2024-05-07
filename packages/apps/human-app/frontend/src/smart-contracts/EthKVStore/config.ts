@@ -9,14 +9,14 @@ export const EthKVStoreKeys = {
   PublicKey: 'Public Key',
   WebhookUrl: 'Webhook Url',
   Role: 'Role',
-  RecordingOracle: 'Recording Oracle',
+  Fee: 'Fee',
 } as const;
 
 interface EthKVStoreValues {
   [EthKVStoreKeys.PublicKey]: string;
   [EthKVStoreKeys.WebhookUrl]: string;
   [EthKVStoreKeys.Role]: Role;
-  [EthKVStoreKeys.RecordingOracle]: string;
+  [EthKVStoreKeys.Fee]: string;
 }
 
 export type SetBulkKey = keyof EthKVStoreValues;
@@ -24,7 +24,7 @@ export type SetBulkKeys = [
   typeof EthKVStoreKeys.PublicKey,
   typeof EthKVStoreKeys.WebhookUrl,
   typeof EthKVStoreKeys.Role,
-  typeof EthKVStoreKeys.RecordingOracle,
+  typeof EthKVStoreKeys.Fee,
 ];
 
 export type SetBulkValues = [string, string, Role, string];

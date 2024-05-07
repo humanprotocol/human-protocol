@@ -17,13 +17,13 @@ export async function get({
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.PublicKey),
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.WebhookUrl),
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.Role),
-    ethKVStoreContract.get(accountAddress, EthKVStoreKeys.RecordingOracle),
+    ethKVStoreContract.get(accountAddress, EthKVStoreKeys.Fee),
   ])) as unknown as string[];
 
   return {
     [EthKVStoreKeys.PublicKey]: keys[0],
     [EthKVStoreKeys.WebhookUrl]: keys[1],
     [EthKVStoreKeys.Role]: keys[2],
-    [EthKVStoreKeys.RecordingOracle]: keys[3],
+    [EthKVStoreKeys.Fee]: keys[3],
   };
 }
