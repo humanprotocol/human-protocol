@@ -50,11 +50,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 #### Defined in
 
-<<<<<<< HEAD
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
-=======
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
->>>>>>> develop
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
@@ -64,11 +60,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 #### Defined in
 
-<<<<<<< HEAD
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> develop
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -78,8 +70,4 @@ ___
 
 #### Defined in
 
-<<<<<<< HEAD
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> develop
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)

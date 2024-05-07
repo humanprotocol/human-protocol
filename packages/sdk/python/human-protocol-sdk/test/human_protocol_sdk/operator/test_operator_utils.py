@@ -41,6 +41,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "publicKey": None,
                                 "webhookUrl": None,
                                 "url": None,
+                                "jobTypes": "type1,type2",
                             }
                         ],
                     }
@@ -72,6 +73,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].public_key, None)
             self.assertEqual(leaders[0].webhook_url, None)
             self.assertEqual(leaders[0].url, None)
+            self.assertEqual(leaders[0].job_types, ["type1", "type2"])
 
     def test_get_leaders_empty_data(self):
         filter = LeaderFilter(networks=[ChainId.POLYGON], role="role")
@@ -126,6 +128,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "publicKey": None,
                             "webhookUrl": None,
                             "url": None,
+                            "jobTypes": "type1,type2",
                         }
                     }
                 }
@@ -156,6 +159,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.public_key, None)
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
+            self.assertEqual(leader.job_types, ["type1", "type2"])
 
     def test_get_leader_empty_data(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -182,7 +186,7 @@ class TestOperatorUtils(unittest.TestCase):
         operator_address = "0x1234567890123456789012345678901234567891"
         role = "Job Launcher"
         url = "https://example.com"
-        job_types = ["type1", "type2"]
+        job_types = "type1,type2"
 
         mock_function = MagicMock()
 
@@ -222,7 +226,7 @@ class TestOperatorUtils(unittest.TestCase):
         self.assertEqual(operators[0].address, operator_address)
         self.assertEqual(operators[0].role, role)
         self.assertEqual(operators[0].url, url)
-        self.assertEqual(operators[0].job_types, job_types)
+        self.assertEqual(operators[0].job_types, ["type1", "type2"])
 
     def test_get_reputation_network_operators_empty_data(self):
         reputation_address = "0x1234567890123456789012345678901234567891"

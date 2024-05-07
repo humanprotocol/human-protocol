@@ -93,6 +93,20 @@ export const NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
     oldFactoryAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
   },
+  [ChainId.SEPOLIA]: {
+    chainId: ChainId.SEPOLIA,
+    title: 'Ethereum Sepolia',
+    scanUrl: 'https://sepolia.etherscan.io/',
+    factoryAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    stakingAddress: '0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203',
+    rewardPoolAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
+    kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
+    subgraphUrl:
+      'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.BSC_MAINNET]: {
     chainId: ChainId.BSC_MAINNET,
     title: 'Binance Smart Chain',

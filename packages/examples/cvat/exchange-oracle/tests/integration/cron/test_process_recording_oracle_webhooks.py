@@ -259,7 +259,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
         with (
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.StakingUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
             patch("httpx.Client.post") as mock_httpx_post,
         ):
             w3 = Mock()

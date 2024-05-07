@@ -33,10 +33,8 @@ export class ImageLabelBinaryJobResults {
   worker_performance: WorkerPerformanceResult[];
 }
 export class CvatAnnotationMetaJobs {
-  id: number;
   job_id: number;
-  annotator_wallet_address: string;
-  annotation_quality: number;
+  final_result_id: number;
 }
 
 export class CvatAnnotationMetaResults {

@@ -14,8 +14,10 @@ import {
 } from '../src/graphql/queries/operator';
 import {
   ILeader,
+  ILeaderSubgraph,
   IOperator,
-  IReputationNetwork,
+  IOperatorSubgraph,
+  IReputationNetworkSubgraph,
   IReward,
 } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
@@ -32,7 +34,7 @@ describe('OperatorUtils', () => {
     const stakerAddress = ethers.ZeroAddress;
     const invalidAddress = 'InvalidAddress';
 
-    const mockLeader: ILeader = {
+    const mockLeaderSubgraph: ILeaderSubgraph = {
       id: stakerAddress,
       chainId: ChainId.LOCALHOST,
       address: stakerAddress,
@@ -45,11 +47,17 @@ describe('OperatorUtils', () => {
       reputation: ethers.parseEther('25'),
       reward: ethers.parseEther('25'),
       amountJobsLaunched: ethers.parseEther('25'),
+      jobTypes: 'type1,type2',
+    };
+
+    const mockLeader: ILeader = {
+      ...mockLeaderSubgraph,
+      jobTypes: ['type1', 'type2'],
     };
 
     test('should return staker information', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        leader: mockLeader,
+        leader: mockLeaderSubgraph,
       });
 
       const result = await OperatorUtils.getLeader(
@@ -88,7 +96,7 @@ describe('OperatorUtils', () => {
   describe('getLeaders', () => {
     const stakerAddress = ethers.ZeroAddress;
 
-    const mockLeader: ILeader = {
+    const mockLeaderSubgraph: ILeaderSubgraph = {
       id: stakerAddress,
       chainId: ChainId.LOCALHOST,
       address: stakerAddress,
@@ -101,11 +109,17 @@ describe('OperatorUtils', () => {
       reputation: ethers.parseEther('25'),
       reward: ethers.parseEther('25'),
       amountJobsLaunched: ethers.parseEther('25'),
+      jobTypes: 'type1,type2',
+    };
+
+    const mockLeader: ILeader = {
+      ...mockLeaderSubgraph,
+      jobTypes: ['type1', 'type2'],
     };
 
     test('should return an array of stakers', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        leaders: [mockLeader, mockLeader],
+        leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
       const filter = { networks: [ChainId.LOCALHOST], role: 'role' };
 
@@ -133,16 +147,20 @@ describe('OperatorUtils', () => {
 
   describe('getReputationNetworkOperators', () => {
     const stakerAddress = ethers.ZeroAddress;
-    const mockOperator: IOperator = {
+    const mockOperatorSubgraph: IOperatorSubgraph = {
       address: '0x0000000000000000000000000000000000000001',
       role: Role.JobLauncher,
       url: 'www.google.com',
-      jobTypes: ['type1,type2'],
+      jobTypes: 'type1,type2',
     };
-    const mockReputationNetwork: IReputationNetwork = {
+    const mockOperator: IOperator = {
+      ...mockOperatorSubgraph,
+      jobTypes: ['type1', 'type2'],
+    };
+    const mockReputationNetwork: IReputationNetworkSubgraph = {
       id: stakerAddress,
       address: stakerAddress,
-      operators: [mockOperator],
+      operators: [mockOperatorSubgraph],
     };
 
     test('should return reputation network operators', async () => {

@@ -88,7 +88,7 @@ class LeaderData:
         public_key: Optional[str] = None,
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
-        job_types: Optional[str] = None,
+        job_types: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -151,7 +151,9 @@ class RewardData:
 
 
 class Operator:
-    def __init__(self, address: str, role: str, url: str = "", job_types: str = ""):
+    def __init__(
+        self, address: str, role: str, url: str = "", job_types: List[str] = []
+    ):
         """
         Initializes an Operator instance.
 
@@ -231,7 +233,11 @@ class OperatorUtils:
                         public_key=leader.get("publicKey", None),
                         webhook_url=leader.get("webhookUrl", None),
                         url=leader.get("url", None),
-                        job_types=leader.get("jobTypes", None),
+                        job_types=(
+                            leader.get("jobTypes").split(",")
+                            if leader.get("jobTypes", None)
+                            else None
+                        ),
                     )
                     for leader in leaders_raw
                 ]
@@ -301,7 +307,11 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
-            job_types=leader.get("jobTypes", None),
+            job_types=(
+                leader.get("jobTypes").split(",")
+                if leader.get("jobTypes", None)
+                else None
+            ),
         )
 
     @staticmethod
@@ -357,7 +367,11 @@ class OperatorUtils:
                 address=operator.get("address", ""),
                 role=operator.get("role", ""),
                 url=operator.get("url", ""),
-                job_types=operator.get("jobTypes", []),
+                job_types=(
+                    operator.get("jobTypes").split(",")
+                    if operator.get("jobTypes", None)
+                    else []
+                ),
             )
             for operator in operators
         ]

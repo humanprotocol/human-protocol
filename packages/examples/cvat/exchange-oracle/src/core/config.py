@@ -32,11 +32,11 @@ class PolygonMainnetConfig:
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
 
-class PolygonMumbaiConfig:
-    chain_id = 80001
-    rpc_api = os.environ.get("POLYGON_MUMBAI_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_MUMBAI_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_MUMBAI_ADDR")
+class PolygonAmoyConfig:
+    chain_id = 80002
+    rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
+    private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
+    addr = os.environ.get("POLYGON_AMOY_ADDR")
 
 
 class LocalhostConfig:
@@ -46,7 +46,7 @@ class LocalhostConfig:
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get("LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = os.environ.get("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     job_launcher_url = os.environ.get("LOCALHOST_JOB_LAUNCHER_URL")
 
@@ -84,9 +84,21 @@ class CronConfig:
         "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
         os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
     )
+    track_completed_escrows_max_downloading_retries = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
+    )
+    "Maximum number of downloading attempts per job during results downloading"
+
+    track_completed_escrows_jobs_downloading_batch_size = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
+    )
+    "Maximum number of parallel downloading requests during results downloading"
 
     rejected_projects_chunk_size = os.environ.get("REJECTED_PROJECTS_CHUNK_SIZE", 20)
     accepted_projects_chunk_size = os.environ.get("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
+
+    track_escrow_creation_chunk_size = os.environ.get("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20)
+    track_escrow_creation_int = int(os.environ.get("TRACK_ESCROW_CREATION_INT", 300))
 
 
 class CvatConfig:
@@ -150,6 +162,15 @@ class FeaturesConfig:
 class CoreConfig:
     default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
 
+    skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
+    "Assignment size multiplier for IMAGE_SKELETONS_FROM_BOXES tasks"
+
+    min_roi_size_w = int(os.environ.get("MIN_ROI_SIZE_W", 350))
+    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+
+    min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
+    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+
 
 class HumanAppConfig:
     signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
@@ -164,7 +185,7 @@ class Config:
     loglevel = parse_log_level(os.environ.get("LOGLEVEL", "info"))
 
     polygon_mainnet = PolygonMainnetConfig
-    polygon_mumbai = PolygonMumbaiConfig
+    polygon_amoy = PolygonAmoyConfig
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig

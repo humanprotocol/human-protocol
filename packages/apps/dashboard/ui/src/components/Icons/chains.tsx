@@ -17,6 +17,7 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.MAINNET]: <EthereumIcon />,
   [ChainId.RINKEBY]: <EthereumIcon />,
   [ChainId.GOERLI]: <EthereumIcon />,
+  [ChainId.SEPOLIA]: <EthereumIcon />,
   [ChainId.POLYGON]: <PolygonIcon />,
   [ChainId.POLYGON_MUMBAI]: <PolygonIcon />,
   [ChainId.POLYGON_AMOY]: <PolygonIcon />,

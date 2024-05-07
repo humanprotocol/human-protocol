@@ -58,11 +58,7 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
-<<<<<<< HEAD
-[operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
-=======
-[operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
->>>>>>> develop
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ___
 
@@ -94,11 +90,7 @@ const leaders = await OperatorUtils.getLeaders();
 
 #### Defined in
 
-<<<<<<< HEAD
-[operator.ts:84](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L84)
-=======
-[operator.ts:84](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L84)
->>>>>>> develop
+[operator.ts:88](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L88)
 
 ___
 
@@ -132,11 +124,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-<<<<<<< HEAD
-[operator.ts:123](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L123)
-=======
-[operator.ts:123](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L123)
->>>>>>> develop
+[operator.ts:132](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L132)
 
 ___
 
@@ -169,8 +157,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
-<<<<<<< HEAD
-[operator.ts:162](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L162)
-=======
-[operator.ts:162](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L162)
->>>>>>> develop
+[operator.ts:174](https://github.com/humanprotocol/human-protocol/blob/84c81d03/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L174)

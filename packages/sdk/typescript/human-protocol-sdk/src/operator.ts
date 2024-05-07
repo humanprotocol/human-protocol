@@ -2,9 +2,10 @@
 import gqlFetch from 'graphql-request';
 import {
   ILeader,
+  ILeaderSubgraph,
   ILeadersFilter,
   IOperator,
-  IReputationNetwork,
+  IReputationNetworkSubgraph,
   IReward,
 } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
@@ -55,12 +56,15 @@ export class OperatorUtils {
 
     try {
       const { leader } = await gqlFetch<{
-        leader: ILeader;
+        leader: ILeaderSubgraph;
       }>(networkData.subgraphUrl, GET_LEADER_QUERY, {
         address: address.toLowerCase(),
       });
 
-      return leader;
+      return {
+        ...leader,
+        jobTypes: leader.jobTypes?.split(','),
+      };
     } catch (e) {
       return throwError(e);
     }
@@ -93,11 +97,16 @@ export class OperatorUtils {
           throw ErrorUnsupportedChainID;
         }
         const { leaders } = await gqlFetch<{
-          leaders: ILeader[];
+          leaders: ILeaderSubgraph[];
         }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
           role: filter.role,
         });
-        leaders_data = leaders_data.concat(leaders);
+        leaders_data = leaders_data.concat(
+          leaders.map((leader) => ({
+            ...leader,
+            jobTypes: leader.jobTypes?.split(','),
+          }))
+        );
       }
 
       return leaders_data;
@@ -132,13 +141,16 @@ export class OperatorUtils {
     }
     try {
       const { reputationNetwork } = await gqlFetch<{
-        reputationNetwork: IReputationNetwork;
+        reputationNetwork: IReputationNetworkSubgraph;
       }>(networkData.subgraphUrl, GET_REPUTATION_NETWORK_QUERY(role), {
         address: address.toLowerCase(),
         role: role,
       });
 
-      return reputationNetwork.operators;
+      return reputationNetwork.operators.map((operator) => ({
+        ...operator,
+        jobTypes: operator.jobTypes?.split(','),
+      }));
     } catch (e) {
       return throwError(e);
     }

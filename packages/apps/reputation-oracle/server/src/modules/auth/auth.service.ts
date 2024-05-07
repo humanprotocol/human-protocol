@@ -78,10 +78,6 @@ export class AuthService {
       throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
     }
 
-    if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
-    }
-
     return this.auth(userEntity);
   }
 

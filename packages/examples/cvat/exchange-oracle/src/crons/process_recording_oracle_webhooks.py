@@ -99,7 +99,6 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                             new_status, webhook.escrow_address, project.cvat_id
                         )
                     )
-
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
         case RecordingOracleEventTypes.task_rejected:
@@ -140,9 +139,13 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                             db_session, task_id, TaskStatuses.annotation
                         )
 
-                    cvat_db_service.update_project_status(
-                        db_session, project.id, ProjectStatuses.annotation
+                    new_status = ProjectStatuses.annotation
+                    logger.info(
+                        "Changing project status to {} (escrow_address={}, project={})".format(
+                            new_status, webhook.escrow_address, project.cvat_id
+                        )
                     )
+                    cvat_db_service.update_project_status(db_session, project.id, new_status)
 
         case _:
             assert False, f"Unknown recording oracle event {webhook.event_type}"
