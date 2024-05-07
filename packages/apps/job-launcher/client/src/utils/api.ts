@@ -1,9 +1,31 @@
 import axios from 'axios';
 import { CaseConverter } from './case-converter';
+import { LOCAL_STORAGE_KEYS } from 'src/constants';
+
+interface FailedPromise {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APP_JOB_LAUNCHER_SERVER_URL,
 });
+
+let isRefreshing = false;
+
+let failedQueue: FailedPromise[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
 
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -33,13 +55,56 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error?.response?.status === 401) {
-      const message = error?.response?.data?.message;
-      if (message !== 'User not found' && message !== 'User not active') {
-        localStorage.removeItem('HUMAN_JOB_LAUNCHER_REFRESH_TOKEN');
-        localStorage.removeItem('HUMAN_JOB_LAUNCHER_ACCESS_TOKEN');
-        window.location.href = '/';
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve,
+            reject,
+          });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axios(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
       }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem(
+        LOCAL_STORAGE_KEYS.refreshToken,
+      );
+
+      return new Promise((resolve, reject) => {
+        axiosInstance
+          .post('/auth/refresh', { refresh_token: refreshToken })
+          .then(({ data }) => {
+            localStorage.setItem(
+              LOCAL_STORAGE_KEYS.accessToken,
+              data.accessToken,
+            );
+            localStorage.setItem(
+              LOCAL_STORAGE_KEYS.refreshToken,
+              data.refreshToken,
+            );
+            error.config.headers['Authorization'] =
+              `Bearer ${data.accessToken}`;
+            resolve(axiosInstance(originalRequest));
+          })
+          .catch((err) => {
+            processQueue(err, null);
+            reject(err);
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.accessToken);
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.refreshToken);
+            window.location.href = '/';
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      });
     }
     return Promise.reject(error);
   },
