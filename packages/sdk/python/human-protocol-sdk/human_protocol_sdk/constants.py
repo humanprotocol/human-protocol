@@ -219,7 +219,7 @@ NETWORKS = {
         "title": "X Layer",
         "scan_url": "https://www.oklink.com/oktc-test",
         "subgraph_url": (
-            "https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet"
+            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc",

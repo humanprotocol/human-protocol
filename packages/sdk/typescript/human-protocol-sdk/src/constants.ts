@@ -275,7 +275,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0x44FAd6e8d616AD460cf8eEf503FC101170E7De73',
     kvstoreAddress: '0xcCfF9646Abf988d9842d94b171A67d5F6c30dBe2',
     subgraphUrl:
-      'https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet/graphql/',
+      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
