@@ -1,6 +1,6 @@
 {
-  "network": "xlayer",
-  "description": "Human subgraph on X Layer",
+  "network": "xlayer-sepolia",
+  "description": "Human subgraph on X Layer testnet",
   "EscrowFactory": {
     "address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
     "startBlock": 13485896,

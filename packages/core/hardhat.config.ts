@@ -173,7 +173,7 @@ const config: HardhatUserConfig = {
     xlayer: {
       chainId: 195,
       timeout: 20000000,
-      url: process.env.ETH_XLAYER_URL || '',
+      url: process.env.ETH_XLAYER_TESTNET_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -239,7 +239,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'xlayer',
+        network: 'xlayer-testnet',
         chainId: 195,
         urls: {
           apiURL:
