@@ -26,10 +26,8 @@
     "reputation-oracle:lint": "yarn workspace @human-protocol/reputation-oracle lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
     "sdk:lint": "yarn workspace @human-protocol/sdk lint",
-    "meta-code-verify:test": "yarn workspace @human-protocol/meta-code-verify test",
-    "meta-code-verify:lint": "yarn workspace @human-protocol/meta-code-verify lint",
-    "test": "concurrently npm:core:test npm:subgraph:test npm:dashboard-ui:test npm:fortune-v3:test npm:sdk:test npm:faucet-server:test npm:meta-code-verify:test npm:job-launcher-server:test npm:job-launcher-client:test npm:reputation-oracle:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:dashboard-ui:lint npm:fortune-v3:lint npm:sdk:lint npm:faucet-server:lint npm:meta-code-verify:lint npm:job-launcher-server:lint npm:job-launcher-client:lint npm:reputation-oracle:lint",
+    "test": "concurrently npm:core:test npm:subgraph:test npm:dashboard-ui:test npm:fortune-v3:test npm:sdk:test npm:faucet-server:test npm:job-launcher-server:test npm:job-launcher-client:test npm:reputation-oracle:test",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:dashboard-ui:lint npm:fortune-v3:lint npm:sdk:lint npm:faucet-server:lint npm:job-launcher-server:lint npm:job-launcher-client:lint npm:reputation-oracle:lint",
     "prepare": "husky install",
     "postinstall": "yarn workspace @human-protocol/sdk build"
   },

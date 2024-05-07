@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
@@ -18,6 +18,7 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
+import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
 
 @Module({
   providers: [
@@ -28,6 +29,10 @@ import { EnvConfigModule } from './common/config/config.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DatabaseExceptionFilter,
     },
   ],
   imports: [
