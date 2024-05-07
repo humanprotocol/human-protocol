@@ -1872,7 +1872,7 @@ describe('JobService', () => {
     });
   });
 
-  describe('requestToCancelJob by job id', () => {
+  describe('requestToCancelJobById', () => {
     const jobId = 1;
     const userId = 123;
 
@@ -1897,7 +1897,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJobById(userId, jobId);
 
       expect(jobRepository.findOneByIdAndUserId).toHaveBeenCalledWith(
         jobId,
@@ -1925,7 +1925,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJobById(userId, jobId);
 
       expect(jobRepository.findOneByIdAndUserId).toHaveBeenCalledWith(
         jobId,
@@ -1945,7 +1945,7 @@ describe('JobService', () => {
         .mockResolvedValue(undefined);
 
       await expect(
-        jobService.requestToCancelJob(userId, jobId),
+        jobService.requestToCancelJobById(userId, jobId),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -1963,23 +1963,23 @@ describe('JobService', () => {
         .mockResolvedValue(mockJobEntity);
 
       await expect(
-        jobService.requestToCancelJob(userId, jobId),
+        jobService.requestToCancelJobById(userId, jobId),
       ).rejects.toThrow(
         new ConflictException(ErrorJob.InvalidStatusCancellation),
       );
     });
   });
 
-  describe('requestToCancelJob by chain id and escrowAddress', () => {
+  describe('requestToCancelJobByAddress', () => {
     const jobId = 1;
     const chainId = ChainId.LOCALHOST;
     const escrowAddress = MOCK_ADDRESS;
     const userId = 123;
 
     beforeEach(() => {
-      web3Service.getValidChains = jest
+      web3Service.validateChainId = jest
         .fn()
-        .mockReturnValue([ChainId.LOCALHOST]);
+        .mockResolvedValue(() => {});
     });
 
     it('should cancel the job when status is Launched', async () => {
@@ -1997,7 +1997,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJob(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
@@ -2024,7 +2024,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJob(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
@@ -2043,18 +2043,18 @@ describe('JobService', () => {
         .mockResolvedValue(undefined);
 
       await expect(
-        jobService.requestToCancelJob(userId, chainId, escrowAddress),
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw not found exception if job not found when an invalid chain id', async () => {
-      jobRepository.findOneByChainIdAndEscrowAddress = jest
+      web3Service.validateChainId = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockRejectedValue(new BadRequestException(ErrorWeb3.InvalidChainId));
 
       await expect(
-        jobService.requestToCancelJob(userId, 123, escrowAddress),
-      ).rejects.toThrow(NotFoundException);
+        jobService.requestToCancelJobByAddress(userId, 123, escrowAddress),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw not found exception if job not found when an escrow address is not valid', async () => {
@@ -2063,7 +2063,7 @@ describe('JobService', () => {
         .mockResolvedValue(undefined);
 
       await expect(
-        jobService.requestToCancelJob(userId, chainId, '0x123'),
+        jobService.requestToCancelJobByAddress(userId, chainId, '0x123'),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -2081,7 +2081,7 @@ describe('JobService', () => {
         .mockResolvedValue(mockJobEntity);
 
       await expect(
-        jobService.requestToCancelJob(userId, chainId, escrowAddress),
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
       ).rejects.toThrow(
         new ConflictException(ErrorJob.InvalidStatusCancellation),
       );

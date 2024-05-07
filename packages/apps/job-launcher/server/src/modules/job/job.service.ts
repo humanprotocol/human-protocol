@@ -952,28 +952,41 @@ export class JobService {
     return jobEntity;
   }
 
-  public async requestToCancelJob(
+  public async requestToCancelJobById(
     userId: number,
-    id: number,
-    escrowAddress?: string,
+    jobId: number,
   ): Promise<void> {
-    let jobEntity;
-    const validChains = this.web3Service.getValidChains();
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(jobId, userId);
 
-    if (id && !escrowAddress) {
-      jobEntity = await this.jobRepository.findOneByIdAndUserId(id, userId);
-    } else if (validChains.includes(id) && ethers.isAddress(escrowAddress)) {
-      jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-        id,
-        escrowAddress,
-      );
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
     }
+
+    await this.requestToCancelJob(jobEntity);
+  }
+
+  public async requestToCancelJobByAddress(
+    userId: number,
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<void> {
+    await this.web3Service.validateChainId(chainId);
+
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(chainId, escrowAddress);
 
     if (!jobEntity || (jobEntity && jobEntity.userId !== userId)) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
+    await this.requestToCancelJob(jobEntity);
+  }
+
+
+  public async requestToCancelJob(
+    jobEntity: JobEntity
+  ): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
       this.logger.log(ErrorJob.InvalidStatusCancellation, JobService.name);
       throw new ConflictException(ErrorJob.InvalidStatusCancellation);

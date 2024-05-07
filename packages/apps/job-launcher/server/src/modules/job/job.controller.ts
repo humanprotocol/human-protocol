@@ -271,7 +271,7 @@ export class JobController {
     @Param('chain_id') chainId: ChainId,
     @Param('escrow_address') escrowAddress: string,
   ): Promise<void> {
-    await this.jobService.requestToCancelJob(
+    await this.jobService.requestToCancelJobByAddress(
       req.user.id,
       chainId,
       escrowAddress,
@@ -304,7 +304,7 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
   ): Promise<void> {
-    await this.jobService.requestToCancelJob(req.user.id, params.id);
+    await this.jobService.requestToCancelJobById(req.user.id, params.id);
     return;
   }
 
