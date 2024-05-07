@@ -60,13 +60,6 @@ export class NetworkConfigService {
         },
       }),
     };
-
-    // Remove networks without RPC URLs
-    Object.keys(this.networkMap).forEach((network) => {
-      if (!this.networkMap[network].rpcUrl) {
-        delete this.networkMap[network];
-      }
-    });
   }
 
   get networks(): NetworkDto[] {
