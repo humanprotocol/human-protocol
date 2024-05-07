@@ -5,8 +5,14 @@ import { colorPalette } from '@/styles/color-palette';
 import type { UseFormResult } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { Input } from '@/components/data-entry/input';
 import { MultiSelect } from '@/components/data-entry/multi-select';
+import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
 
-const JOB_TYPES_OPTIONS = ['Image Labelling', 'BBox', 'Testing'];
+const OPTIONS = [
+  Role.ExchangeOracle,
+  Role.JobLauncher,
+  Role.RecordingOracle,
+  Role.ReputationOracle,
+];
 
 export function EditExistingKeysForm({
   closeEditMode,
@@ -29,19 +35,24 @@ export function EditExistingKeysForm({
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
       <Input
         fullWidth
-        label={t('operator.addKeysPage.editKeysForm.fee')}
-        mask="PercentsInputMask"
-        name="fee"
+        label={EthKVStoreKeys.PublicKey}
+        name={EthKVStoreKeys.PublicKey}
       />
       <Input
         fullWidth
-        label={t('operator.addKeysPage.editKeysForm.webhookUrl')}
-        name="webhookUrl"
+        label={EthKVStoreKeys.WebhookUrl}
+        name={EthKVStoreKeys.WebhookUrl}
       />
       <MultiSelect
-        label={t('operator.addKeysPage.editKeysForm.jobTypes')}
-        name="jobTypes"
-        options={JOB_TYPES_OPTIONS}
+        label={EthKVStoreKeys.Role}
+        name={EthKVStoreKeys.Role}
+        options={OPTIONS}
+        singleValue
+      />
+      <Input
+        fullWidth
+        label={EthKVStoreKeys.RecordingOracle}
+        name={EthKVStoreKeys.RecordingOracle}
       />
       <div>
         <Button

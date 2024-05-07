@@ -11,21 +11,22 @@ import {
 } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
-import { useGetKeys } from '@/api/servieces/operator/get-keys';
-import { PendingKeys } from '@/pages/operator/sign-up/add-keys/pending-keys';
-import type { EditExistingKeysCallArguments } from '@/api/servieces/operator/edit-existing-keys';
+import type { EditEthKVStoreValuesMutationData } from '@/api/servieces/operator/edit-existing-keys';
 import {
-  editExistingKeysCallArgumentsSchema,
+  editEthKVStoreValuesMutationSchema,
   useEditExistingKeysMutation,
   useEditExistingKeysMutationState,
 } from '@/api/servieces/operator/edit-existing-keys';
-import type {
-  ExistingKeys as IExistingKeys,
-  PendingKeys as IPendingKeys,
-} from '@/smart-contracts/keys/fake-keys-smart-contract';
 import { Button } from '@/components/ui/button';
 import { ExistingKeys } from '@/pages/operator/sign-up/add-keys/existing-keys';
 import { EditExistingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-form';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import { useGetKeys } from '@/api/servieces/operator/get-keys';
+
+export type UseFormResult = UseFormReturn<
+  GetEthKVStoreValuesSuccessResponse,
+  EditEthKVStoreValuesMutationData
+>;
 
 export function AddKeysOperatorPage() {
   const {
@@ -61,43 +62,42 @@ export function AddKeysOperatorPage() {
   );
 }
 
-export type UseFormResult = UseFormReturn<
-  EditExistingKeysCallArguments,
-  unknown
->;
-
 export function Form({
-  keysData: {
-    pendingKeys,
-    existingKeys: { jobTypes, webhookUrl, fee },
-  },
+  keysData,
 }: {
-  keysData: {
-    pendingKeys: IPendingKeys;
-    existingKeys: IExistingKeys;
-  };
+  keysData: GetEthKVStoreValuesSuccessResponse;
 }) {
   const [editMode, setEditMode] = useState(false);
   const editExistingKeys = useEditExistingKeysMutation();
 
-  const methods = useForm<EditExistingKeysCallArguments>({
-    defaultValues: {
-      jobTypes,
-      webhookUrl,
-      fee,
-    },
-    resolver: zodResolver(editExistingKeysCallArgumentsSchema),
+  const methods = useForm<
+    GetEthKVStoreValuesSuccessResponse,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
+    any,
+    EditEthKVStoreValuesMutationData
+  >({
+    defaultValues: keysData,
+    resolver: zodResolver(editEthKVStoreValuesMutationSchema),
   });
 
-  const handleEdit = (data: EditExistingKeysCallArguments) => {
+  const handleEdit = (data: EditEthKVStoreValuesMutationData) => {
     editExistingKeys.mutate(data);
   };
 
   return (
     <Grid container gap="2rem" marginTop="1rem">
-      <FormProvider {...methods}>
+      <FormProvider<
+        GetEthKVStoreValuesSuccessResponse,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
+        any,
+        EditEthKVStoreValuesMutationData
+      >
+        {...methods}
+      >
         <form
-          onSubmit={(event) => void methods.handleSubmit(handleEdit)(event)}
+          onSubmit={(event) => {
+            void methods.handleSubmit(handleEdit)(event);
+          }}
           style={{
             width: '100%',
             display: 'flex',
@@ -116,7 +116,6 @@ export function Form({
               useFormResult={methods}
             />
           )}
-          <PendingKeys pendingKeys={pendingKeys} />
           <Button
             disabled={editExistingKeys.isPending}
             fullWidth
