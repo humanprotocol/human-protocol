@@ -40,17 +40,19 @@ import {
 import {
   PrepareSignatureCommand,
   PrepareSignatureData,
-} from '../../../modules/disable-operator/model/prepare-signature.model';
+} from '../../../modules/prepare-signature/model/prepare-signature.model';
 import {
   disableOperatorCommandFixture,
   disableOperatorDataFixture,
-  prepareSignatureCommandFixture,
-  prepareSignatureDataFixture,
 } from '../../../modules/disable-operator/spec/disable-operator.fixtures';
 import {
   DisableOperatorCommand,
   DisableOperatorData,
 } from '../../../modules/disable-operator/model/disable-operator.model';
+import {
+  prepareSignatureCommandFixture,
+  prepareSignatureDataFixture,
+} from '../../../modules/prepare-signature/spec/prepare-signature.fixtures';
 
 describe('ReputationOracleGateway', () => {
   let service: ReputationOracleGateway;

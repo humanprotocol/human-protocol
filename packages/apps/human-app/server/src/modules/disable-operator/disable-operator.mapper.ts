@@ -2,11 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { createMap, forMember, Mapper, mapWith } from '@automapper/core';
 import {
-  PrepareSignatureCommand,
-  PrepareSignatureData,
-  PrepareSignatureDto,
-} from './model/prepare-signature.model';
-import {
   DisableOperatorCommand,
   DisableOperatorData,
   DisableOperatorDto,
@@ -21,9 +16,6 @@ export class DisableOperatorProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, PrepareSignatureDto, PrepareSignatureCommand);
-      createMap(mapper, PrepareSignatureCommand, PrepareSignatureData);
-
       createMap(
         mapper,
         DisableOperatorDto,
