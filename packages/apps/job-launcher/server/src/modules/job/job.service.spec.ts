@@ -124,7 +124,6 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
-import { Web3Env } from 'src/common/enums/web3';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -1977,9 +1976,7 @@ describe('JobService', () => {
     const userId = 123;
 
     beforeEach(() => {
-      web3Service.validateChainId = jest
-        .fn()
-        .mockResolvedValue(() => {});
+      web3Service.validateChainId = jest.fn().mockResolvedValue(() => {});
     });
 
     it('should cancel the job when status is Launched', async () => {
@@ -1997,7 +1994,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
@@ -2024,7 +2025,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,

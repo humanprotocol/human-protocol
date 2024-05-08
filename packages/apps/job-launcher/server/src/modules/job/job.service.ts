@@ -956,7 +956,10 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByIdAndUserId(jobId, userId);
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
+      userId,
+    );
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -973,7 +976,10 @@ export class JobService {
   ): Promise<void> {
     await this.web3Service.validateChainId(chainId);
 
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(chainId, escrowAddress);
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      chainId,
+      escrowAddress,
+    );
 
     if (!jobEntity || (jobEntity && jobEntity.userId !== userId)) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -983,10 +989,7 @@ export class JobService {
     await this.requestToCancelJob(jobEntity);
   }
 
-
-  public async requestToCancelJob(
-    jobEntity: JobEntity
-  ): Promise<void> {
+  public async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
       this.logger.log(ErrorJob.InvalidStatusCancellation, JobService.name);
       throw new ConflictException(ErrorJob.InvalidStatusCancellation);

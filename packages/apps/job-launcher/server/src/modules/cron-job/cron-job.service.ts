@@ -210,10 +210,6 @@ export class CronJobService {
           jobEntity.status = JobStatus.CANCELED;
           await this.jobRepository.updateOne(jobEntity);
 
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
