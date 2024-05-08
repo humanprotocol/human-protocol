@@ -17,7 +17,6 @@ import {
   xLayerTestnet,
 } from 'viem/chains';
 import { formatUnits, parseUnits } from 'viem/utils';
-import { chainConfig } from 'viem/zksync';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
@@ -93,6 +92,7 @@ const fetchData = async () => {
       };
     } catch (err) {
       console.log('Fetch data failed: ', network.title);
+      console.log(err);
       return {
         chainId,
         dailyHMTData: [],
@@ -237,7 +237,7 @@ export default {
         console.log('sync daily task summary ended...');
       } catch (err) {
         console.log('sync daily task summary failed...');
-        console.log(err);
+        console.log(err.response.status, err.response.statusText, err.response.data);
       }
     },
     options: {
