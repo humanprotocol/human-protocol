@@ -1,11 +1,11 @@
 import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import axios from 'axios';
+import { Console } from 'console';
 import dayjs from 'dayjs';
 import { createPublicClient, http } from 'viem';
 import {
   bsc,
   bscTestnet,
-  goerli,
   sepolia,
   mainnet,
   polygon,
@@ -20,7 +20,6 @@ import { formatUnits, parseUnits } from 'viem/utils';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
-  [ChainId.GOERLI]: goerli,
   [ChainId.SEPOLIA]: sepolia,
   [ChainId.BSC_MAINNET]: bsc,
   [ChainId.BSC_TESTNET]: bscTestnet,
@@ -45,6 +44,7 @@ const fetchData = async () => {
   const SUPPORTED_CHAIN_IDS = Object.keys(SUPPORTED_CHAINS);
   const promises = SUPPORTED_CHAIN_IDS.map(async (chainId) => {
     const network = NETWORKS[chainId];
+    console.log('Fetch data: ', network.title);
     const client = new StatisticsClient(network);
     const hmtStats = await client.getHMTStatistics();
     const paymentStats = await client.getPaymentStatistics();
