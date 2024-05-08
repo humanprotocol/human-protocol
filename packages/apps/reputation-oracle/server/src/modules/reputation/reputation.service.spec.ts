@@ -315,7 +315,7 @@ describe('ReputationService', () => {
       expect(reputationRepository.create).toHaveBeenCalledWith({
         chainId,
         address,
-        reputationPoints: 701,
+        reputationPoints: 701, // https://github.com/humanprotocol/human-protocol/issues/1047
         type,
       });
     });
@@ -356,7 +356,7 @@ describe('ReputationService', () => {
       expect(reputationRepository.create).toHaveBeenCalledWith({
         chainId,
         address,
-        reputationPoints: 0,
+        reputationPoints: 700, // https://github.com/humanprotocol/human-protocol/issues/1047
         type,
       });
     });
