@@ -3,7 +3,6 @@ import * as crypto from 'crypto';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
-import { UserRepository } from '../../src/modules/user/user.repository';
 import { UserStatus } from '../../src/common/enums/user';
 import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
@@ -15,7 +14,6 @@ import {
   PaymentType,
 } from '../../src/common/enums/payment';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
-import { JobRepository } from '../../src/modules/job/job.repository';
 
 describe('Fiat account deposit E2E workflow', () => {
   let app: INestApplication;

@@ -6,7 +6,7 @@ import { ErrorCronJob } from '../../common/constants/errors';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { JobService } from '../job/job.service';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
 import { StorageService } from '../storage/storage.service';
 import {
@@ -14,7 +14,6 @@ import {
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
