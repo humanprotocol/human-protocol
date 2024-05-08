@@ -1,6 +1,7 @@
 import uuid
 from typing import Dict, List, Optional, Union
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from src.db import engine as db_engine
@@ -44,6 +45,16 @@ def get_task_validation_results(
         .where(ValidationResult.job.has(Job.task_id == task_id))
         .all()
     )
+
+
+def update_escrow_iteration(session: Session, escrow_address: str, chain_id: int, iteration: int):
+    expression = (
+        update(Task)
+        .where(Task.escrow_address == escrow_address, Task.chain_id == chain_id)
+        .values(iteration=iteration)
+    )
+
+    session.execute(expression)
 
 
 def create_job(session: Session, job_cvat_id: int, task_id: str) -> str:
