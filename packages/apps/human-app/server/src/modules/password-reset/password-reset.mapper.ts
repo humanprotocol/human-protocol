@@ -43,8 +43,8 @@ export class PasswordResetProfile extends AutomapperProfile {
         RestorePasswordCommand,
         RestorePasswordData,
         namingConventions({
-          source: new SnakeCaseNamingConvention(),
-          destination: new CamelCaseNamingConvention(),
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
         }),
       );
     };
