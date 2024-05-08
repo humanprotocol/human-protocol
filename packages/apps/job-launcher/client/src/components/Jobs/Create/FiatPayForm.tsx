@@ -169,15 +169,16 @@ export const FiatPayForm = ({
       if (!chainId) return;
 
       if (jobType === JobType.Fortune && fortuneRequest) {
-        await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
-      } else if (jobType === JobType.CVAT && cvatRequest) {
-        await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
-      } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
-        await jobService.createHCaptchaJob(
+        await jobService.createFortuneJob(
           chainId,
-          hCaptchaRequest,
+          fortuneRequest,
           fundAmount,
+          'usd',
         );
+      } else if (jobType === JobType.CVAT && cvatRequest) {
+        await jobService.createCvatJob(chainId, cvatRequest, fundAmount, 'usd');
+      } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
+        await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
       }
 
       dispatch(fetchUserBalanceAsync());

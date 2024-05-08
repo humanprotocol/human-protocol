@@ -40,6 +40,7 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
 } from '../../common/enums/job';
 import {
   Currency,
@@ -711,6 +712,17 @@ export class JobService {
       tokenFundAmount = dto.fundAmount;
       tokenTotalAmount = add(tokenFundAmount, tokenFee);
       usdTotalAmount = div(tokenTotalAmount, rate);
+    } else if (
+      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
+      dto.currency === JobCurrency.HMT
+    ) {
+      tokenFundAmount = await calculateFundAmount(dto, rate);
+      tokenFee = mul(div(feePercentage, 100), tokenFundAmount);
+      tokenTotalAmount = add(tokenFundAmount, tokenFee);
+
+      const fundAmountInUSD = div(tokenFundAmount, rate);
+      const feeInUSD = div(tokenFee, rate);
+      usdTotalAmount = add(fundAmountInUSD, feeInUSD);
     } else {
       const fundAmount = await calculateFundAmount(dto, rate);
       const fee = mul(div(feePercentage, 100), fundAmount);
@@ -774,9 +786,18 @@ export class JobService {
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -tokenTotalAmount;
-    paymentEntity.currency = TokenId.HMT;
-    paymentEntity.rate = div(1, rate);
+    if (
+      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
+      dto.currency === JobCurrency.USD
+    ) {
+      paymentEntity.amount = -usdTotalAmount;
+      paymentEntity.currency = JobCurrency.USD;
+      paymentEntity.rate = 1;
+    } else {
+      paymentEntity.amount = -tokenTotalAmount;
+      paymentEntity.currency = TokenId.HMT;
+      paymentEntity.rate = div(1, rate);
+    }
     paymentEntity.status = PaymentStatus.SUCCEEDED;
 
     await this.paymentRepository.createUnique(paymentEntity);
@@ -956,7 +977,10 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByIdAndUserId(jobId, userId);
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
+      userId,
+    );
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -973,7 +997,10 @@ export class JobService {
   ): Promise<void> {
     await this.web3Service.validateChainId(chainId);
 
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(chainId, escrowAddress);
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      chainId,
+      escrowAddress,
+    );
 
     if (!jobEntity || (jobEntity && jobEntity.userId !== userId)) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -983,10 +1010,7 @@ export class JobService {
     await this.requestToCancelJob(jobEntity);
   }
 
-
-  public async requestToCancelJob(
-    jobEntity: JobEntity
-  ): Promise<void> {
+  public async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
       this.logger.log(ErrorJob.InvalidStatusCancellation, JobService.name);
       throw new ConflictException(ErrorJob.InvalidStatusCancellation);

@@ -51,9 +51,7 @@ export const CryptoPayForm = ({
     return 0;
   }, [amount, rate]);
   const feeAmount =
-    fundAmount === 0
-      ? 0
-      : Math.max(0.01, fundAmount * (JOB_LAUNCHER_FEE / 100));
+    fundAmount === 0 ? 0 : fundAmount * (JOB_LAUNCHER_FEE / 100);
   const totalAmount = fundAmount + feeAmount;
   const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
 
@@ -109,16 +107,18 @@ export const CryptoPayForm = ({
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,
-            fundAmount,
+            Number(amount),
+            'hmt',
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
-          await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
-        } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
-          await jobService.createHCaptchaJob(
+          await jobService.createCvatJob(
             chainId,
-            hCaptchaRequest,
-            fundAmount,
+            cvatRequest,
+            Number(amount),
+            'hmt',
           );
+        } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
+          await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
         }
         onFinish();
       } catch (err) {
@@ -241,7 +241,8 @@ export const CryptoPayForm = ({
             >
               <Typography>Fees</Typography>
               <Typography color="text.secondary">
-                ({JOB_LAUNCHER_FEE}%) {feeAmount?.toFixed(2)} USD
+                ({JOB_LAUNCHER_FEE}%){' '}
+                {Math.max(0.01, Number(feeAmount?.toFixed(2)))} USD
               </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>

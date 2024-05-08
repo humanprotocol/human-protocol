@@ -32,6 +32,7 @@ import {
   WorkerLocation,
 } from '../../common/enums/job';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
+import { JobCurrency } from '../../common/enums/job';
 export class JobCreateDto {
   @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
@@ -123,6 +124,10 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class StorageDataDto {
@@ -195,6 +200,10 @@ export class JobCvatDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class JobCancelDto {

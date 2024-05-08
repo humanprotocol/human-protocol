@@ -260,8 +260,12 @@ export class PaymentService {
       PaymentStatus.SUCCEEDED,
     );
 
+    const rate = await getRate(TokenId.HMT, Currency.USD);
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return add(total, mul(payment.amount, payment.rate));
+      if (payment.currency === TokenId.HMT) {
+        return add(total, mul(payment.amount, rate));
+      }
+      return add(total, payment.amount);
     }, 0);
 
     return totalAmount;
