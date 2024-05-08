@@ -7,6 +7,7 @@ import { Web3Env } from '../../common/enums/web3';
 import { Web3Service } from './web3.service';
 import { MOCK_PRIVATE_KEY } from './../../../test/constants';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
@@ -16,9 +17,23 @@ describe('Web3Service', () => {
     .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
     .mockReturnValue(MOCK_PRIVATE_KEY);
 
+  jest
+    .spyOn(NetworkConfigService.prototype, 'networks', 'get')
+    .mockReturnValue([
+      {
+        chainId: ChainId.POLYGON_AMOY,
+        rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
+      },
+    ]);
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [Web3Service, ConfigService, Web3ConfigService],
+      providers: [
+        Web3Service,
+        ConfigService,
+        Web3ConfigService,
+        NetworkConfigService,
+      ],
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);
