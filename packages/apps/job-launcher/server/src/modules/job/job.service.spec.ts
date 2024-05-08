@@ -35,6 +35,7 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
   JobStatus,
   JobStatusFilter,
@@ -315,6 +316,7 @@ describe('JobService', () => {
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fundAmount: 10,
+      currency: JobCurrency.HMT,
     };
 
     let getUserBalanceMock: any;
@@ -559,6 +561,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_BOXES;
@@ -607,6 +610,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES_FROM_POINTS,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
@@ -656,6 +660,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
@@ -700,6 +705,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: requestType,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const tokenFundAmount = 100;
@@ -721,6 +727,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: requestType,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const tokenFundAmount = 100;
@@ -1164,6 +1171,7 @@ describe('JobService', () => {
       groundTruth: MOCK_STORAGE_DATA,
       userGuide: MOCK_FILE_URL,
       type: JobRequestType.IMAGE_POINTS,
+      currency: JobCurrency.HMT,
     };
 
     let getUserBalanceMock: any;
@@ -1280,6 +1288,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1327,6 +1336,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1372,6 +1382,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1417,6 +1428,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1977,9 +1989,7 @@ describe('JobService', () => {
     const userId = 123;
 
     beforeEach(() => {
-      web3Service.validateChainId = jest
-        .fn()
-        .mockResolvedValue(() => {});
+      web3Service.validateChainId = jest.fn().mockResolvedValue(() => {});
     });
 
     it('should cancel the job when status is Launched', async () => {
@@ -1997,7 +2007,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
@@ -2024,7 +2038,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
