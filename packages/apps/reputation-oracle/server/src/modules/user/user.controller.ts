@@ -29,6 +29,38 @@ import { UserService } from './user.service';
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('/register-user')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Register User',
+    description: 'Endpoint to register blockchain address.',
+  })
+  @ApiBody({ type: RegisterAddressRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Blockchain address registered successfully',
+    type: RegisterAddressResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public async registerUser(
+    @Req() request: RequestWithUser,
+    @Body() data: RegisterAddressRequestDto,
+  ): Promise<void> {
+    return;
+  }
+
   @Post('/register-address')
   @HttpCode(200)
   @ApiOperation({
