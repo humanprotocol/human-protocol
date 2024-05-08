@@ -23,16 +23,6 @@ import { HttpStatus } from '@nestjs/common';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn(),
-  },
-  KVStoreClient: {
-    build: jest.fn(),
-  },
-}));
-
 describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,

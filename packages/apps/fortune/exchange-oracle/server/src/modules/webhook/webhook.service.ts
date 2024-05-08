@@ -50,6 +50,14 @@ export class WebhookService {
         await this.jobService.processInvalidJobSolution(wehbook);
         break;
 
+      case EventType.ABUSE:
+        await this.jobService.pauseJob(wehbook);
+        break;
+
+      case EventType.RESUME_ABUSE:
+        await this.jobService.resumeJob(wehbook);
+        break;
+
       default:
         throw new BadRequestException(
           `Invalid webhook event type: ${wehbook.eventType}`,

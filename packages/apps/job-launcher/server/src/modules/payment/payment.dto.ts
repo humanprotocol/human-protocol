@@ -9,6 +9,12 @@ export class PaymentFiatConfirmDto {
   public paymentId: string;
 }
 
+export class CardConfirmDto {
+  @ApiProperty({ name: 'payment_id' })
+  @IsString()
+  public setupId: string;
+}
+
 export class PaymentFiatCreateDto {
   @ApiProperty()
   @IsNumber()

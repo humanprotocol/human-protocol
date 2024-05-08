@@ -10,6 +10,7 @@ import { SendgridConfigService } from './sendgrid-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { ReputationConfigService } from './reputation-config.service';
 import { SynapsConfigService } from './synaps-config.service';
+import { SlackConfigService } from './slack-config.service';
 import { NetworkConfigService } from './network-config.service';
 
 @Global()
@@ -25,6 +26,7 @@ import { NetworkConfigService } from './network-config.service';
     SendgridConfigService,
     SynapsConfigService,
     PGPConfigService,
+    SlackConfigService,
     NetworkConfigService,
   ],
   exports: [
@@ -38,6 +40,7 @@ import { NetworkConfigService } from './network-config.service';
     SendgridConfigService,
     SynapsConfigService,
     PGPConfigService,
+    SlackConfigService,
     NetworkConfigService,
   ],
 })

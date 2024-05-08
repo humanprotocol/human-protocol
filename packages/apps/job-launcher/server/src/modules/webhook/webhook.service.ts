@@ -28,6 +28,7 @@ import { CaseConverter } from '../../common/utils/case-converter';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
 import { BadRequestException } from '@nestjs/common';
+import { JobRepository } from '../job/job.repository';
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
@@ -37,6 +38,7 @@ export class WebhookService {
     private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
+    private readonly jobRepository: JobRepository,
     public readonly commonConfigSerice: ServerConfigService,
     public readonly web3ConfigService: Web3ConfigService,
     public readonly httpService: HttpService,
@@ -152,10 +154,35 @@ export class WebhookService {
         await this.jobService.escrowFailedWebhook(webhook);
         break;
 
+      case EventType.ABUSE:
+        await this.createIncomingWebhook(webhook);
+        break;
+
       default:
         throw new BadRequestException(
           `Invalid webhook event type: ${webhook.eventType}`,
         );
     }
+  }
+
+  public async createIncomingWebhook(webhook: WebhookDataDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
+    );
+
+    if (!jobEntity) {
+      this.logger.log(ErrorWebhook.InvalidEscrow, WebhookService.name);
+      throw new BadRequestException(ErrorWebhook.InvalidEscrow);
+    }
+
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, webhook);
+    webhookEntity.oracleType = this.jobService.getOracleType(
+      jobEntity.requestType,
+    );
+    webhookEntity.hasSignature = false;
+
+    this.webhookRepository.createUnique(webhookEntity);
   }
 }

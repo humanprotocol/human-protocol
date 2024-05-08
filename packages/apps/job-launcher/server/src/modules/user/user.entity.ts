@@ -8,6 +8,7 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { ApiKeyEntity } from '../auth/apikey.entity';
+import { PaymentInfoEntity } from '../payment/payment-info.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -32,6 +33,9 @@ export class UserEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.user)
   public payments: PaymentEntity[];
+
+  @OneToOne(() => PaymentInfoEntity, (payment) => payment.user)
+  public paymentInfo: PaymentInfoEntity;
 
   @OneToOne(() => ApiKeyEntity, (apiKey) => apiKey.user, {
     nullable: true,

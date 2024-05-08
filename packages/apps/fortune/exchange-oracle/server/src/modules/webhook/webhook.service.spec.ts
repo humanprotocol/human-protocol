@@ -139,6 +139,26 @@ describe('WebhookService', () => {
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
     });
 
+    it('should handle an incoming escrow abuse webhook', async () => {
+      jest.spyOn(jobService, 'pauseJob').mockResolvedValue();
+      const webhook: WebhookDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.ABUSE,
+      };
+      expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
+    });
+
+    it('should handle an incoming escrow resume webhook', async () => {
+      jest.spyOn(jobService, 'resumeJob').mockResolvedValue();
+      const webhook: WebhookDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.RESUME_ABUSE,
+      };
+      expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
+    });
+
     it('should mark a job solution as invalid', async () => {
       const webhook: WebhookDto = {
         chainId,

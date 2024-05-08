@@ -25,4 +25,7 @@ export class ServerConfigService {
   get cronSecret(): string {
     return this.configService.get<string>('CRON_SECRET', '');
   }
+  get abuseAmount(): number {
+    return +this.configService.get<number>('ABUSE_AMOUNT', 10000);
+  }
 }

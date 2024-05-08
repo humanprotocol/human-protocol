@@ -27,6 +27,12 @@ import { HttpService } from '@nestjs/axios';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { AbuseRepository } from '../abuse/abuse.repository';
+import { AbuseService } from '../abuse/abuse.service';
+import { UserRepository } from '../user/user.repository';
+import { SlackConfigService } from '../../common/config/slack-config.service';
+import { AbuseEntity } from '../abuse/abuse.entity';
+import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -34,6 +40,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       setup: jest.fn().mockResolvedValue(null),
       fund: jest.fn().mockResolvedValue(null),
@@ -56,8 +63,11 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('CronJobService', () => {
   let service: CronJobService,
     repository: CronJobRepository,
+    abuseRepository: AbuseRepository,
+    abuseService: AbuseService,
     webhookRepository: WebhookRepository,
     webhookService: WebhookService,
+    userRepository: UserRepository,
     reputationService: ReputationService,
     payoutService: PayoutService;
 
@@ -75,6 +85,14 @@ describe('CronJobService', () => {
           useValue: createMock<CronJobRepository>(),
         },
         {
+          provide: AbuseRepository,
+          useValue: createMock<AbuseRepository>(),
+        },
+        {
+          provide: UserRepository,
+          useValue: createMock<UserRepository>(),
+        },
+        {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
@@ -82,6 +100,7 @@ describe('CronJobService', () => {
             calculateGasPrice: jest.fn().mockReturnValue(1000n),
           },
         },
+        AbuseService,
         WebhookService,
         PayoutService,
         ReputationService,
@@ -89,6 +108,7 @@ describe('CronJobService', () => {
         ServerConfigService,
         Web3ConfigService,
         ReputationConfigService,
+        SlackConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
         {
           provide: WebhookRepository,
@@ -106,6 +126,9 @@ describe('CronJobService', () => {
     repository = module.get<CronJobRepository>(CronJobRepository);
     payoutService = module.get<PayoutService>(PayoutService);
     reputationService = module.get<ReputationService>(ReputationService);
+    abuseRepository = module.get<AbuseRepository>(AbuseRepository);
+    abuseService = module.get<AbuseService>(AbuseService);
+    userRepository = module.get<UserRepository>(UserRepository);
     webhookRepository = module.get<WebhookRepository>(WebhookRepository);
     webhookService = module.get<WebhookService>(WebhookService);
   });
@@ -509,6 +532,249 @@ describe('CronJobService', () => {
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await service.processPaidWebhooks();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(
+        cronJobEntityMock as any,
+      );
+    });
+  });
+
+  describe('processAbuseRequests', () => {
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let abuseEntity1: Partial<AbuseEntity>, abuseEntity2: Partial<AbuseEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.ProcessRequestedAbuse,
+        startedAt: new Date(),
+      };
+
+      abuseEntity1 = {
+        id: 1,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: AbuseStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      abuseEntity2 = {
+        id: 2,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: AbuseStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      jest
+        .spyOn(abuseRepository, 'findByStatus')
+        .mockResolvedValue([abuseEntity1 as any, abuseEntity2 as any]);
+
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
+      jest.spyOn(webhookService, 'sendWebhook').mockResolvedValue();
+      jest.spyOn(abuseService, 'sendSlackNotification').mockResolvedValue();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
+
+      const startCronJobMock = jest.spyOn(service, 'startCronJob');
+
+      await service.processAbuseRequests();
+
+      expect(startCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity to lock the process', async () => {
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.processAbuseRequests();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ProcessRequestedAbuse,
+      );
+    });
+
+    it('should send webhook for all of the pending webhooks', async () => {
+      await service.processAbuseRequests();
+
+      expect(abuseRepository.updateOne).toHaveBeenCalledTimes(2);
+      expect(abuseEntity1.status).toBe(AbuseStatus.NOTIFIED);
+      expect(abuseEntity2.status).toBe(AbuseStatus.NOTIFIED);
+    });
+
+    it('should increase retriesCount by 1 if sending webhook fails', async () => {
+      jest.spyOn(webhookService, 'sendWebhook').mockRejectedValue(new Error());
+      await service.processAbuseRequests();
+
+      expect(abuseRepository.updateOne).toHaveBeenCalled();
+      expect(abuseEntity1.status).toBe(AbuseStatus.PENDING);
+      expect(abuseEntity1.retriesCount).toBe(1);
+      expect(abuseEntity1.waitUntil).toBeInstanceOf(Date);
+    });
+
+    it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
+      jest.spyOn(webhookService, 'sendWebhook').mockRejectedValue(new Error());
+      abuseEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
+
+      await service.processAbuseRequests();
+
+      expect(abuseRepository.updateOne).toHaveBeenCalled();
+      expect(abuseEntity1.status).toBe(AbuseStatus.FAILED);
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.processAbuseRequests();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(
+        cronJobEntityMock as any,
+      );
+    });
+  });
+
+  describe('processClassifiedAbuses', () => {
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let abuseEntity1: Partial<AbuseEntity>, abuseEntity2: Partial<AbuseEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.ProcessClassifiedAbuse,
+        startedAt: new Date(),
+      };
+
+      abuseEntity1 = {
+        id: 1,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: AbuseStatus.NOTIFIED,
+        decision: AbuseDecision.ACCEPTED,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      abuseEntity2 = {
+        id: 2,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: AbuseStatus.NOTIFIED,
+        decision: AbuseDecision.REJECTED,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      jest
+        .spyOn(abuseRepository, 'findClassified')
+        .mockResolvedValue([abuseEntity1 as any, abuseEntity2 as any]);
+
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(userRepository, 'findById')
+        .mockResolvedValue({ evmAddress: MOCK_ADDRESS } as any);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
+      jest.spyOn(webhookService, 'sendWebhook').mockResolvedValue();
+      jest.spyOn(abuseService, 'slashAccount').mockResolvedValue();
+      jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
+
+      const startCronJobMock = jest.spyOn(service, 'startCronJob');
+
+      await service.processClassifiedAbuses();
+
+      expect(startCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity to lock the process', async () => {
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.processClassifiedAbuses();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ProcessClassifiedAbuse,
+      );
+    });
+
+    it('should send webhook for all of the pending webhooks', async () => {
+      await service.processClassifiedAbuses();
+
+      expect(abuseRepository.updateOne).toHaveBeenCalledTimes(2);
+      expect(abuseEntity1.status).toBe(AbuseStatus.COMPLETED);
+      expect(abuseEntity2.status).toBe(AbuseStatus.COMPLETED);
+
+      expect(abuseService.slashAccount).toHaveBeenCalled();
+      expect(reputationService.decreaseReputation).toHaveBeenCalled();
+      expect(webhookService.sendWebhook).toHaveBeenCalledWith(
+        MOCK_WEBHOOK_URL,
+        {
+          chainId: ChainId.LOCALHOST,
+          escrowAddress: MOCK_ADDRESS,
+          eventType: EventType.ABUSE,
+        },
+      );
+      expect(webhookService.sendWebhook).toHaveBeenCalledWith(
+        MOCK_WEBHOOK_URL,
+        {
+          chainId: ChainId.LOCALHOST,
+          escrowAddress: MOCK_ADDRESS,
+          eventType: EventType.RESUME_ABUSE,
+        },
+      );
+    });
+
+    it('should increase retriesCount by 1 if sending webhook fails', async () => {
+      jest.spyOn(webhookService, 'sendWebhook').mockRejectedValue(new Error());
+      await service.processClassifiedAbuses();
+
+      expect(abuseRepository.updateOne).toHaveBeenCalled();
+      expect(abuseEntity1.status).toBe(AbuseStatus.NOTIFIED);
+      expect(abuseEntity1.retriesCount).toBe(1);
+      expect(abuseEntity1.waitUntil).toBeInstanceOf(Date);
+    });
+
+    it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
+      jest.spyOn(webhookService, 'sendWebhook').mockRejectedValue(new Error());
+      abuseEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
+
+      await service.processClassifiedAbuses();
+
+      expect(abuseRepository.updateOne).toHaveBeenCalled();
+      expect(abuseEntity1.status).toBe(AbuseStatus.FAILED);
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.processClassifiedAbuses();
 
       expect(service.completeCronJob).toHaveBeenCalledWith(
         cronJobEntityMock as any,

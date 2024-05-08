@@ -8,6 +8,7 @@ export const envValidator = Joi.object({
   FE_URL: Joi.string(),
   SESSION_SECRET: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
+  ABUSE_AMOUNT: Joi.number(),
   // Auth
   JWT_PRIVATE_KEY: Joi.string().required(),
   JWT_PUBLIC_KEY: Joi.string().required(),

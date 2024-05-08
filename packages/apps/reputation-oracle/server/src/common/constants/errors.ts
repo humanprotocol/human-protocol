@@ -87,6 +87,13 @@ export enum ErrorSendGrid {
   InvalidApiKey = 'Invalid SendGrid API key',
 }
 
+/**
+ * Represents error messages related to slack.
+ */
+export enum ErrorSlack {
+  AbuseNotFound = 'Received abuse not found',
+}
+
 export enum ErrorKyc {
   NotFound = 'KYC session not found',
   AlreadyApproved = 'KYC session already approved',

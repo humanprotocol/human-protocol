@@ -1,5 +1,6 @@
 export enum JobStatus {
   ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
   COMPLETED = 'COMPLETED',
   CANCELED = 'CANCELED',
 }

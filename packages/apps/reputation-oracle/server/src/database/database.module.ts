@@ -15,6 +15,7 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ServerConfigService } from '../common/config/server-config.service';
+import { AbuseEntity } from 'src/modules/abuse/abuse.entity';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ServerConfigService } from '../common/config/server-config.service';
             UserEntity,
             KycEntity,
             CronJobEntity,
+            AbuseEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,

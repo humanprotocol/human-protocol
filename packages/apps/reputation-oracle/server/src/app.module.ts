@@ -18,6 +18,7 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
+import { AbuseModule } from './modules/abuse/abuse.module';
 import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
 
 @Module({
@@ -49,6 +50,7 @@ import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
     WebhookModule,
     Web3Module,
     AuthModule,
+    AbuseModule,
     KycModule,
     ServeStaticModule.forRoot({
       rootPath: join(
