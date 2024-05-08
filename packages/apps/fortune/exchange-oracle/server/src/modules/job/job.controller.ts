@@ -16,13 +16,15 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { SignatureAuthGuard } from '../../common/guards/signature.auth';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { GetJobsDto, JobDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { Role } from '../../common/enums/role';
+import { SignatureAuthGuard } from '../../common/guards/signature.auth';
+import { Public } from '../../common/decorators';
 
 @ApiTags('Job')
 @Controller('job')
@@ -30,11 +32,11 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 @ApiBearerAuth()
 export class JobController {
   constructor(private readonly jobService: JobService) {}
+
   @ApiOperation({
     summary: 'Get Jobs',
     description: 'Endpoint to retrieve a list of jobs.',
   })
-  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     type: PageDto<JobDto>,
@@ -82,7 +84,8 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @Post('solve')
-  @UseGuards(SignatureAuthGuard)
+  @Public()
+  @UseGuards(new SignatureAuthGuard([Role.Worker]))
   solveJob(
     @Request() req: RequestWithUser,
     @Headers(HEADER_SIGNATURE_KEY) _: string,

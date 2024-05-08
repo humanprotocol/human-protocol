@@ -9,11 +9,10 @@ import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { Role } from '../enums/role';
-import { ROLES_KEY } from '../constant';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  constructor(@Inject(ROLES_KEY) private role: Role[]) {}
+  constructor(private role: Role[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

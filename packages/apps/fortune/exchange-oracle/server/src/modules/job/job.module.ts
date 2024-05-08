@@ -12,9 +12,6 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { AssignmentEntity } from '../assignment/assignment.entity';
 import { AssignmentRepository } from '../assignment/assignment.repository';
-import { SignatureAuthGuard } from '../../common/guards/signature.auth';
-import { ROLES_KEY } from '../../common/constant';
-import { Role } from '../../common/enums/role';
 
 @Module({
   imports: [
@@ -32,16 +29,6 @@ import { Role } from '../../common/enums/role';
     JobRepository,
     WebhookRepository,
     AssignmentRepository,
-    SignatureAuthGuard,
-    {
-      provide: ROLES_KEY,
-      useValue: [
-        Role.Worker,
-        Role.JobLauncher,
-        Role.Recording,
-        Role.Reputation,
-      ],
-    },
   ],
   exports: [JobService],
 })
