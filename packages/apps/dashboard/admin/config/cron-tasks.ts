@@ -17,6 +17,7 @@ import {
   xLayerTestnet,
 } from 'viem/chains';
 import { formatUnits, parseUnits } from 'viem/utils';
+import { chainConfig } from 'viem/zksync';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
@@ -44,51 +45,64 @@ const fetchData = async () => {
   const SUPPORTED_CHAIN_IDS = Object.keys(SUPPORTED_CHAINS);
   const promises = SUPPORTED_CHAIN_IDS.map(async (chainId) => {
     const network = NETWORKS[chainId];
-    console.log('Fetch data: ', network.title);
-    const client = new StatisticsClient(network);
-    const hmtStats = await client.getHMTStatistics();
-    const paymentStats = await client.getPaymentStatistics();
+    console.log('Fetch data started: ', network.title);
+    try {
+      const client = new StatisticsClient(network);
+      const hmtStats = await client.getHMTStatistics();
+      const paymentStats = await client.getPaymentStatistics();
 
-    const publicClient: any = createPublicClient({
-      chain: SUPPORTED_CHAINS[chainId],
-      transport: http(),
-    });
-    const totalSupply = await publicClient.readContract({
-      address: network.hmtAddress,
-      abi: [
-        {
-          inputs: [],
-          name: 'totalSupply',
-          outputs: [
-            {
-              internalType: 'uint256',
-              name: '',
-              type: 'uint256',
-            },
-          ],
-          stateMutability: 'view',
-          type: 'function',
-        },
-      ],
-      functionName: 'totalSupply',
-    });
-
-    return {
-      chainId,
-      dailyHMTData: hmtStats.dailyHMTData.map((d) => ({
-        ...d,
-        totalTransactionAmount: formatBigNumber(d.totalTransactionAmount),
-      })),
-      dailyPaymentsData: paymentStats.dailyPaymentsData.map((d) => ({
-        ...d,
-        totalAmountPaid: formatBigNumber(d.totalAmountPaid),
-        averageAmountPerWorker: formatBigNumber(d.averageAmountPerWorker),
-      })),
-      totalTransferAmount: formatBigNumber(hmtStats.totalTransferAmount),
-      totalTransferCount: hmtStats.totalTransferCount,
-      totalHolders: hmtStats.totalHolders,
-      totalSupply: formatUnits(totalSupply, 18),
-    };
+      const publicClient: any = createPublicClient({
+        chain: SUPPORTED_CHAINS[chainId],
+        transport: http(),
+      });
+      const totalSupply = await publicClient.readContract({
+        address: network.hmtAddress,
+        abi: [
+          {
+            inputs: [],
+            name: 'totalSupply',
+            outputs: [
+              {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+              },
+            ],
+            stateMutability: 'view',
+            type: 'function',
+          },
+        ],
+        functionName: 'totalSupply',
+      });
+      console.log('Fetch data ended: ', network.title);
+      return {
+        chainId,
+        dailyHMTData: hmtStats.dailyHMTData.map((d) => ({
+          ...d,
+          totalTransactionAmount: formatBigNumber(d.totalTransactionAmount),
+        })),
+        dailyPaymentsData: paymentStats.dailyPaymentsData.map((d) => ({
+          ...d,
+          totalAmountPaid: formatBigNumber(d.totalAmountPaid),
+          averageAmountPerWorker: formatBigNumber(d.averageAmountPerWorker),
+        })),
+        totalTransferAmount: formatBigNumber(hmtStats.totalTransferAmount),
+        totalTransferCount: hmtStats.totalTransferCount,
+        totalHolders: hmtStats.totalHolders,
+        totalSupply: formatUnits(totalSupply, 18),
+      };
+    } catch (err) {
+      console.log('Fetch data failed: ', network.title);
+      return {
+        chainId,
+        dailyHMTData: [],
+        dailyPaymentsData: [],
+        totalTransferAmount: '0',
+        totalTransferCount: 0,
+        totalHolders: 0,
+        totalSupply: '0',
+      };
+    }
   });
 
   const results = await Promise.all(promises);
@@ -98,8 +112,8 @@ const fetchData = async () => {
 export default {
   syncDashboardData: {
     task: async ({ strapi }) => {
-      console.log('sync started...');
       try {
+        console.log('sync started...');
         const dataItems = await fetchData();
 
         const allNetworkDataItem = {
@@ -113,6 +127,9 @@ export default {
         };
         for (let i = 0; i < dataItems.length; i++) {
           const dataItem = dataItems[i];
+          //If total supply is 0, means fetch data for this network failed
+          if (dataItem.totalSupply === '0') continue;
+
           dataItem.dailyHMTData.forEach((hmtDayData) => {
             const index = allNetworkDataItem.dailyHMTData.findIndex(
               (d) => d.timestamp.getTime() === hmtDayData.timestamp.getTime(),
@@ -179,11 +196,12 @@ export default {
         }
         console.log('sync ended...');
       } catch (err) {
+        console.log('sync failed...');
         console.log(err);
       }
 
-      console.log('sync daily task summary started...');
       try {
+        console.log('sync daily task summary started...');
         const uid = 'api::daily-task-summary.daily-task-summary';
 
         const date = dayjs().format('YYYY-MM-DD');
@@ -218,6 +236,7 @@ export default {
 
         console.log('sync daily task summary ended...');
       } catch (err) {
+        console.log('sync daily task summary failed...');
         console.log(err);
       }
     },
@@ -228,49 +247,56 @@ export default {
   },
   syncMonthlySummaryData: {
     task: async ({ strapi }) => {
-      const uid = 'api::monthly-task-summary.monthly-task-summary';
-      const entries = await strapi.entityService.findMany(uid);
+      try {
+        console.log('syncMonthlySummaryData started');
+        const uid = 'api::monthly-task-summary.monthly-task-summary';
+        const entries = await strapi.entityService.findMany(uid);
 
-      let startDate = dayjs('2022-07-01');
-      const currentDate = dayjs().subtract(1, 'month').endOf('month');
-      const dates = [];
+        let startDate = dayjs('2022-07-01');
+        const currentDate = dayjs().subtract(1, 'month').endOf('month');
+        const dates = [];
 
-      while (startDate <= currentDate) {
-        const from = startDate.startOf('month').format('YYYY-MM-DD');
-        const to = startDate.endOf('month').format('YYYY-MM-DD');
+        while (startDate <= currentDate) {
+          const from = startDate.startOf('month').format('YYYY-MM-DD');
+          const to = startDate.endOf('month').format('YYYY-MM-DD');
 
-        const entry = entries.find((e) => e.date === to);
-        if (!entry) {
-          dates.push({ from, to });
+          const entry = entries.find((e) => e.date === to);
+          if (!entry) {
+            dates.push({ from, to });
+          }
+
+          startDate = startDate.add(1, 'month');
         }
 
-        startDate = startDate.add(1, 'month');
-      }
+        const results = await Promise.all(
+          dates.map(({ from, to }) =>
+            axios
+              .get('/support/summary-stats', {
+                baseURL: 'https://foundation-accounts.hmt.ai',
+                method: 'GET',
+                params: {
+                  start_date: from,
+                  end_date: to,
+                  api_key: process.env.HCAPTCHA_LABELING_STAFF_API_KEY,
+                },
+              })
+              .then((res) => res.data),
+          ),
+        );
 
-      const results = await Promise.all(
-        dates.map(({ from, to }) =>
-          axios
-            .get('/support/summary-stats', {
-              baseURL: 'https://foundation-accounts.hmt.ai',
-              method: 'GET',
-              params: {
-                start_date: from,
-                end_date: to,
-                api_key: process.env.HCAPTCHA_LABELING_STAFF_API_KEY,
-              },
-            })
-            .then((res) => res.data),
-        ),
-      );
+        const entriesToCreate = results.map((r, i) => ({
+          date: dates[i].to,
+          served_count: r.total.served,
+          solved_count: r.total.solved,
+        }));
 
-      const entriesToCreate = results.map((r, i) => ({
-        date: dates[i].to,
-        served_count: r.total.served,
-        solved_count: r.total.solved,
-      }));
+        if (entriesToCreate.length > 0) {
+          await strapi.db.query(uid).createMany({ data: entriesToCreate });
+        }
 
-      if (entriesToCreate.length > 0) {
-        await strapi.db.query(uid).createMany({ data: entriesToCreate });
+        console.log('syncMonthlySummaryData ended');
+      } catch (err) {
+        console.log('syncMonthlySummaryData failed');
       }
     },
     options: {
