@@ -12,6 +12,10 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
+  const signerMock = {
+    address: MOCK_ADDRESS,
+    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+  };
 
   jest
     .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')

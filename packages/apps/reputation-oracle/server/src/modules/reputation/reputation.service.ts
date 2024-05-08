@@ -253,8 +253,7 @@ export class ReputationService {
       this.reputationRepository.create({
         chainId,
         address,
-        reputationPoints:
-          INITIAL_REPUTATION + 1 + this.reputationConfigService.highLevel, // https://github.com/humanprotocol/human-protocol/issues/1047
+        reputationPoints: INITIAL_REPUTATION + 1,
         type,
       });
 
@@ -288,8 +287,7 @@ export class ReputationService {
       this.reputationRepository.create({
         chainId,
         address,
-        reputationPoints:
-          INITIAL_REPUTATION + this.reputationConfigService.highLevel, // https://github.com/humanprotocol/human-protocol/issues/1047,
+        reputationPoints: INITIAL_REPUTATION,
         type,
       });
 
@@ -317,6 +315,15 @@ export class ReputationService {
     chainId: ChainId,
     address: string,
   ): Promise<ReputationDto> {
+    // https://github.com/humanprotocol/human-protocol/issues/1047
+    if (address === this.web3Service.getOperatorAddress()) {
+      return {
+        chainId,
+        address,
+        reputation: ReputationLevel.HIGH,
+      };
+    }
+
     const reputationEntity = await this.reputationRepository.findOne({
       address,
       chainId,
