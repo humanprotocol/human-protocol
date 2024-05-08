@@ -315,7 +315,7 @@ describe('ReputationService', () => {
       expect(reputationRepository.create).toHaveBeenCalledWith({
         chainId,
         address,
-        reputationPoints: 1,
+        reputationPoints: 701,
         type,
       });
     });

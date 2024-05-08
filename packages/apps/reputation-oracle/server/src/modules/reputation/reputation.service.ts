@@ -253,7 +253,8 @@ export class ReputationService {
       this.reputationRepository.create({
         chainId,
         address,
-        reputationPoints: INITIAL_REPUTATION + 1,
+        reputationPoints:
+          INITIAL_REPUTATION + 1 + this.reputationConfigService.highLevel, // https://github.com/humanprotocol/human-protocol/issues/1047
         type,
       });
 
