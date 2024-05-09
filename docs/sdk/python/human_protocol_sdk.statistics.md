@@ -1,36 +1,5 @@
 # human_protocol_sdk.statistics package
 
-This module allows to read statistical data from the subgraph.
-
 ## Submodules
 
 * [human_protocol_sdk.statistics.statistics_client module](human_protocol_sdk.statistics.statistics_client.md)
-  * [Code Example](human_protocol_sdk.statistics.statistics_client.md#code-example)
-  * [Module](human_protocol_sdk.statistics.statistics_client.md#module)
-  * [`DailyEscrowData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyEscrowData)
-    * [`DailyEscrowData.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyEscrowData.__init__)
-  * [`DailyHMTData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyHMTData)
-    * [`DailyHMTData.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyHMTData.__init__)
-  * [`DailyPaymentData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyPaymentData)
-    * [`DailyPaymentData.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyPaymentData.__init__)
-  * [`DailyWorkerData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyWorkerData)
-    * [`DailyWorkerData.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyWorkerData.__init__)
-  * [`EscrowStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.EscrowStatistics)
-    * [`EscrowStatistics.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.EscrowStatistics.__init__)
-  * [`HMTHolder`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTHolder)
-    * [`HMTHolder.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTHolder.__init__)
-  * [`HMTStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTStatistics)
-    * [`HMTStatistics.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTStatistics.__init__)
-  * [`PaymentStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.PaymentStatistics)
-    * [`PaymentStatistics.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.PaymentStatistics.__init__)
-  * [`StatisticsClient`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient)
-    * [`StatisticsClient.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient.__init__)
-    * [`StatisticsClient.get_escrow_statistics()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient.get_escrow_statistics)
-    * [`StatisticsClient.get_hmt_statistics()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient.get_hmt_statistics)
-    * [`StatisticsClient.get_payment_statistics()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient.get_payment_statistics)
-    * [`StatisticsClient.get_worker_statistics()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient.get_worker_statistics)
-  * [`StatisticsClientError`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClientError)
-  * [`StatisticsParam`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsParam)
-    * [`StatisticsParam.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsParam.__init__)
-  * [`WorkerStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.WorkerStatistics)
-    * [`WorkerStatistics.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.WorkerStatistics.__init__)

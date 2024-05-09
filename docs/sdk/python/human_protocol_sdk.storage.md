@@ -1,7 +1,5 @@
 # human_protocol_sdk.storage package
 
-This modules contains an s3 client and utilities for files sharing.
-
 ## Submodules
 
 * [human_protocol_sdk.storage.storage_client module](human_protocol_sdk.storage.storage_client.md)
@@ -18,5 +16,3 @@ This modules contains an s3 client and utilities for files sharing.
   * [`StorageClientError`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.StorageClientError)
   * [`StorageFileNotFoundError`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.StorageFileNotFoundError)
 * [human_protocol_sdk.storage.storage_utils module](human_protocol_sdk.storage.storage_utils.md)
-  * [`StorageUtils`](human_protocol_sdk.storage.storage_utils.md#human_protocol_sdk.storage.storage_utils.StorageUtils)
-    * [`StorageUtils.download_file_from_url()`](human_protocol_sdk.storage.storage_utils.md#human_protocol_sdk.storage.storage_utils.StorageUtils.download_file_from_url)

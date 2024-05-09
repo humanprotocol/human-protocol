@@ -243,6 +243,18 @@ NETWORKS = {
         "old_subgraph_url": "",
         "old_factory_address": "0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c",
     },
+    ChainId.XLAYER: {
+        "title": "XLayer Human Protocol Chain",
+        "scan_url": "",
+        "subgraph_url": (""),
+        "hmt_address": "0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa",
+        "factory_address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",
+        "staking_address": "0x01D115E9E8bF0C58318793624CC662a030D07F1D",
+        "reward_pool_address": "0x7ABa5F75b2b530cB0c8927C86591c21dF44f06b6",
+        "kvstore_address": "0x6512d894cc3d3FE93Da9d0420430136fA889FaB9",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
     ChainId.LOCALHOST: {
         "title": "Localhost",
         "scan_url": "",

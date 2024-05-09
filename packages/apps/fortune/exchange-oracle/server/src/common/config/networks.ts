@@ -41,6 +41,10 @@ export const networkMap: NetworkMapDto = {
     chainId: ChainId.BSC_TESTNET,
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
+  xlayer: {
+    chainId: ChainId.XLAYER,
+    rpcUrl: 'https://rpc.xlayer.tech',
+  },
   localhost: {
     chainId: ChainId.LOCALHOST,
     rpcUrl: 'http://0.0.0.0:8545/',
