@@ -245,9 +245,11 @@ NETWORKS = {
         "old_factory_address": "0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c",
     },
     ChainId.XLAYER: {
-        "title": "XLayer Human Protocol Chain",
+        "title": "XLayer",
         "scan_url": "https://www.oklink.com/xlayer",
-        "subgraph_url": (""),
+        "subgraph_url": (
+            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX"
+        ),
         "hmt_address": "0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa",
         "factory_address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",
         "staking_address": "0x01D115E9E8bF0C58318793624CC662a030D07F1D",

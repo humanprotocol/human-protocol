@@ -288,7 +288,8 @@ export const NETWORKS: {
     stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
     rewardPoolAddress: '0x7ABa5F75b2b530cB0c8927C86591c21dF44f06b6',
     kvstoreAddress: '0x6512d894cc3d3FE93Da9d0420430136fA889FaB9',
-    subgraphUrl: '',
+    subgraphUrl:
+      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },

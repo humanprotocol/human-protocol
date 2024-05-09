@@ -1,6 +1,6 @@
 {
-  "network": "xlayer",
-  "description": "Human subgraph on XLayer Human Protocol chain",
+  "network": "xlayer-mainnet",
+  "description": "Human subgraph on XLayer Mainnet",
   "EscrowFactory": {
     "address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",
     "startBlock": 1125365,
@@ -28,5 +28,8 @@
     "address": "0x7ABa5F75b2b530cB0c8927C86591c21dF44f06b6",
     "startBlock": 1125372,
     "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
   }
 }
