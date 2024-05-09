@@ -5,16 +5,19 @@ import { StatisticsService } from '../statistics.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { Cache } from 'cache-manager';
-import { UserStatisticsCommand, UserStatisticsDetails } from '../model/user-statistics.model';
+import {
+  UserStatisticsCommand,
+  UserStatisticsDetails,
+} from '../model/user-statistics.model';
 import { KvStoreGateway } from '../../../integrations/kv-store/kv-store-gateway.service';
 import {
   OracleStatisticsCommand,
   OracleStatisticsDetails,
   OracleStatisticsResponse,
 } from '../model/oracle-statistics.model';
-const EXCHANGE_ORACLE_URL = 'https://exchangeOracle.url'
-const EXCHANGE_ORACLE_ADDRESS = '0x8f238b21aa2056'
-const TOKEN = 'token1'
+const EXCHANGE_ORACLE_URL = 'https://exchangeOracle.url';
+const EXCHANGE_ORACLE_ADDRESS = '0x8f238b21aa2056';
+const TOKEN = 'token1';
 describe('StatisticsService', () => {
   let service: StatisticsService;
   let cacheManager: Cache & { get: jest.Mock; set: jest.Mock }; // Explicitly type as jest.Mock
@@ -66,7 +69,9 @@ describe('StatisticsService', () => {
       const cachedData = { some: 'data' };
       cacheManager.get.mockResolvedValue(cachedData);
 
-      const command: OracleStatisticsCommand = { address: EXCHANGE_ORACLE_ADDRESS };
+      const command: OracleStatisticsCommand = {
+        address: EXCHANGE_ORACLE_ADDRESS,
+      };
       const result: OracleStatisticsResponse =
         await service.getOracleStats(command);
 

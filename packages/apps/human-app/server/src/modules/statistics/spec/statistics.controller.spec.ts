@@ -5,7 +5,7 @@ import { statisticsServiceMock } from './statistics.service.mock';
 import {
   oracleStatsCommandFixture,
   oracleStatsResponseFixture,
-  statisticsExchangeOracleAddress, statisticsExchangeOracleUrl,
+  statisticsExchangeOracleAddress,
   statisticsToken,
   userStatsCommandFixture,
   userStatsResponseFixture,

@@ -22,12 +22,23 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
+import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
+import Joi from 'joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
+      validationSchema: Joi.object({
+        HOST: Joi.string().required(),
+        PORT: Joi.number().required(),
+        REPUTATION_ORACLE_URL: Joi.string().required(),
+        REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
+        REDIS_PORT: Joi.number().required(),
+        REDIS_HOST: Joi.string().required(),
+        RPC_URL: Joi.string().required(),
+      }),
     }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
@@ -44,6 +55,7 @@ import { KvStoreModule } from './integrations/kv-store/kv-store.module';
     OracleDiscoveryModule,
     StatisticsModule,
     KvStoreModule,
+    EscrowUtilsModule,
   ],
   controllers: [
     AppController,

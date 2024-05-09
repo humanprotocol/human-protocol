@@ -18,17 +18,17 @@ export class OracleDiscoveryService {
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
   ): Promise<OracleDiscoveryResponse[]> {
-    command.address = command.address.toLowerCase();
+    const address = this.configService.reputationOracleAddress.toLowerCase();
     let data: OracleDiscoveryResponse[] | undefined =
-      await this.cacheManager.get(command.address);
+      await this.cacheManager.get(command.chainId.toString());
     if (!data) {
       data = await OperatorUtils.getReputationNetworkOperators(
         command.chainId,
-        command.address,
+        address,
         this.EXCHANGE_ORACLE,
       );
       await this.cacheManager.set(
-        command.address,
+        command.chainId.toString(),
         data,
         this.configService.cacheTtlOracleDiscovery,
       );

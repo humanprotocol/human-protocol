@@ -1,11 +1,11 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ethers } from 'ethers';
-import { KVStoreClient } from '@human-protocol/sdk';
+import { KVStoreClient, KVStoreKeys } from '@human-protocol/sdk';
 
 @Injectable()
 export class KvStoreGateway {
-  private URL_KEY = 'url';
+  private URL_KEY = KVStoreKeys.url;
   private kvStoreClient: KVStoreClient;
   constructor(private environmentConfig: EnvironmentConfigService) {}
   async onModuleInit(): Promise<void> {

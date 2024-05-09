@@ -5,18 +5,14 @@ import {
   PageableData,
   PageableDto,
   PageableParams,
-} from '../../../common/interfaces/pageable.interface';
+} from '../../../common/utils/pageable.model';
 import {
   AssignmentSortField,
   AssignmentStatus,
-} from '../../../common/enums/global-common.interface';
+} from '../../../common/enums/global-common';
 import { Type } from 'class-transformer';
 
 export class JobAssignmentDto {
-  @AutoMap()
-  @IsString()
-  @ApiProperty()
-  address: string;
   @AutoMap()
   @IsString()
   @ApiProperty()
@@ -39,8 +35,6 @@ export class JobAssignmentCommand {
   data: JobAssignmentParams;
   @AutoMap()
   token: string;
-  @AutoMap()
-  address: string;
 }
 
 export class JobAssignmentDetails {

@@ -10,7 +10,7 @@ import {
   JobDiscoveryFieldName,
   JobDiscoverySortField, JobStatus,
   SortOrder,
-} from '../../../common/enums/global-common.interface';
+} from '../../../common/enums/global-common';
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;

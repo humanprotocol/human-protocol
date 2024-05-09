@@ -6,12 +6,12 @@ import {
   JobDiscoveryFieldName,
   JobDiscoverySortField,
   JobStatus,
-} from '../../../common/enums/global-common.interface';
+} from '../../../common/enums/global-common';
 import {
   PageableData,
   PageableDto,
   PageableParams,
-} from '../../../common/interfaces/pageable.interface';
+} from '../../../common/utils/pageable.model';
 
 export class JobsDiscoveryParamsDto extends PageableDto {
   @AutoMap()
