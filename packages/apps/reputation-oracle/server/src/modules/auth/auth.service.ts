@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { OperatorStatus, UserStatus } from '../../common/enums/user';
-import { UserCreateDto, Web3UserCreateDto } from '../user/user.dto';
+import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
@@ -371,17 +371,8 @@ export class AuthService {
     ) {
       throw new BadRequestException(ErrorAuth.InvalidRole);
     }
-    const nonce = await this.userService.getNonce(data.address);
 
-    const web3UserCreateDto: Web3UserCreateDto = {
-      evmAddress: data.address,
-      nonce: nonce,
-    };
-
-    const userEntity = await this.userService.createWeb3User(
-      web3UserCreateDto,
-      data.address,
-    );
+    const userEntity = await this.userService.createWeb3User(data.address);
 
     await kvstore.set(data.address, OperatorStatus.ACTIVE);
 

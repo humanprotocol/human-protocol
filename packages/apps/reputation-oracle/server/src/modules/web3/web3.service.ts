@@ -11,7 +11,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { SignatureBodyDto } from './web3.dto';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { UserService } from '../user/user.service';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class Web3Service {
@@ -21,7 +21,7 @@ export class Web3Service {
   constructor(
     private readonly web3ConfigService: Web3ConfigService,
     private readonly networkConfigService: NetworkConfigService,
-    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
   ) {
     const privateKey = this.web3ConfigService.privateKey;
     const validChains = this.getValidChains();
@@ -95,7 +95,8 @@ export class Web3Service {
           from: address,
           to: this.getOperatorAddress(),
           contents: content,
-          nonce: await this.userService.getNonce(address),
+          nonce: (await this.userRepository.findOneByEvmAddress(address))
+            ?.nonce,
         };
       case SignatureType.DISABLE_OPERATOR:
         content = 'disable-operator';

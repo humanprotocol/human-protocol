@@ -21,17 +21,9 @@ export class UserDto extends UserCreateDto {
   public status: UserStatus;
 }
 
-export class Web3UserCreateDto {
-  @ApiProperty({ name: 'evm_address' })
-  @IsString()
+export class Web3UserDto {
   public evmAddress: string;
-
-  @ApiProperty()
-  @IsString()
   public nonce: string;
-}
-
-export class Web3UserDto extends Web3UserCreateDto {
   public type: UserType;
   public status: UserStatus;
 }

@@ -20,11 +20,7 @@ import {
 } from '../../common/enums/user';
 import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
-import {
-  RegisterAddressRequestDto,
-  UserCreateDto,
-  Web3UserCreateDto,
-} from './user.dto';
+import { RegisterAddressRequestDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
@@ -79,14 +75,11 @@ export class UserService {
     return userEntity.save();
   }
 
-  public async createWeb3User(
-    dto: Web3UserCreateDto,
-    address: string,
-  ): Promise<UserEntity> {
+  public async createWeb3User(address: string): Promise<UserEntity> {
     await this.checkEvmAddress(address);
 
     const newUser = new UserEntity();
-    newUser.evmAddress = dto.evmAddress;
+    newUser.evmAddress = address;
     newUser.nonce = generateNonce();
     newUser.type = UserType.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
@@ -172,11 +165,5 @@ export class UserService {
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
-  }
-
-  public async getNonce(address: string): Promise<string> {
-    const userEntity = await this.getByAddress(address);
-
-    return userEntity.nonce;
   }
 }
