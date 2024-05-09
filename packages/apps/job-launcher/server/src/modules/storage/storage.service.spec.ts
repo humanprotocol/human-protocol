@@ -108,6 +108,7 @@ describe('StorageService', () => {
         MOCK_BUCKET_NAME,
         expect.any(String),
         expect.any(String),
+        undefined,
         {
           'Content-Type': ContentType.APPLICATION_JSON,
           'Cache-Control': 'no-store',

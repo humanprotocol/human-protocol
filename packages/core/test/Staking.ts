@@ -168,7 +168,7 @@ describe('Staking', function () {
 
     describe('Events', function () {
       it('Should emit an event on stake deposited', async function () {
-        await token.connect(operator).approve(await staking.getAddress(), 100); //!
+        await token.connect(operator).approve(await staking.getAddress(), 100);
 
         await expect(await staking.connect(operator).stake(2))
           .to.emit(staking, 'StakeDeposited')

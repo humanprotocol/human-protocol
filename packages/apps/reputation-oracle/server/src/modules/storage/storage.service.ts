@@ -120,6 +120,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         key,
         content,
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -164,6 +165,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         key,
         content,
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

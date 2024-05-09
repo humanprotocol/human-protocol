@@ -122,6 +122,7 @@ describe('StorageService', () => {
         s3ConfigService.bucket,
         `${hash}.json`,
         'encrypted',
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

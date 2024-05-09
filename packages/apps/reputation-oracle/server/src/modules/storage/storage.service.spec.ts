@@ -128,6 +128,7 @@ describe('StorageService', () => {
         s3ConfigService.bucket,
         `${hash}.json`,
         expect.stringContaining('encrypted'),
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -180,6 +181,7 @@ describe('StorageService', () => {
           s3ConfigService.bucket,
           `${hash}.json`,
           expect.stringContaining(content),
+          undefined,
           {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-store',
@@ -332,6 +334,7 @@ describe('StorageService', () => {
           .update('encrypted-file-content')
           .digest('hex')}.zip`,
         'encrypted-file-content',
+        undefined,
         { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
       );
     });
@@ -368,6 +371,7 @@ describe('StorageService', () => {
           .update('encrypted-file-content')
           .digest('hex')}.zip`,
         'encrypted-file-content',
+        undefined,
         { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
       );
     });
@@ -418,6 +422,7 @@ describe('StorageService', () => {
             .update('some-file-content')
             .digest('hex')}.zip`,
           'some-file-content',
+          undefined,
           { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
         );
       });
@@ -454,6 +459,7 @@ describe('StorageService', () => {
             .update('some-file-content')
             .digest('hex')}.zip`,
           'some-file-content',
+          undefined,
           { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
         );
       });
