@@ -178,6 +178,13 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     xlayer: {
+      chainId: 196,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    xlayerTestnet: {
       chainId: 195,
       timeout: 20000000,
       url: process.env.ETH_XLAYER_TESTNET_URL || '',
@@ -236,6 +243,7 @@ const config: HardhatUserConfig = {
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
       xlayer: process.env.OKLINK_API_KEY || '',
+      xlayerTestnet: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
       {
@@ -247,20 +255,29 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'xlayer-testnet',
-        chainId: 195,
-        urls: {
-          apiURL:
-            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET',
-          browserURL: 'https://www.oklink.com/xlayer-test',
-        },
-      },
-      {
         network: 'polygonAmoy',
         chainId: 80002,
         urls: {
           apiURL: 'https://api-amoy.polygonscan.com/api',
           browserURL: 'https://amoy.polygonscan.com',
+        },
+      },
+      {
+        network: 'xlayer',
+        chainId: 196,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER',
+          browserURL: 'https://www.oklink.com/xlayer',
+        },
+      },
+      {
+        network: 'xlayerTestnet',
+        chainId: 195,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET',
+          browserURL: 'https://www.oklink.com/xlayer-test',
         },
       },
     ],

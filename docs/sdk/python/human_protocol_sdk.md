@@ -121,6 +121,7 @@
     * [`ChainId.RINKEBY`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.RINKEBY)
     * [`ChainId.SEPOLIA`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.SEPOLIA)
     * [`ChainId.SKALE`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.SKALE)
+    * [`ChainId.XLAYER`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.XLAYER)
     * [`ChainId.XLAYER_TESTNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.XLAYER_TESTNET)
   * [`KVStoreKeys`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys)
     * [`KVStoreKeys.fee`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.fee)

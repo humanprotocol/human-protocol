@@ -14,6 +14,7 @@ import {
   moonbaseAlpha,
   celo,
   celoAlfajores,
+  xLayer,
   xLayerTestnet,
 } from 'viem/chains';
 import { formatUnits, parseUnits } from 'viem/utils';
@@ -29,6 +30,7 @@ const SUPPORTED_CHAINS = {
   [ChainId.MOONBASE_ALPHA]: moonbaseAlpha,
   [ChainId.CELO]: celo,
   [ChainId.CELO_ALFAJORES]: celoAlfajores,
+  [ChainId.XLAYER]: xLayer,
   [ChainId.XLAYER_TESTNET]: xLayerTestnet,
 };
 
