@@ -1977,9 +1977,7 @@ describe('JobService', () => {
     const userId = 123;
 
     beforeEach(() => {
-      web3Service.validateChainId = jest
-        .fn()
-        .mockResolvedValue(() => {});
+      web3Service.validateChainId = jest.fn().mockResolvedValue(() => {});
     });
 
     it('should cancel the job when status is Launched', async () => {
@@ -1997,7 +1995,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
@@ -2024,7 +2026,11 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress);
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,

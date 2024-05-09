@@ -33,6 +33,7 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.AVALANCHE,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
+  ChainId.XLAYER,
 ];
 
 export const L1_L2_CHAIN_IDS = [
@@ -41,6 +42,7 @@ export const L1_L2_CHAIN_IDS = [
   ChainId.SKALE,
   ChainId.MOONBEAM,
   ChainId.AVALANCHE,
+  ChainId.XLAYER,
 ];
 
 export const TESTNET_CHAIN_IDS = [
@@ -86,6 +88,7 @@ export const RPC_URLS: {
   [ChainId.CELO_ALFAJORES]:
     import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
   [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
+  [ChainId.XLAYER]: import.meta.env.VITE_APP_RPC_URL_XLAYER || '',
 };
 
 export const FAST_INTERVAL = 10_000;

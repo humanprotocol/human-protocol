@@ -17,4 +17,5 @@ export enum ChainId {
   CELO = 42220,
   CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
+  XLAYER = 196,
 }

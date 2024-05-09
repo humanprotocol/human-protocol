@@ -85,6 +85,7 @@ enum ChainId {
   CELO = 42220,
   CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
+  XLAYER = 196
   LOCALHOST = 1338,
 }
 ```
@@ -183,6 +184,7 @@ enum ChainId {
   CELO = 42220,
   CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
+  XLAYER = 196,
   LOCALHOST = 1338,
 }
 ```

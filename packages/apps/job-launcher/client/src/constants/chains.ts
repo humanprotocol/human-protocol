@@ -40,6 +40,7 @@ export const RPC_URLS: Partial<Record<ChainId, string | undefined>> = {
   [ChainId.CELO_ALFAJORES]:
     import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
   [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
+  [ChainId.XLAYER]: import.meta.env.VITE_APP_RPC_URL_XLAYER || '',
 };
 
 export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(

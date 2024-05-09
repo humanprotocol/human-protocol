@@ -10,6 +10,7 @@ import { MoonbaseAlphaIcon } from './MoonbaseAlphaIcon';
 import { MoonbeamIcon } from './MoonbeamIcon';
 import { PolygonIcon } from './PolygonIcon';
 import { SkaleHumanProtocolIcon } from './SkaleHumanProtocolIcon';
+import { XLayerIcon } from './XLayerIcon';
 
 export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.ALL]: <HumanIcon />,
@@ -28,6 +29,7 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
   [ChainId.CELO]: <CeloIcon />,
   [ChainId.CELO_ALFAJORES]: <CeloIcon />,
+  [ChainId.XLAYER]: <XLayerIcon />,
 };
 
 export const TOKEN_ICONS: Record<string, ReactElement> = {
