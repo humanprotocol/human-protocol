@@ -13,6 +13,7 @@ import numpy as np
 from sqlalchemy.orm import Session
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
+import src.core.tasks.simple as simple_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
@@ -90,6 +91,9 @@ T = TypeVar("T")
 
 
 class _TaskValidator:
+    UNKNOWN_QUALITY = -1
+    "The value to be used when job quality cannot be computed (e.g. no GT images available)"
+
     def __init__(
         self,
         escrow_address: str,
@@ -146,19 +150,18 @@ class _TaskValidator:
         return gt_key
 
     def _parse_gt(self):
-        tempdir = self._require_field(self._temp_dir)
-        manifest = self._require_field(self.manifest)
+        layout = simple_task.TaskMetaLayout()
+        serializer = simple_task.TaskMetaSerializer()
 
-        bucket_info = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
-        bucket_client = make_cloud_client(bucket_info)
+        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
+        storage_client = make_cloud_client(oracle_data_bucket)
 
-        gt_annotations = io.BytesIO(bucket_client.download_file(bucket_info.path))
-
-        gt_dataset_path = tempdir / "gt.json"
-        gt_dataset_path.write_bytes(gt_annotations.read())
-        self._gt_dataset = dm.Dataset.import_from(
-            os.fspath(gt_dataset_path),
-            format=DM_GT_DATASET_FORMAT_MAPPING[manifest.annotation.type],
+        self._gt_dataset = serializer.parse_gt_annotations(
+            storage_client.download_file(
+                compose_data_bucket_filename(
+                    self.escrow_address, self.chain_id, layout.GT_FILENAME
+                ),
+            )
         )
 
     def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
@@ -193,6 +196,7 @@ class _TaskValidator:
             try:
                 job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
             except TooFewGtError as e:
+                job_results[job_cvat_id] = self.self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
 
@@ -211,6 +215,23 @@ class _TaskValidator:
         self._job_results = job_results
         self._rejected_jobs = rejected_jobs
 
+    def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
+        class RemoveCommonPrefix(dm.ItemTransform):
+            def __init__(self, extractor: dm.IExtractor, *, prefix: str):
+                super().__init__(extractor)
+                self._prefix = prefix
+
+            def transform_item(self, item: dm.DatasetItem) -> dm.DatasetItem:
+                if item.id.startswith(self._prefix):
+                    item = item.wrap(id=item.id[len(self._prefix) :])
+                return item
+
+        prefix = self.manifest.data.data_url.path.lstrip("/\\") + "/"
+        if all(sample.id.startswith(prefix) for sample in merged_dataset):
+            merged_dataset.transform(RemoveCommonPrefix, prefix=prefix)
+
+        return merged_dataset
+
     def _prepare_merged_dataset(self):
         tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
@@ -225,9 +246,12 @@ class _TaskValidator:
             os.fspath(merged_dataset_path), format=merged_dataset_format
         )
         self._put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
+        self._restore_original_image_paths(merged_dataset)
 
         updated_merged_dataset_path = tempdir / "merged_updated"
-        merged_dataset.export(updated_merged_dataset_path, merged_dataset_format, save_media=False)
+        merged_dataset.export(
+            updated_merged_dataset_path, merged_dataset_format, save_media=False, reindex=True
+        )
 
         updated_merged_dataset_archive = io.BytesIO()
         write_dir_to_zip_archive(updated_merged_dataset_path, updated_merged_dataset_archive)
@@ -247,14 +271,27 @@ class _TaskValidator:
             case TaskTypes.image_boxes.value:
                 merged_dataset.update(gt_dataset)
             case TaskTypes.image_points.value:
+                merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
+                    dm.AnnotationType.label
+                ]
+                skeleton_label_id = next(
+                    i for i, label in enumerate(merged_label_cat) if not label.parent
+                )
+                point_label_id = next(i for i, label in enumerate(merged_label_cat) if label.parent)
+
                 for sample in gt_dataset:
                     annotations = [
-                        # Put a point in the center of each GT bbox
-                        # Not ideal, but it's the target for now
-                        dm.Points(
-                            [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
-                            label=bbox.label,
-                            attributes=bbox.attributes,
+                        dm.Skeleton(
+                            elements=[
+                                # Put a point in the center of each GT bbox
+                                # Not ideal, but it's the target for now
+                                dm.Points(
+                                    [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
+                                    label=point_label_id,
+                                    attributes=bbox.attributes,
+                                )
+                            ],
+                            label=skeleton_label_id,
                         )
                         for bbox in sample.annotations
                         if isinstance(bbox, dm.Bbox)
@@ -359,6 +396,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
             try:
                 job_mean_accuracy = comparator.compare(job_gt_dataset, job_dataset)
             except TooFewGtError as e:
+                job_results[job_cvat_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
 
@@ -902,7 +940,7 @@ def process_intermediate_results(
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("process_intermediate_results for escrow %s", escrow_address)
-        logger.debug("Task id %s, %s", getattr(task, 'id', None), getattr(task, "__dict__", None))
+        logger.debug("Task id %s, %s", getattr(task, "id", None), getattr(task, "__dict__", None))
 
     initial_gt_stats = {
         gt_image_stat.gt_key: gt_image_stat.failed_attempts
@@ -967,24 +1005,50 @@ def process_intermediate_results(
     task_jobs = task.jobs
 
     should_complete = False
-    total_jobs = len(task_jobs)
-    unverifiable_jobs_count = len(
-        [v for v in rejected_jobs.values() if isinstance(v, TooFewGtError)]
-    )
-    if total_jobs * Config.validation.unverifiable_assignments_threshold < unverifiable_jobs_count:
-        logger.info(
-            "Validation for escrow_address={}: "
-            "too many assignments have insufficient GT for validation ({} of {} ({:.2f}%)), "
-            "stopping annotation".format(
-                escrow_address,
-                unverifiable_jobs_count,
-                total_jobs,
-                unverifiable_jobs_count / total_jobs * 100,
+
+    if 0 < Config.validation.max_escrow_iterations:
+        escrow_iteration = task.iteration
+        if escrow_iteration and Config.validation.max_escrow_iterations <= escrow_iteration:
+            logger.info(
+                "Validation for escrow_address={}: too many iterations, stopping annotation".format(
+                    escrow_address
+                )
             )
+            should_complete = True
+
+    db_service.update_escrow_iteration(session, escrow_address, chain_id, task.iteration + 1)
+
+    if not should_complete:
+        total_jobs = len(task_jobs)
+        unverifiable_jobs_count = len(
+            [v for v in rejected_jobs.values() if isinstance(v, TooFewGtError)]
         )
-        should_complete = True
-    elif not rejected_jobs:
-        should_complete = True
+        if (
+            total_jobs * Config.validation.unverifiable_assignments_threshold
+            < unverifiable_jobs_count
+        ):
+            logger.info(
+                "Validation for escrow_address={}: "
+                "too many assignments have insufficient GT for validation ({} of {} ({:.2f}%)), "
+                "stopping annotation".format(
+                    escrow_address,
+                    unverifiable_jobs_count,
+                    total_jobs,
+                    unverifiable_jobs_count / total_jobs * 100,
+                )
+            )
+            should_complete = True
+        elif len(rejected_jobs) == unverifiable_jobs_count:
+            if unverifiable_jobs_count:
+                logger.info(
+                    "Validation for escrow_address={}: "
+                    "only unverifiable assignments left ({}), stopping annotation".format(
+                        escrow_address,
+                        unverifiable_jobs_count,
+                    )
+                )
+
+            should_complete = True
 
     if not should_complete:
         return ValidationFailure(rejected_jobs)
@@ -1017,7 +1081,10 @@ def process_intermediate_results(
     return ValidationSuccess(
         validation_meta=validation_meta,
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
-        average_quality=np.mean(list(job_results.values())) if job_results else 0,
+        average_quality=np.mean(
+            list(v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0)
+            or [0]
+        ),
     )
 
 

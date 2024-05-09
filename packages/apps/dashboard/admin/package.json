@@ -14,7 +14,7 @@
   "dependencies": {
     "@human-protocol/sdk": "*",
     "@strapi/plugin-i18n": "4.16.2",
-    "@strapi/plugin-users-permissions": "4.20.5",
+    "@strapi/plugin-users-permissions": "4.24.1",
     "@strapi/strapi": "4.15.5",
     "axios": "^1.5.1",
     "dayjs": "^1.11.10",
@@ -24,10 +24,10 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
-    "viem": "^2.9.17"
+    "viem": "2.10.2"
   },
   "author": {
-    "name": "Tony Wen"
+    "name": "HUMAN Protocol"
   },
   "strapi": {
     "uuid": "c9312fea-0fdd-4782-a77c-8484ae3a6abe"
@@ -36,5 +36,6 @@
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "readme": "README.md"
 }

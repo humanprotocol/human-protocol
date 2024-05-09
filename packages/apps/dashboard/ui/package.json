@@ -21,7 +21,7 @@
     "jszip": "^3.10.1",
     "nft.storage": "^7.0.0",
     "numeral": "^2.0.6",
-    "openpgp": "^5.10.2",
+    "openpgp": "^5.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-gtm-module": "^2.0.11",
@@ -43,7 +43,7 @@
     "@types/glob": "^8.1.0",
     "@types/numeral": "^2.0.2",
     "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.14",
+    "@types/react-dom": "^18.2.25",
     "@types/react-gtm-module": "^2.0.3",
     "@types/react-test-renderer": "^18.0.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -62,7 +62,7 @@
     "sinon": "^17.0.1",
     "vite": "^5.0.12",
     "vite-plugin-node-polyfills": "^0.19.0",
-    "vitest": "^0.30.1"
+    "vitest": "^1.6.0"
   },
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}'",

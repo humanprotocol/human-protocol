@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import pytest
-from human_protocol_sdk.escrow import EscrowClientError, EscrowData
+from human_protocol_sdk.escrow import EscrowClientError
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider

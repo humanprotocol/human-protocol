@@ -24,7 +24,7 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { networkMap } from '../../common/config';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
 import {
   HMToken,
@@ -43,6 +43,7 @@ export class PaymentService {
   private stripe: Stripe;
 
   constructor(
+    private readonly networkConfigService: NetworkConfigService,
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private stripeConfigService: StripeConfigService,
@@ -160,7 +161,7 @@ export class PaymentService {
     signature: string,
   ): Promise<boolean> {
     this.web3Service.validateChainId(dto.chainId);
-    const network = Object.values(networkMap).find(
+    const network = this.networkConfigService.networks.find(
       (item) => item.chainId === dto.chainId,
     );
     const provider = new ethers.JsonRpcProvider(network?.rpcUrl);

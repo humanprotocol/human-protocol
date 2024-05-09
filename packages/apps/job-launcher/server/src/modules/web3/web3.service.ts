@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { networks } from '../../common/config';
 import { Web3Env } from '../../common/enums/web3';
 import {
   LOCALHOST_CHAIN_IDS,
@@ -17,17 +17,26 @@ export class Web3Service {
   public readonly logger = new Logger(Web3Service.name);
   public readonly signerAddress: string;
 
-  constructor(public readonly web3ConfigService: Web3ConfigService) {
+  constructor(
+    public readonly web3ConfigService: Web3ConfigService,
+    public readonly networkConfigService: NetworkConfigService,
+  ) {
     const privateKey = this.web3ConfigService.privateKey;
+
     const validChains = this.getValidChains();
-    const validNetworks = networks.filter((network) =>
+    const validNetworks = networkConfigService.networks.filter((network) =>
       validChains.includes(network.chainId),
     );
+
+    if (!validNetworks.length) {
+      this.logger.log(ErrorWeb3.NoValidNetworks, Web3Service.name);
+      throw new BadRequestException(ErrorWeb3.NoValidNetworks);
+    }
     for (const network of validNetworks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
-    this.signerAddress = this.signers[validChains[0]].address;
+    this.signerAddress = this.signers[validNetworks[0].chainId].address;
   }
 
   public getSigner(chainId: number): Wallet {

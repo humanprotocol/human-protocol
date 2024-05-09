@@ -16,8 +16,9 @@ type Staker = {
 export const useLeaderboardData = () => {
   const [stakers, setStakers] = useState<Staker[]>();
 
+  // TODO: Refactor this to read data from the connected chain
   const fetchListOfStakers = async () => {
-    const rpcUrl = 'https://rpc-mumbai.maticvigil.com';
+    const rpcUrl = import.meta.env.VITE_APP_RPC_URL_POLYGON_MUMBAI;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     const contract = new ethers.Contract(
       STAKING_CONTRACT_ADDRESS,

@@ -6,29 +6,31 @@ import {
   bsc,
   bscTestnet,
   goerli,
+  sepolia,
   mainnet,
   polygon,
   polygonAmoy,
-  polygonMumbai,
   moonbeam,
   moonbaseAlpha,
   celo,
   celoAlfajores,
+  xLayer
 } from 'viem/chains';
 import { formatUnits, parseUnits } from 'viem/utils';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
   [ChainId.GOERLI]: goerli,
+  [ChainId.SEPOLIA]: sepolia,
   [ChainId.BSC_MAINNET]: bsc,
   [ChainId.BSC_TESTNET]: bscTestnet,
   [ChainId.POLYGON]: polygon,
   [ChainId.POLYGON_AMOY]: polygonAmoy,
-  [ChainId.POLYGON_MUMBAI]: polygonMumbai,
   [ChainId.MOONBEAM]: moonbeam,
   [ChainId.MOONBASE_ALPHA]: moonbaseAlpha,
   [ChainId.CELO]: celo,
   [ChainId.CELO_ALFAJORES]: celoAlfajores,
+  [ChainId.XLAYER]: xLayer,
 };
 
 const addBigInts = (a: string, b: string, decimals = 18) => {
@@ -36,7 +38,7 @@ const addBigInts = (a: string, b: string, decimals = 18) => {
 };
 
 const formatBigNumber = (n: any, decimals = 18) => {
-  return formatUnits(n.toBigInt(), decimals);
+  return formatUnits(BigInt(n), decimals);
 };
 
 const fetchData = async () => {

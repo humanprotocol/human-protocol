@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import List
 
 from dateutil.parser import parse as parse_aware_datetime
@@ -5,8 +6,9 @@ from dateutil.parser import parse as parse_aware_datetime
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
-from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses
+from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
+from src.db import errors as db_errors
 from src.log import ROOT_LOGGER_NAME
 from src.utils.logging import get_function_logger
 
@@ -121,6 +123,41 @@ def handle_create_job_event(payload: dict) -> None:
                 payload.job["task_id"],
                 payload.job["project_id"],
                 status=JobStatuses[payload.job["state"]],
+            )
+
+        with suppress(db_errors.LockNotAvailable):
+            projects = cvat_service.get_projects_by_cvat_ids(
+                session, project_cvat_ids=[payload.job["project_id"]], for_update=True
+            )
+            if not projects:
+                return
+
+            project = projects[0]
+
+            escrow_creation = cvat_service.get_escrow_creation_by_escrow_address(
+                session,
+                escrow_address=project.escrow_address,
+                chain_id=project.chain_id,
+                for_update=True,
+            )
+            if not escrow_creation:
+                return
+
+            created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+                session,
+                escrow_address=escrow_creation.escrow_address,
+                chain_id=escrow_creation.chain_id,
+                status=JobStatuses.new,
+            )
+
+            if created_jobs_count != escrow_creation.total_jobs:
+                return
+
+            cvat_service.update_project_statuses_by_escrow_address(
+                session=session,
+                escrow_address=escrow_creation.escrow_address,
+                chain_id=escrow_creation.chain_id,
+                status=ProjectStatuses.annotation,
             )
 
 

@@ -14,7 +14,7 @@ dotenv.config();
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
-      react({ fastRefresh: false }),
+      react(),
       nodePolyfills({
         // Whether to polyfill `node:` protocol imports.
         protocolImports: true,
@@ -41,10 +41,13 @@ export default defineConfig(({ mode }) => {
       },
     ],
     worker: {
-      plugins: [react()],
+      plugins: () => react(),
     },
     resolve: {
-      alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
+      alias: [
+        { find: 'src', replacement: path.resolve(__dirname, 'src') },
+        { find: 'tests', replacement: path.resolve(__dirname, 'tests') },
+      ],
     },
     test: {
       globals: true,

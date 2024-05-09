@@ -55,15 +55,15 @@
   "crons": [
     {
       "path": "/cron/escrow/create",
-      "schedule": "*/5 * * * *"
+      "schedule": "*/2 * * * *"
     },
     {
       "path": "/cron/escrow/setup",
-      "schedule": "*/5 * * * *"
+      "schedule": "1-59/2 * * * *"
     },
     {
       "path": "/cron/escrow/fund",
-      "schedule": "*/5 * * * *"
+      "schedule": "*/2 * * * *"
     },
     {
       "path": "/cron/escrow/cancel",
@@ -71,7 +71,7 @@
     },
     {
       "path": "/cron/webhook/process",
-      "schedule": "*/5 * * * *"
+      "schedule": "*/3 * * * *"
     }
   ],
   "headers": [
