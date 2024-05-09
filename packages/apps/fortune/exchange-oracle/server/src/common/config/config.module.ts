@@ -8,7 +8,6 @@ import { S3ConfigService } from './s3-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { NetworkConfigService } from './network-config.service';
 
-
 @Global()
 @Module({
   providers: [
