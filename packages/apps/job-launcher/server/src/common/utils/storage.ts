@@ -58,6 +58,13 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
       let objects: string[] = [];
       let nextContinuationToken: string | undefined;
       const baseUrl = `${url.protocol}//${url.host}`;
+      console.log(
+        `${baseUrl}?list-type=2${
+          nextContinuationToken
+            ? `&continuation-token=${encodeURIComponent(nextContinuationToken)}`
+            : ''
+        }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`,
+      );
       do {
         const response = await axios.get(
           `${baseUrl}?list-type=2${

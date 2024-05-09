@@ -24,7 +24,7 @@ import { UserStatus } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { ApiKeyRepository } from './apikey.repository';
-import { AuthError } from './auth.error';
+import { CustomError } from '../../common/errors/custom';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 
@@ -300,7 +300,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(null);
       expect(
         authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(AuthError);
+      ).rejects.toThrow(CustomError);
     });
 
     it('should throw Unauthorized exception if user is not active', () => {
@@ -308,7 +308,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(userEntity);
       expect(
         authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(AuthError);
+      ).rejects.toThrow(CustomError);
     });
 
     it('should remove existing token if it exists', async () => {
@@ -373,7 +373,7 @@ describe('AuthService', () => {
           password: 'password',
           hCaptchaToken: 'token',
         }),
-      ).rejects.toThrow(AuthError);
+      ).rejects.toThrow(CustomError);
     });
 
     it('should throw an error if token is expired', () => {
@@ -386,7 +386,7 @@ describe('AuthService', () => {
           password: 'password',
           hCaptchaToken: 'token',
         }),
-      ).rejects.toThrow(AuthError);
+      ).rejects.toThrow(CustomError);
     });
 
     it('should update password and send email', async () => {
@@ -437,14 +437,14 @@ describe('AuthService', () => {
     it('should throw an error if token is not found', () => {
       findTokenMock.mockResolvedValue(null);
       expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
-        AuthError,
+        CustomError,
       );
     });
     it('should throw an error if token is expired', () => {
       tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
       findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
       expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
-        AuthError,
+        CustomError,
       );
     });
 
@@ -487,7 +487,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(null);
       expect(
         authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(AuthError);
+      ).rejects.toThrow(CustomError);
     });
 
     it('should throw an error if user is not pending', () => {
@@ -495,7 +495,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(userEntity);
       expect(
         authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(AuthError);
+      ).rejects.toThrow(CustomError);
     });
 
     it('should create token and send email', async () => {
