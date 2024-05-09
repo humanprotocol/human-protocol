@@ -16,6 +16,10 @@ export class SignatureBodyDto {
   @ApiProperty()
   @IsString()
   public contents: string;
+
+  @ApiProperty()
+  @IsString()
+  public nonce: string | undefined;
 }
 
 export class PrepareSignatureDto {

@@ -371,7 +371,7 @@ export class AuthService {
     ) {
       throw new BadRequestException(ErrorAuth.InvalidRole);
     }
-    const nonce = await this.getNonce(data.address);
+    const nonce = await this.userService.getNonce(data.address);
 
     const web3UserCreateDto: Web3UserCreateDto = {
       evmAddress: data.address,
@@ -388,18 +388,17 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async getNonce(address: string): Promise<string> {
-    const userEntity = await this.userService.getByAddress(address);
-
-    return userEntity.nonce;
-  }
-
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByAddress(data.address);
 
-    const verified = verifySignature(userEntity.nonce, data.signature, [
-      data.address,
-    ]);
+    const verified = verifySignature(
+      await this.web3Service.prepareSignatureBody(
+        SignatureType.SIGNIN,
+        data.address,
+      ),
+      data.signature,
+      [data.address],
+    );
 
     if (!verified) {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);

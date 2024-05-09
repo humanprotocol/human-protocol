@@ -18,7 +18,7 @@ import {
   UserStatus,
   UserType,
 } from '../../common/enums/user';
-import { getNonce, verifySignature } from '../../common/utils/signature';
+import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
@@ -87,7 +87,7 @@ export class UserService {
 
     const newUser = new UserEntity();
     newUser.evmAddress = dto.evmAddress;
-    newUser.nonce = getNonce();
+    newUser.nonce = generateNonce();
     newUser.type = UserType.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
 
@@ -115,7 +115,7 @@ export class UserService {
   }
 
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.nonce = getNonce();
+    userEntity.nonce = generateNonce();
     return userEntity.save();
   }
 
@@ -172,5 +172,11 @@ export class UserService {
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
+  }
+
+  public async getNonce(address: string): Promise<string> {
+    const userEntity = await this.getByAddress(address);
+
+    return userEntity.nonce;
   }
 }

@@ -6,5 +6,6 @@ export enum Web3Env {
 
 export enum SignatureType {
   SIGNUP = 'SIGNUP',
+  SIGNIN = 'SIGNIN',
   DISABLE_OPERATOR = 'DISABLE_OPERATOR',
 }
