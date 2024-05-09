@@ -20,7 +20,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_RPC_URL_CELO: string;
   readonly VITE_APP_RPC_URL_CELO_ALFAJORES: string;
   readonly VITE_APP_RPC_URL_SKALE: string;
-  readonly VITE_APP_RPC_URL_X_LAYER_TESTNET: string;
+  readonly VITE_APP_RPC_URL_XLAYER_TESTNET: string;
 }
 
 interface ImportMeta {

@@ -44,8 +44,8 @@ export const FAUCET_NETWORKS: {
   [ChainId.CELO_ALFAJORES]: {
     rpcUrl: process.env.RPC_URL_CELO_ALFAJORES || '',
   },
-  [ChainId.X_LAYER_TESTNET]: {
-    rpcUrl: process.env.RPC_URL_X_LAYER_TESTNET || '',
+  [ChainId.XLAYER_TESTNET]: {
+    rpcUrl: process.env.RPC_URL_XLAYER_TESTNET || '',
   },
   [ChainId.SKALE]: {
     rpcUrl: process.env.RPC_URL_SKALE || '',

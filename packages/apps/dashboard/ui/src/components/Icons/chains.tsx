@@ -30,5 +30,5 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
   [ChainId.CELO]: <CeloIcon />,
   [ChainId.CELO_ALFAJORES]: <CeloIcon />,
-  [ChainId.X_LAYER_TESTNET]: <OkxIcon />,
+  [ChainId.XLAYER_TESTNET]: <OkxIcon />,
 };

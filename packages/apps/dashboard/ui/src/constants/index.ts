@@ -11,7 +11,7 @@ export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER_TESTNET,
+  ChainId.XLAYER_TESTNET,
   // ChainId.SKALE,
   // ChainId.AVALANCHE,
   // ChainId.AVALANCHE_TESTNET,
@@ -34,7 +34,7 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.AVALANCHE,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER_TESTNET,
+  ChainId.XLAYER_TESTNET,
 ];
 
 export const L1_L2_CHAIN_IDS = [
@@ -43,7 +43,7 @@ export const L1_L2_CHAIN_IDS = [
   ChainId.SKALE,
   ChainId.MOONBEAM,
   ChainId.AVALANCHE,
-  ChainId.X_LAYER_TESTNET,
+  ChainId.XLAYER_TESTNET,
 ];
 
 export const TESTNET_CHAIN_IDS = [
@@ -56,7 +56,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER_TESTNET,
+  ChainId.XLAYER_TESTNET,
 ];
 
 export const FAUCET_CHAIN_IDS = [
@@ -69,7 +69,7 @@ export const FAUCET_CHAIN_IDS = [
   ChainId.AVALANCHE_TESTNET,
   ChainId.SKALE,
   ChainId.CELO_ALFAJORES,
-  ChainId.X_LAYER_TESTNET,
+  ChainId.XLAYER_TESTNET,
 ];
 
 export const RPC_URLS: {
@@ -91,8 +91,8 @@ export const RPC_URLS: {
   [ChainId.CELO_ALFAJORES]:
     import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
   [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
-  [ChainId.X_LAYER_TESTNET]:
-    import.meta.env.VITE_APP_RPC_URL_X_LAYER_TESTNET || '',
+  [ChainId.XLAYER_TESTNET]:
+    import.meta.env.VITE_APP_RPC_URL_XLAYER_TESTNET || '',
 };
 
 export const FAST_INTERVAL = 10_000;

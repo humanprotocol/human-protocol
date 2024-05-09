@@ -279,8 +279,8 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
   },
-  [ChainId.X_LAYER_TESTNET]: {
-    chainId: ChainId.X_LAYER_TESTNET,
+  [ChainId.XLAYER_TESTNET]: {
+    chainId: ChainId.XLAYER_TESTNET,
     title: 'X Layer Testnet',
     scanUrl: 'https://www.okx.com/explorer/xlayer-test',
     factoryAddress: '0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc',
