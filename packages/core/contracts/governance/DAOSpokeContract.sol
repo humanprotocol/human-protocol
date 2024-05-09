@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/Timers.sol';
-import '@openzeppelin/contracts/utils/Checkpoints.sol';
+import '@openzeppelin/contracts/utils/structs/Checkpoints.sol';
 import '@openzeppelin/contracts/governance/utils/IVotes.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 
