@@ -14,7 +14,7 @@
     "axios": "^1.2.3",
     "bignumber.js": "^9.1.0",
     "dayjs": "^1.11.6",
-    "ethers": "^5.7.2",
+    "ethers": "^6.12.1",
     "fast-json-stable-stringify": "^2.1.0",
     "file-saver": "^2.0.5",
     "graphql": "^16.6.0",
