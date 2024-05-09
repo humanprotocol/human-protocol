@@ -47,7 +47,7 @@ export const CryptoTopUpForm = () => {
     try {
       // send HMT token to operator and retrieve transaction hash
       const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
-      const tokenAmount = ethers.utils.parseUnits(amount, 18);
+      const tokenAmount = ethers.parseUnits(amount, 18);
 
       const tx = await contract.transfer(
         await paymentService.getOperatorAddress(),

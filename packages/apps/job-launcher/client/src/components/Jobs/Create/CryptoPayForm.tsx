@@ -85,7 +85,7 @@ export const CryptoPayForm = ({
 
           const tx = await contract.transfer(
             await paymentService.getOperatorAddress(),
-            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18),
+            ethers.parseUnits(tokenAmount.toFixed(2), 18),
           );
 
           await tx.wait();
