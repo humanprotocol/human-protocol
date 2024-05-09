@@ -163,6 +163,13 @@ class ValidationConfig:
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
+    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", 0))
+    """
+    Maximum escrow annotation-validation iterations.
+    After this, the escrow is finished automatically.
+    Supposed only for testing. Use 0 to disable.
+    """
+
 
 class Config:
     port = int(os.environ.get("PORT", 8000))
