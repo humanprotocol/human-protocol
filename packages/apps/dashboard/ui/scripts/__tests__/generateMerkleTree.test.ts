@@ -1,27 +1,20 @@
-import * as fs from 'node:fs';
 import * as path from 'path';
 import { NFTStorage } from 'nft.storage';
 import { stub, restore } from 'sinon';
-import tmp from 'tmp';
-import { test, assert } from 'vitest';
+import { test, assert, vi } from 'vitest';
 import generateMerkleTree from '../generateMerkleTree';
 const mockToken = 'test-token';
 
-test('generateMerkleTree should return a valid Merkle tree JSON', async () => {
-  // Create a temporary directory for the dist/assets folder
-  const tmpDir = tmp.dirSync();
-  const tmpDistAssetsPath = path.join(tmpDir.name, 'dist/assets');
-  fs.mkdirSync(tmpDistAssetsPath, { recursive: true });
+vi.mock('fs', () => ({
+  readFileSync: vi.fn().mockReturnValue('test-file-content'),
+}));
 
-  // Create some JS files in the temporary dist/assets folder
-  fs.writeFileSync(
-    path.join(tmpDistAssetsPath, 'test.js'),
-    'console.log("Hello, world!");'
-  );
-  fs.writeFileSync(
-    path.join(tmpDistAssetsPath, 'test2.js'),
-    'console.log("Another file!");'
-  );
+vi.mock('glob', () => ({
+  sync: vi.fn().mockImplementation(() => ['test.js', 'test2.js']),
+}));
+
+test('generateMerkleTree should return a valid Merkle tree JSON', async () => {
+  const tmpDistAssetsPath = path.join(__dirname, 'tmp-dist-assets');
 
   // Mock NFTStorage.storeBlob method
   const fakeCid = 'bafybeih42y6g7zkr76j6ax7z6wjc5d56xazsrtxzp6f7j6fsk67djnppmq';
@@ -37,7 +30,6 @@ test('generateMerkleTree should return a valid Merkle tree JSON', async () => {
   const merkleTreeData = JSON.parse(merkleTreeJson);
 
   // Cleanup and restore the actual file system and NFTStorage.storeBlob method
-  fs.rmdirSync(tmpDir.name, { recursive: true });
   restore();
 
   // Assertions
