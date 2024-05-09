@@ -24,7 +24,7 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
-    "viem": "^2.9.17"
+    "viem": "2.10.2"
   },
   "author": {
     "name": "HUMAN Protocol"

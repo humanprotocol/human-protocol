@@ -177,6 +177,13 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    xlayer: {
+      chainId: 196,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -228,6 +235,7 @@ const config: HardhatUserConfig = {
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
+      xlayer: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
       {
@@ -244,6 +252,15 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-amoy.polygonscan.com/api',
           browserURL: 'https://amoy.polygonscan.com',
+        },
+      },
+      {
+        network: 'xlayer',
+        chainId: 196,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER',
+          browserURL: 'https://www.oklink.com/xlayer',
         },
       },
     ],

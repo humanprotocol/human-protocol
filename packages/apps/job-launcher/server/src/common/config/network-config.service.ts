@@ -77,6 +77,15 @@ export class NetworkConfigService {
           },
         },
       }),
+      ...(this.configService.get<string>('RPC_URL_XLAYER') && {
+        xlayer: {
+          chainId: ChainId.XLAYER,
+          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER'),
+          tokens: {
+            hmt: NETWORKS[ChainId.XLAYER]?.hmtAddress,
+          },
+        },
+      }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
         localhost: {
           chainId: ChainId.LOCALHOST,

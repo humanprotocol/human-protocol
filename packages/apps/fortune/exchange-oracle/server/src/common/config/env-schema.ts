@@ -24,6 +24,7 @@ export const envValidator = Joi.object({
   RPC_URL_SEPOLIA: Joi.string(),
   RPC_URL_MOONBEAM: Joi.string(),
   RPC_URL_BSC_TESTNET: Joi.string(),
+  RPC_URL_XLAYER: Joi.string(),
   RPC_URL_LOCALHOST: Joi.string(),
   // S3
   S3_ENDPOINT: Joi.string(),

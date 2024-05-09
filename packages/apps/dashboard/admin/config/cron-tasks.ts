@@ -14,6 +14,7 @@ import {
   moonbaseAlpha,
   celo,
   celoAlfajores,
+  xLayer
 } from 'viem/chains';
 import { formatUnits, parseUnits } from 'viem/utils';
 
@@ -29,6 +30,7 @@ const SUPPORTED_CHAINS = {
   [ChainId.MOONBASE_ALPHA]: moonbaseAlpha,
   [ChainId.CELO]: celo,
   [ChainId.CELO_ALFAJORES]: celoAlfajores,
+  [ChainId.XLAYER]: xLayer,
 };
 
 const addBigInts = (a: string, b: string, decimals = 18) => {
