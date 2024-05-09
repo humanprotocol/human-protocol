@@ -85,7 +85,6 @@ enum ChainId {
   CELO = 42220,
   CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
-  XLAYER = 196
   LOCALHOST = 1338,
 }
 ```
@@ -140,7 +139,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Defined in
 
-[escrow.ts:1634](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1634)
+[escrow.ts:1634](https://github.com/humanprotocol/human-protocol/blob/2c6aa24f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1634)
 
 ___
 
@@ -184,7 +183,6 @@ enum ChainId {
   CELO = 42220,
   CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
-  XLAYER = 196,
   LOCALHOST = 1338,
 }
 ```
@@ -255,4 +253,4 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1505](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1505)
+[escrow.ts:1505](https://github.com/humanprotocol/human-protocol/blob/2c6aa24f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1505)
