@@ -246,7 +246,7 @@ NETWORKS = {
     },
     ChainId.XLAYER: {
         "title": "XLayer Human Protocol Chain",
-        "scan_url": "",
+        "scan_url": "https://www.oklink.com/xlayer",
         "subgraph_url": (""),
         "hmt_address": "0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa",
         "factory_address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",

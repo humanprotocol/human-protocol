@@ -282,7 +282,7 @@ export const NETWORKS: {
   [ChainId.XLAYER]: {
     chainId: ChainId.XLAYER,
     title: 'XLayer',
-    scanUrl: 'https://explorer.xlayer.app',
+    scanUrl: 'https://www.oklink.com/xlayer',
     factoryAddress: '0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15',
     hmtAddress: '0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa',
     stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
