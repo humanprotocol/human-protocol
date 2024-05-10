@@ -5,8 +5,8 @@ import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { Web3Service } from '../web3/web3.service';
 import { verifySignature } from '../../common/utils/signature';
-import { ErrorAuth } from '../../common/constants/errors';
-import { Wallet } from 'ethers';
+import { ErrorAuth, ErrorCredential } from '../../common/constants/errors';
+import { Signature, Wallet } from 'ethers';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -47,6 +47,26 @@ export class CredentialService {
     }
 
     return credentialEntity;
+  }
+
+  private validateCredentialData(
+    credential: CredentialEntity,
+    reference: string,
+    workerAddress: string,
+  ): boolean {
+    if (!credential || credential.status !== CredentialStatus.ACTIVE) {
+      return false;
+    }
+
+    const currentDate = new Date();
+    if (credential.expiresAt && currentDate > credential.expiresAt) {
+      return false;
+    }
+
+    const signedData = this.web3Service.prepareSignatureBody(
+      SignatureType.CERTIFICATE_AUTHENTICATION,
+      credential.reputationOracleAddress,
+    );
   }
 
   public async addCredentialOnChain(

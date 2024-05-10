@@ -41,7 +41,6 @@ export class CredentialDto {
   public description: string;
 
   @ApiPropertyOptional()
-  @IsOptional()
   @IsString()
   public url?: string;
 

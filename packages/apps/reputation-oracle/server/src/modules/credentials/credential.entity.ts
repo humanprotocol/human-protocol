@@ -1,7 +1,8 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { CredentialStatus } from '../../common/enums/credential';
+import { UserEntity } from '../user/user.entity';
 
 @Entity({ schema: NS, name: 'credential' })
 export class CredentialEntity extends BaseEntity {
@@ -20,9 +21,24 @@ export class CredentialEntity extends BaseEntity {
   })
   public status: CredentialStatus;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   public startsAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  public expiresAt: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  public expiresAt?: Date;
+}
+
+@Entity()
+export class CredentialValidationEntity extends BaseEntity {
+  @ManyToOne(() => CredentialEntity, { eager: true })
+  credential: CredentialEntity;
+
+  @ManyToOne(() => UserEntity, { eager: true })
+  user: UserEntity;
+
+  @Column({ type: 'enum', enum: ['VALIDATED', 'ON_CHAIN'] })
+  status: string;
+
+  @Column({ nullable: true })
+  certificate: string;
 }
