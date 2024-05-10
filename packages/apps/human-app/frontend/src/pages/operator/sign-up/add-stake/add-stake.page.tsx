@@ -14,6 +14,7 @@ import { StakeForm } from '@/pages/operator/sign-up/add-stake/stake-form';
 import { Alert } from '@/components/ui/alert';
 import { useGetStakedAmount } from '@/api/servieces/operator/get-stacked-amount';
 import { useAddStakeMutationState } from '@/api/servieces/operator/add-stake';
+import { useHMTokenDecimals } from '@/api/servieces/operator/human-token-decimals';
 
 export function AddStakeOperatorPage() {
   const [displayForm, setDisplayForm] = useState(false);
@@ -24,6 +25,11 @@ export function AddStakeOperatorPage() {
     isPending: isGetStakedAmountPending,
   } = useGetStakedAmount();
   const addStakeMutationState = useAddStakeMutationState();
+  const {
+    data: decimalsData,
+    error: decimalsDataError,
+    isPending: isDecimalsDataPending,
+  } = useHMTokenDecimals();
 
   const getAlert = () => {
     switch (true) {
@@ -49,7 +55,7 @@ export function AddStakeOperatorPage() {
     }
   };
 
-  if (isGetStakedAmountError) {
+  if (isGetStakedAmountError || decimalsDataError) {
     return (
       <PageCardError
         errorMessage={defaultErrorMessage(getStackedAmountError)}
@@ -57,7 +63,11 @@ export function AddStakeOperatorPage() {
     );
   }
 
-  if (isGetStakedAmountPending) {
+  if (
+    isGetStakedAmountPending ||
+    isDecimalsDataPending ||
+    decimalsData === undefined
+  ) {
     return <PageCardLoader />;
   }
 
@@ -81,7 +91,7 @@ export function AddStakeOperatorPage() {
           {stakedAmount}
         </Typography>
         {displayForm ? (
-          <StakeForm />
+          <StakeForm decimals={decimalsData} />
         ) : (
           <Buttons openForm={setDisplayForm.bind(null, true)} />
         )}

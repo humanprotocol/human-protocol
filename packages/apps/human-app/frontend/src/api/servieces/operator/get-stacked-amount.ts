@@ -1,22 +1,43 @@
-import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { getStackedAmount } from '@/smart-contracts/stake/get-staked-amount';
+import { ethers } from 'ethers';
+import { t } from 'i18next';
+import { getStakedTokens } from '@/smart-contracts/Staking/get-staked-tokens';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
+import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
-export const getStakedAmountCallArgumentsSchema = z.object({
-  address: z.string(),
-});
+const stakedAmountFormatter = (amount: bigint) => {
+  const amountAsString = ethers.formatEther(amount);
 
-export type GetStackedAmountCallArguments = z.infer<
-  typeof getStakedAmountCallArgumentsSchema
->;
+  if (amountAsString.split('.')[1] === '0') {
+    // decimals part should be omitted
+    return `${amountAsString.replace('.0', '')} ${t('inputMasks.humanCurrencySuffix')}`;
+  }
+  return `${ethers.formatEther(amount)} ${t('inputMasks.humanCurrencySuffix')}`;
+};
 
 export function useGetStakedAmount() {
-  const { address } = useConnectedWallet();
+  const {
+    address,
+    chainId,
+    web3ProviderMutation: { data },
+  } = useConnectedWallet();
 
   return useQuery({
-    queryFn: () => getStackedAmount({ address }),
-    queryKey: ['getStackedAmount', address],
+    queryFn: async () => {
+      const contractAddress = getContractAddress({
+        chainId,
+        contractName: 'Staking',
+      });
+      const stakeAmount = await getStakedTokens({
+        contractAddress,
+        stakerAddress: address,
+        chainId,
+        signer: data?.signer,
+      });
+
+      return stakedAmountFormatter(stakeAmount);
+    },
+    queryKey: ['getStackedAmount', address, chainId, data?.signer],
     refetchInterval: 0,
   });
 }
