@@ -85,7 +85,7 @@ export const protectedRoutes: RouteProps[] = [
   },
 ];
 
-export const protectedWeb3Routes: RouteProps[] = [
+export const walletConnectRoutes: RouteProps[] = [
   {
     path: routerPaths.operator.addStake,
     element: <AddStakeOperatorPage />,
