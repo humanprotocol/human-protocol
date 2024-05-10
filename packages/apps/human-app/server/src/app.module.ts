@@ -24,6 +24,7 @@ import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-or
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
 import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
 import Joi from 'joi';
+import { ChainId } from '@human-protocol/sdk';
 
 @Module({
   imports: [
@@ -38,6 +39,19 @@ import Joi from 'joi';
         REDIS_PORT: Joi.number().required(),
         REDIS_HOST: Joi.string().required(),
         RPC_URL: Joi.string().required(),
+        CHAIN_IDS_ENABLED: Joi.string()
+          .custom((value) => {
+            const chainIds = value.split(',');
+            for (const id of chainIds) {
+              if (!Object.values(ChainId).includes(Number(id.trim()))) {
+                throw new Error(
+                  `Invalid chain ID: Chain ID ${id} is not included in the HUMAN SDK.`,
+                );
+              }
+            }
+            return value;
+          })
+          .required(),
       }),
     }),
     AutomapperModule.forRoot({

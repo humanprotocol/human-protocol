@@ -47,7 +47,7 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
 };
 
 export const userStatsCommandFixture: UserStatisticsCommand = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 export const userStatsDetailsFixture: UserStatisticsDetails = {
@@ -56,7 +56,7 @@ export const userStatsDetailsFixture: UserStatisticsDetails = {
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
 };
 export const oracleStatsDetailsFixture: OracleStatisticsDetails = {
   exchangeOracleUrl: EXCHANGE_ORACLE_URL,

@@ -64,4 +64,8 @@ export class EnvironmentConfigService {
       DEFAULT_CORS_ALLOWED_HEADERS,
     );
   }
+  get chainIdsEnabled(): string[] {
+    const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');
+    return chainIds.split(',').map((id) => id.trim());
+  }
 }

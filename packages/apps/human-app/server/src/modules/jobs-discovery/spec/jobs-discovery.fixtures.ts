@@ -8,7 +8,8 @@ import {
 } from '../model/jobs-discovery.model';
 import {
   JobDiscoveryFieldName,
-  JobDiscoverySortField, JobStatus,
+  JobDiscoverySortField,
+  JobStatus,
   SortOrder,
 } from '../../../common/enums/global-common';
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
@@ -34,7 +35,7 @@ const STATUS = JobStatus.ACTIVE;
 export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL;
 export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracle_address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
   page_size: PAGE_SIZE,
@@ -71,7 +72,7 @@ const paramsDataFixture: JobsDiscoveryParamsData = {
 export const paramsDataFixtureAsString = `?escrow_address=${paramsDataFixture.escrow_address}&chain_id=${paramsDataFixture.chain_id}&page_size=${paramsDataFixture.page_size}&page=${paramsDataFixture.page}&sort=${paramsDataFixture.sort}&sort_field=${paramsDataFixture.sort_field}&job_type=${paramsDataFixture.job_type}&fields=${paramsDataFixture.fields.join(',')}`;
 export const jobsDiscoveryParamsCommandFixture: JobsDiscoveryParamsCommand = {
   data: dataFixture,
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 export const jobsDiscoveryParamsDetailsFixture: JobsDiscoveryParamsDetails = {

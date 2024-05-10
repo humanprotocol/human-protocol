@@ -70,12 +70,12 @@ describe('StatisticsService', () => {
       cacheManager.get.mockResolvedValue(cachedData);
 
       const command: OracleStatisticsCommand = {
-        address: EXCHANGE_ORACLE_ADDRESS,
+        oracleAddress: EXCHANGE_ORACLE_ADDRESS,
       };
       const result: OracleStatisticsResponse =
         await service.getOracleStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(command.address);
+      expect(cacheManager.get).toHaveBeenCalledWith(command.oracleAddress);
       expect(result).toEqual(cachedData);
       expect(exchangeGateway.fetchOracleStatistics).not.toHaveBeenCalled();
     });
@@ -85,21 +85,21 @@ describe('StatisticsService', () => {
       cacheManager.get.mockResolvedValue(undefined);
       exchangeGateway.fetchOracleStatistics.mockResolvedValue(newData);
 
-      const command = { address: EXCHANGE_ORACLE_ADDRESS };
+      const command = { oracleAddress: EXCHANGE_ORACLE_ADDRESS };
       const result = await service.getOracleStats(command);
       const details: OracleStatisticsDetails = {
         exchangeOracleUrl: EXCHANGE_ORACLE_URL,
       };
 
       expect(kvStoreGateway.getExchangeOracleUrlByAddress).toHaveBeenCalledWith(
-        command.address,
+        command.oracleAddress,
       );
-      expect(cacheManager.get).toHaveBeenCalledWith(command.address);
+      expect(cacheManager.get).toHaveBeenCalledWith(command.oracleAddress);
       expect(exchangeGateway.fetchOracleStatistics).toHaveBeenCalledWith(
         details,
       );
       expect(cacheManager.set).toHaveBeenCalledWith(
-        command.address,
+        command.oracleAddress,
         newData,
         configService.cacheTtlOracleStats,
       );
@@ -114,7 +114,7 @@ describe('StatisticsService', () => {
       cacheManager.get.mockResolvedValue(cachedData);
 
       const command = {
-        address: EXCHANGE_ORACLE_ADDRESS,
+        oracleAddress: EXCHANGE_ORACLE_ADDRESS,
         token: TOKEN,
       };
       const result = await service.getUserStats(command);
@@ -131,7 +131,7 @@ describe('StatisticsService', () => {
       exchangeGateway.fetchUserStatistics.mockResolvedValue(newData);
 
       const command = {
-        address: EXCHANGE_ORACLE_ADDRESS,
+        oracleAddress: EXCHANGE_ORACLE_ADDRESS,
         token: TOKEN,
       } as UserStatisticsCommand;
       const details = {
@@ -140,7 +140,7 @@ describe('StatisticsService', () => {
       } as UserStatisticsDetails;
       const result = await service.getUserStats(command);
       expect(kvStoreGateway.getExchangeOracleUrlByAddress).toHaveBeenCalledWith(
-        command.address,
+        command.oracleAddress,
       );
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
       expect(exchangeGateway.fetchUserStatistics).toHaveBeenCalledWith(details);

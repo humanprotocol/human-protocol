@@ -4,18 +4,11 @@ import { classes } from '@automapper/classes';
 import { OracleDiscoveryController } from '../oracle-discovery.controller';
 import { OracleDiscoveryService } from '../oracle-discovery.serivce';
 import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
-import { OracleDiscoveryProfile } from '../oracle-discovery.mapper';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-  OracleDiscoveryDto,
-} from '../model/oracle-discovery.model';
-import { ChainId } from '@human-protocol/sdk';
+import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
-  let service: OracleDiscoveryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,7 +18,7 @@ describe('OracleDiscoveryController', () => {
           strategyInitializer: classes(),
         }),
       ],
-      providers: [OracleDiscoveryService, OracleDiscoveryProfile],
+      providers: [OracleDiscoveryService],
     })
       .overrideProvider(OracleDiscoveryService)
       .useValue(oracleDiscoveryServiceMock)
@@ -34,7 +27,6 @@ describe('OracleDiscoveryController', () => {
     controller = module.get<OracleDiscoveryController>(
       OracleDiscoveryController,
     );
-    service = module.get<OracleDiscoveryService>(OracleDiscoveryService);
   });
 
   it('should be defined', () => {
@@ -42,18 +34,8 @@ describe('OracleDiscoveryController', () => {
   });
 
   describe('oracle discovery', () => {
-    it('oracle discovery should be called with input in OracleDiscoveryDto format and return OracleDiscoveryData', async () => {
-      const dto: OracleDiscoveryDto = {
-        chainId: 80001,
-      };
-      const result: OracleDiscoveryResponse[] =
-        await controller.getOracles(dto);
-      const expectedCommand = {
-        chainId: ChainId.POLYGON_MUMBAI,
-      } as OracleDiscoveryCommand;
-      expect(service.processOracleDiscovery).toHaveBeenCalledWith(
-        expectedCommand,
-      );
+    it('oracle discovery should be return OracleDiscoveryData', async () => {
+      const result: OracleDiscoveryResponse[] = await controller.getOracles();
       const expectedResponse = generateOracleDiscoveryResponseBody();
       expect(result).toEqual(expectedResponse);
     });

@@ -5,7 +5,6 @@ import { KVStoreClient, KVStoreKeys } from '@human-protocol/sdk';
 
 @Injectable()
 export class KvStoreGateway {
-  private URL_KEY = KVStoreKeys.url;
   private kvStoreClient: KVStoreClient;
   constructor(private environmentConfig: EnvironmentConfigService) {}
   async onModuleInit(): Promise<void> {
@@ -14,6 +13,6 @@ export class KvStoreGateway {
     );
   }
   async getExchangeOracleUrlByAddress(address: string): Promise<string> {
-    return this.kvStoreClient.get(address, this.URL_KEY);
+    return this.kvStoreClient.get(address, KVStoreKeys.url);
   }
 }

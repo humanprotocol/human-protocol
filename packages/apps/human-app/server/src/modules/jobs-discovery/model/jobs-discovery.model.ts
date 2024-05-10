@@ -17,7 +17,7 @@ export class JobsDiscoveryParamsDto extends PageableDto {
   @AutoMap()
   @IsString()
   @ApiProperty()
-  address?: string;
+  oracle_address?: string;
   @AutoMap()
   @IsOptional()
   @IsString()
@@ -79,7 +79,7 @@ export class JobsDiscoveryParamsData extends PageableData {
 }
 export class JobsDiscoveryParamsCommand {
   @AutoMap()
-  address: string;
+  oracleAddress: string;
   @AutoMap()
   token: string;
   @AutoMap()
