@@ -133,7 +133,6 @@ describe('Storage tests', () => {
         DEFAULT_PUBLIC_BUCKET,
         key,
         JSON.stringify(file),
-        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -311,7 +310,6 @@ describe('Storage tests', () => {
         DEFAULT_PUBLIC_BUCKET,
         key,
         JSON.stringify(file),
-        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

@@ -132,6 +132,11 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
         chainId: data.chainId,
       });
     }
+    if (data.assignmentId !== undefined) {
+      queryBuilder.andWhere('assignment.id = :assignmentId', {
+        assignmentId: data.assignmentId,
+      });
+    }
     if (data.escrowAddress) {
       queryBuilder.andWhere('job.escrowAddress = :escrowAddress', {
         escrowAddress: data.escrowAddress,

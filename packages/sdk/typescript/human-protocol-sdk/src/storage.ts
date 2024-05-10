@@ -215,7 +215,7 @@ export class StorageClient {
         const key = `s3${hash}.json`;
 
         try {
-          await this.client.putObject(bucket, key, content, undefined, {
+          await this.client.putObject(bucket, key, content, {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-store',
           });

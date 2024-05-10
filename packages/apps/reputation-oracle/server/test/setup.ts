@@ -28,7 +28,7 @@ export async function setup(): Promise<void> {
     throw new Error('Bucket does not exists');
   }
   try {
-    await minioClient.putObject(bucket, fileName, jwtPublicKey, undefined, {
+    await minioClient.putObject(bucket, fileName, jwtPublicKey, {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-store',
     });
