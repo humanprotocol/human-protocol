@@ -20,7 +20,11 @@ import {
 } from '../../common/enums/user';
 import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
-import { RegisterAddressRequestDto, UserCreateDto } from './user.dto';
+import {
+  RegisterAddressRequestDto,
+  SignatureBodyDto,
+  UserCreateDto,
+} from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
@@ -136,7 +140,7 @@ export class UserService {
     user: UserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = this.web3Service.prepareSignatureBody(
+    const signedData = this.prepareSignatureBody(
       SignatureType.DISABLE_OPERATOR,
       user.evmAddress,
     );
@@ -165,5 +169,34 @@ export class UserService {
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
+  }
+
+  public async prepareSignatureBody(
+    type: SignatureType,
+    address: string,
+  ): Promise<SignatureBodyDto> {
+    let content: string;
+    let nonce: string | undefined;
+    switch (type) {
+      case SignatureType.SIGNUP:
+        content = 'signup';
+        break;
+      case SignatureType.SIGNIN:
+        content = 'signin';
+        nonce = (await this.userRepository.findOneByEvmAddress(address))?.nonce;
+        break;
+      case SignatureType.DISABLE_OPERATOR:
+        content = 'disable-operator';
+        break;
+      default:
+        throw new BadRequestException('Type not allowed');
+    }
+
+    return {
+      from: address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: content,
+      nonce: nonce ?? undefined,
+    };
   }
 }
