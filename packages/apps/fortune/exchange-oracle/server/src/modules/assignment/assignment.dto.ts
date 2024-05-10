@@ -54,6 +54,11 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsEnum(AssignmentStatus)
   @IsOptional()
   status: AssignmentStatus;
+
+  @ApiPropertyOptional({ name: 'assignment_id' })
+  @IsOptional()
+  @IsString()
+  assignmentId: string;
 }
 
 export class AssignmentDto {
