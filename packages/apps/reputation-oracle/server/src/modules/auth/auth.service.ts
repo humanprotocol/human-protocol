@@ -339,7 +339,7 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = this.web3Service.prepareSignatureBody(
+    const preSignUpData = this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
       data.address,
     );
@@ -383,7 +383,7 @@ export class AuthService {
     const userEntity = await this.userService.getByAddress(data.address);
 
     const verified = verifySignature(
-      await this.web3Service.prepareSignatureBody(
+      await this.userService.prepareSignatureBody(
         SignatureType.SIGNIN,
         data.address,
       ),

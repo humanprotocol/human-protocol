@@ -5,7 +5,7 @@ import {
   MAINNET_CHAIN_IDS,
   TESTNET_CHAIN_IDS,
 } from '../../common/constants/networks';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { Web3Env } from '../../common/enums/web3';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
