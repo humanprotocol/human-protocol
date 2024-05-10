@@ -9,14 +9,21 @@ export const apiPaths = {
     signUp: {
       path: '/auth/signup',
     },
+    obtainAccessToken: {
+      // TODO add correct path
+      path: '/auth/refresh',
+    },
     sendResetLink: {
-      path: '/auth/reset-link',
+      path: '/password-reset/forgot-password',
     },
     resetPassword: {
-      path: '/auth/reset-password',
+      path: '/password-reset/restore-password',
     },
     verifyEmail: {
-      path: '/auth/verify',
+      path: '/email-confirmation/email-verification',
+    },
+    resendEmailVerification: {
+      path: '/email-confirmation/resend-email-verification',
     },
   },
 } as const;

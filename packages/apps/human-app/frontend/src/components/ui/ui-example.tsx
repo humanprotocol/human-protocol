@@ -28,6 +28,8 @@ import {
   ProfileIcon,
   CheckmarkIcon,
   LockerIcon,
+  FiltersButtonIcon,
+  SortArrow,
 } from '@/components/ui/icons';
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
@@ -246,6 +248,12 @@ export function UiExample() {
         </Grid>
         <Grid>
           <LockerIcon />
+        </Grid>
+        <Grid>
+          <FiltersButtonIcon />
+        </Grid>
+        <Grid>
+          <SortArrow />
         </Grid>
       </Stack>
 

@@ -20,6 +20,8 @@ import MobileHeaderIcon from '@/assets/icons/icons-homepage/mobile-header.svg';
 import ProfileIcon from '@/assets/icons/profile-icon.svg';
 import CheckmarkIcon from '@/assets/icons/checkmark-icon.svg';
 import LockerIcon from '@/assets/icons/locker-icon.svg';
+import FiltersButtonIcon from '@/assets/icons/filters-button-icon.svg';
+import SortArrow from '@/assets/icons/sort-arrow.svg';
 
 export {
   HomepageLogoIcon,
@@ -44,4 +46,6 @@ export {
   ProfileIcon,
   CheckmarkIcon,
   LockerIcon,
+  FiltersButtonIcon,
+  SortArrow,
 };

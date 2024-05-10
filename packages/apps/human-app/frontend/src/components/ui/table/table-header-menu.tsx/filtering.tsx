@@ -1,7 +1,6 @@
 import Checkbox from '@mui/material/Checkbox';
 import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
-import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import { useTranslation } from 'react-i18next';
@@ -30,12 +29,12 @@ export function Filtering({ label, filteringOptions }: FilteringProps) {
 
   return (
     <List sx={{ padding: 0 }}>
-      <ListItemText primary={label} sx={{ padding: '0.5rem' }}>
+      <ListItem component="span" sx={{ padding: '0.5rem' }}>
         <Typography>{label}</Typography>
-      </ListItemText>
+      </ListItem>
       {filteringOptions.map(({ value, text }) => {
         return (
-          <ListItem key={text} sx={{ padding: '0.5rem' }}>
+          <ListItem component="span" key={text} sx={{ padding: '0.5rem' }}>
             <Checkbox
               checked={isChecked(value)}
               name={text}
@@ -49,16 +48,21 @@ export function Filtering({ label, filteringOptions }: FilteringProps) {
               }}
               sx={{ paddingLeft: 0, ':hover': { background: 'none' } }}
             />
-            <ListItemText primary={text}>
-              <Typography color={colorPalette.primary.main} variant="subtitle2">
+            <ListItem
+              component="span"
+              sx={{
+                paddingLeft: 0,
+              }}
+            >
+              <Typography color={colorPalette.primary.main} variant="body1">
                 {text}
               </Typography>
-            </ListItemText>
+            </ListItem>
           </ListItem>
         );
       })}
       <Divider component="li" variant="fullWidth" />
-      <ListItemText sx={{ padding: '0.5rem', cursor: 'pointer' }}>
+      <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>
         <Typography
           color={colorPalette.primary.main}
           onClick={() => {
@@ -75,7 +79,7 @@ export function Filtering({ label, filteringOptions }: FilteringProps) {
         >
           {t('components.table.clearBtn')}
         </Typography>
-      </ListItemText>
+      </ListItem>
     </List>
   );
 }

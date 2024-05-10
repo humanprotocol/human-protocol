@@ -4,11 +4,12 @@ import { Playground } from '@/pages/playground/playground.page';
 import { ProtectedPage } from '@/pages/protected.page';
 import { SignInWorkerPage } from '@/pages/worker/sign-in.page';
 import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
-import { OperatorProfilePage } from '@/pages/operator/profile.page';
+import { OperatorProfilePage } from '@/pages/operator/profile/profile.page';
 import { WorkerProfilePage } from '@/pages/worker/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
 import { routerPaths } from '@/router/router-paths';
+import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { AddStakeOperatorPage } from '@/pages/operator/sign-up/add-stake/add-stake.page';
 import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
 import { ResetPasswordWorkerPage } from '@/pages/worker/reset-password/reset-password.page';
@@ -52,6 +53,22 @@ export const unprotectedRoutes: RouteProps[] = [
     path: routerPaths.worker.sendEmailVerification,
     element: <SendEmailVerificationWorkerPage />,
   },
+  {
+    path: routerPaths.worker.sendResetLink,
+    element: <SendResetLinkWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.resetPassword,
+    element: <ResetPasswordWorkerPage />,
+  },
+  {
+    path: routerPaths.worker.sendResetLinkSuccess,
+    element: <SendResetLinkWorkerSuccessPage />,
+  },
+  {
+    path: routerPaths.worker.resetPasswordSuccess,
+    element: <ResetPasswordWorkerSuccessPage />,
+  },
 ];
 
 export const protectedRoutes: RouteProps[] = [
@@ -60,28 +77,16 @@ export const protectedRoutes: RouteProps[] = [
     element: <ProtectedPage />,
   },
   {
-    path: '/operator/profile',
+    path: routerPaths.worker.jobs,
+    element: <JobsPage />,
+  },
+  {
+    path: routerPaths.operator.profile,
     element: <OperatorProfilePage />,
   },
   {
-    path: '/worker/profile',
+    path: routerPaths.worker.profile,
     element: <WorkerProfilePage />,
-  },
-  {
-    path: routerPaths.worker.sendResetLink,
-    element: <SendResetLinkWorkerPage />,
-  },
-  {
-    path: routerPaths.worker.sendResetLinkSuccess,
-    element: <SendResetLinkWorkerSuccessPage />,
-  },
-  {
-    path: routerPaths.worker.resetPassword,
-    element: <ResetPasswordWorkerPage />,
-  },
-  {
-    path: routerPaths.worker.resetPasswordSuccess,
-    element: <ResetPasswordWorkerSuccessPage />,
   },
 ];
 

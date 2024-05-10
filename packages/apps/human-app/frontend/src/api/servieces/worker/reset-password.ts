@@ -43,7 +43,7 @@ export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: resetPasswordMutationFn,
     onSuccess: async () => {
-      navigate(routerPaths.worker.signIn);
+      navigate(routerPaths.worker.resetPasswordSuccess);
       await queryClient.invalidateQueries();
     },
     onError: async () => {

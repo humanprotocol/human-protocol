@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useAuth } from '@/auth/use-auth';
 
 interface DrawerNavigationProps {
   open: boolean;
@@ -35,6 +36,7 @@ const bottomMenuItems = [
 export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
   const isMobile = useIsMobile();
   const { t } = useTranslation();
+  const { signOut } = useAuth();
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -83,6 +85,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                       disableTypography
                       primary={
                         <Typography
+                          component="span"
                           fontWeight={index === 0 ? '600' : '500'}
                           variant="body2"
                         >
@@ -123,7 +126,9 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                     <ListItemText
                       disableTypography
                       primary={
-                        <Typography variant="body1">{t(text)}</Typography>
+                        <Typography component="span" variant="body1">
+                          {t(text)}
+                        </Typography>
                       }
                       sx={{
                         textAlign: 'center',
@@ -137,6 +142,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
           </List>
         </Stack>
         <Button
+          onClick={signOut}
           size="large"
           sx={{
             marginBottom: '44px',
