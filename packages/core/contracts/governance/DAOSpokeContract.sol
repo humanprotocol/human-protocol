@@ -302,7 +302,9 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         }
     }
 
-    function sendVoteResultToHub(uint256 proposalId) public payable {
+    function sendVoteResultToHub(
+        uint256 proposalId
+    ) public payable onlyMagistrate {
         require(
             proposals[proposalId].voteFinished,
             'DAOSpokeContract: vote is not finished'
