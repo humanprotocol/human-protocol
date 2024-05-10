@@ -339,7 +339,7 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = this.userService.prepareSignatureBody(
+    const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
       data.address,
     );
