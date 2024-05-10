@@ -24,7 +24,7 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { getNonce, signMessage } from '../../common/utils/signature';
+import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
@@ -521,8 +521,8 @@ describe('AuthService', () => {
 
     describe('web3auth', () => {
       describe('signin', () => {
-        const nonce = getNonce();
-        const nonce1 = getNonce();
+        const nonce = generateNonce();
+        const nonce1 = generateNonce();
 
         const userEntity: Partial<UserEntity> = {
           id: 1,
@@ -591,7 +591,7 @@ describe('AuthService', () => {
           type: SignatureType.SIGNUP,
         };
 
-        const nonce = getNonce();
+        const nonce = generateNonce();
 
         const userEntity: Partial<UserEntity> = {
           id: 1,
