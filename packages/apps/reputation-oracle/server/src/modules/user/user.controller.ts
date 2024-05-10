@@ -110,6 +110,6 @@ export class UserController {
   public async prepareSignature(
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
-    return this.userService.prepareSignatureBody(data.type, data.address);
+    return await this.userService.prepareSignatureBody(data.type, data.address);
   }
 }

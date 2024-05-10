@@ -140,7 +140,7 @@ export class UserService {
     user: UserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = this.prepareSignatureBody(
+    const signedData = await this.prepareSignatureBody(
       SignatureType.DISABLE_OPERATOR,
       user.evmAddress,
     );
