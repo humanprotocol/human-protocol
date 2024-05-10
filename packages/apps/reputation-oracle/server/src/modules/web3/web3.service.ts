@@ -20,7 +20,6 @@ export class Web3Service {
   constructor(
     private readonly web3ConfigService: Web3ConfigService,
     private readonly networkConfigService: NetworkConfigService,
-    private readonly userRepository: UserRepository,
   ) {
     const privateKey = this.web3ConfigService.privateKey;
     const validChains = this.getValidChains();
