@@ -33,6 +33,8 @@ export const colorPalette = {
   paper: {
     main: '#F6F7FE',
     light: '#F6F6FF',
+    text: '#CBCFE8',
+    disabled: '#FBFBFE',
   },
   chip: {
     main: 'rgba(203, 207, 232, 0.28)',
