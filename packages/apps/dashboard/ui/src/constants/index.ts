@@ -111,3 +111,22 @@ export const BITFINEX_SUPPORTED_CHAIN_IDS = [ChainId.MAINNET, ChainId.POLYGON];
 
 export const BITFINEX_HOT_WALLET_ADDRESS =
   '0x77134cbc06cb00b66f4c7e623d5fdbf6777635ec';
+
+export const X_LAYER = {
+  id: 196,
+  name: 'xLayer',
+  network: 'xLayer',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'OKB',
+    symbol: 'OKB',
+  },
+  rpcUrls: {
+    public: { http: [import.meta.env.VITE_APP_RPC_URL_XLAYER] },
+    default: { http: [import.meta.env.VITE_APP_RPC_URL_XLAYER] },
+  },
+  blockExplorers: {
+    etherscan: { name: 'SnowTrace', url: 'https://www.oklink.com/xlayer' },
+    default: { name: 'SnowTrace', url: 'https://www.oklink.com/xlayer' },
+  },
+};
