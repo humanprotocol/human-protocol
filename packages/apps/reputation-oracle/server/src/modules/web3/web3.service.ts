@@ -10,7 +10,6 @@ import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class Web3Service {
