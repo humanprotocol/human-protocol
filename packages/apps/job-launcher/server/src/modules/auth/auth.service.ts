@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -30,11 +30,10 @@ import * as crypto from 'crypto';
 import { verifyToken } from '../../common/utils/hcaptcha';
 import { UserRepository } from '../user/user.repository';
 import { ApiKeyEntity } from './apikey.entity';
-import { CustomError } from '../../common/errors/custom';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
@@ -66,7 +65,7 @@ export class AuthService {
     );
 
     if (!userEntity) {
-      throw new CustomError(
+      throw new ControlledError(
         ErrorAuth.InvalidEmailOrPassword,
         HttpStatus.FORBIDDEN,
       );
@@ -124,11 +123,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new CustomError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new CustomError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     return this.auth(tokenEntity.user);
@@ -173,11 +172,11 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
-      throw new CustomError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
     }
 
     if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new CustomError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -237,11 +236,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new CustomError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new CustomError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -267,11 +266,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new CustomError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new CustomError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     tokenEntity.user.status = UserStatus.ACTIVE;
@@ -284,7 +283,7 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
-      throw new CustomError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -349,8 +348,7 @@ export class AuthService {
     const apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
 
     if (!apiKeyEntity) {
-      this.logger.log('API Key Entity not found', AuthService.name);
-      throw new CustomError(ErrorAuth.ApiKeyNotFound, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.ApiKeyNotFound, HttpStatus.FORBIDDEN);
     }
 
     const hash = await generateHash(
@@ -370,8 +368,7 @@ export class AuthService {
     const apiKeyEntity = await this.apiKeyRepository.findAPIKeyById(apiKeyId);
 
     if (!apiKeyEntity) {
-      this.logger.log('API Key Entity not found', AuthService.name);
-      throw new CustomError(ErrorAuth.ApiKeyNotFound, HttpStatus.FORBIDDEN);
+      throw new ControlledError(ErrorAuth.ApiKeyNotFound, HttpStatus.FORBIDDEN);
     }
     const hash = await generateHash(
       apiKey,

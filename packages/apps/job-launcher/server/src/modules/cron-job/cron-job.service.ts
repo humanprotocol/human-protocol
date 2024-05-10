@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
 import { ErrorCronJob } from '../../common/constants/errors';
@@ -8,7 +8,6 @@ import { CronJobRepository } from './cron-job.repository';
 import { JobService } from '../job/job.service';
 import { JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
-import { StorageService } from '../storage/storage.service';
 import {
   EventType,
   OracleType,
@@ -19,6 +18,7 @@ import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class CronJobService {
@@ -29,7 +29,6 @@ export class CronJobService {
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
-    private readonly storageService: StorageService,
     private readonly paymentService: PaymentService,
     private readonly webhookRepository: WebhookRepository,
   ) {}
@@ -63,7 +62,7 @@ export class CronJobService {
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
       this.logger.error(ErrorCronJob.Completed, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.Completed);
+      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
     }
 
     cronJobEntity.completedAt = new Date();

@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-export class CustomError extends Error {
+export class ControlledError extends Error {
   status: HttpStatus;
 
   constructor(message: string, status: HttpStatus, stack?: string) {
