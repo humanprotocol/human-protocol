@@ -15,4 +15,15 @@ export class CredentialRepository extends BaseRepository<CredentialEntity> {
     const credentialEntity = this.findOne({ where: { reference } });
     return credentialEntity;
   }
+
+  async getCredentials(status?: string): Promise<CredentialEntity[]> {
+    let queryBuilder = this.createQueryBuilder('credential');
+    if (status) {
+      queryBuilder = queryBuilder.where('credential.status = :status', {
+        status,
+      });
+    }
+    const credentials = await queryBuilder.getMany();
+    return credentials;
+  }
 }

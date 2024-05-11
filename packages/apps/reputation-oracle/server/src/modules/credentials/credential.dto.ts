@@ -76,6 +76,20 @@ export class QueryCredentialDto {
   public reference?: string;
 }
 
+export class AddCertificateDto {
+  @ApiProperty()
+  @IsString()
+  public reference: string;
+
+  @ApiProperty()
+  @IsString()
+  public reputationOracleAddress: string;
+
+  @ApiProperty()
+  @IsString()
+  public signedMessage: string;
+}
+
 export class UpdateCredentialStatusDto {
   @ApiProperty()
   @IsString()

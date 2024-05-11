@@ -8,7 +8,7 @@ import {
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
-import { SignatureBodyDto } from './web3.dto';
+import { SignatureBodyDto } from '../web3/web3.dto';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 
@@ -81,23 +81,38 @@ export class Web3Service {
   public prepareSignatureBody(
     type: SignatureType,
     address: string,
+    additionalData?: { reference?: string; workerAddress?: string },
   ): SignatureBodyDto {
-    let content: string;
+    let contents: any;
+
     switch (type) {
       case SignatureType.SIGNUP:
-        content = 'signup';
+        contents = 'signup';
         break;
       case SignatureType.DISABLE_OPERATOR:
-        content = 'disable-operator';
+        contents = 'disable-operator';
+        break;
+      case SignatureType.CERTIFICATE_AUTHENTICATION:
+        if (
+          !additionalData ||
+          !additionalData.reference ||
+          !additionalData.workerAddress
+        ) {
+          throw new BadRequestException('Missing necessary credential data');
+        }
+        contents = {
+          reference: additionalData.reference,
+          workerAddress: additionalData.workerAddress,
+        };
         break;
       default:
-        throw new BadRequestException('Type not allowed');
+        throw new BadRequestException('Unsupported signature type');
     }
 
     return {
       from: address,
       to: this.getOperatorAddress(),
-      contents: content,
+      contents: JSON.stringify(contents),
     };
   }
 }

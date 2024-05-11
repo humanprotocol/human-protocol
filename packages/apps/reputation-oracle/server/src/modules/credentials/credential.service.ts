@@ -5,11 +5,11 @@ import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { Web3Service } from '../web3/web3.service';
 import { verifySignature } from '../../common/utils/signature';
-import { ErrorAuth, ErrorCredential } from '../../common/constants/errors';
-import { Signature, Wallet } from 'ethers';
+import { ErrorAuth } from '../../common/constants/errors';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { EscrowClient } from '@human-protocol/sdk';
 
 @Injectable()
 export class CredentialService {
@@ -33,6 +33,25 @@ export class CredentialService {
     return this.credentialRepository.create(createCredentialDto);
   }
 
+  public async getCredentials(
+    user: any,
+    status?: string,
+  ): Promise<CredentialEntity[]> {
+    let query = this.credentialRepository.createQueryBuilder('credential');
+    query = query.where('credential.userId = :userId', { userId: user.id });
+
+    if (status) {
+      query = query.andWhere('credential.status = :status', { status: status });
+    }
+    try {
+      const credentials = await query.getMany();
+      return credentials;
+    } catch (error) {
+      this.logger.error(`Failed to fetch credentials: ${error.message}`);
+      throw new Error(`Failed to fetch credentials: ${error.message}`);
+    }
+  }
+
   public async getByReference(
     reference: string,
   ): Promise<CredentialEntity | null> {
@@ -49,44 +68,58 @@ export class CredentialService {
     return credentialEntity;
   }
 
-  private validateCredentialData(
-    credential: CredentialEntity,
+  /**
+   * Validate a credential based on provided data.
+   * @param {string} reference - The unique reference of the credential.
+   * @param {string} workerAddress - The address of the user that completed the training or activity.
+   * @returns {Promise<void>}
+   */
+  public async validateCredential(
     reference: string,
     workerAddress: string,
-  ): boolean {
-    if (!credential || credential.status !== CredentialStatus.ACTIVE) {
-      return false;
+  ): Promise<void> {
+    const credential =
+      await this.credentialRepository.findByReference(reference);
+
+    if (!credential) {
+      throw new Error('Credential not found.');
     }
 
-    const currentDate = new Date();
-    if (credential.expiresAt && currentDate > credential.expiresAt) {
-      return false;
+    if (credential.status !== CredentialStatus.ACTIVE) {
+      throw new Error('Credential is not in a valid state for validation.');
     }
+    credential.status = CredentialStatus.VALIDATED;
+    await this.credentialRepository.save(credential);
 
-    const signedData = this.web3Service.prepareSignatureBody(
-      SignatureType.CERTIFICATE_AUTHENTICATION,
-      credential.reputationOracleAddress,
-    );
+    this.logger.log(`Credential ${reference} validated successfully.`);
   }
 
   public async addCredentialOnChain(
     reference: string,
-    reputationOracleAddress: string,
+    workerAddress: string,
     signature: string,
+    chainId: ChainId,
+    escrowAddress: string,
   ): Promise<void> {
-    const signedData = this.web3Service.prepareSignatureBody(
+    let signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const reputationOracleAddress =
+      await escrowClient.getReputationOracleAddress(escrowAddress);
+
+    const signatureBody = this.web3Service.prepareSignatureBody(
       SignatureType.CERTIFICATE_AUTHENTICATION,
       reputationOracleAddress,
+      {
+        reference: reference,
+        workerAddress: workerAddress,
+      },
     );
 
-    const verified = verifySignature(signedData, signature, [
-      reputationOracleAddress,
-    ]);
-    if (!verified) {
+    if (!verifySignature(signatureBody.contents, signature, [workerAddress])) {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);
     }
 
-    let signer: Wallet;
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
       signer = this.web3Service.getSigner(ChainId.POLYGON);
@@ -95,11 +128,14 @@ export class CredentialService {
     } else {
       signer = this.web3Service.getSigner(ChainId.LOCALHOST);
     }
-
     const kvstore = await KVStoreClient.build(signer);
+    const key = `${reference}-${workerAddress}`;
+    const value = JSON.stringify({
+      signature,
+      contents: signatureBody.contents,
+    });
 
-    const key = `${reference}-${reputationOracleAddress}`;
-    await kvstore.set(key, signature);
+    await kvstore.set(key, value);
 
     this.logger.log(
       `Credential added to the blockchain for reference: ${reference}`,
