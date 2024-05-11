@@ -89,13 +89,3 @@ export class AddCertificateDto {
   @IsString()
   public signedMessage: string;
 }
-
-export class UpdateCredentialStatusDto {
-  @ApiProperty()
-  @IsString()
-  public reference: string;
-
-  @ApiProperty({ enum: CredentialStatus })
-  @IsEnum(CredentialStatus)
-  public status: CredentialStatus;
-}
