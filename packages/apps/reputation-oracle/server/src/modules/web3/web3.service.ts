@@ -84,7 +84,6 @@ export class Web3Service {
     additionalData?: { reference?: string; workerAddress?: string },
   ): SignatureBodyDto {
     let contents: any;
-
     switch (type) {
       case SignatureType.SIGNUP:
         contents = 'signup';
@@ -100,10 +99,10 @@ export class Web3Service {
         ) {
           throw new BadRequestException('Missing necessary credential data');
         }
-        contents = {
+        contents = JSON.stringify({
           reference: additionalData.reference,
-          workerAddress: additionalData.workerAddress,
-        };
+          workerJson: additionalData.workerAddress,
+        });
         break;
       default:
         throw new BadRequestException('Unsupported signature type');
@@ -111,8 +110,8 @@ export class Web3Service {
 
     return {
       from: address,
-      to: this.getOperatorAddress(),
-      contents: JSON.stringify(contents),
+      to: address,
+      contents: contents,
     };
   }
 }

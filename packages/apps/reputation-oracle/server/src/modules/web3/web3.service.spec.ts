@@ -80,12 +80,10 @@ describe('Web3Service', () => {
         to: MOCK_ADDRESS,
         contents: 'signup',
       };
-
       const result = await web3Service.prepareSignatureBody(
         SignatureType.SIGNUP,
         MOCK_ADDRESS,
       );
-
       expect(result).toStrictEqual(expectedData);
     });
   });
