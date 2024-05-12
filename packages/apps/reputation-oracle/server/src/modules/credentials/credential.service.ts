@@ -74,10 +74,7 @@ export class CredentialService {
    * @param {string} workerAddress - The address of the user that completed the training or activity.
    * @returns {Promise<void>}
    */
-  public async validateCredential(
-    reference: string,
-    workerAddress: string,
-  ): Promise<void> {
+  public async validateCredential(reference: string): Promise<void> {
     const credential =
       await this.credentialRepository.findByReference(reference);
 
@@ -129,7 +126,7 @@ export class CredentialService {
       signer = this.web3Service.getSigner(ChainId.LOCALHOST);
     }
     const kvstore = await KVStoreClient.build(signer);
-    const key = `${reference}-${workerAddress}`;
+    const key = `${reference}-${reputationOracleAddress}`;
     const value = JSON.stringify({
       signature,
       contents: signatureBody.contents,
