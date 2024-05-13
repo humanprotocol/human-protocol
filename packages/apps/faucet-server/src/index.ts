@@ -42,6 +42,8 @@ const blockList = new NodeCache();
 const lastSend: lastSendType[] = [];
 
 const getNetworkData = (chainId: ChainId) => {
+  console.log('NETWORKS', NETWORKS[chainId]);
+  console.log('FAUCET_NETWORKS', FAUCET_NETWORKS[chainId]);
   return {
     ...NETWORKS[chainId],
     ...FAUCET_NETWORKS[chainId],
@@ -52,7 +54,7 @@ app.get('/stats', async (_request: Request, response: Response) => {
   const chainId = Number(_request.query.chainId);
   // Check for valid network
   const network = getNetworkData(chainId as ChainId);
-
+  console.log(network);
   if (!network)
     return response.status(200).json({
       status: false,
