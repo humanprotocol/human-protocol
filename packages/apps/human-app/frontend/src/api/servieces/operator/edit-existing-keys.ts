@@ -10,22 +10,13 @@ import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
-import { setBulk } from '@/smart-contracts/EthKVStore/set-bulk';
+import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
 export const editEthKVStoreValuesMutationSchema = z.object({
   [EthKVStoreKeys.PublicKey]: z.string().min(1),
   [EthKVStoreKeys.WebhookUrl]: z.string().url(),
-  [EthKVStoreKeys.Role]: z
-    .array(
-      z.enum([
-        Role.ExchangeOracle,
-        Role.JobLauncher,
-        Role.RecordingOracle,
-        Role.ReputationOracle,
-      ])
-    )
-    .length(1),
+  [EthKVStoreKeys.Role]: z.nativeEnum(Role),
   [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
 });
 
@@ -45,7 +36,7 @@ function editExistingKeysMutationFn(
     contractName: 'EthKVStore',
   });
 
-  return setBulk({
+  return ethKvStoreSetBulk({
     keys: [
       EthKVStoreKeys.PublicKey,
       EthKVStoreKeys.WebhookUrl,
@@ -55,7 +46,7 @@ function editExistingKeysMutationFn(
     values: [
       data[EthKVStoreKeys.PublicKey],
       data[EthKVStoreKeys.WebhookUrl],
-      data.Role[0],
+      data[EthKVStoreKeys.Role],
       data[EthKVStoreKeys.Fee].toString(),
     ],
     contractAddress,

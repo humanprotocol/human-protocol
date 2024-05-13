@@ -1,11 +1,11 @@
 import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
+import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
-import type { UseFormResult } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { Input } from '@/components/data-entry/input';
-import { MultiSelect } from '@/components/data-entry/multi-select';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
+import { Select } from '@/components/data-entry/select';
 
 const OPTIONS = [
   Role.ExchangeOracle,
@@ -16,12 +16,10 @@ const OPTIONS = [
 
 export function EditExistingKeysForm({
   closeEditMode,
-  useFormResult,
 }: {
-  useFormResult: UseFormResult;
   closeEditMode: () => void;
 }) {
-  const { trigger } = useFormResult;
+  const { trigger } = useFormContext();
 
   const save = async () => {
     const valid = await trigger();
@@ -49,11 +47,11 @@ export function EditExistingKeysForm({
         label={EthKVStoreKeys.WebhookUrl}
         name={EthKVStoreKeys.WebhookUrl}
       />
-      <MultiSelect
+      <Select
+        isChipRenderValue
         label={EthKVStoreKeys.Role}
         name={EthKVStoreKeys.Role}
-        options={OPTIONS}
-        singleValue
+        options={OPTIONS.map((role, i) => ({ name: role, value: role, id: i }))}
       />
       <div>
         <Button

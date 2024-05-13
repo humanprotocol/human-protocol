@@ -108,13 +108,9 @@ export function Form({
           {editMode ? (
             <EditExistingKeysForm
               closeEditMode={setEditMode.bind(null, false)}
-              useFormResult={methods}
             />
           ) : (
-            <ExistingKeys
-              openEditMode={setEditMode.bind(null, true)}
-              useFormResult={methods}
-            />
+            <ExistingKeys openEditMode={setEditMode.bind(null, true)} />
           )}
           <Button
             disabled={editExistingKeys.isPending}
