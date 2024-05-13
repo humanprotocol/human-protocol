@@ -5,7 +5,9 @@ import { Typography } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import { colorPalette } from '@/styles/color-palette';
 
-const getIcon = (type: 'success' | 'warning') => {
+export type TopNotificationType = 'success' | 'warning';
+
+const getIcon = (type: TopNotificationType) => {
   switch (type) {
     case 'success':
       return <CheckCircleIcon sx={{ fill: colorPalette.white }} />;
@@ -16,7 +18,7 @@ const getIcon = (type: 'success' | 'warning') => {
 };
 
 type TopNotificationProps = MuiAlertProps & {
-  type: 'success' | 'warning';
+  type: TopNotificationType;
 };
 
 export function TopNotification({

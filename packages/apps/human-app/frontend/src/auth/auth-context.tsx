@@ -19,7 +19,7 @@ const userDataSchema = z.object({
   email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
 });
 
-type UserData = z.infer<typeof userDataSchema>;
+export type UserData = z.infer<typeof userDataSchema>;
 
 export interface AuthenticatedUserContextType {
   user: UserData;

@@ -7,7 +7,9 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { breakpoints } from '@/styles/theme';
-import { TopNotification } from '@/components/ui/top-notofication';
+import { TopNotification } from '@/components/ui/top-notification';
+import type { TopNotificationPayload } from '@/components/layout/protected/layout-notification-context';
+import { ProtectedLayoutContext } from '@/components/layout/protected/layout-notification-context';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
@@ -40,6 +42,8 @@ export function Layout({
 }: {
   pageHeaderProps: PageHeaderProps;
 }) {
+  const [notification, setNotification] =
+    useState<TopNotificationPayload | null>(null);
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const { backgroundColor } = useBackgroundColorStore();
@@ -53,52 +57,80 @@ export function Layout({
   }, [isMobile]);
 
   return (
-    <Grid
-      alignItems="center"
-      container
-      direction="column"
-      flexWrap="nowrap"
-      justifyContent="space-between"
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        height: '100%',
-        width: '100%',
-        pt: '0',
-        pl: isMobile ? 0 : '120px',
-        pr: isMobile ? 0 : '20px',
-        backgroundColor,
+    <ProtectedLayoutContext.Provider
+      value={{
+        setTopNotification: (data) => {
+          setNotification(data);
+        },
+        closeNotification: () => {
+          setNotification(null);
+        },
       }}
     >
-      <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
-      <DrawerNavigation drawerWidth={drawerWidth} open={drawerOpen} />
-      <Main isMobile={isMobile} open={drawerOpen}>
-        <Grid
-          container
-          sx={{
-            margin: '1rem 0',
-            display: 'flex',
-            gap: '2rem',
-            flexDirection: 'column',
-            padding: '0 2rem',
-            [breakpoints.mobile]: {
-              gap: '1rem',
-              padding: '0 1rem',
-            },
-          }}
-        >
-          <Grid item minHeight="3rem">
-            <TopNotification type="warning">test</TopNotification>
-          </Grid>
+      <Grid
+        alignItems="center"
+        container
+        direction="column"
+        flexWrap="nowrap"
+        justifyContent="space-between"
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          height: '100%',
+          width: '100%',
+          pt: '0',
+          pl: isMobile ? 0 : '120px',
+          pr: isMobile ? 0 : '20px',
+          backgroundColor,
+        }}
+      >
+        <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
+        <DrawerNavigation drawerWidth={drawerWidth} open={drawerOpen} />
+        <Main isMobile={isMobile} open={drawerOpen}>
+          <Grid
+            container
+            sx={{
+              margin: '1rem 0',
+              display: 'flex',
+              gap: '2rem',
+              flexDirection: 'column',
+              padding: '0 2rem',
+              [breakpoints.mobile]: {
+                gap: '1rem',
+                padding: '0 1rem',
+              },
+            }}
+          >
+            <Grid
+              item
+              sx={{
+                minHeight: '3.2rem',
+                [breakpoints.mobile]: {
+                  minHeight: 'unset',
+                },
+              }}
+            >
+              {notification ? (
+                <TopNotification
+                  onClose={() => {
+                    setNotification(null);
+                  }}
+                  type={notification.type}
+                >
+                  {notification.content}
+                </TopNotification>
+              ) : null}
+            </Grid>
 
-          <Grid item>
-            <PageHeader {...pageHeaderProps} />
+            <Grid item>
+              <PageHeader {...pageHeaderProps} />
+            </Grid>
+            <Outlet />
           </Grid>
-          <Outlet />
-        </Grid>
-      </Main>
-      <Footer isProtected />
-    </Grid>
+        </Main>
+        <Footer isProtected />
+      </Grid>
+    </ProtectedLayoutContext.Provider>
   );
 }
