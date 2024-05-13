@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { OracleDiscoveryController } from '../oracle-discovery.controller';
-import { OracleDiscoveryService } from '../oracle-discovery.serivce';
+import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
 import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
