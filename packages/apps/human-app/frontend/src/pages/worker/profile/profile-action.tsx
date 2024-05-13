@@ -15,8 +15,8 @@ export function ProfileAction({
 }: ProfileActionProps) {
   if (done) {
     return (
-      <Grid alignItems="center" container gap="0.5rem">
-        <Typography variant="subtitle2">{doneLabel}</Typography>
+      <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">
+        <Typography variant="buttonLarge">{doneLabel}</Typography>
         <CheckmarkIcon />
       </Grid>
     );
