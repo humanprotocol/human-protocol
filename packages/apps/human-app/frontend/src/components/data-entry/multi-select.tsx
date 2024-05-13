@@ -8,8 +8,9 @@ import InputLabel from '@mui/material/InputLabel';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import { useTranslation } from 'react-i18next';
-import { Box, Chip, OutlinedInput } from '@mui/material';
+import { Box, Chip, FormHelperText, OutlinedInput } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { colorPalette } from '@/styles/color-palette';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
   options: string[];
@@ -99,7 +100,7 @@ export function MultiSelect({
     <Controller
       defaultValue={[]}
       name={name}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         return (
           <FormControl fullWidth>
             <InputLabel id={`${name}-${label}`}>{label}</InputLabel>
@@ -107,6 +108,7 @@ export function MultiSelect({
               input={<OutlinedInput id={name} label={label} />}
               {...field}
               defaultValue={[]}
+              error={Boolean(fieldState.error)}
               id={name}
               labelId={`${name}-${label}`}
               multiple
@@ -129,6 +131,9 @@ export function MultiSelect({
                 </MenuItem>
               ))}
             </Select>
+            <FormHelperText sx={{ color: colorPalette.error.main }}>
+              {fieldState.error?.message}
+            </FormHelperText>
           </FormControl>
         );
       }}

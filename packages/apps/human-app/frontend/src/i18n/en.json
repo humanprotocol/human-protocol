@@ -281,15 +281,10 @@
       },
       "existingKeys": {
         "title": "Existing keys",
-        "fee": "Fee",
-        "webhookUrl": "Webhook URL",
-        "jobTypes": "Job types",
+        "noValue": "No value",
         "editBtn": "Edit"
       },
       "editKeysForm": {
-        "fee": "Fee",
-        "webhookUrl": "Webhook URL",
-        "jobTypes": "Job Types",
         "btn": "Save"
       }
     },

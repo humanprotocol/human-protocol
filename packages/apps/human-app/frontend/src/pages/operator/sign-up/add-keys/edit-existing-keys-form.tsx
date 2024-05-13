@@ -1,21 +1,25 @@
 import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
+import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
-import type { UseFormResult } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { Input } from '@/components/data-entry/input';
-import { MultiSelect } from '@/components/data-entry/multi-select';
+import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
+import { Select } from '@/components/data-entry/select';
 
-const JOB_TYPES_OPTIONS = ['Image Labelling', 'BBox', 'Testing'];
+const OPTIONS = [
+  Role.ExchangeOracle,
+  Role.JobLauncher,
+  Role.RecordingOracle,
+  Role.ReputationOracle,
+];
 
 export function EditExistingKeysForm({
   closeEditMode,
-  useFormResult,
 }: {
-  useFormResult: UseFormResult;
   closeEditMode: () => void;
 }) {
-  const { trigger } = useFormResult;
+  const { trigger } = useFormContext();
 
   const save = async () => {
     const valid = await trigger();
@@ -29,19 +33,25 @@ export function EditExistingKeysForm({
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
       <Input
         fullWidth
-        label={t('operator.addKeysPage.editKeysForm.fee')}
+        label={EthKVStoreKeys.Fee}
         mask="PercentsInputMask"
-        name="fee"
+        name={EthKVStoreKeys.Fee}
       />
       <Input
         fullWidth
-        label={t('operator.addKeysPage.editKeysForm.webhookUrl')}
-        name="webhookUrl"
+        label={EthKVStoreKeys.PublicKey}
+        name={EthKVStoreKeys.PublicKey}
       />
-      <MultiSelect
-        label={t('operator.addKeysPage.editKeysForm.jobTypes')}
-        name="jobTypes"
-        options={JOB_TYPES_OPTIONS}
+      <Input
+        fullWidth
+        label={EthKVStoreKeys.WebhookUrl}
+        name={EthKVStoreKeys.WebhookUrl}
+      />
+      <Select
+        isChipRenderValue
+        label={EthKVStoreKeys.Role}
+        name={EthKVStoreKeys.Role}
+        options={OPTIONS.map((role, i) => ({ name: role, value: role, id: i }))}
       />
       <div>
         <Button

@@ -18,7 +18,9 @@ export const env = z
     }),
     VITE_TESTNET_AMOY_STAKING_CONTRACT: z.string(),
     VITE_TESTNET_AMOY_HMTOKEN_STAKING_CONTRACT: z.string(),
+    VITE_TESTNET_AMOY_ETH_KV_STORE_CONTRACT: z.string(),
     VITE_MAINNET_POLYGON_STAKING_CONTRACT: z.string(),
     VITE_MAINNET_POLYGON_HMTOKEN_CONTRACT: z.string(),
+    VITE_MAINNET_POLYGON_ETH_KV_STORE_CONTRACT: z.string(),
   })
   .parse(import.meta.env);
