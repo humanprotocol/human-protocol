@@ -46,6 +46,7 @@ const defaultChains = [
   wagmiChains.avalancheFuji,
   wagmiChains.avalanche,
   wagmiChains.skaleHumanProtocol,
+  wagmiChains.okc,
   xLayer,
 ];
 

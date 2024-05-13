@@ -42,6 +42,8 @@ Enum for chain IDs.
 
 #### XLAYER *= 196*
 
+#### XLAYER_TESTNET *= 195*
+
 ### *class* human_protocol_sdk.constants.KVStoreKeys(value)
 
 Bases: `Enum`
