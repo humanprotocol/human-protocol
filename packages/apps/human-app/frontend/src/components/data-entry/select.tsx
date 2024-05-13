@@ -18,7 +18,7 @@ interface SelectComponentProps extends Omit<SelectProps, 'name' | 'error'> {
   name: string;
   label?: string;
   ariaLabelledby?: string;
-  chip?: boolean;
+  isChipRenderValue?: boolean;
 }
 
 export function Select({
@@ -26,7 +26,7 @@ export function Select({
   name,
   label,
   options,
-  chip,
+  isChipRenderValue,
   ...props
 }: SelectComponentProps) {
   return (
@@ -43,7 +43,7 @@ export function Select({
             {...props}
             label={label}
             renderValue={
-              chip
+              isChipRenderValue
                 ? (selected) => <Chip label={selected as string} />
                 : undefined
             }
