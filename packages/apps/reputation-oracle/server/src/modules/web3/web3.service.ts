@@ -110,7 +110,7 @@ export class Web3Service {
 
     return {
       from: address,
-      to: address,
+      to: this.getOperatorAddress(),
       contents: contents,
     };
   }
