@@ -48,7 +48,7 @@ export function EditExistingKeysForm({
         name={EthKVStoreKeys.WebhookUrl}
       />
       <Select
-        chip
+        isChipRenderValue
         label={EthKVStoreKeys.Role}
         name={EthKVStoreKeys.Role}
         options={OPTIONS.map((role, i) => ({ name: role, value: role, id: i }))}
