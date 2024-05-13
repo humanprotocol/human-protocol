@@ -61,7 +61,7 @@ describe('CredentialService', () => {
       const startsAtDate = new Date('2024-05-12T13:48:35.938Z');
       const createCredentialDto: CreateCredentialDto = {
         reference: 'bbe5b21336ce',
-        description: 'expertise skills',
+        description: 'expertise skill',
         url: 'https://credentials-validator.com?credential_id=1',
         startsAt: startsAtDate,
       };
