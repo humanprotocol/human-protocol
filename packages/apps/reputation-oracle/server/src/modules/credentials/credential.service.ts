@@ -29,8 +29,22 @@ export class CredentialService {
   public async createCredential(
     createCredentialDto: CreateCredentialDto,
   ): Promise<CredentialEntity> {
-    this.logger.log('Creating a new credential');
-    return this.credentialRepository.create(createCredentialDto);
+    const newCredential = new CredentialEntity();
+    newCredential.reference = createCredentialDto.reference;
+    newCredential.description = createCredentialDto.description;
+    newCredential.url = createCredentialDto.url;
+    newCredential.startsAt = new Date(createCredentialDto.startsAt);
+    if (createCredentialDto.expiresAt) {
+      const providedExpiresAt = new Date(createCredentialDto.expiresAt);
+      if (providedExpiresAt <= newCredential.startsAt) {
+        throw new Error('ExpiresAt must be after StartsAt.');
+      } else {
+        newCredential.expiresAt = providedExpiresAt;
+      }
+    }
+    newCredential.status = CredentialStatus.ACTIVE;
+    await this.credentialRepository.createUnique(newCredential);
+    return newCredential;
   }
 
   public async getCredentials(

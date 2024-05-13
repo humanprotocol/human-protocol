@@ -23,12 +23,12 @@ export class CreateCredentialDto {
 
   @ApiProperty()
   @IsDateString()
-  public startsAt: string;
+  public startsAt: Date;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
-  public expiresAt?: string;
+  public expiresAt?: Date;
 }
 
 export class CredentialDto {
