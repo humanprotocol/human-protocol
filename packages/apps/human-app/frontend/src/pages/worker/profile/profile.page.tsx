@@ -9,10 +9,11 @@ export function WorkerProfilePage() {
     <Paper
       sx={{
         backgroundColor: colorPalette.white,
-        minHeight: '100%',
+        height: '100%',
         boxShadow: 'none',
         padding: '40px',
         display: 'flex',
+        flexDirection: 'column',
         borderRadius: '20px',
         alignItems: 'center',
         justifyContent: 'center',

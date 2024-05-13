@@ -7,6 +7,7 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { PageHeader } from '@/components/layout/protected/page-header';
 import { breakpoints } from '@/styles/theme';
+import { TopNotification } from '@/components/ui/top-notofication';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
@@ -21,8 +22,6 @@ const Main = styled('main', {
 }>(({ theme, open, isMobile }) => ({
   width: '100%',
   flex: '1',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -89,6 +88,10 @@ export function Layout({
             },
           }}
         >
+          <Grid item minHeight="3rem">
+            <TopNotification type="warning">test</TopNotification>
+          </Grid>
+
           <Grid item>
             <PageHeader {...pageHeaderProps} />
           </Grid>
