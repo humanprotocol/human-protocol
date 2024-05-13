@@ -267,7 +267,8 @@
       "backBtn": "Skip",
       "label": "Stake amount",
       "description": "Please add bellow the amount to stake",
-      "successAlert": "You have successfully staked {{amount}} HMT"
+      "successAlert": "You have successfully staked {{amount}} HMT",
+      "invalidDecimals": "Incorrect decimal expansion. HMT token has {{decimals}} decimals"
     },
     "addKeysPage": {
       "title": "Setup Operator",

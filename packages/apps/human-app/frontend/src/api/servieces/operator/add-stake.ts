@@ -6,30 +6,89 @@ import {
   useMutationState,
   useQueryClient,
 } from '@tanstack/react-query';
-import { addStake } from '@/smart-contracts/stake/add-stake';
+import { t } from 'i18next';
+import { stake } from '@/smart-contracts/Staking/stake';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
+import { getContractAddress } from '@/smart-contracts/get-contract-address';
+import { approve } from '@/smart-contracts/HMToken/approve';
+import type { ContractCallArguments } from '@/smart-contracts/types';
 
-export const addStakeCallArgumentsSchema = z.object({
-  amount: z.coerce.number().min(1).max(1_000_000_000),
-});
+type AmountValidation = z.ZodEffects<
+  z.ZodEffects<z.ZodString, string, string>,
+  string,
+  string
+>;
+type AmountField = z.infer<AmountValidation>;
 
-export type AddStakeCallArguments = z.infer<typeof addStakeCallArgumentsSchema>;
+export const addStakeAmountCallArgumentsSchema = (
+  decimals: number
+): AmountValidation =>
+  z
+    .string()
+    .refine((amount) => !amount.startsWith('-'))
+    .refine(
+      (amount) => {
+        const decimalPart = amount.toString().split('.')[1];
+        if (!decimalPart) return true;
+        return decimalPart.length <= decimals;
+      },
+      {
+        message: t('operator.stakeForm.invalidDecimals', {
+          decimals,
+        }),
+      }
+    );
+
+export interface AddStakeCallArguments {
+  amount: AmountField;
+}
 
 async function addStakeMutationFn(
-  data: AddStakeCallArguments & { address: string }
+  data: AddStakeCallArguments & {
+    address: string;
+    amount: string;
+  } & Omit<ContractCallArguments, 'contractAddress'>
 ) {
-  await addStake(data);
+  const stakingContractAddress = getContractAddress({
+    chainId: data.chainId,
+    contractName: 'Staking',
+  });
+
+  const hmTokenContractAddress = getContractAddress({
+    chainId: data.chainId,
+    contractName: 'HMToken',
+  });
+
+  await approve({
+    spender: stakingContractAddress,
+    contractAddress: hmTokenContractAddress,
+    chainId: data.chainId,
+    provider: data.provider,
+    signer: data.signer,
+    amount: data.amount,
+  });
+  await stake({ ...data, contractAddress: stakingContractAddress });
   return data;
 }
 
 export function useAddStakeMutation() {
-  const { address } = useConnectedWallet();
+  const {
+    chainId,
+    address,
+    web3ProviderMutation: { data: web3data },
+  } = useConnectedWallet();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: AddStakeCallArguments) =>
-      addStakeMutationFn({ ...data, address }),
+      addStakeMutationFn({
+        ...data,
+        address,
+        provider: web3data?.provider,
+        signer: web3data?.signer,
+        chainId,
+      }),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },

@@ -4,8 +4,9 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
+import { z } from 'zod';
 import {
-  addStakeCallArgumentsSchema,
+  addStakeAmountCallArgumentsSchema,
   useAddStakeMutation,
   type AddStakeCallArguments,
 } from '@/api/servieces/operator/add-stake';
@@ -14,14 +15,18 @@ import { Input } from '@/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';
 
-export function StakeForm() {
+export function StakeForm({ decimals }: { decimals: number }) {
   const addStakeMutation = useAddStakeMutation();
 
   const methods = useForm<AddStakeCallArguments>({
     defaultValues: {
-      amount: 0,
+      // Since we deal with numbers that may have huge decimal extensions,
+      // we are using strings as a safer solution
+      amount: '0',
     },
-    resolver: zodResolver(addStakeCallArgumentsSchema),
+    resolver: zodResolver(
+      z.object({ amount: addStakeAmountCallArgumentsSchema(decimals) })
+    ),
   });
 
   const addStake = (data: AddStakeCallArguments) => {
@@ -45,6 +50,7 @@ export function StakeForm() {
               label={t('operator.stakeForm.label')}
               mask="HumanCurrencyInputMask"
               name="amount"
+              type="text"
             />
             <Grid
               container

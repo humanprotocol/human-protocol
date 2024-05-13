@@ -10,16 +10,9 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import { useWeb3Provider } from '@/hooks/use-web3-provider';
 import { env } from '@/shared/env';
 import type { ResponseError } from '@/shared/types/global.type';
+import { chains } from '@/smart-contracts/chains';
 
 const projectId = env.VITE_WALLET_CONNECT_PROJECT_ID;
-
-const mainnet = {
-  chainId: 1,
-  name: 'Ethereum',
-  currency: 'ETH',
-  explorerUrl: 'https://etherscan.io',
-  rpcUrl: 'https://cloudflare-eth.com',
-};
 
 const metadata = {
   name: env.VITE_DAPP_META_NAME,
@@ -33,7 +26,7 @@ const ethersConfig = defaultConfig({
 });
 createWeb3Modal({
   ethersConfig,
-  chains: [mainnet],
+  chains,
   projectId,
   enableAnalytics: true,
 });
