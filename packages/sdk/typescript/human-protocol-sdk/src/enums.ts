@@ -3,6 +3,7 @@ export enum ChainId {
   MAINNET = 1,
   RINKEBY = 4,
   GOERLI = 5,
+  SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
@@ -16,4 +17,5 @@ export enum ChainId {
   CELO = 42220,
   CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
+  XLAYER = 196,
 }

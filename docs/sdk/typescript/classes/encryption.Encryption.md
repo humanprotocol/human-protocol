@@ -81,11 +81,7 @@ Constructor for the Encryption class.
 
 #### Defined in
 
-<<<<<<< HEAD
-[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
-=======
-[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
->>>>>>> develop
+[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/7266ce78/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
 
 ## Properties
 
@@ -95,11 +91,7 @@ Constructor for the Encryption class.
 
 #### Defined in
 
-<<<<<<< HEAD
-[encryption.ts:46](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L46)
-=======
-[encryption.ts:46](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L46)
->>>>>>> develop
+[encryption.ts:46](https://github.com/humanprotocol/human-protocol/blob/7266ce78/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L46)
 
 ## Methods
 
@@ -148,11 +140,7 @@ const resultMessage = await encription.decrypt('message');
 
 #### Defined in
 
-<<<<<<< HEAD
-[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
-=======
-[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
->>>>>>> develop
+[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/7266ce78/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
 
 ___
 
@@ -188,11 +176,7 @@ const resultMessage = await encription.sign('message');
 
 #### Defined in
 
-<<<<<<< HEAD
-[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
-=======
-[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
->>>>>>> develop
+[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/7266ce78/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
 
 ___
 
@@ -254,11 +238,7 @@ const resultMessage = await encription.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
-<<<<<<< HEAD
-[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
-=======
-[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
->>>>>>> develop
+[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/7266ce78/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
 
 ___
 
@@ -283,8 +263,4 @@ Builds an Encryption instance by decrypting the private key from an encrypted pr
 
 #### Defined in
 
-<<<<<<< HEAD
-[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/4a01940c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)
-=======
-[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/e4b60ab1/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)
->>>>>>> develop
+[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/7266ce78/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)

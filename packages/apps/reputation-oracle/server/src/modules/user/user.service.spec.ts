@@ -253,7 +253,7 @@ describe('UserService', () => {
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
         MOCK_ADDRESS,
-        'ACTIVE',
+        OperatorStatus.INACTIVE,
       );
     });
 

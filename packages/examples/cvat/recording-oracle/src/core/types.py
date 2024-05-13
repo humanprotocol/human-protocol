@@ -6,7 +6,7 @@ from src.utils.enums import BetterEnumMeta
 
 class Networks(int, Enum):
     polygon_mainnet = Config.polygon_mainnet.chain_id
-    polygon_mumbai = Config.polygon_mumbai.chain_id
+    polygon_amoy = Config.polygon_amoy.chain_id
     localhost = Config.localhost.chain_id
 
 

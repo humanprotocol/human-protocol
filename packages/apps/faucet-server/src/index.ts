@@ -8,7 +8,8 @@ import RateLimit from 'express-rate-limit';
 import NodeCache from 'node-cache';
 import path from 'path';
 import Web3 from 'web3';
-import { ChainId, FAUCET_NETWORKS } from './constants/networks';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { FAUCET_NETWORKS } from './constants/networks';
 import { lastSendType } from './interfaces/lastSendType';
 import {
   checkFaucetBalance,
@@ -40,15 +41,30 @@ const blockList = new NodeCache();
 // init queue
 const lastSend: lastSendType[] = [];
 
+const getNetworkData = (chainId: ChainId) => {
+  return {
+    ...NETWORKS[chainId],
+    ...FAUCET_NETWORKS[chainId],
+  };
+};
+
 app.get('/stats', async (_request: Request, response: Response) => {
   const chainId = Number(_request.query.chainId);
   // Check for valid network
-  const network = FAUCET_NETWORKS[chainId as ChainId];
+  const network = getNetworkData(chainId as ChainId);
+
   if (!network)
     return response.status(200).json({
       status: false,
       message: 'Invalid Chain Id',
     });
+
+  if (!network.rpcUrl?.length) {
+    return response.status(200).json({
+      status: false,
+      message: 'Faucet is disabled',
+    });
+  }
 
   const web3 = getWeb3(network.rpcUrl);
   response.send({
@@ -71,12 +87,19 @@ app.post('/faucet', async (request: Request, response: Response) => {
   const toAddress = request.body.address.replace(' ', '');
 
   // Check for valid network
-  const network = FAUCET_NETWORKS[chainId as ChainId];
+  const network = getNetworkData(chainId as ChainId);
   if (!network)
     return response.status(200).json({
       status: false,
       message: 'Invalid Chain Id',
     });
+
+  if (!network.rpcUrl?.length) {
+    return response.status(200).json({
+      status: false,
+      message: 'Faucet is disabled',
+    });
+  }
 
   // check for valid Eth address
   if (!Web3.utils.isAddress(toAddress))

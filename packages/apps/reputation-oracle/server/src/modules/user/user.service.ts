@@ -157,8 +157,10 @@ export class UserService {
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
       signer = this.web3Service.getSigner(ChainId.POLYGON);
-    } else {
+    } else if (currentWeb3Env === Web3Env.TESTNET) {
       signer = this.web3Service.getSigner(ChainId.POLYGON_AMOY);
+    } else {
+      signer = this.web3Service.getSigner(ChainId.LOCALHOST);
     }
 
     const kvstore = await KVStoreClient.build(signer);
@@ -169,6 +171,6 @@ export class UserService {
       throw new BadRequestException(ErrorOperator.OperatorNotActive);
     }
 
-    await kvstore.set(user.evmAddress, 'ACTIVE');
+    await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
   }
 }

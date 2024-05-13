@@ -7,9 +7,10 @@
  */
 
 import hmtAbi from '@human-protocol/core/abis/HMToken.json';
+import { ChainId } from '@human-protocol/sdk';
 import Web3 from 'web3';
 
-import { ChainId, FAUCET_NETWORKS } from '../constants/networks';
+import { FAUCET_NETWORKS } from '../constants/networks';
 import {
   AnonymousParams,
   AnonymousPoW,

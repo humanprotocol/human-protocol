@@ -5,6 +5,8 @@ import { createPublicClient, http } from 'viem';
 import {
   bsc,
   bscTestnet,
+  goerli,
+  sepolia,
   mainnet,
   polygon,
   polygonAmoy,
@@ -12,11 +14,14 @@ import {
   moonbaseAlpha,
   celo,
   celoAlfajores,
+  xLayer
 } from 'viem/chains';
 import { formatUnits, parseUnits } from 'viem/utils';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
+  [ChainId.GOERLI]: goerli,
+  [ChainId.SEPOLIA]: sepolia,
   [ChainId.BSC_MAINNET]: bsc,
   [ChainId.BSC_TESTNET]: bscTestnet,
   [ChainId.POLYGON]: polygon,
@@ -25,6 +30,7 @@ const SUPPORTED_CHAINS = {
   [ChainId.MOONBASE_ALPHA]: moonbaseAlpha,
   [ChainId.CELO]: celo,
   [ChainId.CELO_ALFAJORES]: celoAlfajores,
+  [ChainId.XLAYER]: xLayer,
 };
 
 const addBigInts = (a: string, b: string, decimals = 18) => {

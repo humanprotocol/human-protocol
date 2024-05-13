@@ -35,17 +35,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
         self.assertEqual(w3.manager._provider.endpoint_uri, PolygonMainnetConfig.rpc_api)
 
-    def test_get_web3_mumbai(self):
-        class PolygonMumbaiConfig:
-            chain_id = 80001
-            rpc_api = "https://polygon-mumbai-rpc.com"
+    def test_get_web3_amoy(self):
+        class PolygonAmoyConfig:
+            chain_id = 80002
+            rpc_api = "https://polygon-amoy-rpc.com"
             private_key = DEFAULT_GAS_PAYER_PRIV
 
-        with patch("src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig):
-            w3 = get_web3(ChainId.POLYGON_MUMBAI.value)
+        with patch("src.chain.web3.Config.polygon_amoy", PolygonAmoyConfig):
+            w3 = get_web3(ChainId.POLYGON_AMOY.value)
         self.assertIsInstance(w3, Web3)
         self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
-        self.assertEqual(w3.manager._provider.endpoint_uri, PolygonMumbaiConfig.rpc_api)
+        self.assertEqual(w3.manager._provider.endpoint_uri, PolygonAmoyConfig.rpc_api)
 
     def test_get_web3_localhost(self):
         w3 = get_web3(ChainId.LOCALHOST.value)
@@ -70,13 +70,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             signed_message, _ = sign_message(ChainId.POLYGON.value, "message")
         self.assertEqual(signed_message, SIGNATURE)
 
-    def test_sign_message_mumbai(self):
+    def test_sign_message_amoy(self):
         with patch("src.chain.web3.get_web3") as mock_function, patch(
-            "src.chain.web3.Config.polygon_mumbai.private_key",
+            "src.chain.web3.Config.polygon_amoy.private_key",
             DEFAULT_GAS_PAYER_PRIV,
         ):
             mock_function.return_value = self.w3
-            signed_message, _ = sign_message(ChainId.POLYGON_MUMBAI.value, "message")
+            signed_message, _ = sign_message(ChainId.POLYGON_AMOY.value, "message")
         self.assertEqual(signed_message, SIGNATURE)
 
     def test_sign_message_invalid_chain_id(self):

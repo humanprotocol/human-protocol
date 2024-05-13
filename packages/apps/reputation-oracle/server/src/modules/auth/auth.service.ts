@@ -8,7 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
-import { UserStatus } from '../../common/enums/user';
+import { OperatorStatus, UserStatus } from '../../common/enums/user';
 import { UserCreateDto, Web3UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -76,10 +76,6 @@ export class AuthService {
 
     if (!userEntity) {
       throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
-    }
-
-    if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
     }
 
     return this.auth(userEntity);
@@ -387,7 +383,7 @@ export class AuthService {
       data.address,
     );
 
-    await kvstore.set(data.address, 'ACTIVE');
+    await kvstore.set(data.address, OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }
