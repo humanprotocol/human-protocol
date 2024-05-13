@@ -1,15 +1,24 @@
 import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 import Button from '@mui/material/Button';
+import { useEffect } from 'react';
 import { ProfileAction } from '@/pages/worker/profile/profile-action';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 
-export function ProfileActions() {
+export function ProfileActions({
+  setNotifications,
+}: {
+  setNotifications: () => void;
+}) {
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   const { isConnected: isWalletConnected } = useWalletConnect();
+
+  useEffect(() => {
+    setNotifications();
+  }, [isWalletConnected, setNotifications]);
 
   return (
     <Grid container flexDirection="column" gap="1rem">

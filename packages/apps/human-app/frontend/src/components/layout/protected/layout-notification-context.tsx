@@ -6,7 +6,9 @@ export interface TopNotificationPayload {
   type: TopNotificationType;
 }
 
+export type SetTopNotificationFn = (data: TopNotificationPayload) => void;
+
 export const ProtectedLayoutContext = createContext<{
-  setTopNotification: (data: TopNotificationPayload) => void;
+  setTopNotification: SetTopNotificationFn;
   closeNotification: () => void;
 } | null>(null);

@@ -4,11 +4,11 @@ import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 import { ProfileData } from '@/pages/worker/profile/profile-data';
 import { ProfileActions } from '@/pages/worker/profile/profile-actions';
-import { ProfileNotification } from '@/pages/worker/profile/profile-notifications';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import type { UserData } from '@/auth/auth-context';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
+import { ProfileEmailNotification } from '@/pages/worker/profile/profile-email-notifications';
 
 const getNotificationMessage = (
   user: UserData & { isWalletConnected: boolean }
@@ -28,14 +28,16 @@ const getNotificationMessage = (
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
   const { isConnected } = useWalletConnect();
-  const { setTopNotification } = useProtectedLayoutNotification();
+  const { setTopNotification: setTopNotificationInLayout } =
+    useProtectedLayoutNotification();
+
   const setNotifications = () => {
     const notification = getNotificationMessage({
       ...user,
       isWalletConnected: isConnected,
     });
     if (notification) {
-      setTopNotification({ type: 'warning', content: notification });
+      setTopNotificationInLayout({ type: 'warning', content: notification });
     }
   };
 
@@ -66,8 +68,8 @@ export function WorkerProfilePage() {
         }}
       >
         <ProfileData />
-        <ProfileActions />
-        <ProfileNotification />
+        <ProfileActions setNotifications={setNotifications} />
+        <ProfileEmailNotification />
       </Grid>
     </Paper>
   );

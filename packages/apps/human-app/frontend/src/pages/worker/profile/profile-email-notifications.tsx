@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 
-export function ProfileNotification() {
+export function ProfileEmailNotification() {
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
 
