@@ -33,6 +33,41 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [EndpointName.EMAIL_VERIFICATION]: {
+              endpoint: '/auth/email-verification',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.RESEND_EMAIL_VERIFICATION]: {
+              endpoint: '/auth/resend-email-verification',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.FORGOT_PASSWORD]: {
+              endpoint: '/auth/forgot-password',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.RESTORE_PASSWORD]: {
+              endpoint: '/auth/restore-password',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.PREPARE_SIGNATURE]: {
+              endpoint: '/web3/prepare-signature',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.DISABLE_OPERATOR]: {
+              endpoint: '/user/disable-operator',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [EndpointName.KYC_PROCEDURE_START]: {
+              endpoint: '/kyc/start',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
           },
         },
       },
