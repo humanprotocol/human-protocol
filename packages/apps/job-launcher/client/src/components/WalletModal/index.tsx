@@ -87,7 +87,13 @@ export default function WalletModal({
                   },
                 }}
                 key={connector.id}
-                onClick={() => connect({ connector })}
+                onClick={() => {
+                  connect({ connector });
+
+                  if (connector.id === 'walletConnect') {
+                    onClose();
+                  }
+                }}
               >
                 <img
                   src={connector.icon ?? WALLET_ICONS[connector.id]}
