@@ -10,14 +10,12 @@ import ListItemText from '@mui/material/ListItemText';
 import { useTranslation } from 'react-i18next';
 import { Box, Chip, FormHelperText, OutlinedInput } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
-import last from 'lodash/last';
 import { colorPalette } from '@/styles/color-palette';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
   options: string[];
   name: string;
   label: string;
-  singleValue?: boolean;
 }
 
 type FieldType = ControllerRenderProps<FieldValues, string>;
@@ -28,7 +26,6 @@ export function MultiSelect({
   name,
   options,
   label,
-  singleValue,
   ...props
 }: MultiSelectProps) {
   const { t } = useTranslation();
@@ -86,13 +83,6 @@ export function MultiSelect({
     field: FieldType
   ) => {
     const value = event.target.value;
-    if (singleValue) {
-      const singleSelectedValue = last(value);
-      const val = singleSelectedValue ? [singleSelectedValue] : [];
-      context.setValue(name, val);
-      return;
-    }
-
     if (
       value[value.length - 1] === CHECK_ALL_NAME &&
       Array.isArray(field.value)
@@ -128,14 +118,12 @@ export function MultiSelect({
                 handleChange(event, field);
               }}
             >
-              {singleValue ? null : (
-                <MenuItem value={CHECK_ALL_NAME}>
-                  <Checkbox checked={isAllFieldsChecked(field)} />
-                  <ListItemText>
-                    {t('components.multiSelect.allFields')}
-                  </ListItemText>
-                </MenuItem>
-              )}
+              <MenuItem value={CHECK_ALL_NAME}>
+                <Checkbox checked={isAllFieldsChecked(field)} />
+                <ListItemText>
+                  {t('components.multiSelect.allFields')}
+                </ListItemText>
+              </MenuItem>
               {options.map((option) => (
                 <MenuItem key={option} value={option}>
                   <Checkbox checked={isFieldChecked(field, option)} />

@@ -1,36 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
-import { get } from '@/smart-contracts/EthKVStore/get-all-keys';
+import { ethKVStoreGetKeys } from '@/smart-contracts/EthKVStore/eth-kv-store-get-keys';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 
 export const getEthKVStoreValuesSuccessSchema = z.object({
   [EthKVStoreKeys.PublicKey]: z.string().optional(),
   [EthKVStoreKeys.WebhookUrl]: z.string().optional(),
-  [EthKVStoreKeys.Role]: z
-    .string()
-    .optional()
-    .transform((role) => {
-      if (!role) return [];
-      return [role];
-    }),
-  [EthKVStoreKeys.Fee]: z
-    .string()
-    .transform((fee, ctx) => {
-      const feeAsNumber = Number(fee);
-      try {
-        return z.number().parse(feeAsNumber);
-      } catch (error) {
-        ctx.addIssue({
-          path: [EthKVStoreKeys.Fee],
-          message: 'Invalid input',
-          code: 'custom',
-        });
-        return false;
-      }
-    })
-    .optional(),
+  [EthKVStoreKeys.Role]: z.string().optional(),
+  [EthKVStoreKeys.Fee]: z.string().optional(),
 });
 
 export type GetEthKVStoreValuesSuccessResponse = z.infer<
@@ -50,7 +29,7 @@ export function useGetKeys() {
         chainId,
         contractName: 'EthKVStore',
       });
-      const result = await get({
+      const result = await ethKVStoreGetKeys({
         accountAddress: address,
         contractAddress,
         chainId,

@@ -6,7 +6,7 @@ import type {
   SetBulkValues,
 } from '@/smart-contracts/EthKVStore/config';
 
-export async function setBulk({
+export async function ethKvStoreSetBulk({
   keys,
   values,
   contractAddress,

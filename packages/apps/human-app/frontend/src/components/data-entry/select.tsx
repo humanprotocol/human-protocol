@@ -5,6 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { Controller } from 'react-hook-form';
 import InputLabel from '@mui/material/InputLabel';
 import FormHelperText from '@mui/material/FormHelperText';
+import { Chip } from '@/components/ui/chip';
 
 export interface OptionsProps {
   id: number;
@@ -17,6 +18,7 @@ interface SelectComponentProps extends Omit<SelectProps, 'name' | 'error'> {
   name: string;
   label?: string;
   ariaLabelledby?: string;
+  chip?: boolean;
 }
 
 export function Select({
@@ -24,6 +26,7 @@ export function Select({
   name,
   label,
   options,
+  chip,
   ...props
 }: SelectComponentProps) {
   return (
@@ -39,6 +42,11 @@ export function Select({
             labelId={`${name}-label`}
             {...props}
             label={label}
+            renderValue={
+              chip
+                ? (selected) => <Chip label={selected as string} />
+                : undefined
+            }
           >
             {options.map((elem) => (
               <MenuItem key={crypto.randomUUID().toString()} value={elem.value}>

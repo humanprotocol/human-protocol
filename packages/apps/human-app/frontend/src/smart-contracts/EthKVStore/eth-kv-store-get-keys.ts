@@ -3,7 +3,7 @@ import EthKVStore from '@/smart-contracts/abi/EthKVStore.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 
-export async function get({
+export async function ethKVStoreGetKeys({
   accountAddress,
   contractAddress,
   signer,

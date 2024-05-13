@@ -7,11 +7,11 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { stake } from '@/smart-contracts/Staking/stake';
+import { stakingStake } from '@/smart-contracts/Staking/staking-stake';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
-import { approve } from '@/smart-contracts/HMToken/approve';
+import { hmTokenApprove } from '@/smart-contracts/HMToken/hm-token-approve';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 
 type AmountValidation = z.ZodEffects<
@@ -60,7 +60,7 @@ async function addStakeMutationFn(
     contractName: 'HMToken',
   });
 
-  await approve({
+  await hmTokenApprove({
     spender: stakingContractAddress,
     contractAddress: hmTokenContractAddress,
     chainId: data.chainId,
@@ -68,7 +68,7 @@ async function addStakeMutationFn(
     signer: data.signer,
     amount: data.amount,
   });
-  await stake({ ...data, contractAddress: stakingContractAddress });
+  await stakingStake({ ...data, contractAddress: stakingContractAddress });
   return data;
 }
 

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
-import { decimals } from '@/smart-contracts/HMToken/decimals';
+import { hmTokenDecimals } from '@/smart-contracts/HMToken/hm-token-decimals';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
 export function useHMTokenDecimals() {
@@ -15,7 +15,7 @@ export function useHMTokenDecimals() {
         chainId,
         contractName: 'HMToken',
       });
-      return decimals({
+      return hmTokenDecimals({
         contractAddress,
         chainId,
         signer: data?.signer,
