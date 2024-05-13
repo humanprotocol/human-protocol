@@ -30,7 +30,7 @@ export const wagmiConfig = createConfig({
       projectId: projectId ?? '',
     }),
     coinbaseWallet({
-      appName: 'human-dashboard-ui',
+      appName: 'human-job-launcher',
     }),
   ],
   transports: {
