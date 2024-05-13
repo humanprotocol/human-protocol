@@ -77,6 +77,15 @@ export class NetworkConfigService {
           },
         },
       }),
+      ...(this.configService.get<string>('RPC_URL_XLAYER_TESTNET') && {
+        xlayertestnet: {
+          chainId: ChainId.XLAYER_TESTNET,
+          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER_TESTNET'),
+          tokens: {
+            hmt: NETWORKS[ChainId.XLAYER_TESTNET]?.hmtAddress,
+          },
+        },
+      }),
       ...(this.configService.get<string>('RPC_URL_XLAYER') && {
         xlayer: {
           chainId: ChainId.XLAYER,

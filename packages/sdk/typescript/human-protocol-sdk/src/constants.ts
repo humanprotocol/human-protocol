@@ -293,6 +293,20 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
+  [ChainId.XLAYER_TESTNET]: {
+    chainId: ChainId.XLAYER_TESTNET,
+    title: 'XLayer Testnet',
+    scanUrl: 'https://www.okx.com/explorer/xlayer-test',
+    factoryAddress: '0x83bf8975F4B1B99969B5134f86E5bd683DCf5aFc',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    stakingAddress: '0x703936A24DFaDcD34008Db338FDB087c43C8c56a',
+    rewardPoolAddress: '0x44FAd6e8d616AD460cf8eEf503FC101170E7De73',
+    kvstoreAddress: '0xcCfF9646Abf988d9842d94b171A67d5F6c30dBe2',
+    subgraphUrl:
+      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',
