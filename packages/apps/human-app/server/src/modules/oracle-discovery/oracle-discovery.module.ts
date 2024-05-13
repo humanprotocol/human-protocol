@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { OracleDiscoveryService } from './oracle-discovery.serivce';
+import { OracleDiscoveryService } from './oracle-discovery.service';
 
 @Module({
   providers: [OracleDiscoveryService],

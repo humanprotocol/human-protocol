@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
-import { OracleDiscoveryService } from '../oracle-discovery.serivce';
+import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
 import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';

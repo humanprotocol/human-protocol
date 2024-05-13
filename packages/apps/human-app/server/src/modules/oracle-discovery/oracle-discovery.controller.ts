@@ -1,6 +1,6 @@
 import { Controller, Get, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { OracleDiscoveryService } from './oracle-discovery.serivce';
+import { OracleDiscoveryService } from './oracle-discovery.service';
 import { OracleDiscoveryResponse } from './model/oracle-discovery.model';
 
 @Controller()
