@@ -19,6 +19,8 @@ import { EmailVerificationWorkerPage } from '@/pages/worker/email-verification/e
 import { SendEmailVerificationWorkerPage } from '@/pages/worker/email-verification/send-email-verification.page';
 import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
+import type { PageHeaderProps } from '@/components/layout/protected/page-header';
+import { HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -71,22 +73,49 @@ export const unprotectedRoutes: RouteProps[] = [
   },
 ];
 
-export const protectedRoutes: RouteProps[] = [
+export const protectedRoutes: {
+  routerProps: RouteProps;
+  pageHeaderProps: PageHeaderProps;
+}[] = [
   {
-    path: '/protected',
-    element: <ProtectedPage />,
+    routerProps: {
+      path: '/protected',
+      element: <ProtectedPage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <ProfileIcon />,
+      headerText: 'Profile',
+    },
   },
   {
-    path: routerPaths.worker.jobs,
-    element: <JobsPage />,
+    routerProps: {
+      path: routerPaths.worker.jobs,
+      element: <JobsPage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <HomepageWorkIcon />,
+      headerText: 'Jobs',
+    },
   },
   {
-    path: routerPaths.operator.profile,
-    element: <OperatorProfilePage />,
+    routerProps: {
+      path: routerPaths.operator.profile,
+      element: <OperatorProfilePage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <ProfileIcon />,
+      headerText: 'Profile',
+    },
   },
   {
-    path: routerPaths.worker.profile,
-    element: <WorkerProfilePage />,
+    routerProps: {
+      path: routerPaths.worker.profile,
+      element: <WorkerProfilePage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <ProfileIcon />,
+      headerText: 'Profile',
+    },
   },
 ];
 

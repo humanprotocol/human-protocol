@@ -24,6 +24,7 @@ export function Footer({ isProtected }: FooterProps) {
 
   return (
     <Grid
+      component="footer"
       container
       sx={{
         pr: isMobile ? 0 : '44px',

@@ -4,10 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
 import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
-import { PageHeader } from '@/components/layout/protected/page-header';
-import { useIsMobile } from '@/hooks/use-is-mobile';
-import { HomepageWorkIcon } from '@/components/ui/icons';
 import { Modal } from '@/components/ui/modal/modal';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { AvailableJobsTable } from './components/avaible-jobs/available-jobs-table';
 import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
 import { MyJobsTableMobile } from './components/my-jobs/my-jobs-table-mobile';
@@ -56,13 +54,6 @@ export function JobsPage() {
         />
       </Modal>
       <Grid alignItems="center" container justifyContent="center">
-        <Grid item xs={12}>
-          <PageHeader
-            backgroundColor={colorPalette.paper.main}
-            headerIcon={<HomepageWorkIcon />}
-            headerText={t('worker.jobs.jobsDiscovery')}
-          />
-        </Grid>
         <Grid item xs={12}>
           <Paper
             sx={{

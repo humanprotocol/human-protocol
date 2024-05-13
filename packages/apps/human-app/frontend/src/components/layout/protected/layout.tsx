@@ -4,7 +4,9 @@ import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
-import { colorPalette } from '@/styles/color-palette';
+import type { PageHeaderProps } from '@/components/layout/protected/page-header';
+import { PageHeader } from '@/components/layout/protected/page-header';
+import { breakpoints } from '@/styles/theme';
 import { Footer } from '../footer';
 import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
@@ -18,7 +20,7 @@ const Main = styled('main', {
   isMobile?: boolean;
 }>(({ theme, open, isMobile }) => ({
   width: '100%',
-  flexGrow: 1,
+  flex: '1',
   flexDirection: 'column',
   justifyContent: 'space-between',
   transition: theme.transitions.create('margin', {
@@ -34,7 +36,11 @@ const Main = styled('main', {
   }),
 }));
 
-export function Layout() {
+export function Layout({
+  pageHeaderProps,
+}: {
+  pageHeaderProps: PageHeaderProps;
+}) {
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const { backgroundColor } = useBackgroundColorStore();
@@ -55,19 +61,39 @@ export function Layout() {
       flexWrap="nowrap"
       justifyContent="space-between"
       sx={{
-        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
         minHeight: '100vh',
+        height: '100%',
         width: '100%',
         pt: '0',
         pl: isMobile ? 0 : '120px',
         pr: isMobile ? 0 : '20px',
-        backgroundColor: isMobile ? colorPalette.white : backgroundColor,
+        backgroundColor,
       }}
     >
       <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
       <DrawerNavigation drawerWidth={drawerWidth} open={drawerOpen} />
       <Main isMobile={isMobile} open={drawerOpen}>
-        <Outlet />
+        <Grid
+          container
+          sx={{
+            margin: '1rem 0',
+            display: 'flex',
+            gap: '2rem',
+            flexDirection: 'column',
+            padding: '0 2rem',
+            [breakpoints.mobile]: {
+              gap: '1rem',
+              padding: '0 1rem',
+            },
+          }}
+        >
+          <Grid item>
+            <PageHeader {...pageHeaderProps} />
+          </Grid>
+          <Outlet />
+        </Grid>
       </Main>
       <Footer isProtected />
     </Grid>
