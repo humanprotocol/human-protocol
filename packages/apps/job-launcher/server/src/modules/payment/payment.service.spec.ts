@@ -32,7 +32,7 @@ import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
 import { verifySignature } from '../../common/utils/signature';
 import { ConflictException } from '@nestjs/common';
-import { DatabaseError } from '../../database/database.error';
+import { DatabaseError } from '../../common/errors/database';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 

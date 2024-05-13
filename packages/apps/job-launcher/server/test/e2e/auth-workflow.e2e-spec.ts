@@ -111,7 +111,6 @@ describe('AuthService E2E', () => {
     expect(refreshTokenResponse.body).toHaveProperty('refresh_token');
 
     const accessToken = refreshTokenResponse.body.access_token;
-    const refreshToken = refreshTokenResponse.body.refresh_token;
 
     // Resend Email Verification
     const resendEmailVerificationResponse = await request(app.getHttpServer())
