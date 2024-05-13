@@ -3,8 +3,12 @@ import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Grid, Paper, Typography, Box, Button, TextField } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import * as openpgp from 'openpgp';
-import { FC, useState } from 'react';
-import { useWaitForTransaction, useContractWrite, useNetwork } from 'wagmi';
+import { FC, useEffect, useState } from 'react';
+import {
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useAccount,
+} from 'wagmi';
 
 import { Alert } from '../Alert';
 import { NFT_STORAGE_CLIENT } from './constants';
@@ -14,7 +18,7 @@ export type EncryptProps = {
 };
 
 export const Encrypt: FC<EncryptProps> = ({ publicKey }) => {
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const [key, setKey] = useState('');
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,32 +27,27 @@ export const Encrypt: FC<EncryptProps> = ({ publicKey }) => {
   const [copy, setCopy] = useState<boolean>(false);
   const [encrypted, setEncrypted] = useState<string>('');
 
-  const { data, writeAsync } = useContractWrite({
-    mode: 'recklesslyUnprepared',
-    address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
-    abi: KVStore,
-    chainId: chain?.id,
-    functionName: 'set',
+  const { data: hash, writeContractAsync } = useWriteContract();
 
-    onError() {
-      setError('Error transaction');
+  const { isSuccess: isTransactionSuccess, error: errorTransaction } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
+
+  useEffect(() => {
+    if (errorTransaction) {
+      setError(errorTransaction.message);
       setSuccess(false);
       setLoading(false);
-    },
-  });
+    }
+  }, [errorTransaction]);
 
-  useWaitForTransaction({
-    hash: data?.hash,
-    onSuccess(data) {
+  useEffect(() => {
+    if (isTransactionSuccess) {
       setSuccess(true);
       setLoading(false);
-    },
-    onError() {
-      setError('Error transaction');
-      setSuccess(false);
-      setLoading(false);
-    },
-  });
+    }
+  }, [isTransactionSuccess]);
 
   async function storeKeyValue() {
     setLoading(true);
@@ -73,7 +72,23 @@ export const Encrypt: FC<EncryptProps> = ({ publicKey }) => {
       });
       const someData = new Blob([encrypted1 as string]);
       const cid = await NFT_STORAGE_CLIENT.storeBlob(someData);
-      await writeAsync?.({ recklesslySetUnpreparedArgs: [key, cid] });
+      await writeContractAsync?.(
+        {
+          address: NETWORKS[chain?.id as ChainId]
+            ?.kvstoreAddress as `0x${string}`,
+          abi: KVStore,
+          chainId: chain?.id,
+          functionName: 'set',
+          args: [key, cid],
+        },
+        {
+          onError: () => {
+            setError('Error transaction');
+            setSuccess(false);
+            setLoading(false);
+          },
+        }
+      );
       setEncrypted(encrypted1 as string);
     } catch (e) {
       if (e instanceof Error) {
