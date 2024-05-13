@@ -40,7 +40,7 @@ following subcategories:
 - **Service**: Contains the main business logic.
 - **Mapper**: Manages mapping between DTOs received from the frontend and the business logic domain datatype, using NestJS AutoMapper.
 - **Module**: Manages the dependency injection for the component.
-- **Interfaces**: For more details, see the **Interfaces** section below.
+- **Model**: For more details, see the **Model** section below.
 - **Spec**: Contains unit tests for the module.
 - **Mock**: Provides mock implementations for the module.
 
@@ -59,9 +59,9 @@ and transformation of data. NestJS provides many built-in pipes, so check the do
 - **Filters**: Classes implementing the `ExceptionFilter` interface, used to handle exceptions.
 - **Interceptors**: Used to bind extra logic before or after method execution or to extend the behavior of the method.
 
-### Interfaces
+### Model 
 
-Interfaces are used to define the shape and responsibilities of the data:
+Models are used to define the shape and responsibilities of the data:
 
 - **Dto (Data Transfer Object)**: Data sent from/to the frontend.
 - **Command**: Datatype used for data manipulation in business logic.
