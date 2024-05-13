@@ -18,6 +18,7 @@ class Task(Base):
     chain_id = Column(Integer, Enum(Networks), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    iteration = Column(Integer, server_default="0", nullable=False)
 
     jobs: Mapped[List["Job"]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True

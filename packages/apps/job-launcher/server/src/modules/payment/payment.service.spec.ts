@@ -34,6 +34,7 @@ import { verifySignature } from '../../common/utils/signature';
 import { ConflictException } from '@nestjs/common';
 import { DatabaseError } from '../../database/database.error';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -69,6 +70,8 @@ describe('PaymentService', () => {
             return '0.0.1';
           case 'STRIPE_APP_INFO_URL':
             return 'https://test-app-url.com';
+          case 'RPC_URL_POLYGON_AMOY':
+            return 'http://0.0.0.0:8545';
           default:
             return defaultValue;
         }
@@ -92,6 +95,7 @@ describe('PaymentService', () => {
         },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        NetworkConfigService,
       ],
     }).compile();
 

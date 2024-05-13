@@ -1,7 +1,10 @@
+import io
 import itertools
 import logging
-from typing import Dict, List, Optional
+from functools import partial
+from typing import Any, Callable, Dict, List, Optional
 
+from datumaro.util import take_by
 from sqlalchemy import exc as db_exc
 from sqlalchemy.orm import Session
 
@@ -40,6 +43,35 @@ class _CompletedEscrowsHandler:
 
     def __init__(self, logger: Optional[logging.Logger]) -> None:
         self.logger = logger or NullLogger()
+
+    def _download_with_retries(
+        self,
+        download_callback: Callable[[], io.RawIOBase],
+        retry_callback: Callable[[], Any],
+        *,
+        max_attempts: Optional[int] = None,
+    ) -> io.RawIOBase:
+        """
+        Sometimes CVAT downloading can fail with the 500 error.
+        This function tries to repeat the export in such cases.
+        """
+
+        if max_attempts is None:
+            max_attempts = CronConfig.track_completed_escrows_max_downloading_retries
+
+        attempt = 0
+        while attempt < max_attempts:
+            try:
+                return download_callback()
+            except cvat_api.exceptions.ApiException as e:
+                if 500 <= e.status < 600 and attempt + 1 < max_attempts:
+                    attempt += 1
+                    self.logger.info(
+                        f"Retrying downloading, attempt #{attempt} of {max_attempts}..."
+                    )
+                    retry_callback()
+                else:
+                    raise
 
     def _process_plain_escrows(self):
         logger = self.logger
@@ -88,31 +120,55 @@ class _CompletedEscrowsHandler:
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[project.job_type]
                 job_annotations: Dict[int, FileDescriptor] = {}
 
-                # Request dataset preparation beforehand
-                for job in jobs:
-                    cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
+                for jobs_batch in take_by(
+                    jobs, count=CronConfig.track_completed_escrows_jobs_downloading_batch_size
+                ):
+                    # Request jobs before downloading for faster batch downloading
+                    for job in jobs_batch:
+                        cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
+
+                    # Collect raw annotations from CVAT, validate and convert them
+                    # into a recording oracle suitable format
+                    for job in jobs_batch:
+                        job_annotations_file = self._download_with_retries(
+                            download_callback=partial(
+                                cvat_api.get_job_annotations,
+                                job.cvat_id,
+                                format_name=annotation_format,
+                            ),
+                            retry_callback=partial(
+                                cvat_api.request_job_annotations,
+                                job.cvat_id,
+                                format_name=annotation_format,
+                            ),
+                        )
+
+                        job_assignment = job.latest_assignment
+                        job_annotations[job.cvat_id] = FileDescriptor(
+                            filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
+                                project.cvat_id,
+                                job.cvat_task_id,
+                                job.cvat_id,
+                                job_assignment.user.cvat_id,
+                                job_assignment.id,
+                            ),
+                            file=job_annotations_file,
+                        )
+
+                # Request project annotations after jobs downloading
+                # to avoid occasional export cleanups in CVAT
                 cvat_api.request_project_annotations(project.cvat_id, format_name=annotation_format)
-
-                # Collect raw annotations from CVAT, validate and convert them
-                # into a recording oracle suitable format
-                for job in jobs:
-                    job_annotations_file = cvat_api.get_job_annotations(
-                        job.cvat_id, format_name=annotation_format
-                    )
-                    job_assignment = job.latest_assignment
-                    job_annotations[job.cvat_id] = FileDescriptor(
-                        filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
-                            project.cvat_id,
-                            job.cvat_task_id,
-                            job.cvat_id,
-                            job_assignment.user.cvat_id,
-                            job_assignment.id,
-                        ),
-                        file=job_annotations_file,
-                    )
-
-                project_annotations_file = cvat_api.get_project_annotations(
-                    project.cvat_id, format_name=annotation_format
+                project_annotations_file = self._download_with_retries(
+                    download_callback=partial(
+                        cvat_api.get_project_annotations,
+                        project.cvat_id,
+                        format_name=annotation_format,
+                    ),
+                    retry_callback=partial(
+                        cvat_api.request_project_annotations,
+                        project.cvat_id,
+                        format_name=annotation_format,
+                    ),
                 )
                 project_annotations_file_desc = FileDescriptor(
                     filename=RESULTING_ANNOTATIONS_FILE,
@@ -250,38 +306,50 @@ class _CompletedEscrowsHandler:
                     f"Downloading results for the escrow (escrow_address={escrow_address})"
                 )
 
-                cvat_jobs: List[cvat_models.Job] = list(
+                jobs: List[cvat_models.Job] = list(
                     itertools.chain.from_iterable(
                         cvat_service.get_jobs_by_cvat_project_id(session, p.cvat_id)
                         for p in escrow_projects
                     )
                 )
 
-                # Request dataset preparation beforehand
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
-                for cvat_job in cvat_jobs:
-                    cvat_api.request_job_annotations(
-                        cvat_job.cvat_id, format_name=annotation_format
-                    )
+                job_annotations: Dict[int, FileDescriptor] = {}
 
                 # Collect raw annotations from CVAT, validate and convert them
                 # into a recording oracle suitable format
-                job_annotations: Dict[int, FileDescriptor] = {}
-                for cvat_job in cvat_jobs:
-                    job_annotations_file = cvat_api.get_job_annotations(
-                        cvat_job.cvat_id, format_name=annotation_format
-                    )
-                    job_assignment = cvat_job.latest_assignment
-                    job_annotations[cvat_job.cvat_id] = FileDescriptor(
-                        filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
-                            cvat_job.cvat_project_id,
-                            cvat_job.cvat_task_id,
-                            cvat_job.cvat_id,
-                            job_assignment.user.cvat_id,
-                            job_assignment.id,
-                        ),
-                        file=job_annotations_file,
-                    )
+                for jobs_batch in take_by(
+                    jobs, count=CronConfig.track_completed_escrows_jobs_downloading_batch_size
+                ):
+                    # Request jobs before downloading for faster batch downloading
+                    for job in jobs_batch:
+                        cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
+
+                    for job in jobs_batch:
+                        job_annotations_file = self._download_with_retries(
+                            download_callback=partial(
+                                cvat_api.get_job_annotations,
+                                job.cvat_id,
+                                format_name=annotation_format,
+                            ),
+                            retry_callback=partial(
+                                cvat_api.request_job_annotations,
+                                job.cvat_id,
+                                format_name=annotation_format,
+                            ),
+                        )
+
+                        job_assignment = job.latest_assignment
+                        job_annotations[job.cvat_id] = FileDescriptor(
+                            filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
+                                job.cvat_project_id,
+                                job.cvat_task_id,
+                                job.cvat_id,
+                                job_assignment.user.cvat_id,
+                                job_assignment.id,
+                            ),
+                            file=job_annotations_file,
+                        )
 
                 resulting_annotations_file_desc = FileDescriptor(
                     filename=RESULTING_ANNOTATIONS_FILE,
@@ -292,7 +360,7 @@ class _CompletedEscrowsHandler:
                 annotation_files.append(resulting_annotations_file_desc)
 
                 annotation_metafile = prepare_annotation_metafile(
-                    jobs=cvat_jobs, job_annotations=job_annotations
+                    jobs=jobs, job_annotations=job_annotations
                 )
                 annotation_files.extend(job_annotations.values())
                 postprocess_annotations(

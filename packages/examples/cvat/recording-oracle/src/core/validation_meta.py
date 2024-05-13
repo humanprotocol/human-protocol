@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 VALIDATION_METAFILE_NAME = "validation_meta.json"
 RESULTING_ANNOTATIONS_FILE = "resulting_annotations.zip"
@@ -15,7 +15,7 @@ class ResultMeta(BaseModel):
     id: int
     job_id: int
     annotator_wallet_address: str
-    annotation_quality: float = Field(ge=0, le=1)
+    annotation_quality: float
 
 
 class ValidationMeta(BaseModel):

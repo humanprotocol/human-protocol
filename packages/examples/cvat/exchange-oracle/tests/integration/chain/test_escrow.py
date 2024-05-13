@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
-from human_protocol_sdk.storage import StorageClientError
 
 from src.chain.escrow import (
     get_escrow_manifest,

@@ -19,6 +19,7 @@ export enum ErrorJob {
   GroundThuthValidationFailed = 'Ground thuth validation failed',
   ManifestHashNotExist = 'Manifest hash does not exist',
   DataNotExist = 'Data does not exist',
+  ImageConsistency = 'Ground Truth images not found in dataset',
 }
 
 /**
@@ -120,6 +121,7 @@ export enum ErrorBucket {
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
+  NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
 }

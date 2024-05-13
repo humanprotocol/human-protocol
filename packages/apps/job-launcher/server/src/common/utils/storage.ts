@@ -66,7 +66,7 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
                   nextContinuationToken,
                 )}`
               : ''
-          }${url.pathname ? `&prefix=${url.pathname}` : ''}`,
+          }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`,
         );
 
         if (response.status === HttpStatus.OK && response.data) {

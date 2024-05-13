@@ -4,6 +4,7 @@ import { ServerConfigService } from './server-config.service';
 import { PGPConfigService } from './pgp-config.service';
 import { S3ConfigService } from './s3-config.service';
 import { Web3ConfigService } from './web3-config.service';
+import { NetworkConfigService } from './network-config.service';
 
 @Global()
 @Module({
@@ -13,6 +14,7 @@ import { Web3ConfigService } from './web3-config.service';
     Web3ConfigService,
     S3ConfigService,
     PGPConfigService,
+    NetworkConfigService,
   ],
   exports: [
     ConfigService,
@@ -20,6 +22,7 @@ import { Web3ConfigService } from './web3-config.service';
     Web3ConfigService,
     S3ConfigService,
     PGPConfigService,
+    NetworkConfigService,
   ],
 })
 export class EnvConfigModule {}

@@ -2,30 +2,23 @@ import unittest
 import uuid
 from unittest.mock import patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
-from human_protocol_sdk.storage import StorageClient
 from sqlalchemy.sql import select
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
-from src.core.config import StorageConfig
 from src.core.types import (
     ExchangeOracleEventTypes,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
 )
-from src.crons.process_exchange_oracle_webhooks import (
-    process_incoming_exchange_oracle_webhooks,
-    process_outgoing_exchange_oracle_webhooks,
-)
+from src.crons.process_exchange_oracle_webhooks import process_incoming_exchange_oracle_webhooks
 from src.db import SessionLocal
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
-from src.utils.logging import get_function_logger
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, RECORDING_ORACLE_FEE, SIGNATURE
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, SIGNATURE
 from tests.utils.setup_escrow import create_escrow, fund_escrow
 
 

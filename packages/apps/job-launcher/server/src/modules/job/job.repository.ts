@@ -40,7 +40,10 @@ export class JobRepository extends BaseRepository<JobEntity> {
     });
   }
 
-  public async findByStatus(status: JobStatus): Promise<JobEntity[]> {
+  public async findByStatus(
+    status: JobStatus,
+    take?: number,
+  ): Promise<JobEntity[]> {
     return this.find({
       where: {
         status: status,
@@ -51,6 +54,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
         createdAt: SortDirection.DESC,
         waitUntil: SortDirection.ASC,
       },
+      ...(take && { take }),
     });
   }
 

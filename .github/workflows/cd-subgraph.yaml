@@ -40,6 +40,8 @@ jobs:
             graph: celo
           - name: celo-alfajores
             graph: celo-alfajores
+          - name: xlayer
+            graph: xlayer
       fail-fast: true
       max-parallel: 3
     steps:

@@ -86,6 +86,13 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
+    sepolia: {
+      chainId: 11155111,
+      url: process.env.ETH_SEPOLIA_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
+    },
     polygon: {
       chainId: 137,
       url: process.env.ETH_POLYGON_URL || '',
@@ -170,6 +177,13 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    xlayer: {
+      chainId: 196,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -208,9 +222,10 @@ const config: HardhatUserConfig = {
       // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
+      sepolia: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
-      polygonAmoy: process.env.OKLINK_API_KEY || '',
+      polygonAmoy: process.env.AMOY_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
@@ -220,6 +235,7 @@ const config: HardhatUserConfig = {
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
+      xlayer: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
       {
@@ -234,9 +250,17 @@ const config: HardhatUserConfig = {
         network: 'polygonAmoy',
         chainId: 80002,
         urls: {
+          apiURL: 'https://api-amoy.polygonscan.com/api',
+          browserURL: 'https://amoy.polygonscan.com',
+        },
+      },
+      {
+        network: 'xlayer',
+        chainId: 196,
+        urls: {
           apiURL:
-            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/AMOY_TESTNET',
-          browserURL: 'https://www.oklink.com',
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER',
+          browserURL: 'https://www.oklink.com/xlayer',
         },
       },
     ],
