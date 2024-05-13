@@ -1,0 +1,35 @@
+{
+  "network": "xlayer-sepolia",
+  "description": "Human subgraph on X Layer testnet",
+  "EscrowFactory": {
+    "address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+    "startBlock": 13485896,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+    "startBlock": 13484407,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0x7457d26a3C70Bd71F7557C773b303c1dB82BBB68",
+    "startBlock": 13484541,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x6D72734F28E807465AeBC2e1302336129242c2e6",
+    "startBlock": 13486007,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+    "startBlock": 13486317,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

@@ -22,6 +22,7 @@ export const wagmiConfig = createConfig({
     wagmiChains.avalancheFuji,
     wagmiChains.avalanche,
     wagmiChains.skaleHumanProtocol,
+    wagmiChains.okc,
     X_LAYER,
   ],
   connectors: [

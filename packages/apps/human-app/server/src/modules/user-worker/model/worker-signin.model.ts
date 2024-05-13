@@ -12,6 +12,10 @@ export class SigninWorkerDto {
   @ApiProperty({ example: 'string' })
   @IsString()
   password: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  h_captcha_token: string;
 }
 
 export class SigninWorkerCommand {
@@ -19,6 +23,8 @@ export class SigninWorkerCommand {
   email: string;
   @AutoMap()
   password: string;
+  @AutoMap()
+  hCaptchaToken: string;
 }
 
 export class SigninWorkerData {
@@ -26,6 +32,8 @@ export class SigninWorkerData {
   email: string;
   @AutoMap()
   password: string;
+  @AutoMap()
+  h_captcha_token: string;
 }
 
 export class SigninWorkerResponse {

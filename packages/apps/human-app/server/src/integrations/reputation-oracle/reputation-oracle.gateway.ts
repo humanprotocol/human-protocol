@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
@@ -6,23 +6,22 @@ import { Mapper } from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
-} from '../../modules/user-worker/interfaces/worker-registration.interface';
+} from '../../modules/user-worker/model/worker-registration.model';
 import {
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/user-operator/interfaces/operator-registration.interface';
+} from '../../modules/user-operator/model/operator-registration.model';
 import { GatewayConfigService } from '../../common/config/gateway-config.service';
 import { GatewayConfig } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';
 import { EndpointName } from '../../common/enums/endpoint-name';
 import { AxiosRequestConfig } from 'axios';
-import {
-  RequestDataType
-} from './reputation-oracle.interface';
+import { RequestDataType } from './reputation-oracle.interface';
 import {
   SigninWorkerCommand,
-  SigninWorkerData, SigninWorkerResponse,
-} from '../../modules/user-worker/interfaces/worker-signin.interface';
+  SigninWorkerData,
+  SigninWorkerResponse,
+} from '../../modules/user-worker/model/worker-signin.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -53,19 +52,8 @@ export class ReputationOracleGateway {
   private async handleRequestToReputationOracle<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
-    try {
-      const response = await lastValueFrom(this.httpService.request(options));
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response.data, error.response.status);
-      } else {
-        throw new HttpException(
-          'Error occurred while redirecting request.',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
+    const response = await lastValueFrom(this.httpService.request(options));
+    return response.data;
   }
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(

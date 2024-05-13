@@ -184,6 +184,13 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    xlayerTestnet: {
+      chainId: 195,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -236,6 +243,7 @@ const config: HardhatUserConfig = {
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
       xlayer: process.env.OKLINK_API_KEY || '',
+      xlayerTestnet: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
       {
@@ -261,6 +269,15 @@ const config: HardhatUserConfig = {
           apiURL:
             'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER',
           browserURL: 'https://www.oklink.com/xlayer',
+        },
+      },
+      {
+        network: 'xlayerTestnet',
+        chainId: 195,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET',
+          browserURL: 'https://www.oklink.com/xlayer-test',
         },
       },
     ],
