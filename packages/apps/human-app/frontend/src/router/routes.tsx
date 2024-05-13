@@ -5,7 +5,7 @@ import { ProtectedPage } from '@/pages/protected.page';
 import { SignInWorkerPage } from '@/pages/worker/sign-in.page';
 import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
 import { OperatorProfilePage } from '@/pages/operator/profile/profile.page';
-import { WorkerProfilePage } from '@/pages/worker/profile.page';
+import { WorkerProfilePage } from '@/pages/worker/profile/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
 import { routerPaths } from '@/router/router-paths';
