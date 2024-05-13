@@ -118,8 +118,8 @@ export function Form({
           )}
           <PendingKeys pendingKeys={pendingKeys} />
           <Button
-            disabled={editExistingKeys.isPending}
             fullWidth
+            loading={editExistingKeys.isPending}
             type="submit"
             variant="contained"
           >

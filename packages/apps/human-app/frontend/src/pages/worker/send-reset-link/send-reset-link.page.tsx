@@ -62,8 +62,8 @@ export function SendResetLinkWorkerPage() {
               name="email"
             />
             <Button
-              disabled={isSendResetLinkWorkerPending}
               fullWidth
+              loading={isSendResetLinkWorkerPending}
               type="submit"
               variant="contained"
             >

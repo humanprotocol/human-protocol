@@ -111,8 +111,8 @@ export function SignUpWorkerPage() {
               </Typography>
             </Grid>
             <Button
-              disabled={isSignUpWorkerPending}
               fullWidth
+              loading={isSignUpWorkerPending}
               type="submit"
               variant="contained"
             >
