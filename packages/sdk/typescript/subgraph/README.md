@@ -76,3 +76,7 @@ You can find networks configuration in the directory `config`. Each JSON file is
 - https://api.thegraph.com/subgraphs/name/humanprotocol/celo
 - https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores
 - https://graph-skale.humanprotocol.org/subgraphs/name/skale-human
+- https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet/graphql 
+
+
+

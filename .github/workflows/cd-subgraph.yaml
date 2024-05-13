@@ -40,6 +40,8 @@ jobs:
             graph: celo
           - name: celo-alfajores
             graph: celo-alfajores
+          - name : xlayer-testnet
+            graph: xlayer-testnet
           - name: xlayer
             graph: xlayer
       fail-fast: true
