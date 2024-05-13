@@ -1,4 +1,4 @@
-import { PrepareSignatureType } from '../../../common/enums/global-common.interface';
+import { PrepareSignatureType } from '../../../common/enums/global-common';
 import {
   PrepareSignatureCommand,
   PrepareSignatureData,

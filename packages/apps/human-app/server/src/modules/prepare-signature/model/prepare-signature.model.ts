@@ -1,7 +1,7 @@
 import { AutoMap } from '@automapper/classes';
 import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PrepareSignatureType } from '../../../common/enums/global-common.interface';
+import { PrepareSignatureType } from '../../../common/enums/global-common';
 
 export class PrepareSignatureDto {
   @AutoMap()
