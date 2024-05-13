@@ -6,18 +6,18 @@ import {
   JobDiscoveryFieldName,
   JobDiscoverySortField,
   JobStatus,
-} from '../../../common/enums/global-common.interface';
+} from '../../../common/enums/global-common';
 import {
   PageableData,
   PageableDto,
   PageableParams,
-} from '../../../common/interfaces/pageable.interface';
+} from '../../../common/utils/pageable.model';
 
 export class JobsDiscoveryParamsDto extends PageableDto {
   @AutoMap()
   @IsString()
   @ApiProperty()
-  address?: string;
+  oracle_address?: string;
   @AutoMap()
   @IsOptional()
   @IsString()
@@ -79,7 +79,7 @@ export class JobsDiscoveryParamsData extends PageableData {
 }
 export class JobsDiscoveryParamsCommand {
   @AutoMap()
-  address: string;
+  oracleAddress: string;
   @AutoMap()
   token: string;
   @AutoMap()

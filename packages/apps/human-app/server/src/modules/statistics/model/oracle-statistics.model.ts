@@ -11,7 +11,7 @@ export class OracleStatisticsResponse {
   assignments_expired: number;
 }
 export class OracleStatisticsCommand {
-  address: string;
+  oracleAddress: string;
 }
 export class OracleStatisticsDetails {
   exchangeOracleUrl: string;
@@ -20,5 +20,5 @@ export class OracleStatisticsDetails {
 export class OracleStatisticsDto {
   @IsString()
   @ApiProperty({ example: 'string' })
-  address: string;
+  oracle_address: string;
 }

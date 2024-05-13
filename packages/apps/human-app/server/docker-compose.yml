@@ -16,9 +16,11 @@ services:
       HOST: ${HOST}
       PORT: ${PORT}
       REPUTATION_ORACLE_URL: ${REPUTATION_ORACLE_URL}
+      REPUTATION_ORACLE_ADDRESS: ${REPUTATION_ORACLE_ADDRESS}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_HOST: redis
       CACHE_TTL_ORACLE_DISCOVERY: ${CACHE_TTL_ORACLE_DISCOVERY}
+      RPC_URL: ${RPC_URL}
     depends_on:
       - redis
   redis:
@@ -27,6 +29,4 @@ services:
     ports:
       - '${REDIS_PORT}:6379'
     volumes:
-      - redis_data:/data
-volumes:
-  redis_data:
+      - ./redis_data:/data

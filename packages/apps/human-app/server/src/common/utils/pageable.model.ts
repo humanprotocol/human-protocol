@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
-import { SortOrder } from '../enums/global-common.interface';
+import { SortOrder } from '../enums/global-common';
 import { AutoMap } from '@automapper/classes';
 
 export abstract class PageableDto {

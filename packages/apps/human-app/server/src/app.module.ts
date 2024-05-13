@@ -27,12 +27,37 @@ import { PasswordResetModule } from './modules/password-reset/password-reset.mod
 import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
 import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
 import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
+import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
+import Joi from 'joi';
+import { ChainId } from '@human-protocol/sdk';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
+      validationSchema: Joi.object({
+        HOST: Joi.string().required(),
+        PORT: Joi.number().required(),
+        REPUTATION_ORACLE_URL: Joi.string().required(),
+        REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
+        REDIS_PORT: Joi.number().required(),
+        REDIS_HOST: Joi.string().required(),
+        RPC_URL: Joi.string().required(),
+        CHAIN_IDS_ENABLED: Joi.string()
+          .custom((value) => {
+            const chainIds = value.split(',');
+            for (const id of chainIds) {
+              if (!Object.values(ChainId).includes(Number(id.trim()))) {
+                throw new Error(
+                  `Invalid chain ID: Chain ID ${id} is not included in the HUMAN SDK.`,
+                );
+              }
+            }
+            return value;
+          })
+          .required(),
+      }),
     }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
@@ -54,6 +79,7 @@ import { PrepareSignatureModule } from './modules/prepare-signature/prepare-sign
     DisableOperatorModule,
     KycProcedureModule,
     PrepareSignatureModule,
+    EscrowUtilsModule,
   ],
   controllers: [
     AppController,

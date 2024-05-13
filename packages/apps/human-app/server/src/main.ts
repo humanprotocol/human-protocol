@@ -12,7 +12,6 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
   const envConfigService = new EnvironmentConfigService(configService);
-  envConfigService.checkMandatoryConfig();
   if (envConfigService.isCorsEnabled) {
     app.enableCors({
       origin: envConfigService.corsEnabledOrigin,

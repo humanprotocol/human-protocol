@@ -1,12 +1,9 @@
 import { Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
-import { OracleDiscoveryService } from '../oracle-discovery.serivce';
+import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-} from '../model/oracle-discovery.model';
+import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
@@ -41,6 +38,14 @@ describe('OracleDiscoveryService', () => {
             set: jest.fn(),
           },
         },
+        {
+          provide: EnvironmentConfigService,
+          useValue: {
+            reputationOracleAddress: 'mockedaddress',
+            cacheTtlOracleDiscovery: 86400,
+            chainIdsEnabled: ['80001'],
+          },
+        },
       ],
     }).compile();
     configService = moduleRef.get<EnvironmentConfigService>(
@@ -60,16 +65,11 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
-    const command: OracleDiscoveryCommand = {
-      address: 'mockAddress',
-      chainId: 80001,
-    };
     jest.spyOn(cacheManager, 'get').mockResolvedValue(mockData);
 
-    const result = await oracleDiscoveryService.processOracleDiscovery(command);
+    const result = await oracleDiscoveryService.processOracleDiscovery();
 
     expect(result).toEqual(mockData);
-    expect(cacheManager.get).toHaveBeenCalledWith(command.address);
     expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
   });
 
@@ -78,27 +78,25 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
-    const command: OracleDiscoveryCommand = {
-      address: 'mockAddress',
-      chainId: 80001,
-    };
+    const chainId = 80001;
+
     jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockResolvedValue(mockData);
 
-    const result = await oracleDiscoveryService.processOracleDiscovery(command);
+    const result = await oracleDiscoveryService.processOracleDiscovery();
 
     expect(result).toEqual(mockData);
-    expect(cacheManager.get).toHaveBeenCalledWith(command.address);
+    expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
     expect(cacheManager.set).toHaveBeenCalledWith(
-      command.address,
+      chainId.toString(),
       mockData,
       configService.cacheTtlOracleDiscovery,
     );
     expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
-      command.chainId,
-      command.address,
+      chainId,
+      'mockedaddress',
       EXCHANGE_ORACLE,
     );
   });

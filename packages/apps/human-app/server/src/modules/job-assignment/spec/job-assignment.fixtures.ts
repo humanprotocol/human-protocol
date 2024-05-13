@@ -17,7 +17,7 @@ import {
   AssignmentSortField,
   AssignmentStatus,
   SortOrder,
-} from '../../../common/enums/global-common.interface';
+} from '../../../common/enums/global-common';
 const EXCHANGE_ORACLE_URL = 'https://www.example.com/api';
 const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
 const ESCROW_ADDRESS = 'test_address';
@@ -40,7 +40,6 @@ const TOKEN = 'test_user_token';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
 };
@@ -52,7 +51,6 @@ const jobAssignmentParams: JobAssignmentParams = {
 export const jobAssignmentCommandFixture: JobAssignmentCommand = {
   data: jobAssignmentParams,
   token: TOKEN,
-  address: EXCHANGE_ORACLE_ADDRESS,
 };
 export const jobAssignmentDetailsFixture: JobAssignmentDetails = {
   data: jobAssignmentParams,

@@ -61,7 +61,7 @@ and transformation of data. NestJS provides many built-in pipes, so check the do
 
 ### Model 
 
-Interfaces are used to define the shape and responsibilities of the data:
+Models are used to define the shape and responsibilities of the data:
 
 - **Dto (Data Transfer Object)**: Data sent from/to the frontend.
 - **Command**: Datatype used for data manipulation in business logic.

@@ -5,7 +5,7 @@ import { statisticsServiceMock } from './statistics.service.mock';
 import {
   oracleStatsCommandFixture,
   oracleStatsResponseFixture,
-  statisticsExchangeOracleAddress, statisticsExchangeOracleUrl,
+  statisticsExchangeOracleAddress,
   statisticsToken,
   userStatsCommandFixture,
   userStatsResponseFixture,
@@ -38,7 +38,7 @@ describe('StatisticsController', () => {
   describe('getOracleStatistics', () => {
     it('should call getOracleStats service method with correct parameters', async () => {
       const dto: OracleStatisticsDto = {
-        address: statisticsExchangeOracleAddress,
+        oracle_address: statisticsExchangeOracleAddress,
       };
       const result = await controller.getOracleStatistics(dto);
 
@@ -52,7 +52,7 @@ describe('StatisticsController', () => {
   describe('getUserStatistics', () => {
     it('should call getUserStats service method with correct parameters', async () => {
       const dto: UserStatisticsDto = {
-        address: statisticsExchangeOracleAddress,
+        oracle_address: statisticsExchangeOracleAddress,
       };
       const result = await controller.getUserStatistics(dto, statisticsToken);
 

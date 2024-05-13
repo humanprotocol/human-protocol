@@ -30,7 +30,7 @@ export class StatisticsController {
     @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
     const command = {
-      address: dto.address,
+      oracleAddress: dto.oracle_address,
     } as OracleStatisticsCommand;
     return this.service.getOracleStats(command);
   }
@@ -45,7 +45,7 @@ export class StatisticsController {
     @Authorization() token: string,
   ): Promise<UserStatisticsResponse> {
     const command: UserStatisticsCommand = {
-      address: dto.address,
+      oracleAddress: dto.oracle_address,
       token: token,
     } as UserStatisticsCommand;
     return this.service.getUserStats(command);
