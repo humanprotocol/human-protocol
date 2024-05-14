@@ -18,7 +18,8 @@ export function ProfileActions({
 
   useEffect(() => {
     setNotifications();
-  }, [isWalletConnected, setNotifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- correct dependency
+  }, [isWalletConnected]);
 
   return (
     <Grid container flexDirection="column" gap="1rem">
