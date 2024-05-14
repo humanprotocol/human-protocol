@@ -89,6 +89,59 @@ describe('UserService', () => {
     });
   });
 
+  describe('createCredentialValidatorUser', () => {
+    const userCreateDto: UserCreateDto = {
+      email: 'validator@example.com',
+      password: 'password123',
+      hCaptchaToken: 'test',
+    };
+
+    it('should create a new credential validator user and return the created user entity', async () => {
+      const createdUser: Partial<UserEntity> = {
+        email: userCreateDto.email,
+        password: expect.any(String),
+        type: UserType.CREDENTIAL_VALIDATOR,
+        status: UserStatus.PENDING,
+      };
+
+      jest
+        .spyOn(userRepository, 'createUnique')
+        .mockResolvedValue(createdUser as UserEntity);
+
+      const result =
+        await userService.createCredentialValidatorUser(userCreateDto);
+
+      expect(userRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: userCreateDto.email,
+          password: expect.any(String),
+          type: UserType.CREDENTIAL_VALIDATOR,
+          status: UserStatus.PENDING,
+        }),
+      );
+      expect(result).toMatchObject(createdUser);
+    });
+
+    it('should handle errors if user creation fails', async () => {
+      jest
+        .spyOn(userRepository, 'createUnique')
+        .mockRejectedValue(new Error('Creation Failed'));
+
+      await expect(
+        userService.createCredentialValidatorUser(userCreateDto),
+      ).rejects.toThrow('Creation Failed');
+
+      expect(userRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: userCreateDto.email,
+          password: expect.any(String),
+          type: UserType.CREDENTIAL_VALIDATOR,
+          status: UserStatus.PENDING,
+        }),
+      );
+    });
+  });
+
   describe('getByCredentials', () => {
     const email = 'test@example.com';
     const password = 'password123';
