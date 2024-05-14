@@ -47,6 +47,6 @@ export function recoverSigner(
   }
 }
 
-export function getNonce(): string {
+export function generateNonce(): string {
   return Buffer.from(ethers.randomBytes(16)).toString('hex');
 }

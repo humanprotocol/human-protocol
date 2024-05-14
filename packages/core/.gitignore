@@ -33,3 +33,5 @@ deployments_tenderly
 !.openzeppelin/unknown-80002.json
 # skale
 !.openzeppelin/unknown-1273227453.json
+# xlayer
+!.openzeppelin/unknown-196.json

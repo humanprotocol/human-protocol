@@ -40,6 +40,10 @@ Enum for chain IDs.
 
 #### SKALE *= 1273227453*
 
+#### XLAYER *= 196*
+
+#### XLAYER_TESTNET *= 195*
+
 ### *class* human_protocol_sdk.constants.KVStoreKeys(value)
 
 Bases: `Enum`

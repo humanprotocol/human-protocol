@@ -5,10 +5,9 @@ import {
   MAINNET_CHAIN_IDS,
   TESTNET_CHAIN_IDS,
 } from '../../common/constants/networks';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { Web3Env } from '../../common/enums/web3';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
-import { SignatureBodyDto } from './web3.dto';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 
@@ -76,28 +75,5 @@ export class Web3Service {
 
   public getOperatorAddress(): string {
     return Object.values(this.signers)[0].address;
-  }
-
-  public prepareSignatureBody(
-    type: SignatureType,
-    address: string,
-  ): SignatureBodyDto {
-    let content: string;
-    switch (type) {
-      case SignatureType.SIGNUP:
-        content = 'signup';
-        break;
-      case SignatureType.DISABLE_OPERATOR:
-        content = 'disable-operator';
-        break;
-      default:
-        throw new BadRequestException('Type not allowed');
-    }
-
-    return {
-      from: address,
-      to: this.getOperatorAddress(),
-      contents: content,
-    };
   }
 }

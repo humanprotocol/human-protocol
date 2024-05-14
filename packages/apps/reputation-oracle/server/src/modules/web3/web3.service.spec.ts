@@ -4,8 +4,6 @@ import { Test } from '@nestjs/testing';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { TESTNET_CHAIN_IDS } from '../../common/constants/networks';
 import { ErrorWeb3 } from '../../common/constants/errors';
-import { SignatureType } from '../../common/enums/web3';
-import { SignatureBodyDto } from './web3.dto';
 import { Web3Service } from './web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -71,26 +69,6 @@ describe('Web3Service', () => {
     it('should get the operator address', () => {
       const operatorAddress = web3Service.getOperatorAddress();
       expect(operatorAddress).toBe(MOCK_ADDRESS);
-    });
-  });
-  describe('prepareSignatureBody', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should prepare web3 pre sign up payload and return typed structured data', async () => {
-      const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
-        contents: 'signup',
-      };
-
-      const result = await web3Service.prepareSignatureBody(
-        SignatureType.SIGNUP,
-        MOCK_ADDRESS,
-      );
-
-      expect(result).toStrictEqual(expectedData);
     });
   });
 });

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/Timers.sol';
-import '@openzeppelin/contracts/utils/Checkpoints.sol';
+import '@openzeppelin/contracts/utils/structs/Checkpoints.sol';
 import '@openzeppelin/contracts/governance/utils/IVotes.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 
@@ -302,7 +301,9 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         }
     }
 
-    function sendVoteResultToHub(uint256 proposalId) public payable {
+    function sendVoteResultToHub(
+        uint256 proposalId
+    ) public payable onlyMagistrate {
         require(
             proposals[proposalId].voteFinished,
             'DAOSpokeContract: vote is not finished'

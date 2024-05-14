@@ -18,12 +18,12 @@ import {
   UserStatus,
   UserType,
 } from '../../common/enums/user';
-import { getNonce, verifySignature } from '../../common/utils/signature';
+import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
+  SignatureBodyDto,
   UserCreateDto,
-  Web3UserCreateDto,
 } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
@@ -79,15 +79,12 @@ export class UserService {
     return userEntity.save();
   }
 
-  public async createWeb3User(
-    dto: Web3UserCreateDto,
-    address: string,
-  ): Promise<UserEntity> {
+  public async createWeb3User(address: string): Promise<UserEntity> {
     await this.checkEvmAddress(address);
 
     const newUser = new UserEntity();
-    newUser.evmAddress = dto.evmAddress;
-    newUser.nonce = getNonce();
+    newUser.evmAddress = address;
+    newUser.nonce = generateNonce();
     newUser.type = UserType.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
 
@@ -115,7 +112,7 @@ export class UserService {
   }
 
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.nonce = getNonce();
+    userEntity.nonce = generateNonce();
     return userEntity.save();
   }
 
@@ -143,7 +140,7 @@ export class UserService {
     user: UserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = this.web3Service.prepareSignatureBody(
+    const signedData = await this.prepareSignatureBody(
       SignatureType.DISABLE_OPERATOR,
       user.evmAddress,
     );
@@ -172,5 +169,48 @@ export class UserService {
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
+  }
+
+  public async prepareSignatureBody(
+    type: SignatureType,
+    address: string,
+    additionalData?: { reference?: string; workerAddress?: string },
+  ): Promise<SignatureBodyDto> {
+    let content: string;
+    let nonce: string | undefined;
+    switch (type) {
+      case SignatureType.SIGNUP:
+        content = 'signup';
+        break;
+      case SignatureType.SIGNIN:
+        content = 'signin';
+        nonce = (await this.userRepository.findOneByEvmAddress(address))?.nonce;
+        break;
+      case SignatureType.DISABLE_OPERATOR:
+        content = 'disable-operator';
+        break;
+      case SignatureType.CERTIFICATE_AUTHENTICATION:
+        if (
+          !additionalData ||
+          !additionalData.reference ||
+          !additionalData.workerAddress
+        ) {
+          throw new BadRequestException('Missing necessary credential data');
+        }
+        content = JSON.stringify({
+          reference: additionalData.reference,
+          workerJson: additionalData.workerAddress,
+        });
+        break;
+      default:
+        throw new BadRequestException('Type not allowed');
+    }
+
+    return {
+      from: address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: content,
+      nonce: nonce ?? undefined,
+    };
   }
 }

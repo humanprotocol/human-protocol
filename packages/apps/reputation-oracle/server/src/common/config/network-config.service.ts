@@ -56,6 +56,18 @@ export class NetworkConfigService {
           rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
         },
       }),
+      ...(this.configService.get<string>('RPC_URL_XLAYER_TESTNET') && {
+        xlayertestnet: {
+          chainId: ChainId.XLAYER_TESTNET,
+          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER_TESTNET'),
+        },
+      }),
+      ...(this.configService.get<string>('RPC_URL_XLAYER') && {
+        xlayer: {
+          chainId: ChainId.XLAYER,
+          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER'),
+        },
+      }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
         localhost: {
           chainId: ChainId.LOCALHOST,

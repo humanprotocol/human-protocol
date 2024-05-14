@@ -9,9 +9,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Get,
   HttpCode,
-  Param,
   Post,
   Req,
   UseGuards,
@@ -158,25 +156,6 @@ export class AuthJwtController {
   })
   public async web3SignIn(@Body() data: Web3SignInDto): Promise<AuthDto> {
     return this.authService.web3Signin(data);
-  }
-
-  @Public()
-  @Get('/web3/:address/nonce')
-  @ApiOperation({
-    summary: 'Get Web3 Nonce',
-    description: 'Endpoint to get the Web3 user nonce.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Web3 nonce retrieved successfully',
-    type: String,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public async getNonce(@Param('address') address: string): Promise<string> {
-    return this.authService.getNonce(address);
   }
   @Public()
   @HttpCode(200)
