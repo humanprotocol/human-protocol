@@ -258,6 +258,8 @@ export const theme: ThemeOptions = {
     MuiButton: {
       styleOverrides: {
         root: {
+          paddingTop: '0.6rem',
+          paddingBottom: '0.6rem',
           fontSize: '14px',
           fontWeight: 600,
           textTransform: 'none',
