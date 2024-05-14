@@ -9,7 +9,6 @@ import queryString from 'query-string';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
 import { PageCard } from '@/components/ui/page-card';
-import { routerPaths } from '@/router/router-paths';
 import type { ResetPasswordDto } from '@/api/servieces/worker/reset-password';
 import {
   resetPasswordDtoSchema,
@@ -57,7 +56,7 @@ export function ResetPasswordWorkerPage() {
           </Alert>
         ) : undefined
       }
-      backArrowPath={routerPaths.homePage}
+      backArrowPath={-1}
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>
@@ -81,8 +80,8 @@ export function ResetPasswordWorkerPage() {
               name="confirmPassword"
             />
             <Button
-              disabled={isResetPasswordWorkerPending}
               fullWidth
+              loading={isResetPasswordWorkerPending}
               type="submit"
               variant="contained"
             >

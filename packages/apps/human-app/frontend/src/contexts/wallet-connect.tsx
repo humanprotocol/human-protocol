@@ -24,7 +24,6 @@ const metadata = {
 const ethersConfig = defaultConfig({
   metadata,
 });
-
 createWeb3Modal({
   ethersConfig,
   chains,

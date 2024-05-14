@@ -33,7 +33,7 @@ export function SignInWorkerPage() {
 
   useEffect(() => {
     if (user) {
-      navigate(routerPaths.worker.profile);
+      navigate(routerPaths.worker.profile, { replace: true });
     }
   }, [navigate, user]);
 
@@ -96,8 +96,8 @@ export function SignInWorkerPage() {
               </Link>
             </Typography>
             <Button
-              disabled={isSignInWorkerPending}
               fullWidth
+              loading={isSignInWorkerPending}
               type="submit"
               variant="contained"
             >

@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import {
   useMutation,
   useMutationState,
@@ -6,36 +5,73 @@ import {
 } from '@tanstack/react-query';
 import last from 'lodash/last';
 import { useNavigate } from 'react-router-dom';
-import { editExistingKeys } from '@/smart-contracts/keys/edit-existing-keys';
+import type { JsonRpcSigner } from 'ethers';
+import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
+import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
+import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
+import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
-export const editExistingKeysCallArgumentsSchema = z.object({
-  fee: z.coerce.number().min(1).max(100).step(1),
-  webhookUrl: z.string().url(),
-  jobTypes: z.array(z.string()),
+export const editEthKVStoreValuesMutationSchema = z.object({
+  [EthKVStoreKeys.PublicKey]: z.string().min(1),
+  [EthKVStoreKeys.WebhookUrl]: z.string().url(),
+  [EthKVStoreKeys.Role]: z.nativeEnum(Role),
+  [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
 });
 
-export type EditExistingKeysCallArguments = z.infer<
-  typeof editExistingKeysCallArgumentsSchema
+export type EditEthKVStoreValuesMutationData = z.infer<
+  typeof editEthKVStoreValuesMutationSchema
 >;
 
 function editExistingKeysMutationFn(
-  data: EditExistingKeysCallArguments & { address: string }
+  data: EditEthKVStoreValuesMutationData & {
+    accountAddress: string;
+    chainId: number;
+    signer?: JsonRpcSigner;
+  }
 ) {
-  return editExistingKeys(data);
+  const contractAddress = getContractAddress({
+    chainId: data.chainId,
+    contractName: 'EthKVStore',
+  });
+
+  return ethKvStoreSetBulk({
+    keys: [
+      EthKVStoreKeys.PublicKey,
+      EthKVStoreKeys.WebhookUrl,
+      EthKVStoreKeys.Role,
+      EthKVStoreKeys.Fee,
+    ],
+    values: [
+      data[EthKVStoreKeys.PublicKey],
+      data[EthKVStoreKeys.WebhookUrl],
+      data[EthKVStoreKeys.Role],
+      data[EthKVStoreKeys.Fee].toString(),
+    ],
+    contractAddress,
+    chainId: data.chainId,
+    signer: data.signer,
+  });
 }
 
-export const editKeysMutationKey = ['editKeys'];
-
 export function useEditExistingKeysMutation() {
-  const { address } = useConnectedWallet();
+  const {
+    address,
+    chainId,
+    web3ProviderMutation: { data: web3Data },
+  } = useConnectedWallet();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: EditExistingKeysCallArguments) =>
-      editExistingKeysMutationFn({ ...data, address }),
+    mutationFn: (data: EditEthKVStoreValuesMutationData) =>
+      editExistingKeysMutationFn({
+        ...data,
+        accountAddress: address,
+        chainId,
+        signer: web3Data?.signer,
+      }),
     onSuccess: async () => {
       navigate(routerPaths.operator.editExistingKeysSuccess);
       await queryClient.invalidateQueries();
@@ -43,13 +79,15 @@ export function useEditExistingKeysMutation() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
-    mutationKey: editKeysMutationKey,
+    mutationKey: ['editKeys', address],
   });
 }
 
 export function useEditExistingKeysMutationState() {
+  const { address } = useConnectedWallet();
+
   const state = useMutationState({
-    filters: { mutationKey: editKeysMutationKey },
+    filters: { mutationKey: ['editKeys', address] },
     select: (mutation) => mutation.state,
   });
 

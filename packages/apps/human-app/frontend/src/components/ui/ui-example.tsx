@@ -131,6 +131,9 @@ export function UiExample() {
         <Button disabled variant="outlined">
           Disabled
         </Button>
+        <Button loading variant="outlined">
+          Loading
+        </Button>
       </Stack>
 
       <h2>Button sizes</h2>

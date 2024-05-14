@@ -2,7 +2,7 @@ import { Contract } from 'ethers';
 import HMToken from '@/smart-contracts/abi/HMToken.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 
-export async function decimals({
+export async function hmTokenDecimals({
   contractAddress,
   signer,
 }: ContractCallArguments) {

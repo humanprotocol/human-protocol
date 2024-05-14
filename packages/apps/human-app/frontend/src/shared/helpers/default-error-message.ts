@@ -18,6 +18,9 @@ export function defaultErrorMessage(
   }
 
   if (unknownError instanceof FetchError) {
+    if (unknownError.message) {
+      return unknownError.message;
+    }
     return t('errors.errorWithStatusCode', { code: unknownError.status });
   }
 

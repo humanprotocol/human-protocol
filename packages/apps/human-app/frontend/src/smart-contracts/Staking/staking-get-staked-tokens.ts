@@ -2,7 +2,7 @@ import { Contract } from 'ethers';
 import Staking from '@/smart-contracts/abi/Staking.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 
-export async function getStakedTokens({
+export async function stakingGetStakedTokens({
   contractAddress,
   stakerAddress,
   signer,

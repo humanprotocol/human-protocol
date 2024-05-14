@@ -2,7 +2,7 @@ import { Contract, ethers } from 'ethers';
 import HMToken from '@/smart-contracts/abi/HMToken.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 
-export async function approve({
+export async function hmTokenApprove({
   contractAddress,
   spender,
   amount,
