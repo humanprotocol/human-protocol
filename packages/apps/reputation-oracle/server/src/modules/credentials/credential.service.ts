@@ -10,6 +10,7 @@ import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { EscrowClient } from '@human-protocol/sdk';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class CredentialService {
@@ -18,6 +19,7 @@ export class CredentialService {
   constructor(
     private readonly credentialRepository: CredentialRepository,
     private readonly web3Service: Web3Service,
+    private readonly userService: UserService,
     private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
@@ -118,7 +120,7 @@ export class CredentialService {
     const reputationOracleAddress =
       await escrowClient.getReputationOracleAddress(escrowAddress);
 
-    const signatureBody = this.web3Service.prepareSignatureBody(
+    const signatureBody = await this.userService.prepareSignatureBody(
       SignatureType.CERTIFICATE_AUTHENTICATION,
       reputationOracleAddress,
       {

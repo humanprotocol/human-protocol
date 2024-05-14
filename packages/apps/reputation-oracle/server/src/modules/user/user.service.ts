@@ -174,6 +174,7 @@ export class UserService {
   public async prepareSignatureBody(
     type: SignatureType,
     address: string,
+    additionalData?: { reference?: string; workerAddress?: string },
   ): Promise<SignatureBodyDto> {
     let content: string;
     let nonce: string | undefined;
@@ -187,6 +188,19 @@ export class UserService {
         break;
       case SignatureType.DISABLE_OPERATOR:
         content = 'disable-operator';
+        break;
+      case SignatureType.CERTIFICATE_AUTHENTICATION:
+        if (
+          !additionalData ||
+          !additionalData.reference ||
+          !additionalData.workerAddress
+        ) {
+          throw new BadRequestException('Missing necessary credential data');
+        }
+        content = JSON.stringify({
+          reference: additionalData.reference,
+          workerJson: additionalData.workerAddress,
+        });
         break;
       default:
         throw new BadRequestException('Type not allowed');
