@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { CredentialModule } from './modules/credentials/credential.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
@@ -43,6 +44,7 @@ import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
         : '.env',
       validationSchema: envValidator,
     }),
+    CredentialModule,
     DatabaseModule,
     HealthModule,
     ReputationModule,

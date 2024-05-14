@@ -20,10 +20,12 @@ import { CredentialService } from './credential.service';
 import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { CredentialExceptionFilter } from '../../common/exceptions/credential.filter';
+import { Public } from '../../common/decorators';
 
+@Public()
 @ApiTags('Credentials')
 @UseFilters(CredentialExceptionFilter)
-@Controller('/credential')
+@Controller('credential')
 export class CredentialController {
   constructor(private readonly credentialService: CredentialService) {}
 
@@ -35,13 +37,9 @@ export class CredentialController {
   @ApiQuery({ name: 'reference', type: String, required: false })
   @ApiResponse({
     status: 200,
-    description: 'Returns a list of credentials',
+    description: 'Credentials retrieved successfully',
     type: [CredentialEntity],
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden. Unauthorized access.' })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal Server Error. Failed to fetch credentials.',
+    isArray: true,
   })
   public async getCredentials(
     @Req() req: any,
