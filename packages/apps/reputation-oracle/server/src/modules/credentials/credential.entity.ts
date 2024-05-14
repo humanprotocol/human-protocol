@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { CredentialStatus } from '../../common/enums/credential';
@@ -8,6 +8,9 @@ import { UserEntity } from '../user/user.entity';
 export class CredentialEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   public reference: string;
+
+  @ManyToOne(() => UserEntity, { eager: true })
+  validator: UserEntity;
 
   @Column({ type: 'text' })
   public description: string;
@@ -26,6 +29,12 @@ export class CredentialEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', nullable: true })
   public expiresAt?: Date;
+
+  @OneToMany(
+    () => CredentialValidationEntity,
+    (validation) => validation.credential,
+  )
+  validations: CredentialValidationEntity[];
 }
 
 @Entity({ schema: NS, name: 'credential_validations' })
