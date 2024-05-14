@@ -507,6 +507,7 @@ describe('ReputationService', () => {
       expect(
         reputationRepository.findOneByAddressAndChainId,
       ).toHaveBeenCalledWith(NOT_ORACLE_ADDRESS, chainId);
+
       expect(result).toEqual(resultReputation);
     });
   });
