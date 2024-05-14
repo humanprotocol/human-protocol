@@ -126,6 +126,11 @@
       "paragraph3": "<1>Cant find our email?</1> If you can’t find the inbox in your email please check the spam folder or click below and we will send you a new one.",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
+    "sendEmailVerificationError": {
+      "title": "Verification failed",
+      "description": "An error occurred during email verification. Click button bellow to resend verification email.",
+      "btn": "Resend Verification Email"
+    },
     "emailVerification": {
       "title": "Email Verified",
       "description": "You are ready to go. Your email has been successfully verified!",
