@@ -10,6 +10,7 @@ import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { EscrowClient } from '@human-protocol/sdk';
+import { UserType } from '../../common/enums/user';
 
 @Injectable()
 export class CredentialService {
@@ -50,16 +51,40 @@ export class CredentialService {
   public async getCredentials(
     user: any,
     status?: string,
+    reference?: string,
   ): Promise<CredentialEntity[]> {
     let query = this.credentialRepository.createQueryBuilder('credential');
-    query = query.where('credential.userId = :userId', { userId: user.id });
+
+    if (reference) {
+      query = query.andWhere('credential.reference = :reference', {
+        reference,
+      });
+    }
 
     if (status) {
-      query = query.andWhere('credential.status = :status', { status: status });
+      query = query.andWhere('credential.status = :status', { status });
     }
+
     try {
       const credentials = await query.getMany();
-      return credentials;
+
+      if (user.role === UserType.CREDENTIAL_VALIDATOR) {
+        return credentials.filter(
+          (credential) =>
+            credential.status === CredentialStatus.ACTIVE ||
+            credential.status === CredentialStatus.EXPIRED,
+        );
+      } else if (user.role === UserType.WORKER) {
+        return credentials.filter(
+          (credential) =>
+            credential.status === CredentialStatus.ACTIVE ||
+            credential.status === CredentialStatus.EXPIRED ||
+            credential.status === CredentialStatus.VALIDATED ||
+            credential.status === CredentialStatus.ON_CHAIN,
+        );
+      } else {
+        throw new UnauthorizedException('Invalid user role');
+      }
     } catch (error) {
       this.logger.error(`Failed to fetch credentials: ${error.message}`);
       throw new Error(`Failed to fetch credentials: ${error.message}`);

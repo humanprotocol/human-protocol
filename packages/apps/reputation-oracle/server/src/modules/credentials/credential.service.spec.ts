@@ -9,6 +9,7 @@ import { Web3Service } from '../web3/web3.service';
 import { SelectQueryBuilder } from 'typeorm';
 import { CredentialStatus } from '../../common/enums/credential';
 import { CreateCredentialDto } from './credential.dto';
+import { UserType } from '../../common/enums/user';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -88,8 +89,13 @@ describe('CredentialService', () => {
     });
 
     describe('getCredentials', () => {
-      it('should return a list of credentials for a user', async () => {
-        const credentials = [new CredentialEntity()];
+      it('should return a list of credentials for a CREDENTIAL_VALIDATOR', async () => {
+        const credentials = [
+          { status: CredentialStatus.ACTIVE } as CredentialEntity,
+          { status: CredentialStatus.EXPIRED } as CredentialEntity,
+          { status: CredentialStatus.VALIDATED } as CredentialEntity,
+        ];
+
         const mockQueryBuilder = {
           where: jest.fn().mockReturnThis(),
           andWhere: jest.fn().mockReturnThis(),
@@ -103,10 +109,47 @@ describe('CredentialService', () => {
           );
 
         const result = await credentialService.getCredentials(
-          { id: 'user123' },
+          { id: 'user123', role: UserType.CREDENTIAL_VALIDATOR },
           'ACTIVE',
         );
-        expect(result).toEqual(credentials);
+
+        expect(result).toEqual([
+          { status: CredentialStatus.ACTIVE },
+          { status: CredentialStatus.EXPIRED },
+        ]);
+      });
+
+      it('should return a list of credentials for a WORKER', async () => {
+        const credentials = [
+          { status: CredentialStatus.ACTIVE } as CredentialEntity,
+          { status: CredentialStatus.EXPIRED } as CredentialEntity,
+          { status: CredentialStatus.VALIDATED } as CredentialEntity,
+          { status: CredentialStatus.ON_CHAIN } as CredentialEntity,
+        ];
+
+        const mockQueryBuilder = {
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getMany: jest.fn().mockResolvedValue(credentials),
+        } as Partial<SelectQueryBuilder<CredentialEntity>>;
+
+        jest
+          .spyOn(credentialRepository, 'createQueryBuilder')
+          .mockReturnValue(
+            mockQueryBuilder as SelectQueryBuilder<CredentialEntity>,
+          );
+
+        const result = await credentialService.getCredentials(
+          { id: 'user123', role: UserType.WORKER },
+          'ACTIVE',
+        );
+
+        expect(result).toEqual([
+          { status: CredentialStatus.ACTIVE },
+          { status: CredentialStatus.EXPIRED },
+          { status: CredentialStatus.VALIDATED },
+          { status: CredentialStatus.ON_CHAIN },
+        ]);
       });
     });
 
