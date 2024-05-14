@@ -17,10 +17,10 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { CredentialService } from './credential.service';
-import { CredentialEntity } from './credential.entity';
-import { CredentialStatus } from '../../common/enums/credential';
+import { CredentialDto, CredentialQueryDto } from './credential.dto';
 import { CredentialExceptionFilter } from '../../common/exceptions/credential.filter';
 import { Public } from '../../common/decorators';
+import { CredentialStatus } from '../../common/enums/credential';
 
 @Public()
 @ApiTags('Credentials')
@@ -38,14 +38,14 @@ export class CredentialController {
   @ApiResponse({
     status: 200,
     description: 'Credentials retrieved successfully',
-    type: [CredentialEntity],
+    type: [CredentialDto],
     isArray: true,
   })
   public async getCredentials(
     @Req() req: any,
-    @Query('status') status?: string,
-    @Query('reference') reference?: string,
-  ): Promise<CredentialEntity[]> {
+    @Query() query: CredentialQueryDto,
+  ): Promise<CredentialDto[]> {
+    const { status, reference } = query;
     const userRole = req.user.role;
     try {
       return await this.credentialService.getCredentials(
