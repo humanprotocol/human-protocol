@@ -31,10 +31,11 @@ import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
 import { verifySignature } from '../../common/utils/signature';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, HttpStatus } from '@nestjs/common';
 import { DatabaseError } from '../../common/errors/database';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk');
 
@@ -186,7 +187,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionAlreadyExists,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw a bad request exception if the payment intent creation fails', async () => {
@@ -198,11 +204,16 @@ describe('PaymentService', () => {
 
       const userId = 1;
 
-      createPaymentIntentMock.mockRejectedValue(new Error());
+      createPaymentIntentMock.mockResolvedValue();
 
       await expect(
         paymentService.createFiatPayment(userId, dto),
-      ).rejects.toThrowError();
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.ClientSecretDoesNotExist,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 
@@ -271,7 +282,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.NotSuccess, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should handle payment requiring a payment method', async () => {
@@ -299,7 +312,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.NotSuccess, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should handle payment status other than succeeded', async () => {
@@ -340,7 +355,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotFound);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
+      );
     });
   });
 
@@ -472,7 +489,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.UnsupportedToken, HttpStatus.CONFLICT),
+      );
     });
 
     it('should throw a conflict exception if an unsupported token is used', async () => {
@@ -511,7 +530,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.UnsupportedToken, HttpStatus.CONFLICT),
+      );
     });
 
     it('should throw a signature error if the signature is wrong', async () => {
@@ -536,7 +557,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorSignature.SignatureNotVerified);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        ),
+      );
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {
@@ -550,7 +576,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.TransactionNotFoundByHash);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionNotFoundByHash,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
 
     it('should throw a not found exception if the transaction data is invalid', async () => {
@@ -572,7 +603,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.InvalidTransactionData);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.InvalidTransactionData,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
 
     it('should throw a not found exception if the transaction has insufficient confirmations', async () => {
@@ -609,8 +645,11 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(
-        ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+          HttpStatus.NOT_FOUND,
+        ),
       );
     });
 
@@ -652,7 +691,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionAlreadyExists,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
@@ -733,7 +777,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createRefundPayment(mockPaymentRefundCreateDto),
-      ).rejects.toThrow(DatabaseError);
+      ).rejects.toThrow(mockError);
     });
 
     it('should throw NotSuccess error on other database errors', async () => {
@@ -743,7 +787,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createRefundPayment(mockPaymentRefundCreateDto),
-      ).rejects.toThrow(DatabaseError);
+      ).rejects.toThrow(new DatabaseError('', ''));
     });
   });
 });

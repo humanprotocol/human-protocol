@@ -61,7 +61,6 @@ export class CronJobService {
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
       throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
     }
 
