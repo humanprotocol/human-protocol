@@ -15,7 +15,7 @@ import {
   ApiTags,
   ApiQuery,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/guards';
 import { CredentialService } from './credential.service';
 import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
