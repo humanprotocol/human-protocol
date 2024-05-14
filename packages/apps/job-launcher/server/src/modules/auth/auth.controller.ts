@@ -39,7 +39,6 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
-import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
 
@@ -60,7 +59,6 @@ import { TokenType } from './token.entity';
   status: 422,
   description: 'Unprocessable entity.',
 })
-@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);

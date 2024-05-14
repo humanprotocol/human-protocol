@@ -86,7 +86,7 @@ export const SolvedTasksView: FC = () => {
                   mb="14px"
                 >
                   {`Total number of tasks till ${dayjs(
-                    data[data.length - 1].date
+                    data?.[(data?.length || 1) - 1].date
                   ).format('MMM D, YYYY')}`}
                 </Typography>
                 <Typography

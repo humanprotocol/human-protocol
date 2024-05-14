@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "types": ["node", "jest", "@testing-library/jest-dom"]
   },
   "include": ["src", "tests"]

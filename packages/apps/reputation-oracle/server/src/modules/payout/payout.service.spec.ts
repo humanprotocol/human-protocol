@@ -21,7 +21,7 @@ import { PayoutService } from './payout.service';
 import { createMock } from '@golevelup/ts-jest';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ErrorResults } from '../../common/constants/errors';
-import { CvatAnnotationMeta } from 'src/common/dto/result';
+import { CvatAnnotationMeta } from '../../common/dto/result';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),

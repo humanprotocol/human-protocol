@@ -41,6 +41,9 @@ export const RPC_URLS: Partial<Record<ChainId, string | undefined>> = {
     import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
   [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
   [ChainId.XLAYER]: import.meta.env.VITE_APP_RPC_URL_XLAYER || '',
+  [ChainId.XLAYER_TESTNET]:
+    import.meta.env.VITE_APP_RPC_URL_XLAYER_TESTNET || '',
+  [ChainId.LOCALHOST]: 'http://127.0.0.1:8545',
 };
 
 export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(
@@ -57,4 +60,23 @@ export const CHAIN_ID_BY_NAME: Record<string, ChainId> = {
   'Binance Smart Chain': ChainId.BSC_MAINNET,
   'Ethereum Sepolia': ChainId.SEPOLIA,
   Localhost: ChainId.LOCALHOST,
+};
+
+export const LOCALHOST = {
+  id: 1338,
+  name: 'Localhost',
+  network: 'localhost',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['http://127.0.0.1:8545'],
+    },
+    public: {
+      http: ['http://127.0.0.1:8545'],
+    },
+  },
 };

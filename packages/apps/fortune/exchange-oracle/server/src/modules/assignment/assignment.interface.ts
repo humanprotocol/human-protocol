@@ -4,6 +4,7 @@ import { AssignmentEntity } from './assignment.entity';
 
 export interface AssignmentFilterData {
   chainId?: number;
+  assignmentId?: string;
   escrowAddress?: string;
   status?: AssignmentStatus;
   sortField?: AssignmentSortField;

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -207,7 +206,7 @@ export class JobController {
     @Query('status') status: JobStatusFilter,
     @Query('skip') skip = 0,
     @Query('limit') limit = 10,
-  ): Promise<JobListDto[] | BadRequestException> {
+  ): Promise<JobListDto[]> {
     networks = !Array.isArray(networks) ? [networks] : networks;
     return this.jobService.getJobsByStatus(
       networks,

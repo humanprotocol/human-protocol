@@ -11,50 +11,11 @@ export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.CELO,
   ChainId.CELO_ALFAJORES,
+  ChainId.XLAYER,
+  ChainId.XLAYER_TESTNET,
   // ChainId.SKALE,
   // ChainId.AVALANCHE,
   // ChainId.AVALANCHE_TESTNET,
-];
-
-export const SUPPORTED_CHAIN_IDS = [
-  ChainId.MAINNET,
-  ChainId.RINKEBY,
-  ChainId.GOERLI,
-  ChainId.SEPOLIA,
-  ChainId.BSC_MAINNET,
-  ChainId.BSC_TESTNET,
-  ChainId.POLYGON,
-  ChainId.POLYGON_MUMBAI,
-  ChainId.POLYGON_AMOY,
-  ChainId.SKALE,
-  ChainId.MOONBEAM,
-  ChainId.MOONBASE_ALPHA,
-  ChainId.AVALANCHE_TESTNET,
-  ChainId.AVALANCHE,
-  ChainId.CELO,
-  ChainId.CELO_ALFAJORES,
-  ChainId.XLAYER,
-];
-
-export const L1_L2_CHAIN_IDS = [
-  ChainId.BSC_MAINNET,
-  ChainId.POLYGON,
-  ChainId.SKALE,
-  ChainId.MOONBEAM,
-  ChainId.AVALANCHE,
-  ChainId.XLAYER,
-];
-
-export const TESTNET_CHAIN_IDS = [
-  ChainId.RINKEBY,
-  ChainId.GOERLI,
-  ChainId.SEPOLIA,
-  ChainId.BSC_TESTNET,
-  ChainId.POLYGON_MUMBAI,
-  ChainId.POLYGON_AMOY,
-  ChainId.MOONBASE_ALPHA,
-  ChainId.AVALANCHE_TESTNET,
-  ChainId.CELO_ALFAJORES,
 ];
 
 export const FAUCET_CHAIN_IDS = [
@@ -67,6 +28,7 @@ export const FAUCET_CHAIN_IDS = [
   ChainId.AVALANCHE_TESTNET,
   ChainId.SKALE,
   ChainId.CELO_ALFAJORES,
+  ChainId.XLAYER_TESTNET,
 ];
 
 export const RPC_URLS: {
@@ -89,6 +51,8 @@ export const RPC_URLS: {
     import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
   [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
   [ChainId.XLAYER]: import.meta.env.VITE_APP_RPC_URL_XLAYER || '',
+  [ChainId.XLAYER_TESTNET]:
+    import.meta.env.VITE_APP_RPC_URL_XLAYER_TESTNET || '',
 };
 
 export const FAST_INTERVAL = 10_000;
@@ -111,3 +75,22 @@ export const BITFINEX_SUPPORTED_CHAIN_IDS = [ChainId.MAINNET, ChainId.POLYGON];
 
 export const BITFINEX_HOT_WALLET_ADDRESS =
   '0x77134cbc06cb00b66f4c7e623d5fdbf6777635ec';
+
+export const X_LAYER = {
+  id: 196,
+  name: 'xLayer',
+  network: 'xLayer',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'OKB',
+    symbol: 'OKB',
+  },
+  rpcUrls: {
+    public: { http: [import.meta.env.VITE_APP_RPC_URL_XLAYER] },
+    default: { http: [import.meta.env.VITE_APP_RPC_URL_XLAYER] },
+  },
+  blockExplorers: {
+    etherscan: { name: 'SnowTrace', url: 'https://www.oklink.com/xlayer' },
+    default: { name: 'SnowTrace', url: 'https://www.oklink.com/xlayer' },
+  },
+};
