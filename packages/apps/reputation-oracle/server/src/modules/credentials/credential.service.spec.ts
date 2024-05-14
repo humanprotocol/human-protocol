@@ -10,6 +10,7 @@ import { SelectQueryBuilder } from 'typeorm';
 import { CredentialStatus } from '../../common/enums/credential';
 import { CreateCredentialDto } from './credential.dto';
 import { UserType } from '../../common/enums/user';
+import { UserService } from '../user/user.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -49,6 +50,10 @@ describe('CredentialService', () => {
         {
           provide: Web3ConfigService,
           useValue: createMock<Web3ConfigService>(),
+        },
+        {
+          provide: UserService,
+          useValue: createMock<UserService>(),
         },
       ],
     }).compile();

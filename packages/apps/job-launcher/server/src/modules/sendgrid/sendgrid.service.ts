@@ -24,7 +24,10 @@ export class SendGridService {
     }
 
     if (!SENDGRID_API_KEY_REGEX.test(this.sendgridConfigService.apiKey)) {
-      throw new Error(ErrorSendGrid.InvalidApiKey);
+      throw new ControlledError(
+        ErrorSendGrid.InvalidApiKey,
+        HttpStatus.CONFLICT,
+      );
     }
 
     this.mailService.setApiKey(this.sendgridConfigService.apiKey);
