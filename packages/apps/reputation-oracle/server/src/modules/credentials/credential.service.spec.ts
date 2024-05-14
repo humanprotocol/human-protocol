@@ -75,126 +75,295 @@ describe('CredentialService', () => {
       createdCredential.status = CredentialStatus.ACTIVE;
 
       jest
-        .spyOn(credentialRepository, 'createUnique')
+        .spyOn(credentialRepository, 'save')
         .mockResolvedValue(createdCredential);
 
       const result =
-        await credentialService.createCredential(createdCredential);
+        await credentialService.createCredential(createCredentialDto);
 
-      expect(credentialRepository.createUnique).toHaveBeenCalledWith(
-        createdCredential,
-      );
-
+      expect(credentialRepository.save).toHaveBeenCalledWith(createdCredential);
       expect(result).toMatchObject(createdCredential);
     });
+  });
 
-    describe('getCredentials', () => {
-      it('should return a list of credentials for a CREDENTIAL_VALIDATOR', async () => {
-        const credentials = [
-          { status: CredentialStatus.ACTIVE } as CredentialEntity,
-          { status: CredentialStatus.EXPIRED } as CredentialEntity,
-          { status: CredentialStatus.VALIDATED } as CredentialEntity,
-        ];
+  describe('getCredentials', () => {
+    it('should return a list of credentials for a CREDENTIAL_VALIDATOR', async () => {
+      const credentials = [
+        {
+          id: 1,
+          reference: 'ref1',
+          description: 'desc1',
+          url: 'url1',
+          status: CredentialStatus.ACTIVE,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [],
+        } as unknown as CredentialEntity,
+        {
+          id: 2,
+          reference: 'ref2',
+          description: 'desc2',
+          url: 'url2',
+          status: CredentialStatus.EXPIRED,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [],
+        } as unknown as CredentialEntity,
+        {
+          id: 3,
+          reference: 'ref3',
+          description: 'desc3',
+          url: 'url3',
+          status: CredentialStatus.VALIDATED,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [],
+        } as unknown as CredentialEntity,
+      ];
 
-        const mockQueryBuilder = {
-          where: jest.fn().mockReturnThis(),
-          andWhere: jest.fn().mockReturnThis(),
-          getMany: jest.fn().mockResolvedValue(credentials),
-        } as Partial<SelectQueryBuilder<CredentialEntity>>;
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(credentials),
+      } as Partial<SelectQueryBuilder<CredentialEntity>>;
 
-        jest
-          .spyOn(credentialRepository, 'createQueryBuilder')
-          .mockReturnValue(
-            mockQueryBuilder as SelectQueryBuilder<CredentialEntity>,
-          );
-
-        const result = await credentialService.getCredentials(
-          { id: 'user123', role: UserType.CREDENTIAL_VALIDATOR },
-          'ACTIVE',
+      jest
+        .spyOn(credentialRepository, 'createQueryBuilder')
+        .mockReturnValue(
+          mockQueryBuilder as SelectQueryBuilder<CredentialEntity>,
         );
 
-        expect(result).toEqual([
-          { status: CredentialStatus.ACTIVE },
-          { status: CredentialStatus.EXPIRED },
-        ]);
-      });
+      const result = await credentialService.getCredentials(
+        { id: 'user123', role: UserType.CREDENTIAL_VALIDATOR },
+        'ACTIVE',
+      );
 
-      it('should return a list of credentials for a WORKER', async () => {
-        const credentials = [
-          { status: CredentialStatus.ACTIVE } as CredentialEntity,
-          { status: CredentialStatus.EXPIRED } as CredentialEntity,
-          { status: CredentialStatus.VALIDATED } as CredentialEntity,
-          { status: CredentialStatus.ON_CHAIN } as CredentialEntity,
-        ];
+      expect(result).toEqual([
+        {
+          id: 1,
+          reference: 'ref1',
+          description: 'desc1',
+          url: 'url1',
+          status: CredentialStatus.ACTIVE,
+          startsAt: expect.any(Date),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          validator: { id: 1 },
+          validations: [],
+        },
+        {
+          id: 2,
+          reference: 'ref2',
+          description: 'desc2',
+          url: 'url2',
+          status: CredentialStatus.EXPIRED,
+          startsAt: expect.any(Date),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          validator: { id: 1 },
+          validations: [],
+        },
+      ]);
+    });
 
-        const mockQueryBuilder = {
-          where: jest.fn().mockReturnThis(),
-          andWhere: jest.fn().mockReturnThis(),
-          getMany: jest.fn().mockResolvedValue(credentials),
-        } as Partial<SelectQueryBuilder<CredentialEntity>>;
+    it('should return a list of credentials for a WORKER', async () => {
+      const credentials = [
+        {
+          id: 1,
+          reference: 'ref1',
+          description: 'desc1',
+          url: 'url1',
+          status: CredentialStatus.ACTIVE,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [{ certificate: null, user: { id: 'user123' } as any }],
+        } as unknown as CredentialEntity,
+        {
+          id: 2,
+          reference: 'ref2',
+          description: 'desc2',
+          url: 'url2',
+          status: CredentialStatus.EXPIRED,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [{ certificate: null, user: { id: 'user123' } as any }],
+        } as unknown as CredentialEntity,
+        {
+          id: 3,
+          reference: 'ref3',
+          description: 'desc3',
+          url: 'url3',
+          status: CredentialStatus.VALIDATED,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [
+            { certificate: 'cert123', user: { id: 'user123' } as any },
+          ],
+        } as unknown as CredentialEntity,
+        {
+          id: 4,
+          reference: 'ref4',
+          description: 'desc4',
+          url: 'url4',
+          status: CredentialStatus.ON_CHAIN,
+          startsAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          validator: { id: 1 } as any, // Mock validator
+          validations: [
+            { certificate: 'cert456', user: { id: 'user123' } as any },
+          ],
+        } as unknown as CredentialEntity,
+      ];
 
-        jest
-          .spyOn(credentialRepository, 'createQueryBuilder')
-          .mockReturnValue(
-            mockQueryBuilder as SelectQueryBuilder<CredentialEntity>,
-          );
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(credentials),
+      } as Partial<SelectQueryBuilder<CredentialEntity>>;
 
-        const result = await credentialService.getCredentials(
-          { id: 'user123', role: UserType.WORKER },
-          'ACTIVE',
+      jest
+        .spyOn(credentialRepository, 'createQueryBuilder')
+        .mockReturnValue(
+          mockQueryBuilder as SelectQueryBuilder<CredentialEntity>,
         );
 
-        expect(result).toEqual([
-          { status: CredentialStatus.ACTIVE },
-          { status: CredentialStatus.EXPIRED },
-          { status: CredentialStatus.VALIDATED },
-          { status: CredentialStatus.ON_CHAIN },
-        ]);
-      });
+      const result = await credentialService.getCredentials(
+        { id: 'user123', role: UserType.WORKER },
+        'ACTIVE',
+      );
+
+      expect(result).toEqual([
+        {
+          id: 1,
+          reference: 'ref1',
+          description: 'desc1',
+          url: 'url1',
+          status: CredentialStatus.ACTIVE,
+          certificate: null,
+          startsAt: expect.any(Date),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          validations: [
+            {
+              certificate: null,
+              user: { id: 'user123' },
+            },
+          ],
+          validator: { id: 1 },
+        },
+        {
+          id: 2,
+          reference: 'ref2',
+          description: 'desc2',
+          url: 'url2',
+          status: CredentialStatus.EXPIRED,
+          certificate: null,
+          startsAt: expect.any(Date),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          validations: [
+            {
+              certificate: null,
+              user: { id: 'user123' },
+            },
+          ],
+          validator: { id: 1 },
+        },
+        {
+          id: 3,
+          reference: 'ref3',
+          description: 'desc3',
+          url: 'url3',
+          status: CredentialStatus.VALIDATED,
+          certificate: 'cert123',
+          startsAt: expect.any(Date),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          validations: [
+            {
+              certificate: 'cert123',
+              user: { id: 'user123' },
+            },
+          ],
+          validator: { id: 1 },
+        },
+        {
+          id: 4,
+          reference: 'ref4',
+          description: 'desc4',
+          url: 'url4',
+          status: CredentialStatus.ON_CHAIN,
+          certificate: 'cert456',
+          startsAt: expect.any(Date),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          validations: [
+            {
+              certificate: 'cert456',
+              user: { id: 'user123' },
+            },
+          ],
+          validator: { id: 1 },
+        },
+      ]);
+    });
+  });
+
+  describe('getByReference', () => {
+    it('should return a credential by reference', async () => {
+      const credential = new CredentialEntity();
+      jest
+        .spyOn(credentialRepository, 'findByReference')
+        .mockResolvedValue(credential);
+
+      const result = await credentialService.getByReference('ref123');
+      expect(result).toEqual(credential);
     });
 
-    describe('getByReference', () => {
-      it('should return a credential by reference', async () => {
-        const credential = new CredentialEntity();
-        jest
-          .spyOn(credentialRepository, 'findByReference')
-          .mockResolvedValue(credential);
+    it('should return null if the credential is expired', async () => {
+      const credential = { status: 'EXPIRED' } as CredentialEntity;
+      jest
+        .spyOn(credentialRepository, 'findByReference')
+        .mockResolvedValue(credential);
 
-        const result = await credentialService.getByReference('ref123');
-        expect(result).toEqual(credential);
-      });
+      const result = await credentialService.getByReference('ref123');
+      expect(result).toBeNull();
+    });
+  });
 
-      it('should return null if the credential is expired', async () => {
-        const credential = { status: 'EXPIRED' } as CredentialEntity;
-        jest
-          .spyOn(credentialRepository, 'findByReference')
-          .mockResolvedValue(credential);
+  describe('validateCredential', () => {
+    it('should validate an active credential', async () => {
+      const credential = { status: 'ACTIVE' } as CredentialEntity;
+      jest
+        .spyOn(credentialRepository, 'findByReference')
+        .mockResolvedValue(credential);
+      jest.spyOn(credentialRepository, 'save').mockResolvedValue(credential);
 
-        const result = await credentialService.getByReference('ref123');
-        expect(result).toBeNull();
-      });
+      await credentialService.validateCredential('ref123');
+      expect(credential.status).toEqual('VALIDATED');
     });
 
-    describe('validateCredential', () => {
-      it('should validate an active credential', async () => {
-        const credential = { status: 'ACTIVE' } as CredentialEntity;
-        jest
-          .spyOn(credentialRepository, 'findByReference')
-          .mockResolvedValue(credential);
-        jest.spyOn(credentialRepository, 'save').mockResolvedValue(credential);
-
-        await credentialService.validateCredential('ref123');
-        expect(credential.status).toEqual('VALIDATED');
-      });
-
-      it('should throw an error if the credential is not found', async () => {
-        jest
-          .spyOn(credentialRepository, 'findByReference')
-          .mockResolvedValue(null);
-        await expect(
-          credentialService.validateCredential('ref123'),
-        ).rejects.toThrow('Credential not found.');
-      });
+    it('should throw an error if the credential is not found', async () => {
+      jest
+        .spyOn(credentialRepository, 'findByReference')
+        .mockResolvedValue(null);
+      await expect(
+        credentialService.validateCredential('ref123'),
+      ).rejects.toThrow('Credential not found.');
     });
   });
 });

@@ -7,6 +7,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { CredentialStatus } from '../../common/enums/credential';
+
 export class CreateCredentialDto {
   @ApiProperty()
   @IsString()
@@ -31,7 +32,7 @@ export class CreateCredentialDto {
 }
 
 export class CredentialQueryDto {
-  @ApiPropertyOptional({ enum: CredentialStatus, name: 'credential_status' })
+  @ApiPropertyOptional({ enum: CredentialStatus })
   @IsOptional()
   @IsEnum(CredentialStatus)
   public status?: CredentialStatus;
@@ -58,7 +59,7 @@ export class CredentialDto {
   @IsUrl()
   public url: string;
 
-  @ApiProperty({ enum: CredentialStatus, name: 'credential_status' })
+  @ApiProperty({ enum: CredentialStatus })
   @IsEnum(CredentialStatus)
   public status: CredentialStatus;
 
