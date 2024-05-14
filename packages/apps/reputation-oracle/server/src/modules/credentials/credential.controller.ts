@@ -32,40 +32,6 @@ export class CredentialController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post()
-  @ApiOperation({ summary: 'Create a new credential' })
-  @ApiResponse({
-    status: 201,
-    description: 'Credential created successfully',
-  })
-  public async createCredential(
-    @Req() req: any,
-    @Body() createCredentialDto: CreateCredentialDto,
-  ): Promise<any> {
-    if (req.user.role !== UserType.CREDENTIAL_VALIDATOR) {
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
-
-    try {
-      const credential =
-        await this.credentialService.createCredential(createCredentialDto);
-      return { credential_id: credential.id };
-    } catch (error) {
-      if (error.code === '23505') {
-        throw new HttpException(
-          'Duplicate reference value',
-          HttpStatus.CONFLICT,
-        );
-      }
-      throw new HttpException(
-        'Failed to create credential',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Retrieve a list of credentials based on filters' })
   @ApiResponse({
