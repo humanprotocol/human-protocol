@@ -398,12 +398,8 @@ contract MetaHumanGovernor is
         //create snapshot of current spokes
         createSnapshot(proposalId);
 
-        uint256 voteStartTimestamp = estimateTimestampFromBlock(
-            proposalSnapshot(proposalId)
-        );
-        uint256 voteEndTimestamp = estimateTimestampFromBlock(
-            proposalDeadline(proposalId)
-        );
+        uint256 voteStartTimestamp = proposalSnapshot(proposalId);
+        uint256 voteEndTimestamp = proposalDeadline(proposalId);
 
         // Sends the proposal to all of the other spoke contracts
         if (spokeContractsSnapshots[proposalId].length > 0) {
@@ -466,31 +462,6 @@ contract MetaHumanGovernor is
             valueToSend,
             GAS_LIMIT
         );
-    }
-
-    /**
-     * @dev Estimates timestamp when given block number should be the current block.
-     *  @return blockToEstimate Block to estimate the timestamp for.
-     */
-    function estimateTimestampFromBlock(
-        uint256 blockToEstimate
-    ) internal view returns (uint256) {
-        uint256 currentTimestamp = block.timestamp;
-        uint256 currentBlock = block.number;
-        uint256 estimatedTimestamp = 0;
-        if (blockToEstimate > currentBlock) {
-            //future
-            uint256 blockDifference = blockToEstimate - currentBlock;
-            uint256 timeDifference = blockDifference * secondsPerBlock;
-            estimatedTimestamp = currentTimestamp + timeDifference;
-        } else {
-            //past
-            uint256 blockDifference = currentBlock - blockToEstimate;
-            uint256 timeDifference = blockDifference * secondsPerBlock;
-            estimatedTimestamp = currentTimestamp - timeDifference;
-        }
-
-        return estimatedTimestamp;
     }
 
     // The following functions are overrides required by Solidity.
