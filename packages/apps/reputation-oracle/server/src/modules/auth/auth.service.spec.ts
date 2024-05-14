@@ -34,6 +34,7 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
+import { SiteKeyRepository } from '../user/site-key.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -84,6 +85,10 @@ describe('AuthService', () => {
         },
         { provide: TokenRepository, useValue: createMock<TokenRepository>() },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: SiteKeyRepository,
+          useValue: createMock<SiteKeyRepository>(),
+        },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
         {

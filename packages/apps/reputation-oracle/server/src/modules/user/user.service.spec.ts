@@ -12,7 +12,11 @@ import {
   UserType,
 } from '../../common/enums/user';
 import { signMessage } from '../../common/utils/signature';
-import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_EMAIL,
+  MOCK_PRIVATE_KEY,
+} from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
@@ -20,6 +24,13 @@ import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../web3/web3.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { SiteKeyRepository } from './site-key.repository';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { getLabelerData, registerLabeler } from '../../common/utils/hcaptcha';
+import { OracleType } from '../../common/enums';
+import { SiteKeyEntity } from './site-key.entity';
+
+jest.mock('../../common/utils/hcaptcha');
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -47,6 +58,10 @@ describe('UserService', () => {
         UserService,
         { provide: UserRepository, useValue: createMock<UserRepository>() },
         {
+          provide: SiteKeyRepository,
+          useValue: createMock<SiteKeyRepository>(),
+        },
+        {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
@@ -56,6 +71,7 @@ describe('UserService', () => {
         },
         ConfigService,
         Web3ConfigService,
+        AuthConfigService,
       ],
     }).compile();
 
@@ -135,6 +151,190 @@ describe('UserService', () => {
 
       expect(userRepository.findOneByEvmAddress).toHaveBeenCalledWith(address);
       expect(result).toBe(userEntity);
+    });
+  });
+
+  describe('registerLabeler', () => {
+    it('should register labeler successfully and return site key', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+      const data = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      const mockLabelerData = { sitekeys: [{ sitekey: 'site_key' }] };
+
+      (registerLabeler as jest.Mock).mockResolvedValueOnce(true);
+      (getLabelerData as jest.Mock).mockResolvedValueOnce(mockLabelerData);
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        signMessage: jest.fn().mockResolvedValue('signature'),
+      });
+
+      const result = await userService.registerLabeler(
+        userEntity as UserEntity,
+        data,
+      );
+
+      expect(result).toEqual('signature');
+    });
+
+    it('should throw BadRequestException if user address is incorrect', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      const data = {
+        address: 'different_address',
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity, data),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if user type is invalid', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.OPERATOR, // Invalid type
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+      const data = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity, data),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if user KYC status is not approved', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          status: KycStatus.PENDING_VERIFICATION,
+        },
+        save: jest.fn(),
+      };
+      const data = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity, data),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if user is already registered as a labeler', async () => {
+      const siteKeyEntity: DeepPartial<SiteKeyEntity> = {
+        id: 1,
+        siteKey: 'site_key',
+      };
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        siteKey: siteKeyEntity,
+        save: jest.fn(),
+      };
+      const data = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity, data),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if registering labeler fails', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+      const data = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      (registerLabeler as jest.Mock).mockResolvedValueOnce(false);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity, data),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if retrieving labeler data fails', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+      const data = {
+        address: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        type: OracleType.HCAPTCHA,
+        country: 'US',
+      };
+
+      (registerLabeler as jest.Mock).mockResolvedValueOnce(true);
+      (getLabelerData as jest.Mock).mockResolvedValueOnce(null);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity, data),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

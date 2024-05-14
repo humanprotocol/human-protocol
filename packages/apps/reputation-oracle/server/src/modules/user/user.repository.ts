@@ -10,11 +10,17 @@ export class UserRepository extends BaseRepository<UserEntity> {
   }
 
   async findById(id: number): Promise<UserEntity | null> {
-    return this.findOne({ where: { id }, relations: { kyc: true } });
+    return this.findOne({
+      where: { id },
+      relations: { kyc: true, siteKey: true },
+    });
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    return this.findOne({ where: { email }, relations: { kyc: true } });
+    return this.findOne({
+      where: { email },
+      relations: { kyc: true, siteKey: true },
+    });
   }
 
   public async findOneByEvmAddress(

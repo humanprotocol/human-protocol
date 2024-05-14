@@ -13,4 +13,5 @@ export enum WebhookStatus {
 export enum OracleType {
   FORTUNE = 'fortune',
   CVAT = 'cvat',
+  HCAPTCHA = 'hcaptcha',
 }

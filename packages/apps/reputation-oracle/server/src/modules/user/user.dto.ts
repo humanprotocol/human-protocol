@@ -1,9 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsEthereumAddress,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ChainId } from '@human-protocol/sdk';
+import { Type } from '../../common/enums/role';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -49,6 +56,30 @@ export class UserUpdateDto {
   @IsOptional()
   @IsEnum(UserStatus)
   public status?: UserStatus;
+}
+
+export class RegisterLabelerRequestDto {
+  @ApiProperty({ name: 'chain_id' })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty()
+  @IsEthereumAddress()
+  public address: string;
+
+  @ApiProperty({ name: 'type' })
+  @IsEnum(Type)
+  public type: Type;
+
+  @ApiProperty()
+  @IsString()
+  public country: string;
+}
+
+export class RegisterLabelerResponseDto {
+  @ApiProperty({ name: 'signed_site_key' })
+  @IsString()
+  public signedSiteKey: string;
 }
 
 export class RegisterAddressRequestDto {

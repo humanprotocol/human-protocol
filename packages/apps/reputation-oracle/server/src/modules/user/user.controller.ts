@@ -18,6 +18,8 @@ import {
   DisableOperatorDto,
   RegisterAddressRequestDto,
   RegisterAddressResponseDto,
+  RegisterLabelerRequestDto,
+  RegisterLabelerResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
@@ -30,17 +32,17 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/register-user')
+  @Post('/register-labeler')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Register User',
-    description: 'Endpoint to register blockchain address.',
+    summary: 'Register Labeler',
+    description: 'Endpoint to register user as a labeler on hcaptcha services.',
   })
-  @ApiBody({ type: RegisterAddressRequestDto })
+  @ApiBody({ type: RegisterLabelerRequestDto })
   @ApiResponse({
     status: 200,
-    description: 'Blockchain address registered successfully',
-    type: RegisterAddressResponseDto,
+    description: 'Labeler registered successfully',
+    type: RegisterLabelerResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -54,11 +56,16 @@ export class UserController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public async registerUser(
+  public async registerLabeler(
     @Req() request: RequestWithUser,
-    @Body() data: RegisterAddressRequestDto,
-  ): Promise<void> {
-    return;
+    @Body() data: RegisterLabelerRequestDto,
+  ): Promise<RegisterLabelerResponseDto> {
+    const signedSiteKey = await this.userService.registerLabeler(
+      request.user,
+      data,
+    );
+
+    return { signedSiteKey };
   }
 
   @Post('/register-address')
