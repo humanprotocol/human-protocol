@@ -1,10 +1,11 @@
-import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ErrorBucket } from '../constants/errors';
 import { JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { parseString } from 'xml2js';
+import { ControlledError } from '../errors/controlled';
 
 export function generateBucketUrl(
   storageData: StorageDataDto,
@@ -17,18 +18,27 @@ export function generateBucketUrl(
       jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
     storageData.provider != StorageProviders.AWS
   ) {
-    throw new BadRequestException(ErrorBucket.InvalidProvider);
+    throw new ControlledError(
+      ErrorBucket.InvalidProvider,
+      HttpStatus.BAD_REQUEST,
+    );
   }
   if (!storageData.bucketName) {
-    throw new BadRequestException(ErrorBucket.EmptyBucket);
+    throw new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST);
   }
   switch (storageData.provider) {
     case StorageProviders.AWS:
       if (!storageData.region) {
-        throw new BadRequestException(ErrorBucket.EmptyRegion);
+        throw new ControlledError(
+          ErrorBucket.EmptyRegion,
+          HttpStatus.BAD_REQUEST,
+        );
       }
       if (!isRegion(storageData.region)) {
-        throw new BadRequestException(ErrorBucket.InvalidRegion);
+        throw new ControlledError(
+          ErrorBucket.InvalidRegion,
+          HttpStatus.BAD_REQUEST,
+        );
       }
       return new URL(
         `https://${storageData.bucketName}.s3.${
@@ -44,7 +54,10 @@ export function generateBucketUrl(
         }`,
       );
     default:
-      throw new BadRequestException(ErrorBucket.InvalidProvider);
+      throw new ControlledError(
+        ErrorBucket.InvalidProvider,
+        HttpStatus.BAD_REQUEST,
+      );
   }
 }
 

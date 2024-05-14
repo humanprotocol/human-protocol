@@ -8,6 +8,8 @@ import { Web3Service } from './web3.service';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from './../../../test/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 describe('Web3Service', () => {
   let mockConfigService: Partial<ConfigService>;
@@ -66,7 +68,9 @@ describe('Web3Service', () => {
             new Web3ConfigService(mockConfigService as ConfigService),
             new NetworkConfigService(mockConfigService as ConfigService),
           ),
-      ).toThrow(ErrorWeb3.NoValidNetworks);
+      ).toThrow(
+        new ControlledError(ErrorWeb3.NoValidNetworks, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -83,7 +87,7 @@ describe('Web3Service', () => {
       const invalidChainId = ChainId.POLYGON;
 
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
-        ErrorWeb3.InvalidChainId,
+        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
       );
     });
   });

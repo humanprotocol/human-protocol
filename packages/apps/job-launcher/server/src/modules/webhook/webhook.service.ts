@@ -21,7 +21,6 @@ import { WebhookDataDto } from './webhook.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
-import { BadRequestException } from '@nestjs/common';
 import { ControlledError } from '../../common/errors/controlled';
 @Injectable()
 export class WebhookService {
@@ -144,8 +143,9 @@ export class WebhookService {
         break;
 
       default:
-        throw new BadRequestException(
+        throw new ControlledError(
           `Invalid webhook event type: ${webhook.eventType}`,
+          HttpStatus.BAD_REQUEST,
         );
     }
   }

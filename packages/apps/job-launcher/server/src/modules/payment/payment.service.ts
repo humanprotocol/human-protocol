@@ -67,7 +67,7 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    if (!paymentIntent.client_secret) {
+    if (!paymentIntent?.client_secret) {
       throw new ControlledError(
         ErrorPayment.ClientSecretDoesNotExist,
         HttpStatus.NOT_FOUND,
