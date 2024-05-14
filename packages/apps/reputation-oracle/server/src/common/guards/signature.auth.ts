@@ -46,6 +46,6 @@ export class SignatureAuthGuard implements CanActivate {
       console.error(error);
     }
 
-    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new UnauthorizedException('Unauthorized');
   }
 }
