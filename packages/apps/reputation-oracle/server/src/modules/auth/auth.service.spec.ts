@@ -519,6 +519,74 @@ describe('AuthService', () => {
       });
     });
 
+    describe('signupCredentialValidator', () => {
+      const signInDto = {
+        email: 'test@example.com',
+        password: 'password',
+        hCaptchaToken: 'token',
+      };
+
+      const mockUserEntity: Partial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        evmAddress: '',
+        kyc: undefined,
+        nonce: '',
+        status: UserStatus.PENDING,
+      };
+
+      beforeEach(() => {
+        jest
+          .spyOn(userService, 'createCredentialValidatorUser')
+          .mockResolvedValue(mockUserEntity as UserEntity);
+        jest
+          .spyOn(tokenRepository, 'createUnique')
+          .mockResolvedValue(undefined as any);
+        jest.spyOn(sendGridService, 'sendEmail').mockResolvedValue();
+      });
+
+      it('should create a credential validator user and send verification email', async () => {
+        const result = await authService.signupCredentialValidator(signInDto);
+
+        expect(userService.createCredentialValidatorUser).toHaveBeenCalledWith(
+          signInDto,
+        );
+        expect(tokenRepository.createUnique).toHaveBeenCalled();
+        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+          expect.objectContaining({
+            personalizations: [
+              {
+                to: signInDto.email,
+                dynamicTemplateData: {
+                  service_name: SERVICE_NAME,
+                  url: expect.stringContaining('/verify?token='),
+                },
+              },
+            ],
+            templateId: SENDGRID_TEMPLATES.signup,
+          }),
+        );
+        expect(result).toEqual(mockUserEntity);
+      });
+
+      it('should handle errors if user creation fails', async () => {
+        jest
+          .spyOn(userService, 'createCredentialValidatorUser')
+          .mockRejectedValue(new Error('Creation Failed'));
+
+        await expect(
+          authService.signupCredentialValidator(signInDto),
+        ).rejects.toThrow('Creation Failed');
+
+        expect(userService.createCredentialValidatorUser).toHaveBeenCalledWith(
+          signInDto,
+        );
+        expect(tokenRepository.createUnique).not.toHaveBeenCalled();
+        expect(sendGridService.sendEmail).not.toHaveBeenCalled();
+      });
+    });
+
     describe('web3auth', () => {
       describe('signin', () => {
         const nonce = getNonce();
