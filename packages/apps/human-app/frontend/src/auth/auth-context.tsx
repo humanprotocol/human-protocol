@@ -1,7 +1,6 @@
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { ZodError, z } from 'zod';
-import { t } from 'i18next';
+import { z } from 'zod';
 import { browserAuthProvider } from '@/auth/browser-auth-provider';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 
@@ -17,10 +16,9 @@ const userDataSchema = z.object({
 
 type UserData = z.infer<typeof userDataSchema>;
 
-type AuthStatus = 'loading' | 'idle';
+type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 export interface AuthenticatedUserContextType {
   user: UserData;
-  userDataError: null;
   status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
@@ -28,7 +26,6 @@ export interface AuthenticatedUserContextType {
 
 interface UnauthenticatedUserContextType {
   user: null;
-  userDataError: string | null;
   status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
@@ -39,30 +36,24 @@ export const AuthContext = createContext<
 >(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<AuthStatus>('loading');
+  const [authState, setAuthState] = useState<{
+    user: UserData | null;
+    status: AuthStatus;
+  }>({ user: null, status: 'loading' });
 
   const handleSignIn = () => {
     try {
       const accessToken = browserAuthProvider.getAccessToken();
       if (!accessToken) {
-        setStatus('idle');
+        setAuthState({ user: null, status: 'idle' });
         return;
       }
       const userData = jwtDecode(accessToken);
       const validUserData = userDataSchema.parse(userData);
-      setUser(validUserData);
-      setError(null);
-      setStatus('idle');
-    } catch (err) {
+      setAuthState({ user: validUserData, status: 'success' });
+    } catch {
       browserAuthProvider.signOut();
-      if (err instanceof ZodError) {
-        setError(err.message);
-      } else {
-        setError(t('errors.unknown'));
-      }
-      setStatus('idle');
+      setAuthState({ user: null, status: 'error' });
     }
   };
 
@@ -73,8 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = () => {
     browserAuthProvider.signOut();
-    setUser(null);
-    setError(null);
+    setAuthState({ user: null, status: 'idle' });
   };
 
   useEffect(() => {
@@ -84,20 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={
-        user && !error
+        authState.user && authState.status === 'success'
           ? {
-              user,
+              ...authState,
               signOut,
               signIn,
-              userDataError: null,
-              status: 'idle',
             }
           : {
-              user: null,
+              ...authState,
               signOut,
               signIn,
-              userDataError: error,
-              status,
             }
       }
     >
