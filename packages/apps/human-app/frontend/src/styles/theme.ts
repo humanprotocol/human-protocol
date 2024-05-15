@@ -101,8 +101,8 @@ export const theme: ThemeOptions = {
       fontWeight: 600,
       letterSpacing: 0.25,
       [breakpoints.mobile]: {
-        fontSize: 20,
-        fontWeight: 500,
+        fontSize: 28,
+        fontWeight: 600,
         letterSpacing: 0.15,
       },
     },
