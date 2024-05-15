@@ -166,11 +166,19 @@
       "email": "Email",
       "password": "Password",
       "resetPassword": "Reset Password",
+      "completeKYC": "Complete KYC",
       "kycCompleted": "KYC Completed",
+      "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
+      "addKYCInfoOnChain": "Add KYC Info On-chain",
       "kycInfoOnChainAdded": "KYC Info On-Chain Added ",
       "emailNotifications": "Email Notifications",
-      "notificationsConsent": "I would like to be notified about News and Offers"
+      "notificationsConsent": "I would like to be notified about News and Offers",
+      "topNotifications": {
+        "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
+        "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
+        "noKYCOnChain": "Please complete your profile! You still need to add KYC info on-chain."
+      }
     },
     "jobs": {
       "errorFetchingData": "There was an error while fetching data, please try again",

@@ -262,7 +262,7 @@ export const theme: ThemeOptions = {
           fontWeight: 600,
           textTransform: 'none',
           '&.Mui-disabled': {
-            backgroundColor: colorPalette.primary.contrastText,
+            backgroundColor: colorPalette.button.disabled,
             color: colorPalette.text.secondary,
           },
         },

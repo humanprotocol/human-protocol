@@ -31,19 +31,21 @@ export function Router() {
             />
           ))}
         </Route>
-        <Route element={<LayoutProtected />}>
-          {protectedRoutes.map((route) => (
+        {protectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+          <Route
+            element={<LayoutProtected pageHeaderProps={pageHeaderProps} />}
+            key={routerProps.path}
+          >
             <Route
               element={
                 <RequireAuth>
-                  <>{route.element}</>
+                  <>{routerProps.element}</>
                 </RequireAuth>
               }
-              key={route.path}
-              path={route.path}
+              path={routerProps.path}
             />
-          ))}
-        </Route>
+          </Route>
+        ))}
       </Routes>
     </BrowserRouter>
   );

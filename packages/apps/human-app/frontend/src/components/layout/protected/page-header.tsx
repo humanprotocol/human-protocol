@@ -1,34 +1,42 @@
 import { Grid, Typography } from '@mui/material';
 import React from 'react';
 
-interface PageHeaderProps {
+export interface PageHeaderProps {
   headerIcon: React.ReactNode;
   headerText: string;
-  backgroundColor?: string;
 }
 
-export function PageHeader({
-  headerIcon,
-  headerText,
-  backgroundColor,
-}: PageHeaderProps) {
+export function PageHeader({ headerIcon, headerText }: PageHeaderProps) {
   return (
-    <Grid
-      alignContent="center"
-      container
-      sx={{
-        paddingTop: '70px',
-        backgroundColor: backgroundColor ? backgroundColor : 'transparent',
-      }}
-    >
-      <Grid item>{headerIcon}</Grid>
-      <Grid
-        item
-        sx={{
-          marginTop: '10px',
-        }}
-      >
-        <Typography variant="h3">{headerText}</Typography>
+    <Grid container>
+      <Grid alignContent="center" container gap="1rem" justifyContent="start">
+        <Grid
+          sx={{
+            height: '70px',
+            width: '70px',
+            position: 'relative',
+          }}
+        >
+          <span
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%,-30%)',
+            }}
+          >
+            {headerIcon}
+          </span>
+        </Grid>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant="h3">{headerText}</Typography>
+        </div>
       </Grid>
     </Grid>
   );
