@@ -18,17 +18,51 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { CredentialService } from './credential.service';
-import { CreateCredentialDto, CredentialQueryDto } from './credential.dto';
+import {
+  CreateCredentialDto,
+  CredentialQueryDto,
+  CredentialDto,
+} from './credential.dto';
 import { CredentialExceptionFilter } from '../../common/exceptions/credential.filter';
 import { Public } from '../../common/decorators';
 import { UserType } from '../../common/enums/user';
-
 @Public()
 @ApiTags('Credentials')
 @UseFilters(CredentialExceptionFilter)
 @Controller('credential')
 export class CredentialController {
   constructor(private readonly credentialService: CredentialService) {}
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  @ApiOperation({ summary: 'Create a new credential' })
+  @ApiResponse({
+    status: 201,
+    description: 'Credential created successfully',
+    type: CredentialDto,
+  })
+  public async createCredential(
+    @Req() req: any,
+    @Body() createCredentialDto: CreateCredentialDto,
+  ): Promise<{ credential_id: number }> {
+    if (req.user.role !== UserType.CREDENTIAL_VALIDATOR) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    try {
+      const credential =
+        await this.credentialService.createCredential(createCredentialDto);
+      return { credential_id: credential.id };
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new HttpException('Duplicate reference', HttpStatus.CONFLICT);
+      }
+      throw new HttpException(
+        'Failed to create credential',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
