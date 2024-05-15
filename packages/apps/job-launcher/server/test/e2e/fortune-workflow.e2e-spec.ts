@@ -3,12 +3,10 @@ import * as crypto from 'crypto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
-import { UserRepository } from '../../src/modules/user/user.repository';
 import { UserStatus } from '../../src/common/enums/user';
 import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
 import setupE2eEnvironment from './env-setup';
-import { MOCK_FILE_HASH, MOCK_FILE_URL } from '../../test/constants';
 import { JobRequestType, JobStatus } from '../../src/common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 import { ErrorJob } from '../../src/common/constants/errors';
@@ -22,16 +20,21 @@ import {
 import { PaymentEntity } from '../../src/modules/payment/payment.entity';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
 import { JobRepository } from '../../src/modules/job/job.repository';
+import { StorageService } from '../../src/modules/storage/storage.service';
+import { delay } from './utils';
+import { PaymentService } from '../../src/modules/payment/payment.service';
 
-describe('Quick launch E2E workflow', () => {
+describe('Fortune E2E workflow', () => {
   let app: INestApplication;
-  let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
+  let paymentService: PaymentService;
+  let storageService: StorageService;
 
   let userEntity: UserEntity;
   let accessToken: string;
+  const initialBalance = 100;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
   const paymentIntentId = crypto.randomBytes(16).toString('hex');
@@ -45,10 +48,11 @@ describe('Quick launch E2E workflow', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    userRepository = moduleFixture.get<UserRepository>(UserRepository);
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
+    paymentService = moduleFixture.get<PaymentService>(PaymentService);
+    storageService = moduleFixture.get<StorageService>(StorageService);
 
     userEntity = await userService.create({
       email,
@@ -74,7 +78,7 @@ describe('Quick launch E2E workflow', () => {
       userId: userEntity.id,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: 100,
+      amount: initialBalance,
       currency: Currency.USD,
       rate: 1,
       transaction: paymentIntentId,
@@ -83,23 +87,31 @@ describe('Quick launch E2E workflow', () => {
     await paymentRepository.createUnique(newPaymentEntity);
   });
 
+  afterEach(async () => {
+    // Add a delay of 1 second between each test. Prevention: "429 Too Many Requests"
+    await delay(1000);
+  });
+
   afterAll(async () => {
     await app.close();
   });
 
-  it('should create a job via quick launch successfully', async () => {
-    const quickLaunchDto = {
+  it('should create a Fortune job successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance);
+
+    const createJobDto = {
       chain_id: ChainId.LOCALHOST,
-      request_type: JobRequestType.HCAPTCHA,
-      manifest_url: MOCK_FILE_URL,
-      manifest_hash: MOCK_FILE_HASH,
-      fund_amount: 10, // HMT
+      requester_title: 'Write an odd number',
+      requester_description: 'Prime number',
+      submissions_required: 10,
+      fund_amount: 10, // USD
     };
 
     const response = await request(app.getHttpServer())
-      .post('/job/quick-launch')
+      .post('/job/fortune')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send(quickLaunchDto)
+      .send(createJobDto)
       .expect(201);
 
     expect(response.text).toBeDefined();
@@ -112,6 +124,17 @@ describe('Quick launch E2E workflow', () => {
 
     expect(jobEntity).toBeDefined();
     expect(jobEntity!.status).toBe(JobStatus.PAID);
+    expect(jobEntity!.manifestUrl).toBeDefined();
+
+    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    expect(manifest).toMatchObject({
+      chainId: ChainId.LOCALHOST,
+      fundAmount: expect.any(Number),
+      requestType: JobRequestType.FORTUNE,
+      requesterDescription: createJobDto.requester_description,
+      requesterTitle: createJobDto.requester_title,
+      submissionsRequired: createJobDto.submissions_required,
+    });
 
     const paymentEntities = await paymentRepository.findByUserAndStatus(
       userEntity.id,
@@ -121,46 +144,30 @@ describe('Quick launch E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    const paidAmount = paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should handle not enough funds error', async () => {
-    const quickLaunchData = {
+    const createJobDto = {
       chain_id: ChainId.LOCALHOST,
-      request_type: JobRequestType.HCAPTCHA,
-      manifest_url: MOCK_FILE_URL,
-      manifest_hash: MOCK_FILE_HASH,
-      fund_amount: 100000000, // HMT
+      requester_title: 'Write an odd number',
+      requester_description: 'Prime number',
+      submissions_required: 10,
+      fund_amount: 100000000, // USD
     };
 
     const invalidQuickLaunchResponse = await request(app.getHttpServer())
-      .post('/job/quick-launch')
+      .post('/job/fortune')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send(quickLaunchData)
+      .send(createJobDto)
       .expect(400);
 
     expect(invalidQuickLaunchResponse.status).toBe(HttpStatus.BAD_REQUEST);
     expect(invalidQuickLaunchResponse.body.message).toBe(
       ErrorJob.NotEnoughFunds,
-    );
-  });
-
-  it('should handle manifest hash does not exist error', async () => {
-    const quickLaunchData = {
-      chain_id: ChainId.LOCALHOST,
-      request_type: JobRequestType.HCAPTCHA,
-      manifest_url: 'http://example.com',
-      fund_amount: 10, // HMT
-    };
-
-    const invalidQuickLaunchResponse = await request(app.getHttpServer())
-      .post('/job/quick-launch')
-      .set('Authorization', `Bearer ${accessToken}`)
-      .send(quickLaunchData)
-      .expect(409);
-
-    expect(invalidQuickLaunchResponse.status).toBe(HttpStatus.CONFLICT);
-    expect(invalidQuickLaunchResponse.body.message).toBe(
-      ErrorJob.ManifestHashNotExist,
     );
   });
 });
