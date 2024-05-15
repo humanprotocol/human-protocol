@@ -214,10 +214,11 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<void>(options);
   }
 
-  async sendKycProcedureStart() {
+  async sendKycProcedureStart(token: string) {
     const options = this.getEndpointOptions(
       EndpointName.KYC_PROCEDURE_START,
       EmptyData,
+      token,
     );
     return this.handleRequestToReputationOracle<KycProcedureStartResponse>(
       options,

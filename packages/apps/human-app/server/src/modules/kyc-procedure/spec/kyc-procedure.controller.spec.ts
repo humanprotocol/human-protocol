@@ -30,7 +30,7 @@ describe('KycProcedureController', () => {
       service,
       'processStartKycProcedure',
     );
-    await controller.startKycProcedure();
+    await controller.startKycProcedure('token');
     expect(startKycProcedureSpy).toHaveBeenCalled();
   });
 });

@@ -447,7 +447,7 @@ describe('ReputationOracleGateway', () => {
       const command: PrepareSignatureCommand = prepareSignatureCommandFixture;
       const data: PrepareSignatureData = prepareSignatureDataFixture;
       nock('https://expample.com')
-        .post('/disable-operator/prepare-signature', {
+        .post('/prepare-signature', {
           ...data,
         })
         .reply(201, '');
@@ -496,7 +496,7 @@ describe('ReputationOracleGateway', () => {
       const command: DisableOperatorCommand = disableOperatorCommandFixture;
       const data: DisableOperatorData = disableOperatorDataFixture;
       nock('https://expample.com')
-        .post('/disable-operator/prepare-signature', {
+        .post('/disable-operator', {
           ...data,
         })
         .reply(201, '');
@@ -541,7 +541,7 @@ describe('ReputationOracleGateway', () => {
   describe('sendKycProcedureStart', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       nock('https://expample.com').post('/kyc/start', {}).reply(201, '');
-      await expect(service.sendKycProcedureStart()).resolves.not.toThrow();
+      await expect(service.sendKycProcedureStart('token')).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
 
@@ -558,7 +558,7 @@ describe('ReputationOracleGateway', () => {
           ),
         );
 
-      await expect(service.sendKycProcedureStart()).rejects.toThrow(
+      await expect(service.sendKycProcedureStart('token')).rejects.toThrow(
         new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
       );
     });
@@ -568,7 +568,7 @@ describe('ReputationOracleGateway', () => {
         .spyOn(httpService, 'request')
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
-      await expect(service.sendKycProcedureStart()).rejects.toThrow(
+      await expect(service.sendKycProcedureStart('token')).rejects.toThrow(
         new HttpException(
           'Internal Server Error',
           HttpStatus.INTERNAL_SERVER_ERROR,

@@ -54,7 +54,7 @@ export class GatewayConfigService {
               headers: this.JSON_HEADER,
             },
             [EndpointName.PREPARE_SIGNATURE]: {
-              endpoint: '/web3/prepare-signature',
+              endpoint: '/user/prepare-signature',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },

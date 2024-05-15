@@ -6,7 +6,9 @@ import { KycProcedureStartResponse } from './model/kyc-start.model';
 export class KycProcedureService {
   constructor(private gateway: ReputationOracleGateway) {}
 
-  async processStartKycProcedure(): Promise<KycProcedureStartResponse> {
-    return this.gateway.sendKycProcedureStart();
+  async processStartKycProcedure(
+    token: string,
+  ): Promise<KycProcedureStartResponse> {
+    return this.gateway.sendKycProcedureStart(token);
   }
 }

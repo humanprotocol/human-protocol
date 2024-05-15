@@ -31,7 +31,7 @@ describe('KycProcedureService', () => {
       reputationOracleGateway,
       'sendKycProcedureStart',
     );
-    await service.processStartKycProcedure();
+    await service.processStartKycProcedure('token');
     expect(sendKycProcedureStartSpy).toHaveBeenCalled();
   });
 });

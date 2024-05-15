@@ -38,4 +38,5 @@ export enum AssignmentSortField {
 export enum PrepareSignatureType {
   SIGNUP = 'SIGNUP',
   DISABLE_OPERATOR = 'DISABLE_OPERATOR',
+  SIGNIN = 'SIGNIN',
 }

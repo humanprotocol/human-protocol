@@ -38,7 +38,7 @@ export const gatewayConfigServiceMock = {
         headers: { 'Content-Type': 'application/json' },
       },
       PREPARE_SIGNATURE: {
-        endpoint: '/web3/prepare-signature',
+        endpoint: '/user/prepare-signature',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
