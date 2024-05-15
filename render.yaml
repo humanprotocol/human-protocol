@@ -17,6 +17,9 @@ services:
     value: 0.0.0.0
   - key: PORT
     value: 80
+  - key: FE_URL
+    value: https://job-launcher.humanprotocol.org/
+    previewValue: https://stg-job-launcher.humanprotocol.org/
   - key: POSTGRES_URL
     fromDatabase:
       name: job-launcher
@@ -87,6 +90,12 @@ services:
   - key: SENDGRID_API_KEY
     sync: false
   - key: CRON_SECRET
+    sync: false
+  - key: RPC_URL_POLYGON
+    sync: false
+  - key: RPC_URL_POLYGON_AMOY
+    sync: false
+  - key: RPC_URL_XLAYER_TESTNET
     sync: false
     
   region: frankfurt
