@@ -8,6 +8,7 @@ import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
 import { useLocationState } from '@/hooks/use-location-state';
 import { SuccessLabel } from '@/components/ui/success-label';
+import { env } from '@/shared/env';
 
 export function SendResetLinkWorkerSuccessPage() {
   const { t } = useTranslation();
@@ -56,7 +57,11 @@ export function SendResetLinkWorkerSuccessPage() {
           >
             Strong
             <Typography variant="buttonMedium" />
-            <Link to={routerPaths.homePage} />
+            <Link
+              rel="noreferrer"
+              target="_blank"
+              to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
+            />
           </Trans>
         </Typography>
       </Grid>
