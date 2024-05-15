@@ -12,7 +12,6 @@ const web3browserAuthProvider = {
   signOut() {
     web3browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(web3accessTokenKey);
-    web3browserAuthProvider.triggerSignOutSubscriptions();
   },
   getAccessToken() {
     const result = localStorage.getItem(web3accessTokenKey);
@@ -31,17 +30,6 @@ const web3browserAuthProvider = {
     }
 
     return atob(result);
-  },
-  subscribeSignOut(callback: () => void) {
-    web3browserAuthProvider.signOutCallbacks.push(callback);
-  },
-  unsubscribeSignOut() {
-    web3browserAuthProvider.signOutCallbacks = [];
-  },
-  triggerSignOutSubscriptions() {
-    web3browserAuthProvider.signOutCallbacks.forEach((callback) => {
-      callback();
-    });
   },
 };
 

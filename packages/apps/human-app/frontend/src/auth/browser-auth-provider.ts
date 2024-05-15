@@ -15,7 +15,6 @@ const browserAuthProvider = {
     browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
-    browserAuthProvider.triggerSignOutSubscriptions();
   },
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
@@ -34,17 +33,6 @@ const browserAuthProvider = {
     }
 
     return atob(result);
-  },
-  subscribeSignOut(callback: () => void) {
-    browserAuthProvider.signOutCallbacks.push(callback);
-  },
-  unsubscribeSignOut() {
-    browserAuthProvider.signOutCallbacks = [];
-  },
-  triggerSignOutSubscriptions() {
-    browserAuthProvider.signOutCallbacks.forEach((callback) => {
-      callback();
-    });
   },
 };
 

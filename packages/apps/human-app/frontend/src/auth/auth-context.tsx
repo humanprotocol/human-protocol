@@ -1,7 +1,7 @@
-import { useState, createContext, useCallback } from 'react';
+import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { ZodError, z } from 'zod';
+import { t } from 'i18next';
 import { browserAuthProvider } from '@/auth/browser-auth-provider';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 
@@ -17,21 +17,21 @@ const userDataSchema = z.object({
 
 type UserData = z.infer<typeof userDataSchema>;
 
+type AuthStatus = 'loading' | 'idle';
 export interface AuthenticatedUserContextType {
   user: UserData;
-  isUserDataError: false;
+  userDataError: null;
+  status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
-  isPending: false;
 }
 
 interface UnauthenticatedUserContextType {
   user: null;
-  isUserDataError: boolean;
-  userDataError: unknown;
+  userDataError: string | null;
+  status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
-  isPending: boolean;
 }
 
 export const AuthContext = createContext<
@@ -40,57 +40,64 @@ export const AuthContext = createContext<
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
-  const signOutSubscription = useCallback(() => {
-    setUser(null);
-  }, []);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<AuthStatus>('loading');
 
-  const { data, isPending, isError, refetch, error } = useQuery({
-    queryFn: () => {
+  const handleSignIn = () => {
+    try {
       const accessToken = browserAuthProvider.getAccessToken();
       if (!accessToken) {
+        setStatus('idle');
         return;
       }
       const userData = jwtDecode(accessToken);
       const validUserData = userDataSchema.parse(userData);
-      browserAuthProvider.subscribeSignOut(signOutSubscription);
-      return { accessToken, userData: validUserData };
-    },
-    queryKey: [
-      'singIn',
-      browserAuthProvider.getAccessToken(),
-      user,
-      signOutSubscription,
-    ],
-  });
+      setUser(validUserData);
+      setError(null);
+      setStatus('idle');
+    } catch (err) {
+      browserAuthProvider.signOut();
+      if (err instanceof ZodError) {
+        setError(err.message);
+      } else {
+        setError(t('errors.unknown'));
+      }
+      setStatus('idle');
+    }
+  };
 
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
     browserAuthProvider.signIn(singIsSuccess);
-    void refetch();
+    handleSignIn();
   };
 
   const signOut = () => {
     browserAuthProvider.signOut();
-    void refetch();
+    setUser(null);
+    setError(null);
   };
+
+  useEffect(() => {
+    handleSignIn();
+  }, []);
 
   return (
     <AuthContext.Provider
       value={
-        data?.userData && !isError
+        user && !error
           ? {
-              user: data.userData,
+              user,
               signOut,
               signIn,
-              isUserDataError: false,
-              isPending: false,
+              userDataError: null,
+              status: 'idle',
             }
           : {
               user: null,
               signOut,
               signIn,
-              isUserDataError: isError,
               userDataError: error,
-              isPending,
+              status,
             }
       }
     >

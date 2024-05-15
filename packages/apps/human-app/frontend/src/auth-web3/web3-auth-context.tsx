@@ -1,29 +1,32 @@
-import { useState, createContext, useCallback } from 'react';
+import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { ZodError, z } from 'zod';
+import { t } from 'i18next';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { web3browserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
 
-const web3userDataSchema = z.unknown();
+const web3userDataSchema = z.object({
+  // TODO add valid schema that defines JWT payload
+  address: z.string().nullable().optional(),
+});
 
 type Web3UserData = z.infer<typeof web3userDataSchema>;
 
+type AuthStatus = 'loading' | 'idle';
 export interface Web3AuthenticatedUserContextType {
   user: Web3UserData;
-  isUserDataError: false;
+  userDataError: null;
+  status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
-  isPending: false;
 }
 
 interface Web3UnauthenticatedUserContextType {
   user: null;
-  isUserDataError: boolean;
-  userDataError: unknown;
+  userDataError: string | null;
+  status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
-  isPending: boolean;
 }
 
 export const Web3AuthContext = createContext<
@@ -31,58 +34,66 @@ export const Web3AuthContext = createContext<
 >(null);
 
 export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<Web3UserData>(null);
-  const signOutSubscription = useCallback(() => {
-    setUser(null);
-  }, []);
+  const [user, setUser] = useState<Web3UserData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<AuthStatus>('loading');
 
-  const { data, isPending, isError, refetch, error } = useQuery({
-    queryFn: () => {
+  // TODO update SignInSuccessResponse according to new endpoint web3/auth/signin
+  const handleSignIn = () => {
+    try {
       const accessToken = web3browserAuthProvider.getAccessToken();
       if (!accessToken) {
+        setStatus('idle');
         return;
       }
       const userData = jwtDecode(accessToken);
       const validUserData = web3userDataSchema.parse(userData);
-      web3browserAuthProvider.subscribeSignOut(signOutSubscription);
-      return { accessToken, userData: validUserData };
-    },
-    queryKey: [
-      'singIn',
-      web3browserAuthProvider.getAccessToken(),
-      user,
-      signOutSubscription,
-    ],
-  });
-
+      setUser(validUserData);
+      setError(null);
+      setStatus('idle');
+    } catch (err) {
+      web3browserAuthProvider.signOut();
+      if (err instanceof ZodError) {
+        setError(err.message);
+      } else {
+        setError(t('errors.unknown'));
+      }
+      setStatus('idle');
+    }
+  };
+  // TODO correct interface of singIsSuccess from auth/web3/signin
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
     web3browserAuthProvider.signIn(singIsSuccess);
-    void refetch();
+    handleSignIn();
   };
 
   const signOut = () => {
     web3browserAuthProvider.signOut();
-    void refetch();
+    setUser(null);
+    setError(null);
   };
+
+  useEffect(() => {
+    handleSignIn();
+  }, []);
 
   return (
     <Web3AuthContext.Provider
       value={
-        data?.userData && !isError
+        user && !error
           ? {
-              user: data.userData,
+              user,
               signOut,
               signIn,
-              isUserDataError: false,
-              isPending: false,
+              userDataError: null,
+              status,
             }
           : {
               user: null,
               signOut,
               signIn,
-              isUserDataError: isError,
               userDataError: error,
-              isPending,
+              status,
             }
       }
     >
