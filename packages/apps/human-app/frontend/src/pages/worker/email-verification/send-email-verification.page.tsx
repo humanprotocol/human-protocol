@@ -2,7 +2,6 @@ import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
-import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
 import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { env } from '@/shared/env';
 
 export function SendEmailVerificationWorkerPage() {
   const { t } = useTranslation();
@@ -77,7 +77,11 @@ export function SendEmailVerificationWorkerPage() {
           <Trans i18nKey="worker.sendEmailVerification.paragraph4">
             Strong
             <Typography variant="buttonMedium" />
-            <Link to={routerPaths.homePage} />
+            <Link
+              rel="noreferrer"
+              target="_blank"
+              to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
+            />
           </Trans>
         </Typography>
       </Grid>
