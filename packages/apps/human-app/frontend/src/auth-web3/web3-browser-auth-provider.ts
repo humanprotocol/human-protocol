@@ -4,7 +4,7 @@ const web3accessTokenKey = btoa('web3_access_token');
 
 const web3browserAuthProvider = {
   isAuthenticated: false,
-  signOutCallbacks: [] as (() => void)[],
+  signOutCallback: (() => undefined) as () => void,
   signIn(singIsSuccess: SignInSuccessResponse) {
     web3browserAuthProvider.isAuthenticated = true;
     localStorage.setItem(web3accessTokenKey, btoa(singIsSuccess.access_token));
@@ -12,6 +12,7 @@ const web3browserAuthProvider = {
   signOut() {
     web3browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(web3accessTokenKey);
+    web3browserAuthProvider.triggerSignOutSubscriptions();
   },
   getAccessToken() {
     const result = localStorage.getItem(web3accessTokenKey);
@@ -30,6 +31,15 @@ const web3browserAuthProvider = {
     }
 
     return atob(result);
+  },
+  subscribeSignOut(callback: () => void) {
+    web3browserAuthProvider.signOutCallback = callback;
+  },
+  unsubscribeSignOut() {
+    web3browserAuthProvider.signOutCallback = () => undefined;
+  },
+  triggerSignOutSubscriptions() {
+    web3browserAuthProvider.signOutCallback();
   },
 };
 

@@ -47,6 +47,9 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = jwtDecode(accessToken);
       const validUserData = web3userDataSchema.parse(userData);
       setWeb3AuthState({ user: validUserData, status: 'success' });
+      web3browserAuthProvider.subscribeSignOut(() => {
+        setWeb3AuthState({ user: null, status: 'idle' });
+      });
     } catch {
       web3browserAuthProvider.signOut();
       setWeb3AuthState({ user: null, status: 'error' });

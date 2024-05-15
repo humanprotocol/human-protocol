@@ -5,7 +5,7 @@ const refreshTokenKey = btoa('refresh_token');
 
 const browserAuthProvider = {
   isAuthenticated: false,
-  signOutCallbacks: [] as (() => void)[],
+  signOutCallback: (() => undefined) as () => void,
   signIn(singIsSuccess: SignInSuccessResponse) {
     browserAuthProvider.isAuthenticated = true;
     localStorage.setItem(accessTokenKey, btoa(singIsSuccess.access_token));
@@ -15,6 +15,7 @@ const browserAuthProvider = {
     browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
+    browserAuthProvider.triggerSignOutSubscriptions();
   },
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
@@ -33,6 +34,15 @@ const browserAuthProvider = {
     }
 
     return atob(result);
+  },
+  subscribeSignOut(callback: () => void) {
+    browserAuthProvider.signOutCallback = callback;
+  },
+  unsubscribeSignOut() {
+    browserAuthProvider.signOutCallback = () => undefined;
+  },
+  triggerSignOutSubscriptions() {
+    browserAuthProvider.signOutCallback();
   },
 };
 

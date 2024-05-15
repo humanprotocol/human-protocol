@@ -51,6 +51,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = jwtDecode(accessToken);
       const validUserData = userDataSchema.parse(userData);
       setAuthState({ user: validUserData, status: 'success' });
+      browserAuthProvider.subscribeSignOut(() => {
+        setAuthState({ user: null, status: 'idle' });
+      });
     } catch {
       browserAuthProvider.signOut();
       setAuthState({ user: null, status: 'error' });
