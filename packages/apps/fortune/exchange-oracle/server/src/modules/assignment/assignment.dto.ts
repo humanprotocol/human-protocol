@@ -38,22 +38,27 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  chainId: number;
+  chainId?: number;
 
   @ApiPropertyOptional({ name: 'job_type', enum: JobType })
   @IsEnum(JobType)
   @IsOptional()
-  jobType: JobType;
+  jobType?: JobType;
 
   @ApiPropertyOptional({ name: 'escrow_address' })
   @IsOptional()
   @IsString()
-  escrowAddress: string;
+  escrowAddress?: string;
 
   @ApiPropertyOptional({ enum: AssignmentStatus })
   @IsEnum(AssignmentStatus)
   @IsOptional()
-  status: AssignmentStatus;
+  status?: AssignmentStatus;
+
+  @ApiPropertyOptional({ name: 'assignment_id' })
+  @IsOptional()
+  @IsString()
+  assignmentId?: string;
 }
 
 export class AssignmentDto {

@@ -215,10 +215,20 @@ export class PayoutService {
     }
 
     const bountyValue = ethers.parseUnits(manifest.job_bounty, 18);
-    const accumulatedBounties = annotations.results.reduce((accMap, curr) => {
-      if (curr.annotation_quality >= manifest.validation.min_quality) {
-        const existingValue = accMap.get(curr.annotator_wallet_address) || 0n;
-        accMap.set(curr.annotator_wallet_address, existingValue + bountyValue);
+    const accumulatedBounties = annotations.jobs.reduce((accMap, job) => {
+      const finalResult = annotations.results.find(
+        (result) => result.id === job.final_result_id,
+      );
+      if (
+        finalResult
+        // && finalResult.annotation_quality >= manifest.validation.min_quality
+      ) {
+        const existingValue =
+          accMap.get(finalResult.annotator_wallet_address) || 0n;
+        accMap.set(
+          finalResult.annotator_wallet_address,
+          existingValue + bountyValue,
+        );
       }
       return accMap;
     }, new Map<string, typeof bountyValue>());

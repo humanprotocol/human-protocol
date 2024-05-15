@@ -49,7 +49,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
 
     event SpokesUpdated(CrossChainAddress[] indexed spokes);
 
-    constructor(CrossChainAddress[] memory _spokeContracts) {
+    constructor(
+        CrossChainAddress[] memory _spokeContracts
+    ) Ownable(msg.sender) {
         updateSpokeContracts(_spokeContracts);
     }
 

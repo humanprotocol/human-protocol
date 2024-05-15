@@ -4,26 +4,33 @@ import {
   LOCALHOST_CHAIN_IDS,
   MAINNET_CHAIN_IDS,
   TESTNET_CHAIN_IDS,
-  networks,
-} from '../../common/config';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
+} from '../../common/constants/networks';
+import { Web3Env } from '../../common/enums/web3';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
-import { SignatureBodyDto } from './web3.dto';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
-  public readonly signerAddress: string;
   public readonly logger = new Logger(Web3Service.name);
 
-  constructor(private readonly web3ConfigService: Web3ConfigService) {
+  constructor(
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly networkConfigService: NetworkConfigService,
+  ) {
     const privateKey = this.web3ConfigService.privateKey;
     const validChains = this.getValidChains();
-    const validNetworks = networks.filter((network) =>
+    const validNetworks = this.networkConfigService.networks.filter((network) =>
       validChains.includes(network.chainId),
     );
+
+    if (!validNetworks.length) {
+      this.logger.log(ErrorWeb3.NoValidNetworks, Web3Service.name);
+      throw new BadRequestException(ErrorWeb3.NoValidNetworks);
+    }
+
     for (const network of validNetworks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
@@ -68,28 +75,5 @@ export class Web3Service {
 
   public getOperatorAddress(): string {
     return Object.values(this.signers)[0].address;
-  }
-
-  public prepareSignatureBody(
-    type: SignatureType,
-    address: string,
-  ): SignatureBodyDto {
-    let content: string;
-    switch (type) {
-      case SignatureType.SIGNUP:
-        content = 'signup';
-        break;
-      case SignatureType.DISABLE_OPERATOR:
-        content = 'disable-operator';
-        break;
-      default:
-        throw new BadRequestException('Type not allowed');
-    }
-
-    return {
-      from: address,
-      to: this.getOperatorAddress(),
-      contents: content,
-    };
   }
 }

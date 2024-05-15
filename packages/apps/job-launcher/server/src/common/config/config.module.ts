@@ -5,6 +5,7 @@ import { AuthConfigService } from './auth-config.service';
 import { ServerConfigService } from './server-config.service';
 import { CvatConfigService } from './cvat-config.service';
 import { DatabaseConfigService } from './database-config.service';
+import { NetworkConfigService } from './network-config.service';
 import { PGPConfigService } from './pgp-config.service';
 import { S3ConfigService } from './s3-config.service';
 import { SendgridConfigService } from './sendgrid-config.service';
@@ -24,6 +25,7 @@ import { Web3ConfigService } from './web3-config.service';
     SendgridConfigService,
     CvatConfigService,
     PGPConfigService,
+    NetworkConfigService,
   ],
   exports: [
     ConfigService,
@@ -36,6 +38,7 @@ import { Web3ConfigService } from './web3-config.service';
     SendgridConfigService,
     CvatConfigService,
     PGPConfigService,
+    NetworkConfigService,
   ],
 })
 export class EnvConfigModule {}

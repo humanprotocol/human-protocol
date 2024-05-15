@@ -193,7 +193,9 @@ describe('Kyc Service', () => {
         });
       });
 
-      jest.spyOn(kycRepository, 'create').mockResolvedValue({} as KycEntity);
+      jest
+        .spyOn(kycRepository, 'createUnique')
+        .mockResolvedValue({} as KycEntity);
 
       const result = await kycService.initSession(mockUserEntity as any);
 
@@ -208,7 +210,7 @@ describe('Kyc Service', () => {
           headers: { 'Api-Key': synapsConfigService.apiKey },
         },
       );
-      expect(kycRepository.create).toHaveBeenCalledWith({
+      expect(kycRepository.createUnique).toHaveBeenCalledWith({
         sessionId: '123',
         status: KycStatus.NONE,
         userId: 1,
@@ -266,10 +268,9 @@ describe('Kyc Service', () => {
         mockKycUpdate,
       );
 
-      expect(kycRepository.updateOne).toHaveBeenCalledWith(
-        { sessionId: '123' },
-        { status: KycStatus.APPROVED },
-      );
+      expect(kycRepository.updateOne).toHaveBeenCalledWith({
+        status: KycStatus.APPROVED,
+      });
     });
   });
 });

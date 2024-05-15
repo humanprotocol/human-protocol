@@ -589,6 +589,29 @@ describe('DAOSpokeContract', function () {
       );
     });
 
+    it('should revert when the caller is not the magistrate', async () => {
+      const proposalId = await createProposalOnSpoke(
+        daoSpoke,
+        wormholeMockForDaoSpoke,
+        1,
+        await governor.getAddress()
+      );
+
+      await finishProposal(
+        daoSpoke,
+        wormholeMockForDaoSpoke,
+        proposalId,
+        await governor.getAddress()
+      );
+
+      const proposal = await daoSpoke.proposals(proposalId);
+      expect(proposal.voteFinished).to.be.true;
+
+      await expect(
+        daoSpoke.connect(user1).sendVoteResultToHub(proposalId)
+      ).to.be.revertedWith('Magistrate: caller is not the magistrate');
+    });
+
     it('should send vote result to hub', async () => {
       const proposalId = await createProposalOnSpoke(
         daoSpoke,

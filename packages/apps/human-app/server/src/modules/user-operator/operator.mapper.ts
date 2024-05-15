@@ -4,7 +4,7 @@ import { createMap, Mapper } from '@automapper/core';
 import {
   SignupOperatorCommand,
   SignupOperatorDto,
-} from './interfaces/operator-registration.interface';
+} from './model/operator-registration.model';
 
 @Injectable()
 export class OperatorProfile extends AutomapperProfile {

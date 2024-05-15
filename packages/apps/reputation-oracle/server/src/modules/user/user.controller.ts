@@ -16,12 +16,15 @@ import {
 } from '@nestjs/common';
 import {
   DisableOperatorDto,
+  PrepareSignatureDto,
   RegisterAddressRequestDto,
   RegisterAddressResponseDto,
+  SignatureBodyDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
+import { Public } from '../../common/decorators';
 
 @ApiTags('User')
 @Controller('/user')
@@ -85,5 +88,28 @@ export class UserController {
     @Request() req: RequestWithUser,
   ): Promise<void> {
     return this.userService.disableOperator(req.user, data.signature);
+  }
+
+  @Public()
+  @Post('/prepare-signature')
+  @ApiOperation({
+    summary: 'Web3 signature body',
+    description:
+      'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms.',
+  })
+  @ApiBody({ type: PrepareSignatureDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Typed structured data object generated successfully',
+    type: SignatureBodyDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async prepareSignature(
+    @Body() data: PrepareSignatureDto,
+  ): Promise<SignatureBodyDto> {
+    return await this.userService.prepareSignatureBody(data.type, data.address);
   }
 }
