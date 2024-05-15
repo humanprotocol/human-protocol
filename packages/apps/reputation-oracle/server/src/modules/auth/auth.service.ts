@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { OperatorStatus, UserStatus } from '../../common/enums/user';
-import { UserCreateDto, Web3UserCreateDto } from '../user/user.dto';
+import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
@@ -339,7 +339,7 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = this.web3Service.prepareSignatureBody(
+    const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
       data.address,
     );
@@ -371,35 +371,25 @@ export class AuthService {
     ) {
       throw new BadRequestException(ErrorAuth.InvalidRole);
     }
-    const nonce = await this.getNonce(data.address);
 
-    const web3UserCreateDto: Web3UserCreateDto = {
-      evmAddress: data.address,
-      nonce: nonce,
-    };
-
-    const userEntity = await this.userService.createWeb3User(
-      web3UserCreateDto,
-      data.address,
-    );
+    const userEntity = await this.userService.createWeb3User(data.address);
 
     await kvstore.set(data.address, OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }
 
-  public async getNonce(address: string): Promise<string> {
-    const userEntity = await this.userService.getByAddress(address);
-
-    return userEntity.nonce;
-  }
-
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByAddress(data.address);
 
-    const verified = verifySignature(userEntity.nonce, data.signature, [
-      data.address,
-    ]);
+    const verified = verifySignature(
+      await this.userService.prepareSignatureBody(
+        SignatureType.SIGNIN,
+        data.address,
+      ),
+      data.signature,
+      [data.address],
+    );
 
     if (!verified) {
       throw new UnauthorizedException(ErrorAuth.InvalidSignature);

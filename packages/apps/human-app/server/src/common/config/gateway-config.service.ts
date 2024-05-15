@@ -3,9 +3,13 @@ import { ExternalApiName } from '../enums/external-api-name';
 import { EndpointName } from '../enums/endpoint-name';
 import { GatewayConfig, Gateways } from '../interfaces/endpoint.interface';
 import { EnvironmentConfigService } from './environment-config.service';
+import { HttpMethod } from '../enums/http-method';
 
 @Injectable()
 export class GatewayConfigService {
+  JSON_HEADER = {
+    'Content-Type': 'application/json',
+  };
   constructor(private envConfig: EnvironmentConfigService) {}
 
   private getGatewaysConfig(): Gateways {
@@ -16,24 +20,18 @@ export class GatewayConfigService {
           endpoints: {
             [EndpointName.WORKER_SIGNUP]: {
               endpoint: '/auth/signup',
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
             },
             [EndpointName.OPERATOR_SIGNUP]: {
               endpoint: '/auth/web3/signup',
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
             },
             [EndpointName.WORKER_SIGNIN]: {
               endpoint: '/auth/signin',
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
             },
           },
         },

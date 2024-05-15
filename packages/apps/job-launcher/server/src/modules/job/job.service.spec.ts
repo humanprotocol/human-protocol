@@ -12,16 +12,12 @@ import {
   KVStoreClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import {
-  BadGatewayException,
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   ErrorBucket,
+  ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -124,6 +120,7 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
+import { ControlledError } from '../../common/errors/controlled';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -502,12 +499,17 @@ describe('JobService', () => {
 
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
-        throw new Error(ErrorWeb3.InvalidChainId);
+        throw new ControlledError(
+          ErrorWeb3.InvalidChainId,
+          HttpStatus.BAD_REQUEST,
+        );
       });
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrow(ErrorWeb3.InvalidChainId);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -524,7 +526,9 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
-      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -705,7 +709,9 @@ describe('JobService', () => {
 
       expect(
         jobService.createCvatManifest(dto, requestType, tokenFundAmount),
-      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT),
+      );
     });
 
     it('should throw an error data not exist for image skeletons from boxes job type', async () => {
@@ -726,7 +732,9 @@ describe('JobService', () => {
 
       expect(
         jobService.createCvatManifest(dto, requestType, tokenFundAmount),
-      ).rejects.toThrow(new ConflictException(ErrorJob.DataNotExist));
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT),
+      );
     });
   });
 
@@ -1075,7 +1083,7 @@ describe('JobService', () => {
       });
     });
 
-    it('should throw BadRequestException for invalid POLYGON job type without label', async () => {
+    it('should throw ControlledError for invalid POLYGON job type without label', async () => {
       const fileContent = JSON.stringify({
         [MOCK_HCAPTCHA_IMAGE_URL]: [[MOCK_HCAPTCHA_IMAGE_LABEL]],
       });
@@ -1099,7 +1107,10 @@ describe('JobService', () => {
       };
 
       await expect(jobService.createHCaptchaManifest(jobDto)).rejects.toThrow(
-        BadRequestException,
+        new ControlledError(
+          ErrorJob.JobParamsValidationFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
@@ -1291,7 +1302,12 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrow(ErrorBucket.InvalidProvider);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorBucket.InvalidProvider,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1338,7 +1354,9 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrow(ErrorBucket.InvalidRegion);
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.InvalidRegion, HttpStatus.BAD_REQUEST),
+      );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1383,7 +1401,9 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrow(ErrorBucket.EmptyRegion);
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.EmptyRegion, HttpStatus.BAD_REQUEST),
+      );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1428,7 +1448,9 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrow(ErrorBucket.EmptyBucket);
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST),
+      );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
@@ -1485,7 +1507,10 @@ describe('JobService', () => {
 
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
-        throw new Error(ErrorWeb3.InvalidChainId);
+        throw new ControlledError(
+          ErrorWeb3.InvalidChainId,
+          HttpStatus.BAD_REQUEST,
+        );
       });
 
       await expect(
@@ -1494,7 +1519,9 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrow(ErrorWeb3.InvalidChainId);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should throw an exception for insufficient user balance', async () => {
@@ -1516,7 +1543,9 @@ describe('JobService', () => {
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
-      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -1661,7 +1690,9 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
-      ).rejects.toThrow(ErrorJob.NotEnoughFunds);
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -1705,6 +1736,7 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.FORTUNE,
         status: JobStatus.PAID,
+        userId: 1,
         save: jest.fn().mockResolvedValue(true),
       };
 
@@ -1785,7 +1817,12 @@ describe('JobService', () => {
 
       await expect(
         jobService.setupEscrow(mockJobEntity as JobEntity),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.ManifestValidationFailed,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
 
     it('should handle error during job setup', async () => {
@@ -1861,6 +1898,8 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.FORTUNE,
         status: JobStatus.SET_UP,
+        userId: 1,
+        fundAmount: 100,
         save: jest.fn().mockResolvedValue(true),
       };
 
@@ -1871,9 +1910,15 @@ describe('JobService', () => {
     });
   });
 
-  describe('requestToCancelJob', () => {
+  describe('requestToCancelJobById', () => {
     const jobId = 1;
     const userId = 123;
+
+    beforeEach(() => {
+      web3Service.getValidChains = jest
+        .fn()
+        .mockReturnValue([ChainId.LOCALHOST]);
+    });
 
     it('should cancel the job when status is Launched', async () => {
       const escrowAddress = MOCK_ADDRESS;
@@ -1890,7 +1935,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJobById(userId, jobId);
 
       expect(jobRepository.findOneByIdAndUserId).toHaveBeenCalledWith(
         jobId,
@@ -1918,7 +1963,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJobById(userId, jobId);
 
       expect(jobRepository.findOneByIdAndUserId).toHaveBeenCalledWith(
         jobId,
@@ -1938,8 +1983,10 @@ describe('JobService', () => {
         .mockResolvedValue(undefined);
 
       await expect(
-        jobService.requestToCancelJob(userId, jobId),
-      ).rejects.toThrow(NotFoundException);
+        jobService.requestToCancelJobById(userId, jobId),
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND),
+      );
     });
 
     it('should throw an error if status is invalid', async () => {
@@ -1956,9 +2003,147 @@ describe('JobService', () => {
         .mockResolvedValue(mockJobEntity);
 
       await expect(
-        jobService.requestToCancelJob(userId, jobId),
+        jobService.requestToCancelJobById(userId, jobId),
       ).rejects.toThrow(
-        new ConflictException(ErrorJob.InvalidStatusCancellation),
+        new ControlledError(
+          ErrorJob.InvalidStatusCancellation,
+          HttpStatus.CONFLICT,
+        ),
+      );
+    });
+  });
+
+  describe('requestToCancelJobByAddress', () => {
+    const jobId = 1;
+    const chainId = ChainId.LOCALHOST;
+    const escrowAddress = MOCK_ADDRESS;
+    const userId = 123;
+
+    beforeEach(() => {
+      web3Service.validateChainId = jest.fn().mockResolvedValue(() => {});
+    });
+
+    it('should cancel the job when status is Launched', async () => {
+      const escrowAddress = MOCK_ADDRESS;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: 1,
+        userId,
+        status: JobStatus.LAUNCHED,
+        escrowAddress,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(jobRepository.updateOne).toHaveBeenCalled();
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
+    });
+
+    it('should cancel the job when status is Pending', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.PENDING,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
+        jobId,
+        userId,
+        refundAmount: fundAmount,
+      });
+      expect(jobRepository.updateOne).toHaveBeenCalled();
+    });
+
+    it('should throw not found exception if job not found', async () => {
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw not found exception if job not found when an invalid chain id', async () => {
+      web3Service.validateChainId = jest
+        .fn()
+        .mockRejectedValue(
+          new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
+        );
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, 123, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw not found exception if job not found when an escrow address is not valid', async () => {
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, '0x123'),
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw an error if status is invalid', async () => {
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.COMPLETED,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.InvalidStatusCancellation,
+          HttpStatus.CONFLICT,
+        ),
       );
     });
   });
@@ -2008,7 +2193,12 @@ describe('JobService', () => {
 
       await expect(
         jobService.processEscrowCancellation(jobEntityMock as any),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorEscrow.InvalidStatusCancellation,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw bad request exception if escrowStatus is Paid', async () => {
@@ -2018,7 +2208,12 @@ describe('JobService', () => {
 
       await expect(
         jobService.processEscrowCancellation(jobEntityMock as any),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorEscrow.InvalidStatusCancellation,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw bad request exception if escrowStatus is Cancelled', async () => {
@@ -2028,7 +2223,12 @@ describe('JobService', () => {
 
       await expect(
         jobService.processEscrowCancellation(jobEntityMock as any),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorEscrow.InvalidStatusCancellation,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw bad request exception if escrow balance is zero', async () => {
@@ -2039,7 +2239,12 @@ describe('JobService', () => {
 
       await expect(
         jobService.processEscrowCancellation(jobEntityMock as any),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorEscrow.InvalidBalanceCancellation,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
@@ -2111,7 +2316,9 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.UnableSaveFile, HttpStatus.BAD_GATEWAY),
+      );
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -2228,7 +2435,9 @@ describe('JobService', () => {
           chainId,
           manifest,
         ),
-      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.UnableSaveFile, HttpStatus.BAD_GATEWAY),
+      );
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
@@ -2333,7 +2542,9 @@ describe('JobService', () => {
           chainId,
           fortuneManifestParams,
         ),
-      ).rejects.toThrow(new BadGatewayException(ErrorBucket.UnableSaveFile));
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.UnableSaveFile, HttpStatus.BAD_GATEWAY),
+      );
 
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
@@ -2440,7 +2651,7 @@ describe('JobService', () => {
       expect(result).toEqual(MOCK_FILE_URL);
     });
 
-    it('should throw a NotFoundException if the result is not found', async () => {
+    it('should throw a ControlledError if the result is not found', async () => {
       const jobEntityMock = {
         status: JobStatus.COMPLETED,
         fundAmount: 100,
@@ -2461,12 +2672,14 @@ describe('JobService', () => {
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
-      ).rejects.toThrow(new NotFoundException(ErrorJob.ResultNotFound));
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND),
+      );
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(storageService.download).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw a NotFoundException if the result is not valid', async () => {
+    it('should throw a ControlledError if the result is not valid', async () => {
       const jobEntityMock = {
         status: JobStatus.COMPLETED,
         fundAmount: 100,
@@ -2502,7 +2715,12 @@ describe('JobService', () => {
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
-      ).rejects.toThrow(new NotFoundException(ErrorJob.ResultValidationFailed));
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.ResultValidationFailed,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
 
       expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
       expect(storageService.download).toHaveBeenCalledTimes(1);
@@ -2704,7 +2922,7 @@ describe('JobService', () => {
   });
 
   describe('escrowFailedWebhook', () => {
-    it('should throw BadRequestException for invalid event type', async () => {
+    it('should throw ControlledError for invalid event type', async () => {
       const dto = {
         eventType: 'ANOTHER_EVENT' as EventType,
         chainId: 1,
@@ -2715,11 +2933,11 @@ describe('JobService', () => {
       };
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
-        BadRequestException,
+        new ControlledError(ErrorJob.InvalidEventType, HttpStatus.NOT_FOUND),
       );
     });
 
-    it('should throw NotFoundException if jobEntity is not found', async () => {
+    it('should throw ControlledError if jobEntity is not found', async () => {
       const dto = {
         eventType: EventType.ESCROW_FAILED,
         chainId: 1,
@@ -2731,11 +2949,11 @@ describe('JobService', () => {
         .mockResolvedValue(null);
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
-        NotFoundException,
+        new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND),
       );
     });
 
-    it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
+    it('should throw ControlledError if jobEntity status is not LAUNCHED', async () => {
       const dto = {
         eventType: EventType.ESCROW_FAILED,
         chainId: 1,
@@ -2752,7 +2970,7 @@ describe('JobService', () => {
         .mockResolvedValue(mockJobEntity);
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
-        ConflictException,
+        new ControlledError(ErrorJob.NotLaunched, HttpStatus.CONFLICT),
       );
     });
 
@@ -2931,7 +3149,7 @@ describe('JobService', () => {
         .mockResolvedValue(undefined);
 
       await expect(jobService.getDetails(1, 123)).rejects.toThrow(
-        NotFoundException,
+        new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND),
       );
     });
   });
@@ -3026,7 +3244,7 @@ describe('JobService', () => {
   });
 
   describe('escrowCompletedWebhook', () => {
-    it('should throw NotFoundException if jobEntity is not found', async () => {
+    it('should throw ControlledError if jobEntity is not found', async () => {
       const dto = {
         eventType: EventType.ESCROW_COMPLETED,
         chainId: 1,
@@ -3037,11 +3255,11 @@ describe('JobService', () => {
         .mockResolvedValue(null);
 
       await expect(jobService.completeJob(dto)).rejects.toThrow(
-        NotFoundException,
+        new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND),
       );
     });
 
-    it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
+    it('should throw ControlledError if jobEntity status is not LAUNCHED', async () => {
       const dto = {
         eventType: EventType.ESCROW_COMPLETED,
         chainId: 1,
@@ -3055,7 +3273,7 @@ describe('JobService', () => {
         .mockResolvedValue(mockJobEntity);
 
       await expect(jobService.completeJob(dto)).rejects.toThrow(
-        ConflictException,
+        new ControlledError(ErrorJob.NotLaunched, HttpStatus.CONFLICT),
       );
     });
 

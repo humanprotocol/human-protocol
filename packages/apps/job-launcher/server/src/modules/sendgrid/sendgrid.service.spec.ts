@@ -9,6 +9,8 @@ import {
   MOCK_SENDGRID_FROM_NAME,
 } from '../../../test/constants';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
@@ -103,7 +105,9 @@ describe('SendGridService', () => {
           text: 'and easy to do anywhere, even with Node.js',
           html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         }),
-      ).rejects.toThrowError(ErrorSendGrid.EmailNotSent);
+      ).rejects.toThrow(
+        new ControlledError(ErrorSendGrid.EmailNotSent, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -126,7 +130,9 @@ describe('SendGridService', () => {
           mailService,
           mockConfigService as any,
         );
-      }).toThrow(ErrorSendGrid.InvalidApiKey);
+      }).toThrow(
+        new ControlledError(ErrorSendGrid.InvalidApiKey, HttpStatus.CONFLICT),
+      );
     });
   });
 });

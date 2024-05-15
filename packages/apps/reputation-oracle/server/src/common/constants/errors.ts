@@ -18,6 +18,15 @@ export enum ErrorReputation {
 }
 
 /**
+ * Represents error messages related to credential.
+ */
+export enum ErrorCredential {
+  NotFound = 'Credential not found',
+  NotCreated = 'Credential has not been created',
+  InvalidCredential = 'Invalid credential',
+}
+
+/**
  * Represents error messages related to results.
  */
 export enum ErrorResults {

@@ -13,13 +13,13 @@ import {
 } from '@mui/material';
 import * as openpgp from 'openpgp';
 import { useState, ChangeEvent, FC } from 'react';
-import { useContractRead, useAccount, useNetwork } from 'wagmi';
+import { useReadContract, useAccount } from 'wagmi';
 
 import { Alert } from '../Alert';
 import { showIPFS } from 'src/services';
 
 export const Decrypt: FC = () => {
-  const { chain } = useNetwork();
+  const { address, chain } = useAccount();
   const [key, setKey] = useState('');
   const [passphrase, setPassphrase] = useState('');
   const [value, setValue] = useState('');
@@ -30,8 +30,7 @@ export const Decrypt: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>('');
 
-  const { address } = useAccount();
-  const { refetch } = useContractRead({
+  const { refetch } = useReadContract({
     address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'get',

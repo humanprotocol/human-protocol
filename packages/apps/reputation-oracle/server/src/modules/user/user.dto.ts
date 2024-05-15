@@ -10,7 +10,8 @@ import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ChainId } from '@human-protocol/sdk';
-import { Type } from '../../common/enums/role';
+import { SignatureType } from '../../common/enums/web3';
+import { OracleType } from '../../common/enums';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -28,17 +29,9 @@ export class UserDto extends UserCreateDto {
   public status: UserStatus;
 }
 
-export class Web3UserCreateDto {
-  @ApiProperty({ name: 'evm_address' })
-  @IsString()
+export class Web3UserDto {
   public evmAddress: string;
-
-  @ApiProperty()
-  @IsString()
   public nonce: string;
-}
-
-export class Web3UserDto extends Web3UserCreateDto {
   public type: UserType;
   public status: UserStatus;
 }
@@ -68,8 +61,8 @@ export class RegisterLabelerRequestDto {
   public address: string;
 
   @ApiProperty({ name: 'type' })
-  @IsEnum(Type)
-  public type: Type;
+  @IsEnum(OracleType)
+  public type: OracleType;
 
   @ApiProperty()
   @IsString()
@@ -102,4 +95,37 @@ export class DisableOperatorDto {
   @ApiProperty()
   @IsString()
   public signature: string;
+}
+
+export class SignatureBodyDto {
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public from: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public to: string;
+
+  @ApiProperty()
+  @IsString()
+  public contents: string;
+
+  @ApiProperty()
+  @IsString()
+  public nonce: string | undefined;
+}
+
+export class PrepareSignatureDto {
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public address: string;
+
+  @ApiProperty({
+    enum: SignatureType,
+  })
+  @IsEnum(SignatureType)
+  public type: SignatureType;
 }

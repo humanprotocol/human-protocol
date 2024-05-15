@@ -1,7 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import React, { useEffect } from 'react';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useAccount, useSwitchChain } from 'wagmi';
 import { NetworkSelect } from '../../../components/NetworkSelect';
 import { IS_MAINNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
@@ -13,12 +13,12 @@ import { HCaptchaJobRequestForm } from './HCaptchaJobRequestForm';
 export const CreateJob = () => {
   const { payMethod, jobRequest, updateJobRequest } = useCreateJobPageUI();
   const { chainId } = jobRequest;
-  const { chain } = useNetwork();
-  const { switchNetworkAsync } = useSwitchNetwork();
+  const { chain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
   useEffect(() => {
-    if (payMethod === PayMethod.Crypto && chainId !== chain?.id) {
-      switchNetworkAsync?.(chainId);
+    if (payMethod === PayMethod.Crypto && chainId && chainId !== chain?.id) {
+      switchChainAsync?.({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payMethod, chainId]);

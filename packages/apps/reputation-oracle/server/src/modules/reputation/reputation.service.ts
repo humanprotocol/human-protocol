@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 import {
   CVAT_VALIDATION_META_FILENAME,
@@ -29,6 +29,8 @@ import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../common/utils';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ReputationEntity } from './reputation.entity';
+import { ReputationError } from './reputation.error';
 
 @Injectable()
 export class ReputationService {
@@ -63,7 +65,7 @@ export class ReputationService {
         ErrorManifest.ManifestUrlDoesNotExist,
         ReputationService.name,
       );
-      throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
+      throw new ReputationError(ErrorManifest.ManifestUrlDoesNotExist);
     }
 
     const manifest = await this.storageService.download(manifestUrl);
@@ -162,7 +164,7 @@ export class ReputationService {
         ErrorResults.NoResultsHaveBeenVerified,
         ReputationService.name,
       );
-      throw new Error(ErrorResults.NoResultsHaveBeenVerified);
+      throw new ReputationError(ErrorResults.NoResultsHaveBeenVerified);
     }
 
     // Assess reputation scores for workers based on the final results of a job.
@@ -208,7 +210,7 @@ export class ReputationService {
         ErrorResults.NoAnnotationsMetaFound,
         ReputationService.name,
       );
-      throw new Error(ErrorResults.NoAnnotationsMetaFound);
+      throw new ReputationError(ErrorResults.NoAnnotationsMetaFound);
     }
 
     // Assess reputation scores for workers based on the annoation quality.
@@ -245,18 +247,16 @@ export class ReputationService {
     address: string,
     type: ReputationEntityType,
   ): Promise<void> {
-    const reputationEntity = await this.reputationRepository.findOne({
-      address,
-    });
+    const reputationEntity =
+      await this.reputationRepository.findOneByAddress(address);
 
     if (!reputationEntity) {
-      this.reputationRepository.create({
-        chainId,
-        address,
-        reputationPoints: INITIAL_REPUTATION + 1,
-        type,
-      });
-
+      const reputationEntity = new ReputationEntity();
+      reputationEntity.chainId = chainId;
+      reputationEntity.address = address;
+      reputationEntity.reputationPoints = INITIAL_REPUTATION + 1;
+      reputationEntity.type = type;
+      this.reputationRepository.createUnique(reputationEntity);
       return;
     }
 
@@ -279,18 +279,16 @@ export class ReputationService {
     address: string,
     type: ReputationEntityType,
   ): Promise<void> {
-    const reputationEntity = await this.reputationRepository.findOne({
-      address,
-    });
+    const reputationEntity =
+      await this.reputationRepository.findOneByAddress(address);
 
     if (!reputationEntity) {
-      this.reputationRepository.create({
-        chainId,
-        address,
-        reputationPoints: INITIAL_REPUTATION,
-        type,
-      });
-
+      const reputationEntity = new ReputationEntity();
+      reputationEntity.chainId = chainId;
+      reputationEntity.address = address;
+      reputationEntity.reputationPoints = INITIAL_REPUTATION;
+      reputationEntity.type = type;
+      this.reputationRepository.createUnique(reputationEntity);
       return;
     }
 
@@ -315,14 +313,15 @@ export class ReputationService {
     chainId: ChainId,
     address: string,
   ): Promise<ReputationDto> {
-    const reputationEntity = await this.reputationRepository.findOne({
-      address,
-      chainId,
-    });
+    const reputationEntity =
+      await this.reputationRepository.findOneByAddressAndChainId(
+        address,
+        chainId,
+      );
 
     if (!reputationEntity) {
       this.logger.log(ErrorReputation.NotFound, ReputationService.name);
-      throw new NotFoundException(ErrorReputation.NotFound);
+      throw new ReputationError(ErrorReputation.NotFound);
     }
 
     return {
@@ -355,9 +354,7 @@ export class ReputationService {
    * @returns {Promise<ReputationDto[]>} A Promise containing an array of reputation data.
    */
   public async getAllReputations(chainId?: ChainId): Promise<ReputationDto[]> {
-    const reputations = await this.reputationRepository.find({
-      chainId,
-    });
+    const reputations = await this.reputationRepository.findByChainId(chainId);
 
     return reputations.map((reputation) => ({
       chainId: reputation.chainId,

@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import React, { createContext, useContext, useState } from 'react';
-import { useNetwork } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { IS_MAINNET, SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import { CreateJobStep, JobRequest, JobType, PayMethod } from '../types';
 
@@ -39,7 +39,7 @@ export const CreateJobPageUIProvider = ({
 }: {
   children: React.ReactElement;
 }) => {
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const [step, setStep] = useState<CreateJobStep>(CreateJobStep.FundingMethod);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({

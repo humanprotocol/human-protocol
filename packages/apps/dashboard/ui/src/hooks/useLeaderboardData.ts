@@ -1,5 +1,5 @@
 import StakingABI from '@human-protocol/core/abis/Staking.json';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumberish, ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 
 import { STAKING_CONTRACT_ADDRESS } from 'src/constants';
@@ -7,10 +7,10 @@ import { STAKING_CONTRACT_ADDRESS } from 'src/constants';
 type Staker = {
   address: string;
   role: number;
-  tokensAllocated: BigNumber;
-  tokensLocked: BigNumber;
-  tokensLockedUntil: BigNumber;
-  tokensStaked: BigNumber;
+  tokensAllocated: BigNumberish;
+  tokensLocked: BigNumberish;
+  tokensLockedUntil: BigNumberish;
+  tokensStaked: BigNumberish;
 };
 
 export const useLeaderboardData = () => {
@@ -19,7 +19,7 @@ export const useLeaderboardData = () => {
   // TODO: Refactor this to read data from the connected chain
   const fetchListOfStakers = async () => {
     const rpcUrl = import.meta.env.VITE_APP_RPC_URL_POLYGON_MUMBAI;
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const contract = new ethers.Contract(
       STAKING_CONTRACT_ADDRESS,
       StakingABI,

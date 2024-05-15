@@ -21,7 +21,7 @@ import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
-import { SignatureBodyDto } from '../web3/web3.dto';
+import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { SiteKeyRepository } from './site-key.repository';
@@ -67,6 +67,7 @@ describe('UserService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         ConfigService,
@@ -406,7 +407,8 @@ describe('UserService', () => {
     const signatureBody: SignatureBodyDto = {
       from: MOCK_ADDRESS,
       to: MOCK_ADDRESS,
-      contents: 'signup',
+      contents: 'disable-operator',
+      nonce: undefined,
     };
 
     const userEntity: DeepPartial<UserEntity> = {
@@ -416,7 +418,7 @@ describe('UserService', () => {
 
     beforeEach(() => {
       jest
-        .spyOn(web3Service as any, 'prepareSignatureBody')
+        .spyOn(userService as any, 'prepareSignatureBody')
         .mockReturnValue(signatureBody);
     });
 
@@ -441,7 +443,7 @@ describe('UserService', () => {
       );
 
       expect(result).toBe(undefined);
-      expect(web3Service.prepareSignatureBody).toHaveBeenCalledWith(
+      expect(userService.prepareSignatureBody).toHaveBeenCalledWith(
         SignatureType.DISABLE_OPERATOR,
         MOCK_ADDRESS,
       );
@@ -480,6 +482,28 @@ describe('UserService', () => {
       await expect(
         userService.disableOperator(userEntity as any, signature),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('prepareSignatureBody', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should prepare web3 pre sign up payload and return typed structured data', async () => {
+      const expectedData: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'signup',
+        nonce: undefined,
+      };
+
+      const result = await userService.prepareSignatureBody(
+        SignatureType.SIGNUP,
+        MOCK_ADDRESS,
+      );
+
+      expect(result).toStrictEqual(expectedData);
     });
   });
 });

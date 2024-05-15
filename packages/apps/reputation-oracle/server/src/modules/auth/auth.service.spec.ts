@@ -24,10 +24,10 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { getNonce, signMessage } from '../../common/utils/signature';
+import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
-import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
+import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthError } from './auth.error';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -97,7 +97,7 @@ describe('AuthService', () => {
             prepareSignatureBody: jest.fn(),
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
-            getOperatorAddress: jest.fn(),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
       ],
@@ -526,8 +526,8 @@ describe('AuthService', () => {
 
     describe('web3auth', () => {
       describe('signin', () => {
-        const nonce = getNonce();
-        const nonce1 = getNonce();
+        const nonce = generateNonce();
+        const nonce1 = generateNonce();
 
         const userEntity: Partial<UserEntity> = {
           id: 1,
@@ -546,6 +546,9 @@ describe('AuthService', () => {
             accessToken: MOCK_ACCESS_TOKEN,
             refreshToken: MOCK_REFRESH_TOKEN,
           });
+          jest
+            .spyOn(userRepository, 'findOneByEvmAddress')
+            .mockResolvedValue({ nonce: nonce } as any);
         });
 
         afterEach(() => {
@@ -559,7 +562,14 @@ describe('AuthService', () => {
             nonce: nonce1,
           } as UserEntity);
 
-          const signature = await signMessage(nonce, MOCK_PRIVATE_KEY);
+          const data = {
+            from: MOCK_ADDRESS,
+            to: web3Service.getOperatorAddress(),
+            contents: 'signin',
+            nonce: nonce,
+          };
+
+          const signature = await signMessage(data, MOCK_PRIVATE_KEY);
           const result = await authService.web3Signin({
             address: MOCK_ADDRESS,
             signature,
@@ -596,7 +606,7 @@ describe('AuthService', () => {
           type: SignatureType.SIGNUP,
         };
 
-        const nonce = getNonce();
+        const nonce = generateNonce();
 
         const userEntity: Partial<UserEntity> = {
           id: 1,
@@ -608,6 +618,7 @@ describe('AuthService', () => {
           from: MOCK_ADDRESS,
           to: MOCK_ADDRESS,
           contents: 'signup',
+          nonce: undefined,
         };
         let createUserMock: any;
 
@@ -638,13 +649,14 @@ describe('AuthService', () => {
             from: address,
             to: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
             contents: 'signup',
+            nonce: undefined,
           };
 
           jest
-            .spyOn(web3Service, 'prepareSignatureBody')
-            .mockReturnValue(expectedResult);
+            .spyOn(userService, 'prepareSignatureBody')
+            .mockResolvedValue(expectedResult);
 
-          const result = web3Service.prepareSignatureBody(
+          const result = await userService.prepareSignatureBody(
             signatureType,
             address,
           );
@@ -670,9 +682,6 @@ describe('AuthService', () => {
           });
 
           expect(userService.createWeb3User).toHaveBeenCalledWith(
-            expect.objectContaining({
-              evmAddress: web3PreSignUpDto.address,
-            }),
             web3PreSignUpDto.address,
           );
 

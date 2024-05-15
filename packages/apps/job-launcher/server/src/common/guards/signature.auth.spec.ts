@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, HttpStatus } from '@nestjs/common';
 import { SignatureAuthGuard } from './signature.auth';
 import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { Role } from '../enums/role';
+import { ControlledError } from '../errors/controlled';
 
 jest.mock('../../common/utils/signature');
 
@@ -81,14 +82,14 @@ describe('SignatureAuthGuard', () => {
       (verifySignature as jest.Mock).mockReturnValue(false);
 
       await expect(guard.canActivate(context as any)).rejects.toThrow(
-        UnauthorizedException,
+        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
       );
     });
 
     it('should throw unauthorized exception for unrecognized oracle type', async () => {
       mockRequest.originalUrl = '/some/random/path';
       await expect(guard.canActivate(context as any)).rejects.toThrow(
-        UnauthorizedException,
+        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
       );
     });
   });
