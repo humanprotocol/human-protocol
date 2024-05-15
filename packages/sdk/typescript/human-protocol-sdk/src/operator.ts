@@ -85,21 +85,24 @@ export class OperatorUtils {
    * const leaders = await OperatorUtils.getLeaders();
    * ```
    */
-  public static async getLeaders(
-    filter: ILeadersFilter = { networks: [ChainId.POLYGON_AMOY] }
-  ): Promise<ILeader[]> {
+  public static async getLeaders(filter?: ILeadersFilter): Promise<ILeader[]> {
     try {
       let leaders_data: ILeader[] = [];
-      for (const chainId of filter.networks) {
+      const networks = filter?.networks ?? [];
+
+      for (const chainId of networks) {
         const networkData = NETWORKS[chainId];
 
         if (!networkData) {
           throw ErrorUnsupportedChainID;
         }
+
+        const gqlFilter = filter ?? { networks: [] };
+
         const { leaders } = await gqlFetch<{
           leaders: ILeaderSubgraph[];
-        }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
-          role: filter.role,
+        }>(networkData.subgraphUrl, GET_LEADERS_QUERY(gqlFilter), {
+          role: filter?.role,
         });
         leaders_data = leaders_data.concat(
           leaders.map((leader) => ({

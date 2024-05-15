@@ -173,9 +173,7 @@ class OperatorUtils:
     """
 
     @staticmethod
-    def get_leaders(
-        filter: LeaderFilter = LeaderFilter(networks=[ChainId.POLYGON_AMOY]),
-    ) -> List[LeaderData]:
+    def get_leaders(filter: LeaderFilter) -> List[LeaderData]:
         """Get leaders data of the protocol
 
         :param filter: Leader filter

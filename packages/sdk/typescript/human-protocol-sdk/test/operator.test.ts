@@ -135,12 +135,25 @@ describe('OperatorUtils', () => {
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
+    test('should return an empty array', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: null,
+      });
+
+      const result = await OperatorUtils.getLeaders();
+
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(0);
+      expect(result).toEqual([]);
+    });
+
     test('should throw an error if gql fetch fails', async () => {
+      const filter = { networks: [ChainId.LOCALHOST], role: 'role' };
+
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
         .mockRejectedValueOnce(new Error('Error'));
 
-      await expect(OperatorUtils.getLeaders()).rejects.toThrow();
+      await expect(OperatorUtils.getLeaders(filter)).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
   });
