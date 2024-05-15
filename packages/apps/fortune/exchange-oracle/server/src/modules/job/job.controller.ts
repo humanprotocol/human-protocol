@@ -94,7 +94,7 @@ export class JobController {
     return this.jobService.solveJob(
       body.chainId,
       body.escrowAddress,
-      req.user.address,
+      body.assignmentId,
       body.solution,
     );
   }

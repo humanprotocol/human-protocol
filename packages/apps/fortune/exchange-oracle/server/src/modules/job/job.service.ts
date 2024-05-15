@@ -282,4 +282,30 @@ export class JobService {
       throw new NotFoundException('Unable to get manifest');
     } else return manifest;
   }
+
+  public async getAddressesByAssignmentId(assignmentId: number): Promise<{
+    workerAddress: string;
+    escrowAddress: string;
+    chainId: number;
+  }> {
+    const assignment = await this.assignmentRepository.findOne({
+      where: { id: assignmentId },
+      relations: ['job'],
+    });
+    if (!assignment) {
+      throw new NotFoundException('Assignment not found');
+    }
+
+    const { workerAddress, job } = assignment;
+    if (!job) {
+      throw new NotFoundException('Job not found for the assignment');
+    }
+
+    const { escrowAddress, chainId } = job;
+    return {
+      workerAddress,
+      escrowAddress,
+      chainId,
+    };
+  }
 }

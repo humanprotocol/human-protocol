@@ -34,6 +34,10 @@ export class SolveJobDto {
   @ApiProperty()
   @IsString()
   public solution: string;
+
+  @ApiProperty({ name: 'assignment_id' })
+  @IsString()
+  public assignmentId: string;
 }
 
 export class GetJobsDto extends PageOptionsDto {
