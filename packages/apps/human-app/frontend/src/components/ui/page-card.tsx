@@ -207,12 +207,21 @@ export function PageCardLoader({
 }
 export function PageCardError({
   errorMessage,
+  children,
   withLayoutBackground,
-}: {
-  errorMessage: string;
-  cardMaxWidth?: string;
-  withLayoutBackground?: boolean;
-}) {
+}:
+  | {
+      errorMessage: string;
+      children?: never;
+      cardMaxWidth?: string;
+      withLayoutBackground?: boolean;
+    }
+  | {
+      errorMessage?: never;
+      children: React.ReactElement;
+      cardMaxWidth?: string;
+      withLayoutBackground?: boolean;
+    }) {
   const navigate = useNavigate();
   const { setGrayBackground } = useBackgroundColorStore();
 
@@ -222,20 +231,27 @@ export function PageCardError({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
   }, []);
+
   return (
     <Grid container sx={commonStyles}>
-      <Alert color="error" severity="error">
-        {errorMessage}
-      </Alert>
-      <Button onClick={navigate.bind(null, 0)} variant="contained">
-        {t('components.pageCardError.reload')}
-      </Button>
-      <Button
-        onClick={navigate.bind(null, routerPaths.homePage)}
-        variant="outlined"
-      >
-        {t('components.pageCardError.goHome')}
-      </Button>
+      {children ? (
+        children
+      ) : (
+        <>
+          <Alert color="error" severity="error">
+            {errorMessage}
+          </Alert>
+          <Button onClick={navigate.bind(null, 0)} variant="contained">
+            {t('components.pageCardError.reload')}
+          </Button>
+          <Button
+            onClick={navigate.bind(null, routerPaths.homePage)}
+            variant="outlined"
+          >
+            {t('components.pageCardError.goHome')}
+          </Button>
+        </>
+      )}
     </Grid>
   );
 }
