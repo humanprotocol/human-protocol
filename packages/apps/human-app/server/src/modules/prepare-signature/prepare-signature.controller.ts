@@ -7,13 +7,14 @@ import {
 } from '@nestjs/common';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   PrepareSignatureCommand,
   PrepareSignatureDto,
   PrepareSignatureResponse,
 } from './model/prepare-signature.model';
 import { PrepareSignatureService } from './prepare-signature.service';
+import { Authorization } from '../../common/config/params-decorators';
 
 @Controller('/prepare-signature')
 export class PrepareSignatureController {
@@ -24,6 +25,7 @@ export class PrepareSignatureController {
 
   @ApiTags('Prepare-Signature')
   @Post('/')
+  @ApiBearerAuth()
   @ApiOperation({
     summary:
       'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms',
@@ -31,12 +33,14 @@ export class PrepareSignatureController {
   @UsePipes(new ValidationPipe())
   public async prepareSignature(
     @Body() prepareSignatureDto: PrepareSignatureDto,
+    @Authorization() token: string,
   ): Promise<PrepareSignatureResponse> {
-    const prepareSignatureCommand = this.mapper.map(
+    const command = this.mapper.map(
       prepareSignatureDto,
       PrepareSignatureDto,
       PrepareSignatureCommand,
     );
-    return this.service.processPrepareSignature(prepareSignatureCommand);
+    command.token = token;
+    return this.service.processPrepareSignature(command);
   }
 }

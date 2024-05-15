@@ -37,10 +37,7 @@ import {
   RestorePasswordCommand,
   RestorePasswordData,
 } from '../../../modules/password-reset/model/restore-password.model';
-import {
-  PrepareSignatureCommand,
-  PrepareSignatureData,
-} from '../../../modules/prepare-signature/model/prepare-signature.model';
+import { PrepareSignatureCommand } from '../../../modules/prepare-signature/model/prepare-signature.model';
 import {
   disableOperatorCommandFixture,
   disableOperatorDataFixture,
@@ -52,7 +49,17 @@ import {
 import {
   prepareSignatureCommandFixture,
   prepareSignatureDataFixture,
+  prepareSignatureResponseFixture,
+  TOKEN,
 } from '../../../modules/prepare-signature/spec/prepare-signature.fixtures';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
+import { ReputationOracleProfile } from '../reputation-oracle.mapper';
+import { AxiosRequestConfig } from 'axios';
+
+const httpServiceMock = {
+  request: jest.fn(),
+};
 
 describe('ReputationOracleGateway', () => {
   let service: ReputationOracleGateway;
@@ -60,24 +67,19 @@ describe('ReputationOracleGateway', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        AutomapperModule.forRoot({
+          strategyInitializer: classes(),
+        }),
+      ],
       providers: [
         ReputationOracleGateway,
         GatewayConfigService,
         {
           provide: HttpService,
-          useValue: {
-            request: jest.fn().mockReturnValue(of({ data: 'mocked response' })),
-          },
+          useValue: httpServiceMock,
         },
-        {
-          provide: 'automapper:nestjs:default',
-          useValue: {
-            map: jest.fn((source, _, destination) => ({
-              ...source,
-              type: destination,
-            })),
-          },
-        },
+        ReputationOracleProfile,
       ],
     })
       .overrideProvider(GatewayConfigService)
@@ -88,26 +90,33 @@ describe('ReputationOracleGateway', () => {
     httpService = module.get<HttpService>(HttpService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    nock.cleanAll();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
   describe('sendWorkerSignup', () => {
-    it('should successfully call the reputation oracle worker signup endpoint', async () => {
-      const command = new SignupWorkerCommand(
-        'asfdsafdd@asdf.cvd',
-        'asdfasdf2133!!dasfA',
-        'Bearer sadf234efaddasf234sadgv43rz89al',
-      );
-      const expectedData = {
-        email: 'asfdsafdd@asdf.cvd',
-        password: 'asdfasdf2133!!dasfA',
-        type: 'WORKER',
-      };
+    const command = new SignupWorkerCommand(
+      'asfdsafdd@asdf.cvd',
+      'asdfasdf2133!!dasfA',
+      'Bearer sadf234efaddasf234sadgv43rz89al',
+    );
+    const expectedData = {
+      email: 'asfdsafdd@asdf.cvd',
+      password: 'asdfasdf2133!!dasfA',
+      type: 'WORKER',
+    };
 
-      nock('https://expample.com')
+    it('should successfully call the reputation oracle worker signup endpoint', async () => {
+      nock('https://example.com')
         .post('/auth/signup', expectedData)
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
 
       await expect(service.sendWorkerSignup(command)).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
@@ -136,12 +145,6 @@ describe('ReputationOracleGateway', () => {
         .spyOn(httpService, 'request')
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
-      const command = new SignupWorkerCommand(
-        'asfdsafdd@asdf.cvd',
-        'asdfasdf2133!!dasfA',
-        'Bearer sadf234efaddasf234sadgv43rz89al',
-      );
-
       await expect(service.sendWorkerSignup(command)).rejects.toThrow(
         new HttpException(
           'Internal Server Error',
@@ -153,6 +156,7 @@ describe('ReputationOracleGateway', () => {
 
   describe('sendOperatorSignup', () => {
     let exampleCommand: SignupOperatorCommand;
+
     beforeEach(async () => {
       const wallet = ethers.Wallet.createRandom();
       exampleCommand = new SignupOperatorCommand(
@@ -160,6 +164,7 @@ describe('ReputationOracleGateway', () => {
         await wallet.signMessage('signup'),
       );
     });
+
     it('should successfully call the reputation oracle operator signup endpoint', async () => {
       const expectedData = {
         address: exampleCommand.address,
@@ -167,9 +172,11 @@ describe('ReputationOracleGateway', () => {
         type: 'OPERATOR',
       };
 
-      nock('https://expample.com')
+      nock('https://example.com')
         .post('/auth/web3/signup', expectedData)
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
 
       await expect(
         service.sendOperatorSignup(exampleCommand),
@@ -179,21 +186,23 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendWorkerSignin', () => {
-    it('should successfully call the reputation oracle worker signin endpoint', async () => {
-      const command: SigninWorkerCommand = {
-        email: 'johndoe@example.com',
-        password: 's3cr3tP@ssw0rd',
-        hCaptchaToken: 'token',
-      };
-      const expectedData = {
-        email: 'johndoe@example.com',
-        password: 's3cr3tP@ssw0rd',
-        h_captcha_token: 'token',
-      };
+    const command: SigninWorkerCommand = {
+      email: 'johndoe@example.com',
+      password: 's3cr3tP@ssw0rd',
+      hCaptchaToken: 'token',
+    };
+    const expectedData = {
+      email: 'johndoe@example.com',
+      password: 's3cr3tP@ssw0rd',
+      h_captcha_token: 'token',
+    };
 
-      nock('https://expample.com')
+    it('should successfully call the reputation oracle worker signin endpoint', async () => {
+      nock('https://example.com')
         .post('/auth/signin', expectedData)
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
 
       await expect(service.sendWorkerSignin(command)).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
@@ -212,25 +221,21 @@ describe('ReputationOracleGateway', () => {
           ),
         );
 
-      const command: SigninWorkerCommand = {
+      const invalidCommand: SigninWorkerCommand = {
         email: '',
         password: '',
         hCaptchaToken: '',
       };
-      await expect(service.sendWorkerSignin(command)).rejects.toThrow(
-        new HttpException({ message: 'Bad request' }, 400),
+
+      await expect(service.sendWorkerSignin(invalidCommand)).rejects.toThrow(
+        new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
       );
     });
+
     it('should handle network or unknown errors correctly', async () => {
       jest
         .spyOn(httpService, 'request')
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
-
-      const command: SigninWorkerCommand = {
-        email: 'johndoe@example.com',
-        password: 's3cr3tP@ssw0rd',
-        hCaptchaToken: 'token',
-      };
 
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(
         new HttpException(
@@ -245,11 +250,13 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle email verification endpoint', async () => {
       const command: EmailVerificationCommand = emailVerificationCommandFixture;
       const data: EmailVerificationData = emailVerificationDataFixture;
-      nock('https://expample.com')
-        .post('/email-confirmation/email-verification', {
+
+      nock('https://example.com')
+        .post('/auth/email-verification', {
           ...data,
         })
         .reply(201, '');
+      httpServiceMock.request.mockReturnValue(of({}));
       await expect(
         service.sendEmailVerification(command),
       ).resolves.not.toThrow();
@@ -297,11 +304,14 @@ describe('ReputationOracleGateway', () => {
       const data: ResendEmailVerificationData = {
         ...command.data,
       };
-      nock('https://expample.com')
-        .post('/email-confirmation/resend-email-verification', {
+      nock('https://example.com')
+        .post('/auth/resend-email-verification', {
           ...data,
         })
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
+
       await expect(
         service.sendResendEmailVerification(command),
       ).resolves.not.toThrow();
@@ -352,11 +362,14 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       const command: ForgotPasswordCommand = forgotPasswordCommandFixture;
       const data: ForgotPasswordData = forgotPasswordDataFixture;
-      nock('https://expample.com')
-        .post('/password-reset/forgot-password', {
+      nock('https://example.com')
+        .post('/auth/forgot-password', {
           ...data,
         })
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
+
       await expect(service.sendForgotPassword(command)).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
@@ -399,11 +412,14 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       const command: RestorePasswordCommand = restorePasswordCommandFixture;
       const data: RestorePasswordData = restorePasswordDataFixture;
-      nock('https://expample.com')
-        .post('/password-reset/restore-password', {
+      nock('https://example.com')
+        .post('/auth/restore-password', {
           ...data,
         })
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
+
       await expect(service.sendRestorePassword(command)).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
@@ -445,16 +461,22 @@ describe('ReputationOracleGateway', () => {
   describe('sendPrepareSignature', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       const command: PrepareSignatureCommand = prepareSignatureCommandFixture;
-      const data: PrepareSignatureData = prepareSignatureDataFixture;
-      nock('https://expample.com')
-        .post('/prepare-signature', {
-          ...data,
-        })
-        .reply(201, '');
+      httpServiceMock.request.mockReturnValue(
+        of(prepareSignatureResponseFixture),
+      );
+
+      const expectedOptions: AxiosRequestConfig = {
+        method: 'POST',
+        url: `https://example.com/user/prepare-signature`,
+        headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+        data: prepareSignatureDataFixture,
+        params: {},
+      };
+
       await expect(
         service.sendPrepareSignature(command),
       ).resolves.not.toThrow();
-      expect(httpService.request).toHaveBeenCalled();
+      expect(httpService.request).toHaveBeenCalledWith(expectedOptions);
     });
 
     it('should handle http error response correctly', async () => {
@@ -495,11 +517,14 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       const command: DisableOperatorCommand = disableOperatorCommandFixture;
       const data: DisableOperatorData = disableOperatorDataFixture;
-      nock('https://expample.com')
-        .post('/disable-operator', {
+      nock('https://example.com')
+        .post('/user/disable-operator', {
           ...data,
         })
         .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
+
       await expect(service.sendDisableOperator(command)).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
@@ -540,8 +565,11 @@ describe('ReputationOracleGateway', () => {
 
   describe('sendKycProcedureStart', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
-      nock('https://expample.com').post('/kyc/start', {}).reply(201, '');
-      await expect(service.sendKycProcedureStart('token')).resolves.not.toThrow();
+      nock('https://example.com').post('/kyc/start', {}).reply(201, '');
+      httpServiceMock.request.mockReturnValue(of({}));
+      await expect(
+        service.sendKycProcedureStart('token'),
+      ).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
 

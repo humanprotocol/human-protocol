@@ -1,6 +1,6 @@
 export const gatewayConfigServiceMock = {
   getConfig: jest.fn().mockReturnValue({
-    url: 'https://expample.com',
+    url: 'https://example.com',
     endpoints: {
       WORKER_SIGNUP: {
         endpoint: '/auth/signup',

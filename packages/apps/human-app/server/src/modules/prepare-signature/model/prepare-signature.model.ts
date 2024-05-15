@@ -19,6 +19,7 @@ export class PrepareSignatureCommand {
   address: string;
   @AutoMap()
   type: PrepareSignatureType;
+  token: string;
 }
 
 export class PrepareSignatureData {
