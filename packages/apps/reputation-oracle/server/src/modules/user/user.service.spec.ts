@@ -29,6 +29,7 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { getLabelerData, registerLabeler } from '../../common/utils/hcaptcha';
 import { OracleType } from '../../common/enums';
 import { SiteKeyEntity } from './site-key.entity';
+import { ErrorUser } from '../../common/constants/errors';
 
 jest.mock('../../common/utils/hcaptcha');
 
@@ -191,7 +192,7 @@ describe('UserService', () => {
       expect(result).toEqual('signature');
     });
 
-    it('should throw BadRequestException if user address is incorrect', async () => {
+    it('should throw IncorrectAddress if user address is incorrect', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
@@ -212,10 +213,10 @@ describe('UserService', () => {
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(new BadRequestException(ErrorUser.IncorrectAddress));
     });
 
-    it('should throw BadRequestException if user type is invalid', async () => {
+    it('should throw InvalidType if user type is invalid', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
@@ -235,10 +236,10 @@ describe('UserService', () => {
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(new BadRequestException(ErrorUser.InvalidType));
     });
 
-    it('should throw BadRequestException if user KYC status is not approved', async () => {
+    it('should throw KycNotApproved if user KYC status is not approved', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
@@ -258,10 +259,10 @@ describe('UserService', () => {
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(new BadRequestException(ErrorUser.KycNotApproved));
     });
 
-    it('should throw BadRequestException if user is already registered as a labeler', async () => {
+    it('should throw LabelerAlreadyRegistered if user is already registered as a labeler', async () => {
       const siteKeyEntity: DeepPartial<SiteKeyEntity> = {
         id: 1,
         siteKey: 'site_key',
@@ -286,14 +287,17 @@ describe('UserService', () => {
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new BadRequestException(ErrorUser.LabelerAlreadyRegistered),
+      );
     });
 
-    it('should throw BadRequestException if registering labeler fails', async () => {
+    it('should throw LabelingEnableFailed if registering labeler fails', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
         kyc: {
           status: KycStatus.APPROVED,
         },
@@ -310,14 +314,17 @@ describe('UserService', () => {
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new BadRequestException(ErrorUser.LabelingEnableFailed),
+      );
     });
 
-    it('should throw BadRequestException if retrieving labeler data fails', async () => {
+    it('should throw LabelingEnableFailed if retrieving labeler data fails', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
         kyc: {
           status: KycStatus.APPROVED,
         },
@@ -335,7 +342,9 @@ describe('UserService', () => {
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new BadRequestException(ErrorUser.LabelingEnableFailed),
+      );
     });
   });
 
