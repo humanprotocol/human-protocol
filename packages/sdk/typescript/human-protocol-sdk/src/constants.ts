@@ -303,7 +303,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0x6daccd1f3a68945f8a7ac6d20260953f7a97fae4',
     kvstoreAddress: '0xdE8BE9E3C12E9F546309A429cd88d026a25EaF8C',
     subgraphUrl:
-      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93',
+      'https://gateway-testnet-arbitrum.network.thegraph.com/api/48b915028e741e9c0a26f914f4a697e6/subgraphs/id/9zd1LcywWjuSUtde4ofC8oyyzpawPwGUiPsvqTq247xk',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },

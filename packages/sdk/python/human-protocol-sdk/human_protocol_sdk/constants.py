@@ -263,7 +263,7 @@ NETWORKS = {
         "title": "X Layer Testnet",
         "scan_url": "https://www.oklink.com/oktc-test",
         "subgraph_url": (
-            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93"
+            "https://gateway-testnet-arbitrum.network.thegraph.com/api/48b915028e741e9c0a26f914f4a697e6/subgraphs/id/9zd1LcywWjuSUtde4ofC8oyyzpawPwGUiPsvqTq247xk"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e",
