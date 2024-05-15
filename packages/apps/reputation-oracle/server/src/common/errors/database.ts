@@ -1,5 +1,5 @@
 import { QueryFailedError } from 'typeorm';
-import { PostgresErrorCodes } from './database.enum';
+import { PostgresErrorCodes } from '../enums/database';
 
 export class DatabaseError extends Error {
   constructor(message: string, stack: string) {

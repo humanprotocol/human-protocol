@@ -27,6 +27,8 @@ import { StorageService } from '../storage/storage.service';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 import { EscrowClient } from '@human-protocol/sdk';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -104,7 +106,12 @@ describe('ReputationService', () => {
 
       await expect(
         reputationService.assessReputationScores(chainId, escrowAddress),
-      ).rejects.toThrow(ErrorManifest.ManifestUrlDoesNotExist);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorManifest.ManifestUrlDoesNotExist,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     describe('fortune', () => {
@@ -128,7 +135,12 @@ describe('ReputationService', () => {
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
-        ).rejects.toThrow(ErrorResults.NoResultsHaveBeenVerified);
+        ).rejects.toThrow(
+          new ControlledError(
+            ErrorResults.NoResultsHaveBeenVerified,
+            HttpStatus.BAD_REQUEST,
+          ),
+        );
       });
 
       it('should assess reputation scores', async () => {
@@ -220,7 +232,12 @@ describe('ReputationService', () => {
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
-        ).rejects.toThrow(ErrorResults.NoAnnotationsMetaFound);
+        ).rejects.toThrow(
+          new ControlledError(
+            ErrorResults.NoAnnotationsMetaFound,
+            HttpStatus.BAD_REQUEST,
+          ),
+        );
       });
 
       it('should assess reputation scores', async () => {

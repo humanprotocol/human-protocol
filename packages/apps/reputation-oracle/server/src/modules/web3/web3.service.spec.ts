@@ -7,6 +7,8 @@ import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Service } from './web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { HttpStatus } from '@nestjs/common';
+import { ControlledError } from '../../common/errors/controlled';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
@@ -49,7 +51,7 @@ describe('Web3Service', () => {
       const invalidChainId = ChainId.POLYGON;
 
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
-        ErrorWeb3.InvalidChainId,
+        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
       );
     });
   });

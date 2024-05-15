@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 import {
   CVAT_VALIDATION_META_FILENAME,
@@ -30,12 +30,10 @@ import { getRequestType } from '../../common/utils';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
-import { ReputationError } from './reputation.error';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class ReputationService {
-  private readonly logger = new Logger(ReputationService.name);
-
   constructor(
     @Inject(StorageService)
     private readonly storageService: StorageService,
@@ -61,11 +59,10 @@ export class ReputationService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      this.logger.log(
+      throw new ControlledError(
         ErrorManifest.ManifestUrlDoesNotExist,
-        ReputationService.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new ReputationError(ErrorManifest.ManifestUrlDoesNotExist);
     }
 
     const manifest = await this.storageService.download(manifestUrl);
@@ -160,11 +157,10 @@ export class ReputationService {
     const finalResults = await this.storageService.download(finalResultsUrl);
 
     if (finalResults.length === 0) {
-      this.logger.log(
+      throw new ControlledError(
         ErrorResults.NoResultsHaveBeenVerified,
-        ReputationService.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new ReputationError(ErrorResults.NoResultsHaveBeenVerified);
     }
 
     // Assess reputation scores for workers based on the final results of a job.
@@ -206,11 +202,10 @@ export class ReputationService {
 
     // If annotation meta does not exist
     if (annotations && Array.isArray(annotations) && annotations.length === 0) {
-      this.logger.log(
+      throw new ControlledError(
         ErrorResults.NoAnnotationsMetaFound,
-        ReputationService.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new ReputationError(ErrorResults.NoAnnotationsMetaFound);
     }
 
     // Assess reputation scores for workers based on the annoation quality.
@@ -320,8 +315,10 @@ export class ReputationService {
       );
 
     if (!reputationEntity) {
-      this.logger.log(ErrorReputation.NotFound, ReputationService.name);
-      throw new ReputationError(ErrorReputation.NotFound);
+      throw new ControlledError(
+        ErrorReputation.NotFound,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return {

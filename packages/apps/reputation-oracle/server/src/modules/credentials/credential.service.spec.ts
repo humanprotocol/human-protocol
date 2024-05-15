@@ -10,6 +10,8 @@ import { SelectQueryBuilder } from 'typeorm';
 import { CredentialStatus } from '../../common/enums/credential';
 import { CreateCredentialDto } from './credential.dto';
 import { UserService } from '../user/user.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -155,7 +157,9 @@ describe('CredentialService', () => {
           .mockResolvedValue(null);
         await expect(
           credentialService.validateCredential('ref123'),
-        ).rejects.toThrow('Credential not found.');
+        ).rejects.toThrow(
+          new ControlledError('Credential not found.', HttpStatus.BAD_REQUEST),
+        );
       });
     });
   });
