@@ -1,13 +1,10 @@
-previewsEnabled: true
-previewsExpireAfterDays: 2
+previewsEnabled: false
 services:
 - type: web
   name: job-launcher-server
   runtime: node
   repo: https://github.com/humanprotocol/human-protocol
-  branch: feat/render
   plan: starter
-  previewPlan: starter
   envVars:
   - key: NODE_VERSION
     value: 18
@@ -18,8 +15,7 @@ services:
   - key: PORT
     value: 80
   - key: FE_URL
-    value: https://job-launcher.humanprotocol.org/
-    previewValue: https://stg-job-launcher.humanprotocol.org/
+    sync: false
   - key: POSTGRES_URL
     fromDatabase:
       name: job-launcher
@@ -28,10 +24,8 @@ services:
     value: false # for internal db connections
   - key: POSTGRES_LOGGING
     value: info
-    previewValue: all
   - key: WEB3_ENV
-    value: mainnet
-    previewValue: testnet
+    sync: false
   - key: WEB3_PRIVATE_KEY
     sync: false
   - key: GAS_PRICE_MULTIPLIER
@@ -81,8 +75,7 @@ services:
   - key: STRIPE_API_VERSION
     value: '2022-11-15'
   - key: STRIPE_APP_NAME
-    value: Production Launcher Sever
-    previewValue: Staging Launcher Server
+    sync: false
   - key: STRIPE_APP_VERSION
     value: 1.0.0
   - key: STRIPE_APP_INFO_URL
@@ -102,8 +95,6 @@ services:
   buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
   startCommand: yarn start:prod
   preDeployCommand: yarn migration:run
-  domains:
-  - job-launcher-server.humanprotocol.org
   rootDir: packages/apps/job-launcher/server
 
 databases:
