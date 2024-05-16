@@ -125,7 +125,7 @@ services:
 
 databases:
   # A database that allows only private network connections
-  - name: job-launcher
+  - name: job-launcher-db
     databaseName: job_launcher
     plan: starter
     previewPlan: starter
