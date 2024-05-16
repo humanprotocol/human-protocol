@@ -22,6 +22,7 @@ import {
   CreateCredentialDto,
   CredentialQueryDto,
   CredentialDto,
+  AddCredentialOnChainDto,
 } from './credential.dto';
 import { CredentialExceptionFilter } from '../../common/exceptions/credential.filter';
 import { Public } from '../../common/decorators';
@@ -91,5 +92,28 @@ export class CredentialController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('on-chain')
+  @ApiOperation({ summary: 'Add a credential on-chain' })
+  @ApiResponse({
+    status: 201,
+    description: 'Credential added on-chain successfully.',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  public async addCredentialOnChain(
+    @Body() addCredentialOnChainDto: AddCredentialOnChainDto,
+  ): Promise<void> {
+    const { credential_id, workerAddress, signature, chainId, escrowAddress } =
+      addCredentialOnChainDto;
+    await this.credentialService.addCredentialOnChain(
+      credential_id,
+      workerAddress,
+      signature,
+      chainId,
+      escrowAddress,
+    );
   }
 }

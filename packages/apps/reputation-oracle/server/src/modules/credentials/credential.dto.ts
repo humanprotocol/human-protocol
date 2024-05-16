@@ -6,6 +6,7 @@ import {
   IsUrl,
   IsEnum,
 } from 'class-validator';
+import { ChainId } from '@human-protocol/sdk';
 import { CredentialStatus } from '../../common/enums/credential';
 
 export class CreateCredentialDto {
@@ -76,4 +77,25 @@ export class CredentialDto {
   @IsOptional()
   @IsString()
   public certificate?: string;
+}
+
+export class AddCredentialOnChainDto {
+  @ApiProperty()
+  public credential_id: number;
+
+  @ApiProperty()
+  @IsString()
+  public workerAddress: string;
+
+  @ApiProperty()
+  @IsString()
+  public signature: string;
+
+  @ApiProperty({ enum: ChainId })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty()
+  @IsString()
+  public escrowAddress: string;
 }
