@@ -4,7 +4,7 @@ services:
   name: job-launcher-server
   runtime: node
   repo: https://github.com/humanprotocol/human-protocol
-  plan: starter
+  plan: free
   envVars:
   - key: NODE_VERSION
     value: 18
@@ -96,6 +96,34 @@ services:
   startCommand: yarn start:prod
   preDeployCommand: yarn migration:run
   rootDir: packages/apps/job-launcher/server
+- type: web
+  name: job-launcher-client
+  runtime: node
+  repo: https://github.com/humanprotocol/human-protocol
+  plan: starter
+  envVars:
+  - key: NODE_VERSION
+    value: 18
+  - key: VITE_APP_ENVIRONMENT
+    sync: false
+  - key: VITE_APP_JOB_LAUNCHER_SERVER_URL
+    sync: false
+  - key: VITE_APP_WALLETCONNECT_PROJECT_ID
+    sync: false
+  - key: VITE_APP_STRIPE_PUBLISHABLE_KEY
+    sync: false
+  - key: VITE_APP_RPC_URL_POLYGON
+    sync: false
+  - key: VITE_APP_RPC_URL_POLYGON
+    sync: false
+  - key: VITE_APP_RPC_URL_POLYGON_AMOY
+    sync: false
+  - key: VITE_APP_RPC_URL_XLAYER_TESTNET
+    sync: false
+  region: frankfurt
+  buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
+  startCommand: yarn start:prod
+  rootDir: packages/apps/job-launcher/client
 
 databases:
   # A database that allows only private network connections
