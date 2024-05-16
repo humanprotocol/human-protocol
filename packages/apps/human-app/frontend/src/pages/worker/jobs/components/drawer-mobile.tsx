@@ -15,6 +15,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
+import type { JobsFilterStoreProps } from '@/hooks/use-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 
 interface DrawerMobileProps {
@@ -28,7 +29,10 @@ export function DrawerMobile({
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
-  const handleCheckboxClick = (paramName: string, paramValue: string) => {
+  const handleCheckboxClick = (
+    paramName: keyof JobsFilterStoreProps['filterParams'],
+    paramValue: string
+  ) => {
     if (filterParams[paramName] === paramValue) {
       setFilterParams({
         ...filterParams,

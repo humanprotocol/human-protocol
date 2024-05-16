@@ -21,7 +21,8 @@
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
     "errorWithStatusCode": "Error with status code: {{code}}",
-    "unknown": "An error occurred, please try again."
+    "unknown": "An error occurred, please try again.",
+    "unknownNetwork": "Unknown network"
   },
   "components": {
     "multiSelect": {

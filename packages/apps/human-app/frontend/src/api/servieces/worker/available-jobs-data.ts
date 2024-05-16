@@ -15,6 +15,8 @@ const availableJobSchema = z.object({
   job_type: z.string(),
   status: z.string(),
   job_description: z.string().optional(),
+  reward_amount: z.number().optional(),
+  reward_token: z.string().optional(),
 });
 
 const availableJobsSuccessResponseSchema =

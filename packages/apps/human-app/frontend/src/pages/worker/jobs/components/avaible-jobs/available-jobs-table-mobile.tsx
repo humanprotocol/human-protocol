@@ -10,9 +10,9 @@ import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import { parseNetworkName } from '@/shared/helpers/parse-network-label';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import type { AvailableJobsSuccessResponse } from '@/api/servieces/worker/available-jobs-data';
+import { getNetworkName } from '@/smart-contracts/get-network-name';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -99,7 +99,7 @@ export function AvailableJobsTableMobile({
                     <Grid item xs={6}>
                       <ProfileListItem
                         header={t('worker.jobs.network')}
-                        paragraph={parseNetworkName(d.chain_id)}
+                        paragraph={getNetworkName(d.chain_id)}
                       />
                     </Grid>
                     <Grid item xs={12}>

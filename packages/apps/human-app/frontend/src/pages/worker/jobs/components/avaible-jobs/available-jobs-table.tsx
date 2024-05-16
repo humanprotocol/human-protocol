@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
   MaterialReactTable,
@@ -6,19 +7,17 @@ import {
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
-import { Button } from '@/components/ui/button';
-import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { parseNetworkName } from '@/shared/helpers/parse-network-label';
+import type { AvailableJobsSuccessResponse } from '@/api/servieces/worker/available-jobs-data';
+import { mapAvailableJobsResponseToTableData } from '@/pages/worker/jobs/components/avaible-jobs/map-avialable-jobs-data-to-table-data';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type {
-  AvailableJob,
-  AvailableJobsSuccessResponse,
-} from '@/api/servieces/worker/available-jobs-data';
 
-interface AvailableJobTableData {
+export interface AvailableJobTableData {
   jobDescription?: string;
+  rewardTokenInfo?: JSX.Element | string;
   network: string;
   jobTypeChips: JSX.Element;
   escrowAddress: string;
@@ -30,55 +29,48 @@ const columns: MRT_ColumnDef<AvailableJobTableData>[] = [
     accessorKey: 'jobDescription',
     header: t('worker.jobs.jobDescription'),
     size: 100,
-    enableSorting: true,
+    enableSorting: false,
   },
   {
     accessorKey: 'escrowAddress',
     header: t('worker.jobs.escrowAddress'),
     size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      return (
+        <Tooltip title={props.cell.getValue() as string}>
+          <Typography variant="body2">
+            {shortenEscrowAddress(props.cell.getValue() as string)}
+          </Typography>
+        </Tooltip>
+      );
+    },
   },
   {
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
-    enableSorting: true,
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'rewardTokenInfo',
+    header: t('worker.jobs.rewardAmount'),
+    size: 100,
+    enableSorting: false,
   },
   {
     accessorKey: 'jobTypeChips',
     header: t('worker.jobs.jobType'),
     size: 200,
-    enableSorting: true,
+    enableSorting: false,
   },
   {
     accessorKey: 'buttonColumn',
     header: '',
     size: 100,
-    enableSorting: true,
-  },
-  {
-    accessorKey: 'buttonColumn',
-    header: '',
-    size: 100,
-    enableSorting: true,
+    enableSorting: false,
   },
 ];
-
-const mapAvailableJobsResponseToTableData = (
-  responseData: AvailableJob[]
-): AvailableJobTableData[] => {
-  return responseData.map((job) => ({
-    jobDescription: job.job_description,
-    network: parseNetworkName(job.chain_id),
-    jobTypeChips: <Chip label={job.job_type} />,
-    escrowAddress: shortenEscrowAddress(job.escrow_address),
-    buttonColumn: (
-      <Button color="secondary" size="small" type="button" variant="contained">
-        {t('worker.jobs.selectJob')}
-      </Button>
-    ),
-  }));
-};
 
 export function AvailableJobsTable() {
   const { setFilterParams, filterParams } = useJobsFilterStore();
@@ -101,7 +93,6 @@ export function AvailableJobsTable() {
     setFilterParams({
       ...filterParams,
       page: paginationState.pageIndex,
-      // eslint-disable-next-line camelcase -- ...
       page_size: paginationState.pageSize,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
@@ -125,7 +116,7 @@ export function AvailableJobsTable() {
     onPaginationChange: setPaginationState,
     enableColumnActions: false,
     enableColumnFilters: false,
-    enableSorting: false,
+    enableSorting: true,
     renderTopToolbar: ({ table: tab }) => (
       <SearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
