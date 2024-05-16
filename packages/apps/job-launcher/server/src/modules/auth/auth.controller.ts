@@ -7,12 +7,11 @@ import {
   UseGuards,
   UseInterceptors,
   Request,
-  UnprocessableEntityException,
   Logger,
   UsePipes,
   Ip,
-  UseFilters,
   HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -41,6 +40,7 @@ import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { ControlledError } from 'src/common/errors/controlled';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -247,15 +247,16 @@ export class AuthJwtController {
     @Request() req: RequestWithUser,
   ): Promise<ApiKeyDto> {
     try {
-      const apiKey = await this.authService.createOrUpdateAPIKey(req.user.id);
+      const apiKey = await this.authService.createOrUpdateAPIKey(req.user);
       return { apiKey };
     } catch (e) {
       this.logger.log(
         e.message,
         `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
       );
-      throw new UnprocessableEntityException(
+      throw new ControlledError(
         ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

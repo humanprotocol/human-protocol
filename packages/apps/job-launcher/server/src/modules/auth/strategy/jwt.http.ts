@@ -1,12 +1,13 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable, Req } from '@nestjs/common';
 
 import { UserEntity } from '../../user/user.entity';
 import { RESEND_EMAIL_VERIFICATION_PATH } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
 import { AuthConfigService } from '../../../common/config/auth-config.service';
 import { UserRepository } from '../../user/user.repository';
+import { ControlledError } from 'src/common/errors/controlled';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -29,14 +30,14 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     const user = await this.userRepository.findById(payload.userId);
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new ControlledError('User not found', HttpStatus.UNAUTHORIZED);
     }
 
     if (
       user.status !== UserStatus.ACTIVE &&
       request.url !== RESEND_EMAIL_VERIFICATION_PATH
     ) {
-      throw new UnauthorizedException('User not active');
+      throw new ControlledError('User not active', HttpStatus.UNAUTHORIZED);
     }
 
     return user;
