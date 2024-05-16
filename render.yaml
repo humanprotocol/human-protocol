@@ -118,6 +118,12 @@ services:
     sync: false
   - key: VITE_APP_RPC_URL_XLAYER_TESTNET
     sync: false
+  - key: VITE_APP_HCAPTCHA_SITE_KEY
+    sync: false
+  - key: VITE_APP_HCAPTCHA_EXCHANGE_URL
+    sync: false
+  - key: VITE_APP_HCAPTCHA_LABELING_BASE_URL
+    sync: false
   region: frankfurt
   buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
   startCommand: yarn start:prod
