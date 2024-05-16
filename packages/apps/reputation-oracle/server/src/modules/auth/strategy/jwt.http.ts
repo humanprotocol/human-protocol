@@ -7,7 +7,7 @@ import { RESEND_EMAIL_VERIFICATION_PATH } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
 import { UserRepository } from '../../user/user.repository';
 import { AuthConfigService } from '../../../common/config/auth-config.service';
-import { ControlledError } from 'src/common/errors/controlled';
+import { ControlledError } from '../../../common/errors/controlled';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
