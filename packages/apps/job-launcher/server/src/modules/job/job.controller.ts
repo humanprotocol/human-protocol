@@ -35,7 +35,7 @@ import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
-import { ControlledError } from 'src/common/errors/controlled';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)

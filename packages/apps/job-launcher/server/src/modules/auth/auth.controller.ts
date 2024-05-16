@@ -40,7 +40,7 @@ import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
-import { ControlledError } from 'src/common/errors/controlled';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiTags('Auth')
 @ApiResponse({

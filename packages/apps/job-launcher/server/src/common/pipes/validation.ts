@@ -26,7 +26,7 @@ export class HttpValidationPipe extends ValidationPipe {
           HttpStatus.BAD_REQUEST,
         );
       },
-      transform: false,
+      transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
       forbidUnknownValues: true,

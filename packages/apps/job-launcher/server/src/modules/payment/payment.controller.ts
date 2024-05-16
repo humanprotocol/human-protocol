@@ -28,7 +28,7 @@ import {
 import { PaymentService } from './payment.service';
 import { getRate } from '../../common/utils';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { ControlledError } from 'src/common/errors/controlled';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
