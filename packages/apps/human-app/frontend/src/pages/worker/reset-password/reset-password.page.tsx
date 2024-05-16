@@ -80,8 +80,8 @@ export function ResetPasswordWorkerPage() {
               name="confirmPassword"
             />
             <Button
-              disabled={isResetPasswordWorkerPending}
               fullWidth
+              loading={isResetPasswordWorkerPending}
               type="submit"
               variant="contained"
             >

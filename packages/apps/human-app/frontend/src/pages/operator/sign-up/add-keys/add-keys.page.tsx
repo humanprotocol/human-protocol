@@ -113,8 +113,8 @@ export function Form({
             <ExistingKeys openEditMode={setEditMode.bind(null, true)} />
           )}
           <Button
-            disabled={editExistingKeys.isPending}
             fullWidth
+            loading={editExistingKeys.isPending}
             type="submit"
             variant="contained"
           >

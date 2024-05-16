@@ -3,12 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
-export const resendEmailVErificationDtoSchema = z.object({
+export const resendEmailVerificationDtoSchema = z.object({
   email: z.string().email(),
 });
 
 export type ResendEmailVerificationDto = z.infer<
-  typeof resendEmailVErificationDtoSchema
+  typeof resendEmailVerificationDtoSchema
 >;
 
 const ResendEmailVerificationSuccessResponseSchema = z.unknown();

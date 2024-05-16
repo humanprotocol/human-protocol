@@ -8,6 +8,7 @@ declare module '@mui/material/Typography' {
     body3: true;
     body4: true;
     body5: true;
+    body6: true;
     buttonLarge: true;
     buttonMedium: true;
     buttonSmall: true;
@@ -29,6 +30,7 @@ declare module '@mui/material/styles' {
     body3: CSSProperties;
     body4: CSSProperties;
     body5: CSSProperties;
+    body6: CSSProperties;
     buttonLarge: CSSProperties;
     buttonMedium: CSSProperties;
     buttonSmall: CSSProperties;
@@ -49,6 +51,7 @@ declare module '@mui/material/styles' {
     body3?: CSSProperties;
     body4?: CSSProperties;
     body5?: CSSProperties;
+    body6?: CSSProperties;
     buttonLarge?: CSSProperties;
     buttonMedium?: CSSProperties;
     buttonSmall?: CSSProperties;
@@ -179,6 +182,11 @@ export const theme: ThemeOptions = {
       fontWeight: 500,
       letterSpacing: 0.15,
     },
+    body6: {
+      fontSize: 24,
+      fontWeight: 600,
+      letterSpacing: 0.15,
+    },
     buttonLarge: {
       fontSize: 15,
       fontWeight: 600,
@@ -258,11 +266,13 @@ export const theme: ThemeOptions = {
     MuiButton: {
       styleOverrides: {
         root: {
+          paddingTop: '0.6rem',
+          paddingBottom: '0.6rem',
           fontSize: '14px',
           fontWeight: 600,
           textTransform: 'none',
           '&.Mui-disabled': {
-            backgroundColor: colorPalette.primary.contrastText,
+            backgroundColor: colorPalette.button.disabled,
             color: colorPalette.text.secondary,
           },
         },

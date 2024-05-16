@@ -12,9 +12,13 @@ const userDataSchema = z.object({
   reputation_network: z.string(),
   // eslint-disable-next-line camelcase -- camel case defined by api
   kyc_status: z.enum(['APPROVED']).optional(),
+  // eslint-disable-next-line camelcase -- camel case defined by api
+  kyc_added_on_chain: z.boolean().optional(), // TODO that should be verified when adding KYC info on chain feature is done
+  // eslint-disable-next-line camelcase -- camel case defined by api
+  email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
 });
 
-type UserData = z.infer<typeof userDataSchema>;
+export type UserData = z.infer<typeof userDataSchema>;
 
 type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 export interface AuthenticatedUserContextType {

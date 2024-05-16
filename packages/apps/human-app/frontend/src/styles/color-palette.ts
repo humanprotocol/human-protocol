@@ -39,6 +39,9 @@ export const colorPalette = {
   chip: {
     main: 'rgba(203, 207, 232, 0.28)',
   },
+  button: {
+    disabled: 'rgba(218, 222, 240, 0.8)',
+  },
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
 } as const;

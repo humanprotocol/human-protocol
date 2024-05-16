@@ -2,7 +2,6 @@ import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
-import { routerPaths } from '@/router/router-paths';
 import { colorPalette } from '@/styles/color-palette';
 import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
@@ -10,12 +9,16 @@ import { Button } from '@/components/ui/button';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { env } from '@/shared/env';
 
 export function SendEmailVerificationWorkerPage() {
   const { t } = useTranslation();
-  const { field: email } = useLocationState({
-    keyInStorage: 'email',
-    schema: z.string().email(),
+  const { field: routerState } = useLocationState({
+    keyInStorage: 'routerState',
+    schema: z.object({
+      email: z.string().email(),
+      resendOnMount: z.boolean().optional(),
+    }),
   });
   const {
     mutate: resendEmailVerificationWorkerMutation,
@@ -25,8 +28,8 @@ export function SendEmailVerificationWorkerPage() {
   } = useResendEmailVerificationWorkerMutation();
 
   const sendEmailVerificationMutation = () => {
-    if (email) {
-      resendEmailVerificationWorkerMutation({ email });
+    if (routerState?.email) {
+      resendEmailVerificationWorkerMutation({ email: routerState.email });
     }
   };
 
@@ -49,7 +52,7 @@ export function SendEmailVerificationWorkerPage() {
         <Typography>
           <Trans
             i18nKey="worker.sendEmailVerification.paragraph1"
-            values={{ email }}
+            values={{ email: routerState?.email }}
           >
             Strong <Typography variant="buttonMedium" />
           </Trans>
@@ -63,21 +66,22 @@ export function SendEmailVerificationWorkerPage() {
           </Trans>
         </Typography>
         <Button
-          disabled={isEmailVerificationWorkerPending}
           fullWidth
+          loading={isEmailVerificationWorkerPending}
           onClick={sendEmailVerificationMutation}
           variant="outlined"
         >
           {t('worker.sendEmailVerification.btn')}
         </Button>
         <Typography variant="body1">
-          <Trans
-            i18nKey="worker.sendEmailVerification.paragraph4"
-            values={{ email }}
-          >
+          <Trans i18nKey="worker.sendEmailVerification.paragraph4">
             Strong
             <Typography variant="buttonMedium" />
-            <Link to={routerPaths.homePage} />
+            <Link
+              rel="noreferrer"
+              target="_blank"
+              to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
+            />
           </Trans>
         </Typography>
       </Grid>

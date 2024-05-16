@@ -5,8 +5,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Stack, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { Grid, Stack, Typography } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { t } from 'i18next';
 import {
   HelpIcon,
   HumanLogoNavbarIcon,
@@ -16,26 +17,57 @@ import {
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useAuth } from '@/auth/use-auth';
+import { routerPaths } from '@/router/router-paths';
 
 interface DrawerNavigationProps {
   open: boolean;
   drawerWidth: number;
 }
 
-const topMenuItems = [
-  'components.DrawerNavigation.jobs',
-  'components.DrawerNavigation.captchaLabelling',
-  'components.DrawerNavigation.jobsDiscovery',
-] as const;
+interface DrawerItem {
+  label: string;
+  link?: string;
+  icon?: JSX.Element;
+}
 
-const bottomMenuItems = [
-  'components.DrawerNavigation.profile',
-  'components.DrawerNavigation.help',
-] as const;
+const topMenuItems: (DrawerItem | JSX.Element)[] = [
+  <Grid
+    key={crypto.randomUUID()}
+    sx={{
+      display: 'inline-flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '0.8rem',
+    }}
+  >
+    <WorkIcon />
+    <Typography variant="body6">
+      {t('components.DrawerNavigation.jobs')}
+    </Typography>
+  </Grid>,
+  { label: t('components.DrawerNavigation.captchaLabelling') },
+  {
+    label: t('components.DrawerNavigation.jobsDiscovery'),
+    link: routerPaths.worker.jobs,
+  },
+];
+
+const bottomMenuItems: DrawerItem[] = [
+  {
+    label: t('components.DrawerNavigation.profile'),
+    link: routerPaths.worker.profile,
+    icon: <UserOutlinedIcon />,
+  },
+  {
+    label: t('components.DrawerNavigation.help'),
+    link: routerPaths.homePage,
+    icon: <HelpIcon />,
+  },
+];
 
 export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { t } = useTranslation();
   const { signOut } = useAuth();
 
   return (
@@ -57,7 +89,9 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
       >
         {!isMobile && (
           <Stack alignItems="center">
-            <HumanLogoNavbarIcon />
+            <Link to={routerPaths.homePage}>
+              <HumanLogoNavbarIcon />
+            </Link>
           </Stack>
         )}
         <Stack
@@ -71,40 +105,70 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
               marginTop: '66px',
             }}
           >
-            {topMenuItems.map((text, index) => (
-              <ListItem disablePadding key={text}>
-                <ListItemButton>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      ml: isMobile ? '28px' : '56px',
+            {topMenuItems.map((item, index) => {
+              if (!('label' in item)) {
+                return (
+                  <ListItem key={crypto.randomUUID()}>
+                    <Stack
+                      direction="row"
+                      sx={{
+                        ml: isMobile ? '28px' : '56px',
+                      }}
+                    >
+                      {item}
+                    </Stack>
+                  </ListItem>
+                );
+              }
+
+              const { link, label } = item;
+              return (
+                <ListItem disablePadding key={link}>
+                  <ListItemButton
+                    onClick={() => {
+                      if (link) {
+                        navigate(link);
+                      }
                     }}
                   >
-                    {index === 0 && <WorkIcon />}
-                    <ListItemText
-                      disableTypography
-                      primary={
-                        <Typography
-                          component="span"
-                          fontWeight={index === 0 ? '600' : '500'}
-                          variant="body2"
-                        >
-                          {t(text)}
-                        </Typography>
-                      }
+                    <Stack
+                      direction="row"
                       sx={{
-                        marginLeft: index === 0 ? '10px' : '0px',
+                        ml: isMobile ? '28px' : '56px',
                       }}
-                    />
-                  </Stack>
-                </ListItemButton>
-              </ListItem>
-            ))}
+                    >
+                      <ListItemText
+                        disableTypography
+                        primary={
+                          <Typography
+                            component="span"
+                            fontWeight={index === 0 ? '600' : '500'}
+                            variant="body2"
+                          >
+                            {label}
+                          </Typography>
+                        }
+                        sx={{
+                          marginLeft: index === 0 ? '10px' : '0px',
+                        }}
+                      />
+                    </Stack>
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
           </List>
           <List>
-            {bottomMenuItems.map((text, index) => (
-              <ListItem alignItems="center" disablePadding key={text}>
-                <ListItemButton alignItems="center">
+            {bottomMenuItems.map(({ label, link, icon }) => (
+              <ListItem alignItems="center" disablePadding key={link}>
+                <ListItemButton
+                  alignItems="center"
+                  onClick={() => {
+                    if (link) {
+                      navigate(link);
+                    }
+                  }}
+                >
                   <Stack
                     alignItems="center"
                     direction="row"
@@ -113,21 +177,12 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
                       ml: isMobile ? '12px' : '56px',
                     }}
                   >
-                    {index === 0 && <UserOutlinedIcon />}
-                    {index === 1 && (
-                      <Stack
-                        sx={{
-                          marginLeft: '-2px',
-                        }}
-                      >
-                        <HelpIcon />
-                      </Stack>
-                    )}
+                    {icon}
                     <ListItemText
                       disableTypography
                       primary={
                         <Typography component="span" variant="body1">
-                          {t(text)}
+                          {label}
                         </Typography>
                       }
                       sx={{
@@ -150,7 +205,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
           }}
           variant="outlined"
         >
-          Log out
+          {t('components.DrawerNavigation.logout')}
         </Button>
       </Drawer>
     </Box>

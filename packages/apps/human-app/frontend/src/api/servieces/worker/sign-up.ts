@@ -61,7 +61,9 @@ export function useSignUpMutation() {
     mutationFn: signUpMutationFn,
     onSuccess: async (successSignInData, { email }) => {
       signIn(successSignInData);
-      navigate(routerPaths.worker.sendEmailVerification, { state: { email } });
+      navigate(routerPaths.worker.sendEmailVerification, {
+        state: { routerState: { email } },
+      });
       await queryClient.invalidateQueries();
     },
     onError: async () => {

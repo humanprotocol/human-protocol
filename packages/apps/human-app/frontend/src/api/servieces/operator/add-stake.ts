@@ -72,8 +72,6 @@ async function addStakeMutationFn(
   return data;
 }
 
-export const addStakeMutationKey = ['addStake'];
-
 export function useAddStakeMutation() {
   const {
     chainId,

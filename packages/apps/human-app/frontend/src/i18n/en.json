@@ -126,6 +126,11 @@
       "paragraph3": "<1>Cant find our email?</1> If you can’t find the inbox in your email please check the spam folder or click below and we will send you a new one.",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
+    "sendEmailVerificationError": {
+      "title": "Verification failed",
+      "description": "An error occurred during email verification. Click button bellow to resend verification email.",
+      "btn": "Resend Verification Email"
+    },
     "emailVerification": {
       "title": "Email Verified",
       "description": "You are ready to go. Your email has been successfully verified!",
@@ -166,11 +171,19 @@
       "email": "Email",
       "password": "Password",
       "resetPassword": "Reset Password",
+      "completeKYC": "Complete KYC",
       "kycCompleted": "KYC Completed",
+      "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
+      "addKYCInfoOnChain": "Add KYC Info On-chain",
       "kycInfoOnChainAdded": "KYC Info On-Chain Added ",
       "emailNotifications": "Email Notifications",
-      "notificationsConsent": "I would like to be notified about News and Offers"
+      "notificationsConsent": "I would like to be notified about News and Offers",
+      "topNotifications": {
+        "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
+        "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
+        "noKYCOnChain": "Please complete your profile! You still need to add KYC info on-chain."
+      }
     },
     "jobs": {
       "errorFetchingData": "There was an error while fetching data, please try again",

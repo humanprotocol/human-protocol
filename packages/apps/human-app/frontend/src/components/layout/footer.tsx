@@ -24,6 +24,7 @@ export function Footer({ isProtected }: FooterProps) {
 
   return (
     <Grid
+      component="footer"
       container
       sx={{
         pr: isMobile ? 0 : '44px',
@@ -44,7 +45,9 @@ export function Footer({ isProtected }: FooterProps) {
         <Stack direction={isMobile ? 'column' : 'row'}>
           <Link
             href={env.VITE_PRIVACY_POLICY_URL}
+            rel="noreferrer"
             sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
+            target="_blank"
             underline="none"
           >
             <Typography color={colorPalette.text.secondary} variant="caption">
@@ -53,7 +56,9 @@ export function Footer({ isProtected }: FooterProps) {
           </Link>
           <Link
             href={env.VITE_TERMS_OF_SERVICE_URL}
+            rel="noreferrer"
             sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
+            target="_blank"
             underline="none"
           >
             <Typography color={colorPalette.text.secondary} variant="caption">
@@ -62,9 +67,11 @@ export function Footer({ isProtected }: FooterProps) {
           </Link>
           <Link
             href={env.VITE_HUMAN_PROTOCOL_URL}
+            rel="noreferrer"
             sx={{
               mb: isMobile ? '10px' : 0,
             }}
+            target="_blank"
             underline="none"
           >
             <Typography color={colorPalette.text.secondary} variant="caption">
