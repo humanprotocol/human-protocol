@@ -25,7 +25,6 @@ export class PrepareSignatureController {
 
   @ApiTags('Prepare-Signature')
   @Post('/')
-  @ApiBearerAuth()
   @ApiOperation({
     summary:
       'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms',
@@ -33,14 +32,12 @@ export class PrepareSignatureController {
   @UsePipes(new ValidationPipe())
   public async prepareSignature(
     @Body() prepareSignatureDto: PrepareSignatureDto,
-    @Authorization() token: string,
   ): Promise<PrepareSignatureResponse> {
     const command = this.mapper.map(
       prepareSignatureDto,
       PrepareSignatureDto,
       PrepareSignatureCommand,
     );
-    command.token = token;
     return this.service.processPrepareSignature(command);
   }
 }

@@ -468,7 +468,7 @@ describe('ReputationOracleGateway', () => {
       const expectedOptions: AxiosRequestConfig = {
         method: 'POST',
         url: `https://example.com/user/prepare-signature`,
-        headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+        headers: { 'Content-Type': 'application/json' },
         data: prepareSignatureDataFixture,
         params: {},
       };

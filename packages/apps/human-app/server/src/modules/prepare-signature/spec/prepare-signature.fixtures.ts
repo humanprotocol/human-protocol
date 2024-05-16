@@ -26,7 +26,6 @@ export const prepareSignatureDtoFixture: PrepareSignatureDto = {
 export const prepareSignatureCommandFixture: PrepareSignatureCommand = {
   address: ADDRESS,
   type: TYPE,
-  token: TOKEN,
 };
 
 export const prepareSignatureDataFixture: PrepareSignatureData = {

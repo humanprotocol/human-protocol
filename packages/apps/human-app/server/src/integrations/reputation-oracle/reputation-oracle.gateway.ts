@@ -200,7 +200,6 @@ export class ReputationOracleGateway {
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.PREPARE_SIGNATURE,
       data,
-      command.token,
     );
     return this.handleRequestToReputationOracle<PrepareSignatureResponse>(
       options,
