@@ -8,8 +8,6 @@ import {
 } from '@nestjs/terminus';
 import { Public } from '../../common/decorators';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { delay } from 'rxjs';
-import { sleep } from '@nestjs/terminus/dist/utils';
 
 @Public()
 @ApiTags('Health')
@@ -27,7 +25,6 @@ export class HealthController {
     description: 'Endpoint to perform health checks for the application.',
   })
   async readiness(): Promise<HealthCheckResult> {
-    await sleep(900000);
     return this.health.check([
       async (): Promise<HealthIndicatorResult> =>
         this.db.pingCheck('database', {
