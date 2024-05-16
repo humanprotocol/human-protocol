@@ -1,6 +1,7 @@
 import { Grid, List, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Dispatch, SetStateAction } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
@@ -11,21 +12,25 @@ import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
 import { parseNetworkName } from '@/shared/helpers/parse-network-label';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { AvailableJobs } from '@/api/servieces/worker/available-jobs-table-service-mock';
+import type { AvailableJobsSuccessResponse } from '@/api/servieces/worker/available-jobs-data';
 
 interface AvailableJobsTableMobileProps {
-  data?: AvailableJobs;
-  isLoading: boolean;
-  isError: boolean;
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function AvailableJobsTableMobile({
-  data,
-  isLoading,
-  isError,
   setIsMobileFilterDrawerOpen,
 }: AvailableJobsTableMobileProps) {
+  const { filterParams } = useJobsFilterStore();
+  const queryClient = useQueryClient();
+  const availableJobsTableState = queryClient.getQueryState([
+    'availableJobs',
+    filterParams,
+  ]);
+  const queryData = queryClient.getQueryData<AvailableJobsSuccessResponse>([
+    'availableJobs',
+    filterParams,
+  ]);
   const { t } = useTranslation();
 
   const { setSearchEscrowAddress } = useJobsFilterStore();
@@ -55,18 +60,21 @@ export function AvailableJobsTableMobile({
         <FiltersButtonIcon />
       </Button>
       <Stack flexDirection="column">
-        {isError ? (
+        {availableJobsTableState?.status === 'error' ? (
           <Alert color="error" severity="error">
             {t('worker.jobs.errorFetchingData')}
           </Alert>
         ) : null}
-        {isLoading && !isError ? (
+        {availableJobsTableState?.status === 'pending' &&
+        !availableJobsTableState.error ? (
           <Stack alignItems="center" justifyContent="center">
             <Loader size={90} />
           </Stack>
         ) : null}
-        {!isLoading && !isError && data
-          ? data.results.map((d) => (
+        {availableJobsTableState?.status === 'success' &&
+        !availableJobsTableState.error &&
+        queryData?.results
+          ? queryData.results.map((d) => (
               <Paper
                 key={crypto.randomUUID()}
                 sx={{

@@ -25,5 +25,11 @@ export const apiPaths = {
     resendEmailVerification: {
       path: '/email-confirmation/resend-email-verification',
     },
+    oracles: {
+      path: '/oracles',
+    },
+    jobs: {
+      path: '/jobs',
+    },
   },
 } as const;

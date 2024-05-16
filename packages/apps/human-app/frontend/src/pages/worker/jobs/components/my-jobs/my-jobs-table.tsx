@@ -14,8 +14,8 @@ import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { parseNetworkName } from '@/shared/helpers/parse-network-label';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { JobsArray } from '@/api/servieces/worker/available-jobs-table-service-mock';
 import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
+import type { JobsArray } from '@/api/servieces/worker/available-jobs-table-service-mock';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
