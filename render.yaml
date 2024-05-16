@@ -4,7 +4,7 @@ services:
   name: job-launcher-server
   runtime: node
   repo: https://github.com/humanprotocol/human-protocol
-  plan: free
+  plan: starter
   envVars:
   - key: NODE_VERSION
     value: 18
@@ -100,7 +100,7 @@ services:
   name: job-launcher-client
   runtime: node
   repo: https://github.com/humanprotocol/human-protocol
-  plan: starter
+  plan: free
   envVars:
   - key: NODE_VERSION
     value: 18
