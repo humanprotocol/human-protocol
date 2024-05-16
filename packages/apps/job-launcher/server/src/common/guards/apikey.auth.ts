@@ -1,11 +1,12 @@
 import {
   Injectable,
   ExecutionContext,
-  UnauthorizedException,
   CanActivate,
+  HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthService } from '../../modules/auth/auth.service';
+import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -25,24 +26,21 @@ export class ApiKeyGuard implements CanActivate {
         const apiKey = parts[0];
         const apiKeyId = parts[1];
 
-        try {
-          const userWithApiKey =
-            await this.authService.validateAPIKeyAndGetUser(
-              Number(apiKeyId),
-              apiKey,
-            );
-
-          if (userWithApiKey) {
-            request.user = userWithApiKey;
-            return true;
-          }
-        } catch (error) {
-          throw new UnauthorizedException('Invalid API Key');
+        const userWithApiKey = await this.authService.validateAPIKeyAndGetUser(
+          Number(apiKeyId),
+          apiKey,
+        );
+        if (userWithApiKey) {
+          request.user = userWithApiKey;
+          return true;
         }
       } else {
-        throw new UnauthorizedException('Invalid API Key format');
+        throw new ControlledError(
+          'Invalid API Key format',
+          HttpStatus.UNAUTHORIZED,
+        );
       }
     }
-    return false;
+    throw new ControlledError('Invalid API Key', HttpStatus.UNAUTHORIZED);
   }
 }
