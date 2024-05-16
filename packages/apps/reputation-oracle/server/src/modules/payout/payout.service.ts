@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 
@@ -19,6 +19,7 @@ import {
 } from '../../common/dto/result';
 import { RequestAction } from './payout.interface';
 import { getRequestType } from '../../common/utils';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class PayoutService {
@@ -48,11 +49,10 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      this.logger.log(
+      throw new ControlledError(
         ErrorManifest.ManifestUrlDoesNotExist,
-        PayoutService.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
     }
 
     const manifest = await this.storageService.download(manifestUrl);
@@ -150,16 +150,18 @@ export class PayoutService {
         ErrorResults.NoIntermediateResultsFound,
         PayoutService.name,
       );
-      throw new Error(ErrorResults.NoIntermediateResultsFound);
+      throw new ControlledError(
+        ErrorResults.NoIntermediateResultsFound,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const validResults = intermediateResults.filter((result) => !result.error);
     if (validResults.length < manifest.submissionsRequired) {
-      this.logger.error(
+      throw new ControlledError(
         ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
-        PayoutService.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new Error(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
     }
 
     const { url, hash } = await this.storageService.uploadJobSolutions(
@@ -210,8 +212,10 @@ export class PayoutService {
 
     // If annotation meta does not exist
     if (annotations && Array.isArray(annotations) && annotations.length === 0) {
-      this.logger.log(ErrorResults.NoAnnotationsMetaFound, PayoutService.name);
-      throw new Error(ErrorResults.NoAnnotationsMetaFound);
+      throw new ControlledError(
+        ErrorResults.NoAnnotationsMetaFound,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     const bountyValue = ethers.parseUnits(manifest.job_bounty, 18);

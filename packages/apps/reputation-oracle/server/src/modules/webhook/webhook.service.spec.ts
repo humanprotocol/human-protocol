@@ -22,6 +22,7 @@ import { signMessage } from '../../common/utils/signature';
 import { HttpStatus } from '@nestjs/common';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -116,7 +117,12 @@ describe('WebhookService', () => {
 
       await expect(
         webhookService.createIncomingWebhook(invalidDto),
-      ).rejects.toThrow(ErrorWebhook.InvalidEventType);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorWebhook.InvalidEventType,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw NotFoundException if webhook entity not created', async () => {
@@ -132,7 +138,9 @@ describe('WebhookService', () => {
 
       await expect(
         webhookService.createIncomingWebhook(validDto),
-      ).rejects.toThrow(ErrorWebhook.NotCreated);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotCreated, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -210,7 +218,9 @@ describe('WebhookService', () => {
       });
       await expect(
         webhookService.sendWebhook(MOCK_WEBHOOK_URL, webhookBody),
-      ).rejects.toThrow(ErrorWebhook.NotSent);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotSent, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 });

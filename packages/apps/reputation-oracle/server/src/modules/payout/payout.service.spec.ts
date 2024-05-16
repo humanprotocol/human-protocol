@@ -22,6 +22,8 @@ import { createMock } from '@golevelup/ts-jest';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ErrorResults } from '../../common/constants/errors';
 import { CvatAnnotationMeta } from '../../common/dto/result';
+import { HttpStatus } from '@nestjs/common';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -226,7 +228,12 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.processFortune(manifest, chainId, escrowAddress),
-      ).rejects.toThrow(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 

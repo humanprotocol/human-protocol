@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
@@ -11,11 +11,10 @@ import { SynapsConfigService } from '../../common/config/synaps-config.service';
 import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { KycEntity } from './kyc.entity';
-import { KycError } from './kyc.error';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class KycService {
-  private readonly logger = new Logger(KycService.name);
   private readonly synapsBaseURL: string;
 
   constructor(
@@ -29,16 +28,23 @@ export class KycService {
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
       if (userEntity.kyc.status === KycStatus.APPROVED) {
-        throw new KycError(ErrorKyc.AlreadyApproved);
+        throw new ControlledError(
+          ErrorKyc.AlreadyApproved,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       if (userEntity.kyc.status === KycStatus.PENDING_VERIFICATION) {
-        throw new KycError(ErrorKyc.VerificationInProgress);
+        throw new ControlledError(
+          ErrorKyc.VerificationInProgress,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       if (userEntity.kyc.status === KycStatus.REJECTED) {
-        throw new KycError(
+        throw new ControlledError(
           `${ErrorKyc.Rejected}. Reason: ${userEntity.kyc.message}`,
+          HttpStatus.BAD_REQUEST,
         );
       }
 
@@ -77,7 +83,10 @@ export class KycService {
     );
 
     if (!data?.session_id) {
-      throw new KycError(ErrorKyc.InvalidSynapsAPIResponse);
+      throw new ControlledError(
+        ErrorKyc.InvalidSynapsAPIResponse,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     const kycEntity = new KycEntity();
@@ -97,7 +106,10 @@ export class KycService {
     data: KycStatusDto,
   ): Promise<void> {
     if (secret !== this.synapsConfigService.webhookSecret) {
-      throw new UnauthorizedException(ErrorKyc.InvalidWebhookSecret);
+      throw new ControlledError(
+        ErrorKyc.InvalidWebhookSecret,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const { data: sessionData } = await firstValueFrom(
@@ -113,14 +125,17 @@ export class KycService {
       !sessionData?.session?.status ||
       sessionData.session.status !== data.state
     ) {
-      throw new KycError(ErrorKyc.InvalidSynapsAPIResponse);
+      throw new ControlledError(
+        ErrorKyc.InvalidSynapsAPIResponse,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     const kycEntity = await this.kycRepository.findOneBySessionId(
       data.sessionId,
     );
     if (!kycEntity) {
-      throw new KycError(ErrorKyc.NotFound);
+      throw new ControlledError(ErrorKyc.NotFound, HttpStatus.BAD_REQUEST);
     }
     kycEntity.status = data.state;
     kycEntity.message = data.reason;

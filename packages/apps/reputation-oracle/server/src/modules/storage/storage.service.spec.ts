@@ -17,6 +17,8 @@ import crypto from 'crypto';
 import { Web3Service } from '../web3/web3.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -206,7 +208,9 @@ describe('StorageService', () => {
         storageService.uploadJobSolutions(escrowAddress, chainId, [
           jobSolution,
         ]),
-      ).rejects.toThrow('Bucket not found');
+      ).rejects.toThrow(
+        new ControlledError('Bucket not found', HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should fail if the file cannot be uploaded', async () => {
@@ -231,7 +235,9 @@ describe('StorageService', () => {
         storageService.uploadJobSolutions(escrowAddress, chainId, [
           jobSolution,
         ]),
-      ).rejects.toThrow('File not uploaded');
+      ).rejects.toThrow(
+        new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -470,7 +476,9 @@ describe('StorageService', () => {
           chainId,
           MOCK_FILE_URL,
         ),
-      ).rejects.toThrow('File not uploaded');
+      ).rejects.toThrow(
+        new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
+      );
     });
   });
 });
