@@ -36,8 +36,10 @@ export const envValidator = Joi.object({
   HCAPTCHA_REPUTATION_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
-  // HCAPTCHA_SECRET: Joi.string().required(),
-  HCAPTCHA_EXCHANGE_URL: Joi.string().description('hcaptcha exchange url'),
+  HCAPTCHA_SECRET: Joi.string().required(),
+  HCAPTCHA_PROTECTION_URL: Joi.string().description(
+    'Endpoint for validating signin/signup hcaptcha tokens',
+  ),
   RPC_URL_SEPOLIA: Joi.string(),
   RPC_URL_POLYGON: Joi.string(),
   RPC_URL_POLYGON_AMOY: Joi.string(),
