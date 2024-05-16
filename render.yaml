@@ -18,7 +18,7 @@ services:
     sync: false
   - key: POSTGRES_URL
     fromDatabase:
-      name: job-launcher
+      name: job-launcher-db
       property: connectionString
   - key: POSTGRES_SSL
     value: false # for internal db connections
