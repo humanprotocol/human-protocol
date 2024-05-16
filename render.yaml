@@ -114,8 +114,6 @@ services:
     sync: false
   - key: VITE_APP_RPC_URL_POLYGON
     sync: false
-  - key: VITE_APP_RPC_URL_POLYGON
-    sync: false
   - key: VITE_APP_RPC_URL_POLYGON_AMOY
     sync: false
   - key: VITE_APP_RPC_URL_XLAYER_TESTNET
