@@ -7,8 +7,8 @@ import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Modal } from '@/components/ui/modal/modal';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-data';
-import { AvailableJobsTable } from '@/pages/worker/jobs/components/avaible-jobs/available-jobs-table';
-import { AvailableJobsTableMobile } from './components/avaible-jobs/available-jobs-table-mobile';
+import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/available-jobs-table';
+import { AvailableJobsTableMobile } from './components/available-jobs/available-jobs-table-mobile';
 import { MyJobsTableMobile } from './components/my-jobs/my-jobs-table-mobile';
 import { DrawerMobile } from './components/drawer-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
@@ -65,6 +65,7 @@ export function JobsPage() {
               boxShadow: 'none',
               padding: '40px',
               minHeight: '800px',
+              borderRadius: '20px',
             }}
           >
             <Stack>

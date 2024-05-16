@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Dispatch, SetStateAction } from 'react';
@@ -13,6 +14,10 @@ import { Alert } from '@/components/ui/alert';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import type { AvailableJobsSuccessResponse } from '@/api/servieces/worker/available-jobs-data';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
+import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
+import { wait } from '@/shared/helpers/wait';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -22,7 +27,34 @@ export function AvailableJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: AvailableJobsTableMobileProps) {
   const { filterParams } = useJobsFilterStore();
+  const { setTopNotification, closeNotification } =
+    useProtectedLayoutNotification();
+
+  const onJobAssignmentSuccess = async () => {
+    setTopNotification({
+      content: 'Successfully assigned a job!',
+      type: 'success',
+    });
+    await wait(5000);
+    closeNotification();
+  };
+
+  const onJobAssignmentError = async (error: unknown) => {
+    setTopNotification({
+      content: defaultErrorMessage(error),
+      type: 'warning',
+    });
+    await wait(5000);
+    closeNotification();
+  };
+
   const queryClient = useQueryClient();
+
+  const { mutate: assignJobMutation } = useAssignJobMutation({
+    onSuccess: onJobAssignmentSuccess,
+    onError: onJobAssignmentError,
+  });
+
   const availableJobsTableState = queryClient.getQueryState([
     'availableJobs',
     filterParams,
@@ -82,6 +114,8 @@ export function AvailableJobsTableMobile({
                   py: '32px',
                   backgroundColor: colorPalette.white,
                   marginBottom: '20px',
+                  borderRadius: '20px',
+                  boxShadow: 'unset',
                 }}
               >
                 <List>
@@ -106,6 +140,12 @@ export function AvailableJobsTableMobile({
                       <Button
                         color="secondary"
                         fullWidth
+                        onClick={() => {
+                          assignJobMutation({
+                            escrow_address: d.escrow_address,
+                            chain_id: d.chain_id,
+                          });
+                        }}
                         size="small"
                         sx={{
                           marginTop: '15px',
