@@ -50,6 +50,6 @@ export function useGetAvailableJobsData() {
 
   return useQuery({
     queryKey: ['availableJobs', filterParams],
-    queryFn: () => getAvailableJobsTableData({ ...filterParams }),
+    queryFn: () => getAvailableJobsTableData(filterParams),
   });
 }
