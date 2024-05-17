@@ -1,11 +1,12 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
@@ -27,7 +28,7 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
       }
 
       console.error(e);
-      throw new UnauthorizedException('Unauthorized');
+      throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
     });
   }
 }

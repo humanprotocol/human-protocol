@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
-import { CvatManifestDto, FortuneManifestDto } from 'src/common/dto/manifest';
-import { ProcessingResultDto } from 'src/common/dto/result';
+import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
+import { ProcessingResultDto } from '../../common/dto/result';
 
 export interface RequestAction {
   calculateResults: (

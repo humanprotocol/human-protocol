@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -10,11 +10,11 @@ import {
 } from '../../common/constants';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
-  public readonly logger = new Logger(Web3Service.name);
   public readonly signerAddress: string;
 
   constructor(
@@ -29,8 +29,10 @@ export class Web3Service {
     );
 
     if (!validNetworks.length) {
-      this.logger.log(ErrorWeb3.NoValidNetworks, Web3Service.name);
-      throw new BadRequestException(ErrorWeb3.NoValidNetworks);
+      throw new ControlledError(
+        ErrorWeb3.NoValidNetworks,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     for (const network of validNetworks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
@@ -47,8 +49,10 @@ export class Web3Service {
   public validateChainId(chainId: number): void {
     const validChainIds = this.getValidChains();
     if (!validChainIds.includes(chainId)) {
-      this.logger.log(ErrorWeb3.InvalidChainId, Web3Service.name);
-      throw new BadRequestException(ErrorWeb3.InvalidChainId);
+      throw new ControlledError(
+        ErrorWeb3.InvalidChainId,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -71,7 +75,7 @@ export class Web3Service {
     if (gasPrice) {
       return gasPrice * BigInt(multiplier);
     }
-    throw new Error(ErrorWeb3.GasPriceError);
+    throw new ControlledError(ErrorWeb3.GasPriceError, HttpStatus.CONFLICT);
   }
 
   public getOperatorAddress(): string {

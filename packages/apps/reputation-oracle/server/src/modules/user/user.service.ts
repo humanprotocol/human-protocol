@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   ErrorAuth,
@@ -18,12 +11,12 @@ import {
   UserStatus,
   UserType,
 } from '../../common/enums/user';
-import { getNonce, verifySignature } from '../../common/utils/signature';
+import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
+  SignatureBodyDto,
   UserCreateDto,
-  Web3UserCreateDto,
 } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
@@ -32,6 +25,7 @@ import { Wallet } from 'ethers';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class UserService {
@@ -79,15 +73,12 @@ export class UserService {
     return userEntity.save();
   }
 
-  public async createWeb3User(
-    dto: Web3UserCreateDto,
-    address: string,
-  ): Promise<UserEntity> {
+  public async createWeb3User(address: string): Promise<UserEntity> {
     await this.checkEvmAddress(address);
 
     const newUser = new UserEntity();
-    newUser.evmAddress = dto.evmAddress;
-    newUser.nonce = getNonce();
+    newUser.evmAddress = address;
+    newUser.nonce = generateNonce();
     newUser.type = UserType.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
 
@@ -100,7 +91,10 @@ export class UserService {
 
     if (userEntity) {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
-      throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
+      throw new ControlledError(
+        ErrorUser.AccountCannotBeRegistered,
+        HttpStatus.CONFLICT,
+      );
     }
   }
 
@@ -108,14 +102,14 @@ export class UserService {
     const userEntity = await this.userRepository.findOneByEvmAddress(address);
 
     if (!userEntity) {
-      throw new NotFoundException(ErrorUser.NotFound);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NOT_FOUND);
     }
 
     return userEntity;
   }
 
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.nonce = getNonce();
+    userEntity.nonce = generateNonce();
     return userEntity.save();
   }
 
@@ -124,11 +118,17 @@ export class UserService {
     data: RegisterAddressRequestDto,
   ): Promise<string> {
     if (user.evmAddress && user.evmAddress !== data.address) {
-      throw new BadRequestException(ErrorUser.IncorrectAddress);
+      throw new ControlledError(
+        ErrorUser.IncorrectAddress,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (user.kyc?.status !== KycStatus.APPROVED) {
-      throw new BadRequestException(ErrorUser.KycNotApproved);
+      throw new ControlledError(
+        ErrorUser.KycNotApproved,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     user.evmAddress = data.address;
@@ -143,14 +143,17 @@ export class UserService {
     user: UserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = this.web3Service.prepareSignatureBody(
+    const signedData = await this.prepareSignatureBody(
       SignatureType.DISABLE_OPERATOR,
       user.evmAddress,
     );
 
     const verified = verifySignature(signedData, signature, [user.evmAddress]);
     if (!verified) {
-      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+      throw new ControlledError(
+        ErrorAuth.InvalidSignature,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     let signer: Wallet;
@@ -168,9 +171,58 @@ export class UserService {
     const status = await kvstore.get(signer.address, user.evmAddress);
 
     if (status === OperatorStatus.INACTIVE) {
-      throw new BadRequestException(ErrorOperator.OperatorNotActive);
+      throw new ControlledError(
+        ErrorOperator.OperatorNotActive,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
+  }
+
+  public async prepareSignatureBody(
+    type: SignatureType,
+    address: string,
+    additionalData?: { reference?: string; workerAddress?: string },
+  ): Promise<SignatureBodyDto> {
+    let content: string;
+    let nonce: string | undefined;
+    switch (type) {
+      case SignatureType.SIGNUP:
+        content = 'signup';
+        break;
+      case SignatureType.SIGNIN:
+        content = 'signin';
+        nonce = (await this.userRepository.findOneByEvmAddress(address))?.nonce;
+        break;
+      case SignatureType.DISABLE_OPERATOR:
+        content = 'disable-operator';
+        break;
+      case SignatureType.CERTIFICATE_AUTHENTICATION:
+        if (
+          !additionalData ||
+          !additionalData.reference ||
+          !additionalData.workerAddress
+        ) {
+          throw new ControlledError(
+            'Missing necessary credential data',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        content = JSON.stringify({
+          reference: additionalData.reference,
+          workerJson: additionalData.workerAddress,
+        });
+        break;
+      default:
+        throw new ControlledError('Type not allowed', HttpStatus.BAD_REQUEST);
+    }
+
+    return {
+      from: address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: content,
+      nonce: nonce ?? undefined,
+    };
   }
 }

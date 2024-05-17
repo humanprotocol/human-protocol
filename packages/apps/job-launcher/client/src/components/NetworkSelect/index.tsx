@@ -11,10 +11,10 @@ import { FC } from 'react';
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { CHAIN_ICONS } from '../Icons/chains';
 
-interface NetworkSelectProps extends SelectProps {
+type NetworkSelectProps = SelectProps & {
   showAllNetwork?: boolean;
   label?: string;
-}
+};
 
 export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
   <FormControl variant="standard" sx={{ minWidth: 220 }}>

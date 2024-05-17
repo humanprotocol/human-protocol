@@ -6,7 +6,6 @@ import {
   IsPositive,
   IsString,
   IsUrl,
-  IsDate,
   IsDateString,
   IsOptional,
   IsObject,
@@ -25,6 +24,7 @@ import { ChainId } from '@human-protocol/sdk';
 import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
   JobStatus,
   WorkerBrowser,
@@ -32,47 +32,6 @@ import {
   WorkerLocation,
 } from '../../common/enums/job';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
-import { JobCurrency } from '../../common/enums/job';
-export class JobCreateDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  @IsNotEmpty()
-  public chainId: ChainId;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public userId: number;
-
-  @ApiProperty()
-  @IsUrl()
-  @IsNotEmpty()
-  public manifestUrl: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  public manifestHash: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fee: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
-
-  @ApiProperty({ enum: JobStatus })
-  @IsEnum(JobStatus)
-  @IsNotEmpty()
-  public status: JobStatus;
-
-  @ApiProperty()
-  @IsDate()
-  public waitUntil: Date;
-}
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -216,20 +175,6 @@ export class JobIdDto {
   @ApiProperty()
   @IsNumberString()
   public id: number;
-}
-
-export class JobUpdateDto {
-  @ApiPropertyOptional({ enum: JobStatus })
-  @IsEnum(JobStatus)
-  public status: JobStatus;
-}
-
-export class JobUpdateDataDto extends JobUpdateDto {
-  @IsNumber()
-  public retriesCount: number;
-
-  @IsDate()
-  public waitUntil: Date;
 }
 
 export class StakingDetails {
@@ -495,24 +440,6 @@ export class FortuneFinalResultDto {
   @IsOptional()
   @IsString()
   public error?: string;
-}
-
-export class CvatFinalResultDto {
-  @ApiProperty()
-  @IsString()
-  public url: string;
-
-  @ApiProperty()
-  @IsString()
-  public final_answer: string;
-
-  @ApiProperty()
-  @IsArray()
-  public correct: string[];
-
-  @ApiProperty()
-  @IsArray()
-  public wrong: string[];
 }
 
 export class JobListDto {

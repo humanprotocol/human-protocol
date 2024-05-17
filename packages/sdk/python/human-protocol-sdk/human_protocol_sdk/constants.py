@@ -21,6 +21,8 @@ class ChainId(Enum):
     SKALE = 1273227453
     CELO = 42220
     CELO_ALFAJORES = 44787
+    XLAYER_TESTNET = 195
+    XLAYER = 196
     LOCALHOST = 1338
 
 
@@ -242,6 +244,34 @@ NETWORKS = {
         "kvstore_address": "0xE1055607327b1be2080D31211dCDC4D9338CaF4A",
         "old_subgraph_url": "",
         "old_factory_address": "0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c",
+    },
+    ChainId.XLAYER: {
+        "title": "XLayer",
+        "scan_url": "https://www.oklink.com/xlayer",
+        "subgraph_url": (
+            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX"
+        ),
+        "hmt_address": "0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa",
+        "factory_address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",
+        "staking_address": "0x01D115E9E8bF0C58318793624CC662a030D07F1D",
+        "reward_pool_address": "0x7ABa5F75b2b530cB0c8927C86591c21dF44f06b6",
+        "kvstore_address": "0x6512d894cc3d3FE93Da9d0420430136fA889FaB9",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
+    ChainId.XLAYER_TESTNET: {
+        "title": "X Layer Testnet",
+        "scan_url": "https://www.oklink.com/oktc-test",
+        "subgraph_url": (
+            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93"
+        ),
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+        "factory_address": "0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e",
+        "staking_address": "0x187edb5651464427b312De2AD40F4C679cf6e02D",
+        "reward_pool_address": "0x6daccd1f3a68945f8a7ac6d20260953f7a97fae4",
+        "kvstore_address": "0xdE8BE9E3C12E9F546309A429cd88d026a25EaF8C",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
     },
     ChainId.LOCALHOST: {
         "title": "Localhost",

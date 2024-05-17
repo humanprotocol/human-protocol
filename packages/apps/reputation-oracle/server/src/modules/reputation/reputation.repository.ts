@@ -1,67 +1,38 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
-
+import { ChainId } from '@human-protocol/sdk';
+import { Injectable, Logger } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { BaseRepository } from '../../database/base.repository';
 import { ReputationEntity } from './reputation.entity';
-import {
-  FindOptionsWhere,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-} from 'typeorm';
-import { ErrorReputation } from '../../common/constants/errors';
-import { ReputationCreateDto, ReputationUpdateDto } from './reputation.dto';
 
 @Injectable()
-export class ReputationRepository {
+export class ReputationRepository extends BaseRepository<ReputationEntity> {
   private readonly logger = new Logger(ReputationRepository.name);
 
-  constructor(
-    @InjectRepository(ReputationEntity)
-    private readonly reputationEntityRepository: Repository<ReputationEntity>,
-    private readonly configService: ConfigService,
-  ) {}
-
-  public async updateOne(
-    where: FindOptionsWhere<ReputationEntity>,
-    dto: Partial<ReputationUpdateDto>,
-  ): Promise<ReputationEntity> {
-    const reputationEntity =
-      await this.reputationEntityRepository.findOneBy(where);
-
-    if (!reputationEntity) {
-      this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
-      throw new NotFoundException(ErrorReputation.NotFound);
-    }
-
-    Object.assign(reputationEntity, dto);
-    return reputationEntity.save();
+  constructor(private dataSource: DataSource) {
+    super(ReputationEntity, dataSource);
   }
 
-  public async findOne(
-    where: FindOptionsWhere<ReputationEntity>,
-    options?: FindOneOptions<ReputationEntity>,
-  ): Promise<ReputationEntity | null> {
-    return this.reputationEntityRepository.findOne({
-      where,
-      ...options,
+  public findOneByAddress(address: string): Promise<ReputationEntity | null> {
+    return this.findOne({
+      where: { address },
     });
   }
 
-  public find(
-    where: FindOptionsWhere<ReputationEntity>,
-    options?: FindManyOptions<ReputationEntity>,
-  ): Promise<ReputationEntity[]> {
-    return this.reputationEntityRepository.find({
-      where,
+  public findOneByAddressAndChainId(
+    address: string,
+    chainId: ChainId,
+  ): Promise<ReputationEntity | null> {
+    return this.findOne({
+      where: { address, chainId },
+    });
+  }
+
+  public findByChainId(chainId?: ChainId): Promise<ReputationEntity[]> {
+    return this.find({
+      where: chainId && { chainId },
       order: {
         createdAt: 'DESC',
       },
-      ...options,
     });
-  }
-
-  public async create(dto: ReputationCreateDto): Promise<ReputationEntity> {
-    return this.reputationEntityRepository.create(dto).save();
   }
 }

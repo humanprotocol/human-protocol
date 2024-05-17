@@ -8,8 +8,10 @@ import { EthereumIcon } from './EthereumIcon';
 import { HumanIcon } from './HumanIcon';
 import { MoonbaseAlphaIcon } from './MoonbaseAlphaIcon';
 import { MoonbeamIcon } from './MoonbeamIcon';
+import { OkxIcon } from './OkxIcon';
 import { PolygonIcon } from './PolygonIcon';
 import { SkaleHumanProtocolIcon } from './SkaleHumanProtocolIcon';
+import { XLayerIcon } from './XLayerIcon';
 
 export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.ALL]: <HumanIcon />,
@@ -29,4 +31,6 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
   [ChainId.CELO]: <CeloIcon />,
   [ChainId.CELO_ALFAJORES]: <CeloIcon />,
+  [ChainId.XLAYER_TESTNET]: <OkxIcon />,
+  [ChainId.XLAYER]: <XLayerIcon />,
 };

@@ -4,19 +4,17 @@ import { Mapper } from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerDto,
-} from '../interfaces/worker-registration.interface';
+} from '../model/worker-registration.model';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserType } from '../../../common/enums/user';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { WorkerProfile } from '../worker.mapper';
 import { workerServiceMock } from './worker.service.mock';
-import { SigninWorkerDto } from '../interfaces/worker-signin.interface';
+import { SigninWorkerDto } from '../model/worker-signin.model';
 
 describe('WorkerController', () => {
   let controller: WorkerController;
   let workerService: WorkerService;
-  let mapper: Mapper;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,12 +43,13 @@ describe('WorkerController', () => {
       const dto: SignupWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',
+        h_captcha_token: 'hcaptchatonsdkfa',
       };
       await controller.signupWorker(dto);
       const expectedCommand = {
         email: dto.email,
         password: dto.password,
-        type: UserType.WORKER,
+        hCaptchaToken: dto.h_captcha_token,
       } as SignupWorkerCommand;
       expect(workerService.signupWorker).toHaveBeenCalledWith(expectedCommand);
     });
@@ -61,11 +60,13 @@ describe('WorkerController', () => {
       const dto: SigninWorkerDto = {
         email: 'email@example.com',
         password: 'Pa55word!',
+        h_captcha_token: 'hcaptchatonsdkfa',
       };
       await controller.signinWorker(dto);
       const expectedCommand = {
         email: dto.email,
         password: dto.password,
+        hCaptchaToken: dto.h_captcha_token,
       };
       expect(workerService.signinWorker).toHaveBeenCalledWith(expectedCommand);
     });

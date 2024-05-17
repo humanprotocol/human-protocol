@@ -7,6 +7,7 @@ import {
   Request,
   UseGuards,
   Headers,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -27,6 +28,7 @@ import {
 import { PaymentService } from './payment.service';
 import { getRate } from '../../common/utils';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { ControlledError } from 'src/common/errors/controlled';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -156,7 +158,11 @@ export class PaymentController {
     try {
       return getRate(data.from, data.to);
     } catch (e) {
-      throw new Error(e);
+      throw new ControlledError(
+        'Error getting rates',
+        HttpStatus.CONFLICT,
+        e.stack,
+      );
     }
   }
 }

@@ -8,11 +8,7 @@ import {
   DAOSpokeContract,
   WormholeMock,
 } from '../typechain-types';
-import {
-  IWormholeVM,
-  IWormholeSignature,
-  SignatureComponents,
-} from './GovernanceTypes';
+import { IWormholeVM, IWormholeSignature } from './GovernanceTypes';
 
 let owner: Signer;
 
@@ -261,11 +257,13 @@ export async function signProposalWithReasonAndParams(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
+  voter: string,
+  nonce: number,
   reason: string,
   params: string,
   signer: Signer
-): Promise<SignatureComponents> {
-  const signature = await signer.signTypedData(
+): Promise<string> {
+  return await signer.signTypedData(
     {
       name: 'MetaHumanGovernor',
       version: '1',
@@ -281,6 +279,14 @@ export async function signProposalWithReasonAndParams(
         {
           name: 'support',
           type: 'uint8',
+        },
+        {
+          name: 'voter',
+          type: 'address',
+        },
+        {
+          name: 'nonce',
+          type: 'uint256',
         },
         {
           name: 'reason',
@@ -295,26 +301,23 @@ export async function signProposalWithReasonAndParams(
     {
       proposalId,
       support,
+      voter,
+      nonce,
       reason,
       params,
     }
   );
-
-  // Extract the signature components
-  const r = signature.slice(0, 66);
-  const s = '0x' + signature.slice(66, 130);
-  const v = parseInt(signature.slice(130, 132), 16);
-
-  return { v, r, s };
 }
 
 export async function signProposal(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
+  voter: string,
+  nonce: number,
   signer: Signer
-): Promise<SignatureComponents> {
-  const signature = await signer.signTypedData(
+): Promise<string> {
+  return await signer.signTypedData(
     {
       name: 'MetaHumanGovernor',
       version: '1',
@@ -331,20 +334,23 @@ export async function signProposal(
           name: 'support',
           type: 'uint8',
         },
+        {
+          name: 'voter',
+          type: 'address',
+        },
+        {
+          name: 'nonce',
+          type: 'uint256',
+        },
       ],
     },
     {
       proposalId,
       support,
+      voter,
+      nonce,
     }
   );
-
-  // Extract the signature components
-  const r = signature.slice(0, 66);
-  const s = '0x' + signature.slice(66, 130);
-  const v = parseInt(signature.slice(130, 132), 16);
-
-  return { v, r, s };
 }
 
 export async function updateVotingDelay(

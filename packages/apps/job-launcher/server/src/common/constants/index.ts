@@ -16,6 +16,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
+  ChainId.XLAYER_TESTNET,
 ];
 export const MAINNET_CHAIN_IDS = [
   ChainId.BSC_MAINNET,
