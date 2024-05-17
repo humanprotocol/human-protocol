@@ -127,12 +127,16 @@ def get_projects_by_status(
     status: ProjectStatuses,
     *,
     included_types: Optional[Sequence[TaskTypes]] = None,
+    task_status: Optional[TaskStatuses] = None,
     limit: int = 5,
     for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
     projects = _maybe_for_update(session.query(Project), enable=for_update).where(
         Project.status == status.value
     )
+
+    if task_status:
+        projects = projects.where(Project.tasks.any(Task.status == task_status.value))
 
     if included_types is not None:
         projects = projects.where(Project.job_type.in_([t.value for t in included_types]))
@@ -341,13 +345,28 @@ def get_tasks_by_cvat_id(
 
 
 def get_tasks_by_status(
-    session: Session, status: TaskStatuses, *, for_update: Union[bool, ForUpdateParams] = False
+    session: Session,
+    status: TaskStatuses,
+    *,
+    job_status: Optional[JobStatuses] = None,
+    project_status: Optional[ProjectStatuses] = None,
+    for_update: Union[bool, ForUpdateParams] = False,
+    limit: Optional[int] = 20,
 ) -> List[Task]:
-    return (
-        _maybe_for_update(session.query(Task), enable=for_update)
-        .where(Task.status == status.value)
-        .all()
+    query = _maybe_for_update(session.query(Task), enable=for_update).where(
+        Task.status == status.value
     )
+
+    if job_status:
+        query = query.where(Task.jobs.any(Job.status == job_status.value))
+
+    if project_status:
+        query = query.where(Task.project.has(Project.status == project_status.value))
+
+    if limit:
+        query = query.limit(limit)
+
+    return query.all()
 
 
 def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:

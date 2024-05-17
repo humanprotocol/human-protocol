@@ -68,8 +68,9 @@ class CronConfig:
     track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
     track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 30))
-    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+    track_completed_tasks_chunk_size = os.environ.get("TRACK_COMPLETED_TASKS_CHUNK_SIZE", 20)
     track_creating_tasks_int = int(os.environ.get("TRACK_CREATING_TASKS_INT", 300))
+    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
     track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
