@@ -5,24 +5,19 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 import { t } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import type {
-  AvailableJob,
-  AvailableJobsSuccessResponse,
-} from '@/api/servieces/worker/available-jobs-data';
+import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
 import type { AssignJobBody } from '@/api/servieces/worker/assign-job';
 import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
-import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
-import { wait } from '@/shared/helpers/wait';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { Button } from '@/components/ui/button';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
+import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
+import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -110,42 +105,17 @@ const getColumns = (callbacks: {
 
 export function AvailableJobsTable() {
   const { setFilterParams, filterParams } = useJobsFilterStore();
-  const { setTopNotification, closeNotification } =
-    useProtectedLayoutNotification();
+  const { onJobAssignmentError, onJobAssignmentSuccess } =
+    useJobsNotifications();
 
-  const onJobAssignmentSuccess = async () => {
-    setTopNotification({
-      content: 'Successfully assigned a job!',
-      type: 'success',
-    });
-    await wait(5000);
-    closeNotification();
-  };
-
-  const onJobAssignmentError = async (error: unknown) => {
-    setTopNotification({
-      content: defaultErrorMessage(error),
-      type: 'warning',
-    });
-    await wait(5000);
-    closeNotification();
-  };
-
-  const queryClient = useQueryClient();
   const { mutate: assignJobMutation, isPending: isAssignJobMutationPending } =
     useAssignJobMutation({
       onSuccess: onJobAssignmentSuccess,
       onError: onJobAssignmentError,
     });
 
-  const availableJobsTableState = queryClient.getQueryState([
-    'availableJobs',
-    filterParams,
-  ]);
-  const queryData = queryClient.getQueryData<AvailableJobsSuccessResponse>([
-    'availableJobs',
-    filterParams,
-  ]);
+  const { availableJobsTableState, availableJobsTableQueryData } =
+    useAvailableJobsTableState();
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -161,18 +131,13 @@ export function AvailableJobsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
   }, [paginationState]);
 
-  const memoizedData = useMemo(() => {
-    if (!queryData?.results) return [];
-    return queryData.results;
-  }, [queryData?.results]);
-
   const table = useMaterialReactTable({
     columns: getColumns({
       assignJob: (data) => {
         assignJobMutation(data);
       },
     }),
-    data: memoizedData,
+    data: availableJobsTableQueryData,
     state: {
       isLoading: availableJobsTableState?.status === 'pending',
       showAlertBanner: Boolean(availableJobsTableState?.status === 'error'),

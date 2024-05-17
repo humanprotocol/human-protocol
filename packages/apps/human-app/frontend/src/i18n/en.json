@@ -189,6 +189,7 @@
       }
     },
     "jobs": {
+      "successFullyAssignedJob": "Successfully assigned a job!",
       "errorFetchingData": "There was an error while fetching data, please try again",
       "availableJobs": "Available Jobs",
       "myJobs": "My Jobs",
