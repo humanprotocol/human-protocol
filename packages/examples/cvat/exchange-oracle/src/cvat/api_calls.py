@@ -559,7 +559,7 @@ def update_job_assignee(id: str, assignee_id: Optional[int]):
             raise
 
 
-def restart_job(id: str):
+def restart_job(id: str, *, assignee_id: Optional[int] = None):
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -567,7 +567,7 @@ def restart_job(id: str):
             api_client.jobs_api.partial_update(
                 id=id,
                 patched_job_write_request=models.PatchedJobWriteRequest(
-                    stage="annotation", state="new"
+                    stage="annotation", state="new", assignee_id=assignee_id
                 ),
             )
         except exceptions.ApiException as e:
