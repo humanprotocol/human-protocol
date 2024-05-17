@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
 import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
@@ -18,6 +13,7 @@ import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { WebhookDto } from '../webhook/webhook.dto';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class CronJobService {
@@ -73,14 +69,13 @@ export class CronJobService {
    * Throws an error if the cron job entity is already marked as completed.
    * @param cronJobEntity The cron job entity to mark as completed.
    * @returns {Promise<CronJobEntity>} A Promise containing the updated cron job entity.
-   * @throws {BadRequestException} if the cron job is already completed.
+   * @throws {ControlledError} if the cron job is already completed.
    */
   public async completeCronJob(
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.Completed);
+      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
     }
 
     cronJobEntity.completedAt = new Date();
@@ -193,8 +188,10 @@ export class CronJobService {
           };
           for (const webhookUrl of webhookUrls) {
             if (!webhookUrl) {
-              this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
-              throw new NotFoundException(ErrorWebhook.UrlNotFound);
+              throw new ControlledError(
+                ErrorWebhook.UrlNotFound,
+                HttpStatus.NOT_FOUND,
+              );
             }
 
             await this.webhookService.sendWebhook(webhookUrl, webhookBody);

@@ -22,7 +22,7 @@ export const envValidator = Joi.object({
   HCAPTCHA_EXCHANGE_URL: Joi.string()
     .required()
     .description('hcaptcha exchange url'),
-  HCAPTHCHA_API_KEY: Joi.string()
+  HCAPTCHA_API_KEY: Joi.string()
     .required()
     .description('Account api key at hcaptcha foundation'),
   // Database

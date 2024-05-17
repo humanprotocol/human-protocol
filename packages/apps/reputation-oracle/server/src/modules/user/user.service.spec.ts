@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, ConflictException } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
@@ -31,6 +30,13 @@ import { ErrorUser } from '../../common/constants/errors';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { HttpService } from '@nestjs/axios';
+import { ControlledError } from '../../common/errors/controlled';
+import {
+  ErrorOperator,
+  ErrorSignature,
+  ErrorUser,
+} from '../../common/constants/errors';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -396,7 +402,9 @@ describe('UserService', () => {
           chainId: ChainId.POLYGON_AMOY,
           address,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it("should fail if user's kyc is not approved", async () => {
@@ -416,7 +424,9 @@ describe('UserService', () => {
           chainId: ChainId.POLYGON_AMOY,
           address,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -484,7 +494,12 @@ describe('UserService', () => {
 
       await expect(
         userService.disableOperator(userEntity as any, invalidSignature),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
     it('should throw BadRequestException if operator already disabled in KVStore', async () => {
       const kvstoreClientMock = {
@@ -498,7 +513,12 @@ describe('UserService', () => {
 
       await expect(
         userService.disableOperator(userEntity as any, signature),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorOperator.OperatorNotActive,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 

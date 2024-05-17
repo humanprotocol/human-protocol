@@ -2,12 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Request,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -35,6 +35,7 @@ import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -128,6 +129,7 @@ export class JobController {
     status: 409,
     description: 'Conflict. Conflict with the current state of the server.',
   })
+  @ApiKey()
   @Post('/cvat')
   public async createCvatJob(
     @Request() req: RequestWithUser,
@@ -163,7 +165,10 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
   ): Promise<number> {
-    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    throw new ControlledError(
+      'Hcaptcha jobs disabled temporally',
+      HttpStatus.UNAUTHORIZED,
+    );
     return this.jobService.createJob(
       req.user.id,
       JobRequestType.HCAPTCHA,

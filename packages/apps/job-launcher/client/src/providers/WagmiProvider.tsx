@@ -22,6 +22,8 @@ export const wagmiConfig = createConfig({
     wagmiChains.avalancheFuji,
     wagmiChains.avalanche,
     wagmiChains.skaleHumanProtocol,
+    wagmiChains.xLayer,
+    wagmiChains.xLayerTestnet,
     LOCALHOST,
   ],
   connectors: [
@@ -45,6 +47,8 @@ export const wagmiConfig = createConfig({
     [wagmiChains.avalanche.id]: http(RPC_URLS[ChainId.AVALANCHE]),
     [wagmiChains.avalancheFuji.id]: http(RPC_URLS[ChainId.AVALANCHE_TESTNET]),
     [wagmiChains.skaleHumanProtocol.id]: http(RPC_URLS[ChainId.SKALE]),
+    [wagmiChains.xLayer.id]: http(RPC_URLS[ChainId.XLAYER]),
+    [wagmiChains.xLayerTestnet.id]: http(RPC_URLS[ChainId.XLAYER_TESTNET]),
     [LOCALHOST.id]: http(RPC_URLS[ChainId.LOCALHOST]),
   },
 });

@@ -57,7 +57,7 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
     const userEntity = await this.userService.getByCredentials(
       data.email,
@@ -86,7 +86,7 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
     const userEntity = await this.userService.create(data);
 
@@ -227,7 +227,7 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
@@ -319,7 +319,7 @@ export class AuthService {
     });
   }
 
-  async createOrUpdateAPIKey(userId: number): Promise<string> {
+  async createOrUpdateAPIKey(user: UserEntity): Promise<string> {
     const salt = crypto.randomBytes(16).toString('hex');
     const apiKey = crypto.randomBytes(32).toString('hex');
     const hashedAPIKey = await generateHash(
@@ -329,11 +329,19 @@ export class AuthService {
       this.authConfigService.apiKeyLength,
     );
 
-    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(user.id);
     if (!apiKeyEntity) {
       apiKeyEntity = new ApiKeyEntity();
-      apiKeyEntity.user.id = userId;
+      apiKeyEntity.user = user;
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
       await this.apiKeyRepository.createUnique(apiKeyEntity);
+    } else {
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
+      this.apiKeyRepository.updateOne(apiKeyEntity);
     }
 
     apiKeyEntity.hashedAPIKey = hashedAPIKey;
