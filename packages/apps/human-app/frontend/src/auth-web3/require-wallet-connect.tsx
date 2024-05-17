@@ -7,7 +7,7 @@ import { routerPaths } from '@/router/router-paths';
 export const AuthWeb3Context =
   createContext<WalletConnectContextConnectedAccount | null>(null);
 
-export function RequireWeb3Auth({ children }: { children: JSX.Element }) {
+export function RequireWalletConnect({ children }: { children: JSX.Element }) {
   const walletConnect = useWalletConnect();
   const location = useLocation();
 

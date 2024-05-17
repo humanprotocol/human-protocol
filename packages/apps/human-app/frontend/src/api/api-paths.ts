@@ -38,4 +38,17 @@ export const apiPaths = {
       path: '/assignment/job',
     },
   },
+  operator: {
+    web3Auth: {
+      prepareSignature: {
+        path: '/prepare-signature',
+      },
+      signUp: {
+        path: '/auth/web3/signup',
+      },
+      signIn: {
+        path: '/auth/web3/signin',
+      },
+    },
+  },
 } as const;
