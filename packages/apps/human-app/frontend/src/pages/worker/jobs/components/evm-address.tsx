@@ -4,7 +4,7 @@ import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import { breakpoints } from '@/styles/theme';
 import { colorPalette } from '@/styles/color-palette';
 
-export function EscrowAddress({ address }: { address: string }) {
+export function EvmAddress({ address }: { address: string }) {
   return (
     <Tooltip title={address}>
       <Typography

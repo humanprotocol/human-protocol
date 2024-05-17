@@ -31,6 +31,9 @@ export const apiPaths = {
     jobs: {
       path: '/jobs',
     },
+    myJobs: {
+      path: '/assignment/job',
+    },
     assignJob: {
       path: '/assignment/job',
     },

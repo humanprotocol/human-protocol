@@ -1,37 +1,38 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Dispatch, SetStateAction } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
-import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Chip } from '@/components/ui/chip';
 import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
+import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
+import type { MyJobsWithJobTypes } from '@/api/servieces/worker/my-jobs-data';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
 interface MyJobsTableMobileProps {
-  data?: MyJobs;
-  isLoading: boolean;
-  isError: boolean;
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function MyJobsTableMobile({
-  data,
-  isLoading,
-  isError,
   setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
   const { t } = useTranslation();
-  const { setSearchEscrowAddress } = useJobsFilterStore();
+  const { setSearchEscrowAddress, filterParams } = useMyJobsFilterStore();
+  const queryClient = useQueryClient();
+  const myJobsTableState = queryClient.getQueryState(['myJobs', filterParams]);
+  const queryData = queryClient.getQueryData<MyJobsWithJobTypes>([
+    'myJobs',
+    filterParams,
+  ]);
 
   return (
     <>
@@ -58,18 +59,18 @@ export function MyJobsTableMobile({
         <FiltersButtonIcon />
       </Button>
       <Stack flexDirection="column">
-        {isError ? (
+        {myJobsTableState?.status === 'error' ? (
           <Alert color="error" severity="error">
             {t('worker.jobs.errorFetchingData')}
           </Alert>
         ) : null}
-        {isLoading && !isError ? (
+        {myJobsTableState?.status === 'pending' && !myJobsTableState.error ? (
           <Stack alignItems="center" justifyContent="center">
             <Loader size={90} />
           </Stack>
         ) : null}
-        {!isLoading && !isError && data
-          ? data.results.map((d) => (
+        {myJobsTableState?.status === 'success' && queryData?.jobs.results
+          ? queryData.jobs.results.map((d) => (
               <Paper
                 key={crypto.randomUUID()}
                 sx={{

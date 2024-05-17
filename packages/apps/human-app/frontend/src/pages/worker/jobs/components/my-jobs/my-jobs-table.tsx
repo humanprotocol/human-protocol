@@ -6,53 +6,53 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
-import { formatDate } from '@/shared/helpers/format-date';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
-import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
-import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
-import { Chip } from '@/components/ui/chip';
-import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
-import type { JobsArray } from '@/api/servieces/worker/available-jobs-table-service-mock';
+import type {
+  MyJob,
+  MyJobsWithJobTypes,
+} from '@/api/servieces/worker/my-jobs-data';
+import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
+import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
+import { Chip } from '@/components/ui/chip';
+import { formatDate } from '@/shared/helpers/format-date';
+import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
+import { MyJobsButton } from '@/pages/worker/jobs/components/my-jobs/my-jobs-button';
+import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-network-filter';
+import { MyJobsJobTypeFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-job-type-filter';
+import { MyJobsRewardAmountSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-reward-amount-sort';
+import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-status-filter';
+import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-expires-at-sort';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
-import { MyJobsButton } from './my-jobs-button';
 
-const columns: MRT_ColumnDef<JobsArray>[] = [
+const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
   {
-    accessorKey: 'escrowAddress',
+    accessorKey: 'escrow_address',
     header: t('worker.jobs.escrowAddress'),
     size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      return <EvmAddress address={props.row.original.escrow_address} />;
+    },
   },
   {
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
+    Cell: (props) => {
+      return getNetworkName(props.row.original.chain_id);
+    },
     muiTableHeadCellProps: () => ({
-      component: (props) => (
-        <TableHeaderCell
-          itemRef={props.itemRef}
-          {...props}
-          popoverContent={
-            <Filtering
-              filteringOptions={[
-                {
-                  value: t('worker.jobs.mobileFilterDrawer.network.matic'),
-                  text: t('worker.jobs.mobileFilterDrawer.network.matic'),
-                },
-                {
-                  value: t('worker.jobs.mobileFilterDrawer.network.polygon'),
-                  text: t('worker.jobs.mobileFilterDrawer.network.polygon'),
-                },
-              ]}
-              label={t('worker.jobs.filter')}
-            />
-          }
-        />
-      ),
+      component: (props) => {
+        return (
+          <TableHeaderCell
+            {...props}
+            popoverContent={<MyJobsNetworkFilter />}
+          />
+        );
+      },
     }),
   },
   {
@@ -60,73 +60,109 @@ const columns: MRT_ColumnDef<JobsArray>[] = [
     header: t('worker.jobs.rewardAmount'),
     size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      const { reward_amount, reward_token } = props.row.original;
+      return (
+        <RewardAmount
+          reward_amount={reward_amount}
+          reward_token={reward_token}
+        />
+      );
+    },
     muiTableHeadCellProps: () => ({
       component: (props) => (
         <TableHeaderCell
           {...props}
-          popoverContent={
-            <Sorting
-              columnId="rewardAmount"
-              label="Sort"
-              sortingOption={[
-                {
-                  sort: 'ASC',
-                  text: t('worker.jobs.sortDirection.fromHighest'),
-                },
-                {
-                  sort: 'DESC',
-                  text: t('worker.jobs.sortDirection.fromLowest'),
-                },
-              ]}
-            />
-          }
+          popoverContent={<MyJobsRewardAmountSort />}
         />
       ),
     }),
   },
   {
-    accessorKey: 'jobTypeChips',
+    accessorKey: 'job_type',
     header: t('worker.jobs.jobType'),
-    size: 200,
+    size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      return <Chip label={props.row.original.job_type} />;
+    },
+    muiTableHeadCellProps: () => ({
+      component: (props) => {
+        return (
+          <TableHeaderCell
+            {...props}
+            popoverContent={<MyJobsJobTypeFilter jobTypes={jobTypes} />}
+          />
+        );
+      },
+    }),
   },
   {
     accessorKey: 'expires_at',
     header: t('worker.jobs.expiresAt'),
     size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      return formatDate(props.row.original.expires_at);
+    },
+    muiTableHeadCellProps: () => ({
+      component: (props) => {
+        return (
+          <TableHeaderCell
+            {...props}
+            popoverContent={<MyJobsExpiresAtSort />}
+          />
+        );
+      },
+    }),
   },
   {
-    accessorKey: 'statusChip',
+    accessorKey: 'status',
     header: t('worker.jobs.status'),
     size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      const status = props.row.original.status;
+      return (
+        <Chip
+          backgroundColor={parseJobStatusChipColor(status)}
+          label={status}
+        />
+      );
+    },
+    muiTableHeadCellProps: () => ({
+      component: (props) => {
+        return (
+          <TableHeaderCell {...props} popoverContent={<MyJobsStatusFilter />} />
+        );
+      },
+    }),
   },
   {
-    accessorKey: 'buttonColumn',
+    accessorKey: 'assignment_id',
     header: '',
     size: 100,
     enableSorting: true,
+    Cell: (props) => {
+      const { status } = props.row.original;
+      return <MyJobsButton status={status} />;
+    },
   },
 ];
-interface MyJobsTableProps {
-  data?: MyJobs;
-  isLoading: boolean;
-  isError: boolean;
-  isRefetching: boolean;
-}
 
-export function MyJobsTable({
-  data,
-  isLoading,
-  isError,
-  isRefetching,
-}: MyJobsTableProps) {
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+export function MyJobsTable() {
+  const { setFilterParams, filterParams } = useMyJobsFilterStore();
+  const queryClient = useQueryClient();
+
+  const myJobsTableState = queryClient.getQueryState(['myJobs', filterParams]);
+  const queryData = queryClient.getQueryData<MyJobsWithJobTypes>([
+    'myJobs',
+    filterParams,
+  ]);
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 5,
   });
 
   useEffect(() => {
@@ -139,32 +175,17 @@ export function MyJobsTable({
   }, [paginationState]);
 
   const memoizedData = useMemo(() => {
-    if (!data) return [];
-
-    return data.results.map((job) => ({
-      ...job,
-      expires_at: formatDate(job.expires_at),
-      jobTypeChips: <Chip label={job.job_type} />,
-      network: getNetworkName(job.chain_id),
-      statusChip: (
-        <Chip
-          backgroundColor={parseJobStatusChipColor(job.status)}
-          key={job.status}
-          label={job.status}
-        />
-      ),
-      escrowAddress: shortenEscrowAddress(job.escrow_address),
-      buttonColumn: <MyJobsButton status={job.status} />,
-    }));
-  }, [data]);
+    if (!queryData?.jobs.results) return [];
+    return queryData.jobs.results;
+  }, [queryData?.jobs.results]);
 
   const table = useMaterialReactTable({
-    columns,
+    columns: getColumnsDefinition(queryData?.jobTypes || []),
     data: memoizedData,
     state: {
-      isLoading,
-      showAlertBanner: isError,
-      showProgressBars: isRefetching,
+      isLoading: myJobsTableState?.status === 'pending',
+      showAlertBanner: Boolean(myJobsTableState?.status === 'error'),
+      showProgressBars: myJobsTableState?.fetchStatus === 'fetching',
       pagination: paginationState,
     },
     manualPagination: true,

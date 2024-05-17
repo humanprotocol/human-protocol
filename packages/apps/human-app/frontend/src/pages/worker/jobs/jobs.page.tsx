@@ -8,11 +8,11 @@ import { Modal } from '@/components/ui/modal/modal';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-data';
 import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/available-jobs-table';
+import { useGetMyJobsData } from '@/api/servieces/worker/my-jobs-data';
+import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/my-jobs-table-mobile';
 import { AvailableJobsTableMobile } from './components/available-jobs/available-jobs-table-mobile';
-import { MyJobsTableMobile } from './components/my-jobs/my-jobs-table-mobile';
 import { DrawerMobile } from './components/drawer-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
-import { MyJobsDataProvider } from './components/my-jobs/my-jobs-data-provider';
 import { MyJobsTable } from './components/my-jobs/my-jobs-table';
 
 function generateTabA11yProps(index: number) {
@@ -24,6 +24,7 @@ function generateTabA11yProps(index: number) {
 
 export function JobsPage() {
   useGetAvailableJobsData();
+  useGetMyJobsData();
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
@@ -103,30 +104,16 @@ export function JobsPage() {
                     {!isMobile ? <AvailableJobsTable /> : null}
                   </TabPanel>
                   <TabPanel activeTab={activeTab} index={1}>
-                    <MyJobsDataProvider>
-                      {({ data, isLoading, isError, isRefetching }) => (
-                        <>
-                          {isMobile ? (
-                            <MyJobsTableMobile
-                              data={data}
-                              isError={isError}
-                              isLoading={isLoading}
-                              setIsMobileFilterDrawerOpen={
-                                setIsMobileFilterDrawerOpen
-                              }
-                            />
-                          ) : null}
-                          {!isMobile ? (
-                            <MyJobsTable
-                              data={data}
-                              isError={isError}
-                              isLoading={isLoading}
-                              isRefetching={isRefetching}
-                            />
-                          ) : null}
-                        </>
-                      )}
-                    </MyJobsDataProvider>
+                    <>
+                      {isMobile ? (
+                        <MyJobsTableMobile
+                          setIsMobileFilterDrawerOpen={
+                            setIsMobileFilterDrawerOpen
+                          }
+                        />
+                      ) : null}
+                      {!isMobile ? <MyJobsTable /> : null}
+                    </>
                   </TabPanel>
                 </Box>
               </TableQueryContextProvider>

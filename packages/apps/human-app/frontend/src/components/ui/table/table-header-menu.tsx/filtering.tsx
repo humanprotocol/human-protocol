@@ -3,48 +3,44 @@ import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
-import { useTranslation } from 'react-i18next';
-import { useTableQuery } from '@/components/ui/table/table-query-hook';
+import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 
-export interface FilteringOption {
-  text: string;
-  value: string;
+interface FilteringOption<T> {
+  name: string;
+  option: T;
 }
 
-interface FilteringProps {
-  label: string;
-  filteringOptions: FilteringOption[];
+interface FilteringProps<T> {
+  filteringOptions: FilteringOption<T>[];
+  isChecked: (option: T) => boolean;
+  setFiltering: (option: T) => void;
+  clear: () => void;
 }
 
-export function Filtering({ label, filteringOptions }: FilteringProps) {
-  const {
-    actions: { setFiltering },
-    fields: { filtering },
-  } = useTableQuery();
-  const { t } = useTranslation();
-
-  const isChecked = (currentFilter: string) =>
-    Boolean(filtering.includes(currentFilter));
-
+export function Filtering<T>({
+  filteringOptions,
+  isChecked,
+  setFiltering,
+  clear,
+}: FilteringProps<T>) {
   return (
     <List sx={{ padding: 0 }}>
-      <ListItem component="span" sx={{ padding: '0.5rem' }}>
-        <Typography>{label}</Typography>
-      </ListItem>
-      {filteringOptions.map(({ value, text }) => {
+      <Typography
+        color={colorPalette.text.secondary}
+        sx={{ padding: '0.5rem' }}
+        variant="body2"
+      >
+        {t('components.table.filter')}
+      </Typography>
+      {filteringOptions.map(({ option, name }) => {
         return (
-          <ListItem component="span" key={text} sx={{ padding: '0.5rem' }}>
+          <ListItem component="span" key={name} sx={{ padding: '0 0.5rem' }}>
             <Checkbox
-              checked={isChecked(value)}
-              name={text}
+              checked={isChecked(option)}
+              name={name}
               onClick={() => {
-                setFiltering((prevFilters) => {
-                  if (isChecked(value)) {
-                    return prevFilters.filter((filter) => filter !== value);
-                  }
-                  return [...prevFilters, value];
-                });
+                setFiltering(option);
               }}
               sx={{ paddingLeft: 0, ':hover': { background: 'none' } }}
             />
@@ -55,7 +51,7 @@ export function Filtering({ label, filteringOptions }: FilteringProps) {
               }}
             >
               <Typography color={colorPalette.primary.main} variant="body1">
-                {text}
+                {name}
               </Typography>
             </ListItem>
           </ListItem>
@@ -66,16 +62,9 @@ export function Filtering({ label, filteringOptions }: FilteringProps) {
         <Typography
           color={colorPalette.primary.main}
           onClick={() => {
-            setFiltering((prevFilters) => {
-              return prevFilters.filter(
-                (filter) =>
-                  !filteringOptions.find(({ value }) => {
-                    return value === filter;
-                  })
-              );
-            });
+            clear();
           }}
-          variant="button"
+          variant="buttonMedium"
         >
           {t('components.table.clearBtn')}
         </Typography>

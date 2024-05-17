@@ -18,8 +18,8 @@ import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { wait } from '@/shared/helpers/wait';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { EscrowAddress } from '@/pages/worker/jobs/components/available-jobs/escrow-address';
-import { RewardAmount } from '@/pages/worker/jobs/components/available-jobs/reward-amount';
+import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
+import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { Button } from '@/components/ui/button';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
@@ -47,7 +47,7 @@ const getColumns = (callbacks: {
       size: 100,
       enableSorting: true,
       Cell: (props) => {
-        return <EscrowAddress address={props.cell.getValue() as string} />;
+        return <EvmAddress address={props.cell.getValue() as string} />;
       },
     },
     {
