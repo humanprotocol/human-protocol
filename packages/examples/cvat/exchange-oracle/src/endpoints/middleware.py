@@ -2,6 +2,8 @@ import json
 import time
 from typing import Any, Callable
 
+import fastapi
+import packaging.version as pv
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pyinstrument import Profiler
@@ -58,12 +60,31 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
     """
 
+    @staticmethod
+    async def _set_body(request: Request, body: bytes):
+        # Before FastAPI 0.108.0 infinite hang is expected,
+        # if request body is awaited more than once.
+        # It's not needed when using FastAPI >= 0.108.0.
+        # https://github.com/tiangolo/fastapi/discussions/8187#discussioncomment-7962889
+        if pv.parse(fastapi.__version__) >= pv.Version("0.108.0"):
+            return
+
+        async def receive():
+            return {"type": "http.request", "body": body}
+
+        request._receive = receive
+
     def __init__(self, app: FastAPI) -> None:
         super().__init__(app)
         self.logger = get_root_logger()
 
+        self.max_displayed_body_size = 200
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         logging_dict: dict[str, Any] = {}
+
+        body = await request.body()
+        await self._set_body(request, body)
 
         response, response_dict = await self._log_response(call_next, request)
         request_dict = await self._log_request(request)
@@ -96,10 +117,26 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         }
 
         try:
-            body = await request.json()
+            body = await request.body()
+            await self._set_body(request, body)
         except Exception:
             body = None
         else:
+            if body is not None:
+                raw_body = False
+
+                if len(body) < self.max_displayed_body_size:
+                    try:
+                        body = json.loads(body)
+                    except (json.JSONDecodeError, TypeError):
+                        raw_body = True
+                else:
+                    raw_body = True
+
+                if raw_body:
+                    body = body.decode(errors="ignore")
+                    body = body[: self.max_displayed_body_size]
+
             request_logging["body"] = body
 
         return request_logging
