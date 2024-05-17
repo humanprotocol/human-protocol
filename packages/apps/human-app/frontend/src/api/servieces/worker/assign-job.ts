@@ -8,12 +8,12 @@ export interface AssignJobBody {
   chain_id: number;
 }
 
-const ResetPasswordSuccessResponseSchema = z.unknown();
+const AssignJobBodySuccessResponseSchema = z.unknown();
 
 function assignJob(data: AssignJobBody) {
   return apiClient(apiPaths.worker.assignJob.path, {
     authenticated: true,
-    successSchema: ResetPasswordSuccessResponseSchema,
+    successSchema: AssignJobBodySuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
