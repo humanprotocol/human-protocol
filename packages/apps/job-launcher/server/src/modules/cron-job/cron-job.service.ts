@@ -19,6 +19,7 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -68,6 +69,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
