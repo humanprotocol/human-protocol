@@ -421,6 +421,8 @@ def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
 
 
 # Job
+
+
 def create_job(
     session: Session,
     cvat_id: int,
@@ -498,6 +500,27 @@ def count_jobs_by_escrow_address(
             ),
         )
         .count()
+    )
+
+
+def get_free_job(
+    session: Session,
+    cvat_projects: List[int],
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+) -> Optional[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(
+            Job.cvat_project_id.in_(cvat_projects),
+            ~Job.assignments.any(
+                (Assignment.status == AssignmentStatuses.completed.value)
+                | (Assignment.status == AssignmentStatuses.created.value)
+                & (Assignment.completed_at == None)
+                & (utcnow() < Assignment.expires_at)
+            ),
+        )
+        .first()
     )
 
 
@@ -658,6 +681,24 @@ def get_user_assignments_in_cvat_projects(
             & (Assignment.user_wallet_address == wallet_address)
         )
         .all()
+    )
+
+
+def count_active_user_assignments(
+    session: Session,
+    wallet_address: int,
+    cvat_projects: List[int],
+) -> int:
+    return (
+        session.query(Assignment)
+        .where(
+            Assignment.job.has(Job.cvat_project_id.in_(cvat_projects)),
+            Assignment.user_wallet_address == wallet_address,
+            Assignment.status == AssignmentStatuses.created.value,
+            Assignment.completed_at == None,
+            utcnow() < Assignment.expires_at,
+        )
+        .count()
     )
 
 

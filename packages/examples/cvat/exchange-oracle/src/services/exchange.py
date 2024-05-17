@@ -134,31 +134,20 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
 
         manifest = parse_manifest(get_escrow_manifest(project.chain_id, project.escrow_address))
 
-        unassigned_job: Optional[models.Job] = None
-        unfinished_assignments: list[models.Assignment] = []
-        for job in project.jobs:
-            job_assignment = job.latest_assignment
-            if job_assignment and not job_assignment.is_finished:
-                unfinished_assignments.append(job_assignment)
-
-            if (
-                not unassigned_job
-                and job.status == JobStatuses.new
-                and (not job_assignment or job_assignment.is_finished)
-            ):
-                unassigned_job = job
-
-        now = utcnow()
-        unfinished_user_assignments = [
-            assignment
-            for assignment in unfinished_assignments
-            if assignment.user_wallet_address == wallet_address and now < assignment.expires_at
-        ]
-        if unfinished_user_assignments:
+        has_active_assignments = (
+            cvat_service.count_active_user_assignments(
+                session, wallet_address=wallet_address, cvat_projects=[project.cvat_id]
+            )
+            > 0
+        )
+        if has_active_assignments:
             raise UserHasUnfinishedAssignmentError(
                 "The user already has an unfinished assignment in this project"
             )
 
+        unassigned_job = cvat_service.get_free_job(
+            session, cvat_projects=[project.cvat_id], for_update=True
+        )
         if not unassigned_job:
             return None
 
@@ -166,7 +155,7 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             session,
             wallet_address=user.wallet_address,
             cvat_job_id=unassigned_job.cvat_id,
-            expires_at=now
+            expires_at=utcnow()
             + timedelta(
                 seconds=manifest.annotation.max_time
                 or get_default_assignment_timeout(manifest.annotation.type)
