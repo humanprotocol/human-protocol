@@ -1,7 +1,6 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Dispatch, SetStateAction } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import { Alert } from '@/components/ui/alert';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
-import type { MyJobsWithJobTypes } from '@/api/servieces/worker/my-jobs-data';
+import { useMyJobsTableState } from '@/hooks/use-my-jobs-table-state';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
@@ -26,13 +25,8 @@ export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
   const { t } = useTranslation();
-  const { setSearchEscrowAddress, filterParams } = useMyJobsFilterStore();
-  const queryClient = useQueryClient();
-  const myJobsTableState = queryClient.getQueryState(['myJobs', filterParams]);
-  const queryData = queryClient.getQueryData<MyJobsWithJobTypes>([
-    'myJobs',
-    filterParams,
-  ]);
+  const { setSearchEscrowAddress } = useMyJobsFilterStore();
+  const { myJobsTableState, myJobsTableQueryData } = useMyJobsTableState();
 
   return (
     <>
@@ -69,8 +63,8 @@ export function MyJobsTableMobile({
             <Loader size={90} />
           </Stack>
         ) : null}
-        {myJobsTableState?.status === 'success' && queryData?.jobs.results
-          ? queryData.jobs.results.map((d) => (
+        {myJobsTableState?.status === 'success'
+          ? myJobsTableQueryData.map((d) => (
               <Paper
                 key={crypto.randomUUID()}
                 sx={{

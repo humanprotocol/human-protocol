@@ -5,14 +5,10 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 import { t } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
-import type {
-  MyJob,
-  MyJobsWithJobTypes,
-} from '@/api/servieces/worker/my-jobs-data';
+import type { MyJob } from '@/api/servieces/worker/my-jobs-data';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
@@ -25,6 +21,7 @@ import { MyJobsJobTypeFilter } from '@/pages/worker/jobs/components/my-jobs/my-j
 import { MyJobsRewardAmountSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-reward-amount-sort';
 import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-status-filter';
 import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-expires-at-sort';
+import { useMyJobsTableState } from '@/hooks/use-my-jobs-table-state';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 
 const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
@@ -152,13 +149,8 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
 
 export function MyJobsTable() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
-  const queryClient = useQueryClient();
-
-  const myJobsTableState = queryClient.getQueryState(['myJobs', filterParams]);
-  const queryData = queryClient.getQueryData<MyJobsWithJobTypes>([
-    'myJobs',
-    filterParams,
-  ]);
+  const { myJobsTableState, myJobsTableQueryData, jobTypes } =
+    useMyJobsTableState();
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -174,14 +166,9 @@ export function MyJobsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
   }, [paginationState]);
 
-  const memoizedData = useMemo(() => {
-    if (!queryData?.jobs.results) return [];
-    return queryData.jobs.results;
-  }, [queryData?.jobs.results]);
-
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(queryData?.jobTypes || []),
-    data: memoizedData,
+    columns: getColumnsDefinition(jobTypes),
+    data: myJobsTableQueryData,
     state: {
       isLoading: myJobsTableState?.status === 'pending',
       showAlertBanner: Boolean(myJobsTableState?.status === 'error'),
