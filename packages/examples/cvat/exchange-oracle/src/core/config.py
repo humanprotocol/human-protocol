@@ -162,7 +162,7 @@ class FeaturesConfig:
     "Allow to log request details for each request"
 
     profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
-    "Allow to profile specific requests by specifying profile=1"
+    "Allow to profile specific requests"
 
 
 class CoreConfig:
