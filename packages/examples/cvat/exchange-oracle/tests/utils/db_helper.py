@@ -61,8 +61,8 @@ def create_job(session: Session, cvat_id: int, cvat_task_id: int, cvat_project_i
     cvat_job = Job(
         id=str(uuid.uuid4()),
         cvat_id=cvat_id,
-        cvat_project_id=cvat_id,
-        cvat_task_id=cvat_id,
+        cvat_project_id=cvat_project_id,
+        cvat_task_id=cvat_task_id,
         status=JobStatuses.new,
     )
     session.add(cvat_job)

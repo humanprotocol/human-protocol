@@ -19,7 +19,12 @@ from src.services.exchange import (
     serialize_task,
 )
 
-from tests.utils.db_helper import create_project, create_project_task_and_job
+from tests.utils.db_helper import (
+    create_job,
+    create_project,
+    create_project_task_and_job,
+    create_task,
+)
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -227,6 +232,50 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.assertEqual(assignment.user_wallet_address, user_address)
             self.assertEqual(assignment.status, AssignmentStatuses.created)
 
+    def test_create_assignment_many_jobs(self):
+        cvat_project, _, cvat_job_1 = create_project_task_and_job(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+        cvat_task_2 = create_task(self.session, 2, cvat_project.cvat_id)
+        cvat_job_2 = create_job(self.session, 2, cvat_task_2.cvat_id, cvat_project.cvat_id)
+
+        user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
+        user = User(
+            wallet_address=user_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        now = datetime.now()
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=user_address,
+            cvat_job_id=cvat_job_1.cvat_id,
+            created_at=now - timedelta(hours=1),
+            completed_at=now - timedelta(minutes=40),
+            expires_at=datetime.now() + timedelta(days=1),
+            status=AssignmentStatuses.completed.value,
+        )
+        self.session.add(assignment)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            assingment_id = create_assignment(cvat_project.id, user_address)
+
+        assignment = self.session.query(Assignment).filter_by(id=assingment_id).first()
+
+        self.assertEqual(assignment.cvat_job_id, cvat_job_2.cvat_id)
+        self.assertEqual(assignment.user_wallet_address, user_address)
+        self.assertEqual(assignment.status, AssignmentStatuses.created)
+
     def test_create_assignment_invalid_user_address(self):
         cvat_project_1, _, _ = create_project_task_and_job(
             self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -280,3 +329,91 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             with self.assertRaises(HTTPException):
                 create_assignment("1", user_address)
+
+    def test_create_assignment_no_available_jobs_completed_assignment(self):
+        cvat_project, _, cvat_job_1 = create_project_task_and_job(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+
+        user_address1 = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
+        user1 = User(
+            wallet_address=user_address1,
+            cvat_email="test1@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user1)
+
+        user_address2 = "0x86e83d346041E8806e352681f3F14549C0d2BC70"
+        user2 = User(
+            wallet_address=user_address2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user2)
+
+        now = datetime.now()
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=user_address1,
+            cvat_job_id=cvat_job_1.cvat_id,
+            created_at=now - timedelta(days=1),
+            completed_at=now - timedelta(hours=22),
+            expires_at=now + timedelta(hours=2),
+            status=AssignmentStatuses.completed.value,
+        )
+        self.session.add(assignment)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            assignment_id = create_assignment(cvat_project.id, user_address2)
+
+        self.assertEqual(assignment_id, None)
+
+    def test_create_assignment_no_available_jobs_active_foreign_assignment(self):
+        cvat_project, _, cvat_job_1 = create_project_task_and_job(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+
+        user_address1 = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
+        user1 = User(
+            wallet_address=user_address1,
+            cvat_email="test1@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user1)
+
+        user_address2 = "0x86e83d346041E8806e352681f3F14549C0d2BC70"
+        user2 = User(
+            wallet_address=user_address2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user2)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=user_address1,
+            cvat_job_id=cvat_job_1.cvat_id,
+            expires_at=datetime.now() + timedelta(days=1),
+        )
+        self.session.add(assignment)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            assignment_id = create_assignment(cvat_project.id, user_address2)
+
+        self.assertEqual(assignment_id, None)
