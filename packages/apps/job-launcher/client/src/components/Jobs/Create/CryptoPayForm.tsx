@@ -1,5 +1,6 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
-import { NETWORKS } from '@human-protocol/sdk';
+import KVStoreABI from '@human-protocol/core/abis/KVStore.json';
+import { KVStoreKeys, NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -15,11 +16,11 @@ import {
   Typography,
 } from '@mui/material';
 import { ethers } from 'ethers';
-import React, { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
-import { useAccount, useWalletClient } from 'wagmi';
+import { useAccount, useReadContract, useWalletClient } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
-import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
+import { CURRENCY } from '../../../constants/payment';
 import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
@@ -43,16 +44,43 @@ export const CryptoPayForm = ({
   const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
+  const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
+  const [minFee, setMinFee] = useState<number>(0.01);
   const { data: signer } = useWalletClient();
   const { user } = useAppSelector((state) => state.auth);
   const { data: rate } = useTokenRate('hmt', 'usd');
+
+  useEffect(() => {
+    const fetchJobLauncherData = async () => {
+      const address = await paymentService.getOperatorAddress();
+      const fee = await paymentService.getFee();
+      setJobLauncherAddress(address);
+      setMinFee(fee);
+    };
+
+    fetchJobLauncherData();
+  }, []);
+
+  const { data: jobLauncherFee } = useReadContract({
+    address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
+    abi: KVStoreABI,
+    functionName: 'get',
+    args: jobLauncherAddress
+      ? [jobLauncherAddress, KVStoreKeys.fee]
+      : undefined,
+    query: {
+      enabled: !!jobLauncherAddress,
+    },
+  });
 
   const fundAmount = useMemo(() => {
     if (amount && rate) return Number(amount) * rate;
     return 0;
   }, [amount, rate]);
   const feeAmount =
-    fundAmount === 0 ? 0 : fundAmount * (JOB_LAUNCHER_FEE / 100);
+    fundAmount === 0
+      ? 0
+      : Math.max(minFee, fundAmount * (Number(jobLauncherFee) / 100));
   const totalAmount = fundAmount + feeAmount;
   const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
 
@@ -81,8 +109,8 @@ export const CryptoPayForm = ({
             abi: HMTokenABI,
             functionName: 'transfer',
             args: [
-              await paymentService.getOperatorAddress(),
-              ethers.parseUnits(tokenAmount.toFixed(2), 18),
+              jobLauncherAddress,
+              ethers.parseUnits(tokenAmount.toString(), 18),
             ],
           });
 
@@ -106,14 +134,14 @@ export const CryptoPayForm = ({
             chainId,
             fortuneRequest,
             Number(amount),
-            'hmt',
+            CURRENCY.hmt,
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(
             chainId,
             cvatRequest,
             Number(amount),
-            'hmt',
+            CURRENCY.hmt,
           );
         } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
           await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
@@ -239,8 +267,7 @@ export const CryptoPayForm = ({
             >
               <Typography>Fees</Typography>
               <Typography color="text.secondary">
-                ({JOB_LAUNCHER_FEE}%){' '}
-                {Math.max(0.01, Number(feeAmount?.toFixed(2)))} USD
+                ({Number(jobLauncherFee)}%) {feeAmount?.toFixed(2)} USD
               </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>

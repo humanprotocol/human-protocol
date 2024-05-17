@@ -29,13 +29,17 @@ import { PaymentService } from './payment.service';
 import { getRate } from '../../common/utils';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ControlledError } from '../../common/errors/controlled';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment')
 @Controller('/payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+    private readonly serverConfigService: ServerConfigService,
+  ) {}
 
   @ApiOperation({
     summary: 'Create a fiat payment',
@@ -164,5 +168,27 @@ export class PaymentController {
         e.stack,
       );
     }
+  }
+
+  @ApiOperation({
+    summary: 'Get Job Launcher minimum fee',
+    description: 'Endpoint to get Job Launcher minimum fee in USD.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Minimum fee retrieved successfully',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @Get('/fee')
+  public async getFee(): Promise<number> {
+    return this.serverConfigService.minimunFeeUsd;
   }
 }

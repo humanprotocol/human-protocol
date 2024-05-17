@@ -53,7 +53,7 @@ import {
   isValidJSON,
   parseUrl,
 } from '../../common/utils';
-import { add, div, lt, mul } from '../../common/utils/decimal';
+import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -709,7 +709,10 @@ export class JobService {
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
-    const userBalance = await this.paymentService.getUserBalance(userId);
+    const userBalance = await this.paymentService.getUserBalance(
+      userId,
+      div(1, rate),
+    );
     const feePercentage = Number(
       await this.getOracleFee(
         await this.web3Service.getOperatorAddress(),
@@ -728,16 +731,21 @@ export class JobService {
       (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
       dto.currency === JobCurrency.HMT
     ) {
-      tokenFundAmount = await calculateFundAmount(dto, rate);
-      tokenFee = mul(div(feePercentage, 100), tokenFundAmount);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-
+      tokenFundAmount = dto.fundAmount;
       const fundAmountInUSD = div(tokenFundAmount, rate);
-      const feeInUSD = div(tokenFee, rate);
+      const feeInUSD = max(
+        this.serverConfigService.minimunFeeUsd,
+        mul(div(feePercentage, 100), fundAmountInUSD),
+      );
+      tokenFee = mul(feeInUSD, rate);
+      tokenTotalAmount = add(tokenFundAmount, tokenFee);
       usdTotalAmount = add(fundAmountInUSD, feeInUSD);
     } else {
       const fundAmount = await calculateFundAmount(dto, rate);
-      const fee = mul(div(feePercentage, 100), fundAmount);
+      const fee = max(
+        this.serverConfigService.minimunFeeUsd,
+        mul(div(feePercentage, 100), fundAmount),
+      );
 
       tokenFundAmount = mul(fundAmount, rate);
       tokenFee = mul(fee, rate);
