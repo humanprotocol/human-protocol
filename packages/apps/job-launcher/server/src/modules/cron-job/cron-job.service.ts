@@ -103,6 +103,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
@@ -137,6 +138,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async fundEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.FundEscrow,
@@ -171,6 +173,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async cancelCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CancelEscrow,
@@ -236,6 +239,7 @@ export class CronJobService {
     return true;
   }
 
+  @Cron('*/5 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
