@@ -3,11 +3,11 @@ import { Layout as LayoutProtected } from '@/components/layout/protected/layout'
 import { Layout as LayoutUnprotected } from '@/components/layout/unprotected/layout';
 import {
   protectedRoutes,
-  protectedWeb3Routes,
+  walletConnectRoutes,
   unprotectedRoutes,
 } from '@/router/routes';
 import { RequireAuth } from '@/auth/require-auth';
-import { RequireWeb3Auth } from '@/auth-web3/require-web3-auth';
+import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 
 export function Router() {
   return (
@@ -19,12 +19,12 @@ export function Router() {
           ))}
         </Route>
         <Route element={<LayoutUnprotected />}>
-          {protectedWeb3Routes.map((route) => (
+          {walletConnectRoutes.map((route) => (
             <Route
               element={
-                <RequireWeb3Auth>
+                <RequireWalletConnect>
                   <>{route.element}</>
-                </RequireWeb3Auth>
+                </RequireWalletConnect>
               }
               key={route.path}
               path={route.path}

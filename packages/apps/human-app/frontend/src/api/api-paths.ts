@@ -26,4 +26,17 @@ export const apiPaths = {
       path: '/email-confirmation/resend-email-verification',
     },
   },
+  operator: {
+    web3Auth: {
+      prepareSignature: {
+        path: '/prepare-signature',
+      },
+      signUp: {
+        path: '/auth/web3/signup',
+      },
+      signIn: {
+        path: '/auth/web3/signin',
+      },
+    },
+  },
 } as const;

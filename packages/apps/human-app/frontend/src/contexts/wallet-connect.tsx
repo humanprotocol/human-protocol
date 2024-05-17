@@ -46,10 +46,14 @@ interface ConnectedAccount {
   isConnected: true;
   chainId: number;
   address: `0x${string}`;
+  signMessage: (message: string) => Promise<string | undefined>;
 }
 
 interface DisconnectedAccount {
   isConnected: false;
+  chainId?: never;
+  address?: never;
+  signMessage?: never;
 }
 
 export type WalletConnectContextConnectedAccount = CommonWalletConnectContext &
@@ -80,13 +84,15 @@ export function WalletConnectProvider({
   return (
     <WalletConnectContext.Provider
       value={
-        isConnected && address && chainId
+        isConnected && address && chainId && web3ProviderMutation.data
           ? {
               isConnected: true,
               address,
               chainId,
               web3ProviderMutation,
               openModal,
+              signMessage: (message: string) =>
+                web3ProviderMutation.data.signer.signMessage(message),
             }
           : {
               isConnected: false,
