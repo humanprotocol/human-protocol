@@ -158,6 +158,12 @@ class FeaturesConfig:
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
+    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", False))
+    "Allow to log request details for each request"
+
+    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
+    "Allow to profile specific requests"
+
 
 class CoreConfig:
     default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))

@@ -4,6 +4,7 @@ from fastapi import APIRouter, FastAPI
 from src.core.config import Config
 from src.endpoints.cvat import router as cvat_router
 from src.endpoints.exchange import router as service_router
+from src.endpoints.middleware import setup_middleware
 from src.endpoints.webhook import router as webhook_router
 from src.schemas import MetaResponse, ResponseError, ValidationErrorResponse
 
@@ -45,5 +46,7 @@ def init_api(app: FastAPI) -> FastAPI:
     app.include_router(cvat_router, responses=default_responses)
     app.include_router(webhook_router, responses=default_responses)
     app.include_router(service_router, responses=default_responses)
+
+    setup_middleware(app)
 
     return app
