@@ -142,11 +142,9 @@ def get_projects_by_status(
     return projects
 
 
-def get_available_projects(
-    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Project]:
+def get_available_projects(session: Session, *, limit: int = 10) -> List[Project]:
     return (
-        _maybe_for_update(session.query(Project), enable=for_update)
+        session.query(Project)
         .where(
             (Project.status == ProjectStatuses.annotation.value)
             & Project.jobs.any(
