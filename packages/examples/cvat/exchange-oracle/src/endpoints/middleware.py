@@ -65,7 +65,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         logging_dict: dict[str, Any] = {}
 
-        await request.body()
         response, response_dict = await self._log_response(call_next, request)
         request_dict = await self._log_request(request)
         logging_dict["request"] = request_dict
