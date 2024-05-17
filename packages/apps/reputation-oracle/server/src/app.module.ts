@@ -19,6 +19,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
+import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 
 @Module({
   providers: [
@@ -60,6 +61,7 @@ import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
     CronJobModule,
     PayoutModule,
     EnvConfigModule,
+    HCaptchaModule,
   ],
   controllers: [AppController],
 })

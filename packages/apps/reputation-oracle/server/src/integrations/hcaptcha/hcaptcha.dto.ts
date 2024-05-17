@@ -1,8 +1,4 @@
 export class hCaptchaApiParams {
-  public url: string;
-  public apiKey?: string;
-  public secret?: string;
-  public sitekey?: string;
   public ip?: string;
 }
 

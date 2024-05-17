@@ -25,13 +25,12 @@ import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { SiteKeyRepository } from './site-key.repository';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { getLabelerData, registerLabeler } from '../../common/utils/hcaptcha';
 import { OracleType } from '../../common/enums';
 import { SiteKeyEntity } from './site-key.entity';
 import { ErrorUser } from '../../common/constants/errors';
-
-jest.mock('../../common/utils/hcaptcha');
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HttpService } from '@nestjs/axios';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -47,6 +46,7 @@ describe('UserService', () => {
   let userService: UserService;
   let userRepository: UserRepository;
   let web3Service: Web3Service;
+  let hcaptchaService: HCaptchaService;
 
   beforeEach(async () => {
     const signerMock = {
@@ -57,6 +57,7 @@ describe('UserService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         UserService,
+        HCaptchaService,
         { provide: UserRepository, useValue: createMock<UserRepository>() },
         {
           provide: SiteKeyRepository,
@@ -71,15 +72,20 @@ describe('UserService', () => {
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
+        {
+          provide: HttpService,
+          useValue: createMock<HttpService>(),
+        },
         ConfigService,
         Web3ConfigService,
-        AuthConfigService,
+        HCaptchaConfigService,
       ],
     }).compile();
 
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get(UserRepository);
     web3Service = moduleRef.get(Web3Service);
+    hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
   });
 
   describe('create', () => {
@@ -177,8 +183,10 @@ describe('UserService', () => {
 
       const mockLabelerData = { sitekeys: [{ sitekey: 'site_key' }] };
 
-      (registerLabeler as jest.Mock).mockResolvedValueOnce(true);
-      (getLabelerData as jest.Mock).mockResolvedValueOnce(mockLabelerData);
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(true);
+      hcaptchaService.getLabelerData = jest
+        .fn()
+        .mockResolvedValueOnce(mockLabelerData);
 
       web3Service.getSigner = jest.fn().mockReturnValue({
         signMessage: jest.fn().mockResolvedValue('signature'),
@@ -310,7 +318,7 @@ describe('UserService', () => {
         country: 'US',
       };
 
-      (registerLabeler as jest.Mock).mockResolvedValueOnce(false);
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),
@@ -337,8 +345,8 @@ describe('UserService', () => {
         country: 'US',
       };
 
-      (registerLabeler as jest.Mock).mockResolvedValueOnce(true);
-      (getLabelerData as jest.Mock).mockResolvedValueOnce(null);
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(true);
+      hcaptchaService.getLabelerData = jest.fn().mockResolvedValueOnce(null);
 
       await expect(
         userService.registerLabeler(userEntity as UserEntity, data),

@@ -33,11 +33,10 @@ import { Wallet } from 'ethers';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { getLabelerData, registerLabeler } from '../../common/utils/hcaptcha';
-import { AuthConfigService } from '../../common/config/auth-config.service';
 import { SiteKeyEntity } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { OracleType } from '../../common/enums';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 
 @Injectable()
 export class UserService {
@@ -47,8 +46,8 @@ export class UserService {
     private userRepository: UserRepository,
     private siteKeyRepository: SiteKeyRepository,
     private readonly web3Service: Web3Service,
+    private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly authConfigService: AuthConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -148,9 +147,7 @@ export class UserService {
     }
 
     // Register user as a labeler at hcaptcha foundation
-    const registeredLabeler = await registerLabeler({
-      url: this.authConfigService.hCaptchaExchangeURL,
-      apiKey: this.authConfigService.hCaptchaJobAPIKey,
+    const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
       language: 'en',
       country: data.country,
@@ -162,9 +159,7 @@ export class UserService {
     }
 
     // Retrieve labeler site key from hcaptcha foundation
-    const labelerData = await getLabelerData({
-      url: this.authConfigService.hCaptchaExchangeURL,
-      apiKey: this.authConfigService.hCaptchaJobAPIKey,
+    const labelerData = await this.hcaptchaService.getLabelerData({
       email: user.email,
     });
     if (!labelerData || !labelerData.sitekeys.length) {

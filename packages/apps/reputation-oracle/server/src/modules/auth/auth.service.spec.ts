@@ -35,6 +35,8 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
 import { SiteKeyRepository } from '../user/site-key.repository';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -44,9 +46,6 @@ jest.mock('@human-protocol/sdk', () => ({
       get: jest.fn(),
     })),
   },
-}));
-jest.mock('../../common/utils/hcaptcha', () => ({
-  verifyToken: jest.fn().mockReturnValue({ success: true }),
 }));
 
 jest.mock('uuid', () => ({
@@ -62,6 +61,7 @@ describe('AuthService', () => {
   let sendGridService: SendGridService;
   let web3Service: Web3Service;
   let authConfigService: AuthConfigService;
+  let hcaptchaService: HCaptchaService;
 
   beforeAll(async () => {
     const signerMock = {
@@ -77,6 +77,8 @@ describe('AuthService', () => {
         ServerConfigService,
         Web3ConfigService,
         ConfigService,
+        HCaptchaService,
+        HCaptchaConfigService,
         {
           provide: JwtService,
           useValue: {
@@ -111,6 +113,9 @@ describe('AuthService', () => {
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
+    hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
+
+    hcaptchaService.verifyToken = jest.fn().mockReturnValue({ success: true });
   });
 
   afterEach(() => {
