@@ -6,12 +6,22 @@ import { ProfileAction } from '@/pages/worker/profile/profile-action';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
+import { useKycSessionIdMutation } from '@/api/servieces/worker/get-kyc-session-id';
+import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
+import { useSynaps } from '@/hooks/use-synaps';
 
 export function ProfileActions({
   setNotifications,
 }: {
   setNotifications: () => void;
 }) {
+  // const { setTopNotification } = useProtectedLayoutNotification();
+  // const { use } = useSynaps()
+  // const {
+  //   mutate: kycSessionIdMutation,
+  //   error: kycSessionMutationError,
+  //   isPending,
+  // } = useKycSessionIdMutation();
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   const { isConnected: isWalletConnected } = useWalletConnect();
