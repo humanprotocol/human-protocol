@@ -19,6 +19,7 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -68,6 +69,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -81,10 +83,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.PAID,
-        3,
-      );
+      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
@@ -101,6 +100,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('1-59/2 * * * *')
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
@@ -116,7 +116,6 @@ export class CronJobService {
     try {
       const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.CREATED,
-        3,
       );
 
       for (const jobEntity of jobEntities) {
@@ -135,6 +134,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async fundEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.FundEscrow,
@@ -150,7 +150,6 @@ export class CronJobService {
     try {
       const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.SET_UP,
-        3,
       );
 
       for (const jobEntity of jobEntities) {
@@ -169,6 +168,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async cancelCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CancelEscrow,
@@ -184,7 +184,6 @@ export class CronJobService {
     try {
       const jobEntities = await this.jobRepository.findByStatus(
         JobStatus.TO_CANCEL,
-        3,
       );
 
       for (const jobEntity of jobEntities) {
@@ -234,6 +233,7 @@ export class CronJobService {
     return true;
   }
 
+  @Cron('*/5 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
