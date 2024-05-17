@@ -100,7 +100,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
+  @Cron('1-59/2 * * * *')
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
