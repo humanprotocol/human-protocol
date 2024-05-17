@@ -6,7 +6,7 @@ interface SearchUpdaterProps {
   value: string;
 }
 
-interface JobsFilterStoreProps {
+export interface JobsFilterStoreProps {
   filterParams: {
     sort?: 'ASC' | 'DESC';
     sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
@@ -20,10 +20,10 @@ interface JobsFilterStoreProps {
       | 'EXPIRED'
       | 'REJECTED';
     escrow_address?: string;
-    page?: number;
-    page_size?: number;
-    [key: string]: string | number | undefined;
-  } | null;
+    page: number;
+    page_size: number;
+    fields: string[];
+  };
   setFilterParams: (
     partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => void;
@@ -31,7 +31,11 @@ interface JobsFilterStoreProps {
   setSearchEscrowAddress: (searchParams: SearchUpdaterProps[]) => void;
 }
 
-const initialFiltersState = null;
+const initialFiltersState = {
+  page: 0,
+  page_size: 5,
+  fields: ['reward_amount', 'job_description', 'reward_token'],
+};
 
 export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
   filterParams: initialFiltersState,

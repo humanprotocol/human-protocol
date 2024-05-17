@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
   MaterialReactTable,
@@ -12,10 +13,10 @@ import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering
 import { Sorting } from '@/components/ui/table/table-header-menu.tsx/sorting';
 import { Chip } from '@/components/ui/chip';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { parseNetworkName } from '@/shared/helpers/parse-network-label';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { JobsArray } from '@/api/servieces/worker/available-jobs-table-service-mock';
 import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
+import type { JobsArray } from '@/api/servieces/worker/available-jobs-table-service-mock';
+import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
@@ -132,7 +133,7 @@ export function MyJobsTable({
     setFilterParams({
       ...filterParams,
       page: paginationState.pageIndex,
-      pageSize: paginationState.pageSize,
+      page_size: paginationState.pageSize,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
   }, [paginationState]);
@@ -142,10 +143,9 @@ export function MyJobsTable({
 
     return data.results.map((job) => ({
       ...job,
-      // eslint-disable-next-line camelcase -- output from api
       expires_at: formatDate(job.expires_at),
       jobTypeChips: <Chip label={job.job_type} />,
-      network: parseNetworkName(job.chain_id),
+      network: getNetworkName(job.chain_id),
       statusChip: (
         <Chip
           backgroundColor={parseJobStatusChipColor(job.status)}

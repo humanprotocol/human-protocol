@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Dispatch, SetStateAction } from 'react';
@@ -9,23 +10,30 @@ import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import { parseNetworkName } from '@/shared/helpers/parse-network-label';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { AvailableJobs } from '@/api/servieces/worker/available-jobs-table-service-mock';
+import { getNetworkName } from '@/smart-contracts/get-network-name';
+import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
+import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
+import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
 
 interface AvailableJobsTableMobileProps {
-  data?: AvailableJobs;
-  isLoading: boolean;
-  isError: boolean;
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function AvailableJobsTableMobile({
-  data,
-  isLoading,
-  isError,
   setIsMobileFilterDrawerOpen,
 }: AvailableJobsTableMobileProps) {
+  const { onJobAssignmentError, onJobAssignmentSuccess } =
+    useJobsNotifications();
+
+  const { mutate: assignJobMutation } = useAssignJobMutation({
+    onSuccess: onJobAssignmentSuccess,
+    onError: onJobAssignmentError,
+  });
+
+  const { availableJobsTableState, availableJobsTableQueryData } =
+    useAvailableJobsTableState();
+
   const { t } = useTranslation();
 
   const { setSearchEscrowAddress } = useJobsFilterStore();
@@ -55,18 +63,20 @@ export function AvailableJobsTableMobile({
         <FiltersButtonIcon />
       </Button>
       <Stack flexDirection="column">
-        {isError ? (
+        {availableJobsTableState?.status === 'error' ? (
           <Alert color="error" severity="error">
             {t('worker.jobs.errorFetchingData')}
           </Alert>
         ) : null}
-        {isLoading && !isError ? (
+        {availableJobsTableState?.status === 'pending' &&
+        !availableJobsTableState.error ? (
           <Stack alignItems="center" justifyContent="center">
             <Loader size={90} />
           </Stack>
         ) : null}
-        {!isLoading && !isError && data
-          ? data.results.map((d) => (
+        {availableJobsTableState?.status === 'success' &&
+        !availableJobsTableState.error
+          ? availableJobsTableQueryData.map((d) => (
               <Paper
                 key={crypto.randomUUID()}
                 sx={{
@@ -74,6 +84,8 @@ export function AvailableJobsTableMobile({
                   py: '32px',
                   backgroundColor: colorPalette.white,
                   marginBottom: '20px',
+                  borderRadius: '20px',
+                  boxShadow: 'unset',
                 }}
               >
                 <List>
@@ -91,13 +103,19 @@ export function AvailableJobsTableMobile({
                     <Grid item xs={6}>
                       <ProfileListItem
                         header={t('worker.jobs.network')}
-                        paragraph={parseNetworkName(d.chain_id)}
+                        paragraph={getNetworkName(d.chain_id)}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <Button
                         color="secondary"
                         fullWidth
+                        onClick={() => {
+                          assignJobMutation({
+                            escrow_address: d.escrow_address,
+                            chain_id: d.chain_id,
+                          });
+                        }}
                         size="small"
                         sx={{
                           marginTop: '15px',

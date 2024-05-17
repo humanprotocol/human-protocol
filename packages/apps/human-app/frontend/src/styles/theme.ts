@@ -304,6 +304,16 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          fontSize: 'inherit',
+          backgroundColor: colorPalette.white,
+          boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
+          color: colorPalette.text.primary,
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

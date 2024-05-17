@@ -25,6 +25,15 @@ export const apiPaths = {
     resendEmailVerification: {
       path: '/email-confirmation/resend-email-verification',
     },
+    oracles: {
+      path: '/oracles',
+    },
+    jobs: {
+      path: '/jobs',
+    },
+    assignJob: {
+      path: '/assignment/job',
+    },
   },
   operator: {
     web3Auth: {

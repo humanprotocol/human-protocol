@@ -11,9 +11,9 @@ import { Chip } from '@/components/ui/chip';
 import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import { parseNetworkName } from '@/shared/helpers/parse-network-label';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import type { MyJobs } from '@/api/servieces/worker/my-jobs-table-service-mock';
+import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 import { MyJobsButton } from './my-jobs-button';
 
@@ -98,7 +98,7 @@ export function MyJobsTableMobile({
                     <Grid item xs={6}>
                       <ProfileListItem
                         header={t('worker.jobs.network')}
-                        paragraph={parseNetworkName(d.chain_id)}
+                        paragraph={getNetworkName(d.chain_id)}
                       />
                       <Typography
                         component="div"

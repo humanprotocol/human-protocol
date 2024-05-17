@@ -15,6 +15,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
+import type { JobsFilterStoreProps } from '@/hooks/use-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 
 interface DrawerMobileProps {
@@ -28,8 +29,11 @@ export function DrawerMobile({
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
-  const handleCheckboxClick = (paramName: string, paramValue: string) => {
-    if (filterParams && filterParams[paramName] === paramValue) {
+  const handleCheckboxClick = (
+    paramName: keyof JobsFilterStoreProps['filterParams'],
+    paramValue: string
+  ) => {
+    if (filterParams[paramName] === paramValue) {
       setFilterParams({
         ...filterParams,
         [paramName]: undefined,
@@ -181,7 +185,7 @@ export function DrawerMobile({
           key={crypto.randomUUID()}
         >
           <Checkbox
-            checked={filterParams?.network === 'MATIC'}
+            checked={filterParams.network === 'MATIC'}
             onClick={() => {
               handleCheckboxClick('network', 'MATIC');
             }}
@@ -206,7 +210,7 @@ export function DrawerMobile({
           key={crypto.randomUUID()}
         >
           <Checkbox
-            checked={filterParams?.job_type === 'FORTUNE'}
+            checked={filterParams.job_type === 'FORTUNE'}
             onClick={() => {
               handleCheckboxClick('job_type', 'FORTUNE');
             }}
@@ -231,7 +235,7 @@ export function DrawerMobile({
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={filterParams?.status === 'ACTIVE'}
+              checked={filterParams.status === 'ACTIVE'}
               onClick={() => {
                 handleCheckboxClick('status', 'ACTIVE');
               }}
@@ -246,7 +250,7 @@ export function DrawerMobile({
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={filterParams?.status === 'COMPLETED'}
+              checked={filterParams.status === 'COMPLETED'}
               onClick={() => {
                 handleCheckboxClick('status', 'COMPLETED');
               }}
@@ -261,7 +265,7 @@ export function DrawerMobile({
             key={crypto.randomUUID()}
           >
             <Checkbox
-              checked={filterParams?.status === 'CANCELED'}
+              checked={filterParams.status === 'CANCELED'}
               onClick={() => {
                 handleCheckboxClick('status', 'CANCELED');
               }}
@@ -278,7 +282,7 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams?.status === 'VALIDATION'}
+                  checked={filterParams.status === 'VALIDATION'}
                   onClick={() => {
                     handleCheckboxClick('status', 'VALIDATION');
                   }}
@@ -293,7 +297,7 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams?.status === 'EXPIRED'}
+                  checked={filterParams.status === 'EXPIRED'}
                   onClick={() => {
                     handleCheckboxClick('status', 'EXPIRED');
                   }}
@@ -308,7 +312,7 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams?.status === 'REJECTED'}
+                  checked={filterParams.status === 'REJECTED'}
                   onClick={() => {
                     handleCheckboxClick('status', 'REJECTED');
                   }}
