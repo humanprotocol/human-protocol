@@ -5,7 +5,6 @@ import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { Web3Service } from '../web3/web3.service';
 import { verifySignature } from '../../common/utils/signature';
-import { ErrorAuth } from '../../common/constants/errors';
 import { ChainId, KVStoreClient, EscrowClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -146,23 +145,26 @@ export class CredentialService {
       throw new HttpException('Credential not found', HttpStatus.NOT_FOUND);
     }
 
+    if (credential.status !== CredentialStatus.VALIDATED) {
+      throw new HttpException(
+        'Credential is not in a valid state for on-chain addition.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     let signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-
     const reputationOracleAddress =
       await escrowClient.getReputationOracleAddress(escrowAddress);
 
     const signatureBody = await this.userService.prepareSignatureBody(
       SignatureType.CERTIFICATE_AUTHENTICATION,
       reputationOracleAddress,
-      {
-        reference: credential.reference,
-        workerAddress: workerAddress,
-      },
+      { reference: credential.reference, workerAddress },
     );
 
     if (!verifySignature(signatureBody.contents, signature, [workerAddress])) {
-      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+      throw new UnauthorizedException('Invalid signature');
     }
 
     const currentWeb3Env = this.web3ConfigService.env;

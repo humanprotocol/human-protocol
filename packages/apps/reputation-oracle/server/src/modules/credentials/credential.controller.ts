@@ -22,7 +22,6 @@ import {
   CreateCredentialDto,
   CredentialQueryDto,
   CredentialDto,
-  AddCredentialOnChainDto,
 } from './credential.dto';
 import { CredentialExceptionFilter } from '../../common/exceptions/credential.filter';
 import { Public } from '../../common/decorators';
