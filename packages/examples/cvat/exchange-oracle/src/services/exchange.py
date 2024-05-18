@@ -2,10 +2,9 @@ from datetime import timedelta
 from typing import Optional
 
 import src.cvat.api_calls as cvat_api
-import src.models.cvat as models
 import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest
-from src.core.types import AssignmentStatuses, JobStatuses, PlatformTypes, ProjectStatuses
+from src.core.types import AssignmentStatuses, PlatformTypes, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.schemas import exchange as service_api
 from src.utils.assignments import (
@@ -48,8 +47,7 @@ def serialize_task(
             title=f"Task {project.escrow_address[:10]}",
             description=manifest.annotation.description,
             job_bounty=manifest.job_bounty,
-            job_time_limit=manifest.annotation.max_time
-            or get_default_assignment_timeout(manifest.annotation.type),
+            job_time_limit=get_default_assignment_timeout(manifest.annotation.type),
             job_size=get_default_assignment_size(manifest),
             job_type=project.job_type,
             platform=PlatformTypes.CVAT,
@@ -132,8 +130,6 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             )
             return None
 
-        manifest = parse_manifest(get_escrow_manifest(project.chain_id, project.escrow_address))
-
         has_active_assignments = (
             cvat_service.count_active_user_assignments(
                 session, wallet_address=wallet_address, cvat_projects=[project.cvat_id]
@@ -156,10 +152,7 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             wallet_address=user.wallet_address,
             cvat_job_id=unassigned_job.cvat_id,
             expires_at=utcnow()
-            + timedelta(
-                seconds=manifest.annotation.max_time
-                or get_default_assignment_timeout(manifest.annotation.type)
-            ),
+            + timedelta(seconds=get_default_assignment_timeout(TaskTypes(project.job_type))),
         )
 
         cvat_api.clear_job_annotations(unassigned_job.cvat_id)
