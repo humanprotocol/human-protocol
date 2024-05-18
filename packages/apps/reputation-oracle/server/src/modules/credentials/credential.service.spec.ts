@@ -11,6 +11,19 @@ import { CredentialStatus } from '../../common/enums/credential';
 import { CreateCredentialDto } from './credential.dto';
 import { UserType } from '../../common/enums/user';
 import { UserService } from '../user/user.service';
+import { verifySignature } from '../../common/utils/signature';
+import { KVStoreClient } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
+import {
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { UserRepository } from '../user/user.repository';
+
+jest.mock('../../common/utils/signature', () => ({
+  verifySignature: jest.fn(),
+}));
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -30,6 +43,8 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('CredentialService', () => {
   let credentialService: CredentialService;
   let credentialRepository: CredentialRepository;
+  let userService: UserService;
+  let userRepository: UserRepository;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -60,6 +75,7 @@ describe('CredentialService', () => {
 
     credentialService = moduleRef.get<CredentialService>(CredentialService);
     credentialRepository = moduleRef.get(CredentialRepository);
+    userService = moduleRef.get<UserService>(UserService);
   });
 
   describe('createCredential', () => {
@@ -369,6 +385,142 @@ describe('CredentialService', () => {
       await expect(
         credentialService.validateCredential('ref123'),
       ).rejects.toThrow('Credential not found.');
+    });
+  });
+
+  describe('addCredentialOnChain', () => {
+    const mockCredential = new CredentialEntity();
+    mockCredential.id = 1;
+    mockCredential.reference = 'ref123';
+    mockCredential.status = CredentialStatus.VALIDATED;
+
+    it('should add a credential on-chain and update the status', async () => {
+      jest
+        .spyOn(credentialRepository, 'findOne')
+        .mockResolvedValue(mockCredential);
+      const mockKVStoreClient = {
+        set: jest.fn().mockResolvedValue(undefined),
+      };
+      jest.spyOn(userService, 'prepareSignatureBody').mockResolvedValue({
+        contents: 'signatureBodyContents',
+        from: 'fromAddress',
+        to: 'toAddress',
+        nonce: 'nonceValue',
+      });
+
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
+      jest
+        .spyOn(credentialRepository, 'save')
+        .mockResolvedValue(mockCredential);
+
+      KVStoreClient.build = jest.fn().mockResolvedValue(mockKVStoreClient);
+
+      await credentialService.addCredentialOnChain(
+        mockCredential.id,
+        '0xWorkerAddress',
+        'signature',
+        ChainId.LOCALHOST,
+        '0xEscrowAddress',
+      );
+
+      expect(credentialRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockCredential.id },
+        relations: ['validator'],
+      });
+      expect(mockKVStoreClient.set).toHaveBeenCalledWith(
+        `${mockCredential.reference}-MOCK_ADDRESS`,
+        JSON.stringify({
+          signature: 'signature',
+          contents: 'signatureBodyContents',
+        }),
+      );
+      expect(credentialRepository.save).toHaveBeenCalledWith({
+        ...mockCredential,
+        status: CredentialStatus.ON_CHAIN,
+      });
+    });
+
+    it('should throw an error if the credential is not found', async () => {
+      jest.spyOn(credentialRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        credentialService.addCredentialOnChain(
+          1,
+          '0xWorkerAddress',
+          'signature',
+          ChainId.LOCALHOST,
+          '0xEscrowAddress',
+        ),
+      ).rejects.toThrow(
+        new HttpException('Credential not found', HttpStatus.NOT_FOUND),
+      );
+
+      expect(credentialRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['validator'],
+      });
+    });
+
+    it('should throw an error if the credential is not in a valid state for on-chain addition', async () => {
+      mockCredential.status = CredentialStatus.ACTIVE;
+      jest
+        .spyOn(credentialRepository, 'findOne')
+        .mockResolvedValue(mockCredential);
+
+      await expect(
+        credentialService.addCredentialOnChain(
+          1,
+          '0xWorkerAddress',
+          'signature',
+          ChainId.LOCALHOST,
+          '0xEscrowAddress',
+        ),
+      ).rejects.toThrow(
+        new HttpException(
+          'Credential is not in a valid state for on-chain addition.',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+
+      expect(credentialRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['validator'],
+      });
+    });
+
+    it('should throw an error if the signature is invalid', async () => {
+      mockCredential.status = CredentialStatus.VALIDATED;
+      jest
+        .spyOn(credentialRepository, 'findOne')
+        .mockResolvedValue(mockCredential);
+      const mockKVStoreClient = {
+        set: jest.fn().mockResolvedValue(undefined),
+      };
+      jest.spyOn(userService, 'prepareSignatureBody').mockResolvedValue({
+        contents: 'signatureBodyContents',
+        from: 'fromAddress',
+        to: 'toAddress',
+        nonce: 'nonceValue',
+      });
+      (verifySignature as jest.Mock).mockReturnValue(false);
+
+      KVStoreClient.build = jest.fn().mockResolvedValue(mockKVStoreClient);
+
+      await expect(
+        credentialService.addCredentialOnChain(
+          1,
+          '0xWorkerAddress',
+          'signature',
+          ChainId.LOCALHOST,
+          '0xEscrowAddress',
+        ),
+      ).rejects.toThrow(new UnauthorizedException('Invalid signature'));
+
+      expect(credentialRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['validator'],
+      });
     });
   });
 });
