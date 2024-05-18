@@ -5,9 +5,10 @@ import {
   IsDateString,
   IsUrl,
   IsEnum,
+  IsNumber,
 } from 'class-validator';
-import { ChainId } from '@human-protocol/sdk';
 import { CredentialStatus } from '../../common/enums/credential';
+import { ChainId } from '@human-protocol/sdk';
 
 export class CreateCredentialDto {
   @ApiProperty()
@@ -81,6 +82,7 @@ export class CredentialDto {
 
 export class AddCredentialOnChainDto {
   @ApiProperty()
+  @IsNumber()
   public credential_id: number;
 
   @ApiProperty()
