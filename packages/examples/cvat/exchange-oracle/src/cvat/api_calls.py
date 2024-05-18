@@ -567,7 +567,7 @@ def restart_job(id: str, *, assignee_id: Optional[int] = None):
             api_client.jobs_api.partial_update(
                 id=id,
                 patched_job_write_request=models.PatchedJobWriteRequest(
-                    stage="annotation", state="new", assignee_id=assignee_id
+                    stage="annotation", state="new", assignee=assignee_id
                 ),
             )
         except exceptions.ApiException as e:
