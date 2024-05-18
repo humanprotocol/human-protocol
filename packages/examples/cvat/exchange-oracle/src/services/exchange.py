@@ -155,8 +155,10 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             + timedelta(seconds=get_default_assignment_timeout(TaskTypes(project.job_type))),
         )
 
-        cvat_api.clear_job_annotations(unassigned_job.cvat_id)
-        cvat_api.restart_job(unassigned_job.cvat_id, assignee_id=user.cvat_id)
+        with cvat_api.api_client_context(cvat_api.get_api_client()):
+            cvat_api.clear_job_annotations(unassigned_job.cvat_id)
+            cvat_api.restart_job(unassigned_job.cvat_id, assignee_id=user.cvat_id)
+
         # rollback is automatic within the transaction
 
     return assignment_id
