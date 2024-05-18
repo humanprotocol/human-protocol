@@ -1,17 +1,18 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, HttpException } from '@nestjs/common';
 import { CreateCredentialDto } from './credential.dto';
 import { CredentialRepository } from './credential.repository';
 import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { Web3Service } from '../web3/web3.service';
 import { verifySignature } from '../../common/utils/signature';
-import { ErrorAuth } from '../../common/constants/errors';
 import { ChainId, KVStoreClient, EscrowClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { UserType } from '../../common/enums/user';
 import { UserService } from '../user/user.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { UnauthorizedException } from '@nestjs/common';
+import { ErrorAuth } from '../../common/constants/errors';
 
 @Injectable()
 export class CredentialService {
@@ -143,28 +144,41 @@ export class CredentialService {
   }
 
   public async addCredentialOnChain(
-    reference: string,
+    credential_id: number,
     workerAddress: string,
     signature: string,
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<void> {
+    const credential = await this.credentialRepository.findOne({
+      where: { id: credential_id },
+      relations: ['validator'],
+    });
+
+    if (!credential) {
+      throw new HttpException('Credential not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (credential.status !== CredentialStatus.VALIDATED) {
+      throw new HttpException(
+        'Credential is not in a valid state for on-chain addition.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     let signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-
     const reputationOracleAddress =
       await escrowClient.getReputationOracleAddress(escrowAddress);
 
     const signatureBody = await this.userService.prepareSignatureBody(
       SignatureType.CERTIFICATE_AUTHENTICATION,
       reputationOracleAddress,
-      {
-        reference: reference,
-        workerAddress: workerAddress,
-      },
+      { reference: credential.reference, workerAddress },
     );
 
     if (!verifySignature(signatureBody.contents, signature, [workerAddress])) {
+      throw new UnauthorizedException('Invalid signature');
       throw new ControlledError(
         ErrorAuth.InvalidSignature,
         HttpStatus.UNAUTHORIZED,
@@ -179,8 +193,9 @@ export class CredentialService {
     } else {
       signer = this.web3Service.getSigner(ChainId.LOCALHOST);
     }
+
     const kvstore = await KVStoreClient.build(signer);
-    const key = `${reference}-${reputationOracleAddress}`;
+    const key = `${credential.reference}-${reputationOracleAddress}`;
     const value = JSON.stringify({
       signature,
       contents: signatureBody.contents,
@@ -188,8 +203,11 @@ export class CredentialService {
 
     await kvstore.set(key, value);
 
+    credential.status = CredentialStatus.ON_CHAIN;
+    await this.credentialRepository.save(credential);
+
     this.logger.log(
-      `Credential added to the blockchain for reference: ${reference}`,
+      `Credential added to the blockchain for ID: ${credential_id}`,
     );
   }
 }
