@@ -22,6 +22,11 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
+import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
+import { PasswordResetModule } from './modules/password-reset/password-reset.module';
+import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
+import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
+import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
 import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
 import Joi from 'joi';
 import { ChainId } from '@human-protocol/sdk';
@@ -69,6 +74,11 @@ import { ChainId } from '@human-protocol/sdk';
     OracleDiscoveryModule,
     StatisticsModule,
     KvStoreModule,
+    EmailConfirmationModule,
+    PasswordResetModule,
+    DisableOperatorModule,
+    KycProcedureModule,
+    PrepareSignatureModule,
     EscrowUtilsModule,
   ],
   controllers: [

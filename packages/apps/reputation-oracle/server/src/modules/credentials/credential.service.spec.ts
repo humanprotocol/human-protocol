@@ -11,6 +11,8 @@ import { CredentialStatus } from '../../common/enums/credential';
 import { CreateCredentialDto } from './credential.dto';
 import { UserType } from '../../common/enums/user';
 import { UserService } from '../user/user.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -369,6 +371,28 @@ describe('CredentialService', () => {
       await expect(
         credentialService.validateCredential('ref123'),
       ).rejects.toThrow('Credential not found.');
+    describe('validateCredential', () => {
+      it('should validate an active credential', async () => {
+        const credential = { status: 'ACTIVE' } as CredentialEntity;
+        jest
+          .spyOn(credentialRepository, 'findByReference')
+          .mockResolvedValue(credential);
+        jest.spyOn(credentialRepository, 'save').mockResolvedValue(credential);
+
+        await credentialService.validateCredential('ref123');
+        expect(credential.status).toEqual('VALIDATED');
+      });
+
+      it('should throw an error if the credential is not found', async () => {
+        jest
+          .spyOn(credentialRepository, 'findByReference')
+          .mockResolvedValue(null);
+        await expect(
+          credentialService.validateCredential('ref123'),
+        ).rejects.toThrow(
+          new ControlledError('Credential not found.', HttpStatus.BAD_REQUEST),
+        );
+      });
     });
   });
 });
