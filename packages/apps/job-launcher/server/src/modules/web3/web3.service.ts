@@ -75,7 +75,7 @@ export class Web3Service {
     if (gasPrice) {
       return gasPrice * BigInt(multiplier);
     }
-    throw new Error(ErrorWeb3.GasPriceError);
+    throw new ControlledError(ErrorWeb3.GasPriceError, HttpStatus.CONFLICT);
   }
 
   public getOperatorAddress(): string {

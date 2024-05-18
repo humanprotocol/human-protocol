@@ -24,6 +24,7 @@ xmltodict = "^0.13.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
 boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
+pyinstrument = "^4.6.2"
 
 
 [tool.poetry.group.dev.dependencies]

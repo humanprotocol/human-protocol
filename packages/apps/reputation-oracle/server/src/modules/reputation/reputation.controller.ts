@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseFilters } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -14,11 +14,9 @@ import {
   ReputationGetParamsDto,
   ReputationGetQueryDto,
 } from './reputation.dto';
-import { ReputationExceptionFilter } from '../../common/exceptions/reputation.filter';
 
 @Public()
 @ApiTags('Reputation')
-@UseFilters(ReputationExceptionFilter)
 @Controller('reputation')
 export class ReputationController {
   constructor(private readonly reputationService: ReputationService) {}

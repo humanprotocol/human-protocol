@@ -1,10 +1,11 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { ServerConfigService } from '../config/server-config.service';
+import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class CronAuthGuard implements CanActivate {
@@ -20,6 +21,6 @@ export class CronAuthGuard implements CanActivate {
       return true;
     }
 
-    throw new UnauthorizedException('Unauthorized');
+    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
   }
 }

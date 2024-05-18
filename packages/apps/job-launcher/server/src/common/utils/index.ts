@@ -109,7 +109,7 @@ export const parseUrl = (
     }
   }
 
-  throw new Error('Invalid URL');
+  throw new ControlledError('Invalid URL', HttpStatus.BAD_REQUEST);
 };
 
 export function hashStream(stream: Readable): Promise<string> {

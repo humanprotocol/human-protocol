@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, HttpException } from '@nestjs/common';
 import { CreateCredentialDto } from './credential.dto';
 import { CredentialRepository } from './credential.repository';
 import { CredentialEntity } from './credential.entity';
@@ -10,7 +10,9 @@ import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { UserType } from '../../common/enums/user';
 import { UserService } from '../user/user.service';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { ControlledError } from '../../common/errors/controlled';
+import { UnauthorizedException } from '@nestjs/common';
+import { ErrorAuth } from '../../common/constants/errors';
 
 @Injectable()
 export class CredentialService {
@@ -34,7 +36,10 @@ export class CredentialService {
     if (createCredentialDto.expiresAt) {
       const providedExpiresAt = new Date(createCredentialDto.expiresAt);
       if (providedExpiresAt <= newCredential.startsAt) {
-        throw new Error('ExpiresAt must be after StartsAt.');
+        throw new ControlledError(
+          'ExpiresAt must be after StartsAt.',
+          HttpStatus.BAD_REQUEST,
+        );
       } else {
         newCredential.expiresAt = providedExpiresAt;
       }
@@ -90,9 +95,12 @@ export class CredentialService {
       } else {
         throw new UnauthorizedException('Invalid user role');
       }
+      return query.getMany();
     } catch (error) {
-      this.logger.error(`Failed to fetch credentials: ${error.message}`);
-      throw new Error(`Failed to fetch credentials: ${error.message}`);
+      throw new ControlledError(
+        `Failed to fetch credentials: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -117,11 +125,17 @@ export class CredentialService {
       await this.credentialRepository.findByReference(reference);
 
     if (!credential) {
-      throw new Error('Credential not found.');
+      throw new ControlledError(
+        'Credential not found.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (credential.status !== CredentialStatus.ACTIVE) {
-      throw new Error('Credential is not in a valid state for validation.');
+      throw new ControlledError(
+        'Credential is not in a valid state for validation.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     credential.status = CredentialStatus.VALIDATED;
     await this.credentialRepository.save(credential);
@@ -165,6 +179,10 @@ export class CredentialService {
 
     if (!verifySignature(signatureBody.contents, signature, [workerAddress])) {
       throw new UnauthorizedException('Invalid signature');
+      throw new ControlledError(
+        ErrorAuth.InvalidSignature,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const currentWeb3Env = this.web3ConfigService.env;
