@@ -513,9 +513,9 @@ def get_free_job(
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(
             Job.cvat_project_id.in_(cvat_projects),
+            Job.status == JobStatuses.new,
             ~Job.assignments.any(
-                (Assignment.status == AssignmentStatuses.completed.value)
-                | (Assignment.status == AssignmentStatuses.created.value)
+                (Assignment.status == AssignmentStatuses.created.value)
                 & (Assignment.completed_at == None)
                 & (utcnow() < Assignment.expires_at)
             ),
