@@ -17,10 +17,10 @@ import { join } from 'path';
 import { StorageModule } from './modules/storage/storage.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
-import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { E2E_TEST_ENV } from './common/constants';
+import { ExceptionFilter } from './common/exceptions/exception.filter';
 
 @Module({
   providers: [
@@ -38,7 +38,7 @@ import { E2E_TEST_ENV } from './common/constants';
     },
     {
       provide: APP_FILTER,
-      useClass: DatabaseExceptionFilter,
+      useClass: ExceptionFilter,
     },
   ],
   imports: [

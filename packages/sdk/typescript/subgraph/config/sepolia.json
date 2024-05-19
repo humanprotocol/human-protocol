@@ -1,0 +1,35 @@
+{
+  "network": "sepolia",
+  "description": "HUMAN subgraph on Sepolia Ethereum Testnet",
+  "EscrowFactory": {
+    "address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
+    "startBlock": 5716237,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+    "startBlock": 5716225,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "KVStore": {
+    "address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+    "startBlock": 5716238,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "Staking": {
+    "address": "0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203",
+    "startBlock": 5716235,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "RewardPool": {
+    "address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+    "startBlock": 5716239,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

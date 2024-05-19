@@ -65,7 +65,7 @@ class TestEscrowUtils(unittest.TestCase):
             }
 
             def side_effect(subgraph_url, query, params):
-                if subgraph_url == NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"]:
+                if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"]:
                     return {"data": {"escrows": [mock_escrow_1]}}
                 else:
                     return {"data": {"escrows": [mock_escrow_2]}}
@@ -73,7 +73,7 @@ class TestEscrowUtils(unittest.TestCase):
             mock_function.side_effect = side_effect
 
             filter = EscrowFilter(
-                networks=[ChainId.POLYGON_MUMBAI],
+                networks=[ChainId.POLYGON_AMOY],
                 launcher="0x1234567890123456789012345678901234567891",
                 job_requester_id="1",
                 status=Status.Pending,
@@ -83,7 +83,7 @@ class TestEscrowUtils(unittest.TestCase):
             filtered = EscrowUtils.get_escrows(filter)
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
                 query=get_escrows_query(filter),
                 params={
                     "launcher": "0x1234567890123456789012345678901234567891",
@@ -99,12 +99,12 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].address, mock_escrow_1["address"])
 
-            filter = EscrowFilter(networks=[ChainId.POLYGON, ChainId.POLYGON_MUMBAI])
+            filter = EscrowFilter(networks=[ChainId.POLYGON, ChainId.POLYGON_AMOY])
 
             filtered = EscrowUtils.get_escrows(filter)
 
             mock_function.assert_called_with(
-                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
                 query=get_escrows_query(filter),
                 params={
                     "launcher": None,
@@ -119,7 +119,7 @@ class TestEscrowUtils(unittest.TestCase):
             )
             self.assertEqual(len(filtered), 2)
             self.assertEqual(filtered[0].chain_id, ChainId.POLYGON)
-            self.assertEqual(filtered[1].chain_id, ChainId.POLYGON_MUMBAI)
+            self.assertEqual(filtered[1].chain_id, ChainId.POLYGON_AMOY)
 
     def test_get_escrow(self):
         with patch(
@@ -155,18 +155,18 @@ class TestEscrowUtils(unittest.TestCase):
             }
 
             escrow = EscrowUtils.get_escrow(
-                ChainId.POLYGON_MUMBAI,
+                ChainId.POLYGON_AMOY,
                 "0x1234567890123456789012345678901234567890",
             )
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
                 query=get_escrow_query(),
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
                 },
             )
-            self.assertEqual(escrow.chain_id, ChainId.POLYGON_MUMBAI)
+            self.assertEqual(escrow.chain_id, ChainId.POLYGON_AMOY)
             self.assertEqual(escrow.address, mock_escrow["address"])
             self.assertEqual(escrow.amount_paid, int(mock_escrow["amountPaid"]))
 
@@ -181,11 +181,11 @@ class TestEscrowUtils(unittest.TestCase):
             }
 
             escrow = EscrowUtils.get_escrow(
-                ChainId.POLYGON_MUMBAI,
+                ChainId.POLYGON_AMOY,
                 "0x1234567890123456789012345678901234567890",
             )
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
                 query=get_escrow_query(),
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",

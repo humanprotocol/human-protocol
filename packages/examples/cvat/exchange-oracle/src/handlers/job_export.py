@@ -435,7 +435,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
                     elements=[
                         dm.Points(
                             [0, 0],
-                            visibility=[dm.Points.Visibility.hidden],
+                            visibility=[dm.Points.Visibility.absent],
                             label=merged_label_cat.find(
                                 point_label,
                                 parent=merged_label_cat[

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
-import { networks } from '../../common/config';
 import { Web3Env } from '../../common/enums/web3';
 import {
   LOCALHOST_CHAIN_IDS,
@@ -10,6 +9,7 @@ import {
 import { ErrorWeb3 } from '../../common/constant/errors';
 import { ChainId } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class Web3Service {
@@ -18,10 +18,13 @@ export class Web3Service {
   public readonly signerAddress: string;
   public readonly currentWeb3Env: string;
 
-  constructor(private readonly web3ConfigService: Web3ConfigService) {
+  constructor(
+    private readonly web3ConfigService: Web3ConfigService,
+    public readonly networkConfigService: NetworkConfigService,
+  ) {
     const privateKey = this.web3ConfigService.privateKey;
     const validChains = this.getValidChains();
-    const validNetworks = networks.filter((network) =>
+    const validNetworks = networkConfigService.networks.filter((network) =>
       validChains.includes(network.chainId),
     );
     for (const network of validNetworks) {

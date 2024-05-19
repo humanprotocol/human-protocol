@@ -61,6 +61,9 @@ export default function AuthLayout() {
                   <Link to="/jobs/pending">Pending</Link>
                 </ListItem>
                 <ListItem>
+                  <Link to="/jobs/partial">Partial</Link>
+                </ListItem>
+                <ListItem>
                   <Link to="/jobs/completed">Completed</Link>
                 </ListItem>
                 <ListItem>

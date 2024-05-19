@@ -9,20 +9,20 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   SignupWorkerCommand,
   SignupWorkerDto,
-} from './interfaces/worker-registration.interface';
+} from './model/worker-registration.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { WorkerService } from './worker.service';
 import {
   SigninWorkerCommand,
   SigninWorkerDto,
-} from './interfaces/worker-signin.interface';
-import { SigninWorkerResponse } from './interfaces/worker-signin.interface';
+} from './model/worker-signin.model';
+import { SigninWorkerResponse } from './model/worker-signin.model';
 
 @Controller()
 export class WorkerController {
   constructor(
-    private readonly authWorkerService: WorkerService,
+    private readonly service: WorkerService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
   @ApiTags('User-Worker')
@@ -35,7 +35,7 @@ export class WorkerController {
       SignupWorkerDto,
       SignupWorkerCommand,
     );
-    return this.authWorkerService.signupWorker(signupWorkerCommand);
+    return this.service.signupWorker(signupWorkerCommand);
   }
 
   @ApiTags('User-Worker')
@@ -50,6 +50,6 @@ export class WorkerController {
       SigninWorkerDto,
       SigninWorkerCommand,
     );
-    return this.authWorkerService.signinWorker(signinWorkerCommand);
+    return this.service.signinWorker(signinWorkerCommand);
   }
 }

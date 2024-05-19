@@ -16,7 +16,8 @@ import {
 } from '@mui/material';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
-import { useAccount, useNetwork, useSigner } from 'wagmi';
+import { Address } from 'viem';
+import { useAccount, useWalletClient } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
 import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
 import { useTokenRate } from '../../../hooks/useTokenRate';
@@ -36,13 +37,13 @@ export const CryptoPayForm = ({
   onError: (err: any) => void;
 }) => {
   const { isConnected } = useAccount();
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const { jobRequest, goToPrevStep } = useCreateJobPageUI();
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
-  const { data: signer } = useSigner();
+  const { data: signer } = useWalletClient();
   const { user } = useAppSelector((state) => state.auth);
   const { data: rate } = useTokenRate('hmt', 'usd');
 
@@ -77,23 +78,20 @@ export const CryptoPayForm = ({
           // send HMT token to operator and retrieve transaction hash
           const tokenAmount = walletPayAmount / rate;
 
-          const contract = new ethers.Contract(
-            tokenAddress,
-            HMTokenABI,
-            signer,
-          );
-
-          const tx = await contract.transfer(
-            await paymentService.getOperatorAddress(),
-            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18),
-          );
-
-          await tx.wait();
+          const hash = await signer.writeContract({
+            address: tokenAddress as Address,
+            abi: HMTokenABI,
+            functionName: 'transfer',
+            args: [
+              await paymentService.getOperatorAddress(),
+              ethers.parseUnits(tokenAmount.toFixed(2), 18),
+            ],
+          });
 
           // create crypto payment record
           await paymentService.createCryptoPayment(signer, {
             chainId: jobRequest.chainId,
-            transactionHash: tx.hash,
+            transactionHash: hash,
           });
         }
 
@@ -128,7 +126,7 @@ export const CryptoPayForm = ({
     }
   };
 
-  if (!chain || chain.unsupported || chain.id !== jobRequest.chainId)
+  if (!chain || chain.id !== jobRequest.chainId)
     return (
       <Box textAlign="center">
         <Typography textAlign="center">

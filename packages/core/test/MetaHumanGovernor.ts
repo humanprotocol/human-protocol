@@ -18,6 +18,7 @@ import {
   callReceiveMessageWithWormholeMock,
   updateVotingDelay,
   signProposal,
+  SECONDS_PER_BLOCK,
 } from './GovernanceUtils';
 
 describe.only('MetaHumanGovernor', function () {
@@ -95,9 +96,9 @@ describe.only('MetaHumanGovernor', function () {
       0,
       await wormholeMockForGovernor.getAddress(),
       owner.getAddress(),
-      12,
-      1,
-      300,
+      SECONDS_PER_BLOCK,
+      SECONDS_PER_BLOCK * 1,
+      SECONDS_PER_BLOCK * 300,
       0,
       4
     )) as MetaHumanGovernor;
@@ -122,7 +123,7 @@ describe.only('MetaHumanGovernor', function () {
       ethers.zeroPadBytes(await governor.getAddress(), 32),
       hubChainId, // hubChainId
       voteToken.getAddress(),
-      12, // voting period
+      SECONDS_PER_BLOCK, // voting period
       spokeChainId, // spokeChainId
       await wormholeMockForDaoSpoke.getAddress(),
       owner.getAddress() // admin address
@@ -304,7 +305,7 @@ describe.only('MetaHumanGovernor', function () {
 
     await expect(
       governor.connect(owner).updateSpokeContracts(spokeContracts)
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWithCustomError(governor, 'OwnableUnauthorizedAccount');
   });
 
   it('Should create a grant proposal', async function () {
@@ -430,7 +431,10 @@ describe.only('MetaHumanGovernor', function () {
 
     await expect(
       governor.connect(user1).castVote(proposalId, 1)
-    ).to.be.revertedWith('Governor: vote not currently active');
+    ).to.be.revertedWithCustomError(
+      governor,
+      'GovernorUnexpectedProposalState'
+    );
   });
 
   it('Should allow voting against', async function () {
@@ -781,23 +785,31 @@ describe.only('MetaHumanGovernor', function () {
 
     await expect(
       governor.execute(targets, values, calldatas, ethers.id('test1'))
-    ).to.be.revertedWith('Governor: proposal not successful');
+    ).to.be.revertedWithCustomError(governor, 'CollectionPhaseUnfinished');
   });
 
   it('Should get voting delay', async function () {
     const votingDelay = await governor.votingDelay();
-    expect(votingDelay).to.equal(1); //1 is just taken from MetaHumanGovernor.sol constructor (GovernorSettings)
+    expect(votingDelay).to.equal(SECONDS_PER_BLOCK * 1); // This is just taken from MetaHumanGovernor.sol constructor (GovernorSettings)
   });
 
   it('Should get voting period', async function () {
     const votingPeriod = await governor.votingPeriod();
-    expect(votingPeriod).to.equal(20 * 15); //5 is just taken from MetaHumanGovernor.sol constructor (GovernorSettings)
+    expect(votingPeriod).to.equal(SECONDS_PER_BLOCK * 20 * 15); // This is just taken from MetaHumanGovernor.sol constructor (GovernorSettings)
   });
 
   it('Should get proposal qorum', async function () {
     await mineNBlocks(3);
     const latestBlockNumber = await ethers.provider.getBlockNumber();
-    const quorum = await governor.quorum(latestBlockNumber - 1);
+    const oneBlockBeforLatest = await ethers.provider.getBlock(
+      latestBlockNumber - 1
+    );
+
+    if (!oneBlockBeforLatest) {
+      throw new Error('Block not found');
+    }
+
+    const quorum = await governor.quorum(oneBlockBeforLatest?.timestamp);
     expect(quorum).to.equal(ethers.parseEther('4'));
   });
 
@@ -816,7 +828,7 @@ describe.only('MetaHumanGovernor', function () {
     expect(state).to.equal(expectedState);
   });
 
-  it('Should get proposal state when not succeeded and collection not finished', async function () {
+  it('Should get proposal state when not succeeded', async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -828,11 +840,11 @@ describe.only('MetaHumanGovernor', function () {
     await mineNBlocks(50410);
 
     const state = await governor.state(proposalId);
-    const expectedState = 0;
+    const expectedState = 3;
     expect(state).to.equal(expectedState);
   });
 
-  it('Should get proposal state when succeded and collection not finished', async function () {
+  it('Should get proposal state when collection not finished', async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
@@ -851,7 +863,7 @@ describe.only('MetaHumanGovernor', function () {
     await mineNBlocks(50410);
 
     const state = await governor.state(proposalId);
-    const expectedState = 0;
+    const expectedState = 3; // we ensure it's not in pending state
     expect(state).to.equal(expectedState);
   });
 
@@ -894,11 +906,6 @@ describe.only('MetaHumanGovernor', function () {
 
   it('Should support interface IERC1155 Receiver', async function () {
     const supportsInterface = await governor.supportsInterface('0x4e2312e0');
-    expect(supportsInterface).to.be.true;
-  });
-
-  it('Should support interface IGovernorTimeLock', async function () {
-    const supportsInterface = await governor.supportsInterface('0x6e665ced');
     expect(supportsInterface).to.be.true;
   });
 
@@ -1235,12 +1242,14 @@ describe.only('MetaHumanGovernor', function () {
     const params = defaultAbiCoder.encode(['string'], ['test params']);
 
     // Cast vote
-
     await expect(
       governor
         .connect(user1)
         .castVoteWithReasonAndParams(proposalId, 1, 'test reason', params)
-    ).to.be.revertedWith('Governor: vote not currently active');
+    ).to.be.revertedWithCustomError(
+      governor,
+      'GovernorUnexpectedProposalState'
+    );
   });
 
   it('Should vote on proposal by signature', async function () {
@@ -1256,17 +1265,22 @@ describe.only('MetaHumanGovernor', function () {
 
     // create signature
     const support = 1;
-    const { v, r, s } = await signProposal(
+    const user1Address = await user1.getAddress();
+    const signature = await signProposal(
       proposalId,
       governor,
       support,
+      user1Address,
+      0,
       user1
     );
 
     // wait for next block
     await mineNBlocks(2);
     // cast vote with sig
-    await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s);
+    await governor
+      .connect(user1)
+      .castVoteBySig(proposalId, support, user1Address, signature);
 
     //assert votes
     const { againstVotes, forVotes, abstainVotes } =
@@ -1292,17 +1306,25 @@ describe.only('MetaHumanGovernor', function () {
 
     // create signature
     const support = 1;
-    const { v, r, s } = await signProposal(
+    const user1Address = await user1.getAddress();
+    const signature = await signProposal(
       proposalId,
       governor,
       support,
+      user1Address,
+      0,
       user1
     );
 
     // cast vote with sig
-    expect(
-      await governor.connect(user1).castVoteBySig(proposalId, support, v, r, s)
-    ).to.be.revertedWith('Governor: vote not currently active');
+    await expect(
+      governor
+        .connect(user1)
+        .castVoteBySig(proposalId, support, await user1.getAddress(), signature)
+    ).to.be.revertedWithCustomError(
+      governor,
+      'GovernorUnexpectedProposalState'
+    );
   });
 
   it('Should revert when creating proposal with propose', async function () {

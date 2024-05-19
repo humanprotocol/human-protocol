@@ -15,6 +15,7 @@ from src.crons.state_trackers import (
     track_completed_escrows,
     track_completed_projects,
     track_completed_tasks,
+    track_escrow_creation,
     track_task_creation,
 )
 
@@ -62,6 +63,11 @@ def setup_cron_jobs(app: FastAPI):
             track_task_creation,
             "interval",
             seconds=Config.cron_config.track_creating_tasks_int,
+        )
+        scheduler.add_job(
+            track_escrow_creation,
+            "interval",
+            seconds=Config.cron_config.track_escrow_creation_int,
         )
         scheduler.add_job(
             track_assignments,

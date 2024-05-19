@@ -5,7 +5,7 @@
   "license": "MIT",
   "devDependencies": {
     "dotenv-cli": "^7.3.0",
-    "ethers": "^5.7.2",
+    "ethers": "^6.12.1",
     "mustache": "^4.2.0"
   },
   "scripts": {
