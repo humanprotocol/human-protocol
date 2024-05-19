@@ -8,6 +8,7 @@ import {
   JobSortField,
   JobType,
 } from '../../common/enums/job';
+import { SortDirection } from '../../common/enums/collection';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 
 export class CreateAssignmentDto {
@@ -27,12 +28,21 @@ export class CreateAssignmentDto {
 export class GetAssignmentsDto extends PageOptionsDto {
   @ApiPropertyOptional({
     name: 'sort_field',
-    enum: JobSortField,
-    default: JobSortField.CREATED_AT,
+    enum: AssignmentSortField,
+    default: AssignmentSortField.CREATED_AT,
   })
   @IsOptional()
   @IsEnum(AssignmentSortField)
   sortField?: AssignmentSortField = AssignmentSortField.CREATED_AT;
+
+  @ApiPropertyOptional({
+    name: 'sort_order',
+    enum: SortDirection,
+    default: SortDirection.ASC,
+  })
+  @IsOptional()
+  @IsEnum(SortDirection)
+  sortOrder?: SortDirection = SortDirection.ASC;
 
   @ApiPropertyOptional({ name: 'chain_id' })
   @IsOptional()

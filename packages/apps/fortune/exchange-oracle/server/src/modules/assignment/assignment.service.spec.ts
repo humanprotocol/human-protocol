@@ -15,6 +15,8 @@ import { JobService } from '../job/job.service';
 import { Web3Service } from '../web3/web3.service';
 import { AssignmentDto, CreateAssignmentDto } from './assignment.dto';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
+import { AssignmentSortField } from '../../common/enums/job';
+import { SortDirection } from '../../common/enums/collection';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),
@@ -33,6 +35,19 @@ describe('AssignmentService', () => {
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
   const reputationNetwork = '0x1234567890123456789012345678901234567892';
+
+  const assignments = [
+    {
+      id: 1,
+      job: {
+        chainId: 1,
+        escrowAddress,
+      },
+      status: AssignmentStatus.ACTIVE,
+      createdAt: new Date(),
+      expiresAt: new Date(),
+    },
+  ];
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -67,7 +82,12 @@ describe('AssignmentService', () => {
         { provide: JobService, useValue: createMock<JobService>() },
         {
           provide: AssignmentRepository,
-          useValue: createMock<AssignmentRepository>(),
+          useValue: {
+            fetchFiltered: jest.fn(),
+            createUnique: jest.fn(),
+            findOneByJobIdAndWorker: jest.fn(),
+            countByJobId: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -269,6 +289,8 @@ describe('AssignmentService', () => {
           page: 0,
           pageSize: 10,
           skip: 0,
+          sortField: AssignmentSortField.CREATED_AT,
+          sortOrder: SortDirection.ASC,
         },
         workerAddress,
         reputationNetwork,
@@ -292,6 +314,82 @@ describe('AssignmentService', () => {
         chainId,
         escrowAddress,
       );
+      expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
+        pageSize: 10,
+        skip: 0,
+        reputationNetwork,
+        workerAddress,
+        sortField: AssignmentSortField.CREATED_AT,
+        sort: SortDirection.ASC,
+        chainId,
+        jobType: JobType.FORTUNE,
+        escrowAddress,
+        status: AssignmentStatus.ACTIVE,
+        assignmentId: undefined,
+      });
+    });
+
+    it('should return an empty array if no assignments are found', async () => {
+      jest
+        .spyOn(assignmentRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: [], itemCount: 0 });
+
+      const result = await assignmentService.getAssignmentList(
+        {
+          chainId,
+          jobType: JobType.FORTUNE,
+          escrowAddress,
+          status: AssignmentStatus.ACTIVE,
+          page: 1,
+          pageSize: 10,
+          skip: 0,
+          sortField: AssignmentSortField.CREATED_AT,
+          sortOrder: SortDirection.ASC,
+        },
+        workerAddress,
+        reputationNetwork,
+        MOCK_EXCHANGE_ORACLE,
+      );
+
+      expect(result.totalResults).toEqual(0);
+      expect(result.results).toEqual([]);
+    });
+
+    it('should handle different sort orders correctly', async () => {
+      jest
+        .spyOn(assignmentRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: assignments as any, itemCount: 1 });
+
+      const result = await assignmentService.getAssignmentList(
+        {
+          chainId,
+          jobType: JobType.FORTUNE,
+          escrowAddress,
+          status: AssignmentStatus.ACTIVE,
+          page: 1,
+          pageSize: 10,
+          skip: 0,
+          sortField: AssignmentSortField.CREATED_AT,
+          sortOrder: SortDirection.DESC,
+        },
+        workerAddress,
+        reputationNetwork,
+        MOCK_EXCHANGE_ORACLE,
+      );
+
+      expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
+        pageSize: 10,
+        skip: 0,
+        reputationNetwork,
+        workerAddress,
+        sortField: AssignmentSortField.CREATED_AT,
+        sort: SortDirection.DESC,
+        chainId,
+        jobType: JobType.FORTUNE,
+        escrowAddress,
+        status: AssignmentStatus.ACTIVE,
+        assignmentId: undefined,
+      });
     });
   });
 });
