@@ -8,10 +8,10 @@ import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 import { useKycSessionIdMutation } from '@/api/servieces/worker/get-kyc-session-id';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
-import { useSynaps } from '@/hooks/use-synaps';
 import { Button } from '@/components/ui/button';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { routerPaths } from '@/router/router-paths';
+import { startSynapsKyc } from '@/pages/worker/profile/start-synaps-kyc';
 
 export function ProfileActions({
   setNotifications,
@@ -20,7 +20,6 @@ export function ProfileActions({
 }) {
   const navigation = useNavigate();
   const { setTopNotification } = useProtectedLayoutNotification();
-  const { startSynapsKyc } = useSynaps();
   const {
     data: kycSessionIdData,
     mutate: kycSessionIdMutation,
