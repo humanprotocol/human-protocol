@@ -92,6 +92,7 @@ export function ProfileActions({
       </Grid>
       <Grid>
         <ProfileAction
+          // eslint-disable-next-line react/jsx-no-leaked-render -- ....
           done={isWalletConnected && user.kyc_status === 'APPROVED'}
           doneLabel={t('worker.profile.walletConnected')}
           toDoComponent={
@@ -113,6 +114,7 @@ export function ProfileActions({
           toDoComponent={
             <Button
               // TODO verify if info is added on chain
+              // eslint-disable-next-line react/jsx-boolean-value -- ...
               disabled={true}
               fullWidth
               variant="contained"

@@ -9,6 +9,7 @@ export function useDisableWeb3Operator() {
     mutationFn: async ({ signature }: { signature: string }) =>
       apiClient(apiPaths.operator.disableOperator.path, {
         skipValidation: true,
+        authenticated: true,
         options: {
           method: 'POST',
           body: JSON.stringify({ signature }),

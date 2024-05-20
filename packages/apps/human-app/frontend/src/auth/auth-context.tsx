@@ -1,7 +1,7 @@
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
-import { browserAuthProvider } from '@/auth/browser-auth-provider';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 
 const userDataSchema = z.object({

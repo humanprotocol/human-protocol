@@ -6,7 +6,7 @@ import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { browserAuthProvider } from '@/auth/browser-auth-provider';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,

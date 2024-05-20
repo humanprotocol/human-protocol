@@ -12,7 +12,10 @@ import { colorPalette } from '@/styles/color-palette';
 import { Buttons } from '@/pages/operator/sign-up/add-stake/buttons';
 import { StakeForm } from '@/pages/operator/sign-up/add-stake/stake-form';
 import { Alert } from '@/components/ui/alert';
-import { useGetStakedAmount } from '@/api/servieces/operator/get-stacked-amount';
+import {
+  stakedAmountFormatter,
+  useGetStakedAmount,
+} from '@/api/servieces/operator/get-stacked-amount';
 import { useAddStakeMutationState } from '@/api/servieces/operator/add-stake';
 import { useHMTokenDecimals } from '@/api/servieces/operator/human-token-decimals';
 
@@ -88,10 +91,10 @@ export function AddStakeOperatorPage() {
           {t('operator.addStake.label')}
         </Typography>
         <Typography color={colorPalette.primary.light} variant="body5">
-          {stakedAmount}
+          {stakedAmountFormatter(stakedAmount)}
         </Typography>
         {displayForm ? (
-          <StakeForm decimals={decimalsData} />
+          <StakeForm decimals={decimalsData} stakedAmount={stakedAmount} />
         ) : (
           <Buttons openForm={setDisplayForm.bind(null, true)} />
         )}
