@@ -5,7 +5,7 @@ import {
   useWeb3ModalAccount,
 } from '@web3modal/ethers/react';
 import type { JsonRpcSigner, BrowserProvider, Eip1193Provider } from 'ethers';
-import React, { createContext } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { useWeb3Provider } from '@/hooks/use-web3-provider';
 import { env } from '@/shared/env';
@@ -40,6 +40,7 @@ export interface CommonWalletConnectContext {
     ResponseError,
     Eip1193Provider
   >;
+  initializing: boolean;
 }
 
 interface ConnectedAccount {
@@ -73,6 +74,7 @@ export function WalletConnectProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const [initializing, setInitializing] = useState(true);
   const web3ProviderMutation = useWeb3Provider();
   const { open } = useWeb3Modal();
   const { address, chainId, isConnected } = useWeb3ModalAccount();
@@ -80,6 +82,15 @@ export function WalletConnectProvider({
   const openModal = async () => {
     await open();
   };
+
+  useEffect(() => {
+    if (
+      web3ProviderMutation.status === 'error' ||
+      web3ProviderMutation.status === 'success'
+    ) {
+      setInitializing(false);
+    }
+  }, [web3ProviderMutation]);
 
   return (
     <WalletConnectContext.Provider
@@ -93,11 +104,13 @@ export function WalletConnectProvider({
               openModal,
               signMessage: (message: string) =>
                 web3ProviderMutation.data.signer.signMessage(message),
+              initializing,
             }
           : {
               isConnected: false,
               web3ProviderMutation,
               openModal,
+              initializing,
             }
       }
     >
