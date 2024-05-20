@@ -1,0 +1,27 @@
+.page-wrapper{
+  background-color: $background-color;
+  margin: 0 56px;
+  min-height: calc(100vh - 206px);
+  padding: 30px 0 100px;
+
+  .container{
+    width: 90%;
+    margin: auto;
+  }
+
+  @media (max-width: 1000px) {
+    min-height: calc(100vh - 386px);
+    margin: 0 24px;
+  }
+
+  @media (max-width: 600px) {
+    margin: 0 16px;
+  }
+}
+
+.violet-header{
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+  background-size: 100% 100%;
+  background: linear-gradient(to bottom, $primary 252px, $background-color 1px);
+}
