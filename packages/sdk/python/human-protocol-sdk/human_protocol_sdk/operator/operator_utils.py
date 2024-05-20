@@ -202,6 +202,9 @@ class OperatorUtils:
         for chain_id in filter.networks:
             network = NETWORKS[chain_id]
 
+            if not network.get("subgraph_url"):
+                continue
+
             leaders_data = get_data_from_subgraph(
                 network["subgraph_url"],
                 query=get_leaders_query(filter),

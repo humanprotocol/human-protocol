@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import { ServerConfigService } from './common/config/server-config.service';
 import init from './app-init';
 import { ILeader, ILeadersFilter, OperatorUtils } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -24,7 +25,7 @@ async function bootstrap() {
   });
 
   const filter: ILeadersFilter = {
-    networks: [], // Example chain IDs
+    networks: [ChainId.POLYGON], // Example chain IDs
     // Add other filter properties if necessary
   };
 
