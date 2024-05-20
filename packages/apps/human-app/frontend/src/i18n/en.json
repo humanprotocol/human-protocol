@@ -175,6 +175,7 @@
       "password": "Password",
       "resetPassword": "Reset Password",
       "completeKYC": "Complete KYC",
+      "confirmEmail": "Confirm email",
       "kycCompleted": "KYC Completed",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",

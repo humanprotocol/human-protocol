@@ -25,6 +25,9 @@ export const apiPaths = {
     resendEmailVerification: {
       path: '/email-confirmation/resend-email-verification',
     },
+    kycSessionId: {
+      path: '/kyc/start',
+    },
     oracles: {
       path: '/oracles',
     },
