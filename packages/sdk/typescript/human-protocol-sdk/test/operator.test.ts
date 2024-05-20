@@ -135,7 +135,7 @@ describe('OperatorUtils', () => {
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
-    test.only('should return an empty array', async () => {
+    test('should return an empty array', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: null,
       });
