@@ -160,7 +160,7 @@ export class AuthService {
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.refreshTokenExpiresIn,
+      date.getTime() + this.authConfigService.refreshTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(newRefreshTokenEntity);
