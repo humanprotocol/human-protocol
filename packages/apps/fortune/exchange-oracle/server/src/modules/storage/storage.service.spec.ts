@@ -118,6 +118,7 @@ describe('StorageService', () => {
         s3ConfigService.bucket,
         `${escrowAddress}-${chainId}.json`,
         'encrypted',
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -152,6 +153,7 @@ describe('StorageService', () => {
         s3ConfigService.bucket,
         `${escrowAddress}-${chainId}.json`,
         'encrypted',
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
