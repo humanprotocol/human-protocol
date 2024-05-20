@@ -19,7 +19,6 @@ const LEADER_FRAGMENT = gql`
     publicKey
     webhookUrl
     url
-    jobTypes
   }
 `;
 

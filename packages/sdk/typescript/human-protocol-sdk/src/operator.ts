@@ -101,6 +101,10 @@ export class OperatorUtils {
           throw ErrorUnsupportedChainID;
         }
 
+        if (!networkData.subgraphUrl) {
+          continue;
+        }
+
         const gqlFilter = filter ?? { networks };
 
         const { leaders } = await gqlFetch<{
