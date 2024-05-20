@@ -33,23 +33,23 @@ export function EditExistingKeysForm({
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
       <Input
         fullWidth
-        label={EthKVStoreKeys.Fee}
+        label={t('operator.addKeysPage.existingKeys.fee')}
         mask="PercentsInputMask"
         name={EthKVStoreKeys.Fee}
       />
       <Input
         fullWidth
-        label={EthKVStoreKeys.PublicKey}
+        label={t('operator.addKeysPage.existingKeys.publicKey')}
         name={EthKVStoreKeys.PublicKey}
       />
       <Input
         fullWidth
-        label={EthKVStoreKeys.WebhookUrl}
+        label={t('operator.addKeysPage.existingKeys.webhookUrl')}
         name={EthKVStoreKeys.WebhookUrl}
       />
       <Select
         isChipRenderValue
-        label={EthKVStoreKeys.Role}
+        label={t('operator.addKeysPage.existingKeys.role')}
         name={EthKVStoreKeys.Role}
         options={OPTIONS.map((role, i) => ({ name: role, value: role, id: i }))}
       />

@@ -6,10 +6,10 @@ export enum Role {
 }
 
 export const EthKVStoreKeys = {
-  PublicKey: 'Public Key',
-  WebhookUrl: 'Webhook Url',
-  Role: 'Role',
-  Fee: 'Fee',
+  PublicKey: 'public_key',
+  WebhookUrl: 'webhook_url',
+  Role: 'role',
+  Fee: 'fee',
 } as const;
 
 interface EthKVStoreValues {

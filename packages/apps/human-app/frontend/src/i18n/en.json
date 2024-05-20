@@ -301,7 +301,11 @@
       },
       "existingKeys": {
         "title": "Existing keys",
-        "noValue": "No value",
+        "fee": "Fee",
+        "publicKey": "Public Key",
+        "webhookUrl": "Webhook URL",
+        "role": "Role",
+        "noValue": "no value",
         "editBtn": "Edit"
       },
       "editKeysForm": {

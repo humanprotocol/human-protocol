@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ...*/
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
@@ -5,8 +6,9 @@ import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { web3browserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
 
 const web3userDataSchema = z.object({
-  // TODO add valid schema that defines JWT payload
-  address: z.string().nullable().optional(),
+  userId: z.number(),
+  address: z.string(),
+  reputation_network: z.string(),
 });
 
 type Web3UserData = z.infer<typeof web3userDataSchema>;

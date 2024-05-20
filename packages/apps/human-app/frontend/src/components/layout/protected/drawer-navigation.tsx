@@ -5,67 +5,36 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Grid, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-import {
-  HelpIcon,
-  HumanLogoNavbarIcon,
-  UserOutlinedIcon,
-  WorkIcon,
-} from '@/components/ui/icons';
+import { HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 
-interface DrawerNavigationProps {
-  open: boolean;
-  drawerWidth: number;
-}
+const drawerWidth = 240;
 
-interface DrawerItem {
+export interface DrawerItem {
   label: string;
   link?: string;
   icon?: JSX.Element;
 }
 
-const topMenuItems: (DrawerItem | JSX.Element)[] = [
-  <Grid
-    key={crypto.randomUUID()}
-    sx={{
-      display: 'inline-flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: '0.8rem',
-    }}
-  >
-    <WorkIcon />
-    <Typography variant="body6">
-      {t('components.DrawerNavigation.jobs')}
-    </Typography>
-  </Grid>,
-  { label: t('components.DrawerNavigation.captchaLabelling') },
-  {
-    label: t('components.DrawerNavigation.jobsDiscovery'),
-    link: routerPaths.worker.jobs,
-  },
-];
+export type TopMenuItem = DrawerItem | JSX.Element;
+export type BottomMenuItem = DrawerItem;
+interface DrawerNavigationProps {
+  open: boolean;
+  topMenuItems?: TopMenuItem[];
+  bottomMenuItems?: BottomMenuItem[];
+}
 
-const bottomMenuItems: DrawerItem[] = [
-  {
-    label: t('components.DrawerNavigation.profile'),
-    link: routerPaths.worker.profile,
-    icon: <UserOutlinedIcon />,
-  },
-  {
-    label: t('components.DrawerNavigation.help'),
-    link: routerPaths.homePage,
-    icon: <HelpIcon />,
-  },
-];
-
-export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
+export function DrawerNavigation({
+  open,
+  topMenuItems,
+  bottomMenuItems,
+}: DrawerNavigationProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
@@ -105,7 +74,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
               marginTop: '66px',
             }}
           >
-            {topMenuItems.map((item, index) => {
+            {topMenuItems?.map((item, index) => {
               if (!('label' in item)) {
                 return (
                   <ListItem key={crypto.randomUUID()}>
@@ -159,7 +128,7 @@ export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
             })}
           </List>
           <List>
-            {bottomMenuItems.map(({ label, link, icon }) => (
+            {bottomMenuItems?.map(({ label, link, icon }) => (
               <ListItem alignItems="center" disablePadding key={link}>
                 <ListItemButton
                   alignItems="center"
