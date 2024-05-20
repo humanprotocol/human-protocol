@@ -6,7 +6,7 @@ const PageWrapper: FC<PropsWithChildren<{ violetHeader?: boolean }>> = ({ childr
   return (
     <>
       <Header/>
-      <div className={`page-wrapper ${violetHeader && 'violet-header'}`}>
+      <div className={`page-wrapper ${violetHeader ? 'violet-header' : ''}`}>
         <div className='container'>
           {children}
         </div>

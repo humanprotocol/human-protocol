@@ -1,6 +1,5 @@
 import { FC }  from 'react';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -16,17 +15,17 @@ const Footer: FC = () => {
     <footer>
       <div className='footer-link-wrapper'>
         <div className='footer-link'>
-          <Box component="span" color="text.secondary" onClick={() => handleClick('https://app.humanprotocol.org/')}>
+          <Typography component="span" color="text.secondary" onClick={() => handleClick('https://app.humanprotocol.org/')}>
             Privacy Policy
-          </Box>
-          <Box component="span" color="text.secondary" onClick={() => handleClick('https://app.humanprotocol.org/')}>
+          </Typography>
+          <Typography component="span" color="text.secondary" onClick={() => handleClick('https://app.humanprotocol.org/')}>
             Terms of Service
-          </Box>
-          <Box component="span" color="text.secondary" onClick={() => handleClick('https://app.humanprotocol.org/')}>
+          </Typography>
+          <Typography component="span" color="text.secondary" onClick={() => handleClick('https://app.humanprotocol.org/')}>
             HUMAN Protocol
-          </Box>
+          </Typography>
         </div>
-        <Typography color="text.secondary">
+        <Typography sx={{ fontSize: '12px' }} color="text.secondary">
           © 2021 HPF. HUMAN Protocol® is a registered trademark
         </Typography>
       </div>

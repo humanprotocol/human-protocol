@@ -5,10 +5,12 @@
   .header-list-link {
     display: flex;
     gap: 16px;
+    align-items: center;
     .header-link{
       font-weight: 600;
       padding: 6px 8px;
       cursor: pointer;
+      font-size: 14px;
     }
   }
 
@@ -46,6 +48,7 @@
     .header-link{
       font-weight: 600;
       padding: 6px 8px;
+      font-size: 14px;
     }
   }
 }
