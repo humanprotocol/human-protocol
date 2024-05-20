@@ -51,7 +51,9 @@
       "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
     },
     "table": {
-      "clearBtn": "clear"
+      "clearBtn": "Clear",
+      "sort": "Sort",
+      "filter": "Filter"
     },
     "modal": {
       "header": {
@@ -209,7 +211,9 @@
       "Polygon": "Polygon",
       "sortDirection": {
         "fromHighest": "From highest",
-        "fromLowest": "From lowest"
+        "fromLowest": "From lowest",
+        "furthestToNow": "Furthest to now",
+        "closestToNow": "Closest to now"
       },
       "mobileFilterDrawer": {
         "sortBy": "Sort by",

@@ -1,10 +1,15 @@
 /* eslint-disable camelcase -- api response*/
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { useTableQuery } from '@/components/ui/table/table-query-hook';
-import { getJobsTableData } from './my-jobs-table-service-mock';
+import { apiClient } from '@/api/api-client';
+import { apiPaths } from '@/api/api-paths';
+import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
+import { createPaginationSchema } from '@/shared/helpers/create-pagination-schema';
+import { getOracles } from '@/api/servieces/worker/oracles';
+import type { MyJobsFilterStoreProps } from '@/hooks/use-my-jobs-filter-store';
+import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 
-const JobsSchema = z.object({
+const myJobSchema = z.object({
   assignment_id: z.number(),
   escrow_address: z.string(),
   chain_id: z.number(),
@@ -16,24 +21,46 @@ const JobsSchema = z.object({
   expires_at: z.string(),
   url: z.string(),
 });
+const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
 
-const MyJobsSchema = z.object({
-  page: z.number(),
-  page_size: z.number(),
-  total_pages: z.number(),
-  total_results: z.number(),
-  results: z.array(JobsSchema),
-});
+export type MyJob = z.infer<typeof myJobSchema>;
+export type MyJobsSuccessResponse = z.infer<typeof myJobsSuccessResponseSchema>;
+export interface MyJobsWithJobTypes {
+  jobTypes: string[];
+  jobs: MyJobsSuccessResponse;
+}
 
-type MyJobs = z.infer<typeof MyJobsSchema>;
+type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'];
+
+const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
+  const oraclesResponse = await getOracles();
+  const oracle_address = oraclesResponse[0].address;
+  const jobTypes = oraclesResponse[0].jobTypes.map((jobType) =>
+    jobType.toUpperCase()
+  );
+
+  const jobs = await apiClient(
+    `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto, address: oracle_address })}`,
+    {
+      authenticated: true,
+      successSchema: myJobsSuccessResponseSchema,
+      options: {
+        method: 'GET',
+      },
+    }
+  );
+
+  return {
+    jobs,
+    jobTypes,
+  };
+};
 
 export function useGetMyJobsData() {
-  const {
-    fields: { sorting, pagination },
-  } = useTableQuery();
+  const { filterParams } = useMyJobsFilterStore();
 
-  return useQuery<MyJobs>({
-    queryKey: ['MyJobs', [sorting, pagination]],
-    queryFn: getJobsTableData,
+  return useQuery({
+    queryKey: ['myJobs', filterParams],
+    queryFn: () => getMyJobsTableData(filterParams),
   });
 }
