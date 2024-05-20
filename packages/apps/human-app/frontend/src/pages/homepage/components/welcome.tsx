@@ -65,9 +65,10 @@ export function Welcome({ setStage }: WelcomeProps) {
             sx={{
               marginTop: '1.875rem',
               marginBottom: '3.8125rem',
+              typography: { md: 'h5' },
             }}
             textAlign={isMobile ? 'center' : 'left'}
-            variant="h5"
+            variant="h6"
           >
             {t('homepage.completeJobs')}
           </Typography>
@@ -80,6 +81,7 @@ export function Welcome({ setStage }: WelcomeProps) {
             py: isMobile ? '32px' : '4.8125rem',
             backgroundColor: colorPalette.paper.light,
             boxShadow: 'none',
+            borderRadius: '20px',
           }}
         >
           <Button

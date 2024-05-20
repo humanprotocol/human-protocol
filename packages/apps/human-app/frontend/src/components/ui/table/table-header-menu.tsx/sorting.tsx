@@ -1,60 +1,35 @@
 import { Divider, Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
-import { useTranslation } from 'react-i18next';
-import { useTableQuery } from '@/components/ui/table/table-query-hook';
+import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 
-export type Sort = 'DESC' | 'ASC';
-
-export interface SortingOption {
-  sort: Sort;
-  text: string;
-}
-
 interface SortingMenuProps {
-  label: string;
-  columnId: string;
-  sortingOption: SortingOption[];
+  sortingOptions: { label: string; sortCallback: () => void }[];
+  clear: () => void;
 }
 
-export function Sorting({ sortingOption, columnId, label }: SortingMenuProps) {
-  const {
-    actions: { setSorting },
-  } = useTableQuery();
-  const { t } = useTranslation();
-
-  const clear = () => {
-    setSorting((prev) => prev.filter(({ id }) => id !== columnId));
-  };
-
-  const handleSorting = (selectedSorting: Sort) => {
-    setSorting((prev) => {
-      const prevSorting = prev.filter(({ id }) => id !== columnId);
-
-      return [
-        ...prevSorting,
-        { id: columnId, desc: selectedSorting === 'DESC' },
-      ];
-    });
-  };
-
+export function Sorting({ sortingOptions, clear }: SortingMenuProps) {
   return (
     <List sx={{ padding: 0 }}>
-      <ListItemText primary={label} sx={{ padding: '0.5rem' }}>
-        <Typography>{label}</Typography>
-      </ListItemText>
-      {sortingOption.map(({ sort, text }) => {
+      <Typography
+        color={colorPalette.text.secondary}
+        sx={{ padding: '0.5rem' }}
+        variant="body2"
+      >
+        {t('components.table.sort')}
+      </Typography>
+      {sortingOptions.map(({ label, sortCallback }) => {
         return (
           <ListItemText
-            key={text}
+            key={label}
             onClick={() => {
-              handleSorting(sort);
+              sortCallback();
             }}
-            sx={{ padding: '0.5rem', cursor: 'pointer' }}
+            sx={{ padding: '0.2rem 0.5rem', cursor: 'pointer' }}
           >
             <Typography color={colorPalette.primary.main} variant="subtitle2">
-              {text}
+              {label}
             </Typography>
           </ListItemText>
         );
@@ -64,7 +39,7 @@ export function Sorting({ sortingOption, columnId, label }: SortingMenuProps) {
         <Typography
           color={colorPalette.primary.main}
           onClick={clear}
-          variant="button"
+          variant="buttonMedium"
         >
           {t('components.table.clearBtn')}
         </Typography>

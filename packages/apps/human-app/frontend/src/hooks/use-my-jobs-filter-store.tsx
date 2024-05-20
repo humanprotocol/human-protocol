@@ -6,26 +6,30 @@ interface SearchUpdaterProps {
   value: string;
 }
 
-export interface JobsFilterStoreProps {
+export const jobStatuses = [
+  'ACTIVE',
+  'COMPLETED',
+  'CANCELED',
+  'VALIDATION',
+  'EXPIRED',
+  'REJECTED',
+] as const;
+
+type JobStatus = (typeof jobStatuses)[number];
+
+export interface MyJobsFilterStoreProps {
   filterParams: {
     sort?: 'ASC' | 'DESC';
-    sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
-    network?: 'MATIC' | 'POLYGON';
-    job_type?: 'FORTUNE';
-    status?:
-      | 'ACTIVE'
-      | 'COMPLETED'
-      | 'CANCELED'
-      | 'VALIDATION'
-      | 'EXPIRED'
-      | 'REJECTED';
+    sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'expires_at';
+    job_type?: string;
+    status?: JobStatus;
     escrow_address?: string;
     page: number;
     page_size: number;
-    fields: string[];
+    chain_id?: number;
   };
   setFilterParams: (
-    partialParams: Partial<JobsFilterStoreProps['filterParams']>
+    partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
   ) => void;
   resetFilterParams: () => void;
   setSearchEscrowAddress: (searchParams: SearchUpdaterProps[]) => void;
@@ -34,13 +38,12 @@ export interface JobsFilterStoreProps {
 const initialFiltersState = {
   page: 0,
   page_size: 5,
-  fields: ['reward_amount', 'job_description', 'reward_token'],
 };
 
-export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
+export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
   filterParams: initialFiltersState,
   setFilterParams: (
-    partialParams: Partial<JobsFilterStoreProps['filterParams']>
+    partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
   ) => {
     set((state) => ({
       ...state,

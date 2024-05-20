@@ -12,7 +12,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const auth = useAuth();
   const location = useLocation();
 
-  if (auth.isPending) {
+  if (auth.status === 'loading') {
     return <PageCardLoader />;
   }
 

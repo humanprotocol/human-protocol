@@ -21,7 +21,8 @@
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
     "errorWithStatusCode": "Error with status code: {{code}}",
-    "unknown": "An error occurred, please try again."
+    "unknown": "An error occurred, please try again.",
+    "unknownNetwork": "Unknown network"
   },
   "components": {
     "multiSelect": {
@@ -50,7 +51,9 @@
       "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
     },
     "table": {
-      "clearBtn": "clear"
+      "clearBtn": "Clear",
+      "sort": "Sort",
+      "filter": "Filter"
     },
     "modal": {
       "header": {
@@ -187,6 +190,7 @@
       }
     },
     "jobs": {
+      "successFullyAssignedJob": "Successfully assigned a job!",
       "errorFetchingData": "There was an error while fetching data, please try again",
       "availableJobs": "Available Jobs",
       "myJobs": "My Jobs",
@@ -208,7 +212,9 @@
       "Polygon": "Polygon",
       "sortDirection": {
         "fromHighest": "From highest",
-        "fromLowest": "From lowest"
+        "fromLowest": "From lowest",
+        "furthestToNow": "Furthest to now",
+        "closestToNow": "Closest to now"
       },
       "mobileFilterDrawer": {
         "sortBy": "Sort by",

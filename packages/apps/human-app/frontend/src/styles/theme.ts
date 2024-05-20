@@ -104,8 +104,8 @@ export const theme: ThemeOptions = {
       fontWeight: 600,
       letterSpacing: 0.25,
       [breakpoints.mobile]: {
-        fontSize: 20,
-        fontWeight: 500,
+        fontSize: 28,
+        fontWeight: 600,
         letterSpacing: 0.15,
       },
     },
@@ -301,6 +301,16 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         root: {
           cursor: 'pointer',
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          fontSize: 'inherit',
+          backgroundColor: colorPalette.white,
+          boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
+          color: colorPalette.text.primary,
         },
       },
     },

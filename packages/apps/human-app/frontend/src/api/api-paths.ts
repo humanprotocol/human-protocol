@@ -28,5 +28,30 @@ export const apiPaths = {
     kycSessionId: {
       path: '/kyc/start',
     },
+    oracles: {
+      path: '/oracles',
+    },
+    jobs: {
+      path: '/jobs',
+    },
+    myJobs: {
+      path: '/assignment/job',
+    },
+    assignJob: {
+      path: '/assignment/job',
+    },
+  },
+  operator: {
+    web3Auth: {
+      prepareSignature: {
+        path: '/prepare-signature',
+      },
+      signUp: {
+        path: '/auth/web3/signup',
+      },
+      signIn: {
+        path: '/auth/web3/signin',
+      },
+    },
   },
 } as const;
