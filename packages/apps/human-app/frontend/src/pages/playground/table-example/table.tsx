@@ -29,17 +29,10 @@ const columns: MRT_ColumnDef<Person>[] = [
           {...props}
           popoverContent={
             <Sorting
-              columnId="name.lastName"
-              label="Sorting"
-              sortingOption={[
-                {
-                  sort: 'ASC',
-                  text: 'Asc alphabetic',
-                },
-                {
-                  sort: 'DESC',
-                  text: 'Desc alphabetic',
-                },
+              clear={() => undefined}
+              sortingOptions={[
+                { label: 'test1', sortCallback: () => undefined },
+                { label: 'test2', sortCallback: () => undefined },
               ]}
             />
           }
@@ -57,8 +50,10 @@ const columns: MRT_ColumnDef<Person>[] = [
           {...props}
           popoverContent={
             <Filtering
-              filteringOptions={[{ value: 'test', text: 'Example label' }]}
-              label="Filter"
+              clear={() => undefined}
+              filteringOptions={[{ name: 'test', option: 'test' }]}
+              isChecked={(option) => option === 'test'}
+              setFiltering={() => undefined}
             />
           }
         />

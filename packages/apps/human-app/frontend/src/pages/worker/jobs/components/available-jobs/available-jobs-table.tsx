@@ -11,8 +11,8 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
 import type { AssignJobBody } from '@/api/servieces/worker/assign-job';
 import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
-import { EscrowAddress } from '@/pages/worker/jobs/components/available-jobs/escrow-address';
-import { RewardAmount } from '@/pages/worker/jobs/components/available-jobs/reward-amount';
+import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
+import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { Button } from '@/components/ui/button';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
@@ -42,7 +42,7 @@ const getColumns = (callbacks: {
       size: 100,
       enableSorting: true,
       Cell: (props) => {
-        return <EscrowAddress address={props.cell.getValue() as string} />;
+        return <EvmAddress address={props.cell.getValue() as string} />;
       },
     },
     {
