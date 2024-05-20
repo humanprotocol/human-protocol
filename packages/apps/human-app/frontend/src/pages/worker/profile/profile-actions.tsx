@@ -92,7 +92,7 @@ export function ProfileActions({
       </Grid>
       <Grid>
         <ProfileAction
-          done={isWalletConnected}
+          done={isWalletConnected && user.kyc_status === 'APPROVED'}
           doneLabel={t('worker.profile.walletConnected')}
           toDoComponent={
             <ConnectWalletBtn
@@ -107,11 +107,13 @@ export function ProfileActions({
       </Grid>
       <Grid>
         <ProfileAction
-          done={Boolean(user.kyc_added_on_chain)}
+          // TODO verify if info is added on chain
+          done={false}
           doneLabel={t('worker.profile.kycInfoOnChainAdded')}
           toDoComponent={
             <Button
-              disabled={!isWalletConnected || user.kyc_status === 'APPROVED'}
+              // TODO verify if info is added on chain
+              disabled={true}
               fullWidth
               variant="contained"
             >
