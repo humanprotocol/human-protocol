@@ -14,22 +14,24 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { Public } from '../../common/decorators';
 import {
+  DisableOperatorDto,
+  PrepareSignatureDto,
   RegisterAddressRequestDto,
   RegisterAddressResponseDto,
+  SignatureBodyDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
+import { Public } from '../../common/decorators';
 
 @ApiTags('User')
 @Controller('/user')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Public()
   @Post('/register-address')
   @HttpCode(200)
   @ApiOperation({
@@ -72,7 +74,7 @@ export class UserController {
     summary: 'Disable an operator',
     description: 'Endpoint to disable an operator.',
   })
-  @ApiBody({ type: String })
+  @ApiBody({ type: DisableOperatorDto })
   @ApiResponse({
     status: 204,
     description: 'Operator disabled succesfully',
@@ -82,9 +84,32 @@ export class UserController {
     description: 'Not Found. Could not find the requested content.',
   })
   public disableOperator(
-    @Body() signature: string,
+    @Body() data: DisableOperatorDto,
     @Request() req: RequestWithUser,
   ): Promise<void> {
-    return this.userService.disableOperator(req.user, signature);
+    return this.userService.disableOperator(req.user, data.signature);
+  }
+
+  @Public()
+  @Post('/prepare-signature')
+  @ApiOperation({
+    summary: 'Web3 signature body',
+    description:
+      'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms.',
+  })
+  @ApiBody({ type: PrepareSignatureDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Typed structured data object generated successfully',
+    type: SignatureBodyDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async prepareSignature(
+    @Body() data: PrepareSignatureDto,
+  ): Promise<SignatureBodyDto> {
+    return await this.userService.prepareSignatureBody(data.type, data.address);
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
 import { ErrorCronJob } from '../../common/constants/errors';
@@ -6,20 +6,20 @@ import { ErrorCronJob } from '../../common/constants/errors';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { JobService } from '../job/job.service';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
-import { StorageService } from '../storage/storage.service';
 import {
   EventType,
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
+import { ControlledError } from '../../common/errors/controlled';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -30,7 +30,6 @@ export class CronJobService {
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
-    private readonly storageService: StorageService,
     private readonly paymentService: PaymentService,
     private readonly webhookRepository: WebhookRepository,
   ) {}
@@ -63,14 +62,14 @@ export class CronJobService {
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.Completed);
+      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
     }
 
     cronJobEntity.completedAt = new Date();
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -101,6 +100,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('1-59/2 * * * *')
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
@@ -134,6 +134,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async fundEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.FundEscrow,
@@ -167,6 +168,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async cancelCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CancelEscrow,
@@ -204,10 +206,6 @@ export class CronJobService {
           jobEntity.status = JobStatus.CANCELED;
           await this.jobRepository.updateOne(jobEntity);
 
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
@@ -235,6 +233,7 @@ export class CronJobService {
     return true;
   }
 
+  @Cron('*/5 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.

@@ -1,14 +1,13 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Request,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -25,21 +24,23 @@ import {
   JobFortuneDto,
   JobCvatDto,
   JobListDto,
-  JobCancelDto,
   JobDetailsDto,
   JobIdDto,
   FortuneFinalResultDto,
   JobCaptchaDto,
   JobQuickLaunchDto,
+  JobCancelDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Job')
+@ApiKey()
 @Controller('/job')
 export class JobController {
   constructor(private readonly jobService: JobService) {}
@@ -68,7 +69,6 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/quick-launch')
-  @ApiKey()
   public async quickLaunch(
     @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
@@ -99,7 +99,6 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/fortune')
-  @ApiKey()
   public async createFortuneJob(
     @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
@@ -164,7 +163,10 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
   ): Promise<number> {
-    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    throw new ControlledError(
+      'Hcaptcha jobs disabled temporally',
+      HttpStatus.UNAUTHORIZED,
+    );
     return this.jobService.createJob(
       req.user.id,
       JobRequestType.HCAPTCHA,
@@ -207,7 +209,7 @@ export class JobController {
     @Query('status') status: JobStatusFilter,
     @Query('skip') skip = 0,
     @Query('limit') limit = 10,
-  ): Promise<JobListDto[] | BadRequestException> {
+  ): Promise<JobListDto[]> {
     networks = !Array.isArray(networks) ? [networks] : networks;
     return this.jobService.getJobsByStatus(
       networks,
@@ -222,7 +224,6 @@ export class JobController {
     summary: 'Get the result of a job',
     description: 'Endpoint to retrieve the result of a specified job.',
   })
-  @ApiKey()
   @ApiResponse({
     status: 200,
     description: 'Result of the specified job.',
@@ -246,7 +247,42 @@ export class JobController {
 
   @ApiOperation({
     summary: 'Cancel a job',
-    description: 'Endpoint to cancel a specified job.',
+    description:
+      'Endpoint to cancel a specified job by its associated chain ID and escrow address.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cancellation request for the specified job accepted',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
+  @Patch('/cancel/:chain_id/:escrow_address')
+  public async cancelJobByChainIdAndEscrowAddress(
+    @Request() req: RequestWithUser,
+    @Param('chain_id') chainId: ChainId,
+    @Param('escrow_address') escrowAddress: string,
+  ): Promise<void> {
+    await this.jobService.requestToCancelJobByAddress(
+      req.user.id,
+      chainId,
+      escrowAddress,
+    );
+    return;
+  }
+
+  @ApiOperation({
+    summary: 'Cancel a job',
+    description: 'Endpoint to cancel a specified job by its unique identifier.',
   })
   @ApiResponse({
     status: 200,
@@ -265,11 +301,11 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Patch('/cancel/:id')
-  public async cancelJob(
+  public async cancelJobById(
     @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
   ): Promise<void> {
-    await this.jobService.requestToCancelJob(req.user.id, params.id);
+    await this.jobService.requestToCancelJobById(req.user.id, params.id);
     return;
   }
 
@@ -291,7 +327,6 @@ export class JobController {
     description: 'Not Found. Could not find the requested content.',
   })
   @Get('/details/:id')
-  @ApiKey()
   public async getDetails(
     @Request() req: RequestWithUser,
     @Param() params: JobIdDto,

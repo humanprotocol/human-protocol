@@ -1,25 +1,26 @@
 import KVStore from '@human-protocol/core/abis/KVStore.json';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { useState, useEffect, FC } from 'react';
-import { useAccount, useContractRead, useNetwork } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 
 import { AfterConnect } from './AfterConnect';
 import { Dashboard } from './Dashboard';
 import { MainPage } from './MainPage';
+import { useNotification } from 'src/providers/NotificationProvider';
 
 export const KvstoreView: FC = () => {
-  const { isConnected, address } = useAccount();
-  const { chain } = useNetwork();
+  const { isConnected, address, chain } = useAccount();
   const [publicKey, setPublicKey] = useState<string>('');
   const [step, setStep] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [pubkeyExist, setPubkeyExist] = useState<boolean>(false);
-  const { data, refetch } = useContractRead({
+  const { data, refetch } = useReadContract({
     address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'get',
     args: [address, 'public_key'],
   });
+  const { showMessage } = useNotification();
 
   useEffect(() => {
     if (publicKey?.trim().length === 0) {
@@ -32,9 +33,20 @@ export const KvstoreView: FC = () => {
     }
   }, [data, chain, publicKey]);
 
+  useEffect(() => {
+    if (isConnected && !chain) {
+      showMessage(
+        'Unsupported network.',
+        'Please switch to the one of the supported networks.',
+        'error'
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, chain]);
+
   return (
     <>
-      {!isConnected && <MainPage />}
+      {(!isConnected || !chain) && <MainPage />}
       {isConnected && publicKey?.trim().length === 0 && (
         <AfterConnect
           refetch={refetch}

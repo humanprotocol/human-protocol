@@ -1,11 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
@@ -18,10 +12,10 @@ import { HttpService } from '@nestjs/axios';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
   constructor(
     private readonly httpService: HttpService,
     private readonly webhookRepository: WebhookRepository,
@@ -36,27 +30,24 @@ export class WebhookService {
    * @throws {Error} - An error object if an error occurred.
    */
   public async createIncomingWebhook(dto: WebhookDto): Promise<void> {
-    try {
-      if (dto.eventType !== EventType.TASK_COMPLETED) {
-        this.logger.log(ErrorWebhook.InvalidEventType, WebhookService.name);
-        throw new BadRequestException(ErrorWebhook.InvalidEventType);
-      }
+    if (dto.eventType !== EventType.TASK_COMPLETED) {
+      throw new ControlledError(
+        ErrorWebhook.InvalidEventType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-      let webhookEntity = new WebhookIncomingEntity();
-      webhookEntity.chainId = dto.chainId;
-      webhookEntity.escrowAddress = dto.escrowAddress;
-      webhookEntity.status = WebhookStatus.PENDING;
-      webhookEntity.waitUntil = new Date();
-      webhookEntity.retriesCount = 0;
+    let webhookEntity = new WebhookIncomingEntity();
+    webhookEntity.chainId = dto.chainId;
+    webhookEntity.escrowAddress = dto.escrowAddress;
+    webhookEntity.status = WebhookStatus.PENDING;
+    webhookEntity.waitUntil = new Date();
+    webhookEntity.retriesCount = 0;
 
-      webhookEntity = await this.webhookRepository.createUnique(webhookEntity);
+    webhookEntity = await this.webhookRepository.createUnique(webhookEntity);
 
-      if (!webhookEntity) {
-        this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
-        throw new NotFoundException(ErrorWebhook.NotCreated);
-      }
-    } catch (e) {
-      throw new Error(e);
+    if (!webhookEntity) {
+      throw new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -95,8 +86,7 @@ export class WebhookService {
     );
 
     if (status !== HttpStatus.CREATED) {
-      this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.NotSent);
+      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
     }
   }
 }

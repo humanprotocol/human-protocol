@@ -7,12 +7,11 @@ import {
   UseGuards,
   UseInterceptors,
   Request,
-  UnprocessableEntityException,
   Logger,
   UsePipes,
   Ip,
-  UseFilters,
   HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -39,9 +38,9 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
-import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -60,7 +59,6 @@ import { TokenType } from './token.entity';
   status: 422,
   description: 'Unprocessable entity.',
 })
-@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
@@ -249,15 +247,16 @@ export class AuthJwtController {
     @Request() req: RequestWithUser,
   ): Promise<ApiKeyDto> {
     try {
-      const apiKey = await this.authService.createOrUpdateAPIKey(req.user.id);
+      const apiKey = await this.authService.createOrUpdateAPIKey(req.user);
       return { apiKey };
     } catch (e) {
       this.logger.log(
         e.message,
         `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
       );
-      throw new UnprocessableEntityException(
+      throw new ControlledError(
         ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

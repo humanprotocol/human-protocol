@@ -36,7 +36,7 @@ def add_cvat_project_to_db(cvat_id: int) -> str:
             status="annotation",
             job_type="IMAGE_LABEL_BINARY",
             escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
-            chain_id=80001,
+            chain_id=80002,
             bucket_url="https://test.storage.googleapis.com/",
         )
 

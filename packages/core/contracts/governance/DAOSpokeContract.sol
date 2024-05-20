@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/Timers.sol';
-import '@openzeppelin/contracts/utils/Checkpoints.sol';
+import '@openzeppelin/contracts/utils/structs/Checkpoints.sol';
 import '@openzeppelin/contracts/governance/utils/IVotes.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 
@@ -130,7 +129,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
 
         uint256 weight = token.getPastVotes(
             msg.sender,
-            proposal.localVoteStartBlock
+            proposal.localVoteStart
         );
         _countVote(proposalId, msg.sender, support, weight);
 
@@ -300,6 +299,45 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
                 address(uint160(uint256(hubContractAddress)))
             );
         }
+    }
+
+    function sendVoteResultToHub(
+        uint256 proposalId
+    ) public payable onlyMagistrate {
+        require(
+            proposals[proposalId].voteFinished,
+            'DAOSpokeContract: vote is not finished'
+        );
+
+        ProposalVote storage votes = proposalVotes[proposalId];
+        bytes memory messageToSend = abi.encode(
+            0,
+            proposalId,
+            votes.forVotes,
+            votes.againstVotes,
+            votes.abstainVotes
+        );
+        bytes memory payloadToSend = abi.encode(
+            hubContractAddress,
+            hubContractChainId,
+            msg.sender,
+            messageToSend
+        );
+
+        // Send a message to other contracts
+        // Cost of requesting a message to be sent to
+        // chain 'targetChain' with a gasLimit of 'GAS_LIMIT'
+        uint256 cost = quoteCrossChainMessage(hubContractChainId);
+
+        wormholeRelayer.sendPayloadToEvm{value: cost}(
+            hubContractChainId,
+            address(uint160(uint256(hubContractAddress))),
+            payloadToSend,
+            0, // no receiver value needed
+            GAS_LIMIT,
+            hubContractChainId,
+            address(uint160(uint256(hubContractAddress)))
+        );
     }
 
     /**

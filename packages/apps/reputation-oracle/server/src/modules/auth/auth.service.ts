@@ -1,15 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
-import { UserStatus } from '../../common/enums/user';
-import { UserCreateDto, Web3UserCreateDto } from '../user/user.dto';
+import { OperatorStatus, UserStatus } from '../../common/enums/user';
+import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
@@ -33,14 +27,13 @@ import { Web3Service } from '../web3/web3.service';
 import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { UserRepository } from '../user/user.repository';
-import { AuthError } from './auth.error';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   private readonly salt: string;
 
   constructor(
@@ -67,7 +60,7 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
     const userEntity = await this.userService.getByCredentials(
       data.email,
@@ -75,11 +68,10 @@ export class AuthService {
     );
 
     if (!userEntity) {
-      throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
-    }
-
-    if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
+      throw new ControlledError(
+        ErrorAuth.InvalidEmailOrPassword,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return this.auth(userEntity);
@@ -97,7 +89,7 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED)
     // }
     const userEntity = await this.userService.create(data);
 
@@ -134,11 +126,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(ErrorAuth.InvalidToken);
+      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.TokenExpired);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     return this.auth(tokenEntity.user);
@@ -185,11 +177,11 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
-      throw new AuthError(ErrorUser.NotFound);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
     }
 
     if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new AuthError(ErrorUser.UserNotActive);
+      throw new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -240,7 +232,7 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED)
     // }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
@@ -249,11 +241,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(ErrorAuth.InvalidToken);
+      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.TokenExpired);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -279,11 +271,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(ErrorAuth.NotFound);
+      throw new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.TokenExpired);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     tokenEntity.user.status = UserStatus.ACTIVE;
@@ -296,7 +288,7 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
-      throw new AuthError(ErrorUser.NotFound);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -343,7 +335,7 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = this.web3Service.prepareSignatureBody(
+    const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
       data.address,
     );
@@ -353,7 +345,10 @@ export class AuthService {
     ]);
 
     if (!verified) {
-      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+      throw new ControlledError(
+        ErrorAuth.InvalidSignature,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     let kvstore: KVStoreClient;
@@ -364,7 +359,7 @@ export class AuthService {
       );
     } else {
       kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON_MUMBAI),
+        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
       );
     }
 
@@ -373,40 +368,33 @@ export class AuthService {
         await kvstore.get(data.address, KVStoreKeys.role),
       )
     ) {
-      throw new BadRequestException(ErrorAuth.InvalidRole);
+      throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
-    const nonce = await this.getNonce(data.address);
 
-    const web3UserCreateDto: Web3UserCreateDto = {
-      evmAddress: data.address,
-      nonce: nonce,
-    };
+    const userEntity = await this.userService.createWeb3User(data.address);
 
-    const userEntity = await this.userService.createWeb3User(
-      web3UserCreateDto,
-      data.address,
-    );
-
-    await kvstore.set(data.address, 'ACTIVE');
+    await kvstore.set(data.address, OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
-  }
-
-  public async getNonce(address: string): Promise<string> {
-    const userEntity = await this.userService.getByAddress(address);
-
-    return userEntity.nonce;
   }
 
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByAddress(data.address);
 
-    const verified = verifySignature(userEntity.nonce, data.signature, [
-      data.address,
-    ]);
+    const verified = verifySignature(
+      await this.userService.prepareSignatureBody(
+        SignatureType.SIGNIN,
+        data.address,
+      ),
+      data.signature,
+      [data.address],
+    );
 
     if (!verified) {
-      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+      throw new ControlledError(
+        ErrorAuth.InvalidSignature,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     await this.userService.updateNonce(userEntity);

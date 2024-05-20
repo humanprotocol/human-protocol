@@ -93,6 +93,20 @@ export const NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
     oldFactoryAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
   },
+  [ChainId.SEPOLIA]: {
+    chainId: ChainId.SEPOLIA,
+    title: 'Ethereum Sepolia',
+    scanUrl: 'https://sepolia.etherscan.io/',
+    factoryAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    stakingAddress: '0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203',
+    rewardPoolAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
+    kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
+    subgraphUrl:
+      'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.BSC_MAINNET]: {
     chainId: ChainId.BSC_MAINNET,
     title: 'Binance Smart Chain',
@@ -150,6 +164,20 @@ export const NETWORKS: {
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
     oldFactoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
+  },
+  [ChainId.POLYGON_AMOY]: {
+    chainId: ChainId.POLYGON_AMOY,
+    title: 'Polygon Amoy',
+    scanUrl: 'https://www.oklink.com/amoy',
+    factoryAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    stakingAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
+    rewardPoolAddress: '0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7',
+    kvstoreAddress: '0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7',
+    subgraphUrl:
+      'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
   },
   [ChainId.MOONBEAM]: {
     chainId: ChainId.MOONBEAM,
@@ -251,6 +279,34 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
   },
+  [ChainId.XLAYER]: {
+    chainId: ChainId.XLAYER,
+    title: 'XLayer',
+    scanUrl: 'https://www.oklink.com/xlayer',
+    factoryAddress: '0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15',
+    hmtAddress: '0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa',
+    stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
+    rewardPoolAddress: '0x7ABa5F75b2b530cB0c8927C86591c21dF44f06b6',
+    kvstoreAddress: '0x6512d894cc3d3FE93Da9d0420430136fA889FaB9',
+    subgraphUrl:
+      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
+  [ChainId.XLAYER_TESTNET]: {
+    chainId: ChainId.XLAYER_TESTNET,
+    title: 'XLayer Testnet',
+    scanUrl: 'https://www.okx.com/explorer/xlayer-test',
+    factoryAddress: '0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e',
+    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    stakingAddress: '0x819069fEd50581587fAB9E583b5488fc2D33B7ea',
+    rewardPoolAddress: '0x6daccd1f3a68945f8a7ac6d20260953f7a97fae4',
+    kvstoreAddress: '0xdE8BE9E3C12E9F546309A429cd88d026a25EaF8C',
+    subgraphUrl:
+      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',
@@ -272,10 +328,10 @@ export const KVStoreKeys = {
   publicKey: 'public_key',
   webhookUrl: 'webhook_url',
   url: 'url',
+  jobTypes: 'job_types',
 };
 
 export const Role = {
-  Validator: 'Validator',
   JobLauncher: 'Job Launcher',
   ExchangeOracle: 'Exchange Oracle',
   ReputationOracle: 'Reputation Oracle',

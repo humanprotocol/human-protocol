@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import List
 
 import src.cvat.api_calls as cvat_api
@@ -8,6 +9,7 @@ from src.core.config import CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
 from src.db import SessionLocal
+from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_completed_escrows
 from src.log import ROOT_LOGGER_NAME
@@ -203,6 +205,9 @@ def track_task_creation() -> None:
                 for_update=ForUpdateParams(skip_locked=True),
             )
 
+            if not uploads:
+                return
+
             logger.debug(
                 "Checking the data uploading status of CVAT tasks: {}".format(
                     ", ".join(str(u.task_id) for u in uploads)
@@ -215,6 +220,7 @@ def track_task_creation() -> None:
                 status, reason = cvat_api.get_task_upload_status(upload.task_id)
                 project = upload.task.project
                 if not status or status == cvat_api.UploadStatus.FAILED:
+                    # TODO: add retries if 5xx
                     failed.append(upload)
 
                     oracle_db_service.outbox.create_webhook(
@@ -257,9 +263,9 @@ def track_task_creation() -> None:
                             event=ExchangeOracleEvent_TaskCreationFailed(reason=str(e)),
                         )
 
-            cvat_service.finish_uploads(session, failed + completed)
-
             if completed or failed:
+                cvat_service.finish_data_uploads(session, failed + completed)
+
                 logger.info(
                     "Updated creation status of CVAT tasks: {}".format(
                         "; ".join(
@@ -270,6 +276,63 @@ def track_task_creation() -> None:
                             }.items()
                             if v
                         )
+                    )
+                )
+    except Exception as error:
+        logger.exception(error)
+    finally:
+        logger.debug("Finishing cron job")
+
+
+def track_escrow_creation() -> None:
+    logger = get_function_logger(module_logger)
+
+    try:
+        logger.debug("Starting cron job")
+
+        with SessionLocal.begin() as session:
+            creations = cvat_service.get_active_escrow_creations(
+                session,
+                limit=CronConfig.track_escrow_creation_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
+            )
+
+            if not creations:
+                return
+
+            logger.debug(
+                "Checking escrow creation statuses for escrows: {}".format(
+                    ", ".join(str(c.escrow_address) for c in creations)
+                )
+            )
+
+            finished: List[cvat_models.EscrowCreation] = []
+            for creation in creations:
+                created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+                    session,
+                    escrow_address=creation.escrow_address,
+                    chain_id=creation.chain_id,
+                    status=JobStatuses.new,
+                )
+
+                if created_jobs_count != creation.total_jobs:
+                    continue
+
+                with suppress(db_errors.LockNotAvailable):
+                    cvat_service.update_project_statuses_by_escrow_address(
+                        session=session,
+                        escrow_address=creation.escrow_address,
+                        chain_id=creation.chain_id,
+                        status=ProjectStatuses.annotation,
+                    )
+                    finished.append(creation)
+
+            if finished:
+                cvat_service.finish_escrow_creations(session, finished)
+
+                logger.info(
+                    "Updated creation status of escrows: {}".format(
+                        ", ".join(c.escrow_address for c in finished)
                     )
                 )
     except Exception as error:

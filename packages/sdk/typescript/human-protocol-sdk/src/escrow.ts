@@ -486,7 +486,7 @@ export class EscrowClient extends BaseEthersClient {
       );
       await (
         await tokenContract.transfer(escrowAddress, amount, txOptions)
-      ).wait;
+      ).wait();
 
       return;
     } catch (e) {
@@ -1399,7 +1399,7 @@ export class EscrowClient extends BaseEthersClient {
  * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
  *
  * const escrowAddresses = new EscrowUtils.getEscrows({
- *   networks: [ChainId.POLYGON_MUMBAI]
+ *   networks: [ChainId.POLYGON_AMOY]
  * });
  * ```
  */
@@ -1434,6 +1434,7 @@ export class EscrowUtils {
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
    *   POLYGON_MUMBAI = 80001,
+   *   POLYGON_AMOY=80002,
    *   MOONBEAM = 1284,
    *   MOONBASE_ALPHA = 1287,
    *   AVALANCHE = 43114,
@@ -1496,7 +1497,7 @@ export class EscrowUtils {
    *   status: EscrowStatus.Pending,
    *   from: new Date(2023, 4, 8),
    *   to: new Date(2023, 5, 8),
-   *   networks: [ChainId.POLYGON_MUMBAI]
+   *   networks: [ChainId.POLYGON_AMOY]
    * };
    * const escrowDatas = await EscrowUtils.getEscrows(filters);
    * ```
@@ -1578,6 +1579,7 @@ export class EscrowUtils {
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
    *   POLYGON_MUMBAI = 80001,
+   *   POLYGON_AMOY = 80002,
    *   MOONBEAM = 1284,
    *   MOONBASE_ALPHA = 1287,
    *   AVALANCHE = 43114,
@@ -1626,7 +1628,7 @@ export class EscrowUtils {
    * ```ts
    * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
    *
-   * const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_MUMBAI, "0x1234567890123456789012345678901234567890");
+   * const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
    * ```
    */
   public static async getEscrow(

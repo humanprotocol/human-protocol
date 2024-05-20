@@ -1,3 +1,4 @@
+import { handleQueryFailedError } from '../common/errors/database';
 import {
   DataSource,
   EntityTarget,
@@ -5,8 +6,6 @@ import {
   QueryFailedError,
   Repository,
 } from 'typeorm';
-import { handleQueryFailedError } from './database.error';
-
 export class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
   constructor(target: EntityTarget<T>, dataSource: DataSource) {
     super(target, dataSource.createEntityManager());
