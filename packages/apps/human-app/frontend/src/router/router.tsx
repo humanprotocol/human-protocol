@@ -5,9 +5,16 @@ import {
   protectedRoutes,
   walletConnectRoutes,
   unprotectedRoutes,
+  web3ProtectedRoutes,
 } from '@/router/routes';
 import { RequireAuth } from '@/auth/require-auth';
 import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
+import { RequireWeb3Auth } from '@/auth-web3/require-web3-auth';
+import { DrawerNavigation } from '@/components/layout/protected/drawer-navigation';
+import {
+  workerDrawerBottomMenuItems,
+  workerDrawerTopMenuItems,
+} from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
 
 export function Router() {
   return (
@@ -33,7 +40,18 @@ export function Router() {
         </Route>
         {protectedRoutes.map(({ routerProps, pageHeaderProps }) => (
           <Route
-            element={<LayoutProtected pageHeaderProps={pageHeaderProps} />}
+            element={
+              <LayoutProtected
+                pageHeaderProps={pageHeaderProps}
+                renderDrawer={(open) => (
+                  <DrawerNavigation
+                    bottomMenuItems={workerDrawerBottomMenuItems}
+                    open={open}
+                    topMenuItems={workerDrawerTopMenuItems}
+                  />
+                )}
+              />
+            }
             key={routerProps.path}
           >
             <Route
@@ -41,6 +59,32 @@ export function Router() {
                 <RequireAuth>
                   <>{routerProps.element}</>
                 </RequireAuth>
+              }
+              path={routerProps.path}
+            />
+          </Route>
+        ))}
+        {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+          <Route
+            element={
+              <LayoutProtected
+                pageHeaderProps={pageHeaderProps}
+                renderDrawer={(open) => (
+                  <DrawerNavigation
+                    bottomMenuItems={workerDrawerBottomMenuItems}
+                    open={open}
+                    topMenuItems={workerDrawerTopMenuItems}
+                  />
+                )}
+              />
+            }
+            key={routerProps.path}
+          >
+            <Route
+              element={
+                <RequireWeb3Auth>
+                  <>{routerProps.element}</>
+                </RequireWeb3Auth>
               }
               path={routerProps.path}
             />

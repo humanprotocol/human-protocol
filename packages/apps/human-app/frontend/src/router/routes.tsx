@@ -99,18 +99,24 @@ export const protectedRoutes: {
   },
   {
     routerProps: {
-      path: routerPaths.operator.profile,
-      element: <OperatorProfilePage />,
+      path: routerPaths.worker.profile,
+      element: <WorkerProfilePage />,
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
       headerText: 'Profile',
     },
   },
+];
+
+export const web3ProtectedRoutes: {
+  routerProps: RouteProps;
+  pageHeaderProps: PageHeaderProps;
+}[] = [
   {
     routerProps: {
-      path: routerPaths.worker.profile,
-      element: <WorkerProfilePage />,
+      path: routerPaths.operator.profile,
+      element: <OperatorProfilePage />,
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,

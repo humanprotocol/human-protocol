@@ -5,36 +5,67 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Stack, Typography } from '@mui/material';
+import { Grid, Stack, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-import { HumanLogoNavbarIcon } from '@/components/ui/icons';
+import {
+  HelpIcon,
+  HumanLogoNavbarIcon,
+  UserOutlinedIcon,
+  WorkIcon,
+} from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 
-const drawerWidth = 240;
+interface DrawerNavigationProps {
+  open: boolean;
+  drawerWidth: number;
+}
 
-export interface DrawerItem {
+interface DrawerItem {
   label: string;
   link?: string;
   icon?: JSX.Element;
 }
 
-export type TopMenuItem = DrawerItem | JSX.Element;
-export type BottomMenuItem = DrawerItem;
-interface DrawerNavigationProps {
-  open: boolean;
-  topMenuItems?: TopMenuItem[];
-  bottomMenuItems?: BottomMenuItem[];
-}
+const topMenuItems: (DrawerItem | JSX.Element)[] = [
+  <Grid
+    key={crypto.randomUUID()}
+    sx={{
+      display: 'inline-flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '0.8rem',
+    }}
+  >
+    <WorkIcon />
+    <Typography variant="body6">
+      {t('components.DrawerNavigation.jobs')}
+    </Typography>
+  </Grid>,
+  { label: t('components.DrawerNavigation.captchaLabelling') },
+  {
+    label: t('components.DrawerNavigation.jobsDiscovery'),
+    link: routerPaths.worker.jobs,
+  },
+];
 
-export function DrawerNavigation({
-  open,
-  topMenuItems,
-  bottomMenuItems,
-}: DrawerNavigationProps) {
+const bottomMenuItems: DrawerItem[] = [
+  {
+    label: t('components.DrawerNavigation.profile'),
+    link: routerPaths.worker.profile,
+    icon: <UserOutlinedIcon />,
+  },
+  {
+    label: t('components.DrawerNavigation.help'),
+    link: routerPaths.homePage,
+    icon: <HelpIcon />,
+  },
+];
+
+export function DrawerNavigation({ open, drawerWidth }: DrawerNavigationProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
@@ -74,7 +105,7 @@ export function DrawerNavigation({
               marginTop: '66px',
             }}
           >
-            {topMenuItems?.map((item, index) => {
+            {topMenuItems.map((item, index) => {
               if (!('label' in item)) {
                 return (
                   <ListItem key={crypto.randomUUID()}>
@@ -128,7 +159,7 @@ export function DrawerNavigation({
             })}
           </List>
           <List>
-            {bottomMenuItems?.map(({ label, link, icon }) => (
+            {bottomMenuItems.map(({ label, link, icon }) => (
               <ListItem alignItems="center" disablePadding key={link}>
                 <ListItemButton
                   alignItems="center"

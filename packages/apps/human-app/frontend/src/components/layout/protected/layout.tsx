@@ -11,10 +11,7 @@ import { TopNotification } from '@/components/ui/top-notification';
 import type { TopNotificationPayload } from '@/components/layout/protected/layout-notification-context';
 import { ProtectedLayoutContext } from '@/components/layout/protected/layout-notification-context';
 import { Footer } from '../footer';
-import { DrawerNavigation } from './drawer-navigation';
 import { Navbar } from './navbar';
-
-const drawerWidth = 240;
 
 const Main = styled('main', {
   shouldForwardProp: (prop) => prop !== 'open' && prop !== 'isMobile',
@@ -39,8 +36,10 @@ const Main = styled('main', {
 
 export function Layout({
   pageHeaderProps,
+  renderDrawer,
 }: {
   pageHeaderProps: PageHeaderProps;
+  renderDrawer: (open: boolean) => JSX.Element;
 }) {
   const [notification, setNotification] =
     useState<TopNotificationPayload | null>(null);
@@ -86,7 +85,7 @@ export function Layout({
         }}
       >
         <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
-        <DrawerNavigation drawerWidth={drawerWidth} open={drawerOpen} />
+        {renderDrawer(drawerOpen)}
         <Main isMobile={isMobile} open={drawerOpen}>
           <Grid
             container
