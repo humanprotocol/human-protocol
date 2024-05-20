@@ -22,14 +22,16 @@ export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2">{EthKVStoreKeys.Fee}</Typography>
+        <Typography variant="subtitle2">
+          {t('operator.addKeysPage.existingKeys.fee')}
+        </Typography>
         <Typography variant="body1">
           <OptionalText text={fee?.toString()} />
         </Typography>
       </Grid>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
         <Typography variant="subtitle2" width="100%">
-          {EthKVStoreKeys.PublicKey}
+          {t('operator.addKeysPage.existingKeys.publicKey')}
         </Typography>
         <Typography variant="body1" width="100%">
           <OptionalText text={publicKey} />
@@ -37,7 +39,7 @@ export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
       </Grid>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
         <Typography variant="subtitle2" width="100%">
-          {EthKVStoreKeys.WebhookUrl}
+          {t('operator.addKeysPage.existingKeys.webhookUrl')}
         </Typography>
         <Typography variant="body1" width="100%">
           <OptionalText text={webhookUrl} />
@@ -45,7 +47,7 @@ export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
       </Grid>
       <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
         <Typography variant="subtitle2" width="100%">
-          {EthKVStoreKeys.Role}
+          {t('operator.addKeysPage.existingKeys.role')}
         </Typography>
         <div>{role ? <Chip label={role} /> : <EmptyPlaceholder />}</div>
       </Grid>

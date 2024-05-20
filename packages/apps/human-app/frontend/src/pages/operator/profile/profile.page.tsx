@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useGetKeys } from '@/api/servieces/operator/get-keys';
+import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
+import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { ProfileListItem } from './profile-list-item';
 
 const mockedData = {
@@ -30,10 +34,25 @@ export function OperatorProfilePage() {
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
+  const { user } = useWeb3AuthenticatedUser();
+  const {
+    data: keysData,
+    error: keysError,
+    isError: isKeysError,
+    isPending: isKeysDataPending,
+  } = useGetKeys();
 
   useEffect(() => {
     setGrayBackground();
   }, [setGrayBackground]);
+
+  if (isKeysDataPending) {
+    return <PageCardLoader />;
+  }
+
+  if (isKeysError) {
+    return <PageCardError errorMessage={defaultErrorMessage(keysError)} />;
+  }
 
   return (
     <Grid container spacing={4}>
@@ -44,6 +63,7 @@ export function OperatorProfilePage() {
             height: '100%',
             boxShadow: 'none',
             padding: '40px',
+            borderRadius: '20px',
           }}
         >
           <Typography
@@ -59,24 +79,32 @@ export function OperatorProfilePage() {
             <List>
               <ProfileListItem
                 header={t('operator.profile.about.role')}
-                paragraph={mockedData.profile.role}
+                paragraph={
+                  keysData.role ||
+                  t('operator.addKeysPage.existingKeys.noValue')
+                }
               />
               <ProfileListItem
                 header={t('operator.profile.about.status.statusHeader')}
-                isStatusListItem={mockedData.profile.active}
                 paragraph={
-                  mockedData.profile.active
+                  // TODO check if user is active with JWT payload
+                  user.address
                     ? t('operator.profile.about.status.statusActivated')
                     : t('operator.profile.about.status.statusDeactivated')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.fee')}
-                paragraph={mockedData.profile.fee}
+                paragraph={
+                  keysData.fee || t('operator.addKeysPage.existingKeys.noValue')
+                }
               />
               <ProfileListItem
-                header={t('operator.profile.about.url')}
-                paragraph={mockedData.profile.url}
+                header={t('operator.profile.about.webhookUrl')}
+                paragraph={
+                  keysData.webhook_url ||
+                  t('operator.addKeysPage.existingKeys.noValue')
+                }
               />
               <ProfileListItem
                 header={t('operator.profile.about.webhookUrl')}
@@ -84,7 +112,10 @@ export function OperatorProfilePage() {
               />
               <ProfileListItem
                 header={t('operator.profile.about.jobTypes')}
-                paragraph={mockedData.profile.jobTypes}
+                paragraph={[
+                  keysData.role ||
+                    t('operator.addKeysPage.existingKeys.noValue'),
+                ]}
               />
             </List>
           </Stack>
@@ -100,6 +131,7 @@ export function OperatorProfilePage() {
             display: 'flex',
             flexDirection: 'column',
             padding: '40px',
+            borderRadius: '20px',
           }}
         >
           <Typography

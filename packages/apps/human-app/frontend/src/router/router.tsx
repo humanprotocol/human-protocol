@@ -15,6 +15,7 @@ import {
   workerDrawerBottomMenuItems,
   workerDrawerTopMenuItems,
 } from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
+import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-items/drawer-menu-items-operator';
 
 export function Router() {
   return (
@@ -71,9 +72,8 @@ export function Router() {
                 pageHeaderProps={pageHeaderProps}
                 renderDrawer={(open) => (
                   <DrawerNavigation
-                    bottomMenuItems={workerDrawerBottomMenuItems}
+                    bottomMenuItems={operatorDrawerBottomMenuItems}
                     open={open}
-                    topMenuItems={workerDrawerTopMenuItems}
                   />
                 )}
               />
@@ -82,9 +82,11 @@ export function Router() {
           >
             <Route
               element={
-                <RequireWeb3Auth>
-                  <>{routerProps.element}</>
-                </RequireWeb3Auth>
+                <RequireWalletConnect>
+                  <RequireWeb3Auth>
+                    <>{routerProps.element}</>
+                  </RequireWeb3Auth>
+                </RequireWalletConnect>
               }
               path={routerProps.path}
             />

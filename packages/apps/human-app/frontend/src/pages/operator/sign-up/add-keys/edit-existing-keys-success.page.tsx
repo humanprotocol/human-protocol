@@ -1,13 +1,11 @@
 import { t } from 'i18next';
 import { Grid, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
 import {
   PageCard,
   PageCardError,
   PageCardLoader,
 } from '@/components/ui/page-card';
 import { Button } from '@/components/ui/button';
-import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import type { SignatureData } from '@/api/servieces/operator/prepare-signature';
 import {
@@ -15,6 +13,8 @@ import {
   usePrepareSignature,
 } from '@/api/servieces/operator/prepare-signature';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useWeb3SignUp } from '@/api/servieces/operator/web3-signup';
+import { Alert } from '@/components/ui/alert';
 
 export function EditExistingKeysSuccessPage() {
   const { address, signMessage } = useConnectedWallet();
@@ -27,9 +27,16 @@ export function EditExistingKeysSuccessPage() {
     address,
     type: PrepareSignatureType.SignUp,
   });
+  const {
+    mutate: web3SignUpMutation,
+    isError: isWeb3SignUpError,
+    error: web3SignUpError,
+    isPending: web3SignUpPending,
+  } = useWeb3SignUp();
 
   const createSignature = async (data: SignatureData) => {
-    return signMessage(JSON.stringify(data));
+    const signature = await signMessage(JSON.stringify(data));
+    web3SignUpMutation({ signature: signature || '' });
   };
 
   if (isSignatureDataError) {
@@ -45,7 +52,16 @@ export function EditExistingKeysSuccessPage() {
   }
 
   return (
-    <PageCard title={t('operator.editExistingKeysSuccess.title')}>
+    <PageCard
+      alert={
+        isWeb3SignUpError ? (
+          <Alert color="error" severity="error">
+            {defaultErrorMessage(web3SignUpError)}
+          </Alert>
+        ) : undefined
+      }
+      title={t('operator.editExistingKeysSuccess.title')}
+    >
       <Grid container gap="2rem" marginTop="2rem">
         <Grid>
           <Typography variant="subtitle1">
@@ -56,13 +72,11 @@ export function EditExistingKeysSuccessPage() {
           </Typography>
         </Grid>
         <Button
-          component={Link}
           fullWidth
-          loading={isSignatureDataPending}
+          loading={web3SignUpPending}
           onClick={() => {
             void createSignature(signatureData);
           }}
-          to={routerPaths.homePage}
           variant="contained"
         >
           {t('operator.editExistingKeysSuccess.btn')}
