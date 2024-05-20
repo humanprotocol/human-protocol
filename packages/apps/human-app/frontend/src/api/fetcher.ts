@@ -153,6 +153,7 @@ export function createFetcher(defaultFetcherConfig?: {
             },
           }
         );
+        browserAuthProvider.signIn(refetchAccessTokenSuccess);
       } catch {
         browserAuthProvider.signOut();
         return;
