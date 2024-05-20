@@ -3,6 +3,7 @@ import { createContext } from 'react';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import type { WalletConnectContextConnectedAccount } from '@/contexts/wallet-connect';
 import { routerPaths } from '@/router/router-paths';
+import { PageCardLoader } from '@/components/ui/page-card';
 
 export const AuthWeb3Context =
   createContext<WalletConnectContextConnectedAccount | null>(null);
@@ -10,6 +11,10 @@ export const AuthWeb3Context =
 export function RequireWalletConnect({ children }: { children: JSX.Element }) {
   const walletConnect = useWalletConnect();
   const location = useLocation();
+
+  if (walletConnect.initializing) {
+    return <PageCardLoader />;
+  }
 
   if (!walletConnect.isConnected) {
     return (
