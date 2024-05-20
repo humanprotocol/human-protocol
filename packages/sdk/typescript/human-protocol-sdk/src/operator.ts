@@ -106,8 +106,6 @@ export class OperatorUtils {
         }
 
         const gqlFilter = filter ?? { networks };
-        console.log(gqlFilter);
-        console.log(networkData.subgraphUrl);
 
         const { leaders } = await gqlFetch<{
           leaders: ILeaderSubgraph[];
@@ -129,7 +127,6 @@ export class OperatorUtils {
 
       return leaders_data;
     } catch (e) {
-      console.log(e);
       return throwError(e);
     }
   }
