@@ -195,6 +195,9 @@ class OperatorUtils:
 
         from human_protocol_sdk.gql.operator import get_leaders_query
 
+        if not filter.networks:
+            filter.networks = list(NETWORKS.keys())
+
         leaders = []
         for chain_id in filter.networks:
             network = NETWORKS[chain_id]

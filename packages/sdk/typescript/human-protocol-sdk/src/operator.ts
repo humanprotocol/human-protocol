@@ -88,7 +88,11 @@ export class OperatorUtils {
   public static async getLeaders(filter?: ILeadersFilter): Promise<ILeader[]> {
     try {
       let leaders_data: ILeader[] = [];
-      const networks = filter?.networks ?? [];
+
+      const networks =
+        filter?.networks && filter.networks.length > 0
+          ? filter.networks
+          : Object.keys(NETWORKS).map((chainId) => Number(chainId) as ChainId);
 
       for (const chainId of networks) {
         const networkData = NETWORKS[chainId];
@@ -97,13 +101,18 @@ export class OperatorUtils {
           throw ErrorUnsupportedChainID;
         }
 
-        const gqlFilter = filter ?? { networks: [] };
+        const gqlFilter = filter ?? { networks };
 
         const { leaders } = await gqlFetch<{
           leaders: ILeaderSubgraph[];
         }>(networkData.subgraphUrl, GET_LEADERS_QUERY(gqlFilter), {
           role: filter?.role,
         });
+
+        if (!leaders) {
+          return [];
+        }
+
         leaders_data = leaders_data.concat(
           leaders.map((leader) => ({
             ...leader,

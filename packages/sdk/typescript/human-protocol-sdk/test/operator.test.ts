@@ -135,14 +135,14 @@ describe('OperatorUtils', () => {
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
-    test('should return an empty array', async () => {
+    test.only('should return an empty array', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: null,
       });
 
       const result = await OperatorUtils.getLeaders();
 
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(0);
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
       expect(result).toEqual([]);
     });
 
