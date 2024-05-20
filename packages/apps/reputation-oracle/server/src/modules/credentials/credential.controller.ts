@@ -24,12 +24,10 @@ import {
   CredentialDto,
   AddCredentialOnChainDto,
 } from './credential.dto';
-import { CredentialExceptionFilter } from '../../common/exceptions/credential.filter';
 import { Public } from '../../common/decorators';
 import { UserType } from '../../common/enums/user';
 @Public()
 @ApiTags('Credentials')
-@UseFilters(CredentialExceptionFilter)
 @Controller('credential')
 export class CredentialController {
   constructor(private readonly credentialService: CredentialService) {}
