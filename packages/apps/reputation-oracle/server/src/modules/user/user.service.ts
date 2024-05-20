@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   ErrorAuth,
@@ -32,6 +25,7 @@ import { Wallet } from 'ethers';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class UserService {
@@ -97,7 +91,10 @@ export class UserService {
 
     if (userEntity) {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
-      throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
+      throw new ControlledError(
+        ErrorUser.AccountCannotBeRegistered,
+        HttpStatus.CONFLICT,
+      );
     }
   }
 
@@ -105,7 +102,7 @@ export class UserService {
     const userEntity = await this.userRepository.findOneByEvmAddress(address);
 
     if (!userEntity) {
-      throw new NotFoundException(ErrorUser.NotFound);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NOT_FOUND);
     }
 
     return userEntity;
@@ -121,11 +118,17 @@ export class UserService {
     data: RegisterAddressRequestDto,
   ): Promise<string> {
     if (user.evmAddress && user.evmAddress !== data.address) {
-      throw new BadRequestException(ErrorUser.IncorrectAddress);
+      throw new ControlledError(
+        ErrorUser.IncorrectAddress,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (user.kyc?.status !== KycStatus.APPROVED) {
-      throw new BadRequestException(ErrorUser.KycNotApproved);
+      throw new ControlledError(
+        ErrorUser.KycNotApproved,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     user.evmAddress = data.address;
@@ -147,7 +150,10 @@ export class UserService {
 
     const verified = verifySignature(signedData, signature, [user.evmAddress]);
     if (!verified) {
-      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+      throw new ControlledError(
+        ErrorAuth.InvalidSignature,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     let signer: Wallet;
@@ -165,7 +171,10 @@ export class UserService {
     const status = await kvstore.get(signer.address, user.evmAddress);
 
     if (status === OperatorStatus.INACTIVE) {
-      throw new BadRequestException(ErrorOperator.OperatorNotActive);
+      throw new ControlledError(
+        ErrorOperator.OperatorNotActive,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
@@ -195,7 +204,10 @@ export class UserService {
           !additionalData.reference ||
           !additionalData.workerAddress
         ) {
-          throw new BadRequestException('Missing necessary credential data');
+          throw new ControlledError(
+            'Missing necessary credential data',
+            HttpStatus.BAD_REQUEST,
+          );
         }
         content = JSON.stringify({
           reference: additionalData.reference,
@@ -203,7 +215,7 @@ export class UserService {
         });
         break;
       default:
-        throw new BadRequestException('Type not allowed');
+        throw new ControlledError('Type not allowed', HttpStatus.BAD_REQUEST);
     }
 
     return {

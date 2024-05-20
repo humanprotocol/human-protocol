@@ -1,5 +1,6 @@
 import { Box, Button, CircularProgress, Grid, Typography } from '@mui/material';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as authService from '../../services/auth';
 import { useAppDispatch, useAppSelector } from '../../state';
 import { signOut } from '../../state/auth/reducer';
@@ -9,6 +10,7 @@ export default function VerifyEmailForm() {
   const [emailSent, setEmailSent] = useState(false);
   const { user, refreshToken } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const handleResend = async () => {
     setIsLoading(true);
@@ -33,6 +35,7 @@ export default function VerifyEmailForm() {
     }
     dispatch(signOut());
     setIsLoading(false);
+    navigate('/');
   };
 
   if (isLoading) {

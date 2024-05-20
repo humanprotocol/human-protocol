@@ -21,6 +21,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { E2E_TEST_ENV } from './common/constants';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   providers: [
@@ -42,6 +43,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     },
   ],
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       ignoreEnvFile: process.env.NODE_ENV === E2E_TEST_ENV,
       ...(process.env.NODE_ENV !== E2E_TEST_ENV && {

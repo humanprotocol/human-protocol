@@ -2,12 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Request,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -35,10 +35,12 @@ import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Job')
+@ApiKey()
 @Controller('/job')
 export class JobController {
   constructor(private readonly jobService: JobService) {}
@@ -67,7 +69,6 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/quick-launch')
-  @ApiKey()
   public async quickLaunch(
     @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
@@ -98,7 +99,6 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/fortune')
-  @ApiKey()
   public async createFortuneJob(
     @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
@@ -163,7 +163,10 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
   ): Promise<number> {
-    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    throw new ControlledError(
+      'Hcaptcha jobs disabled temporally',
+      HttpStatus.UNAUTHORIZED,
+    );
     return this.jobService.createJob(
       req.user.id,
       JobRequestType.HCAPTCHA,
@@ -221,7 +224,6 @@ export class JobController {
     summary: 'Get the result of a job',
     description: 'Endpoint to retrieve the result of a specified job.',
   })
-  @ApiKey()
   @ApiResponse({
     status: 200,
     description: 'Result of the specified job.',
@@ -325,7 +327,6 @@ export class JobController {
     description: 'Not Found. Could not find the requested content.',
   })
   @Get('/details/:id')
-  @ApiKey()
   public async getDetails(
     @Request() req: RequestWithUser,
     @Param() params: JobIdDto,

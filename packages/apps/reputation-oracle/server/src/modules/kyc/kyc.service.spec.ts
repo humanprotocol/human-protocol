@@ -4,13 +4,14 @@ import { KycService } from './kyc.service';
 import { HttpService } from '@nestjs/axios';
 import { DeepPartial } from 'typeorm';
 import { createMock } from '@golevelup/ts-jest';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { KycStatus } from '../../common/enums/user';
 import { KycRepository } from './kyc.repository';
 import { KycEntity } from './kyc.entity';
 import { of } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
@@ -122,7 +123,9 @@ describe('Kyc Service', () => {
 
       await expect(
         kycService.initSession(mockUserEntity as any),
-      ).rejects.toThrow(new BadRequestException(ErrorKyc.AlreadyApproved));
+      ).rejects.toThrow(
+        new ControlledError(ErrorKyc.AlreadyApproved, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it("Should throw an error if user already has an active Kyc session, but it's pending verification", async () => {
@@ -136,7 +139,10 @@ describe('Kyc Service', () => {
       await expect(
         kycService.initSession(mockUserEntity as any),
       ).rejects.toThrow(
-        new BadRequestException(ErrorKyc.VerificationInProgress),
+        new ControlledError(
+          ErrorKyc.VerificationInProgress,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
 
@@ -152,8 +158,9 @@ describe('Kyc Service', () => {
       await expect(
         kycService.initSession(mockUserEntity as any),
       ).rejects.toThrow(
-        new BadRequestException(
+        new ControlledError(
           `${ErrorKyc.Rejected}. Reason: ${mockUserEntity.kyc.message}`,
+          HttpStatus.BAD_REQUEST,
         ),
       );
     });
@@ -173,7 +180,12 @@ describe('Kyc Service', () => {
 
       await expect(
         kycService.initSession(mockUserEntity as any),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorKyc.InvalidSynapsAPIResponse,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
     });
 
     it('Should start a Kyc session for the user', async () => {
@@ -229,7 +241,12 @@ describe('Kyc Service', () => {
     it('Should throw an error if the secret is invalid', async () => {
       await expect(
         kycService.updateKycStatus('invalid', mockKycUpdate),
-      ).rejects.toThrow(UnauthorizedException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorKyc.InvalidWebhookSecret,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('Should throw an error if the session data is invalid from synaps', async () => {
@@ -246,7 +263,12 @@ describe('Kyc Service', () => {
           synapsConfigService.webhookSecret,
           mockKycUpdate,
         ),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorKyc.InvalidSynapsAPIResponse,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
     });
 
     it('Should update the Kyc status of the user', async () => {

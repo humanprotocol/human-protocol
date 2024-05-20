@@ -35,3 +35,5 @@ deployments_tenderly
 !.openzeppelin/unknown-1273227453.json
 # xlayer
 !.openzeppelin/unknown-196.json
+# xlayer-testnet
+!.openzeppelin/unknown-195.json

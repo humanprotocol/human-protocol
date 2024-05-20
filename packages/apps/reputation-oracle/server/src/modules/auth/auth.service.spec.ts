@@ -7,7 +7,11 @@ import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../user/user.entity';
-import { ErrorAuth } from '../../common/constants/errors';
+import {
+  ErrorAuth,
+  ErrorSignature,
+  ErrorUser,
+} from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
@@ -22,18 +26,18 @@ import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
-import { AuthError } from './auth.error';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -294,7 +298,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(null);
         expect(
           authService.forgotPassword({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
+        );
       });
 
       it('should throw Unauthorized exception if user is not active', () => {
@@ -302,7 +308,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(userEntity);
         expect(
           authService.forgotPassword({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should remove existing token if it exists', async () => {
@@ -369,7 +377,9 @@ describe('AuthService', () => {
             password: 'password',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should throw an error if token is expired', () => {
@@ -382,7 +392,9 @@ describe('AuthService', () => {
             password: 'password',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should update password and send email', async () => {
@@ -433,14 +445,18 @@ describe('AuthService', () => {
         findTokenMock.mockResolvedValue(null);
         expect(
           authService.emailVerification({ token: 'token' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN),
+        );
       });
       it('should throw an error if token is expired', () => {
         tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
         findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
         expect(
           authService.emailVerification({ token: 'token' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should activate user', async () => {
@@ -482,7 +498,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(null);
         expect(
           authService.resendEmailVerification({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
+        );
       });
 
       it('should throw an error if user is not pending', () => {
@@ -490,7 +508,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(userEntity);
         expect(
           authService.resendEmailVerification({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
+        );
       });
 
       it('should create token and send email', async () => {
@@ -591,7 +611,12 @@ describe('AuthService', () => {
               address: MOCK_ADDRESS,
               signature: invalidSignature,
             }),
-          ).rejects.toThrow(ConflictException);
+          ).rejects.toThrow(
+            new ControlledError(
+              ErrorSignature.SignatureNotVerified,
+              HttpStatus.CONFLICT,
+            ),
+          );
         });
       });
 
@@ -699,7 +724,12 @@ describe('AuthService', () => {
               type: UserType.WORKER,
               signature: invalidSignature,
             }),
-          ).rejects.toThrow(ConflictException);
+          ).rejects.toThrow(
+            new ControlledError(
+              ErrorSignature.SignatureNotVerified,
+              HttpStatus.CONFLICT,
+            ),
+          );
         });
         it('should throw BadRequestException if role is not in KVStore', async () => {
           const signature = await signMessage(
@@ -713,7 +743,9 @@ describe('AuthService', () => {
               type: UserType.WORKER,
               signature: signature,
             }),
-          ).rejects.toThrow(BadRequestException);
+          ).rejects.toThrow(
+            new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST),
+          );
         });
       });
     });
