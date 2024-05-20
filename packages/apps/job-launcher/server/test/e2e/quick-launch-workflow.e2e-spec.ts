@@ -22,6 +22,14 @@ import {
 import { PaymentEntity } from '../../src/modules/payment/payment.entity';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
 import { JobRepository } from '../../src/modules/job/job.repository';
+import { PaymentService } from '../../src/modules/payment/payment.service';
+import { NetworkConfigService } from '../../src/common/config/network-config.service';
+import { Web3ConfigService } from '../../src/common/config/web3-config.service';
+import {
+  MOCK_PRIVATE_KEY,
+  MOCK_WEB3_NODE_HOST,
+  MOCK_WEB3_RPC_URL,
+} from '../constants';
 
 describe('Quick launch E2E workflow', () => {
   let app: INestApplication;
@@ -29,9 +37,11 @@ describe('Quick launch E2E workflow', () => {
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
+  let paymentService: PaymentService;
 
   let userEntity: UserEntity;
   let accessToken: string;
+  const initialBalance = 100;
 
   const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
   const paymentIntentId = crypto.randomBytes(16).toString('hex');
@@ -40,7 +50,22 @@ describe('Quick launch E2E workflow', () => {
     setupE2eEnvironment();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(NetworkConfigService)
+      .useValue({
+        networks: [
+          {
+            chainId: ChainId.LOCALHOST,
+            rpcUrl: MOCK_WEB3_RPC_URL,
+          },
+        ],
+      })
+      .overrideProvider(Web3ConfigService)
+      .useValue({
+        privateKey: MOCK_PRIVATE_KEY,
+        env: MOCK_WEB3_NODE_HOST,
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -49,6 +74,7 @@ describe('Quick launch E2E workflow', () => {
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
+    paymentService = moduleFixture.get<PaymentService>(PaymentService);
 
     userEntity = await userService.create({
       email,
@@ -74,7 +100,7 @@ describe('Quick launch E2E workflow', () => {
       userId: userEntity.id,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: 100,
+      amount: initialBalance,
       currency: Currency.USD,
       rate: 1,
       transaction: paymentIntentId,
@@ -88,6 +114,9 @@ describe('Quick launch E2E workflow', () => {
   });
 
   it('should create a job via quick launch successfully', async () => {
+    const balance_before = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_before).toBe(initialBalance);
+
     const quickLaunchDto = {
       chain_id: ChainId.LOCALHOST,
       request_type: JobRequestType.HCAPTCHA,
@@ -121,6 +150,10 @@ describe('Quick launch E2E workflow', () => {
     expect(paymentEntities[0]).toBeDefined();
     expect(paymentEntities[0].type).toBe(PaymentType.WITHDRAWAL);
     expect(paymentEntities[0].currency).toBe(TokenId.HMT);
+
+    const paidAmount = paymentEntities[0].rate * paymentEntities[0].amount;
+    const balance_after = await paymentService.getUserBalance(userEntity.id);
+    expect(balance_after).toBe(initialBalance + paidAmount);
   });
 
   it('should handle not enough funds error', async () => {

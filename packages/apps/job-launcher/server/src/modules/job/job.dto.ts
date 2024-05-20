@@ -518,7 +518,7 @@ export class JobCaptchaAnnotationsDto {
 
 export class JobCaptchaDto extends JobDto {
   @ApiProperty()
-  @IsUrl()
+  @IsObject()
   data: StorageDataDto;
 
   @ApiProperty({ name: 'accuracy_target' })
@@ -546,7 +546,6 @@ export class JobCaptchaDto extends JobDto {
 
   @ApiProperty()
   @IsDefined()
-  @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
   @Type(() => JobCaptchaAdvancedDto)
