@@ -8,6 +8,7 @@ import { useGetKeys } from '@/api/servieces/operator/get-keys';
 import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { ProfileDisableButton } from '@/pages/operator/profile/profile-disable-button';
 import { ProfileListItem } from './profile-list-item';
 
 const mockedData = {
@@ -93,10 +94,19 @@ export function OperatorProfilePage() {
                     : t('operator.profile.about.status.statusDeactivated')
                 }
               />
+              <ProfileDisableButton />
               <ProfileListItem
                 header={t('operator.profile.about.fee')}
                 paragraph={
-                  keysData.fee || t('operator.addKeysPage.existingKeys.noValue')
+                  `${keysData.fee}${t('inputMasks.percentSuffix')}` ||
+                  t('operator.addKeysPage.existingKeys.noValue')
+                }
+              />
+              <ProfileListItem
+                header={t('operator.profile.about.publicKey')}
+                paragraph={
+                  keysData.public_key ||
+                  t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
               <ProfileListItem
@@ -107,11 +117,7 @@ export function OperatorProfilePage() {
                 }
               />
               <ProfileListItem
-                header={t('operator.profile.about.webhookUrl')}
-                paragraph={mockedData.profile.webhookUrl}
-              />
-              <ProfileListItem
-                header={t('operator.profile.about.jobTypes')}
+                header={t('operator.profile.about.role')}
                 paragraph={[
                   keysData.role ||
                     t('operator.addKeysPage.existingKeys.noValue'),

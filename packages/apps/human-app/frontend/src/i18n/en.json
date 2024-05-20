@@ -253,7 +253,12 @@
         "fee": "Fee",
         "url": "URL",
         "webhookUrl": "Webhook URL",
-        "jobTypes": "Job Types"
+        "jobTypes": "Job Types",
+        "publicKey": "Public Key"
+      },
+      "disable": {
+        "disableBtn": "Deactivate",
+        "cannotDisable": "Cannot deactivate operator"
       },
       "statistics": {
         "header": "Statistics",
