@@ -31,7 +31,7 @@ import {
   MOCK_WEB3_RPC_URL,
 } from '../constants';
 
-describe.skip('Fortune E2E workflow', () => {
+describe('Fortune E2E workflow', () => {
   let app: INestApplication;
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;

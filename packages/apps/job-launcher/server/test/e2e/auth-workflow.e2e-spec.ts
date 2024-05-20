@@ -17,7 +17,7 @@ import {
   MOCK_WEB3_RPC_URL,
 } from '../constants';
 
-describe.skip('AuthService E2E', () => {
+describe('AuthService E2E', () => {
   let app: INestApplication;
   let userRepository: UserRepository;
   let tokenRepository: TokenRepository;

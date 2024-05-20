@@ -25,7 +25,7 @@ import {
   MOCK_WEB3_RPC_URL,
 } from '../constants';
 
-describe.skip('Fiat account deposit E2E workflow', () => {
+describe('Fiat account deposit E2E workflow', () => {
   let app: INestApplication;
   let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;

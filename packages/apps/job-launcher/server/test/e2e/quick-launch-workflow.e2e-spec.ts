@@ -31,7 +31,7 @@ import {
   MOCK_WEB3_RPC_URL,
 } from '../constants';
 
-describe.skip('Quick launch E2E workflow', () => {
+describe('Quick launch E2E workflow', () => {
   let app: INestApplication;
   let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;

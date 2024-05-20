@@ -12,7 +12,7 @@ import {
   MOCK_WEB3_RPC_URL,
 } from '../../test/constants';
 
-describe.skip('AppController (e2e)', () => {
+describe('AppController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {

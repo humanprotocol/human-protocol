@@ -20,7 +20,7 @@ import {
   MOCK_WEB3_RPC_URL,
 } from '../constants';
 
-describe.skip('Restore password E2E workflow', () => {
+describe('Restore password E2E workflow', () => {
   let app: INestApplication;
   let userRepository: UserRepository;
   let tokenRepository: TokenRepository;
