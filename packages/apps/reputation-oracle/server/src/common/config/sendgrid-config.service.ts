@@ -14,13 +14,13 @@ export class SendgridConfigService {
   get fromEmail(): string {
     return this.configService.get<string>(
       'SENDGRID_FROM_EMAIL',
-      'reputation-oracle@hmt.ai',
+      'app@humanprotocol.org',
     );
   }
   get fromName(): string {
     return this.configService.get<string>(
       'SENDGRID_FROM_NAME',
-      'Human Protocol Reputation Oracle',
+      'Human Protocol',
     );
   }
 }
