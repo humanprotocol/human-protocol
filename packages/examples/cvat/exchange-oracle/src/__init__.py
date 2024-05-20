@@ -7,6 +7,7 @@ from src.crons import setup_cron_jobs
 from src.endpoints import init_api
 from src.handlers.error_handlers import setup_error_handlers
 from src.log import setup_logging
+from src.utils.concurrency import fastapi_set_max_threads
 
 setup_logging()
 
@@ -30,6 +31,20 @@ setup_error_handlers(app)
 async def startup_event():
     logger = logging.getLogger("app")
     logger.info("Exchange Oracle is up and running!")
+
+    if Config.features.db_connection_limit < Config.features.thread_limit:
+        logger.warn(
+            "The DB connection limit {} is less than maximum number of working threads {}. "
+            "This configuration can cause runtime errors on long blocking DB calls. "
+            "Consider changing values of the {} and {} environment variables.".format(
+                Config.features.db_connection_limit,
+                Config.features.thread_limit,
+                Config.features.DB_CONNECTION_LIMIT_ENV_VAR,
+                Config.features.THREAD_LIMIT_ENV_VAR,
+            )
+        )
+
+    await fastapi_set_max_threads(Config.features.thread_limit)
 
 
 is_test = Config.environment == "test"
