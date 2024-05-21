@@ -1,4 +1,5 @@
 export const colorPalette = {
+	white: '#F9FAFF',
 	primary: {
 		main: '#320a8d',
 		light: '#320a8d',

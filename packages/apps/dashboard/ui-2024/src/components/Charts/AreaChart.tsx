@@ -16,88 +16,132 @@ import Stack from '@mui/material/Stack';
 import { colorPalette } from '@assets/styles/color-palette';
 import CustomizedXAxisTick from '@components/Charts/CustomizedXAxisTick';
 import DatePicker from '@components/data-entry/DatePicker';
+import ToggleButtons from '@components/data-entry/ToggleButtons';
+
+const HARDCODED_CHART_DATA = [
+	{
+		name: 'Test 1',
+		transferAmount: 100,
+		transactionsCount: 2000,
+		uniqueReceivers: 3000,
+		uniqueSenders: 200,
+	},
+	{
+		name: 'Test 2',
+		transferAmount: 150,
+		transactionsCount: 2200,
+		uniqueReceivers: 3200,
+		uniqueSenders: 250,
+	},
+	{
+		name: 'Test 3',
+		transferAmount: 200,
+		transactionsCount: 2500,
+		uniqueReceivers: 3500,
+		uniqueSenders: 300,
+	},
+	{
+		name: 'Test 4',
+		transferAmount: 120,
+		transactionsCount: 2100,
+		uniqueReceivers: 3100,
+		uniqueSenders: 220,
+	},
+	{
+		name: 'Test 5',
+		transferAmount: 180,
+		transactionsCount: 2300,
+		uniqueReceivers: 3400,
+		uniqueSenders: 270,
+	},
+	{
+		name: 'Test 6',
+		transferAmount: 130,
+		transactionsCount: 2400,
+		uniqueReceivers: 3300,
+		uniqueSenders: 230,
+	},
+	{
+		name: 'Test 7',
+		transferAmount: 170,
+		transactionsCount: 2600,
+		uniqueReceivers: 3600,
+		uniqueSenders: 280,
+	},
+	{
+		name: 'Test 8',
+		transferAmount: 140,
+		transactionsCount: 2700,
+		uniqueReceivers: 3700,
+		uniqueSenders: 240,
+	},
+	{
+		name: 'Test 9',
+		transferAmount: 160,
+		transactionsCount: 2800,
+		uniqueReceivers: 3800,
+		uniqueSenders: 290,
+	},
+	{
+		name: 'Test 10',
+		transferAmount: 190,
+		transactionsCount: 2900,
+		uniqueReceivers: 3900,
+		uniqueSenders: 310,
+	},
+];
+
+const TIME_PERIOD_OPTIONS = [
+	{
+		value: '1W',
+		name: '1W',
+	},
+	{
+		value: '1M',
+		name: '1M',
+	},
+	{
+		value: '6M',
+		name: '6M',
+	},
+	{
+		value: '1Y',
+		name: '1T',
+	},
+	{
+		value: 'All',
+		name: 'All',
+	},
+];
 
 export const AreaChart = () => {
-	const [chartData, setChartData] = useState<Record<string, string | number>[]>(
-		[
-			{
-				name: 'Test 1',
-				transferAmount: 100,
-				transactionsCount: 2000,
-				uniqueReceivers: 3000,
-				uniqueSenders: 200,
-			},
-			{
-				name: 'Test 2',
-				transferAmount: 150,
-				transactionsCount: 2200,
-				uniqueReceivers: 3200,
-				uniqueSenders: 250,
-			},
-			{
-				name: 'Test 3',
-				transferAmount: 200,
-				transactionsCount: 2500,
-				uniqueReceivers: 3500,
-				uniqueSenders: 300,
-			},
-			{
-				name: 'Test 4',
-				transferAmount: 120,
-				transactionsCount: 2100,
-				uniqueReceivers: 3100,
-				uniqueSenders: 220,
-			},
-			{
-				name: 'Test 5',
-				transferAmount: 180,
-				transactionsCount: 2300,
-				uniqueReceivers: 3400,
-				uniqueSenders: 270,
-			},
-			{
-				name: 'Test 6',
-				transferAmount: 130,
-				transactionsCount: 2400,
-				uniqueReceivers: 3300,
-				uniqueSenders: 230,
-			},
-			{
-				name: 'Test 7',
-				transferAmount: 170,
-				transactionsCount: 2600,
-				uniqueReceivers: 3600,
-				uniqueSenders: 280,
-			},
-			{
-				name: 'Test 8',
-				transferAmount: 140,
-				transactionsCount: 2700,
-				uniqueReceivers: 3700,
-				uniqueSenders: 240,
-			},
-			{
-				name: 'Test 9',
-				transferAmount: 160,
-				transactionsCount: 2800,
-				uniqueReceivers: 3800,
-				uniqueSenders: 290,
-			},
-			{
-				name: 'Test 10',
-				transferAmount: 190,
-				transactionsCount: 2900,
-				uniqueReceivers: 3900,
-				uniqueSenders: 310,
-			},
-		]
-	);
+	const [chartData, setChartData] =
+		useState<
+			Record<
+				| 'name'
+				| 'transferAmount'
+				| 'transactionsCount'
+				| 'uniqueReceivers'
+				| 'uniqueSenders',
+				string | number
+			>[]
+		>(HARDCODED_CHART_DATA);
+	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		// if (event.target.value === 'TransferAmount') {
 		// 	console.log('dupa');
 		// }
 		console.log(event.target.value);
+	};
+
+	const handleTimePeriod = (
+		_event: React.MouseEvent<HTMLElement>,
+		value: string | null
+	) => {
+		if (value !== null) {
+			selectTimePeriod(value);
+		}
 	};
 
 	return (
@@ -107,7 +151,16 @@ export const AreaChart = () => {
 				paddingX: { xs: 2, md: 8 },
 			}}
 		>
-			<Stack sx={{ marginBottom: 4 }} direction="row">
+			<Stack
+				sx={{ marginBottom: 4 }}
+				direction={{ xs: 'column', md: 'row' }}
+				gap={{ xs: 6, md: 8 }}
+			>
+				<ToggleButtons
+					options={TIME_PERIOD_OPTIONS}
+					onChange={handleTimePeriod}
+					value={selectedTimePeriod}
+				/>
 				<Stack direction="row" alignItems="center" gap={2}>
 					<DatePicker />
 					-
@@ -229,7 +282,7 @@ export const AreaChart = () => {
 								<Stack direction="column">
 									<Typography fontWeight={600}>Transfer Amount</Typography>
 									<Typography variant="h5" fontWeight={500} component="p">
-										105,553,72
+										{chartData[chartData.length - 1].transferAmount}
 										<Typography
 											variant="h5"
 											component="span"
@@ -264,7 +317,7 @@ export const AreaChart = () => {
 								<Stack>
 									<Typography fontWeight={600}>Transactions Count</Typography>
 									<Typography variant="h5" component="p">
-										746,708,72
+										{chartData[chartData.length - 1].transactionsCount}
 									</Typography>
 								</Stack>
 							}
@@ -290,7 +343,7 @@ export const AreaChart = () => {
 								<Stack>
 									<Typography fontWeight={600}>Unique Receivers</Typography>
 									<Typography variant="h5" component="p">
-										10,506
+										{chartData[chartData.length - 1].uniqueReceivers}
 									</Typography>
 								</Stack>
 							}
@@ -316,7 +369,7 @@ export const AreaChart = () => {
 								<Stack>
 									<Typography fontWeight={600}>Unique Senders</Typography>
 									<Typography variant="h5" component="p">
-										5,502
+										{chartData[chartData.length - 1].uniqueSenders}
 									</Typography>
 								</Stack>
 							}
