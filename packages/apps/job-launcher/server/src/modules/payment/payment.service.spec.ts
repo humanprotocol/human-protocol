@@ -36,6 +36,7 @@ import { DatabaseError } from '../../common/errors/database';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from './rate.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -96,6 +97,7 @@ describe('PaymentService', () => {
         },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        { provide: RateService, useValue: createMock<RateService>() },
         NetworkConfigService,
       ],
     }).compile();

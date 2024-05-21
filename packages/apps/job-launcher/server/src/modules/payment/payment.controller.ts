@@ -26,10 +26,10 @@ import {
   PaymentFiatCreateDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
-import { getRate } from '../../common/utils';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { RateService } from './rate.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -39,6 +39,7 @@ export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly serverConfigService: ServerConfigService,
+    private readonly rateService: RateService,
   ) {}
 
   @ApiOperation({
@@ -160,7 +161,7 @@ export class PaymentController {
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {
-      return getRate(data.from, data.to);
+      return this.rateService.getRate(data.from, data.to);
     } catch (e) {
       throw new ControlledError(
         'Error getting rates',
