@@ -187,8 +187,8 @@ export class PaymentController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Get('/fee')
-  public async getFee(): Promise<number> {
+  @Get('/min-fee')
+  public async getMinFee(): Promise<number> {
     return this.serverConfigService.minimunFeeUsd;
   }
 }

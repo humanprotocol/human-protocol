@@ -44,7 +44,7 @@ export const getRate = async (from: string, to: string) => {
 };
 
 export const getFee = async () => {
-  const { data } = await api.get('/payment/fee');
+  const { data } = await api.get('/payment/min-fee');
 
   return data;
 };
