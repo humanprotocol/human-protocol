@@ -58,7 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       browserAuthProvider.subscribeSignOut(() => {
         setAuthState({ user: null, status: 'idle' });
       });
-    } catch {
+    } catch (e) {
+      // eslint-disable-next-line no-console -- ...
+      console.error('Invalid Jwt payload:', e);
       browserAuthProvider.signOut();
       setAuthState({ user: null, status: 'error' });
     }

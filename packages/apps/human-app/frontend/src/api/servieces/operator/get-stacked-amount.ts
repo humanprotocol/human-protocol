@@ -5,7 +5,7 @@ import { stakingGetStakedTokens } from '@/smart-contracts/Staking/staking-get-st
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
-const stakedAmountFormatter = (amount: bigint) => {
+export const stakedAmountFormatter = (amount: bigint) => {
   const amountAsString = ethers.formatEther(amount);
 
   if (amountAsString.split('.')[1] === '0') {
@@ -35,7 +35,7 @@ export function useGetStakedAmount() {
         signer: data?.signer,
       });
 
-      return stakedAmountFormatter(stakeAmount);
+      return stakeAmount;
     },
     queryKey: ['getStackedAmount', address, chainId, data?.signer],
     refetchInterval: 0,

@@ -7,6 +7,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 import { useAuth } from '@/auth/use-auth';
+import { web3BrowserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
 
 export const signInDtoSchema = z.object({
   email: z.string().email(),
@@ -47,6 +48,7 @@ export function useSignInMutation() {
   return useMutation({
     mutationFn: signInMutationFn,
     onSuccess: async (data) => {
+      web3BrowserAuthProvider.signOut();
       signIn(data);
       navigate(routerPaths.worker.profile);
       await queryClient.invalidateQueries();

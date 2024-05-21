@@ -3,7 +3,7 @@ import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
-import { web3browserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
+import { web3BrowserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
 
 const web3userDataSchema = z.object({
   userId: z.number(),
@@ -41,7 +41,7 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
   // TODO update SignInSuccessResponse according to new endpoint web3/auth/signin
   const handleSignIn = () => {
     try {
-      const accessToken = web3browserAuthProvider.getAccessToken();
+      const accessToken = web3BrowserAuthProvider.getAccessToken();
       if (!accessToken) {
         setWeb3AuthState({ user: null, status: 'idle' });
         return;
@@ -49,22 +49,23 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = jwtDecode(accessToken);
       const validUserData = web3userDataSchema.parse(userData);
       setWeb3AuthState({ user: validUserData, status: 'success' });
-      web3browserAuthProvider.subscribeSignOut(() => {
+      web3BrowserAuthProvider.subscribeSignOut(() => {
         setWeb3AuthState({ user: null, status: 'idle' });
       });
-    } catch {
-      web3browserAuthProvider.signOut();
+    } catch (e) {
+      // eslint-disable-next-line no-console -- ...
+      console.error('Invalid Jwt payload:', e);
+      web3BrowserAuthProvider.signOut();
       setWeb3AuthState({ user: null, status: 'error' });
     }
   };
   // TODO correct interface of singIsSuccess from auth/web3/signin
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
-    web3browserAuthProvider.signIn(singIsSuccess);
+    web3BrowserAuthProvider.signIn(singIsSuccess);
     handleSignIn();
   };
 
   const signOut = () => {
-    web3browserAuthProvider.signOut();
     setWeb3AuthState({ user: null, status: 'idle' });
   };
 

@@ -7,12 +7,7 @@ import { Input } from '@/components/data-entry/input';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
 import { Select } from '@/components/data-entry/select';
 
-const OPTIONS = [
-  Role.ExchangeOracle,
-  Role.JobLauncher,
-  Role.RecordingOracle,
-  Role.ReputationOracle,
-];
+const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
 export function EditExistingKeysForm({
   closeEditMode,

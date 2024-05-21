@@ -15,7 +15,13 @@ import { Input } from '@/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';
 
-export function StakeForm({ decimals }: { decimals: number }) {
+export function StakeForm({
+  decimals,
+  stakedAmount,
+}: {
+  decimals: number;
+  stakedAmount?: bigint;
+}) {
   const addStakeMutation = useAddStakeMutation();
 
   const methods = useForm<AddStakeCallArguments>({
@@ -77,7 +83,9 @@ export function StakeForm({ decimals }: { decimals: number }) {
                 to={routerPaths.operator.addKeys}
                 variant="outlined"
               >
-                {t('operator.stakeForm.backBtn')}
+                {Number(stakedAmount) > 0
+                  ? t('operator.stakeForm.backBtn')
+                  : t('operator.stakeForm.nextBtn')}
               </Button>
             </Grid>
           </Grid>
