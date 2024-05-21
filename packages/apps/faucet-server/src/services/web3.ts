@@ -37,12 +37,26 @@ export const getFaucetBalance = async (
     faucetAddress
   )
     return await web3.eth.getBalance(faucetAddress);
-  const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
+
   const balance = web3.utils.fromWei(
-    await (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call(),
+    await getHmtBalance(web3, hmtAddress),
     'ether'
   );
   return balance;
+};
+
+export const getHmtBalance = async (
+  web3: Web3,
+  hmtAddress: string,
+) => {
+  const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
+  return (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call()
+};
+
+export const getNativeBalance = async (
+  web3: Web3,
+) => {
+  return await web3.eth.getBalance(web3.eth.defaultAccount);
 };
 
 export const sendFunds = async (
