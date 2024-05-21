@@ -6,13 +6,11 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { Stack, Typography } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
 import { HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useAuth } from '@/auth/use-auth';
-import { routerPaths } from '@/router/router-paths';
 
 const drawerWidth = 240;
 
@@ -28,16 +26,17 @@ interface DrawerNavigationProps {
   open: boolean;
   topMenuItems?: TopMenuItem[];
   bottomMenuItems?: BottomMenuItem[];
+  signOut: () => void;
 }
 
 export function DrawerNavigation({
   open,
   topMenuItems,
   bottomMenuItems,
+  signOut,
 }: DrawerNavigationProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { signOut } = useAuth();
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -58,9 +57,7 @@ export function DrawerNavigation({
       >
         {!isMobile && (
           <Stack alignItems="center">
-            <Link to={routerPaths.homePage}>
-              <HumanLogoNavbarIcon />
-            </Link>
+            <HumanLogoNavbarIcon />
           </Stack>
         )}
         <Stack

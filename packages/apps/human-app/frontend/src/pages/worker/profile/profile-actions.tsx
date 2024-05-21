@@ -92,7 +92,7 @@ export function ProfileActions({
       </Grid>
       <Grid>
         <ProfileAction
-          // eslint-disable-next-line react/jsx-no-leaked-render -- ....
+          // eslint-disable-next-line react/jsx-no-leaked-render -- ...
           done={isWalletConnected && user.kyc_status === 'APPROVED'}
           doneLabel={t('worker.profile.walletConnected')}
           toDoComponent={
