@@ -1,42 +1,19 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
+import { TableButton } from '@/pages/worker/jobs/components/table-button';
 
 interface MyJobsButtonProps {
   status: string;
 }
 
 export function MyJobsButton({ status }: MyJobsButtonProps) {
+  // TODO add correct implementation depending on job status
   const { t } = useTranslation();
   if (status === 'RESIGN') {
-    return (
-      <Button color="primary" size="small" type="button" variant="contained">
-        {t('worker.jobs.resign')}
-      </Button>
-    );
+    return <TableButton>{t('worker.jobs.resign')}</TableButton>;
   }
   if (status === 'ACTIVE') {
-    return (
-      <Button color="secondary" size="small" type="button" variant="contained">
-        {t('worker.jobs.solve')}
-      </Button>
-    );
+    return <TableButton>{t('worker.jobs.solve')}</TableButton>;
   }
 
-  return (
-    <Button
-      size="small"
-      sx={{
-        backgroundColor: colorPalette.paper.disabled,
-        color: colorPalette.paper.text,
-        boxShadow: 'none',
-        px: '10px',
-        py: '4px',
-      }}
-      type="button"
-      variant="contained"
-    >
-      {t('worker.jobs.solve')}
-    </Button>
-  );
+  return <TableButton>{t('worker.jobs.solve')}</TableButton>;
 }

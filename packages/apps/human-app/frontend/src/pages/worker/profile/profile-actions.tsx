@@ -40,6 +40,8 @@ export function ProfileActions({
   const emailVerified =
     Boolean(kycSessionIdData?.session_id) ||
     kycSessionIdData?.error !== 'emailNotVerified';
+  const kycApproved =
+    user.kyc_status === 'APPROVED' || kycSessionIdData?.error === 'kycApproved';
 
   useEffect(() => {
     if (user.kyc_status !== 'APPROVED') {
@@ -92,8 +94,7 @@ export function ProfileActions({
       </Grid>
       <Grid>
         <ProfileAction
-          // eslint-disable-next-line react/jsx-no-leaked-render -- ...
-          done={isWalletConnected && user.kyc_status === 'APPROVED'}
+          done={Boolean(isWalletConnected && kycApproved)}
           doneLabel={t('worker.profile.walletConnected')}
           toDoComponent={
             <ConnectWalletBtn
@@ -113,9 +114,7 @@ export function ProfileActions({
           doneLabel={t('worker.profile.kycInfoOnChainAdded')}
           toDoComponent={
             <Button
-              // TODO verify if info is added on chain
-              // eslint-disable-next-line react/jsx-boolean-value -- ...
-              disabled={true}
+              disabled={!(isWalletConnected && kycApproved)}
               fullWidth
               variant="contained"
             >

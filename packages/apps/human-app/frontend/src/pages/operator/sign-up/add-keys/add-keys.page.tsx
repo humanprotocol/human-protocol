@@ -22,6 +22,7 @@ import { ExistingKeys } from '@/pages/operator/sign-up/add-keys/existing-keys';
 import { EditExistingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
 import { useGetKeys } from '@/api/servieces/operator/get-keys';
+import { jsonRpcErrorHandler } from '@/shared/helpers/json-rpc-error-handler';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -39,12 +40,19 @@ export function AddKeysOperatorPage() {
 
   const errorAlert = editExistingKeysMutationState?.error ? (
     <Alert color="error" severity="error">
-      {defaultErrorMessage(editExistingKeysMutationState.error)}
+      {defaultErrorMessage(
+        editExistingKeysMutationState.error,
+        jsonRpcErrorHandler
+      )}
     </Alert>
   ) : undefined;
 
   if (isGetKeysError) {
-    return <PageCardError errorMessage={defaultErrorMessage(getKeysError)} />;
+    return (
+      <PageCardError
+        errorMessage={defaultErrorMessage(getKeysError, jsonRpcErrorHandler)}
+      />
+    );
   }
 
   if (isGetKeysPending) {

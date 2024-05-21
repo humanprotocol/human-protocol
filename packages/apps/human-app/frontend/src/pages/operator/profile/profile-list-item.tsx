@@ -29,6 +29,7 @@ export function ProfileListItem({
           component="span"
           sx={{
             marginBottom: '10px',
+            overflow: 'hidden',
           }}
           variant="subtitle2"
         >
@@ -51,7 +52,7 @@ export function ProfileListItem({
                   : colorPalette.text.primary
               }
               component="span"
-              variant="subtitle1"
+              variant="body1"
             >
               {paragraph}
             </Typography>
