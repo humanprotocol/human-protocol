@@ -7,16 +7,24 @@ import {
 	Area,
 	ResponsiveContainer,
 } from 'recharts';
-import CustomToolTip from './ChartTooltip';
+import CustomChartTooltip from './CustomChartTooltip';
 import { useState } from 'react';
 import Checkbox from '@mui/material/Checkbox';
 import Card from '@mui/material/Card';
 import { FormControlLabel, FormGroup, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { colorPalette } from '@assets/styles/color-palette';
-import CustomizedXAxisTick from '@components/Charts/CustomizedXAxisTick';
+import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
 import DatePicker from '@components/data-entry/DatePicker';
 import ToggleButtons from '@components/data-entry/ToggleButtons';
+import dayjs, { Dayjs } from 'dayjs';
+
+export type ChartTypes =
+	| 'name'
+	| 'transferAmount'
+	| 'transactionsCount'
+	| 'uniqueReceivers'
+	| 'uniqueSenders';
 
 const HARDCODED_CHART_DATA = [
 	{
@@ -106,7 +114,7 @@ const TIME_PERIOD_OPTIONS = [
 	},
 	{
 		value: '1Y',
-		name: '1T',
+		name: '1Y',
 	},
 	{
 		value: 'All',
@@ -116,23 +124,24 @@ const TIME_PERIOD_OPTIONS = [
 
 export const AreaChart = () => {
 	const [chartData, setChartData] =
-		useState<
-			Record<
-				| 'name'
-				| 'transferAmount'
-				| 'transactionsCount'
-				| 'uniqueReceivers'
-				| 'uniqueSenders',
-				string | number
-			>[]
-		>(HARDCODED_CHART_DATA);
+		useState<Record<ChartTypes, string | number>[]>(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
+	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
+	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		// if (event.target.value === 'TransferAmount') {
 		// 	console.log('dupa');
 		// }
 		console.log(event.target.value);
+	};
+
+	const onFromDateChange = (value: Dayjs | null) => {
+		if (value) setFromDate(value);
+	};
+
+	const onToDateChange = (value: Dayjs | null) => {
+		if (value) setToDate(value);
 	};
 
 	const handleTimePeriod = (
@@ -143,6 +152,9 @@ export const AreaChart = () => {
 			selectTimePeriod(value);
 		}
 	};
+
+	console.log({ fromDate, toDate });
+	console.log(selectedTimePeriod);
 
 	return (
 		<Card
@@ -162,9 +174,9 @@ export const AreaChart = () => {
 					value={selectedTimePeriod}
 				/>
 				<Stack direction="row" alignItems="center" gap={2}>
-					<DatePicker />
-					-
-					<DatePicker />
+					<DatePicker onChange={onFromDateChange} value={fromDate} />
+					<Typography>-</Typography>
+					<DatePicker onChange={onToDateChange} value={toDate} />
 				</Stack>
 			</Stack>
 			<ResponsiveContainer height={300}>
@@ -208,7 +220,7 @@ export const AreaChart = () => {
 					<YAxis />
 					<CartesianGrid stroke="#ccc" strokeDasharray="5" vertical={false} />
 					<XAxis
-						tick={<CustomizedXAxisTick />}
+						tick={<CustomXAxisTick />}
 						height={50}
 						stroke={colorPalette.fog.dark}
 						tickSize={20}
@@ -216,7 +228,7 @@ export const AreaChart = () => {
 						dataKey="name"
 						tickMargin={10}
 					/>
-					<Tooltip content={<CustomToolTip />} />
+					<Tooltip content={<CustomChartTooltip />} />
 					<Area
 						type="monotone"
 						dataKey="transferAmount"

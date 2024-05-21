@@ -13,11 +13,10 @@ const renderTitle = (title: string) => {
 		uniqueReceivers: 'Unique Receivers',
 		uniqueSenders: 'Unique Senders',
 	};
-
 	return currentTitle[title];
 };
 
-const ChartTooltip = ({
+const CustomChartTooltip = ({
 	payload,
 	label,
 	active,
@@ -43,23 +42,21 @@ const ChartTooltip = ({
 						{label}
 					</Typography>
 					{payload?.map((elem) => (
-						<>
-							<Stack direction="row" alignItems="center" gap={2}>
-								<Stack direction="row" alignItems="center" gap={1}>
-									<FiberManualRecordIcon
-										sx={{
-											color: elem.stroke,
-										}}
-									/>
-									<Typography fontWeight={500} variant="subtitle1">
-										{renderTitle(elem.name ?? '')}
-									</Typography>
-								</Stack>
-								<Typography variant="subtitle2">
-									{elem.value} {elem.name === 'transferAmount' ? 'HMT' : ''}
+						<Stack key={elem.name} direction="row" alignItems="center" gap={2}>
+							<Stack direction="row" alignItems="center" gap={1}>
+								<FiberManualRecordIcon
+									sx={{
+										color: elem.stroke,
+									}}
+								/>
+								<Typography fontWeight={500} variant="subtitle1">
+									{renderTitle(elem.name ?? '')}
 								</Typography>
 							</Stack>
-						</>
+							<Typography variant="subtitle2">
+								{elem.value} {elem.name === 'transferAmount' ? 'HMT' : ''}
+							</Typography>
+						</Stack>
 					))}
 				</Box>
 			</Card>
@@ -68,4 +65,4 @@ const ChartTooltip = ({
 	return null;
 };
 
-export default ChartTooltip;
+export default CustomChartTooltip;

@@ -7,16 +7,17 @@ import {
 	LineChart as LineChartRecharts,
 	ResponsiveContainer,
 } from 'recharts';
-import CustomToolTip from './ChartTooltip';
+import CustomChartTooltip from './CustomChartTooltip';
 import { useState } from 'react';
 import Card from '@mui/material/Card';
 import { FormControlLabel, FormGroup, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
 import { colorPalette } from '@assets/styles/color-palette';
-import CustomizedXAxisTick from '@components/Charts/CustomizedXAxisTick';
+import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
 import DatePicker from '@components/data-entry/DatePicker';
 import ToggleButtons from '@components/data-entry/ToggleButtons';
+import dayjs, { Dayjs } from 'dayjs';
 
 const HARDCODED_CHART_DATA = [
 	{
@@ -106,7 +107,7 @@ const TIME_PERIOD_OPTIONS = [
 	},
 	{
 		value: '1Y',
-		name: '1T',
+		name: '1Y',
 	},
 	{
 		value: 'All',
@@ -125,6 +126,16 @@ export const LineChart = () => {
 	const [chartData, setChartData] =
 		useState<Record<string, string | number>[]>(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
+	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
+	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
+
+	const onFromDateChange = (value: Dayjs | null) => {
+		if (value) setFromDate(value);
+	};
+
+	const onToDateChange = (value: Dayjs | null) => {
+		if (value) setToDate(value);
+	};
 
 	const handleTimePeriod = (
 		_event: React.MouseEvent<HTMLElement>,
@@ -134,6 +145,8 @@ export const LineChart = () => {
 			selectTimePeriod(value);
 		}
 	};
+
+	console.log(selectedTimePeriod);
 
 	return (
 		<Card
@@ -153,16 +166,16 @@ export const LineChart = () => {
 					value={selectedTimePeriod}
 				/>
 				<Stack direction="row" alignItems="center" gap={2}>
-					<DatePicker />
-					-
-					<DatePicker />
+					<DatePicker onChange={onFromDateChange} value={fromDate} />
+					<Typography>-</Typography>
+					<DatePicker onChange={onToDateChange} value={toDate} />
 				</Stack>
 			</Stack>
 			<ResponsiveContainer height={300}>
 				<LineChartRecharts data={chartData}>
 					<CartesianGrid stroke="#ccc" strokeDasharray="5" vertical={false} />
 					<XAxis
-						tick={<CustomizedXAxisTick />}
+						tick={<CustomXAxisTick />}
 						height={50}
 						stroke={colorPalette.fog.dark}
 						tickSize={20}
@@ -171,7 +184,7 @@ export const LineChart = () => {
 						tickMargin={10}
 					/>
 					<YAxis />
-					<Tooltip content={CustomToolTip} />
+					<Tooltip content={CustomChartTooltip} />
 					<Line
 						type="monotone"
 						dataKey="transferAmount"

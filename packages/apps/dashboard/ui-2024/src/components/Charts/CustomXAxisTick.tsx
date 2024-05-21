@@ -1,6 +1,6 @@
 import { colorPalette } from '@assets/styles/color-palette';
 
-const CustomizedXAxisTick = ({ x, y, payload }: any) => {
+const CustomXAxisTick = ({ x, y, payload }: any) => {
 	return (
 		<g transform={`translate(${x},${y})`}>
 			<text
@@ -17,4 +17,4 @@ const CustomizedXAxisTick = ({ x, y, payload }: any) => {
 	);
 };
 
-export default CustomizedXAxisTick;
+export default CustomXAxisTick;

@@ -4,8 +4,8 @@ import TabPanel from '@mui/lab/TabPanel';
 import Tab from '@mui/material/Tab';
 import { useState } from 'react';
 import TabContext from '@mui/lab/TabContext';
-import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import PageWrapper from '@components/PageWrapper';
 
 type graphType = 'bucketed' | 'cumulative';
 
@@ -16,7 +16,7 @@ const Graph = () => {
 		setValue(newValue);
 	};
 	return (
-		<Container maxWidth="xl">
+		<PageWrapper>
 			<TabContext value={value}>
 				<Tabs
 					textColor="primary"
@@ -51,7 +51,7 @@ const Graph = () => {
 					<LineChart />
 				</TabPanel>
 			</TabContext>
-		</Container>
+		</PageWrapper>
 	);
 };
 

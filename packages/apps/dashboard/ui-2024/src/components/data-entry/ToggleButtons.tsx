@@ -11,9 +11,6 @@ export const StyledToggleButtonGroup = styled(ToggleButtonGroup)({
 		width: 50,
 		color: colorPalette.primary.main,
 	},
-	'.MuiToggleButtonGroup-root': {
-		color: 'red',
-	},
 });
 
 interface ToggleButtonsProps {
@@ -38,6 +35,7 @@ const ToggleButtons = ({ value, onChange, options }: ToggleButtonsProps) => {
 		>
 			{options.map((elem) => (
 				<ToggleButton
+					key={elem.name}
 					sx={{
 						'&.Mui-selected': {
 							backgroundColor: colorPalette.primary.main,

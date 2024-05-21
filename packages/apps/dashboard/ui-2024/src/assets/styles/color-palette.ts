@@ -27,4 +27,10 @@ export const colorPalette = {
 	night: {
 		light: '#1406B20A',
 	},
+	sky: {
+		main: '#858ec6',
+		light: '#858ec6',
+		dark: '#858ec6',
+		contrastText: '#858ec6',
+	},
 } as const;
