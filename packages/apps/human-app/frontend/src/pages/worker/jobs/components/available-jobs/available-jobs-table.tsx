@@ -6,7 +6,7 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
@@ -88,15 +88,17 @@ const getColumns = (callbacks: {
       Cell: (props) => {
         const { escrow_address, chain_id } = props.row.original;
         return (
-          <TableButton
-            onClick={() => {
-              callbacks.assignJob({ escrow_address, chain_id });
-            }}
-          >
-            <Typography color={colorPalette.white} variant="buttonSmall">
-              {t('worker.jobs.selectJob')}
-            </Typography>
-          </TableButton>
+          <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <TableButton
+              onClick={() => {
+                callbacks.assignJob({ escrow_address, chain_id });
+              }}
+            >
+              <Typography color={colorPalette.white} variant="buttonSmall">
+                {t('worker.jobs.selectJob')}
+              </Typography>
+            </TableButton>
+          </Grid>
         );
       },
     },

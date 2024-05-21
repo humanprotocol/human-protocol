@@ -6,6 +6,7 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
+import Grid from '@mui/material/Grid';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import type { MyJob } from '@/api/servieces/worker/my-jobs-data';
@@ -142,7 +143,11 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     enableSorting: true,
     Cell: (props) => {
       const { status } = props.row.original;
-      return <MyJobsButton status={status} />;
+      return (
+        <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <MyJobsButton status={status} />;
+        </Grid>
+      );
     },
   },
 ];
