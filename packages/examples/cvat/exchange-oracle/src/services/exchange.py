@@ -155,10 +155,22 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             + timedelta(seconds=get_default_assignment_timeout(TaskTypes(project.job_type))),
         )
 
-        with cvat_api.api_client_context(cvat_api.get_api_client()):
-            cvat_api.clear_job_annotations(unassigned_job.cvat_id)
-            cvat_api.restart_job(unassigned_job.cvat_id, assignee_id=user.cvat_id)
+        # Need to save the values to use outside the transaction
+        unassigned_job_cvat_id = unassigned_job.cvat_id
+        user_cvat_id = user.cvat_id
 
-        # rollback is automatic within the transaction
+    # Finish the transaction ASAP to release the locks acquired and unblock other clients.
+
+    # It's possible that the following part is never completed. In this case the assignment
+    # will expire as usual after the assignment lifetime, even if not canceled here.
+    try:
+        with cvat_api.api_client_context(cvat_api.get_api_client()):
+            cvat_api.clear_job_annotations(unassigned_job_cvat_id)
+            cvat_api.restart_job(unassigned_job_cvat_id, assignee_id=user_cvat_id)
+    except Exception:
+        with SessionLocal.begin() as session:
+            cvat_service.update_assignment(
+                session, assignment_id, status=AssignmentStatuses.canceled
+            )
 
     return assignment_id

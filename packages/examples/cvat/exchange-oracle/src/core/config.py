@@ -153,6 +153,9 @@ class StorageConfig:
 
 
 class FeaturesConfig:
+    THREAD_LIMIT_ENV_VAR = "MAX_WORKER_THREADS"
+    DB_CONNECTION_LIMIT_ENV_VAR = "MAX_DB_CONNECTIONS"
+
     enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
@@ -164,6 +167,18 @@ class FeaturesConfig:
 
     profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
     "Allow to profile specific requests"
+
+    thread_limit = int(os.getenv(THREAD_LIMIT_ENV_VAR, 5))
+    "Maximum number of threads for blocking requests"
+
+    db_connection_limit = int(os.getenv(DB_CONNECTION_LIMIT_ENV_VAR, 15))
+    """
+    Maximum number of active parallel DB connections.
+    The recommended value is >= thread_limit + cron jobs count
+    """
+
+    db_connection_recycle_timeout = int(os.getenv("DB_CONNECTION_RECYCLE_TIMEOUT", 600))
+    "DB connection lifetime after the last action on the connection, in seconds"
 
 
 class CoreConfig:

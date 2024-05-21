@@ -8,18 +8,22 @@ import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 import src.services.exchange as oracle_service
 from src.db import SessionLocal
+from src.db import errors as db_errors
 from src.schemas.exchange import AssignmentRequest, TaskResponse, UserRequest, UserResponse
+from src.utils.concurrency import run_as_sync
 from src.validators.signature import validate_human_app_signature
 
 router = APIRouter()
 
 
 @router.get("/tasks", description="Lists available tasks")
-async def list_tasks(
+def list_tasks(
     wallet_address: Optional[str] = Query(default=None),
     signature: str = Header(description="Calling service signature"),
 ) -> list[TaskResponse]:
-    await validate_human_app_signature(signature)
+    # Declare this endpoint as sync as it uses a lot of blocking IO (db, manifest, escrow)
+
+    run_as_sync(validate_human_app_signature, signature)
 
     if not wallet_address:
         return oracle_service.get_available_tasks()
@@ -28,11 +32,13 @@ async def list_tasks(
 
 
 @router.put("/register", description="Binds a CVAT user a to HUMAN App user")
-async def register(
+def register(
     user: UserRequest,
     signature: str = Header(description="Calling service signature"),
 ) -> UserResponse:
-    await validate_human_app_signature(signature)
+    # Declare this endpoint as sync as it uses a lot of blocking IO (db, manifest, escrow, CVAT)
+
+    run_as_sync(validate_human_app_signature, signature)
 
     with SessionLocal.begin() as session:
         email_db_user = cvat_service.get_user_by_email(session, user.cvat_email, for_update=True)
@@ -97,19 +103,33 @@ async def register(
     "/tasks/{id}/assignment",
     description="Start an assignment within the task for the annotator",
 )
-async def create_assignment(
+def create_assignment(
     data: AssignmentRequest,
     project_id: str = Path(alias="id"),
     signature: str = Header(description="Calling service signature"),
 ) -> TaskResponse:
-    await validate_human_app_signature(signature)
+    # Declare this endpoint as sync as it uses a lot of blocking IO (db, manifest, escrow, CVAT)
 
-    try:
-        assignment_id = oracle_service.create_assignment(
-            project_id=project_id, wallet_address=data.wallet_address
+    run_as_sync(validate_human_app_signature, signature)
+
+    attempt = 0
+    max_attempts = 10
+    while attempt < max_attempts:
+        try:
+            assignment_id = oracle_service.create_assignment(
+                project_id=project_id, wallet_address=data.wallet_address
+            )
+            break
+        except oracle_service.UserHasUnfinishedAssignmentError as e:
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
+        except db_errors.LockNotAvailable:
+            attempt += 1
+
+    if attempt >= max_attempts:
+        raise HTTPException(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
+            detail="Too many requests at the moment, please try again later",
         )
-    except oracle_service.UserHasUnfinishedAssignmentError as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
     if not assignment_id:
         raise HTTPException(
