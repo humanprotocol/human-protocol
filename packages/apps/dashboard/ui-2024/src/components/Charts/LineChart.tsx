@@ -217,8 +217,8 @@ export const LineChart = () => {
 			>
 				<FormGroup>
 					<Stack
-						gap={{ xs: 4, md: 8 }}
-						direction={{ xs: 'column', sm: 'row' }}
+						gap={{ xs: 2, md: 6 }}
+						direction={{ xs: 'column', md: 'row' }}
 						justifyContent="center"
 					>
 						<FormControlLabel

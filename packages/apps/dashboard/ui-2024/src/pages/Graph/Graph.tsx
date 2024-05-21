@@ -26,10 +26,16 @@ const Graph = () => {
 					aria-label="chart-tabs"
 				>
 					<Tab
+						sx={{
+							width: { xs: '50%', sm: 'auto' },
+						}}
 						label={<Typography fontWeight={600}>Bucketed</Typography>}
 						value="bucketed"
 					/>
 					<Tab
+						sx={{
+							width: { xs: '50%', sm: 'auto' },
+						}}
 						label={<Typography fontWeight={600}>Cumulative</Typography>}
 						value="cumulative"
 					/>
