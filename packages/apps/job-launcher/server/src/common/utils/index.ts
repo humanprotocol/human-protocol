@@ -1,40 +1,7 @@
-import { firstValueFrom } from 'rxjs';
-import { CoingeckoTokenId } from '../constants/payment';
-import { TokenId } from '../enums/payment';
-import { COINGECKO_API_URL } from '../constants';
 import { HttpStatus } from '@nestjs/common';
-import { ErrorCurrency } from '../constants/errors';
-import { HttpService } from '@nestjs/axios';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
 import { ControlledError } from '../errors/controlled';
-
-export async function getRate(from: string, to: string): Promise<number> {
-  if (from === to) {
-    return 1;
-  }
-  let reversed = false;
-
-  if (Object.values(TokenId).includes(to as TokenId)) {
-    [from, to] = [CoingeckoTokenId[to], from];
-    reversed = true;
-  } else {
-    [from, to] = [CoingeckoTokenId[from], to];
-  }
-
-  const httpService = new HttpService();
-  const { data } = (await firstValueFrom(
-    httpService.get(`${COINGECKO_API_URL}?ids=${from}&vs_currencies=${to}`),
-  )) as any;
-
-  if (!data[from] || !data[from][to]) {
-    throw new ControlledError(ErrorCurrency.PairNotFound, HttpStatus.NOT_FOUND);
-  }
-
-  const rate = data[from][to];
-
-  return reversed ? 1 / rate : rate;
-}
 
 export const parseUrl = (
   url: string,

@@ -47,12 +47,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import {
-  isPGPMessage,
-  getRate,
-  isValidJSON,
-  parseUrl,
-} from '../../common/utils';
+import { isPGPMessage, isValidJSON, parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -125,6 +120,7 @@ import {
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from '../payment/rate.service';
 
 @Injectable()
 export class JobService {
@@ -146,6 +142,7 @@ export class JobService {
     public readonly pgpConfigService: PGPConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
+    private readonly rateService: RateService,
     @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
 
@@ -705,7 +702,7 @@ export class JobService {
       chainId = this.routingProtocolService.selectNetwork();
     }
 
-    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
