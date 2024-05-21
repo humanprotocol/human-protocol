@@ -57,7 +57,7 @@ services:
   - key: JWT_ACCESS_TOKEN_EXPIRES_IN
     value: 600
   - key: REFRESH_TOKEN_EXPIRES_IN
-    value: 3600000
+    value: 3600
   - key: S3_ENDPOINT
     value: storage.googleapis.com
   - key: S3_PORT
