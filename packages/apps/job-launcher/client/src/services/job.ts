@@ -16,12 +16,14 @@ export const createFortuneJob = async (
   chainId: number,
   data: FortuneRequest,
   amount: number | string,
+  currency: string,
 ) => {
   const body: CreateFortuneJobRequest = {
     chainId,
     submissionsRequired: Number(data.fortunesRequested),
     requesterTitle: data.title,
     requesterDescription: data.description,
+    currency: currency,
     fundAmount: Number(amount),
   };
   await api.post('/job/fortune', body);
@@ -31,11 +33,13 @@ export const createCvatJob = async (
   chainId: number,
   data: CvatRequest,
   amount: number | string,
+  currency: string,
 ) => {
   const body: CreateCvatJobRequest = {
     chainId,
     requesterDescription: data.description,
     fundAmount: Number(amount),
+    currency: currency,
     data: data.data,
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
@@ -49,7 +53,6 @@ export const createCvatJob = async (
 export const createHCaptchaJob = async (
   chainId: number,
   data: HCaptchaRequest,
-  amount: number | string,
 ) => {
   await api.post('/job/hCaptcha', {
     chainId,

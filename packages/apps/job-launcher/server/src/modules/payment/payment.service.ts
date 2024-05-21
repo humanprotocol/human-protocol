@@ -255,14 +255,19 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number): Promise<number> {
+  public async getUserBalance(userId: number, rate?: number): Promise<number> {
     const paymentEntities = await this.paymentRepository.findByUserAndStatus(
       userId,
       PaymentStatus.SUCCEEDED,
     );
-
+    if (!rate) {
+      rate = await getRate(TokenId.HMT, Currency.USD);
+    }
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return add(total, mul(payment.amount, payment.rate));
+      if (payment.currency === TokenId.HMT) {
+        return add(total, mul(payment.amount, rate));
+      }
+      return add(total, payment.amount);
     }, 0);
 
     return totalAmount;

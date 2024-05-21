@@ -65,3 +65,12 @@ export function gt(a: number, b: number): boolean {
 
   return decimalA.gt(decimalB);
 }
+
+export function max(a: number, b: number): number {
+  const decimalA = new Decimal(a);
+  const decimalB = new Decimal(b);
+
+  const result = decimalA.gt(decimalB) ? decimalA : decimalB;
+
+  return result.toNumber();
+}

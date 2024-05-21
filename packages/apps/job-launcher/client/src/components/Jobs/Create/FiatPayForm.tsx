@@ -1,3 +1,5 @@
+import KVStoreABI from '@human-protocol/core/abis/KVStore.json';
+import { KVStoreKeys, NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -14,14 +16,16 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
-  CardNumberElement,
-  CardExpiryElement,
   CardCvcElement,
+  CardExpiryElement,
+  CardNumberElement,
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import React, { useMemo, useState } from 'react';
-import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
+import { useEffect, useMemo, useState } from 'react';
+import { Address } from 'viem';
+import { useReadContract } from 'wagmi';
+import { CURRENCY } from '../../../constants/payment';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
@@ -64,9 +68,37 @@ export const FiatPayForm = ({
     amount: '',
     name: '',
   });
+  const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
+  const [minFee, setMinFee] = useState<number>(0.01);
+
+  useEffect(() => {
+    const fetchJobLauncherData = async () => {
+      const address = await paymentService.getOperatorAddress();
+      const fee = await paymentService.getFee();
+      setJobLauncherAddress(address);
+      setMinFee(fee);
+    };
+
+    fetchJobLauncherData();
+  }, []);
+
+  const { data: jobLauncherFee } = useReadContract({
+    address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
+    abi: KVStoreABI,
+    functionName: 'get',
+    args: jobLauncherAddress
+      ? [jobLauncherAddress, KVStoreKeys.fee]
+      : undefined,
+    query: {
+      enabled: !!jobLauncherAddress,
+    },
+  });
 
   const fundAmount = paymentData.amount ? Number(paymentData.amount) : 0;
-  const feeAmount = fundAmount * (JOB_LAUNCHER_FEE / 100);
+  const feeAmount = Math.max(
+    minFee,
+    fundAmount * (Number(jobLauncherFee) / 100),
+  );
   const totalAmount = fundAmount + feeAmount;
   const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
 
@@ -136,7 +168,7 @@ export const FiatPayForm = ({
         // send payment if creditCardPayment > 0
         const clientSecret = await paymentService.createFiatPayment({
           amount: creditCardPayAmount,
-          currency: 'usd',
+          currency: CURRENCY.usd,
         });
 
         // stripe payment
@@ -169,15 +201,21 @@ export const FiatPayForm = ({
       if (!chainId) return;
 
       if (jobType === JobType.Fortune && fortuneRequest) {
-        await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
-      } else if (jobType === JobType.CVAT && cvatRequest) {
-        await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
-      } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
-        await jobService.createHCaptchaJob(
+        await jobService.createFortuneJob(
           chainId,
-          hCaptchaRequest,
+          fortuneRequest,
           fundAmount,
+          CURRENCY.usd,
         );
+      } else if (jobType === JobType.CVAT && cvatRequest) {
+        await jobService.createCvatJob(
+          chainId,
+          cvatRequest,
+          fundAmount,
+          CURRENCY.usd,
+        );
+      } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
+        await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
       }
 
       dispatch(fetchUserBalanceAsync());
@@ -309,7 +347,7 @@ export const FiatPayForm = ({
             >
               <Typography>Fees</Typography>
               <Typography color="text.secondary">
-                ({JOB_LAUNCHER_FEE}%) {feeAmount.toFixed(2)} USD
+                ({Number(jobLauncherFee)}%) {feeAmount.toFixed(2)} USD
               </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>

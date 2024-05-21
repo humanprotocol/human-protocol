@@ -422,3 +422,8 @@ export enum WorkerBrowser {
   MOBILE = 'mobile',
   MODERN_BROWSER = 'modern_browser',
 }
+
+export enum JobCurrency {
+  HMT = 'hmt',
+  USD = 'usd',
+}

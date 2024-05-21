@@ -24,6 +24,7 @@ import { ChainId } from '@human-protocol/sdk';
 import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
   JobStatus,
   WorkerBrowser,
@@ -82,6 +83,10 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class StorageDataDto {
@@ -154,6 +159,10 @@ export class JobCvatDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class JobCancelDto {
