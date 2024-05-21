@@ -314,6 +314,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiDrawer: {
+      styleOverrides: {
+        root: {
+          zIndex: 50,
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

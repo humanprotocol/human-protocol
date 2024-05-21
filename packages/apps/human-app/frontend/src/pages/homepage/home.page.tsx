@@ -8,7 +8,7 @@ export function HomePage() {
   const isMobile = useIsMobile();
 
   return (
-    <Box>
+    <Box width="100%">
       <Paper
         sx={{
           backgroundColor: colorPalette.white,

@@ -33,6 +33,8 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
       sx={{
         paddingBottom: isMobile ? '44px' : 0,
         paddingTop: isMobile ? '12px' : 0,
+        width: '100%',
+        maxWidth: '1600px',
       }}
     >
       <Button

@@ -53,5 +53,8 @@ export const apiPaths = {
         path: '/auth/web3/signin',
       },
     },
+    disableOperator: {
+      path: '/disable-operator',
+    },
   },
 } as const;
