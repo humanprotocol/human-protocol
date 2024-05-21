@@ -17,6 +17,7 @@ import {
 } from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/auth/browser-auth-provider';
+import { web3BrowserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
 
 export function Router() {
   return (
@@ -76,7 +77,7 @@ export function Router() {
                   <DrawerNavigation
                     bottomMenuItems={operatorDrawerBottomMenuItems}
                     open={open}
-                    signOut={browserAuthProvider.signOut.bind(undefined)}
+                    signOut={web3BrowserAuthProvider.signOut.bind(undefined)}
                   />
                 )}
               />
