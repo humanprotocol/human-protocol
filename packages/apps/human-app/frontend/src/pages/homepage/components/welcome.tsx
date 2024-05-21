@@ -5,7 +5,6 @@ import {
   HomepageLogoIcon,
   HomepageUserIcon,
   HomepageWorkIcon,
-  MobileHeaderIcon,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
@@ -34,13 +33,15 @@ export function Welcome({ setStage }: WelcomeProps) {
         <Grid container direction="column">
           {isMobile ? (
             <Stack alignItems="center" direction="row" justifyContent="center">
-              <MobileHeaderIcon />
+              <HomepageWorkIcon />
+              <HomepageUserIcon />
+              <HomepageLogoIcon />
             </Stack>
           ) : (
             <Stack direction="row">
-              <HomepageLogoIcon />
-              <HomepageUserIcon />
               <HomepageWorkIcon />
+              <HomepageUserIcon />
+              <HomepageLogoIcon />
             </Stack>
           )}
           <Stack

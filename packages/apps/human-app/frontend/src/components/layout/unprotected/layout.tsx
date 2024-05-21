@@ -31,7 +31,11 @@ export function Layout({ withNavigation = true }: LayoutProps) {
       }}
     >
       <Navbar withNavigation={withNavigation} />
-      <Container component="main" maxWidth="xl" sx={{ p: '0' }}>
+      <Container
+        component="main"
+        maxWidth="xl"
+        sx={{ p: '0', display: 'flex', justifyContent: 'center' }}
+      >
         <Outlet />
       </Container>
       <Footer />
