@@ -10,6 +10,7 @@ export function useDisableWeb3Operator() {
       apiClient(apiPaths.operator.disableOperator.path, {
         skipValidation: true,
         authenticated: true,
+        authProviderType: 'web3',
         options: {
           method: 'POST',
           body: JSON.stringify({ signature }),

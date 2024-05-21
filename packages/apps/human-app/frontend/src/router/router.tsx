@@ -16,7 +16,7 @@ import {
   workerDrawerTopMenuItems,
 } from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-items/drawer-menu-items-operator';
-import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { browserAuthProvider } from '@/auth/browser-auth-provider';
 
 export function Router() {
   return (

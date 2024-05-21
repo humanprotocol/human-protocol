@@ -1,9 +1,10 @@
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
+import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
 
 const accessTokenKey = btoa('access_token');
 const refreshTokenKey = btoa('refresh_token');
 
-const browserAuthProvider = {
+const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   signOutCallback: (() => undefined) as () => void,
   signIn(singIsSuccess: SignInSuccessResponse) {
@@ -19,7 +20,6 @@ const browserAuthProvider = {
   },
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
-
     if (!result) {
       return null;
     }

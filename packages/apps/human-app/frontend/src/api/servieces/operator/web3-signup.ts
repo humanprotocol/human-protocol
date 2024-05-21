@@ -7,7 +7,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
-import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { browserAuthProvider } from '@/auth/browser-auth-provider';
 
 export const web3SignInSuccessResponseSchema = z.object({
   access_token: z.string(),
