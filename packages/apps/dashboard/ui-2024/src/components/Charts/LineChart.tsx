@@ -8,7 +8,7 @@ import {
 	ResponsiveContainer,
 } from 'recharts';
 import CustomChartTooltip from './CustomChartTooltip';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Card from '@mui/material/Card';
 import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
@@ -130,6 +130,7 @@ export const LineChart = () => {
 	const [checkedCharts, setCheckedCharts] = useState(
 		CHECKED_CHARTS_DEFAULT_STATE
 	);
+	const chartRef = useRef<HTMLDivElement>(null);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setCheckedCharts((prevState) => ({
@@ -155,6 +156,29 @@ export const LineChart = () => {
 		}
 	};
 
+	useEffect(() => {
+		const currentRef = chartRef.current;
+		if (currentRef) {
+			const handleScrollChangeDate = (event: WheelEvent) => {
+				if (event.deltaY < 0) {
+					setFromDate((prevState) => {
+						return prevState.add(1, 'day');
+					});
+				} else if (event.deltaY > 0) {
+					setFromDate((prevState) => {
+						return prevState.subtract(1, 'day');
+					});
+				}
+			};
+
+			currentRef.addEventListener('wheel', handleScrollChangeDate);
+
+			return () => {
+				currentRef.removeEventListener('wheel', handleScrollChangeDate);
+			};
+		}
+	}, []);
+
 	return (
 		<Card
 			sx={{
@@ -178,7 +202,7 @@ export const LineChart = () => {
 					<DatePicker onChange={onToDateChange} value={toDate} />
 				</Stack>
 			</Stack>
-			<ResponsiveContainer height={300}>
+			<ResponsiveContainer ref={chartRef} height={300}>
 				<LineChartRecharts data={chartData}>
 					<CartesianGrid stroke="#ccc" strokeDasharray="5" vertical={false} />
 					<XAxis
