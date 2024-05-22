@@ -9,7 +9,6 @@ import { WorkerProfilePage } from '@/pages/worker/profile/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
 import { routerPaths } from '@/router/router-paths';
-import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { AddStakeOperatorPage } from '@/pages/operator/sign-up/add-stake/add-stake.page';
 import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
 import { ResetPasswordWorkerPage } from '@/pages/worker/reset-password/reset-password.page';
@@ -21,6 +20,7 @@ import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
+import { OraclesTableProvider } from '@/pages/worker/oracles/oracles-table-provider';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -90,7 +90,7 @@ export const protectedRoutes: {
   {
     routerProps: {
       path: routerPaths.worker.jobs,
-      element: <JobsPage />,
+      element: <OraclesTableProvider />,
     },
     pageHeaderProps: {
       headerIcon: <HomepageWorkIcon />,

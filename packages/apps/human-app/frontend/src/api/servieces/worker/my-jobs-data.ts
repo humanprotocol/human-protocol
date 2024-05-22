@@ -5,7 +5,6 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
 import { createPaginationSchema } from '@/shared/helpers/create-pagination-schema';
-import { getOracles } from '@/api/servieces/worker/oracles';
 import type { MyJobsFilterStoreProps } from '@/hooks/use-my-jobs-filter-store';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 
@@ -21,6 +20,7 @@ const myJobSchema = z.object({
   expires_at: z.string(),
   url: z.string(),
 });
+
 const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
 
 export type MyJob = z.infer<typeof myJobSchema>;
@@ -32,15 +32,13 @@ export interface MyJobsWithJobTypes {
 
 type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'];
 
-const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
-  const oraclesResponse = await getOracles();
-  const oracle_address = oraclesResponse[0].address;
-  const jobTypes = oraclesResponse[0].jobTypes.map((jobType) =>
-    jobType.toUpperCase()
-  );
-
+const getMyJobsTableData = async (
+  oracleAddress: string,
+  jobTypes: string[],
+  dto: GetMyJobTableDataDto
+) => {
   const jobs = await apiClient(
-    `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto, address: oracle_address })}`,
+    `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto, address: oracleAddress })}`,
     {
       authenticated: true,
       successSchema: myJobsSuccessResponseSchema,
@@ -59,8 +57,11 @@ const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
 export function useGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
 
-  return useQuery({
-    queryKey: ['myJobs', filterParams],
-    queryFn: () => getMyJobsTableData(filterParams),
-  });
+  const useHook = (oracleAddress: string, jobTypes: string[]) =>
+    useQuery({
+      queryKey: ['myJobs', filterParams],
+      queryFn: () => getMyJobsTableData(oracleAddress, jobTypes, filterParams),
+    });
+
+  return useHook;
 }
