@@ -182,12 +182,10 @@ export const AreaChart = () => {
 		if (currentRef) {
 			const handleScrollChangeDate = (event: WheelEvent) => {
 				if (event.deltaY < 0) {
-					console.log('scrolled up');
 					setFromDate((prevState) => {
 						return prevState.add(1, 'day');
 					});
 				} else if (event.deltaY > 0) {
-					console.log('scrolled up');
 					setFromDate((prevState) => {
 						return prevState.subtract(1, 'day');
 					});
