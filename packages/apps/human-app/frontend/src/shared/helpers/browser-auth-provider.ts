@@ -1,8 +1,5 @@
-import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
-import type {
-  AuthType,
-  BrowserAuthProvider,
-} from '@/shared/types/browser-auth-provider';
+/* eslint-disable camelcase -- ...*/
+import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
 
 const accessTokenKey = btoa('access_token');
 const refreshTokenKey = btoa('refresh_token');
@@ -12,19 +9,19 @@ const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
   signOutCallback: (() => undefined) as () => void,
-  signIn(singIsSuccess: SignInSuccessResponse, authType: AuthType) {
+  signIn({ access_token, refresh_token }, authType) {
     browserAuthProvider.isAuthenticated = true;
     browserAuthProvider.authType = authType;
-    localStorage.setItem(accessTokenKey, btoa(singIsSuccess.access_token));
-    localStorage.setItem(refreshTokenKey, btoa(singIsSuccess.refresh_token));
+    localStorage.setItem(accessTokenKey, btoa(access_token));
+    localStorage.setItem(refreshTokenKey, btoa(refresh_token));
     localStorage.setItem(authTypeKey, btoa(authType));
   },
   signOut() {
     browserAuthProvider.isAuthenticated = false;
+    browserAuthProvider.signOutCallback();
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
     localStorage.removeItem(authTypeKey);
-    browserAuthProvider.triggerSignOutSubscriptions();
   },
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
@@ -54,12 +51,6 @@ const browserAuthProvider: BrowserAuthProvider = {
   },
   subscribeSignOut(callback: () => void) {
     browserAuthProvider.signOutCallback = callback;
-  },
-  unsubscribeSignOut() {
-    browserAuthProvider.signOutCallback = () => undefined;
-  },
-  triggerSignOutSubscriptions() {
-    browserAuthProvider.signOutCallback();
   },
 };
 

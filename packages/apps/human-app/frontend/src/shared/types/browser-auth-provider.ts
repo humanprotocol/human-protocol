@@ -6,12 +6,13 @@ export interface BrowserAuthProvider {
   isAuthenticated: boolean;
   authType: AuthType;
   signOutCallback: () => void;
-  signIn: (singIsSuccess: SignInSuccessResponse, authType: AuthType) => void;
+  signIn: (
+    singInSuccessData: SignInSuccessResponse,
+    authType: AuthType
+  ) => void;
   signOut: () => void;
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
   getAuthType: () => string | null;
   subscribeSignOut: (callback: () => void) => void;
-  unsubscribeSignOut: () => void;
-  triggerSignOutSubscriptions: () => void;
 }
