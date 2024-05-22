@@ -46,6 +46,7 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorCronJob } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
+import { RateService } from '../payment/rate.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -123,6 +124,10 @@ describe('CronJobService', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: RateService,
+          useValue: createMock<RateService>(),
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
