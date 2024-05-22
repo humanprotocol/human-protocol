@@ -40,7 +40,6 @@ describe.only('Faucet', () => {
     });
   });
 
-  console.log(token)
   it('Check faucet balance before send', async () => {
     const result = await getFaucetBalance(web3, token.options.address);
 
