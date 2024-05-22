@@ -145,7 +145,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
       const { status } = props.row.original;
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <MyJobsButton status={status} />;
+          <MyJobsButton status={status} />
         </Grid>
       );
     },
