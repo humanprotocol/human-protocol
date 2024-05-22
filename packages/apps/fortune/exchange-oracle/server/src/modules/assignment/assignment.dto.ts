@@ -5,7 +5,6 @@ import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
-  JobSortField,
   JobType,
 } from '../../common/enums/job';
 import { SortDirection } from '../../common/enums/collection';
@@ -40,10 +39,6 @@ export class GetAssignmentsDto extends PageOptionsDto {
     enum: SortDirection,
     default: SortDirection.ASC,
   })
-  @IsOptional()
-  @IsEnum(SortDirection)
-  sortOrder?: SortDirection = SortDirection.ASC;
-
   @ApiPropertyOptional({ name: 'chain_id' })
   @IsOptional()
   @Type(() => Number)

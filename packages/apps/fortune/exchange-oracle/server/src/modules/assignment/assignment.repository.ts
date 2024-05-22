@@ -122,9 +122,6 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
       case AssignmentSortField.CHAIN_ID:
         queryBuilder.orderBy('job.chainId', data.sort);
         break;
-      case AssignmentSortField.CREATED_AT:
-        queryBuilder.orderBy('assignment.createdAt', data.sort);
-        break;
       case AssignmentSortField.STATUS:
         queryBuilder.orderBy('assignment.status', data.sort);
         break;

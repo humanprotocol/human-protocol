@@ -290,7 +290,7 @@ describe('AssignmentService', () => {
           pageSize: 10,
           skip: 0,
           sortField: AssignmentSortField.CREATED_AT,
-          sortOrder: SortDirection.ASC,
+          sort: SortDirection.ASC,
         },
         workerAddress,
         reputationNetwork,
@@ -315,17 +315,17 @@ describe('AssignmentService', () => {
         escrowAddress,
       );
       expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
+        page: 0,
         pageSize: 10,
         skip: 0,
-        reputationNetwork,
-        workerAddress,
-        sortField: AssignmentSortField.CREATED_AT,
         sort: SortDirection.ASC,
+        sortField: AssignmentSortField.CREATED_AT,
         chainId,
         jobType: JobType.FORTUNE,
         escrowAddress,
         status: AssignmentStatus.ACTIVE,
-        assignmentId: undefined,
+        reputationNetwork,
+        workerAddress,
       });
     });
 
@@ -344,7 +344,7 @@ describe('AssignmentService', () => {
           pageSize: 10,
           skip: 0,
           sortField: AssignmentSortField.CREATED_AT,
-          sortOrder: SortDirection.ASC,
+          sort: SortDirection.ASC,
         },
         workerAddress,
         reputationNetwork,
@@ -360,7 +360,7 @@ describe('AssignmentService', () => {
         .spyOn(assignmentRepository, 'fetchFiltered')
         .mockResolvedValueOnce({ entities: assignments as any, itemCount: 1 });
 
-      const result = await assignmentService.getAssignmentList(
+      await assignmentService.getAssignmentList(
         {
           chainId,
           jobType: JobType.FORTUNE,
@@ -370,7 +370,7 @@ describe('AssignmentService', () => {
           pageSize: 10,
           skip: 0,
           sortField: AssignmentSortField.CREATED_AT,
-          sortOrder: SortDirection.DESC,
+          sort: SortDirection.DESC,
         },
         workerAddress,
         reputationNetwork,
@@ -378,17 +378,17 @@ describe('AssignmentService', () => {
       );
 
       expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
+        page: 1,
         pageSize: 10,
         skip: 0,
-        reputationNetwork,
-        workerAddress,
-        sortField: AssignmentSortField.CREATED_AT,
         sort: SortDirection.DESC,
+        sortField: AssignmentSortField.CREATED_AT,
         chainId,
         jobType: JobType.FORTUNE,
         escrowAddress,
         status: AssignmentStatus.ACTIVE,
-        assignmentId: undefined,
+        reputationNetwork,
+        workerAddress,
       });
     });
   });

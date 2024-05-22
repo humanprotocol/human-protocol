@@ -101,17 +101,11 @@ export class AssignmentService {
 
     const { entities, itemCount } =
       await this.assignmentRepository.fetchFiltered({
-        pageSize: data.pageSize!,
-        skip: data.skip!,
+        ...data,
         reputationNetwork,
         workerAddress,
-        sortField: data.sortField,
-        sort: data.sortOrder,
-        chainId: data.chainId,
-        escrowAddress: data.escrowAddress,
-        status: data.status,
-        assignmentId: data.assignmentId,
-        jobType: data.jobType,
+        skip: data.skip!,
+        pageSize: data.pageSize ?? 10,
       });
     const assignments = await Promise.all(
       entities.map(async (entity) => {
