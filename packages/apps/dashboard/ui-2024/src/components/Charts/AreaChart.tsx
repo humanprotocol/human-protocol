@@ -9,15 +9,15 @@ import {
 } from 'recharts';
 import CustomChartTooltip from './CustomChartTooltip';
 import { useState } from 'react';
-import Checkbox from '@mui/material/Checkbox';
 import Card from '@mui/material/Card';
-import { FormControlLabel, FormGroup, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { colorPalette } from '@assets/styles/color-palette';
 import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
 import DatePicker from '@components/data-entry/DatePicker';
 import ToggleButtons from '@components/data-entry/ToggleButtons';
 import dayjs, { Dayjs } from 'dayjs';
+import ToggleCharts from '@components/Charts/ToggleCharts';
 
 export type ChartTypes =
 	| 'name'
@@ -93,9 +93,9 @@ const HARDCODED_CHART_DATA = [
 	{
 		name: 'Test 10',
 		transferAmount: 190,
-		transactionsCount: 2900,
-		uniqueReceivers: 3900,
-		uniqueSenders: 310,
+		transactionsCount: 6000,
+		uniqueReceivers: 1000,
+		uniqueSenders: 50000,
 	},
 ];
 
@@ -158,9 +158,6 @@ export const AreaChart = () => {
 			selectTimePeriod(value);
 		}
 	};
-
-	console.log({ fromDate, toDate });
-	console.log(selectedTimePeriod);
 
 	return (
 		<Card
@@ -281,128 +278,36 @@ export const AreaChart = () => {
 					backgroundColor: colorPalette.night.light,
 				}}
 			>
-				<FormGroup>
-					<Stack
-						gap={{ xs: 2, md: 6 }}
-						direction={{ xs: 'column', md: 'row' }}
-						justifyContent="center"
-					>
-						<FormControlLabel
-							sx={{
-								m: 0,
-								gap: 1,
-							}}
-							control={
-								<Checkbox
-									name="transferAmount"
-									onChange={handleChange}
-									defaultChecked
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.primary.main,
-										},
-									}}
-								/>
-							}
-							label={
-								<Stack direction="column">
-									<Typography fontWeight={600}>Transfer Amount</Typography>
-									<Typography variant="h5" fontWeight={500} component="p">
-										{chartData[chartData.length - 1].transferAmount}
-										<Typography
-											variant="h5"
-											component="span"
-											sx={{
-												marginLeft: 1,
-												color: colorPalette.fog.main,
-											}}
-										>
-											HMT
-										</Typography>
-									</Typography>
-								</Stack>
-							}
-						/>
-						<FormControlLabel
-							sx={{
-								gap: 1,
-								m: 0,
-							}}
-							control={
-								<Checkbox
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.secondary.main,
-										},
-									}}
-									name="transactionsCount"
-									onChange={handleChange}
-									defaultChecked
-								/>
-							}
-							label={
-								<Stack>
-									<Typography fontWeight={600}>Transactions Count</Typography>
-									<Typography variant="h5" component="p">
-										{chartData[chartData.length - 1].transactionsCount}
-									</Typography>
-								</Stack>
-							}
-						/>
-						<FormControlLabel
-							sx={{
-								gap: 1,
-								m: 0,
-							}}
-							control={
-								<Checkbox
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.error.main,
-										},
-									}}
-									name="uniqueReceivers"
-									onChange={handleChange}
-									defaultChecked
-								/>
-							}
-							label={
-								<Stack>
-									<Typography fontWeight={600}>Unique Receivers</Typography>
-									<Typography variant="h5" component="p">
-										{chartData[chartData.length - 1].uniqueReceivers}
-									</Typography>
-								</Stack>
-							}
-						/>
-						<FormControlLabel
-							sx={{
-								gap: 1,
-								m: 0,
-							}}
-							control={
-								<Checkbox
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.success.main,
-										},
-									}}
-									name="uniqueSenders"
-									onChange={handleChange}
-									defaultChecked
-								/>
-							}
-							label={
-								<Stack>
-									<Typography fontWeight={600}>Unique Senders</Typography>
-									<Typography variant="h5" component="p">
-										{chartData[chartData.length - 1].uniqueSenders}
-									</Typography>
-								</Stack>
-							}
-						/>
-					</Stack>
-				</FormGroup>
+				<ToggleCharts
+					handleChange={handleChange}
+					charts={[
+						{
+							title: 'Transfer Amount',
+							isAreaChart: true,
+							name: 'transferAmount',
+							amount: chartData[chartData.length - 1].transferAmount,
+							color: colorPalette.primary.main,
+						},
+						{
+							title: 'Transactions Count',
+							name: 'transactionsCount',
+							amount: chartData[chartData.length - 1].transactionsCount,
+							color: colorPalette.secondary.main,
+						},
+						{
+							title: 'Unique Receivers',
+							name: 'uniqueReceivers',
+							amount: chartData[chartData.length - 1].uniqueReceivers,
+							color: colorPalette.error.main,
+						},
+						{
+							title: 'Unique Senders',
+							name: 'uniqueSenders',
+							amount: chartData[chartData.length - 1].uniqueSenders,
+							color: colorPalette.success.main,
+						},
+					]}
+				/>
 			</Card>
 		</Card>
 	);

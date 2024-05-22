@@ -10,14 +10,14 @@ import {
 import CustomChartTooltip from './CustomChartTooltip';
 import { useState } from 'react';
 import Card from '@mui/material/Card';
-import { FormControlLabel, FormGroup, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
-import Checkbox from '@mui/material/Checkbox';
 import { colorPalette } from '@assets/styles/color-palette';
 import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
 import DatePicker from '@components/data-entry/DatePicker';
 import ToggleButtons from '@components/data-entry/ToggleButtons';
 import dayjs, { Dayjs } from 'dayjs';
+import ToggleCharts from '@components/Charts/ToggleCharts';
 
 const HARDCODED_CHART_DATA = [
 	{
@@ -229,80 +229,31 @@ export const LineChart = () => {
 					backgroundColor: colorPalette.night.light,
 				}}
 			>
-				<FormGroup>
-					<Stack
-						gap={{ xs: 2, md: 6 }}
-						direction={{ xs: 'column', md: 'row' }}
-						justifyContent="center"
-					>
-						<FormControlLabel
-							sx={{ m: 0 }}
-							control={
-								<Checkbox
-									name="transferAmount"
-									onChange={handleChange}
-									defaultChecked
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.primary.main,
-										},
-									}}
-								/>
-							}
-							label={<Typography fontWeight={600}>Transfer Amount</Typography>}
-						/>
-						<FormControlLabel
-							sx={{ margin: 0 }}
-							control={
-								<Checkbox
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.secondary.main,
-										},
-									}}
-									name="transactionsCount"
-									onChange={handleChange}
-									defaultChecked
-								/>
-							}
-							label={
-								<Typography fontWeight={600}>Transactions Count</Typography>
-							}
-						/>
-						<FormControlLabel
-							sx={{ margin: 0 }}
-							control={
-								<Checkbox
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.error.main,
-										},
-									}}
-									name="uniqueReceivers"
-									onChange={handleChange}
-									defaultChecked
-								/>
-							}
-							label={<Typography fontWeight={600}>Unique Receivers</Typography>}
-						/>
-						<FormControlLabel
-							sx={{ margin: 0 }}
-							control={
-								<Checkbox
-									sx={{
-										'&.Mui-checked': {
-											color: colorPalette.success.main,
-										},
-									}}
-									name="uniqueSenders"
-									onChange={handleChange}
-									defaultChecked
-								/>
-							}
-							label={<Typography fontWeight={600}>Unique Senders</Typography>}
-						/>
-					</Stack>
-				</FormGroup>
+				<ToggleCharts
+					handleChange={handleChange}
+					charts={[
+						{
+							title: 'Transfer Amount',
+							name: 'transferAmount',
+							color: colorPalette.primary.main,
+						},
+						{
+							title: 'Transactions Count',
+							name: 'transactionsCount',
+							color: colorPalette.secondary.main,
+						},
+						{
+							title: 'Unique Receivers',
+							name: 'uniqueReceivers',
+							color: colorPalette.error.main,
+						},
+						{
+							title: 'Unique Senders',
+							name: 'uniqueSenders',
+							color: colorPalette.success.main,
+						},
+					]}
+				/>
 			</Card>
 		</Card>
 	);
