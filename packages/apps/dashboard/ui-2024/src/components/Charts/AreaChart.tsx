@@ -123,17 +123,23 @@ const TIME_PERIOD_OPTIONS = [
 ];
 
 export const AreaChart = () => {
-	const [chartData, setChartData] =
+	const [chartData] =
 		useState<Record<ChartTypes, string | number>[]>(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
 	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
 	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
+	const [checkedCharts, setCheckedCharts] = useState({
+		transferAmount: true,
+		transactionsCount: true,
+		uniqueReceivers: true,
+		uniqueSenders: true,
+	});
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		// if (event.target.value === 'TransferAmount') {
-		// 	console.log('dupa');
-		// }
-		console.log(event.target.value);
+		setCheckedCharts({
+			...checkedCharts,
+			[event.target.name]: event.target.checked,
+		});
 	};
 
 	const onFromDateChange = (value: Dayjs | null) => {
@@ -229,34 +235,42 @@ export const AreaChart = () => {
 						tickMargin={10}
 					/>
 					<Tooltip content={<CustomChartTooltip />} />
-					<Area
-						type="monotone"
-						dataKey="transferAmount"
-						stroke={colorPalette.primary.main}
-						fillOpacity={1}
-						fill="url(#colorTransferAmount)"
-					/>
-					<Area
-						type="monotone"
-						dataKey="transactionsCount"
-						stroke={colorPalette.secondary.main}
-						fillOpacity={1}
-						fill="url(#colorTransactionsCount)"
-					/>
-					<Area
-						type="monotone"
-						dataKey="uniqueReceivers"
-						stroke={colorPalette.error.main}
-						fillOpacity={1}
-						fill="url(#colorUniqueRecievers)"
-					/>
-					<Area
-						type="monotone"
-						dataKey="uniqueSenders"
-						stroke={colorPalette.success.main}
-						fillOpacity={1}
-						fill="url(#colorUniqueSenders)"
-					/>
+					{checkedCharts.transferAmount && (
+						<Area
+							type="monotone"
+							dataKey="transferAmount"
+							stroke={colorPalette.primary.main}
+							fillOpacity={1}
+							fill="url(#colorTransferAmount)"
+						/>
+					)}
+					{checkedCharts.transactionsCount && (
+						<Area
+							type="monotone"
+							dataKey="transactionsCount"
+							stroke={colorPalette.secondary.main}
+							fillOpacity={1}
+							fill="url(#colorTransactionsCount)"
+						/>
+					)}
+					{checkedCharts.uniqueReceivers && (
+						<Area
+							type="monotone"
+							dataKey="uniqueReceivers"
+							stroke={colorPalette.error.main}
+							fillOpacity={1}
+							fill="url(#colorUniqueRecievers)"
+						/>
+					)}
+					{checkedCharts.uniqueSenders && (
+						<Area
+							type="monotone"
+							dataKey="uniqueSenders"
+							stroke={colorPalette.success.main}
+							fillOpacity={1}
+							fill="url(#colorUniqueSenders)"
+						/>
+					)}
 				</AreaChartRecharts>
 			</ResponsiveContainer>
 			<Card
@@ -280,7 +294,7 @@ export const AreaChart = () => {
 							}}
 							control={
 								<Checkbox
-									value="TransferAmount"
+									name="transferAmount"
 									onChange={handleChange}
 									defaultChecked
 									sx={{
@@ -300,6 +314,7 @@ export const AreaChart = () => {
 											component="span"
 											sx={{
 												marginLeft: 1,
+												color: colorPalette.fog.main,
 											}}
 										>
 											HMT
@@ -320,7 +335,7 @@ export const AreaChart = () => {
 											color: colorPalette.secondary.main,
 										},
 									}}
-									value="transactionsCount"
+									name="transactionsCount"
 									onChange={handleChange}
 									defaultChecked
 								/>
@@ -346,7 +361,7 @@ export const AreaChart = () => {
 											color: colorPalette.error.main,
 										},
 									}}
-									value="uniqueReceivers"
+									name="uniqueReceivers"
 									onChange={handleChange}
 									defaultChecked
 								/>
@@ -372,7 +387,7 @@ export const AreaChart = () => {
 											color: colorPalette.success.main,
 										},
 									}}
-									value="uniqueSenders"
+									name="uniqueSenders"
 									onChange={handleChange}
 									defaultChecked
 								/>

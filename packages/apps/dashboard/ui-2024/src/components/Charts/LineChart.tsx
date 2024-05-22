@@ -115,19 +115,25 @@ const TIME_PERIOD_OPTIONS = [
 	},
 ];
 
-const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-	if (event.target.value === 'TransferAmount') {
-		console.log('dupa');
-	}
-	console.log(event.target.value);
-};
-
 export const LineChart = () => {
-	const [chartData, setChartData] =
+	const [chartData] =
 		useState<Record<string, string | number>[]>(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
 	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
 	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
+	const [checkedCharts, setCheckedCharts] = useState({
+		transferAmount: true,
+		transactionsCount: true,
+		uniqueReceivers: true,
+		uniqueSenders: true,
+	});
+
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setCheckedCharts({
+			...checkedCharts,
+			[event.target.name]: event.target.checked,
+		});
+	};
 
 	const onFromDateChange = (value: Dayjs | null) => {
 		if (value) setFromDate(value);
@@ -185,26 +191,34 @@ export const LineChart = () => {
 					/>
 					<YAxis />
 					<Tooltip content={CustomChartTooltip} />
-					<Line
-						type="monotone"
-						dataKey="transferAmount"
-						stroke={colorPalette.primary.main}
-					/>
-					<Line
-						type="monotone"
-						dataKey="transactionsCount"
-						stroke={colorPalette.secondary.main}
-					/>
-					<Line
-						type="monotone"
-						dataKey="uniqueReceivers"
-						stroke={colorPalette.error.main}
-					/>
-					<Line
-						type="monotone"
-						dataKey="uniqueSenders"
-						stroke={colorPalette.success.main}
-					/>
+					{checkedCharts.transferAmount && (
+						<Line
+							type="monotone"
+							dataKey="transferAmount"
+							stroke={colorPalette.primary.main}
+						/>
+					)}
+					{checkedCharts.transactionsCount && (
+						<Line
+							type="monotone"
+							dataKey="transactionsCount"
+							stroke={colorPalette.secondary.main}
+						/>
+					)}
+					{checkedCharts.uniqueReceivers && (
+						<Line
+							type="monotone"
+							dataKey="uniqueReceivers"
+							stroke={colorPalette.error.main}
+						/>
+					)}
+					{checkedCharts.uniqueSenders && (
+						<Line
+							type="monotone"
+							dataKey="uniqueSenders"
+							stroke={colorPalette.success.main}
+						/>
+					)}
 				</LineChartRecharts>
 			</ResponsiveContainer>
 			<Card
@@ -225,7 +239,7 @@ export const LineChart = () => {
 							sx={{ m: 0 }}
 							control={
 								<Checkbox
-									value="TransferAmount"
+									name="transferAmount"
 									onChange={handleChange}
 									defaultChecked
 									sx={{
@@ -246,7 +260,7 @@ export const LineChart = () => {
 											color: colorPalette.secondary.main,
 										},
 									}}
-									value="transactionsCount"
+									name="transactionsCount"
 									onChange={handleChange}
 									defaultChecked
 								/>
@@ -264,7 +278,7 @@ export const LineChart = () => {
 											color: colorPalette.error.main,
 										},
 									}}
-									value="uniqueReceivers"
+									name="uniqueReceivers"
 									onChange={handleChange}
 									defaultChecked
 								/>
@@ -280,7 +294,7 @@ export const LineChart = () => {
 											color: colorPalette.success.main,
 										},
 									}}
-									value="uniqueSenders"
+									name="uniqueSenders"
 									onChange={handleChange}
 									defaultChecked
 								/>
