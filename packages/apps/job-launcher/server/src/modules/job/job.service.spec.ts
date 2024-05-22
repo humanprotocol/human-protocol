@@ -122,6 +122,7 @@ import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from '../payment/rate.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -152,7 +153,6 @@ jest.mock('@human-protocol/sdk', () => ({
 
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
-  getRate: jest.fn().mockImplementation(() => rate),
   parseUrl: jest.fn().mockImplementation(() => {
     return {
       useSSL: false,
@@ -254,6 +254,12 @@ describe('JobService', () => {
             validateChainId: jest.fn().mockReturnValue(new Error()),
             calculateGasPrice: jest.fn().mockReturnValue(1000n),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+          },
+        },
+        {
+          provide: RateService,
+          useValue: {
+            getRate: jest.fn().mockResolvedValue(rate),
           },
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
