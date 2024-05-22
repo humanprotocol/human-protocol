@@ -5,9 +5,9 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { browserAuthProvider } from '@/auth/browser-auth-provider';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 const kycSessionIdSchema = z.object({
   session_id: z.string(),
@@ -53,7 +53,10 @@ const kycSessionIdMutation = async (): Promise<KycSessionIdMutationResult> => {
       });
 
   if (typeof tokenOrSignInResponseData !== 'string') {
-    browserAuthProvider.signIn(tokenOrSignInResponseData);
+    browserAuthProvider.signIn(
+      tokenOrSignInResponseData,
+      browserAuthProvider.authType
+    );
   }
 
   try {
