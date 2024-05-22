@@ -29,6 +29,7 @@ export const CVAT_JOB_TYPES = [
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+export const LOGOUT_PATH = '/auth/logout';
 
 export const CURSE_WORDS = [
   '4r5e',

@@ -127,12 +127,16 @@ def get_projects_by_status(
     status: ProjectStatuses,
     *,
     included_types: Optional[Sequence[TaskTypes]] = None,
+    task_status: Optional[TaskStatuses] = None,
     limit: int = 5,
     for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
     projects = _maybe_for_update(session.query(Project), enable=for_update).where(
         Project.status == status.value
     )
+
+    if task_status:
+        projects = projects.where(Project.tasks.any(Task.status == task_status.value))
 
     if included_types is not None:
         projects = projects.where(Project.job_type.in_([t.value for t in included_types]))
@@ -142,11 +146,9 @@ def get_projects_by_status(
     return projects
 
 
-def get_available_projects(
-    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Project]:
+def get_available_projects(session: Session, *, limit: int = 10) -> List[Project]:
     return (
-        _maybe_for_update(session.query(Project), enable=for_update)
+        session.query(Project)
         .where(
             (Project.status == ProjectStatuses.annotation.value)
             & Project.jobs.any(
@@ -343,13 +345,28 @@ def get_tasks_by_cvat_id(
 
 
 def get_tasks_by_status(
-    session: Session, status: TaskStatuses, *, for_update: Union[bool, ForUpdateParams] = False
+    session: Session,
+    status: TaskStatuses,
+    *,
+    job_status: Optional[JobStatuses] = None,
+    project_status: Optional[ProjectStatuses] = None,
+    for_update: Union[bool, ForUpdateParams] = False,
+    limit: Optional[int] = 20,
 ) -> List[Task]:
-    return (
-        _maybe_for_update(session.query(Task), enable=for_update)
-        .where(Task.status == status.value)
-        .all()
+    query = _maybe_for_update(session.query(Task), enable=for_update).where(
+        Task.status == status.value
     )
+
+    if job_status:
+        query = query.where(Task.jobs.any(Job.status == job_status.value))
+
+    if project_status:
+        query = query.where(Task.project.has(Project.status == project_status.value))
+
+    if limit:
+        query = query.limit(limit)
+
+    return query.all()
 
 
 def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:
@@ -404,6 +421,8 @@ def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
 
 
 # Job
+
+
 def create_job(
     session: Session,
     cvat_id: int,
@@ -481,6 +500,27 @@ def count_jobs_by_escrow_address(
             ),
         )
         .count()
+    )
+
+
+def get_free_job(
+    session: Session,
+    cvat_projects: List[int],
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+) -> Optional[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(
+            Job.cvat_project_id.in_(cvat_projects),
+            Job.status == JobStatuses.new,
+            ~Job.assignments.any(
+                (Assignment.status == AssignmentStatuses.created.value)
+                & (Assignment.completed_at == None)
+                & (utcnow() < Assignment.expires_at)
+            ),
+        )
+        .first()
     )
 
 
@@ -641,6 +681,24 @@ def get_user_assignments_in_cvat_projects(
             & (Assignment.user_wallet_address == wallet_address)
         )
         .all()
+    )
+
+
+def count_active_user_assignments(
+    session: Session,
+    wallet_address: int,
+    cvat_projects: List[int],
+) -> int:
+    return (
+        session.query(Assignment)
+        .where(
+            Assignment.job.has(Job.cvat_project_id.in_(cvat_projects)),
+            Assignment.user_wallet_address == wallet_address,
+            Assignment.status == AssignmentStatuses.created.value,
+            Assignment.completed_at == None,
+            utcnow() < Assignment.expires_at,
+        )
+        .count()
     )
 
 
