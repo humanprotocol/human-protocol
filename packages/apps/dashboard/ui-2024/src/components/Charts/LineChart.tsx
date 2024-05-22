@@ -21,70 +21,70 @@ import ToggleCharts from '@components/Charts/ToggleCharts';
 
 const HARDCODED_CHART_DATA = [
 	{
-		name: 'Test 1',
+		name: 'Jan 1',
 		transferAmount: 100,
 		transactionsCount: 2000,
 		uniqueReceivers: 3000,
 		uniqueSenders: 200,
 	},
 	{
-		name: 'Test 2',
+		name: 'Jan 2',
 		transferAmount: 150,
 		transactionsCount: 2200,
 		uniqueReceivers: 3200,
 		uniqueSenders: 250,
 	},
 	{
-		name: 'Test 3',
+		name: 'Jan 3',
 		transferAmount: 200,
 		transactionsCount: 2500,
 		uniqueReceivers: 3500,
 		uniqueSenders: 300,
 	},
 	{
-		name: 'Test 4',
+		name: 'Jan 4',
 		transferAmount: 120,
 		transactionsCount: 2100,
 		uniqueReceivers: 3100,
 		uniqueSenders: 220,
 	},
 	{
-		name: 'Test 5',
+		name: 'Jan 5',
 		transferAmount: 180,
 		transactionsCount: 2300,
 		uniqueReceivers: 3400,
 		uniqueSenders: 270,
 	},
 	{
-		name: 'Test 6',
+		name: 'Jan 6',
 		transferAmount: 130,
 		transactionsCount: 2400,
 		uniqueReceivers: 3300,
 		uniqueSenders: 230,
 	},
 	{
-		name: 'Test 7',
+		name: 'Jan 7',
 		transferAmount: 170,
 		transactionsCount: 2600,
 		uniqueReceivers: 3600,
 		uniqueSenders: 280,
 	},
 	{
-		name: 'Test 8',
+		name: 'Jan 8',
 		transferAmount: 140,
 		transactionsCount: 2700,
 		uniqueReceivers: 3700,
 		uniqueSenders: 240,
 	},
 	{
-		name: 'Test 9',
+		name: 'Jan 9',
 		transferAmount: 160,
 		transactionsCount: 2800,
 		uniqueReceivers: 3800,
 		uniqueSenders: 290,
 	},
 	{
-		name: 'Test 10',
+		name: 'Jan 10',
 		transferAmount: 190,
 		transactionsCount: 2900,
 		uniqueReceivers: 3900,
@@ -115,24 +115,28 @@ const TIME_PERIOD_OPTIONS = [
 	},
 ];
 
+const CHECKED_CHARTS_DEFAULT_STATE = {
+	transferAmount: true,
+	transactionsCount: true,
+	uniqueReceivers: true,
+	uniqueSenders: true,
+};
+
 export const LineChart = () => {
 	const [chartData] =
 		useState<Record<string, string | number>[]>(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
 	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
 	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
-	const [checkedCharts, setCheckedCharts] = useState({
-		transferAmount: true,
-		transactionsCount: true,
-		uniqueReceivers: true,
-		uniqueSenders: true,
-	});
+	const [checkedCharts, setCheckedCharts] = useState(
+		CHECKED_CHARTS_DEFAULT_STATE
+	);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setCheckedCharts({
-			...checkedCharts,
+		setCheckedCharts((prevState) => ({
+			...prevState,
 			[event.target.name]: event.target.checked,
-		});
+		}));
 	};
 
 	const onFromDateChange = (value: Dayjs | null) => {
@@ -151,8 +155,6 @@ export const LineChart = () => {
 			selectTimePeriod(value);
 		}
 	};
-
-	console.log(selectedTimePeriod);
 
 	return (
 		<Card

@@ -19,83 +19,76 @@ import ToggleButtons from '@components/data-entry/ToggleButtons';
 import dayjs, { Dayjs } from 'dayjs';
 import ToggleCharts from '@components/Charts/ToggleCharts';
 
-export type ChartTypes =
-	| 'name'
-	| 'transferAmount'
-	| 'transactionsCount'
-	| 'uniqueReceivers'
-	| 'uniqueSenders';
-
 const HARDCODED_CHART_DATA = [
 	{
-		name: 'Test 1',
+		name: 'Jan 1',
 		transferAmount: 100,
 		transactionsCount: 2000,
 		uniqueReceivers: 3000,
 		uniqueSenders: 200,
 	},
 	{
-		name: 'Test 2',
+		name: 'Jan 2',
 		transferAmount: 150,
 		transactionsCount: 2200,
 		uniqueReceivers: 3200,
 		uniqueSenders: 250,
 	},
 	{
-		name: 'Test 3',
+		name: 'Jan 3',
 		transferAmount: 200,
 		transactionsCount: 2500,
 		uniqueReceivers: 3500,
 		uniqueSenders: 300,
 	},
 	{
-		name: 'Test 4',
+		name: 'Jan 4',
 		transferAmount: 120,
 		transactionsCount: 2100,
 		uniqueReceivers: 3100,
 		uniqueSenders: 220,
 	},
 	{
-		name: 'Test 5',
+		name: 'Jan 5',
 		transferAmount: 180,
 		transactionsCount: 2300,
 		uniqueReceivers: 3400,
 		uniqueSenders: 270,
 	},
 	{
-		name: 'Test 6',
+		name: 'Jan 6',
 		transferAmount: 130,
 		transactionsCount: 2400,
 		uniqueReceivers: 3300,
 		uniqueSenders: 230,
 	},
 	{
-		name: 'Test 7',
+		name: 'Jan 7',
 		transferAmount: 170,
 		transactionsCount: 2600,
 		uniqueReceivers: 3600,
 		uniqueSenders: 280,
 	},
 	{
-		name: 'Test 8',
+		name: 'Jan 8',
 		transferAmount: 140,
 		transactionsCount: 2700,
 		uniqueReceivers: 3700,
-		uniqueSenders: 240,
+		uniqueSenders: 2400,
 	},
 	{
-		name: 'Test 9',
+		name: 'Jan 9',
 		transferAmount: 160,
 		transactionsCount: 2800,
 		uniqueReceivers: 3800,
-		uniqueSenders: 290,
+		uniqueSenders: 2900,
 	},
 	{
-		name: 'Test 10',
+		name: 'Jan 10',
 		transferAmount: 190,
-		transactionsCount: 6000,
+		transactionsCount: 600,
 		uniqueReceivers: 1000,
-		uniqueSenders: 50000,
+		uniqueSenders: 5000,
 	},
 ];
 
@@ -122,20 +115,33 @@ const TIME_PERIOD_OPTIONS = [
 	},
 ];
 
+const CHECKED_CHARTS_DEFAULT_STATE = {
+	transferAmount: true,
+	transactionsCount: true,
+	uniqueReceivers: true,
+	uniqueSenders: true,
+};
+const HOVERED_CHARTS_DEFAULT_STATE = {
+	transferAmount: false,
+	transactionsCount: false,
+	uniqueReceivers: false,
+	uniqueSenders: false,
+};
+
 export const AreaChart = () => {
-	const [chartData] =
-		useState<Record<ChartTypes, string | number>[]>(HARDCODED_CHART_DATA);
+	const [chartData] = useState(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
 	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
 	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
-	const [checkedCharts, setCheckedCharts] = useState({
-		transferAmount: true,
-		transactionsCount: true,
-		uniqueReceivers: true,
-		uniqueSenders: true,
-	});
+	const [checkedCharts, setCheckedCharts] = useState(
+		CHECKED_CHARTS_DEFAULT_STATE
+	);
 
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const [currentHoveredChart, setCurrentHoveredChart] = useState(
+		HOVERED_CHARTS_DEFAULT_STATE
+	);
+
+	const toggleChart = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setCheckedCharts({
 			...checkedCharts,
 			[event.target.name]: event.target.checked,
@@ -157,6 +163,17 @@ export const AreaChart = () => {
 		if (value !== null) {
 			selectTimePeriod(value);
 		}
+	};
+
+	const onChartHover = (name: string) => {
+		setCurrentHoveredChart((prevState) => ({
+			...prevState,
+			[name]: true,
+		}));
+	};
+
+	const onChartLeave = () => {
+		setCurrentHoveredChart(HOVERED_CHARTS_DEFAULT_STATE);
 	};
 
 	return (
@@ -192,8 +209,16 @@ export const AreaChart = () => {
 							x2="0"
 							y2="1"
 						>
-							<stop offset="30%" stopColor="#330B8D33" stopOpacity={0.2} />
-							<stop offset="60%" stopColor="#330B8D00" stopOpacity={0} />
+							<stop
+								offset={currentHoveredChart.transferAmount ? '20%' : '30%'}
+								stopColor="#330B8D33"
+								stopOpacity={currentHoveredChart.transferAmount ? 1 : 0.2}
+							/>
+							<stop
+								offset={currentHoveredChart.transferAmount ? '90%' : '60%'}
+								stopColor="#330B8D00"
+								stopOpacity={currentHoveredChart.transferAmount ? 1 : 0}
+							/>
 						</linearGradient>
 						<linearGradient
 							id="colorTransactionsCount"
@@ -202,8 +227,16 @@ export const AreaChart = () => {
 							x2="0"
 							y2="1"
 						>
-							<stop offset="30%" stopColor="#6309FF26" stopOpacity={0.2} />
-							<stop offset="60%" stopColor="#6309FF00" stopOpacity={0} />
+							<stop
+								offset={currentHoveredChart.transactionsCount ? '20%' : '30%'}
+								stopColor="#6309FF26"
+								stopOpacity={currentHoveredChart.transactionsCount ? 1 : 0.2}
+							/>
+							<stop
+								offset={currentHoveredChart.transactionsCount ? '90%' : '60%'}
+								stopColor="#6309FF00"
+								stopOpacity={currentHoveredChart.transactionsCount ? 1 : 0}
+							/>
 						</linearGradient>
 						<linearGradient
 							id="colorUniqueRecievers"
@@ -212,12 +245,28 @@ export const AreaChart = () => {
 							x2="0"
 							y2="1"
 						>
-							<stop offset="30%" stopColor="#F20D5F33" stopOpacity={0.2} />
-							<stop offset="60%" stopColor="#F20D5F00" stopOpacity={0} />
+							<stop
+								offset={currentHoveredChart.uniqueReceivers ? '20%' : '30%'}
+								stopColor="#F20D5F33"
+								stopOpacity={currentHoveredChart.uniqueReceivers ? 1 : 0.2}
+							/>
+							<stop
+								offset={currentHoveredChart.uniqueReceivers ? '90%' : '60%'}
+								stopColor="#F20D5F00"
+								stopOpacity={currentHoveredChart.uniqueReceivers ? 1 : 0}
+							/>
 						</linearGradient>
 						<linearGradient id="colorUniqueSenders" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="30%" stopColor="#0AD39780" stopOpacity={0.2} />
-							<stop offset="60%" stopColor="#0AD39700" stopOpacity={0} />
+							<stop
+								offset={currentHoveredChart.uniqueSenders ? '20%' : '30%'}
+								stopColor="#0AD39780"
+								stopOpacity={currentHoveredChart.uniqueSenders ? 1 : 0.2}
+							/>
+							<stop
+								offset={currentHoveredChart.uniqueSenders ? '90%' : '70%'}
+								stopColor="#0AD39700"
+								stopOpacity={currentHoveredChart.uniqueSenders ? 1 : 0}
+							/>
 						</linearGradient>
 					</defs>
 					<YAxis />
@@ -279,7 +328,9 @@ export const AreaChart = () => {
 				}}
 			>
 				<ToggleCharts
-					handleChange={handleChange}
+					handleChange={toggleChart}
+					onMouseLeave={onChartLeave}
+					onMouseEnter={onChartHover}
 					charts={[
 						{
 							title: 'Transfer Amount',

@@ -5,6 +5,8 @@ import { colorPalette } from '@assets/styles/color-palette';
 
 interface ToggleChartsProps {
 	handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+	onMouseEnter?: (name: string) => void;
+	onMouseLeave?: () => void;
 	charts: {
 		title: string;
 		isAreaChart?: boolean;
@@ -14,7 +16,12 @@ interface ToggleChartsProps {
 	}[];
 }
 
-const ToggleCharts = ({ handleChange, charts }: ToggleChartsProps) => {
+const ToggleCharts = ({
+	handleChange,
+	charts,
+	onMouseLeave,
+	onMouseEnter,
+}: ToggleChartsProps) => {
 	return (
 		<FormGroup>
 			<Stack
@@ -24,6 +31,11 @@ const ToggleCharts = ({ handleChange, charts }: ToggleChartsProps) => {
 			>
 				{charts.map((elem) => (
 					<FormControlLabel
+						onMouseEnter={() =>
+							onMouseEnter ? onMouseEnter(elem.name) : undefined
+						}
+						onMouseLeave={() => (onMouseLeave ? onMouseLeave() : undefined)}
+						id={elem.name}
 						key={elem.name}
 						sx={{
 							m: 0,
