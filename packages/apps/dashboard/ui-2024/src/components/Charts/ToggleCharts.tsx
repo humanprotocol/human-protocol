@@ -7,7 +7,7 @@ interface ToggleChartsProps {
 	handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 	onMouseEnter?: (name: string) => void;
 	onMouseLeave?: () => void;
-	charts: {
+	chartOptions: {
 		title: string;
 		isAreaChart?: boolean;
 		name: string;
@@ -18,7 +18,7 @@ interface ToggleChartsProps {
 
 const ToggleCharts = ({
 	handleChange,
-	charts,
+	chartOptions,
 	onMouseLeave,
 	onMouseEnter,
 }: ToggleChartsProps) => {
@@ -29,7 +29,7 @@ const ToggleCharts = ({
 				direction={{ xs: 'column', md: 'row' }}
 				justifyContent="center"
 			>
-				{charts.map((elem) => (
+				{chartOptions.map((elem) => (
 					<FormControlLabel
 						onMouseEnter={() =>
 							onMouseEnter ? onMouseEnter(elem.name) : undefined

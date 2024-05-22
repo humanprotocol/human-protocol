@@ -142,10 +142,10 @@ export const AreaChart = () => {
 	);
 
 	const toggleChart = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setCheckedCharts({
-			...checkedCharts,
+		setCheckedCharts((prevState) => ({
+			...prevState,
 			[event.target.name]: event.target.checked,
-		});
+		}));
 	};
 
 	const onFromDateChange = (value: Dayjs | null) => {
@@ -324,14 +324,14 @@ export const AreaChart = () => {
 					paddingY: 3,
 					marginTop: 3,
 					paddingX: 4,
-					backgroundColor: colorPalette.night.light,
+					backgroundColor: colorPalette.overlay.light,
 				}}
 			>
 				<ToggleCharts
 					handleChange={toggleChart}
 					onMouseLeave={onChartLeave}
 					onMouseEnter={onChartHover}
-					charts={[
+					chartOptions={[
 						{
 							title: 'Transfer Amount',
 							isAreaChart: true,

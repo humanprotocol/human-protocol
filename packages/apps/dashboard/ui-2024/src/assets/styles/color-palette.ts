@@ -24,7 +24,7 @@ export const colorPalette = {
 		light: '#CBCFE6',
 		dark: '#E5E7F3',
 	},
-	night: {
+	overlay: {
 		light: '#1406B20A',
 	},
 	sky: {

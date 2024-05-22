@@ -123,8 +123,7 @@ const CHECKED_CHARTS_DEFAULT_STATE = {
 };
 
 export const LineChart = () => {
-	const [chartData] =
-		useState<Record<string, string | number>[]>(HARDCODED_CHART_DATA);
+	const [chartData] = useState(HARDCODED_CHART_DATA);
 	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
 	const [fromDate, setFromDate] = useState<Dayjs>(dayjs(new Date()));
 	const [toDate, setToDate] = useState<Dayjs>(dayjs(new Date()));
@@ -228,12 +227,12 @@ export const LineChart = () => {
 					paddingY: 3,
 					marginTop: 3,
 					paddingX: 4,
-					backgroundColor: colorPalette.night.light,
+					backgroundColor: colorPalette.overlay.light,
 				}}
 			>
 				<ToggleCharts
 					handleChange={handleChange}
-					charts={[
+					chartOptions={[
 						{
 							title: 'Transfer Amount',
 							name: 'transferAmount',

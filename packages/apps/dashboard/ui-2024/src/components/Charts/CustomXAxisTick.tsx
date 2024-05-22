@@ -1,6 +1,8 @@
 import { colorPalette } from '@assets/styles/color-palette';
+// @ts-expect-error -- is this a bug? Because this type work property
+import { ContentRenderer } from 'recharts';
 
-const CustomXAxisTick = ({ x, y, payload }: any) => {
+const CustomXAxisTick = ({ x, y, payload }: ContentRenderer<string>) => {
 	return (
 		<g transform={`translate(${x},${y})`}>
 			<text

@@ -56,7 +56,7 @@ const theme: ThemeOptions = createTheme({
 			main: colorPalette.sky.main,
 			light: colorPalette.sky.light,
 			dark: colorPalette.sky.dark,
-			contrastText: '#858ec6',
+			contrastText: colorPalette.sky.contrastText,
 		},
 	},
 	typography: {
