@@ -266,7 +266,7 @@ class _CompletedEscrowsHandler:
                 except Exception as e:
                     logger.error(
                         "Failed to handle completed projects for escrow {}: {}".format(
-                            escrow_address, e
+                            completed_project.escrow_address, e
                         )
                     )
                     continue

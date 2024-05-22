@@ -24,6 +24,8 @@ export const ERROR_MESSAGES = {
   sactionListError:
     'The app is not available in your location. Please refer to our T&Cs',
   tcRequired: 'The terms and conditions should be accepted',
+  noRpcUrl:
+    'No valid RPC URL provided for the supported blockchain environment',
 };
 
 export const LOCAL_STORAGE_KEYS = {

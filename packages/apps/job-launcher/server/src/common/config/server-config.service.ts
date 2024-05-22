@@ -25,4 +25,7 @@ export class ServerConfigService {
   get cronSecret(): string {
     return this.configService.get<string>('CRON_SECRET', '');
   }
+  get minimunFeeUsd(): number {
+    return +this.configService.get<number>('MINIMUM_FEE_USD', 0.01);
+  }
 }

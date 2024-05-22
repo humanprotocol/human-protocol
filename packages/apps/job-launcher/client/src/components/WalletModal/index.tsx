@@ -15,7 +15,7 @@ import walletConnectSvg from '../../assets/walletconnect.svg';
 
 const WALLET_ICONS: Record<string, any> = {
   metaMask: metaMaskSvg,
-  coinbaseWallet: coinbaseSvg,
+  coinbaseWalletSDK: coinbaseSvg,
   walletConnect: walletConnectSvg,
 };
 
@@ -26,8 +26,7 @@ export default function WalletModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect();
+  const { connect, connectors, error } = useConnect();
 
   const theme = useTheme();
 
@@ -87,18 +86,20 @@ export default function WalletModal({
                     border: `1px solid ${theme.palette.primary.main}`,
                   },
                 }}
-                disabled={!connector.ready}
                 key={connector.id}
-                onClick={() => connect({ connector })}
+                onClick={() => {
+                  connect({ connector });
+
+                  if (connector.id === 'walletConnect') {
+                    onClose();
+                  }
+                }}
               >
-                <img src={WALLET_ICONS[connector.id]} alt={connector.id} />
-                <span>
-                  {connector.name}
-                  {!connector.ready && ' (unsupported)'}
-                  {isLoading &&
-                    connector.id === pendingConnector?.id &&
-                    ' (connecting)'}
-                </span>
+                <img
+                  src={connector.icon ?? WALLET_ICONS[connector.id]}
+                  alt={connector.id}
+                />
+                <span>{connector.name}</span>
               </Button>
             ))}
           </Box>

@@ -6,7 +6,7 @@ import {
   KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
@@ -15,6 +15,7 @@ import { Web3Service } from '../web3/web3.service';
 import { FortuneFinalResult } from '../../common/dto/result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class StorageService {
@@ -62,7 +63,7 @@ export class StorageService {
       await kvstoreClient.getPublicKey(jobLauncherAddress);
 
     if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
-      throw new BadRequestException('Missing public key');
+      throw new ControlledError('Missing public key', HttpStatus.BAD_REQUEST);
     }
 
     return await EncryptionUtils.encrypt(content, [
@@ -104,7 +105,7 @@ export class StorageService {
     solutions: FortuneFinalResult[],
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new BadRequestException('Bucket not found');
+      throw new ControlledError('Bucket not found', HttpStatus.BAD_REQUEST);
     }
 
     try {
@@ -128,8 +129,7 @@ export class StorageService {
 
       return { url: this.getUrl(key), hash };
     } catch (error) {
-      Logger.error('Error uploading job solution:', error);
-      throw new BadRequestException('File not uploaded');
+      throw new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -176,7 +176,11 @@ export class StorageService {
       };
     } catch (error) {
       Logger.error('Error copying file:', error);
-      throw new Error('File not uploaded');
+      throw new ControlledError(
+        'File not uploaded',
+        HttpStatus.CONFLICT,
+        error.stack,
+      );
     }
   }
 }

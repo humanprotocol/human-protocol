@@ -8,6 +8,7 @@ export const envValidator = Joi.object({
   FE_URL: Joi.string(),
   SESSION_SECRET: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
+  MINIMUM_FEE_USD: Joi.number(),
   // Auth
   JWT_PRIVATE_KEY: Joi.string().required(),
   JWT_PUBLIC_KEY: Joi.string().required(),
@@ -38,6 +39,15 @@ export const envValidator = Joi.object({
   HCAPTCHA_SITE_KEY: Joi.string().required(),
   // HCAPTCHA_SECRET: Joi.string().required(),
   HCAPTCHA_EXCHANGE_URL: Joi.string().description('hcaptcha exchange url'),
+  RPC_URL_SEPOLIA: Joi.string(),
+  RPC_URL_POLYGON: Joi.string(),
+  RPC_URL_POLYGON_AMOY: Joi.string(),
+  RPC_URL_BSC_MAINNET: Joi.string(),
+  RPC_URL_BSC_TESTNET: Joi.string(),
+  RPC_URL_MOONBEAM: Joi.string(),
+  RPC_URL_XLAYER_TESTNET: Joi.string(),
+  RPC_URL_XLAYER: Joi.string(),
+  RPC_URL_LOCALHOST: Joi.string(),
   // S3
   S3_ENDPOINT: Joi.string(),
   S3_PORT: Joi.string(),

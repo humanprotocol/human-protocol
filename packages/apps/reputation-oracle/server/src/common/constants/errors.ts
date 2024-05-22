@@ -18,6 +18,15 @@ export enum ErrorReputation {
 }
 
 /**
+ * Represents error messages related to credential.
+ */
+export enum ErrorCredential {
+  NotFound = 'Credential not found',
+  NotCreated = 'Credential has not been created',
+  InvalidCredential = 'Invalid credential',
+}
+
+/**
  * Represents error messages related to results.
  */
 export enum ErrorResults {
@@ -109,6 +118,7 @@ export enum ErrorCronJob {
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
+  NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
 }

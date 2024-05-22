@@ -1,9 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsEthereumAddress,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ChainId } from '@human-protocol/sdk';
+import { SignatureType } from '../../common/enums/web3';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -21,17 +28,9 @@ export class UserDto extends UserCreateDto {
   public status: UserStatus;
 }
 
-export class Web3UserCreateDto {
-  @ApiProperty({ name: 'evm_address' })
-  @IsString()
+export class Web3UserDto {
   public evmAddress: string;
-
-  @ApiProperty()
-  @IsString()
   public nonce: string;
-}
-
-export class Web3UserDto extends Web3UserCreateDto {
   public type: UserType;
   public status: UserStatus;
 }
@@ -71,4 +70,37 @@ export class DisableOperatorDto {
   @ApiProperty()
   @IsString()
   public signature: string;
+}
+
+export class SignatureBodyDto {
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public from: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public to: string;
+
+  @ApiProperty()
+  @IsString()
+  public contents: string;
+
+  @ApiProperty()
+  @IsString()
+  public nonce: string | undefined;
+}
+
+export class PrepareSignatureDto {
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  public address: string;
+
+  @ApiProperty({
+    enum: SignatureType,
+  })
+  @IsEnum(SignatureType)
+  public type: SignatureType;
 }

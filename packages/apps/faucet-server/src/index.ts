@@ -52,7 +52,6 @@ app.get('/stats', async (_request: Request, response: Response) => {
   const chainId = Number(_request.query.chainId);
   // Check for valid network
   const network = getNetworkData(chainId as ChainId);
-
   if (!network)
     return response.status(200).json({
       status: false,

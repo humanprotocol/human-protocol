@@ -3,6 +3,8 @@ import { Readable } from 'stream';
 import { ErrorManifest } from '../constants/errors';
 import { CvatManifestDto, FortuneManifestDto } from '../dto/manifest';
 import { JobRequestType } from '../enums';
+import { ControlledError } from '../errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 export function hashStream(stream: Readable): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -32,7 +34,10 @@ export function getRequestType(
     null;
 
   if (!requestType) {
-    throw new Error(ErrorManifest.UnsupportedManifestType);
+    throw new ControlledError(
+      ErrorManifest.UnsupportedManifestType,
+      HttpStatus.BAD_REQUEST,
+    );
   }
 
   return requestType;

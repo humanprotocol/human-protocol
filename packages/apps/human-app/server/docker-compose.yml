@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  human-app:
+    container_name: human-app
+    restart: unless-stopped
+    build:
+      context: ../../../../
+      dockerfile: packages/apps/human-app/server/Dockerfile
+    expose:
+      - '${PORT}'
+    ports:
+      - '${LOCAL_PORT}:${PORT}'
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      REPUTATION_ORACLE_URL: ${REPUTATION_ORACLE_URL}
+      REPUTATION_ORACLE_ADDRESS: ${REPUTATION_ORACLE_ADDRESS}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: redis
+      CACHE_TTL_ORACLE_DISCOVERY: ${CACHE_TTL_ORACLE_DISCOVERY}
+      RPC_URL: ${RPC_URL}
+    depends_on:
+      - redis
+  redis:
+    image: redis:latest
+    container_name: human_app_cache
+    ports:
+      - '${REDIS_PORT}:6379'
+    volumes:
+      - ./redis_data:/data
