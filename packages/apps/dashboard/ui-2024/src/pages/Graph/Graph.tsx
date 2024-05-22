@@ -10,19 +10,19 @@ import PageWrapper from '@components/PageWrapper';
 type graphType = 'bucketed' | 'cumulative';
 
 const Graph = () => {
-	const [value, setValue] = useState<graphType>('bucketed');
+	const [graphType, setGraphType] = useState<graphType>('bucketed');
 
-	const handleChange = (_: unknown, newValue: graphType) => {
-		setValue(newValue);
+	const handleGraphTypeChange = (_: unknown, newValue: graphType) => {
+		setGraphType(newValue);
 	};
 	return (
 		<PageWrapper>
-			<TabContext value={value}>
+			<TabContext value={graphType}>
 				<Tabs
 					textColor="primary"
 					sx={{ marginBottom: 2 }}
-					value={value}
-					onChange={handleChange}
+					value={graphType}
+					onChange={handleGraphTypeChange}
 					aria-label="chart-tabs"
 				>
 					<Tab

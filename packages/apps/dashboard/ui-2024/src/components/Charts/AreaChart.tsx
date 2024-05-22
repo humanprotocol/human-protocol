@@ -213,9 +213,9 @@ export const AreaChart = () => {
 				gap={{ xs: 6, md: 8 }}
 			>
 				<ToggleButtons
-					options={TIME_PERIOD_OPTIONS}
-					onChange={handleTimePeriod}
-					value={selectedTimePeriod}
+					buttonOptions={TIME_PERIOD_OPTIONS}
+					onValueChange={handleTimePeriod}
+					selectedValue={selectedTimePeriod}
 				/>
 				<Stack direction="row" alignItems="center" gap={2}>
 					<DatePicker onChange={onFromDateChange} value={fromDate} />

@@ -14,26 +14,30 @@ export const StyledToggleButtonGroup = styled(ToggleButtonGroup)({
 });
 
 interface ToggleButtonsProps {
-	options: { name: string; value: string }[];
-	value: string;
-	onChange: (
+	buttonOptions: { name: string; value: string }[];
+	selectedValue: string;
+	onValueChange: (
 		_event: React.MouseEvent<HTMLElement>,
 		value: string | null
 	) => void;
 }
 
-const ToggleButtons = ({ value, onChange, options }: ToggleButtonsProps) => {
+const ToggleButtons = ({
+	selectedValue,
+	onValueChange,
+	buttonOptions,
+}: ToggleButtonsProps) => {
 	return (
 		<StyledToggleButtonGroup
-			value={value}
+			value={selectedValue}
 			aria-label="text-alignment"
-			onChange={onChange}
+			onChange={onValueChange}
 			exclusive
 			sx={{
 				gap: 1,
 			}}
 		>
-			{options.map((elem) => (
+			{buttonOptions.map((elem) => (
 				<ToggleButton
 					key={elem.name}
 					sx={{
