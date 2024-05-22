@@ -8,7 +8,6 @@ import { routerPaths } from '@/router/router-paths';
 import { passwordRegex } from '@/shared/helpers/regex';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { useAuth } from '@/auth/use-auth';
-import { web3BrowserAuthProvider } from '@/auth-web3/web3-browser-auth-provider';
 
 export const signUpDtoSchema = z
   .object({
@@ -61,7 +60,6 @@ export function useSignUpMutation() {
   return useMutation({
     mutationFn: signUpMutationFn,
     onSuccess: async (successSignInData, { email }) => {
-      web3BrowserAuthProvider.signOut();
       signIn(successSignInData);
       navigate(routerPaths.worker.sendEmailVerification, {
         state: { routerState: { email } },

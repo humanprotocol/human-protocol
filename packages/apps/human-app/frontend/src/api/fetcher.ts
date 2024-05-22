@@ -6,8 +6,7 @@ import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import type { AuthProviderType } from '@/shared/helpers/get-browser-auth-provider';
-import { getBrowserAuthProvider } from '@/shared/helpers/get-browser-auth-provider';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,
@@ -51,14 +50,12 @@ export type FetcherOptionsWithValidation<SuccessInput, SuccessOutput> =
     successSchema: ZodType<SuccessOutput, ZodTypeDef, SuccessInput>;
     skipValidation?: false | undefined;
     authenticated?: boolean;
-    authProviderType?: AuthProviderType;
   }>;
 
 export type FetcherOptionsWithoutValidation = Readonly<{
   options?: RequestInit;
   skipValidation: true;
   authenticated?: boolean;
-  authProviderType?: AuthProviderType;
 }>;
 
 export type FetcherOptions<SuccessInput, SuccessOutput> =
@@ -86,9 +83,6 @@ export function createFetcher(defaultFetcherConfig?: {
     fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- required unknown for correct type intellisense
   ): Promise<SuccessOutput | unknown> {
-    const authProvider = getBrowserAuthProvider(
-      fetcherOptions.authProviderType ? fetcherOptions.authProviderType : 'web2'
-    );
     let fetcherOptionsWithDefaults = defaultFetcherConfig?.options
       ? merge(
           {},
@@ -103,7 +97,7 @@ export function createFetcher(defaultFetcherConfig?: {
 
     if (fetcherOptions.authenticated) {
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
-        Authorization: `Bearer ${authProvider.getAccessToken()}`,
+        Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
       });
     }
 
@@ -154,14 +148,17 @@ export function createFetcher(defaultFetcherConfig?: {
               method: 'POST',
               body: JSON.stringify({
                 // eslint-disable-next-line camelcase -- camel case defined by api
-                refresh_token: authProvider.getRefreshToken(),
+                refresh_token: browserAuthProvider.getRefreshToken(),
               }),
             },
           }
         );
-        authProvider.signIn(refetchAccessTokenSuccess);
+        browserAuthProvider.signIn(
+          refetchAccessTokenSuccess,
+          browserAuthProvider.authType
+        );
       } catch {
-        authProvider.signOut();
+        browserAuthProvider.signOut();
         return;
       }
 
@@ -171,7 +168,7 @@ export function createFetcher(defaultFetcherConfig?: {
       response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
 
       if (!response.ok) {
-        authProvider.signOut();
+        browserAuthProvider.signOut();
         return;
       }
     }
