@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { TableButton } from '@/pages/worker/jobs/components/table-button';
+import { TableButton } from '@/components/ui/table-button';
 
 interface MyJobsButtonProps {
   status: string;

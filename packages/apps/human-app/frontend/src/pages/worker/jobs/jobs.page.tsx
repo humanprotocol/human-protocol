@@ -1,6 +1,8 @@
+/* eslint-disable camelcase -- ... */
 import React, { useState, useEffect } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { Navigate } from 'react-router-dom';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
 import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
@@ -10,6 +12,9 @@ import { useGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-d
 import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/available-jobs-table';
 import { useGetMyJobsData } from '@/api/servieces/worker/my-jobs-data';
 import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/my-jobs-table-mobile';
+import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
+import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
+import { routerPaths } from '@/router/router-paths';
 import { AvailableJobsTableMobile } from './components/available-jobs/available-jobs-table-mobile';
 import { DrawerMobile } from './components/drawer-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
@@ -23,6 +28,13 @@ function generateTabA11yProps(index: number) {
 }
 
 export function JobsPage() {
+  const {
+    filterParams: { oracle_address },
+  } = useJobsFilterStore();
+  const {
+    filterParams: { address },
+  } = useMyJobsFilterStore();
+
   useGetAvailableJobsData();
   useGetMyJobsData();
   const { setGrayBackground } = useBackgroundColorStore();
@@ -46,6 +58,10 @@ export function JobsPage() {
   useEffect(() => {
     setGrayBackground();
   }, [setGrayBackground]);
+
+  if (!oracle_address || !address) {
+    return <Navigate to={routerPaths.worker.jobsDiscovery} />;
+  }
 
   return (
     <>

@@ -153,9 +153,9 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
 ];
 
 export function MyJobsTable() {
-  const { setFilterParams, filterParams } = useMyJobsFilterStore();
-  const { myJobsTableState, myJobsTableQueryData, jobTypes } =
-    useMyJobsTableState();
+  const { setFilterParams, filterParams, availableJobTypes } =
+    useMyJobsFilterStore();
+  const { myJobsTableState, myJobsTableQueryData } = useMyJobsTableState();
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -172,7 +172,7 @@ export function MyJobsTable() {
   }, [paginationState]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(jobTypes),
+    columns: getColumnsDefinition(availableJobTypes),
     data: myJobsTableQueryData,
     state: {
       isLoading: myJobsTableState?.status === 'pending',

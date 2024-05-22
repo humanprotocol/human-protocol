@@ -32,13 +32,9 @@ export interface MyJobsWithJobTypes {
 
 type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'];
 
-const getMyJobsTableData = async (
-  oracleAddress: string,
-  jobTypes: string[],
-  dto: GetMyJobTableDataDto
-) => {
-  const jobs = await apiClient(
-    `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto, address: oracleAddress })}`,
+const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
+  return apiClient(
+    `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
       authenticated: true,
       successSchema: myJobsSuccessResponseSchema,
@@ -47,21 +43,13 @@ const getMyJobsTableData = async (
       },
     }
   );
-
-  return {
-    jobs,
-    jobTypes,
-  };
 };
 
 export function useGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
 
-  const useHook = (oracleAddress: string, jobTypes: string[]) =>
-    useQuery({
-      queryKey: ['myJobs', filterParams],
-      queryFn: () => getMyJobsTableData(oracleAddress, jobTypes, filterParams),
-    });
-
-  return useHook;
+  return useQuery({
+    queryKey: ['myJobs', filterParams],
+    queryFn: () => getMyJobsTableData(filterParams),
+  });
 }

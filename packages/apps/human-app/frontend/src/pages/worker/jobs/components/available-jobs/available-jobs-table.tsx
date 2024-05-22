@@ -19,7 +19,7 @@ import { Chip } from '@/components/ui/chip';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
 import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
 import { colorPalette } from '@/styles/color-palette';
-import { TableButton } from '@/pages/worker/jobs/components/table-button';
+import { TableButton } from '@/components/ui/table-button';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {

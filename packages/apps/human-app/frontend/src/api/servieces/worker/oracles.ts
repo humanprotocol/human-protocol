@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
+import { useJobsTypesOraclesFilter } from '@/hooks/use-job-types-oracles-table';
 
 const OracleSuccessSchema = z.object({
   address: z.string(),
@@ -23,8 +24,10 @@ export async function getOracles() {
 }
 
 export function useGetOracles() {
+  // TODO add selectedJobType do DTO
+  const { selectedJobType } = useJobsTypesOraclesFilter();
   return useQuery({
     queryFn: getOracles,
-    queryKey: ['oracles'],
+    queryKey: ['oracles', selectedJobType],
   });
 }

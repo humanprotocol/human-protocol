@@ -1,9 +1,9 @@
 import { useGetOracles } from '@/api/servieces/worker/oracles';
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
-import { OraclesTable } from '@/pages/worker/oracles/oracle-table';
+import { OraclesTable } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
-export function OraclesTableProvider() {
+export function JobsDiscoveryPage() {
   const {
     data: oraclesData,
     error: oraclesDataError,

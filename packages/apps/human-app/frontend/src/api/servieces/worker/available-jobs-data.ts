@@ -28,12 +28,9 @@ export type AvailableJobsSuccessResponse = z.infer<
 
 type GetJobTableDataDto = JobsFilterStoreProps['filterParams'];
 
-const getAvailableJobsTableData = async (
-  oracleAddress: string,
-  dto: GetJobTableDataDto
-) => {
+const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
   return apiClient(
-    `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto, oracle_address: oracleAddress })}`,
+    `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
       authenticated: true,
       successSchema: availableJobsSuccessResponseSchema,
@@ -46,11 +43,9 @@ const getAvailableJobsTableData = async (
 
 export function useGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
-  const useHook = (oracleAddress: string) =>
-    useQuery({
-      queryKey: ['availableJobs', filterParams],
-      queryFn: () => getAvailableJobsTableData(oracleAddress, filterParams),
-    });
 
-  return useHook;
+  return useQuery({
+    queryKey: ['availableJobs', filterParams],
+    queryFn: () => getAvailableJobsTableData(filterParams),
+  });
 }

@@ -11,6 +11,7 @@ export const routerPaths = {
     emailVerification: '/verify',
     sendEmailVerification: '/worker/send-email-verification',
     profile: '/worker/profile',
+    jobsDiscovery: '/worker/jobs-discovery',
     jobs: '/worker/jobs',
   },
   operator: {

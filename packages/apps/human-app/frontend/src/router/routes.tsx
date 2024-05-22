@@ -20,7 +20,8 @@ import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
-import { OraclesTableProvider } from '@/pages/worker/oracles/oracles-table-provider';
+import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
+import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -89,8 +90,18 @@ export const protectedRoutes: {
   },
   {
     routerProps: {
+      path: routerPaths.worker.jobsDiscovery,
+      element: <JobsDiscoveryPage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <HomepageWorkIcon />,
+      headerText: 'Jobs Discovery',
+    },
+  },
+  {
+    routerProps: {
       path: routerPaths.worker.jobs,
-      element: <OraclesTableProvider />,
+      element: <JobsPage />,
     },
     pageHeaderProps: {
       headerIcon: <HomepageWorkIcon />,

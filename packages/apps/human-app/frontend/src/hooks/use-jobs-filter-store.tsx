@@ -23,12 +23,14 @@ export interface JobsFilterStoreProps {
     page: number;
     page_size: number;
     fields: string[];
+    oracle_address?: string;
   };
   setFilterParams: (
     partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => void;
   resetFilterParams: () => void;
   setSearchEscrowAddress: (searchParams: SearchUpdaterProps[]) => void;
+  setOracleAddress: (oracleAddress: string) => void;
 }
 
 const initialFiltersState = {
@@ -64,5 +66,14 @@ export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
         },
       }));
     }
+  },
+  setOracleAddress: (oracleAddress: string) => {
+    set((state) => ({
+      ...state,
+      filterParams: {
+        ...state.filterParams,
+        oracle_address: oracleAddress,
+      },
+    }));
   },
 }));

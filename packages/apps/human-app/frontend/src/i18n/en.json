@@ -189,6 +189,13 @@
         "noKYCOnChain": "Please complete your profile! You still need to add KYC info on-chain."
       }
     },
+    "oraclesTable": {
+      "annotationTool": "Annotation tool",
+      "oracleAddress": "Oracle address",
+      "jobTypes": "Job types",
+      "seeJobs": "See jobs",
+      "allJobs": "All jobs"
+    },
     "jobs": {
       "successFullyAssignedJob": "Successfully assigned a job!",
       "errorFetchingData": "There was an error while fetching data, please try again",
