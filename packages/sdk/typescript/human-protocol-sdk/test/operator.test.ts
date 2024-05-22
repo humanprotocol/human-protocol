@@ -6,6 +6,7 @@ import { NETWORKS, Role } from '../src/constants';
 import {
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
+  ErrorUnsupportedChainID,
 } from '../src/error';
 import {
   GET_LEADERS_QUERY,
@@ -121,7 +122,7 @@ describe('OperatorUtils', () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
-      const filter = { networks: [ChainId.LOCALHOST], role: 'role' };
+      const filter = { network: ChainId.LOCALHOST, role: 'role' };
 
       const result = await OperatorUtils.getLeaders(filter);
 
@@ -135,19 +136,8 @@ describe('OperatorUtils', () => {
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
-    test('should return an empty array', async () => {
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        leaders: null,
-      });
-
-      const result = await OperatorUtils.getLeaders();
-
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
-      expect(result).toEqual([]);
-    });
-
     test('should throw an error if gql fetch fails', async () => {
-      const filter = { networks: [ChainId.LOCALHOST], role: 'role' };
+      const filter = { network: ChainId.LOCALHOST, role: 'role' };
 
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')

@@ -46,25 +46,18 @@ class LeaderFilter:
     A class used to filter leaders.
     """
 
-    def __init__(
-        self,
-        networks: List[ChainId],
-        role: Optional[str] = None,
-    ):
+    def __init__(self, network: ChainId, role: Optional[str] = None):
         """
         Initializes a LeaderFilter instance.
 
-        :param networks: Networks to request data
+        :param network: Chain Id to request data
         :param role: Leader role
         """
 
-        if not networks or any(
-            network.value not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise OperatorUtilsError(f"Invalid ChainId")
+        if network not in ChainId:
+            raise OperatorUtilsError("Invalid ChainId")
 
-        self.networks = networks
+        self.network = network
         self.role = role
 
 
@@ -195,57 +188,51 @@ class OperatorUtils:
 
         from human_protocol_sdk.gql.operator import get_leaders_query
 
-        if not filter.networks:
-            filter.networks = list(NETWORKS.keys())
-
         leaders = []
-        for chain_id in filter.networks:
-            network = NETWORKS[chain_id]
+        network = NETWORKS[filter.network]
 
-            if not network.get("subgraph_url"):
-                continue
+        if not network.get("subgraph_url"):
+            return []
 
-            leaders_data = get_data_from_subgraph(
-                network["subgraph_url"],
-                query=get_leaders_query(filter),
-                params={"role": filter.role},
-            )
-            leaders_raw = leaders_data["data"]["leaders"]
+        leaders_data = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_leaders_query(filter),
+            params={"role": filter.role},
+        )
+        leaders_raw = leaders_data["data"]["leaders"]
 
-            if not leaders_raw:
-                continue
+        if not leaders_raw:
+            return []
 
-            leaders.extend(
-                [
-                    LeaderData(
-                        chain_id=chain_id,
-                        id=leader.get("id", ""),
-                        address=leader.get("address", ""),
-                        amount_staked=int(leader.get("amountStaked", 0)),
-                        amount_allocated=int(leader.get("amountAllocated", 0)),
-                        amount_locked=int(leader.get("amountLocked", 0)),
-                        locked_until_timestamp=int(
-                            leader.get("lockedUntilTimestamp", 0)
-                        ),
-                        amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
-                        amount_slashed=int(leader.get("amountSlashed", 0)),
-                        reputation=int(leader.get("reputation", 0)),
-                        reward=int(leader.get("reward", 0)),
-                        amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
-                        role=leader.get("role", None),
-                        fee=int(leader.get("fee")) if leader.get("fee", None) else None,
-                        public_key=leader.get("publicKey", None),
-                        webhook_url=leader.get("webhookUrl", None),
-                        url=leader.get("url", None),
-                        job_types=(
-                            leader.get("jobTypes").split(",")
-                            if leader.get("jobTypes", None)
-                            else None
-                        ),
-                    )
-                    for leader in leaders_raw
-                ]
-            )
+        leaders.extend(
+            [
+                LeaderData(
+                    chain_id=filter.network,
+                    id=leader.get("id", ""),
+                    address=leader.get("address", ""),
+                    amount_staked=int(leader.get("amountStaked", 0)),
+                    amount_allocated=int(leader.get("amountAllocated", 0)),
+                    amount_locked=int(leader.get("amountLocked", 0)),
+                    locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
+                    amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
+                    amount_slashed=int(leader.get("amountSlashed", 0)),
+                    reputation=int(leader.get("reputation", 0)),
+                    reward=int(leader.get("reward", 0)),
+                    amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                    role=leader.get("role", None),
+                    fee=int(leader.get("fee")) if leader.get("fee", None) else None,
+                    public_key=leader.get("publicKey", None),
+                    webhook_url=leader.get("webhookUrl", None),
+                    url=leader.get("url", None),
+                    job_types=(
+                        leader.get("jobTypes").split(",")
+                        if leader.get("jobTypes", None)
+                        else None
+                    ),
+                )
+                for leader in leaders_raw
+            ]
+        )
 
         return leaders
 
