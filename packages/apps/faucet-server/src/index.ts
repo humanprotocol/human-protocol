@@ -158,6 +158,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
     });
   }
 
+  // Check min HMT balance
   if (
     (await getHmtBalance(
       web3,
@@ -167,6 +168,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
       sendSlackNotification(message);
   }
 
+  // Check min balance
   if (
     (await web3.eth.getBalance(web3.eth.defaultAccount)) < BigInt(process.env.NATIVE_MIN_BALANCE)
   ) {
