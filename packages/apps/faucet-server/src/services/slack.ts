@@ -14,8 +14,8 @@ export function sendSlackNotification(message: string): void {
 
   axios
     .post(slackWebhookUrl, payload)
-    .then((response) => {
-      console.log('Slack notification sent:', response.data);
+    .then(() => {
+      console.log('Slack notification sent:', payload);
     })
     .catch((error) => {
       console.log('Error sending Slack notification:', error);

@@ -142,6 +142,24 @@ app.post('/faucet', async (request: Request, response: Response) => {
 
   const web3 = getWeb3(network.rpcUrl);
 
+  // Check min HMT balance
+  if (
+    (await getHmtBalance(
+      web3,
+      network.hmtAddress
+    )) < BigInt(process.env.FAUCET_MIN_BALANCE)) {
+      const message = `Low faucet balance detection in network ${network.title} with token address ${network.hmtAddress} and wallet address ${web3.eth.defaultAccount}`;
+      sendSlackNotification(message);
+  }
+
+  // Check min native balance
+  if (
+    (await web3.eth.getBalance(web3.eth.defaultAccount)) < BigInt(process.env.NATIVE_MIN_BALANCE)
+  ) {
+    const message = `Low native balance detection in network ${network.title} with wallet address ${web3.eth.defaultAccount}`;
+    sendSlackNotification(message);
+  }
+
   if (
     !(await checkFaucetBalance(
       web3,
@@ -156,24 +174,6 @@ app.post('/faucet', async (request: Request, response: Response) => {
       status: false,
       message: 'Faucet out of balance.',
     });
-  }
-
-  // Check min HMT balance
-  if (
-    (await getHmtBalance(
-      web3,
-      network.hmtAddress
-    )) < BigInt(process.env.FAUCET_MIN_BALANCE)) {
-      const message = `Low faucet balance detection in network ${network.title} with token address ${network.hmtAddress} and wallet address ${web3.eth.defaultAccount}`;
-      sendSlackNotification(message);
-  }
-
-  // Check min balance
-  if (
-    (await web3.eth.getBalance(web3.eth.defaultAccount)) < BigInt(process.env.NATIVE_MIN_BALANCE)
-  ) {
-    const message = `Low native balance detection in network ${network.title} with wallet address ${web3.eth.defaultAccount}`;
-    sendSlackNotification(message);
   }
 
   const txHash = await sendFunds(
