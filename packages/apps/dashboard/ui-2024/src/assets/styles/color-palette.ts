@@ -15,9 +15,15 @@ export const colorPalette = {
 	},
 	success: {
 		main: '#0AD397',
+		light: '#2E7D3280',
+	},
+	warning: {
+		main: '#FFB300',
+		light: '#FFD54F',
 	},
 	error: {
-		main: '#F20D5F',
+		main: '#FFB300',
+		light: '#F20D5F',
 	},
 	fog: {
 		main: '#858EC6',
@@ -32,5 +38,13 @@ export const colorPalette = {
 		light: '#858ec6',
 		dark: '#858ec6',
 		contrastText: '#858ec6',
+	},
+	ocean: {
+		main: '#304FFE',
+		light: '#8C9EFF',
+	},
+	orange: {
+		main: '#ED6C02',
+		light: '#ED6C0280',
 	},
 } as const;

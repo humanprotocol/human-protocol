@@ -61,17 +61,27 @@ const theme: ThemeOptions = createTheme({
 	},
 	typography: {
 		fontFamily: 'Inter, Arial, sans-serif',
-		h3: {
-			fontSize: 28,
-			fontWeight: 500,
+		h1: {
+			fontSize: 32,
 		},
-		h4: {
+		h2: {
+			fontSize: 28,
+			fontWeight: 600,
+		},
+		h3: {
 			fontSize: 24,
 			fontWeight: 500,
 		},
-		h5: {
+		h4: {
 			fontSize: 20,
 			fontWeight: 500,
+		},
+		h5: {
+			fontSize: 18,
+			fontWeight: 600,
+		},
+		h6: {
+			fontSize: 16,
 		},
 		body1: {
 			fontSize: 14,
@@ -81,11 +91,14 @@ const theme: ThemeOptions = createTheme({
 			fontWeight: 500,
 		},
 		subtitle1: {
-			fontSize: 10,
+			fontSize: 12,
 		},
 		subtitle2: {
-			fontSize: 10,
+			fontSize: 12,
 			fontWeight: 600,
+		},
+		caption: {
+			fontSize: 10,
 		},
 	},
 	components: {
@@ -110,6 +123,17 @@ const theme: ThemeOptions = createTheme({
 			styleOverrides: {
 				sizeMedium: {
 					color: colorPalette.primary.main,
+				},
+			},
+		},
+		MuiTooltip: {
+			styleOverrides: {
+				tooltip: {
+					backgroundColor: '#320a8d',
+					color: '#fff',
+				},
+				arrow: {
+					color: '#320a8d',
 				},
 			},
 		},
