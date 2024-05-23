@@ -16,7 +16,6 @@ export const envValidator = Joi.object({
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.number(),
   VERIFY_EMAIL_TOKEN_EXPIRES_IN: Joi.number(),
   FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number(),
-  HCAPTHCHA_JOB_API_KEY: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
   HCAPTCHA_SECRET: Joi.string().required(),
   HCAPTCHA_EXCHANGE_URL: Joi.string()

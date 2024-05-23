@@ -19,7 +19,4 @@ export class HCaptchaConfigService {
       'https://foundation-exchange.hmt.ai',
     );
   }
-  get jobAPIKey(): string {
-    return this.configService.get<string>('HCAPTHCHA_JOB_API_KEY', '');
-  }
 }

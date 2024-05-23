@@ -176,7 +176,7 @@ export class UserService {
 
     await this.siteKeyRepository.createUnique(newSiteKey);
 
-    return await this.web3Service.getSigner(data.chainId).signMessage(siteKey);
+    return siteKey;
   }
 
   public async registerAddress(
