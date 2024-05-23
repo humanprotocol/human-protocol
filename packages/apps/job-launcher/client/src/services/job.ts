@@ -1,5 +1,4 @@
 import { ChainId } from '@human-protocol/sdk';
-import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import {
   CreateFortuneJobRequest,
   CreateCvatJobRequest,
@@ -63,16 +62,21 @@ export const createHCaptchaJob = async (
 export const getJobList = async ({
   chainId = ChainId.ALL,
   status,
+  page,
+  pageSize,
 }: {
   chainId?: ChainId;
   status?: JobStatus;
+  page?: number;
+  pageSize?: number;
 }) => {
-  const networks = chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : [chainId];
-  let queryString = networks.map((n) => `networks=${n}`).join('&');
+  const networks = chainId === ChainId.ALL ? [] : [chainId];
+  let queryString = networks.map((n) => `chain_id=${n}`).join('&');
 
   if (status !== undefined) {
     queryString += `&status=${status}`;
   }
+  queryString += `&page=${page}&page_size=${pageSize}`;
   const { data } = await api.get(`/job/list?${queryString}`);
   return data;
 };
