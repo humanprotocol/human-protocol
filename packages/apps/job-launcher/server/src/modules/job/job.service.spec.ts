@@ -7,7 +7,6 @@ import {
   StakingClient,
   IAllocation,
   EscrowUtils,
-  NETWORKS,
   Encryption,
   KVStoreClient,
 } from '@human-protocol/sdk';
