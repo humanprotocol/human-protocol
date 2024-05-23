@@ -38,6 +38,7 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
 } from '../../common/enums/job';
 import {
   Currency,
@@ -46,13 +47,8 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import {
-  isPGPMessage,
-  getRate,
-  isValidJSON,
-  parseUrl,
-} from '../../common/utils';
-import { add, div, lt, mul } from '../../common/utils/decimal';
+import { isPGPMessage, isValidJSON, parseUrl } from '../../common/utils';
+import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -124,6 +120,7 @@ import {
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from '../payment/rate.service';
 
 @Injectable()
 export class JobService {
@@ -145,6 +142,7 @@ export class JobService {
     public readonly pgpConfigService: PGPConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
+    private readonly rateService: RateService,
     @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
 
@@ -704,11 +702,14 @@ export class JobService {
       chainId = this.routingProtocolService.selectNetwork();
     }
 
-    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
-    const userBalance = await this.paymentService.getUserBalance(userId);
+    const userBalance = await this.paymentService.getUserBalance(
+      userId,
+      div(1, rate),
+    );
     const feePercentage = Number(
       await this.getOracleFee(
         await this.web3Service.getOperatorAddress(),
@@ -723,9 +724,25 @@ export class JobService {
       tokenFundAmount = dto.fundAmount;
       tokenTotalAmount = add(tokenFundAmount, tokenFee);
       usdTotalAmount = div(tokenTotalAmount, rate);
+    } else if (
+      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
+      dto.currency === JobCurrency.HMT
+    ) {
+      tokenFundAmount = dto.fundAmount;
+      const fundAmountInUSD = div(tokenFundAmount, rate);
+      const feeInUSD = max(
+        this.serverConfigService.minimunFeeUsd,
+        mul(div(feePercentage, 100), fundAmountInUSD),
+      );
+      tokenFee = mul(feeInUSD, rate);
+      tokenTotalAmount = add(tokenFundAmount, tokenFee);
+      usdTotalAmount = add(fundAmountInUSD, feeInUSD);
     } else {
       const fundAmount = await calculateFundAmount(dto, rate);
-      const fee = mul(div(feePercentage, 100), fundAmount);
+      const fee = max(
+        this.serverConfigService.minimunFeeUsd,
+        mul(div(feePercentage, 100), fundAmount),
+      );
 
       tokenFundAmount = mul(fundAmount, rate);
       tokenFee = mul(fee, rate);
@@ -765,6 +782,7 @@ export class JobService {
         requestType,
         tokenFundAmount,
       );
+
       const { url, hash } = await this.uploadManifest(
         requestType,
         chainId,
@@ -790,9 +808,18 @@ export class JobService {
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -tokenTotalAmount;
-    paymentEntity.currency = TokenId.HMT;
-    paymentEntity.rate = div(1, rate);
+    if (
+      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
+      dto.currency === JobCurrency.USD
+    ) {
+      paymentEntity.amount = -usdTotalAmount;
+      paymentEntity.currency = JobCurrency.USD;
+      paymentEntity.rate = 1;
+    } else {
+      paymentEntity.amount = -tokenTotalAmount;
+      paymentEntity.currency = TokenId.HMT;
+      paymentEntity.rate = div(1, rate);
+    }
     paymentEntity.status = PaymentStatus.SUCCEEDED;
 
     await this.paymentRepository.createUnique(paymentEntity);
@@ -1052,6 +1079,7 @@ export class JobService {
       );
       manifestFile = encryptedManifest;
     }
+
     const hash = crypto
       .createHash('sha1')
       .update(stringify(manifestFile))

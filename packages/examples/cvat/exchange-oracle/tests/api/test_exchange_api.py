@@ -309,8 +309,7 @@ def test_create_assignment_200(client: TestClient) -> None:
             json={"wallet_address": user_address},
         )
         cvat_api.clear_job_annotations.assert_called_once()
-        cvat_api.restart_job.assert_called_once()
-        cvat_api.update_job_assignee.assert_called_once()
+        cvat_api.restart_job.assert_called_once_with(cvat_job_1.cvat_id, assignee_id=user.cvat_id)
 
     assert response.status_code == 200
     db_assignment = session.query(Assignment).filter_by(user_wallet_address=user_address).first()

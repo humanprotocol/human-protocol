@@ -31,6 +31,7 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
   JobStatus,
   JobStatusFilter,
@@ -121,6 +122,7 @@ import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from '../payment/rate.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -151,7 +153,6 @@ jest.mock('@human-protocol/sdk', () => ({
 
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
-  getRate: jest.fn().mockImplementation(() => rate),
   parseUrl: jest.fn().mockImplementation(() => {
     return {
       useSSL: false,
@@ -255,6 +256,12 @@ describe('JobService', () => {
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
+        {
+          provide: RateService,
+          useValue: {
+            getRate: jest.fn().mockResolvedValue(rate),
+          },
+        },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: WebhookRepository,
@@ -311,6 +318,7 @@ describe('JobService', () => {
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fundAmount: 10,
+      currency: JobCurrency.HMT,
     };
 
     let getUserBalanceMock: any;
@@ -358,7 +366,10 @@ describe('JobService', () => {
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -435,7 +446,10 @@ describe('JobService', () => {
       expect(jobService.createHCaptchaManifest).toHaveBeenCalledTimes(0);
       expect(jobService.uploadManifest).toHaveBeenCalledTimes(0);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -483,7 +497,10 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -562,6 +579,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_BOXES;
@@ -610,6 +628,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES_FROM_POINTS,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
@@ -659,6 +678,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
@@ -703,6 +723,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: requestType,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const tokenFundAmount = 100;
@@ -726,6 +747,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: requestType,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const tokenFundAmount = 100;
@@ -1174,6 +1196,7 @@ describe('JobService', () => {
       groundTruth: MOCK_STORAGE_DATA,
       userGuide: MOCK_FILE_URL,
       type: JobRequestType.IMAGE_POINTS,
+      currency: JobCurrency.HMT,
     };
 
     let getUserBalanceMock: any;
@@ -1236,7 +1259,10 @@ describe('JobService', () => {
         imageLabelBinaryJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -1290,6 +1316,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1309,7 +1336,10 @@ describe('JobService', () => {
         ),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should throw an error for invalid region', async () => {
@@ -1342,6 +1372,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1358,7 +1389,10 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.InvalidRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should throw an error for empty region', async () => {
@@ -1389,6 +1423,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1405,7 +1440,10 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should throw an error for empty bucket', async () => {
@@ -1436,6 +1474,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1452,7 +1491,10 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should create a image label job successfully on network selected from round robin logic', async () => {
@@ -1491,7 +1533,10 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -1622,7 +1667,10 @@ describe('JobService', () => {
         hCaptchaJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -1665,7 +1713,10 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
