@@ -52,21 +52,9 @@ export class UserUpdateDto {
 }
 
 export class RegisterLabelerRequestDto {
-  @ApiProperty({ name: 'chain_id' })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @ApiProperty()
-  @IsEthereumAddress()
-  public address: string;
-
-  @ApiProperty({ name: 'type' })
+  @ApiProperty({ name: 'oracle_type' })
   @IsEnum(OracleType)
-  public type: OracleType;
-
-  @ApiProperty()
-  @IsString()
-  public country: string;
+  public oracleType: OracleType;
 }
 
 export class RegisterLabelerResponseDto {

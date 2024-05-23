@@ -13,6 +13,7 @@ import { AuthConfigService } from '../../../common/config/auth-config.service';
 import { ControlledError } from '../../../common/errors/controlled';
 import { TokenRepository } from '../token.repository';
 import { TokenType } from '../token.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -20,6 +21,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     private readonly userRepository: UserRepository,
     private readonly tokenRepository: TokenRepository,
     private readonly authConfigService: AuthConfigService,
+    private readonly jwtService: JwtService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -55,6 +57,22 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     if (!token) {
       throw new ControlledError(
         'User is not authorized',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // TODO: Remove prefix
+    const jwt =
+      'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN0cmluZ0BobXQuYWkiLCJ1c2VySWQiOjMsImFkZHJlc3MiOiIweDI2RTdFZjJEMDU3OTNjNkQ0N2M2NzhmMUY0QjI0Njg1NjIzNkYwODkiLCJyZXB1dGF0aW9uX25ldHdvcmsiOiIweDQ3MDgzNTQyMTM0NTNhZjBjZEMzM2ViNzVkOTRmQkMwMDA0NTg0MUUiLCJpYXQiOjE3MTY0NjYwMTMsImV4cCI6MTcxNjQ2OTYxM30.uUGClyAq4sbzbWDnsu77zpOeaaX0O_V0FIVPSBMJR-teZOilHCtfCZk0yu_MusZ7CpFZiMafICEXYGYhYEQqug'; //request.headers.authorization;
+
+    const jwtData = await this.jwtService.decode(jwt);
+
+    if (
+      (user.evmAddress && user.evmAddress !== jwtData.address) ||
+      (!user.evmAddress && jwtData.address)
+    ) {
+      throw new ControlledError(
+        'User has invalid jwt data',
         HttpStatus.UNAUTHORIZED,
       );
     }

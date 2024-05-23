@@ -129,13 +129,6 @@ export class UserService {
     user: UserEntity,
     data: RegisterLabelerRequestDto,
   ) {
-    if (
-      !user.evmAddress ||
-      (user.evmAddress && user.evmAddress !== data.address)
-    ) {
-      throw new BadRequestException(ErrorUser.IncorrectAddress);
-    }
-
     if (user.type !== UserType.WORKER) {
       throw new BadRequestException(ErrorUser.InvalidType);
     }
@@ -145,14 +138,14 @@ export class UserService {
     }
 
     if (user.siteKey) {
-      throw new BadRequestException(ErrorUser.LabelerAlreadyRegistered);
+      return user.siteKey;
     }
 
     // Register user as a labeler at hcaptcha foundation
     const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
-      language: 'en',
-      country: data.country,
+      language: 'en', // TODO: Retrieve from kyc
+      country: 'US', // TODO: Retrieve from kyc
       address: user.evmAddress,
     });
 
@@ -172,7 +165,7 @@ export class UserService {
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = siteKey;
     newSiteKey.user = user;
-    newSiteKey.type = OracleType.HCAPTCHA;
+    newSiteKey.type = data.oracleType;
 
     await this.siteKeyRepository.createUnique(newSiteKey);
 
