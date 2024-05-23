@@ -40,7 +40,7 @@ export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
 }
 
 export interface ILeadersFilter {
-  network: ChainId;
+  chainId: ChainId;
   role?: string;
 }
 

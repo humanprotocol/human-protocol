@@ -46,18 +46,18 @@ class LeaderFilter:
     A class used to filter leaders.
     """
 
-    def __init__(self, network: ChainId, role: Optional[str] = None):
+    def __init__(self, chain_id: ChainId, role: Optional[str] = None):
         """
         Initializes a LeaderFilter instance.
 
-        :param network: Chain Id to request data
+        :param chainId: Chain Id to request data
         :param role: Leader role
         """
 
-        if network not in ChainId:
+        if chain_id not in ChainId:
             raise OperatorUtilsError("Invalid ChainId")
 
-        self.network = network
+        self.chain_id = chain_id
         self.role = role
 
 
@@ -181,7 +181,7 @@ class OperatorUtils:
 
                 print(
                     OperatorUtils.get_leaders(
-                        LeaderFilter(networks=[ChainId.POLYGON_AMOY])
+                        LeaderFilter(chain_id=ChainId.POLYGON_AMOY)
                     )
                 )
         """
@@ -189,7 +189,7 @@ class OperatorUtils:
         from human_protocol_sdk.gql.operator import get_leaders_query
 
         leaders = []
-        network = NETWORKS[filter.network]
+        network = NETWORKS[filter.chain_id]
 
         if not network.get("subgraph_url"):
             return []
@@ -207,7 +207,7 @@ class OperatorUtils:
         leaders.extend(
             [
                 LeaderData(
-                    chain_id=filter.network,
+                    chain_id=filter.chain_id,
                     id=leader.get("id", ""),
                     address=leader.get("address", ""),
                     amount_staked=int(leader.get("amountStaked", 0)),

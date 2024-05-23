@@ -92,7 +92,7 @@ export class OperatorUtils {
     try {
       let leaders_data: ILeader[] = [];
 
-      const networkData = NETWORKS[filter.network];
+      const networkData = NETWORKS[filter.chainId];
 
       if (!networkData) {
         throw ErrorUnsupportedChainID;

@@ -14,7 +14,7 @@ from human_protocol_sdk.operator import LeaderFilter, OperatorUtils
 
 class TestOperatorUtils(unittest.TestCase):
     def test_get_leaders(self):
-        filter = LeaderFilter(network=ChainId.POLYGON, role="role")
+        filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
         mock_function = MagicMock()
 
         with patch(
@@ -76,7 +76,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].job_types, ["type1", "type2"])
 
     def test_get_leaders_empty_data(self):
-        filter = LeaderFilter(network=ChainId.POLYGON, role="role")
+        filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
         mock_function = MagicMock()
 
         with patch(
