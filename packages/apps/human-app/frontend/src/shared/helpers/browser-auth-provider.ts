@@ -8,7 +8,6 @@ const authTypeKey = btoa('auth_type');
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
-  signOutCallback: (() => undefined) as () => void,
   signIn({ access_token, refresh_token }, authType) {
     browserAuthProvider.isAuthenticated = true;
     browserAuthProvider.authType = authType;
@@ -16,12 +15,14 @@ const browserAuthProvider: BrowserAuthProvider = {
     localStorage.setItem(refreshTokenKey, btoa(refresh_token));
     localStorage.setItem(authTypeKey, btoa(authType));
   },
-  signOut() {
+  signOut(callback) {
     browserAuthProvider.isAuthenticated = false;
-    browserAuthProvider.signOutCallback();
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
     localStorage.removeItem(authTypeKey);
+    if (callback) {
+      callback();
+    }
   },
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
@@ -48,9 +49,6 @@ const browserAuthProvider: BrowserAuthProvider = {
     }
 
     return atob(result);
-  },
-  subscribeSignOut(callback: () => void) {
-    browserAuthProvider.signOutCallback = callback;
   },
 };
 

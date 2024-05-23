@@ -57,9 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = jwtDecode(accessToken);
       const validUserData = userDataSchema.parse(userData);
       setAuthState({ user: validUserData, status: 'success' });
-      browserAuthProvider.subscribeSignOut(() => {
-        setAuthState({ user: null, status: 'idle' });
-      });
     } catch (e) {
       // eslint-disable-next-line no-console -- ...
       console.error('Invalid Jwt payload:', e);
