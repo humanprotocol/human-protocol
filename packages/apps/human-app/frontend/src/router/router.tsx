@@ -49,7 +49,11 @@ export function Router() {
                   <DrawerNavigation
                     bottomMenuItems={workerDrawerBottomMenuItems}
                     open={open}
-                    signOut={browserAuthProvider.signOut.bind(undefined)}
+                    signOut={() => {
+                      browserAuthProvider.signOut(() => {
+                        window.location.reload();
+                      });
+                    }}
                     topMenuItems={workerDrawerTopMenuItems}
                   />
                 )}
@@ -76,7 +80,11 @@ export function Router() {
                   <DrawerNavigation
                     bottomMenuItems={operatorDrawerBottomMenuItems}
                     open={open}
-                    signOut={browserAuthProvider.signOut.bind(undefined)}
+                    signOut={() => {
+                      browserAuthProvider.signOut(() => {
+                        window.location.reload();
+                      });
+                    }}
                   />
                 )}
               />

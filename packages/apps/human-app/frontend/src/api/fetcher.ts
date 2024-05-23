@@ -158,7 +158,9 @@ export function createFetcher(defaultFetcherConfig?: {
           browserAuthProvider.authType
         );
       } catch {
-        browserAuthProvider.signOut();
+        browserAuthProvider.signOut(() => {
+          window.location.reload();
+        });
         return;
       }
 
@@ -168,7 +170,9 @@ export function createFetcher(defaultFetcherConfig?: {
       response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
 
       if (!response.ok) {
-        browserAuthProvider.signOut();
+        browserAuthProvider.signOut(() => {
+          window.location.reload();
+        });
         return;
       }
     }

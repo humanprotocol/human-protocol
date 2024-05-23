@@ -51,9 +51,6 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = jwtDecode(accessToken);
       const validUserData = web3userDataSchema.parse(userData);
       setWeb3AuthState({ user: validUserData, status: 'success' });
-      browserAuthProvider.subscribeSignOut(() => {
-        setWeb3AuthState({ user: null, status: 'idle' });
-      });
     } catch (e) {
       // eslint-disable-next-line no-console -- ...
       console.error('Invalid Jwt payload:', e);
