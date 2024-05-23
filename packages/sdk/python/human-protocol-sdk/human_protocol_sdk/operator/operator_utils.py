@@ -50,7 +50,7 @@ class LeaderFilter:
         """
         Initializes a LeaderFilter instance.
 
-        :param chainId: Chain Id to request data
+        :param chain_id: Chain Id to request data
         :param role: Leader role
         """
 
