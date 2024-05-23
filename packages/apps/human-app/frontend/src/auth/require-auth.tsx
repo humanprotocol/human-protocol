@@ -18,11 +18,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
   if (!auth.user) {
     return (
-      <Navigate
-        replace
-        state={{ from: location }}
-        to={routerPaths.worker.signIn}
-      />
+      <Navigate replace state={{ from: location }} to={routerPaths.homePage} />
     );
   }
 

@@ -77,7 +77,7 @@ export function OperatorProfilePage() {
             {t('operator.profile.about.header')}
           </Typography>
           <Stack flexDirection="row">
-            <List>
+            <List sx={{ overflow: 'hidden' }}>
               <ProfileListItem
                 header={t('operator.profile.about.role')}
                 paragraph={
@@ -116,13 +116,6 @@ export function OperatorProfilePage() {
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
-              <ProfileListItem
-                header={t('operator.profile.about.role')}
-                paragraph={[
-                  keysData.role ||
-                    t('operator.addKeysPage.existingKeys.noValue'),
-                ]}
-              />
             </List>
           </Stack>
         </Paper>
@@ -150,7 +143,7 @@ export function OperatorProfilePage() {
           >
             {t('operator.profile.statistics.header')}
           </Typography>
-          <Stack flexDirection="row">
+          <Stack flexDirection="row" justifyContent="space-between">
             <List>
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsProcessed')}

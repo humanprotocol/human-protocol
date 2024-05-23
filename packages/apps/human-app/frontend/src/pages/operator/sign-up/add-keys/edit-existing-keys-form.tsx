@@ -7,12 +7,7 @@ import { Input } from '@/components/data-entry/input';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
 import { Select } from '@/components/data-entry/select';
 
-const OPTIONS = [
-  Role.ExchangeOracle,
-  Role.JobLauncher,
-  Role.RecordingOracle,
-  Role.ReputationOracle,
-];
+const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
 export function EditExistingKeysForm({
   closeEditMode,
@@ -30,41 +25,50 @@ export function EditExistingKeysForm({
   };
 
   return (
-    <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
-      <Input
-        fullWidth
-        label={t('operator.addKeysPage.existingKeys.fee')}
-        mask="PercentsInputMask"
-        name={EthKVStoreKeys.Fee}
-      />
-      <Input
-        fullWidth
-        label={t('operator.addKeysPage.existingKeys.publicKey')}
-        name={EthKVStoreKeys.PublicKey}
-      />
-      <Input
-        fullWidth
-        label={t('operator.addKeysPage.existingKeys.webhookUrl')}
-        name={EthKVStoreKeys.WebhookUrl}
-      />
-      <Select
-        isChipRenderValue
-        label={t('operator.addKeysPage.existingKeys.role')}
-        name={EthKVStoreKeys.Role}
-        options={OPTIONS.map((role, i) => ({ name: role, value: role, id: i }))}
-      />
-      <div>
-        <Button
-          onClick={() => {
-            void save();
-          }}
-          variant="contained"
-        >
-          <Typography color={colorPalette.white} variant="buttonMedium">
-            {t('operator.addKeysPage.editKeysForm.btn')}
-          </Typography>
-        </Button>
-      </div>
-    </Grid>
+    <>
+      <Typography variant="body4">
+        {t('operator.addKeysPage.existingKeys.title')}
+      </Typography>
+      <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
+        <Input
+          fullWidth
+          label={t('operator.addKeysPage.existingKeys.fee')}
+          mask="PercentsInputMask"
+          name={EthKVStoreKeys.Fee}
+        />
+        <Input
+          fullWidth
+          label={t('operator.addKeysPage.existingKeys.publicKey')}
+          name={EthKVStoreKeys.PublicKey}
+        />
+        <Input
+          fullWidth
+          label={t('operator.addKeysPage.existingKeys.webhookUrl')}
+          name={EthKVStoreKeys.WebhookUrl}
+        />
+        <Select
+          isChipRenderValue
+          label={t('operator.addKeysPage.existingKeys.role')}
+          name={EthKVStoreKeys.Role}
+          options={OPTIONS.map((role, i) => ({
+            name: role,
+            value: role,
+            id: i,
+          }))}
+        />
+        <div>
+          <Button
+            onClick={() => {
+              void save();
+            }}
+            variant="contained"
+          >
+            <Typography color={colorPalette.white} variant="buttonMedium">
+              {t('operator.addKeysPage.editKeysForm.btn')}
+            </Typography>
+          </Button>
+        </div>
+      </Grid>
+    </>
   );
 }

@@ -87,7 +87,7 @@ export function MyJobsTableMobile({
                       />
                       <ProfileListItem
                         header={t('worker.jobs.rewardAmount')}
-                        paragraph={`${d.reward_amount}`}
+                        paragraph={`${d.reward_amount.toFixed(0)} ${d.reward_token}`}
                       />
                     </Grid>
                     <Grid item xs={6}>

@@ -1,8 +1,8 @@
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
-import { browserAuthProvider } from '@/auth/browser-auth-provider';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 const userDataSchema = z.object({
   email: z.string(),
@@ -48,24 +48,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const handleSignIn = () => {
     try {
       const accessToken = browserAuthProvider.getAccessToken();
-      if (!accessToken) {
+      const authType = browserAuthProvider.getAuthType();
+
+      if (!accessToken || authType !== 'web2') {
         setAuthState({ user: null, status: 'idle' });
         return;
       }
       const userData = jwtDecode(accessToken);
       const validUserData = userDataSchema.parse(userData);
       setAuthState({ user: validUserData, status: 'success' });
-      browserAuthProvider.subscribeSignOut(() => {
-        setAuthState({ user: null, status: 'idle' });
-      });
-    } catch {
+    } catch (e) {
+      // eslint-disable-next-line no-console -- ...
+      console.error('Invalid Jwt payload:', e);
       browserAuthProvider.signOut();
       setAuthState({ user: null, status: 'error' });
     }
   };
 
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
-    browserAuthProvider.signIn(singIsSuccess);
+    browserAuthProvider.signIn(singIsSuccess, 'web2');
     handleSignIn();
   };
 

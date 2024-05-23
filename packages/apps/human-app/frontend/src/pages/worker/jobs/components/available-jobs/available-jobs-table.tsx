@@ -6,6 +6,7 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
+import { Grid, Typography } from '@mui/material';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
@@ -13,11 +14,12 @@ import type { AssignJobBody } from '@/api/servieces/worker/assign-job';
 import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
-import { Button } from '@/components/ui/button';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
 import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
+import { colorPalette } from '@/styles/color-palette';
+import { TableButton } from '@/pages/worker/jobs/components/table-button';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -86,17 +88,17 @@ const getColumns = (callbacks: {
       Cell: (props) => {
         const { escrow_address, chain_id } = props.row.original;
         return (
-          <Button
-            color="secondary"
-            onClick={() => {
-              callbacks.assignJob({ escrow_address, chain_id });
-            }}
-            size="small"
-            type="button"
-            variant="contained"
-          >
-            {t('worker.jobs.selectJob')}
-          </Button>
+          <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <TableButton
+              onClick={() => {
+                callbacks.assignJob({ escrow_address, chain_id });
+              }}
+            >
+              <Typography color={colorPalette.white} variant="buttonSmall">
+                {t('worker.jobs.selectJob')}
+              </Typography>
+            </TableButton>
+          </Grid>
         );
       },
     },
