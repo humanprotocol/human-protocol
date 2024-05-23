@@ -10,7 +10,7 @@ export const getLeaders = async () => {
   }
 
   const filter: ILeadersFilter = {
-    network: ChainId.POLYGON_AMOY,
+    chainId: ChainId.POLYGON_AMOY,
   };
 
   const leaders = await OperatorUtils.getLeaders(filter);
@@ -25,7 +25,7 @@ export const getLeaders = async () => {
   console.log('First leader: ', leader);
 
   const reputationOracles = await OperatorUtils.getLeaders({
-    network: ChainId.POLYGON_AMOY,
+    chainId: ChainId.POLYGON_AMOY,
     role: 'Reputation Oracle',
   });
 

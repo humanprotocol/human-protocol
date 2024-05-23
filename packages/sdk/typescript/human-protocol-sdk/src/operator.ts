@@ -83,7 +83,7 @@ export class OperatorUtils {
    * import { OperatorUtils } from '@human-protocol/sdk';
    *
    * const filter: ILeadersFilter = {
-   *  network: ChainId.POLYGON
+   *  chainId: ChainId.POLYGON
    * };
    * const leaders = await OperatorUtils.getLeaders(filter);
    * ```
