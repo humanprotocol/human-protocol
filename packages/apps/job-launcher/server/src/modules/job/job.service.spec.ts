@@ -2780,42 +2780,80 @@ describe('JobService', () => {
 
   describe('getJobsByStatus', () => {
     const userId = 1;
-    const skip = 0;
-    const limit = 5;
+    const page = 0;
+    const pageSize = 5;
 
     it('should call the database with PENDING status', async () => {
-      jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
+      const jobEntityMock = [
+        {
+          status: JobStatus.PENDING,
+          fundAmount: 100,
+          userId: 1,
+          id: 1,
+          escrowAddress: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+        },
+      ];
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
       );
-      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
-        [ChainId.LOCALHOST],
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
       );
     });
     it('should call the database with FAILED status', async () => {
-      jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
+      const jobEntityMock = [
+        {
+          status: JobStatus.FAILED,
+          fundAmount: 100,
+          userId: 1,
+          id: 1,
+          escrowAddress: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+        },
+      ];
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.FAILED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.FAILED,
-        skip,
-        limit,
       );
-      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
-        [ChainId.LOCALHOST],
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.FAILED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.FAILED,
-        skip,
-        limit,
       );
     });
-    it('should call subgraph and database with LAUNCHED status', async () => {
+    it('should call the database with LAUNCHED status', async () => {
       const jobEntityMock = [
         {
           status: JobStatus.LAUNCHED,
@@ -2826,61 +2864,35 @@ describe('JobService', () => {
           chainId: ChainId.LOCALHOST,
         },
       ];
-      const getEscrowsData = [
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
         {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Launched],
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.LAUNCHED,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ];
-      jobRepository.findByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.LAUNCHED,
-        skip,
-        limit,
       );
 
-      expect(results).toMatchObject([
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
         {
-          status: JobStatus.LAUNCHED,
-          fundAmount: 100,
-          jobId: 1,
-          escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.LAUNCHED,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ]);
-      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
-        MOCK_ADDRESS,
-        MOCK_ADDRESS,
-        MOCK_ADDRESS,
-      ]);
+        userId,
+      );
     });
     it('should call the database with CANCELLED status', async () => {
-      jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
-        userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
-      );
-      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
-        [ChainId.LOCALHOST],
-        userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
-      );
-    });
-
-    it('should call subgraph and database with COMPLETED status', async () => {
       const jobEntityMock = [
         {
-          status: JobStatus.LAUNCHED,
+          status: JobStatus.CANCELED,
           fundAmount: 100,
           userId: 1,
           id: 1,
@@ -2888,46 +2900,71 @@ describe('JobService', () => {
           chainId: ChainId.LOCALHOST,
         },
       ];
-      const getEscrowsData = [
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
         {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Complete],
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ];
-      jobRepository.findByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      jobRepository.updateOne = jest
-        .fn()
-        .mockResolvedValue({ status: JobStatus.COMPLETED });
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.COMPLETED,
-        skip,
-        limit,
       );
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
+        userId,
+      );
+    });
 
-      expect(results).toMatchObject([
+    it('should call the database with COMPLETED status', async () => {
+      const jobEntityMock = [
         {
           status: JobStatus.COMPLETED,
           fundAmount: 100,
-          jobId: 1,
+          userId: 1,
+          id: 1,
           escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
+          chainId: ChainId.LOCALHOST,
         },
-      ]);
-      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
-        MOCK_ADDRESS,
-      ]);
+      ];
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.COMPLETED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
+        userId,
+      );
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.COMPLETED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
+        userId,
+      );
     });
 
-    it('should call subgraph and database with PARTIAL status', async () => {
+    it('should call the database with PARTIAL status', async () => {
       const jobEntityMock = [
         {
-          status: JobStatus.LAUNCHED,
+          status: JobStatus.PARTIAL,
           fundAmount: 100,
           userId: 1,
           id: 1,
@@ -2935,40 +2972,30 @@ describe('JobService', () => {
           chainId: ChainId.LOCALHOST,
         },
       ];
-      const getEscrowsData = [
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
         {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Partial],
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PARTIAL,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ];
-      jobRepository.findByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      jobRepository.updateOne = jest
-        .fn()
-        .mockResolvedValue({ status: JobStatus.PARTIAL });
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.PARTIAL,
-        skip,
-        limit,
       );
 
-      expect(results).toMatchObject([
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
         {
-          status: JobStatus.PARTIAL,
-          fundAmount: 100,
-          jobId: 1,
-          escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PARTIAL,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ]);
-      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
-        MOCK_ADDRESS,
-      ]);
+        userId,
+      );
     });
   });
 

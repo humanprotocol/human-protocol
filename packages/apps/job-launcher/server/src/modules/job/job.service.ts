@@ -120,7 +120,7 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
-import { PageDto } from 'src/common/pagination/pagination.dto';
+import { PageDto } from '../../common/pagination/pagination.dto';
 
 @Injectable()
 export class JobService {
