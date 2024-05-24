@@ -12,3 +12,10 @@
     font-weight: bold;
   }
 }
+
+    @media (max-width: 400px) {
+      padding-top: 30px;
+      font-size: 20px;
+    }
+  }
+}

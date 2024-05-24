@@ -42,56 +42,66 @@ declare module '@mui/material/SvgIcon' {
 }
 
 const theme: ThemeOptions = createTheme({
-  palette: {
-    primary: {
-      main: '#320a8d',
-      light: '#320a8d',
-    },
-    info: {
-      main: '#eeeeee',
-      light: '#f5f5f5',
-      dark: '#bdbdbd',
-    },
-    secondary: {
-      main: '#6309ff',
-      light: '#14062b',
-    },
-    text: {
-      primary: '#320a8d',
-      secondary: '#858ec6',
-    },
-    sky: {
-      main: '#858ec6',
-      light: '#858ec6',
-      dark: '#858ec6',
-      contrastText: '#858ec6',
-    },
-    white: {
-      main: '#fff',
-      light: '#fff',
-      dark: '#fff',
-      contrastText: '#fff',
-    },
-    textSecondary: {
-      main: '#858ec6',
-      light: '#858ec6',
-      dark: '#858ec6',
-      contrastText: '#858ec6',
-    },
-  },
-  typography: {
-		fontFamily: 'Inter, Arial, sans-serif',
-		h3: {
-			fontSize: 28,
-			fontWeight: 500,
+	palette: {
+		primary: {
+			main: colorPalette.primary.main,
+			light: colorPalette.primary.light,
 		},
-		h4: {
+		info: {
+			main: colorPalette.info.main,
+			light: colorPalette.info.light,
+			dark: colorPalette.info.dark,
+		},
+		secondary: {
+			main: colorPalette.secondary.main,
+			light: colorPalette.secondary.light,
+		},
+		text: {
+			primary: colorPalette.primary.main,
+			secondary: colorPalette.fog.main,
+		},
+		sky: {
+			main: colorPalette.sky.main,
+			light: colorPalette.sky.light,
+			dark: colorPalette.sky.dark,
+			contrastText: colorPalette.sky.contrastText,
+		},
+		white: {
+			main: '#fff',
+			light: '#fff',
+			dark: '#fff',
+			contrastText: '#fff',
+		},
+		textSecondary: {
+			main: '#858ec6',
+			light: '#858ec6',
+			dark: '#858ec6',
+			contrastText: '#858ec6',
+		},
+	},
+	typography: {
+		fontFamily: 'Inter, Arial, sans-serif',
+		h1: {
+			fontSize: 32,
+		},
+		h2: {
+			fontSize: 28,
+			fontWeight: 600,
+		},
+		h3: {
 			fontSize: 24,
 			fontWeight: 500,
 		},
-		h5: {
+		h4: {
 			fontSize: 20,
 			fontWeight: 500,
+		},
+		h5: {
+			fontSize: 18,
+			fontWeight: 600,
+		},
+		h6: {
+			fontSize: 16,
 		},
 		body1: {
 			fontSize: 14,
@@ -101,11 +111,14 @@ const theme: ThemeOptions = createTheme({
 			fontWeight: 500,
 		},
 		subtitle1: {
-			fontSize: 10,
+			fontSize: 12,
 		},
 		subtitle2: {
-			fontSize: 10,
+			fontSize: 12,
 			fontWeight: 600,
+		},
+		caption: {
+			fontSize: 10,
 		},
 	},
   components: {
@@ -121,8 +134,7 @@ const theme: ThemeOptions = createTheme({
       styleOverrides: {
         root: {
           '@media (min-width:1001px)': {
-            paddingLeft: '56px',
-            paddingRight: '56px',
+						paddingX: 56,
           },
         },
       },
