@@ -154,3 +154,28 @@
   display: flex;
   gap: 10px;
 }
+
+.mobile-select{
+  width: 270px;
+  background-color: $whiteSolid;
+  padding: 10px;
+  display: none;
+  margin-bottom: 20px;
+  @media (max-width: 1100px) {
+    display: block;
+  }
+}
+
+.table-filter-select{
+  @media (max-width: 1100px) {
+    div{
+      display: none;
+    }
+  }
+  .mobile-title {
+    display: none;
+    @media (max-width: 1100px) {
+      display: block;
+    }
+  }
+}

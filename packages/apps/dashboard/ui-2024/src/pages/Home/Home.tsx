@@ -142,6 +142,33 @@ const Home: React.FC = () => {
     }
   }
 
+  const selectRender = () => {
+    return (
+      <FormControl fullWidth size="small">
+        <InputLabel id="network-select-label">By Network</InputLabel>
+        <Select
+          labelId="network-select-label"
+          id="network-select"
+          value={network}
+          label="By Network"
+          onChange={handleChange}
+        >
+          <MenuItem className='select-item' value={'all'}><img src={human} alt="logo"/>All Networks</MenuItem>
+          <MenuItem value={'ethereum'}>Ethereum</MenuItem>
+          <MenuItem value={'goerli'}>Ethereum Goerli</MenuItem>
+          <MenuItem value={'binance'}>Binance Smart Chain</MenuItem>
+          <MenuItem value={'testnet'}>Binance Smart Chain (Testnet)</MenuItem>
+          <MenuItem value={'polygon'}>Polygon</MenuItem>
+          <MenuItem value={'mumbai'}>Polygon Mumbai</MenuItem>
+          <MenuItem value={'moonbeam'}>Moonbeam</MenuItem>
+          <MenuItem value={'alpha'}>Moonbase Alpha</MenuItem>
+          <MenuItem value={'celo'}>Celo</MenuItem>
+          <MenuItem value={'alfajores'}>Celo Alfajores</MenuItem>
+        </Select>
+      </FormControl>
+    )
+  }
+
   return (
     <PageWrapper violetHeader>
       <div className='home-page-header'>
@@ -231,6 +258,9 @@ const Home: React.FC = () => {
       <ShadowIcon className='home-page-leaderboard' title='Leaderboard' img={cup}/>
 
       <TableContainer component={Paper} sx={{ padding: "32px", marginTop: '30px' }}>
+        <div className='mobile-select'>
+          {selectRender()}
+        </div>
         <SimpleBar>
           <Table
             sx={{
@@ -262,29 +292,9 @@ const Home: React.FC = () => {
                     <span>STAKE</span>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="network-select-label">By Network</InputLabel>
-                    <Select
-                      labelId="network-select-label"
-                      id="network-select"
-                      value={network}
-                      label="By Network"
-                      onChange={handleChange}
-                    >
-                      <MenuItem className='select-item' value={'all'}><img src={human} alt="logo"/>All Networks</MenuItem>
-                      <MenuItem value={'ethereum'}>Ethereum</MenuItem>
-                      <MenuItem value={'goerli'}>Ethereum Goerli</MenuItem>
-                      <MenuItem value={'binance'}>Binance Smart Chain</MenuItem>
-                      <MenuItem value={'testnet'}>Binance Smart Chain (Testnet)</MenuItem>
-                      <MenuItem value={'polygon'}>Polygon</MenuItem>
-                      <MenuItem value={'mumbai'}>Polygon Mumbai</MenuItem>
-                      <MenuItem value={'moonbeam'}>Moonbeam</MenuItem>
-                      <MenuItem value={'alpha'}>Moonbase Alpha</MenuItem>
-                      <MenuItem value={'celo'}>Celo</MenuItem>
-                      <MenuItem value={'alfajores'}>Celo Alfajores</MenuItem>
-                    </Select>
-                  </FormControl>
+                <TableCell className='table-filter-select'>
+                  {selectRender()}
+                  <span className='mobile-title'>NETWORK</span>
                 </TableCell>
                 <TableCell>
                   <div className='icon-table'>
