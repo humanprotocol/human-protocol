@@ -7,7 +7,6 @@ import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-ob
 import type { JobsFilterStoreProps } from '@/hooks/use-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { createPaginationSchema } from '@/shared/helpers/create-pagination-schema';
-import { getOracles } from '@/api/servieces/worker/oracles';
 
 const availableJobSchema = z.object({
   escrow_address: z.string(),
@@ -30,11 +29,8 @@ export type AvailableJobsSuccessResponse = z.infer<
 type GetJobTableDataDto = JobsFilterStoreProps['filterParams'];
 
 const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
-  const oraclesResponse = await getOracles();
-  const oracle_address = oraclesResponse[0].address;
-
   return apiClient(
-    `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto, oracle_address })}`,
+    `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
       authenticated: true,
       successSchema: availableJobsSuccessResponseSchema,

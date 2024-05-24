@@ -2,7 +2,7 @@
 import { Grid, List, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Dispatch, SetStateAction } from 'react';
-import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
+import { ProfileListItem } from '@/components/ui/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';

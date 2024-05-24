@@ -1,4 +1,5 @@
 import type { RouteProps } from 'react-router-dom';
+import { t } from 'i18next';
 import { HomePage } from '@/pages/homepage/home.page';
 import { Playground } from '@/pages/playground/playground.page';
 import { ProtectedPage } from '@/pages/protected.page';
@@ -9,7 +10,6 @@ import { WorkerProfilePage } from '@/pages/worker/profile/profile.page';
 import { SignInOperatorPage } from '@/pages/operator/sign-in.page';
 import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
 import { routerPaths } from '@/router/router-paths';
-import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { AddStakeOperatorPage } from '@/pages/operator/sign-up/add-stake/add-stake.page';
 import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
 import { ResetPasswordWorkerPage } from '@/pages/worker/reset-password/reset-password.page';
@@ -21,6 +21,8 @@ import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
+import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
+import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -84,7 +86,17 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
-      headerText: 'Profile',
+      headerText: t('protectedPagesHeaders.profile'),
+    },
+  },
+  {
+    routerProps: {
+      path: routerPaths.worker.jobsDiscovery,
+      element: <JobsDiscoveryPage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <HomepageWorkIcon />,
+      headerText: t('protectedPagesHeaders.jobsDiscovery'),
     },
   },
   {
@@ -94,7 +106,7 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <HomepageWorkIcon />,
-      headerText: 'Jobs',
+      headerText: t('protectedPagesHeaders.jobs'),
     },
   },
   {
@@ -104,7 +116,7 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
-      headerText: 'Profile',
+      headerText: t('protectedPagesHeaders.profile'),
     },
   },
 ];
@@ -120,7 +132,7 @@ export const web3ProtectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
-      headerText: 'Profile',
+      headerText: t('web3ProtectedPagesHeaders.profile'),
     },
   },
 ];

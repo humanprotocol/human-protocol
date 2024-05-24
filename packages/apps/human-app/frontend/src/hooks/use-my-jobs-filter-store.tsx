@@ -27,12 +27,16 @@ export interface MyJobsFilterStoreProps {
     page: number;
     page_size: number;
     chain_id?: number;
+    address?: string;
   };
+  availableJobTypes: string[];
   setFilterParams: (
     partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
   ) => void;
   resetFilterParams: () => void;
   setSearchEscrowAddress: (searchParams: SearchUpdaterProps[]) => void;
+  setOracleAddress: (oracleAddress: string) => void;
+  setAvailableJobTypes: (jobTypes: string[]) => void;
 }
 
 const initialFiltersState = {
@@ -42,6 +46,7 @@ const initialFiltersState = {
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
   filterParams: initialFiltersState,
+  availableJobTypes: [],
   setFilterParams: (
     partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
   ) => {
@@ -67,5 +72,20 @@ export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
         },
       }));
     }
+  },
+  setOracleAddress: (oracleAddress: string) => {
+    set((state) => ({
+      ...state,
+      filterParams: {
+        ...state.filterParams,
+        address: oracleAddress,
+      },
+    }));
+  },
+  setAvailableJobTypes: (jobTypes: string[]) => {
+    set((state) => ({
+      ...state,
+      jobTypes,
+    }));
   },
 }));
