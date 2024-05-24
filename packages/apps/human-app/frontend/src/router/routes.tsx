@@ -1,4 +1,5 @@
 import type { RouteProps } from 'react-router-dom';
+import { t } from 'i18next';
 import { HomePage } from '@/pages/homepage/home.page';
 import { Playground } from '@/pages/playground/playground.page';
 import { ProtectedPage } from '@/pages/protected.page';
@@ -85,7 +86,7 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
-      headerText: 'Profile',
+      headerText: t('protectedPagesHeaders.profile'),
     },
   },
   {
@@ -95,7 +96,7 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <HomepageWorkIcon />,
-      headerText: 'Jobs Discovery',
+      headerText: t('protectedPagesHeaders.jobsDiscovery'),
     },
   },
   {
@@ -105,7 +106,7 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <HomepageWorkIcon />,
-      headerText: 'Jobs',
+      headerText: t('protectedPagesHeaders.jobs'),
     },
   },
   {
@@ -115,7 +116,7 @@ export const protectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
-      headerText: 'Profile',
+      headerText: t('protectedPagesHeaders.profile'),
     },
   },
 ];
@@ -131,7 +132,7 @@ export const web3ProtectedRoutes: {
     },
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
-      headerText: 'Profile',
+      headerText: t('web3ProtectedPagesHeaders.profile'),
     },
   },
 ];

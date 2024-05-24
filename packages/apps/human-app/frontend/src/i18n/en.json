@@ -6,6 +6,14 @@
     "plusPrefix": "+"
   },
   "dashboard": {},
+  "protectedPagesHeaders": {
+    "profile": "Profile",
+    "jobsDiscovery":"Jobs Discovery",
+    "jobs": "Jobs"
+  },
+  "web3ProtectedPagesHeaders": {
+    "profile": "Profile"
+  },
   "validation": {
     "required": "Required",
     "min": "Min {{count}} characters",

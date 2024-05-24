@@ -9,7 +9,7 @@ import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-use
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { ProfileDisableButton } from '@/pages/operator/profile/profile-disable-button';
-import { ProfileListItem } from './profile-list-item';
+import { ProfileListItem } from '@/components/ui/profile-list-item';
 
 const mockedData = {
   profile: {

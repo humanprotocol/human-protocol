@@ -1,6 +1,6 @@
 import { Grid, Paper, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { ProfileListItem } from '@/pages/operator/profile/profile-list-item';
+import { ProfileListItem } from '@/components/ui/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import type { OraclesSuccessResponse } from '@/api/servieces/worker/oracles';
