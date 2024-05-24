@@ -143,7 +143,7 @@ const Home: React.FC = () => {
   }
 
   return (
-    <PageWrapper violetHeader searchWhite>
+    <PageWrapper violetHeader>
       <div className='home-page-header'>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>All HUMAN activity. In one place.</Typography>
         <Search className='home-page-search'/>
