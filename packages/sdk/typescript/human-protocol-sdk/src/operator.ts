@@ -136,7 +136,6 @@ export class OperatorUtils {
           };
         })
       );
-      console.log('leaders_data after: ', leaders_data.length);
       return leaders_data;
     } catch (e) {
       return throwError(e);
