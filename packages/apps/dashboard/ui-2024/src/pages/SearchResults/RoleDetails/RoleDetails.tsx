@@ -185,12 +185,6 @@ const renderRoleIcon = (
 };
 
 const RoleDetails = () => {
-
-	// TODO
-	// return (
-	// 	<NothingFound/>
-	// )
-
 	return (
 		<>
 			<Card

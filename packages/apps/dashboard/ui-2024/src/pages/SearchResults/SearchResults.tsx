@@ -9,33 +9,46 @@ import RoleDetails from '@pages/SearchResults/RoleDetails';
 import { useParams } from 'react-router-dom';
 import EscrowAddress from '@pages/SearchResults/EscrowAddress';
 import WalletAddress from '@pages/SearchResults/WalletAddress';
+import NothingFound from '@components/NothingFound';
 
 // const TOKEN_ID = '0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031';
 
-const renderCurrentResultType = (type: 1 | 2 | 3) => {
+const renderCurrentResultType = (
+	type: 'roleDetails' | 'escrowAddress' | 'walletAddress' | null,
+	tokenId: string | undefined
+) => {
 	const renderType = {
-		1: {
+		roleDetails: {
 			title: 'Role Details',
 			icon: WalletIcon,
 		},
-		2: {
+		escrowAddress: {
 			title: 'Escrow Address',
 			icon: EscrowIcon,
 		},
-		3: {
+		walletAddress: {
 			title: 'Wallet Address',
 			icon: WalletIcon,
 		},
 	};
 
+	if (type == null) {
+		return null;
+	}
+
 	return (
-		<ShadowIcon img={renderType[type].icon} title={renderType[type].title} />
+		<>
+			<ShadowIcon img={renderType[type].icon} title={renderType[type].title} />
+			<Clipboard value={tokenId ?? ''} />
+		</>
 	);
 };
 
 const SearchResults = () => {
 	const { tokenId } = useParams();
-	const [currentState] = useState<number>(3);
+	const [currentState] = useState<
+		'roleDetails' | 'escrowAddress' | 'walletAddress' | null
+	>(null);
 	return (
 		<PageWrapper displaySearchBar>
 			<Stack
@@ -44,14 +57,13 @@ const SearchResults = () => {
 				gap={3}
 				alignItems={{ xs: 'stretch', md: 'center' }}
 			>
-				{renderCurrentResultType(1)}
-				<Clipboard value={tokenId ?? ''} />
+				{renderCurrentResultType(null, tokenId)}
 			</Stack>
 
-			{currentState === 1 && <RoleDetails />}
-			{currentState === 2 && <EscrowAddress />}
-			{currentState === 3 && <WalletAddress />}
-			{currentState === 4 && <div>Not Found</div>}
+			{currentState === 'roleDetails' && <RoleDetails />}
+			{currentState === 'escrowAddress' && <EscrowAddress />}
+			{currentState === 'walletAddress' && <WalletAddress />}
+			{currentState === null && <NothingFound />}
 		</PageWrapper>
 	);
 };
