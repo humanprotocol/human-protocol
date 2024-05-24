@@ -19,12 +19,14 @@
     "@mui/material": "^5.15.18",
     "@mui/x-date-pickers": "^7.5.0",
     "@types/react-router-dom": "^5.3.3",
+    "clsx": "^2.1.1",
     "node-sass": "^9.0.0",
     "@types/recharts": "^1.8.29",
     "dayjs": "^1.11.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",
+    "simplebar-react": "^3.2.5",
     "recharts": "^2.12.7"
   },
   "devDependencies": {

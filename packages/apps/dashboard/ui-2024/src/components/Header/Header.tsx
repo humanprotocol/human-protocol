@@ -1,4 +1,5 @@
 import { FC, useState }  from 'react';
+import clsx from 'clsx';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -6,9 +7,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import logo from '@assets/logo.png';
+import Search from '@components/Search';
 import logoMobile from '@assets/logo-mobile.png';
 
-const Header: FC = () => {
+const Header: FC<{ displaySearchBar?: boolean }>  = ({ displaySearchBar }) => {
   const [open, setState] = useState(false);
 
   const handleClick = (url: string) => {
@@ -20,9 +22,16 @@ const Header: FC = () => {
 };
 
   return (
-    <Toolbar className="header-toolbar">
+    <Toolbar className={clsx('header-toolbar', { 'header-toolbar-search': displaySearchBar })}>
+      {displaySearchBar && (
+        <Search displaySearchBar className='search-header-mobile' />
+      )}
       <img className='logo' src={logo} alt="logo"/>
       <img className='logo-mobile'src={logoMobile} alt="logo"/>
+
+      {displaySearchBar && (
+        <Search displaySearchBar className='search-header' />
+      )}
 
       <div className='header-list-link'>
         <div className='header-link' onClick={() => handleClick('https://app.humanprotocol.org/')}>

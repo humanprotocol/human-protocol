@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
 import App from './App';
 import '@assets/styles/main.scss';
+import 'simplebar-react/dist/simplebar.min.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<ThemeProvider theme={theme}>
