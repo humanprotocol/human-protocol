@@ -15,6 +15,8 @@ import WalletIcon from '@assets/icons/shadowed/wallet.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ShadowIcon from '@components/ShadowIcon';
 import Clipboard from '@components/clipboard';
+// TODO
+// import NothingFound from '@components/NothingFound';
 
 //TEMPORARY INTERFACE AND DATA
 interface Overview {
@@ -187,6 +189,12 @@ const renderRoleIcon = (
 };
 
 const RoleDetails = () => {
+
+	// TODO
+	// return (
+	// 	<NothingFound/>
+	// )
+
 	return (
 		<PageWrapper>
 			<Stack

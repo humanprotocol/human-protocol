@@ -6,6 +6,7 @@ import { useState } from 'react';
 import TabContext from '@mui/lab/TabContext';
 import Typography from '@mui/material/Typography';
 import PageWrapper from '@components/PageWrapper';
+import Breadcrumbs from '@components/Breadcrumbs';
 
 type graphType = 'bucketed' | 'cumulative';
 
@@ -17,6 +18,7 @@ const Graph = () => {
 	};
 	return (
 		<PageWrapper>
+			<Breadcrumbs title='Charts' />
 			<TabContext value={graphType}>
 				<Tabs
 					textColor="primary"
