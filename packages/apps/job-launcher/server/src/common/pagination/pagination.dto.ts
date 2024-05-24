@@ -62,7 +62,7 @@ export abstract class PageOptionsDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  @Max(10)
+  @Max(25)
   @IsOptional()
   pageSize?: number = 5;
 
