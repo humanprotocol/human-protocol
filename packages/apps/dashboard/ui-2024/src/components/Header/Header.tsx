@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import logo from '@assets/logo.png';
 import Search from '@components/Search';
 import logoMobile from '@assets/logo-mobile.png';
@@ -26,8 +27,10 @@ const Header: FC<{ displaySearchBar?: boolean }>  = ({ displaySearchBar }) => {
       {displaySearchBar && (
         <Search displaySearchBar className='search-header-mobile' />
       )}
-      <img className='logo' src={logo} alt="logo"/>
-      <img className='logo-mobile'src={logoMobile} alt="logo"/>
+      <Link href="/" underline="none">
+        <img className='logo' src={logo} alt="logo"/>
+        <img className='logo-mobile'src={logoMobile} alt="logo"/>
+      </Link>
 
       {displaySearchBar && (
         <Search displaySearchBar className='search-header' />
