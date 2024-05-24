@@ -90,7 +90,10 @@ services:
     sync: false
   - key: RPC_URL_XLAYER_TESTNET
     sync: false
-    
+  - key: RATE_CACHE_TIME
+    sync: false
+  - key: COINGECKO_API_KEY
+    sync: false
   region: frankfurt
   buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
   startCommand: yarn start:prod
@@ -100,7 +103,7 @@ services:
   name: job-launcher-client
   runtime: node
   repo: https://github.com/humanprotocol/human-protocol
-  plan: free
+  plan: starter
   envVars:
   - key: NODE_VERSION
     value: 18

@@ -61,9 +61,17 @@ export class OperatorUtils {
         address: address.toLowerCase(),
       });
 
+      let jobTypes: string[] = [];
+
+      if (typeof leader.jobTypes === 'string') {
+        jobTypes = leader.jobTypes.split(',');
+      } else if (Array.isArray(leader.jobTypes)) {
+        jobTypes = leader.jobTypes;
+      }
+
       return {
         ...leader,
-        jobTypes: leader.jobTypes?.split(','),
+        jobTypes,
       };
     } catch (e) {
       return throwError(e);
@@ -82,33 +90,52 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils } from '@human-protocol/sdk';
    *
-   * const leaders = await OperatorUtils.getLeaders();
+   * const filter: ILeadersFilter = {
+   *  chainId: ChainId.POLYGON
+   * };
+   * const leaders = await OperatorUtils.getLeaders(filter);
    * ```
    */
-  public static async getLeaders(
-    filter: ILeadersFilter = { networks: [ChainId.POLYGON_AMOY] }
-  ): Promise<ILeader[]> {
+  public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
     try {
       let leaders_data: ILeader[] = [];
-      for (const chainId of filter.networks) {
-        const networkData = NETWORKS[chainId];
 
-        if (!networkData) {
-          throw ErrorUnsupportedChainID;
-        }
-        const { leaders } = await gqlFetch<{
-          leaders: ILeaderSubgraph[];
-        }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
-          role: filter.role,
-        });
-        leaders_data = leaders_data.concat(
-          leaders.map((leader) => ({
-            ...leader,
-            jobTypes: leader.jobTypes?.split(','),
-          }))
-        );
+      const networkData = NETWORKS[filter.chainId];
+
+      if (!networkData) {
+        throw ErrorUnsupportedChainID;
       }
 
+      if (!networkData.subgraphUrl) {
+        return [];
+      }
+
+      const { leaders } = await gqlFetch<{
+        leaders: ILeaderSubgraph[];
+      }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
+        role: filter?.role,
+      });
+
+      if (!leaders) {
+        return [];
+      }
+
+      leaders_data = leaders_data.concat(
+        leaders.map((leader) => {
+          let jobTypes: string[] = [];
+
+          if (typeof leader.jobTypes === 'string') {
+            jobTypes = leader.jobTypes.split(',');
+          } else if (Array.isArray(leader.jobTypes)) {
+            jobTypes = leader.jobTypes;
+          }
+
+          return {
+            ...leader,
+            jobTypes,
+          };
+        })
+      );
       return leaders_data;
     } catch (e) {
       return throwError(e);
@@ -147,10 +174,20 @@ export class OperatorUtils {
         role: role,
       });
 
-      return reputationNetwork.operators.map((operator) => ({
-        ...operator,
-        jobTypes: operator.jobTypes?.split(','),
-      }));
+      return reputationNetwork.operators.map((operator) => {
+        let jobTypes: string[] = [];
+
+        if (typeof operator.jobTypes === 'string') {
+          jobTypes = operator.jobTypes.split(',');
+        } else if (Array.isArray(operator.jobTypes)) {
+          jobTypes = operator.jobTypes;
+        }
+
+        return {
+          ...operator,
+          jobTypes,
+        };
+      });
     } catch (e) {
       return throwError(e);
     }

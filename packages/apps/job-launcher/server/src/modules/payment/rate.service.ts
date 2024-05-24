@@ -53,9 +53,17 @@ export class RateService {
     }
 
     try {
+      const authHeader = this.serverConfigService.coingeckoApiKey
+        ? {
+            headers: {
+              'x-cg-demo-api-key': this.serverConfigService.coingeckoApiKey,
+            },
+          }
+        : undefined;
       const { data } = (await firstValueFrom(
         this.httpService.get(
           `${COINGECKO_API_URL}?ids=${coingeckoFrom}&vs_currencies=${coingeckoTo}`,
+          authHeader,
         ),
       )) as any;
 

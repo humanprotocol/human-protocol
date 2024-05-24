@@ -1,5 +1,6 @@
 import { JobRequestType } from '../../common/enums/job';
-import { CreateJob, CvatDataDto, Label, StorageDataDto } from './job.dto';
+import { CreateJob, CvatDataDto, StorageDataDto } from './job.dto';
+import { JobEntity } from './job.entity';
 
 export interface RequestAction {
   calculateFundAmount: (dto: CreateJob, rate: number) => Promise<number>;
@@ -72,4 +73,9 @@ export interface CvatAnnotationData {
   };
   keypoints: [number, number, number];
   num_keypoints: number;
+}
+
+export interface ListResult {
+  entities: JobEntity[];
+  itemCount: number;
 }
