@@ -1,0 +1,14 @@
+.shadow-icon{
+  display: flex;
+  gap: 16px;
+  height: 90px;
+  img {
+    width: 130px;
+    height: 130px;
+  }
+  span{
+    padding-top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+  }
+}

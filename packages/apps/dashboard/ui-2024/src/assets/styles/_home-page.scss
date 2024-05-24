@@ -1,0 +1,156 @@
+.home-page-header{
+  color: $white;
+  .home-page-search{
+    margin-top: 24px;
+  }
+}
+
+.home-page-boxes{
+  margin-top: 62px;
+  display: flex;
+  gap: 24px;
+
+  .home-page-box{
+    color: $primary;
+    background-color: $white;
+    border-radius: 16px;
+    padding: 24px 32px;
+    width: calc(38% - 24px);
+    .box-title{
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .box-content{
+      padding: 24px 0;
+      display: flex;
+      .count{
+        font-size: 20px;
+        font-weight: 500;
+        margin-top: 3px;
+        span {
+          color: $sky;
+        }
+      }
+      .box-icon{
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .home-page-box:first-child{
+    width: 24%;
+  }
+  @media (max-width: 1100px) {
+    flex-wrap: wrap;
+    .home-page-box, .home-page-box:first-child{
+      width: 100%;
+    }
+  }
+}
+
+.home-page-find{
+  font-size: 14px;
+  margin-top: 32px;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  height: 60px;
+  span{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 121px;
+  }
+  @media (max-width: 1100px) {
+    margin-top: 0;
+    span:first-child{
+      display: none;
+    }
+  }
+}
+
+.home-page-find-title-mobile{
+  display: none;
+  margin-top: 32px;
+  font-size: 14px;
+  @media (max-width: 1100px) {
+    display: block;
+  }
+}
+.home-page-leaderboard{
+  margin-top: 60px;
+}
+
+.home-page-table-header{
+  background-color: $whiteSolid;
+  th{
+    font-size: 12px;
+  }
+  .icon-table{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.home-page-table-row{
+  td{
+    padding: 32px 16px;
+    font-size: 16px;
+  }
+  td:first-child{
+    font-size: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .icon-table{
+    background-color: $groundwaterOpacity;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .reputation-table{
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 13px;
+    display: inline-block;
+  }
+
+  .reputation-table-medium{
+    color: $medium;
+    border: 1px solid $mediumBorder;
+  }
+
+  .reputation-table-low{
+    color: $low;
+    border: 1px solid $lowBorder;
+  }
+
+  .reputation-table-high{
+    color: $high;
+    border: 1px solid $highBorder;
+  }
+  .reputation-table-soon{
+    color: $soon;
+    border: 1px solid $soonBorder;
+  }
+}
+
+#network-select{
+  img {
+    display: none;
+  }
+}
+
+.select-item{
+  display: flex;
+  gap: 10px;
+}

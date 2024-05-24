@@ -18,38 +18,50 @@
     display: none;
   }
 
-  .logo-mobile{
+  .logo-mobile, .search-header-mobile {
     display: none;
   }
 
-  @media (max-width: 1000px) {
-    height: 62px;
+  @media (max-width: 1300px) {
     .logo{
       display: none;
     }
     .logo-mobile{
       display: block;
     }
-    .mobile-icon {
+  }
+
+  @media (max-width: 1100px) {
+    height: 62px;
+    .mobile-icon, .search-header-mobile {
       display: block;
     }
-    .header-list-link {
+    .header-list-link, .search-header {
       display: none;
     }
   }
 }
-
-.header-mobile-menu{
-  padding: 20px 10px;
-  .header-list-link {
-    display: flex;
-    gap: 16px;
-    flex-direction: column;
-    .header-link{
-      font-weight: 600;
-      padding: 6px 8px;
-      font-size: 14px;
+.header-toolbar-search{
+  @media (max-width: 1100px) {
+    height: 118px;
+    flex-wrap: wrap;
+  }
+  .header-mobile-menu{
+    padding: 20px 10px;
+    .header-list-link {
+      display: flex;
+      gap: 16px;
+      flex-direction: column;
+      .header-link{
+        font-weight: 600;
+        padding: 6px 8px;
+        font-size: 14px;
+      }
     }
   }
+  .search-header-mobile{
+    width: 100%;
+  }
 }
+
 

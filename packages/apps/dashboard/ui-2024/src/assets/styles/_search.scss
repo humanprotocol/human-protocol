@@ -1,0 +1,99 @@
+.search, .search-white{
+  position: relative;
+  width: 920px;
+  max-width: 100%;
+
+  #search-bar{
+    background-color: $white;
+    width: 100%;
+    border-radius: 8px;
+    padding: 15px 84px 15px 16px;
+    font-size: 16px;
+    line-height: 24px;
+    border: 1px solid $skyOpacity;
+    color: $primary;
+    &::placeholder {
+      color: $sky;
+      opacity: 1;
+    }
+
+    &::-ms-input-placeholder {
+      color: $sky;
+    }
+
+    &:hover, &.search-hover{
+      border-color: $lilacSachet;
+      background-color: $ghostWhite;
+    }
+
+    &:focus, &:focus-visible {
+      border-color: $secondary;
+      outline: none;
+      background-color: $white;
+    }
+    &:-webkit-autofill {
+      -webkit-text-fill-color: $primary;
+      box-shadow: 0 0 0px 1000px $white inset;
+    }
+  }
+
+  .search-close{
+    position: absolute;
+    right: 56px;
+    top: 15px;
+    cursor: pointer;
+  }
+
+  .search-button{
+    position: absolute;
+    right: 4px;
+    background-color: $secondary;
+    border-radius: 8px;
+    top: 4px;
+    svg{
+      font-size: 32px;
+    }
+    &:hover{
+      background-color: $primary;
+    }
+  }
+}
+
+.search-white{
+  width: 500px;
+  max-width: 25%;
+
+  .search-button{
+    padding: 4px;
+    top: 5px;
+    background: #1406B214;
+    svg{
+      font-size: 24px;
+    }
+    &:hover{
+      background-color: $secondary;
+      svg{
+        color: $white;
+      }
+    }
+  }
+
+  .search-close{
+    position: absolute;
+    right: 40px;
+    top: 13px;
+    font-size: 16px;
+  }
+
+  #search-bar{
+    padding: 8px 68px 8px 16px;
+
+  }
+  @media (max-width: 1150px) {
+    max-width: 20%;
+  }
+
+  @media (max-width: 1100px) {
+    max-width: 100%;
+  }
+}
