@@ -29,7 +29,7 @@
     "react-router-dom": "^6.23.1",
     "recharts": "^2.12.7",
     "styled-components": "^6.1.11",
-    "simplebar-react": "^3.2.5",
+    "simplebar-react": "^3.2.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
