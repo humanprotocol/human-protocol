@@ -1,5 +1,7 @@
-import { createTheme, Theme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 import { PaletteColorOptions, PaletteColor } from '@mui/material/styles/createPalette';
+import { ThemeOptions } from '@mui/material';
+import { colorPalette } from '@assets/styles/color-palette';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -39,7 +41,7 @@ declare module '@mui/material/SvgIcon' {
   }
 }
 
-const theme = createTheme({
+const theme: ThemeOptions = createTheme({
   palette: {
     primary: {
       main: '#320a8d',
@@ -78,8 +80,34 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Inter, Arial, sans-serif',
-  },
+		fontFamily: 'Inter, Arial, sans-serif',
+		h3: {
+			fontSize: 28,
+			fontWeight: 500,
+		},
+		h4: {
+			fontSize: 24,
+			fontWeight: 500,
+		},
+		h5: {
+			fontSize: 20,
+			fontWeight: 500,
+		},
+		body1: {
+			fontSize: 14,
+		},
+		body2: {
+			fontSize: 14,
+			fontWeight: 500,
+		},
+		subtitle1: {
+			fontSize: 10,
+		},
+		subtitle2: {
+			fontSize: 10,
+			fontWeight: 600,
+		},
+	},
   components: {
     MuiButton: {
       styleOverrides: {
@@ -110,6 +138,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiIconButton: {
+			styleOverrides: {
+				sizeMedium: {
+					color: colorPalette.primary.main,
+				},
+			},
+		},
     MuiSelect: {
       styleOverrides: {
         root: {
