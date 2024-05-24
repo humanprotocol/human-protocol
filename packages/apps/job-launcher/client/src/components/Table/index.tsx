@@ -95,9 +95,6 @@ export const Table = ({
     setOrderBy(property);
   };
 
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data?.results.length) : 0;
-
   return (
     <Box>
       <TableContainer
@@ -151,11 +148,6 @@ export const Table = ({
                   ))}
                 </TableRow>
               ))}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
             </TableBody>
           ) : (
             <TableBody>

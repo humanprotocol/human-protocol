@@ -55,14 +55,14 @@ export abstract class PageOptionsDto {
 
   @ApiPropertyOptional({
     minimum: 1,
-    maximum: 10,
+    maximum: 25,
     default: 5,
     name: 'page_size',
   })
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  @Max(10)
+  @Max(25)
   @IsOptional()
   pageSize?: number = 5;
 
