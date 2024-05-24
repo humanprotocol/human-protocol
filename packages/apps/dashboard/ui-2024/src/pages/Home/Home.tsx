@@ -183,32 +183,64 @@ const Home: React.FC = () => {
 		}
 	};
 
-  const selectRender = () => {
-    return (
-      <FormControl fullWidth size="small">
-        <InputLabel id="network-select-label">By Network</InputLabel>
-        <Select
+	const selectRender = () => {
+		return (
+			<FormControl fullWidth size="small">
+				<InputLabel id="network-select-label">By Network</InputLabel>
+				<Select
 					labelId="network-select-label"
-          id="network-select"
-          value={network}
-          label="By Network"
-          onChange={handleChange}
-        >
-          <MenuItem className='select-item' value={'all'}><HumanIcon />All Networks</MenuItem>
-          <MenuItem className='select-item' value={'ethereum'}><EthereumIcon />Ethereum</MenuItem>
-          <MenuItem className='select-item' value={'goerli'}><EthereumIcon />Ethereum Goerli</MenuItem>
-          <MenuItem className='select-item' value={'binance'}><BinanceSmartChainIcon />Binance Smart Chain</MenuItem>
-          <MenuItem className='select-item' value={'testnet'}><BinanceSmartChainIcon /> Smart Chain (Testnet)</MenuItem>
-          <MenuItem className='select-item' value={'polygon'}><PolygonIcon />Polygon</MenuItem>
-          <MenuItem className='select-item' value={'mumbai'}><PolygonIcon />Polygon Mumbai</MenuItem>
-          <MenuItem className='select-item' value={'moonbeam'}><MoonbeamIcon />Moonbeam</MenuItem>
-          <MenuItem className='select-item' value={'alpha'}><MoonbaseAlphaIcon />Moonbase Alpha</MenuItem>
-          <MenuItem className='select-item' value={'celo'}><CeloIcon />Celo</MenuItem>
-          <MenuItem className='select-item' value={'alfajores'}><CeloIcon />Celo Alfajores</MenuItem>
-        </Select>
-      </FormControl>
-    )
-  }
+					id="network-select"
+					value={network}
+					label="By Network"
+					onChange={handleChange}
+				>
+					<MenuItem className="select-item" value={'all'}>
+						<HumanIcon />
+						All Networks
+					</MenuItem>
+					<MenuItem className="select-item" value={'ethereum'}>
+						<EthereumIcon />
+						Ethereum
+					</MenuItem>
+					<MenuItem className="select-item" value={'goerli'}>
+						<EthereumIcon />
+						Ethereum Goerli
+					</MenuItem>
+					<MenuItem className="select-item" value={'binance'}>
+						<BinanceSmartChainIcon />
+						Binance Smart Chain
+					</MenuItem>
+					<MenuItem className="select-item" value={'testnet'}>
+						<BinanceSmartChainIcon /> Smart Chain (Testnet)
+					</MenuItem>
+					<MenuItem className="select-item" value={'polygon'}>
+						<PolygonIcon />
+						Polygon
+					</MenuItem>
+					<MenuItem className="select-item" value={'mumbai'}>
+						<PolygonIcon />
+						Polygon Mumbai
+					</MenuItem>
+					<MenuItem className="select-item" value={'moonbeam'}>
+						<MoonbeamIcon />
+						Moonbeam
+					</MenuItem>
+					<MenuItem className="select-item" value={'alpha'}>
+						<MoonbaseAlphaIcon />
+						Moonbase Alpha
+					</MenuItem>
+					<MenuItem className="select-item" value={'celo'}>
+						<CeloIcon />
+						Celo
+					</MenuItem>
+					<MenuItem className="select-item" value={'alfajores'}>
+						<CeloIcon />
+						Celo Alfajores
+					</MenuItem>
+				</Select>
+			</FormControl>
+		);
+	};
 
 	return (
 		<PageWrapper violetHeader>
