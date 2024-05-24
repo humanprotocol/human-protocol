@@ -38,6 +38,14 @@ import recording from '@assets/recording.png';
 import reputation from '@assets/reputation.png';
 import ethereum from '@assets/ethereum.png';
 
+import MoonbaseAlphaIcon from '@components/Icons/MoonbaseAlphaIcon';
+import MoonbeamIcon from '@components/Icons/MoonbeamIcon';
+import BinanceSmartChainIcon from '@components/Icons/BinanceSmartChainIcon';
+import CeloIcon from '@components/Icons/CeloIcon';
+import EthereumIcon from '@components/Icons/EthereumIcon';
+import HumanIcon from '@components/Icons/HumanIcon';
+import PolygonIcon from '@components/Icons/PolygonIcon';
+
 function createData(
   role: string,
   address: string,
@@ -153,17 +161,17 @@ const Home: React.FC = () => {
           label="By Network"
           onChange={handleChange}
         >
-          <MenuItem className='select-item' value={'all'}><img src={human} alt="logo"/>All Networks</MenuItem>
-          <MenuItem value={'ethereum'}>Ethereum</MenuItem>
-          <MenuItem value={'goerli'}>Ethereum Goerli</MenuItem>
-          <MenuItem value={'binance'}>Binance Smart Chain</MenuItem>
-          <MenuItem value={'testnet'}>Binance Smart Chain (Testnet)</MenuItem>
-          <MenuItem value={'polygon'}>Polygon</MenuItem>
-          <MenuItem value={'mumbai'}>Polygon Mumbai</MenuItem>
-          <MenuItem value={'moonbeam'}>Moonbeam</MenuItem>
-          <MenuItem value={'alpha'}>Moonbase Alpha</MenuItem>
-          <MenuItem value={'celo'}>Celo</MenuItem>
-          <MenuItem value={'alfajores'}>Celo Alfajores</MenuItem>
+          <MenuItem className='select-item' value={'all'}><HumanIcon />All Networks</MenuItem>
+          <MenuItem className='select-item' value={'ethereum'}><EthereumIcon />Ethereum</MenuItem>
+          <MenuItem className='select-item' value={'goerli'}><EthereumIcon />Ethereum Goerli</MenuItem>
+          <MenuItem className='select-item' value={'binance'}><BinanceSmartChainIcon />Binance Smart Chain</MenuItem>
+          <MenuItem className='select-item' value={'testnet'}><BinanceSmartChainIcon /> Smart Chain (Testnet)</MenuItem>
+          <MenuItem className='select-item' value={'polygon'}><PolygonIcon />Polygon</MenuItem>
+          <MenuItem className='select-item' value={'mumbai'}><PolygonIcon />Polygon Mumbai</MenuItem>
+          <MenuItem className='select-item' value={'moonbeam'}><MoonbeamIcon />Moonbeam</MenuItem>
+          <MenuItem className='select-item' value={'alpha'}><MoonbaseAlphaIcon />Moonbase Alpha</MenuItem>
+          <MenuItem className='select-item' value={'celo'}><CeloIcon />Celo</MenuItem>
+          <MenuItem className='select-item' value={'alfajores'}><CeloIcon />Celo Alfajores</MenuItem>
         </Select>
       </FormControl>
     )
