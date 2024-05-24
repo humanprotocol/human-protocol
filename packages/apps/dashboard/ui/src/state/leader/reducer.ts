@@ -48,7 +48,7 @@ export const fetchLeadersAsync = createAsyncThunk<
     await Promise.all(
       V2_SUPPORTED_CHAIN_IDS.map(async (chainId) => {
         const leaders = await OperatorUtils.getLeaders({
-          networks: [chainId],
+          chainId,
         });
 
         return {
