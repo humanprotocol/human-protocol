@@ -6,7 +6,8 @@ export const colorPalette = {
 	},
 	secondary: {
 		main: '#6309ff',
-		light: '#14062b',
+		light: '#1406B280',
+		dark: '#14062b',
 	},
 	info: {
 		main: '#eeeeee',

@@ -1,44 +1,46 @@
 import { createTheme } from '@mui/material/styles';
-import { PaletteColorOptions, PaletteColor } from '@mui/material/styles/createPalette';
+import {
+	PaletteColorOptions,
+	PaletteColor,
+} from '@mui/material/styles/createPalette';
 import { ThemeOptions } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 
 declare module '@mui/material/styles' {
-  interface Palette {
-    sky: PaletteColor;
-    white: PaletteColor;
-    textSecondary: PaletteColor;
-  }
-  interface PaletteOptions {
-    sky?: PaletteColorOptions;
-    white?: PaletteColorOptions;
-    textSecondary?: PaletteColorOptions;
-  }
+	interface Palette {
+		sky: PaletteColor;
+		white: PaletteColor;
+		textSecondary: PaletteColor;
+	}
+	interface PaletteOptions {
+		sky?: PaletteColorOptions;
+		white?: PaletteColorOptions;
+		textSecondary?: PaletteColorOptions;
+	}
 }
 
 declare module '@mui/material/Button' {
-  interface ButtonPropsColorOverrides {
-    sky: true;
-    white: true;
-    textSecondary: true;
-
-  }
+	interface ButtonPropsColorOverrides {
+		sky: true;
+		white: true;
+		textSecondary: true;
+	}
 }
 
 declare module '@mui/material/IconButton' {
-  interface IconButtonPropsColorOverrides {
-    sky: true;
-    white: true;
-    textSecondary: true;
-  }
+	interface IconButtonPropsColorOverrides {
+		sky: true;
+		white: true;
+		textSecondary: true;
+	}
 }
 
 declare module '@mui/material/SvgIcon' {
-  interface SvgIconPropsColorOverrides {
-    sky: true;
-    white: true;
-    textSecondary: true;
-  }
+	interface SvgIconPropsColorOverrides {
+		sky: true;
+		white: true;
+		textSecondary: true;
+	}
 }
 
 const theme: ThemeOptions = createTheme({
@@ -121,65 +123,72 @@ const theme: ThemeOptions = createTheme({
 			fontSize: 10,
 		},
 	},
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          fontWeight: 600,
-          textTransform: 'none',
-        },
-      },
-    },
-    MuiToolbar: {
-      styleOverrides: {
-        root: {
-          '@media (min-width:1001px)': {
+	components: {
+		MuiButton: {
+			styleOverrides: {
+				root: {
+					fontWeight: 600,
+					textTransform: 'none',
+				},
+			},
+		},
+		MuiToolbar: {
+			styleOverrides: {
+				root: {
+					'@media (min-width:1001px)': {
 						paddingX: 56,
-          },
-        },
-      },
-    },
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          backgroundColor: '#320a8d',
-          color: '#fff',
-        },
-        arrow:{
-          color: '#320a8d',
-        },
-      },
-    },
-    MuiIconButton: {
+					},
+				},
+			},
+		},
+		MuiTooltip: {
+			styleOverrides: {
+				tooltip: {
+					backgroundColor: '#320a8d',
+					color: '#fff',
+				},
+				arrow: {
+					color: '#320a8d',
+				},
+			},
+		},
+		MuiIconButton: {
 			styleOverrides: {
 				sizeMedium: {
 					color: colorPalette.primary.main,
 				},
 			},
 		},
-    MuiSelect: {
-      styleOverrides: {
-        root: {
-          borderRadius: 4,
-          borderWidth: 2,
-          color: '#320a8d',
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#320a8d',
-            borderWidth: 2,
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#320a8d',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#320a8d',
-          },
-          "& .MuiSvgIcon-root": {
-            color: '#320a8d',
-          },
-        },
-      },
-    },
-  },
+		MuiSelect: {
+			styleOverrides: {
+				root: {
+					borderRadius: 4,
+					borderWidth: 2,
+					color: '#320a8d',
+					'& .MuiOutlinedInput-notchedOutline': {
+						borderColor: '#320a8d',
+						borderWidth: 2,
+					},
+					'&:hover .MuiOutlinedInput-notchedOutline': {
+						borderColor: '#320a8d',
+					},
+					'&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+						borderColor: '#320a8d',
+					},
+					'& .MuiSvgIcon-root': {
+						color: '#320a8d',
+					},
+				},
+			},
+		},
+		MuiTypography: {
+			styleOverrides: {
+				root: {
+					wordBreak: 'break-word',
+				},
+			},
+		},
+	},
 });
 
 export default theme;

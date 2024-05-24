@@ -1,4 +1,3 @@
-import PageWrapper from '@components/PageWrapper';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -8,13 +7,10 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
 import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
-import HumanAppIcon from '@assets//icons/human-app.svg';
-import JobLauncherIcon from '@assets//icons/job-launcher.svg';
-import RecordingOracleIcon from '@assets//icons/recording-oracle.svg';
-import WalletIcon from '@assets/icons/shadowed/wallet.svg';
+import HumanAppIcon from '@assets/icons/human-app.svg';
+import JobLauncherIcon from '@assets/icons/job-launcher.svg';
+import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import ShadowIcon from '@components/ShadowIcon';
-import Clipboard from '@components/clipboard';
 
 //TEMPORARY INTERFACE AND DATA
 interface Overview {
@@ -31,13 +27,11 @@ interface StakeInfo {
 }
 
 interface RoleDetails {
-	token: string;
 	overview: Overview;
 	stakeInfo: StakeInfo;
 }
 //TEMPORARY INTERFACE AND DATA
 const HARDCODED_ROLE_DETAILS: RoleDetails = {
-	token: '0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 	overview: {
 		network: 'Polygon Mumbai',
 		reputation: 'medium',
@@ -67,8 +61,8 @@ const RoleInformation = ({ title, points }: RoleInfoProps) => {
 					paddingLeft: 25,
 				}}
 			>
-				{points.map((elem) => (
-					<li>{elem}</li>
+				{points.map((elem, idx) => (
+					<li key={idx}>{elem}</li>
 				))}
 			</ul>
 		</Box>
@@ -188,17 +182,7 @@ const renderRoleIcon = (
 
 const RoleDetails = () => {
 	return (
-		<PageWrapper>
-			<Stack
-				sx={{ marginBottom: 4 }}
-				direction={{ xs: 'column', md: 'row' }}
-				gap={3}
-				alignItems={{ xs: 'stretch', md: 'center' }}
-			>
-				<ShadowIcon img={WalletIcon} title="Wallet Adress" />
-				<Clipboard value={HARDCODED_ROLE_DETAILS.token} />
-			</Stack>
-
+		<>
 			<Card
 				sx={{
 					paddingX: { xs: 2, md: 8 },
@@ -470,7 +454,7 @@ const RoleDetails = () => {
 					</Typography>
 				</Box>
 			</Card>
-		</PageWrapper>
+		</>
 	);
 };
 export default RoleDetails;

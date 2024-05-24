@@ -14,8 +14,8 @@ import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { colorPalette } from '@assets/styles/color-palette';
 import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
-import DatePicker from '@components/data-entry/DatePicker';
-import ToggleButtons from '@components/data-entry/ToggleButtons';
+import DatePicker from '@components/DataEntry/DatePicker';
+import ToggleButtons from '@components/DataEntry/ToggleButtons';
 import dayjs, { Dayjs } from 'dayjs';
 import ToggleCharts from '@components/Charts/ToggleCharts';
 

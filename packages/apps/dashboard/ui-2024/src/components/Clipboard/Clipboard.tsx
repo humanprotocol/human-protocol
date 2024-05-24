@@ -14,6 +14,7 @@ const Clipboard = ({ value }: ClipboardProps) => {
 			sx={{
 				paddingX: 3,
 				paddingY: 2,
+				borderRadius: 16,
 			}}
 		>
 			<Stack
@@ -27,6 +28,7 @@ const Clipboard = ({ value }: ClipboardProps) => {
 					sx={{
 						textOverflow: 'ellipsis',
 						overflow: 'hidden',
+						wordBreak: 'normal',
 					}}
 				>
 					{value}
