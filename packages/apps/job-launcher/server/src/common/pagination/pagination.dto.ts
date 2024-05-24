@@ -55,7 +55,7 @@ export abstract class PageOptionsDto {
 
   @ApiPropertyOptional({
     minimum: 1,
-    maximum: 10,
+    maximum: 25,
     default: 5,
     name: 'page_size',
   })
