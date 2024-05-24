@@ -3,11 +3,11 @@ import clsx from 'clsx';
 import Header from '@components/Header';
 import Footer from '@components/Footer';
 
-const PageWrapper: FC<PropsWithChildren<{ violetHeader?: boolean, searchWhite?: boolean }>> = ({ children, violetHeader, searchWhite}) => {
+const PageWrapper: FC<PropsWithChildren<{ violetHeader?: boolean, displaySearchBar?: boolean }>> = ({ children, violetHeader, displaySearchBar}) => {
   return (
     <>
-      <Header searchWhite={searchWhite} />
-      <div className={clsx('page-wrapper', { 'violet-header': violetHeader, 'search-white-header': searchWhite})}>
+      <Header displaySearchBar={displaySearchBar} />
+      <div className={clsx('page-wrapper', { 'violet-header': violetHeader, 'search-white-header': displaySearchBar})}>
         <div className='container'>
           {children}
         </div>

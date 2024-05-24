@@ -10,7 +10,7 @@ import logo from '@assets/logo.png';
 import Search from '@components/Search';
 import logoMobile from '@assets/logo-mobile.png';
 
-const Header: FC<{ searchWhite?: boolean }>  = ({ searchWhite }) => {
+const Header: FC<{ displaySearchBar?: boolean }>  = ({ displaySearchBar }) => {
   const [open, setState] = useState(false);
 
   const handleClick = (url: string) => {
@@ -22,15 +22,15 @@ const Header: FC<{ searchWhite?: boolean }>  = ({ searchWhite }) => {
 };
 
   return (
-    <Toolbar className={clsx('header-toolbar', { 'header-toolbar-search': searchWhite })}>
-      {searchWhite && (
-        <Search searchWhite className='search-header-mobile' />
+    <Toolbar className={clsx('header-toolbar', { 'header-toolbar-search': displaySearchBar })}>
+      {displaySearchBar && (
+        <Search displaySearchBar className='search-header-mobile' />
       )}
       <img className='logo' src={logo} alt="logo"/>
       <img className='logo-mobile'src={logoMobile} alt="logo"/>
 
-      {searchWhite && (
-        <Search searchWhite className='search-header' />
+      {displaySearchBar && (
+        <Search displaySearchBar className='search-header' />
       )}
 
       <div className='header-list-link'>

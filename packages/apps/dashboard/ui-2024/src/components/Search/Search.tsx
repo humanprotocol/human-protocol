@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 
-const Search: FC<{ className?: string, searchWhite?: boolean }> = ({ className, searchWhite }) => {
+const Search: FC<{ className?: string, displaySearchBar?: boolean }> = ({ className, displaySearchBar }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [focus, setFocus] = useState<boolean>(false);
   const [hover, setHover] = useState<boolean>(false);
@@ -36,7 +36,7 @@ const Search: FC<{ className?: string, searchWhite?: boolean }> = ({ className, 
   };
 
   return (
-  <form className={clsx('search', className, { 'search-white': searchWhite })} onSubmit={handleSubmit}>
+  <form className={clsx('search', className, { 'search-white': displaySearchBar })} onSubmit={handleSubmit}>
     <input
       id='search-bar'
       placeholder='Search by Wallet/Escrow'
@@ -62,7 +62,7 @@ const Search: FC<{ className?: string, searchWhite?: boolean }> = ({ className, 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <SearchIcon color={`${searchWhite ? 'textSecondary' : 'white'}`} />
+      <SearchIcon color={`${displaySearchBar ? 'textSecondary' : 'white'}`} />
     </IconButton>
   </form>
   );
