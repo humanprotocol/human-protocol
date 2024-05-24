@@ -57,7 +57,7 @@ const SearchResults = () => {
 				gap={3}
 				alignItems={{ xs: 'stretch', md: 'center' }}
 			>
-				{renderCurrentResultType(null, tokenId)}
+				{renderCurrentResultType(currentState, tokenId)}
 			</Stack>
 
 			{currentState === 'roleDetails' && <RoleDetails />}
