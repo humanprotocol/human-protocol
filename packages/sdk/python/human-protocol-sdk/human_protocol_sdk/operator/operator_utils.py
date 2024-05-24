@@ -204,6 +204,12 @@ class OperatorUtils:
         if not leaders_raw:
             return []
 
+        job_types = []
+        if isinstance(job_types, str):
+            job_types = job_types.split(",")
+        elif isinstance(job_types, list):
+            job_types = job_types
+
         leaders.extend(
             [
                 LeaderData(
@@ -226,8 +232,12 @@ class OperatorUtils:
                     url=leader.get("url", None),
                     job_types=(
                         leader.get("jobTypes").split(",")
-                        if leader.get("jobTypes", None)
-                        else None
+                        if isinstance(leader.get("jobTypes"), str)
+                        else (
+                            leader.get("jobTypes", [])
+                            if isinstance(leader.get("jobTypes"), list)
+                            else []
+                        )
                     ),
                 )
                 for leader in leaders_raw
@@ -300,8 +310,12 @@ class OperatorUtils:
             url=leader.get("url", None),
             job_types=(
                 leader.get("jobTypes").split(",")
-                if leader.get("jobTypes", None)
-                else None
+                if isinstance(leader.get("jobTypes"), str)
+                else (
+                    leader.get("jobTypes", [])
+                    if isinstance(leader.get("jobTypes"), list)
+                    else []
+                )
             ),
         )
 
@@ -360,8 +374,12 @@ class OperatorUtils:
                 url=operator.get("url", ""),
                 job_types=(
                     operator.get("jobTypes").split(",")
-                    if operator.get("jobTypes", None)
-                    else []
+                    if isinstance(operator.get("jobTypes"), str)
+                    else (
+                        operator.get("jobTypes", [])
+                        if isinstance(operator.get("jobTypes"), list)
+                        else []
+                    )
                 ),
             )
             for operator in operators

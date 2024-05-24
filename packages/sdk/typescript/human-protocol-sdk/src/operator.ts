@@ -61,9 +61,17 @@ export class OperatorUtils {
         address: address.toLowerCase(),
       });
 
+      let jobTypes: string[] = [];
+
+      if (typeof leader.jobTypes === 'string') {
+        jobTypes = leader.jobTypes.split(',');
+      } else if (Array.isArray(leader.jobTypes)) {
+        jobTypes = leader.jobTypes;
+      }
+
       return {
         ...leader,
-        jobTypes: leader.jobTypes?.split(','),
+        jobTypes,
       };
     } catch (e) {
       return throwError(e);
@@ -113,12 +121,22 @@ export class OperatorUtils {
       }
 
       leaders_data = leaders_data.concat(
-        leaders.map((leader) => ({
-          ...leader,
-          jobTypes: leader.jobTypes?.split(','),
-        }))
-      );
+        leaders.map((leader) => {
+          let jobTypes: string[] = [];
 
+          if (typeof leader.jobTypes === 'string') {
+            jobTypes = leader.jobTypes.split(',');
+          } else if (Array.isArray(leader.jobTypes)) {
+            jobTypes = leader.jobTypes;
+          }
+
+          return {
+            ...leader,
+            jobTypes,
+          };
+        })
+      );
+      console.log('leaders_data after: ', leaders_data.length);
       return leaders_data;
     } catch (e) {
       return throwError(e);
@@ -157,10 +175,20 @@ export class OperatorUtils {
         role: role,
       });
 
-      return reputationNetwork.operators.map((operator) => ({
-        ...operator,
-        jobTypes: operator.jobTypes?.split(','),
-      }));
+      return reputationNetwork.operators.map((operator) => {
+        let jobTypes: string[] = [];
+
+        if (typeof operator.jobTypes === 'string') {
+          jobTypes = operator.jobTypes.split(',');
+        } else if (Array.isArray(operator.jobTypes)) {
+          jobTypes = operator.jobTypes;
+        }
+
+        return {
+          ...operator,
+          jobTypes,
+        };
+      });
     } catch (e) {
       return throwError(e);
     }
