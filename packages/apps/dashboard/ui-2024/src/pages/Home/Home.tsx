@@ -59,7 +59,7 @@ function createData(
 const rows = [
 	createData(
 		'Job Launcher',
-		'1A1zP...ivfNa',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'1e-18 HMT',
 		'Polygon',
 		'Medium',
@@ -67,7 +67,7 @@ const rows = [
 	),
 	createData(
 		'Recording Oracle',
-		'1A1zP...ivfNa',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'1e-18 HMT',
 		'Polygon',
 		'High',
@@ -75,7 +75,7 @@ const rows = [
 	),
 	createData(
 		'Reputation Oracle',
-		'1A1zP...ivfNa',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'3e-18 HMT',
 		'Polygon',
 		'Medium',
@@ -83,7 +83,7 @@ const rows = [
 	),
 	createData(
 		'Exchange Oracle',
-		'1A1zP...ivfNa',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'4e-18 HMT',
 		'Polygon',
 		'Low',
@@ -91,7 +91,7 @@ const rows = [
 	),
 	createData(
 		'HUMAN App',
-		'1A1zP...ivfNa',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'2e-18 HMT',
 		'Polygon',
 		'Coming soon',
