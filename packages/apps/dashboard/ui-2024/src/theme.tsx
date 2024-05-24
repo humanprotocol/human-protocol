@@ -87,7 +87,7 @@ const theme: ThemeOptions = createTheme({
 			fontSize: 32,
 		},
 		h2: {
-			fontSize: 28,
+			fontSize: 34,
 			fontWeight: 600,
 		},
 		h3: {

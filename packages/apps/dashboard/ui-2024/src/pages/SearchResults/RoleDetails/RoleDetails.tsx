@@ -11,6 +11,10 @@ import HumanAppIcon from '@assets/icons/human-app.svg';
 import JobLauncherIcon from '@assets/icons/job-launcher.svg';
 import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import ShadowIcon from '@components/ShadowIcon';
+import Clipboard from '@components/clipboard';
+// TODO
+// import NothingFound from '@components/NothingFound';
 
 //TEMPORARY INTERFACE AND DATA
 interface Overview {
@@ -181,6 +185,12 @@ const renderRoleIcon = (
 };
 
 const RoleDetails = () => {
+
+	// TODO
+	// return (
+	// 	<NothingFound/>
+	// )
+
 	return (
 		<>
 			<Card
