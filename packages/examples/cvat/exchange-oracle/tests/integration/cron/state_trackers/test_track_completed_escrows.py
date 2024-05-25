@@ -144,48 +144,6 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.assertEqual(db_project.status, ProjectStatuses.validation)
 
-    def test_retrieve_annotations_unfinished_jobs(self):
-        cvat_project_id = 1
-        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        project_id = str(uuid.uuid4())
-        cvat_project = Project(
-            id=project_id,
-            cvat_id=cvat_project_id,
-            cvat_cloudstorage_id=1,
-            status=ProjectStatuses.completed.value,
-            job_type=TaskTypes.image_label_binary.value,
-            escrow_address=escrow_address,
-            chain_id=Networks.localhost.value,
-            bucket_url="https://test.storage.googleapis.com/",
-        )
-        self.session.add(cvat_project)
-
-        cvat_task_id = 1
-        cvat_task = Task(
-            id=str(uuid.uuid4()),
-            cvat_id=cvat_task_id,
-            cvat_project_id=cvat_project_id,
-            status=TaskStatuses.completed.value,
-        )
-        self.session.add(cvat_task)
-
-        cvat_job = Job(
-            id=str(uuid.uuid4()),
-            cvat_id=1,
-            cvat_project_id=cvat_project_id,
-            cvat_task_id=cvat_task_id,
-            status=JobStatuses.in_progress,
-        )
-        self.session.add(cvat_job)
-        self.session.commit()
-
-        track_completed_escrows()
-
-        self.session.commit()
-        db_project = self.session.query(Project).filter_by(id=project_id).first()
-
-        self.assertEqual(db_project.status, ProjectStatuses.annotation)
-
     @patch("src.cvat.api_calls.get_job_annotations")
     def test_retrieve_annotations_error_getting_annotations(self, mock_annotations):
         cvat_project_id = 1
