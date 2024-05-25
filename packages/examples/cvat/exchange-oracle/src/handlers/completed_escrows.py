@@ -6,7 +6,7 @@ from functools import partial
 from typing import Any, Callable, Dict, List, Optional
 
 from datumaro.util import take_by
-from sqlalchemy import exc as sa_exc
+from sqlalchemy import exc as sa_errors
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
@@ -268,7 +268,7 @@ class _CompletedEscrowsHandler:
                     escrow_projects = cvat_service.get_projects_by_escrow_address(
                         session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
                     )
-                except sa_exc.OperationalError as ex:
+                except sa_errors.OperationalError as ex:
                     if isinstance(ex.orig, db_errors.LockNotAvailable):
                         continue
                     raise
