@@ -1,6 +1,7 @@
 import io
 import itertools
 import logging
+from collections import Counter
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional
 
@@ -272,7 +273,22 @@ class _CompletedEscrowsHandler:
                         continue
                     raise
 
-                if not all(p.status == ProjectStatuses.completed for p in escrow_projects):
+                # Some escrow projects can be in the validation status,
+                # e.g. if jobs from some projects were rejected
+                # (their projects have been reannotated and become completed now),
+                # and other jobs were validated successfully
+                # (they will hang in the validation state).
+                #
+                # We need to make sure that all the projects are in any of these 2 states,
+                # but also that there's at least 1 completed project in the list.
+                # It's possible that this function is entered 2 times sequentially
+                # before the validation, e.g. in 2 different threads.
+                escrow_project_statuses = Counter(p.status for p in escrow_projects)
+                completed_count = escrow_project_statuses.get(ProjectStatuses.completed.value, 0)
+                validation_count = escrow_project_statuses.get(ProjectStatuses.validation.value, 0)
+                if not (
+                    completed_count and completed_count + validation_count == len(escrow_projects)
+                ):
                     continue
 
                 manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
