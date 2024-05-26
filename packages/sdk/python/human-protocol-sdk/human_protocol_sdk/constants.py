@@ -18,7 +18,6 @@ class ChainId(Enum):
     MOONBASE_ALPHA = 1287
     AVALANCHE_TESTNET = 43113
     AVALANCHE = 43114
-    SKALE = 1273227453
     CELO = 42220
     CELO_ALFAJORES = 44787
     XLAYER_TESTNET = 195
@@ -230,20 +229,6 @@ NETWORKS = {
         "kvstore_address": "0x938335006ea6F9Eb0e8020969cFF94404425e298",
         "old_subgraph_url": "",
         "old_factory_address": "",
-    },
-    ChainId.SKALE: {
-        "title": "SKALE Human Protocol Chain",
-        "scan_url": "https://wan-red-ain.explorer.mainnet.skalenodes.com/",
-        "subgraph_url": (
-            "https://graph-skale.humanprotocol.org/subgraphs/name/skale-human"
-        ),
-        "hmt_address": "0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd",
-        "factory_address": "0x319070b49C8d1cC015915D1E7Eb5fd8e22833885",
-        "staking_address": "0x79F37FB9C210910733c16228AC4D14a8e32C11BD",
-        "reward_pool_address": "0x881218246c25C6898aE96145259584340153aDA2",
-        "kvstore_address": "0xE1055607327b1be2080D31211dCDC4D9338CaF4A",
-        "old_subgraph_url": "",
-        "old_factory_address": "0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c",
     },
     ChainId.XLAYER: {
         "title": "XLayer",

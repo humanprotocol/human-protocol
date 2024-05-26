@@ -156,13 +156,6 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    skale: {
-      chainId: 1273227453,
-      timeout: 2000000,
-      url: process.env.ETH_SKALE_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
     alfajores: {
       chainId: 44787,
       timeout: 2000000,
@@ -237,7 +230,6 @@ const config: HardhatUserConfig = {
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
-      skale: process.env.SKALE_API_KEY || '',
       avalancheFujiTestnet: process.env.AVALANCHE_API_KEY || '',
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
@@ -246,14 +238,6 @@ const config: HardhatUserConfig = {
       xlayerTestnet: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
-      {
-        network: 'skale',
-        chainId: 1273227453,
-        urls: {
-          apiURL: process.env.SKALE_BROWSER_API_URL || '',
-          browserURL: process.env.SKALE_BROWSER_URL || '',
-        },
-      },
       {
         network: 'polygonAmoy',
         chainId: 80002,
