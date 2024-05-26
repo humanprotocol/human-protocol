@@ -20,6 +20,11 @@ export enum JobStatusFilter {
   CANCELED = 'CANCELED',
 }
 
+export enum JobSortField {
+  CHAIN_ID = 'chain_id',
+  CREATED_AT = 'created_at',
+}
+
 export enum JobRequestType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',

@@ -45,18 +45,18 @@ Initializes an LeaderData instance.
   * **url** (`Optional`[`str`]) – Url
   * **job_types** (`Optional`[`List`[`str`]]) – Job types
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(networks, role=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None)
 
 Bases: `object`
 
 A class used to filter leaders.
 
-#### \_\_init_\_(networks, role=None)
+#### \_\_init_\_(chain_id, role=None)
 
 Initializes a LeaderFilter instance.
 
 * **Parameters:**
-  * **networks** (`List`[[`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)]) – Networks to request data
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Id to request data
   * **role** (`Optional`[`str`]) – Leader role
 
 ### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[])
@@ -99,7 +99,7 @@ Get the leader details.
   )
   ```
 
-#### *static* get_leaders(filter=<human_protocol_sdk.operator.operator_utils.LeaderFilter object>)
+#### *static* get_leaders(filter)
 
 Get leaders data of the protocol
 
@@ -116,7 +116,7 @@ Get leaders data of the protocol
 
   print(
       OperatorUtils.get_leaders(
-          LeaderFilter(networks=[ChainId.POLYGON_AMOY])
+          LeaderFilter(chain_id=ChainId.POLYGON_AMOY)
       )
   )
   ```

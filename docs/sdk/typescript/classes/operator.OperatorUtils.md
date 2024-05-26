@@ -64,7 +64,7 @@ ___
 
 ### getLeaders
 
-▸ **getLeaders**(`filter?`): `Promise`\<`ILeader`[]\>
+▸ **getLeaders**(`filter`): `Promise`\<`ILeader`[]\>
 
 This function returns all the leader details of the protocol.
 
@@ -85,7 +85,10 @@ Returns an array with all the leader details.
 ```ts
 import { OperatorUtils } from '@human-protocol/sdk';
 
-const leaders = await OperatorUtils.getLeaders();
+const filter: ILeadersFilter = {
+ chainId: ChainId.POLYGON
+};
+const leaders = await OperatorUtils.getLeaders(filter);
 ```
 
 #### Defined in

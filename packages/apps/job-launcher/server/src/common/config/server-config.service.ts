@@ -34,4 +34,7 @@ export class ServerConfigService {
   get coinmarketcapApiKey(): string {
     return this.configService.get<string>('COINMARKETCAP_API_KEY', '');
   }
+  get coingeckoApiKey(): string {
+    return this.configService.get<string>('COINGECKO_API_KEY', '');
+  }
 }
