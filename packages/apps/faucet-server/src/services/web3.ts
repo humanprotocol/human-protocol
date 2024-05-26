@@ -7,7 +7,6 @@
  */
 
 import hmtAbi from '@human-protocol/core/abis/HMToken.json';
-import { ChainId } from '@human-protocol/sdk';
 import Web3 from 'web3';
 
 export const getWeb3 = (rpcUrl: string): Web3 => {
@@ -20,10 +19,7 @@ export const getWeb3 = (rpcUrl: string): Web3 => {
   return web3;
 };
 
-export const getFaucetBalance = async (
-  web3: Web3,
-  hmtAddress: string
-) => {
+export const getFaucetBalance = async (web3: Web3, hmtAddress: string) => {
   const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
   const balance = web3.utils.fromWei(
     await (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call(),
@@ -63,14 +59,8 @@ export const sendFunds = async (
   return txHash;
 };
 
-export const checkFaucetBalance = async (
-  web3: Web3,
-  hmtAddress: string
-) => {
-  if (
-    (await getFaucetBalance(web3, hmtAddress)) <
-    process.env.DAILY_LIMIT
-  )
+export const checkFaucetBalance = async (web3: Web3, hmtAddress: string) => {
+  if ((await getFaucetBalance(web3, hmtAddress)) < process.env.DAILY_LIMIT)
     return false;
 
   const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
