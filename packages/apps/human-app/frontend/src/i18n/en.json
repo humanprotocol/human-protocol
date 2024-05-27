@@ -303,7 +303,7 @@
       "nextBtn": "Next"
     },
     "stakeForm": {
-      "formBtn": "Stake",
+      "formBtn": "Add Stake",
       "backBtn": "Skip",
       "nextBtn": "Next",
       "label": "Stake amount",
