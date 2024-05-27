@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { colorPalette } from '@assets/styles/color-palette';
 
 interface ClipboardProps {
 	value: string;
@@ -14,6 +15,7 @@ const Clipboard = ({ value }: ClipboardProps) => {
 			sx={{
 				paddingX: 3,
 				paddingY: 2,
+				borderRadius: 16,
 			}}
 		>
 			<Stack
@@ -27,6 +29,7 @@ const Clipboard = ({ value }: ClipboardProps) => {
 					sx={{
 						textOverflow: 'ellipsis',
 						overflow: 'hidden',
+						wordBreak: 'normal',
 					}}
 				>
 					{value}
@@ -39,7 +42,11 @@ const Clipboard = ({ value }: ClipboardProps) => {
 						p: 0,
 					}}
 				>
-					<ContentCopyIcon />
+					<ContentCopyIcon
+						sx={{
+							color: colorPalette.fog.main,
+						}}
+					/>
 				</IconButton>
 			</Stack>
 		</Card>

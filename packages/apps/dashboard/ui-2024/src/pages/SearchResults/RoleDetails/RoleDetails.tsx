@@ -1,4 +1,3 @@
-import PageWrapper from '@components/PageWrapper';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -8,15 +7,10 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
 import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
-import HumanAppIcon from '@assets//icons/human-app.svg';
-import JobLauncherIcon from '@assets//icons/job-launcher.svg';
-import RecordingOracleIcon from '@assets//icons/recording-oracle.svg';
-import WalletIcon from '@assets/icons/shadowed/wallet.svg';
+import HumanAppIcon from '@assets/icons/human-app.svg';
+import JobLauncherIcon from '@assets/icons/job-launcher.svg';
+import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import ShadowIcon from '@components/ShadowIcon';
-import Clipboard from '@components/clipboard';
-// TODO
-// import NothingFound from '@components/NothingFound';
 
 //TEMPORARY INTERFACE AND DATA
 interface Overview {
@@ -33,13 +27,14 @@ interface StakeInfo {
 }
 
 interface RoleDetails {
-	token: string;
 	overview: Overview;
 	stakeInfo: StakeInfo;
+	escrows: {
+		escrowId: string;
+	}[];
 }
 //TEMPORARY INTERFACE AND DATA
 const HARDCODED_ROLE_DETAILS: RoleDetails = {
-	token: '0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 	overview: {
 		network: 'Polygon Mumbai',
 		reputation: 'medium',
@@ -51,6 +46,16 @@ const HARDCODED_ROLE_DETAILS: RoleDetails = {
 		tokensLocked: 40404,
 		jobsLaunched: null,
 	},
+	escrows: [
+		{
+			escrowId:
+				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
+		},
+		{
+			escrowId:
+				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
+		},
+	],
 };
 
 interface RoleInfoProps {
@@ -69,8 +74,8 @@ const RoleInformation = ({ title, points }: RoleInfoProps) => {
 					paddingLeft: 25,
 				}}
 			>
-				{points.map((elem) => (
-					<li>{elem}</li>
+				{points.map((elem, idx) => (
+					<li key={idx}>{elem}</li>
 				))}
 			</ul>
 		</Box>
@@ -189,24 +194,8 @@ const renderRoleIcon = (
 };
 
 const RoleDetails = () => {
-
-	// TODO
-	// return (
-	// 	<NothingFound/>
-	// )
-
 	return (
-		<PageWrapper>
-			<Stack
-				sx={{ marginBottom: 4 }}
-				direction={{ xs: 'column', md: 'row' }}
-				gap={3}
-				alignItems={{ xs: 'stretch', md: 'center' }}
-			>
-				<ShadowIcon img={WalletIcon} title="Wallet Adress" />
-				<Clipboard value={HARDCODED_ROLE_DETAILS.token} />
-			</Stack>
-
+		<>
 			<Card
 				sx={{
 					paddingX: { xs: 2, md: 8 },
@@ -254,11 +243,6 @@ const RoleDetails = () => {
 							direction="row"
 							alignItems="center"
 						>
-							<Tooltip title="Same">
-								<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-									<HelpOutlineIcon fontSize="small" />
-								</IconButton>
-							</Tooltip>
 							<Typography fontWeight={600}>Role</Typography>
 						</Stack>
 						<Stack gap={2} direction="column">
@@ -289,8 +273,14 @@ const RoleDetails = () => {
 							direction="row"
 							alignItems="center"
 						>
-							<Tooltip title="Same">
-								<IconButton sx={{ padding: 0, paddingRight: 1 }}>
+							<Tooltip title="Reputation of the role as per their activities">
+								<IconButton
+									sx={{
+										padding: 0,
+										paddingRight: 1,
+										color: colorPalette.fog.main,
+									}}
+								>
 									<HelpOutlineIcon fontSize="small" />
 								</IconButton>
 							</Tooltip>
@@ -463,22 +453,39 @@ const RoleDetails = () => {
 				<Box>
 					<Typography
 						sx={{
-							marginBottom: 1.5,
+							marginBottom: 3,
 						}}
 						variant="h5"
 					>
 						Escrows
 					</Typography>
-					<Typography
-						variant="h6"
-						component="p"
-						textAlign={{ xs: 'left', md: 'center' }}
-					>
-						No escrows launched yet
-					</Typography>
+					{HARDCODED_ROLE_DETAILS.escrows.length > 1 ? (
+						<>
+							{HARDCODED_ROLE_DETAILS.escrows.map((elem) => (
+								<Typography
+									variant="h6"
+									component="p"
+									sx={{
+										marginBottom: 3,
+										'&:last-child': { marginBottom: 0 },
+									}}
+								>
+									{elem.escrowId}
+								</Typography>
+							))}
+						</>
+					) : (
+						<Typography
+							variant="h6"
+							component="p"
+							textAlign={{ xs: 'left', md: 'center' }}
+						>
+							No escrows launched yet
+						</Typography>
+					)}
 				</Box>
 			</Card>
-		</PageWrapper>
+		</>
 	);
 };
 export default RoleDetails;

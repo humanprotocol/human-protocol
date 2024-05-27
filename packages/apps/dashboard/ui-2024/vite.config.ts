@@ -9,7 +9,7 @@ export default defineConfig({
 		react(),
 		svgr({
 			include: '**/*.svg',
-			exclude: 'src/assets/icons/shadowed/**/*.svg',
+			exclude: 'src/assets/icons/excluded/**/*.svg',
 		}),
 	],
 	resolve: {

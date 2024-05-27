@@ -2,5 +2,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 32px;
+  margin-bottom: 62px;
+
+  @media(max-width: 1100px) {
+    margin-bottom: 24px;
+  }
+
 }
