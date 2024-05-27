@@ -24,6 +24,7 @@ const IconWrapper = styled('div')(() => ({
   ':hover': {
     cursor: 'pointer',
   },
+  fontSize: '26px',
 }));
 
 const commonStyles: SxProps<Theme> = {
@@ -128,12 +129,20 @@ export function PageCard({
                 display: 'flex',
                 width: '100%',
                 justifyContent: backArrowPath ? 'space-between' : 'flex-end',
+                alignItems: 'center',
               },
             }}
           >
             {backArrowPath ? (
-              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-                <ArrowBackIcon />
+              <IconWrapper
+                onClick={goBack.bind(null, backArrowPath)}
+                sx={{
+                  width: '25px',
+                  height: '25px',
+                  fontSize: '18px',
+                }}
+              >
+                <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
             ) : null}
             {!hiddenCancelButton && (
@@ -174,7 +183,7 @@ export function PageCard({
           >
             {backArrowPath ? (
               <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
-                <ArrowBackIcon />
+                <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
             ) : null}
           </Grid>
