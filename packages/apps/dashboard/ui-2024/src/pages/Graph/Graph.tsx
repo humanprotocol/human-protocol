@@ -18,7 +18,7 @@ const Graph = () => {
 	};
 	return (
 		<PageWrapper>
-			<Breadcrumbs title='Charts' />
+			<Breadcrumbs title="Charts" />
 			<TabContext value={graphType}>
 				<Tabs
 					textColor="primary"

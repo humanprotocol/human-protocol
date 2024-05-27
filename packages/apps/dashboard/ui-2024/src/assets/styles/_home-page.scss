@@ -16,6 +16,11 @@
     border-radius: 16px;
     padding: 24px 32px;
     width: calc(38% - 24px);
+
+    @media (max-width: 660px) {
+      padding: 24px 16px;
+    }
+
     .box-title{
       font-size: 14px;
       height: 32px;

@@ -45,6 +45,7 @@ import HumanIcon from '@components/Icons/HumanIcon';
 import PolygonIcon from '@components/Icons/PolygonIcon';
 import CeloIcon from '@assets/icons/celo.svg';
 import SvgIcon from '@mui/material/SvgIcon';
+import GraphSwiper from '@components/Home/GraphSwiper';
 
 function createData(
 	role: string,
@@ -406,7 +407,9 @@ const Home: React.FC = () => {
 						</div>
 					</div>
 				</div>
-				<div className="home-page-box">Graf</div>
+				<div className="home-page-box">
+					<GraphSwiper />
+				</div>
 			</div>
 			<span className="home-page-find-title-mobile">Find HMT at</span>
 			<SimpleBar>
