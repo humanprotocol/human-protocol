@@ -19,10 +19,8 @@ export const V2_SUPPORTED_CHAIN_IDS = [
 ];
 
 export const FAUCET_CHAIN_IDS = [
-  ChainId.GOERLI,
   ChainId.SEPOLIA,
   ChainId.BSC_TESTNET,
-  ChainId.POLYGON_MUMBAI,
   ChainId.POLYGON_AMOY,
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,

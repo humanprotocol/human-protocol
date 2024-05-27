@@ -18,7 +18,7 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
-import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
+import { ExceptionFilter } from './common/exceptions/exception.filter';
 
 @Module({
   providers: [
@@ -32,7 +32,7 @@ import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
     },
     {
       provide: APP_FILTER,
-      useClass: DatabaseExceptionFilter,
+      useClass: ExceptionFilter,
     },
   ],
   imports: [

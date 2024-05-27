@@ -1,20 +1,18 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   Request,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
-  ApiQuery,
   ApiTags,
   ApiBody,
   ApiResponse,
@@ -31,15 +29,19 @@ import {
   JobCaptchaDto,
   JobQuickLaunchDto,
   JobCancelDto,
+  GetJobsDto,
 } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
+import { JobRequestType } from '../../common/enums/job';
 import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
+import { ControlledError } from '../../common/errors/controlled';
+import { PageDto } from '../../common/pagination/pagination.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Job')
+@ApiKey()
 @Controller('/job')
 export class JobController {
   constructor(private readonly jobService: JobService) {}
@@ -68,7 +70,6 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/quick-launch')
-  @ApiKey()
   public async quickLaunch(
     @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
@@ -99,7 +100,6 @@ export class JobController {
     description: 'Conflict. Conflict with the current state of the server.',
   })
   @Post('/fortune')
-  @ApiKey()
   public async createFortuneJob(
     @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
@@ -164,7 +164,10 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
   ): Promise<number> {
-    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    throw new ControlledError(
+      'Hcaptcha jobs disabled temporally',
+      HttpStatus.UNAUTHORIZED,
+    );
     return this.jobService.createJob(
       req.user.id,
       JobRequestType.HCAPTCHA,
@@ -177,16 +180,6 @@ export class JobController {
     description:
       'Endpoint to retrieve a list of jobs based on specified filters.',
   })
-  @ApiQuery({
-    name: 'networks',
-    required: true,
-    enum: ChainId,
-    type: [String],
-    isArray: true,
-  })
-  @ApiQuery({ name: 'status', required: false, enum: JobStatusFilter })
-  @ApiQuery({ name: 'skip', required: false })
-  @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({
     status: 200,
     description: 'List of jobs based on specified filters.',
@@ -203,26 +196,15 @@ export class JobController {
   @Get('/list')
   public async getJobList(
     @Request() req: RequestWithUser,
-    @Query('networks') networks: ChainId[],
-    @Query('status') status: JobStatusFilter,
-    @Query('skip') skip = 0,
-    @Query('limit') limit = 10,
-  ): Promise<JobListDto[] | BadRequestException> {
-    networks = !Array.isArray(networks) ? [networks] : networks;
-    return this.jobService.getJobsByStatus(
-      networks,
-      req.user.id,
-      status,
-      skip,
-      limit,
-    );
+    @Query() data: GetJobsDto,
+  ): Promise<PageDto<JobListDto>> {
+    return this.jobService.getJobsByStatus(data, req.user.id);
   }
 
   @ApiOperation({
     summary: 'Get the result of a job',
     description: 'Endpoint to retrieve the result of a specified job.',
   })
-  @ApiKey()
   @ApiResponse({
     status: 200,
     description: 'Result of the specified job.',
@@ -326,7 +308,6 @@ export class JobController {
     description: 'Not Found. Could not find the requested content.',
   })
   @Get('/details/:id')
-  @ApiKey()
   public async getDetails(
     @Request() req: RequestWithUser,
     @Param() params: JobIdDto,

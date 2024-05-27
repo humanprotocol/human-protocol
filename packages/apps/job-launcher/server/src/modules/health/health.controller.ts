@@ -24,7 +24,7 @@ export class HealthController {
     summary: 'Health Check',
     description: 'Endpoint to perform health checks for the application.',
   })
-  readiness(): Promise<HealthCheckResult> {
+  async readiness(): Promise<HealthCheckResult> {
     return this.health.check([
       async (): Promise<HealthIndicatorResult> =>
         this.db.pingCheck('database', {

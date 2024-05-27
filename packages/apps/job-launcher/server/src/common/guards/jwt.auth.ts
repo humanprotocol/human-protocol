@@ -1,14 +1,13 @@
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
   HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiKeyGuard } from './apikey.auth';
+import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
@@ -17,6 +16,24 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     private readonly moduleRef: ModuleRef,
   ) {
     super();
+  }
+
+  private async handleApiKeyAuthentication(context: ExecutionContext) {
+    const useApiKey = this.reflector.getAllAndOverride<boolean>('isApiKey', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (useApiKey) {
+      const apiKeyGuard = await this.moduleRef.create(ApiKeyGuard);
+      try {
+        return apiKeyGuard.canActivate(context);
+      } catch (apiKeyError) {
+        console.error('API key auth failed:', apiKeyError);
+      }
+    }
+
+    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
   }
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -38,32 +55,14 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     } catch (jwtError) {
       switch (jwtError?.response?.statusCode) {
         case HttpStatus.UNAUTHORIZED:
-          if (jwtError?.response?.message === 'Unauthorized') {
-            throw new UnauthorizedException('Unauthorized');
-          }
-          break;
+          return this.handleApiKeyAuthentication(context);
         case HttpStatus.FORBIDDEN:
           if (jwtError?.response?.message === 'Forbidden') {
-            throw new ForbiddenException('Forbidden');
+            throw new ControlledError('Forbidden', HttpStatus.FORBIDDEN);
           }
           break;
         default:
-          const useApiKey = this.reflector.getAllAndOverride<boolean>(
-            'isApiKey',
-            [context.getHandler(), context.getClass()],
-          );
-          if (useApiKey) {
-            const apiKeyGuard = await this.moduleRef.create(ApiKeyGuard);
-
-            try {
-              return await apiKeyGuard.canActivate(context);
-            } catch (apiKeyError) {
-              // If API key also fails, log the error and throw an UnauthorizedException
-              console.error('API key auth failed:', apiKeyError);
-            }
-          }
-
-          throw new UnauthorizedException('Unauthorized');
+          throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
 
       return false;

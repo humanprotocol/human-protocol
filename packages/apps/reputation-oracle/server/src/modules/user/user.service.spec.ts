@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, ConflictException } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
@@ -17,9 +16,16 @@ import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
-import { SignatureBodyDto } from '../web3/web3.dto';
+import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import {
+  ErrorOperator,
+  ErrorSignature,
+  ErrorUser,
+} from '../../common/constants/errors';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -52,6 +58,7 @@ describe('UserService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         ConfigService,
@@ -178,7 +185,9 @@ describe('UserService', () => {
           chainId: ChainId.POLYGON_AMOY,
           address,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it("should fail if user's kyc is not approved", async () => {
@@ -198,7 +207,9 @@ describe('UserService', () => {
           chainId: ChainId.POLYGON_AMOY,
           address,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -206,7 +217,8 @@ describe('UserService', () => {
     const signatureBody: SignatureBodyDto = {
       from: MOCK_ADDRESS,
       to: MOCK_ADDRESS,
-      contents: 'signup',
+      contents: 'disable-operator',
+      nonce: undefined,
     };
 
     const userEntity: DeepPartial<UserEntity> = {
@@ -216,7 +228,7 @@ describe('UserService', () => {
 
     beforeEach(() => {
       jest
-        .spyOn(web3Service as any, 'prepareSignatureBody')
+        .spyOn(userService as any, 'prepareSignatureBody')
         .mockReturnValue(signatureBody);
     });
 
@@ -241,7 +253,7 @@ describe('UserService', () => {
       );
 
       expect(result).toBe(undefined);
-      expect(web3Service.prepareSignatureBody).toHaveBeenCalledWith(
+      expect(userService.prepareSignatureBody).toHaveBeenCalledWith(
         SignatureType.DISABLE_OPERATOR,
         MOCK_ADDRESS,
       );
@@ -265,7 +277,12 @@ describe('UserService', () => {
 
       await expect(
         userService.disableOperator(userEntity as any, invalidSignature),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
     it('should throw BadRequestException if operator already disabled in KVStore', async () => {
       const kvstoreClientMock = {
@@ -279,7 +296,34 @@ describe('UserService', () => {
 
       await expect(
         userService.disableOperator(userEntity as any, signature),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorOperator.OperatorNotActive,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+  });
+
+  describe('prepareSignatureBody', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should prepare web3 pre sign up payload and return typed structured data', async () => {
+      const expectedData: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'signup',
+        nonce: undefined,
+      };
+
+      const result = await userService.prepareSignatureBody(
+        SignatureType.SIGNUP,
+        MOCK_ADDRESS,
+      );
+
+      expect(result).toStrictEqual(expectedData);
     });
   });
 });

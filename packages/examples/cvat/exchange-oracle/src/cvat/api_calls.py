@@ -2,12 +2,14 @@ import io
 import json
 import logging
 import zipfile
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from time import sleep
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -90,7 +92,23 @@ def _get_annotations(
     return file_buffer
 
 
+_api_client_context: ContextVar[ApiClient] = ContextVar("api_client", default=None)
+
+
+@contextmanager
+def api_client_context(api_client: ApiClient) -> Generator[ApiClient, None, None]:
+    old = _api_client_context.set(api_client)
+    try:
+        yield api_client
+    finally:
+        _api_client_context.reset(old)
+
+
 def get_api_client() -> ApiClient:
+    current_api_client = _api_client_context.get()
+    if current_api_client:
+        return current_api_client
+
     configuration = Configuration(
         host=Config.cvat_config.cvat_url,
         username=Config.cvat_config.cvat_admin,
@@ -559,7 +577,7 @@ def update_job_assignee(id: str, assignee_id: Optional[int]):
             raise
 
 
-def restart_job(id: str):
+def restart_job(id: str, *, assignee_id: Optional[int] = None):
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -567,7 +585,7 @@ def restart_job(id: str):
             api_client.jobs_api.partial_update(
                 id=id,
                 patched_job_write_request=models.PatchedJobWriteRequest(
-                    stage="annotation", state="new"
+                    stage="annotation", state="new", assignee=assignee_id
                 ),
             )
         except exceptions.ApiException as e:

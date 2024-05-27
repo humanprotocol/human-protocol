@@ -1,3 +1,3 @@
-export interface ICoingeckoTokenId {
+export interface ITokenId {
   [key: string]: string;
 }

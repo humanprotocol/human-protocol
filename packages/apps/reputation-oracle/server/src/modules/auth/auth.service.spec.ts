@@ -7,7 +7,11 @@ import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../user/user.entity';
-import { ErrorAuth } from '../../common/constants/errors';
+import {
+  ErrorAuth,
+  ErrorSignature,
+  ErrorUser,
+} from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
@@ -22,18 +26,18 @@ import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { getNonce, signMessage } from '../../common/utils/signature';
+import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { KVStoreClient, Role } from '@human-protocol/sdk';
-import { PrepareSignatureDto, SignatureBodyDto } from '../web3/web3.dto';
+import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
-import { AuthError } from './auth.error';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -92,7 +96,7 @@ describe('AuthService', () => {
             prepareSignatureBody: jest.fn(),
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
-            getOperatorAddress: jest.fn(),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
       ],
@@ -294,7 +298,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(null);
         expect(
           authService.forgotPassword({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
+        );
       });
 
       it('should throw Unauthorized exception if user is not active', () => {
@@ -302,7 +308,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(userEntity);
         expect(
           authService.forgotPassword({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should remove existing token if it exists', async () => {
@@ -369,7 +377,9 @@ describe('AuthService', () => {
             password: 'password',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should throw an error if token is expired', () => {
@@ -382,7 +392,9 @@ describe('AuthService', () => {
             password: 'password',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should update password and send email', async () => {
@@ -433,14 +445,18 @@ describe('AuthService', () => {
         findTokenMock.mockResolvedValue(null);
         expect(
           authService.emailVerification({ token: 'token' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN),
+        );
       });
       it('should throw an error if token is expired', () => {
         tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
         findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
         expect(
           authService.emailVerification({ token: 'token' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+        );
       });
 
       it('should activate user', async () => {
@@ -482,7 +498,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(null);
         expect(
           authService.resendEmailVerification({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
+        );
       });
 
       it('should throw an error if user is not pending', () => {
@@ -490,7 +508,9 @@ describe('AuthService', () => {
         findByEmailMock.mockResolvedValue(userEntity);
         expect(
           authService.resendEmailVerification({ email: 'user@example.com' }),
-        ).rejects.toThrow(AuthError);
+        ).rejects.toThrow(
+          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
+        );
       });
 
       it('should create token and send email', async () => {
@@ -521,8 +541,8 @@ describe('AuthService', () => {
 
     describe('web3auth', () => {
       describe('signin', () => {
-        const nonce = getNonce();
-        const nonce1 = getNonce();
+        const nonce = generateNonce();
+        const nonce1 = generateNonce();
 
         const userEntity: Partial<UserEntity> = {
           id: 1,
@@ -541,6 +561,9 @@ describe('AuthService', () => {
             accessToken: MOCK_ACCESS_TOKEN,
             refreshToken: MOCK_REFRESH_TOKEN,
           });
+          jest
+            .spyOn(userRepository, 'findOneByEvmAddress')
+            .mockResolvedValue({ nonce: nonce } as any);
         });
 
         afterEach(() => {
@@ -554,7 +577,14 @@ describe('AuthService', () => {
             nonce: nonce1,
           } as UserEntity);
 
-          const signature = await signMessage(nonce, MOCK_PRIVATE_KEY);
+          const data = {
+            from: MOCK_ADDRESS,
+            to: web3Service.getOperatorAddress(),
+            contents: 'signin',
+            nonce: nonce,
+          };
+
+          const signature = await signMessage(data, MOCK_PRIVATE_KEY);
           const result = await authService.web3Signin({
             address: MOCK_ADDRESS,
             signature,
@@ -581,7 +611,12 @@ describe('AuthService', () => {
               address: MOCK_ADDRESS,
               signature: invalidSignature,
             }),
-          ).rejects.toThrow(ConflictException);
+          ).rejects.toThrow(
+            new ControlledError(
+              ErrorSignature.SignatureNotVerified,
+              HttpStatus.CONFLICT,
+            ),
+          );
         });
       });
 
@@ -591,7 +626,7 @@ describe('AuthService', () => {
           type: SignatureType.SIGNUP,
         };
 
-        const nonce = getNonce();
+        const nonce = generateNonce();
 
         const userEntity: Partial<UserEntity> = {
           id: 1,
@@ -603,6 +638,7 @@ describe('AuthService', () => {
           from: MOCK_ADDRESS,
           to: MOCK_ADDRESS,
           contents: 'signup',
+          nonce: undefined,
         };
         let createUserMock: any;
 
@@ -633,13 +669,14 @@ describe('AuthService', () => {
             from: address,
             to: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
             contents: 'signup',
+            nonce: undefined,
           };
 
           jest
-            .spyOn(web3Service, 'prepareSignatureBody')
-            .mockReturnValue(expectedResult);
+            .spyOn(userService, 'prepareSignatureBody')
+            .mockResolvedValue(expectedResult);
 
-          const result = web3Service.prepareSignatureBody(
+          const result = await userService.prepareSignatureBody(
             signatureType,
             address,
           );
@@ -665,9 +702,6 @@ describe('AuthService', () => {
           });
 
           expect(userService.createWeb3User).toHaveBeenCalledWith(
-            expect.objectContaining({
-              evmAddress: web3PreSignUpDto.address,
-            }),
             web3PreSignUpDto.address,
           );
 
@@ -690,7 +724,12 @@ describe('AuthService', () => {
               type: UserType.WORKER,
               signature: invalidSignature,
             }),
-          ).rejects.toThrow(ConflictException);
+          ).rejects.toThrow(
+            new ControlledError(
+              ErrorSignature.SignatureNotVerified,
+              HttpStatus.CONFLICT,
+            ),
+          );
         });
         it('should throw BadRequestException if role is not in KVStore', async () => {
           const signature = await signMessage(
@@ -704,7 +743,9 @@ describe('AuthService', () => {
               type: UserType.WORKER,
               signature: signature,
             }),
-          ).rejects.toThrow(BadRequestException);
+          ).rejects.toThrow(
+            new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST),
+          );
         });
       });
     });
