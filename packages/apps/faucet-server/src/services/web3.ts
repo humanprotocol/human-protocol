@@ -45,17 +45,12 @@ export const getFaucetBalance = async (
   return balance;
 };
 
-export const getHmtBalance = async (
-  web3: Web3,
-  hmtAddress: string,
-) => {
+export const getHmtBalance = async (web3: Web3, hmtAddress: string) => {
   const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
-  return (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call()
+  return (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call();
 };
 
-export const getNativeBalance = async (
-  web3: Web3,
-) => {
+export const getNativeBalance = async (web3: Web3) => {
   return await web3.eth.getBalance(web3.eth.defaultAccount);
 };
 

@@ -144,17 +144,17 @@ app.post('/faucet', async (request: Request, response: Response) => {
 
   // Check min HMT balance
   if (
-    (await getHmtBalance(
-      web3,
-      network.hmtAddress
-    )) < BigInt(process.env.FAUCET_MIN_BALANCE)) {
-      const message = `Low faucet balance detection in network ${network.title} with token address ${network.hmtAddress} and wallet address ${web3.eth.defaultAccount}`;
-      sendSlackNotification(message);
+    (await getHmtBalance(web3, network.hmtAddress)) <
+    BigInt(process.env.FAUCET_MIN_BALANCE)
+  ) {
+    const message = `Low faucet balance detection in network ${network.title} with token address ${network.hmtAddress} and wallet address ${web3.eth.defaultAccount}`;
+    sendSlackNotification(message);
   }
 
   // Check min native balance
   if (
-    (await web3.eth.getBalance(web3.eth.defaultAccount)) < BigInt(process.env.NATIVE_MIN_BALANCE)
+    (await web3.eth.getBalance(web3.eth.defaultAccount)) <
+    BigInt(process.env.NATIVE_MIN_BALANCE)
   ) {
     const message = `Low native balance detection in network ${network.title} with wallet address ${web3.eth.defaultAccount}`;
     sendSlackNotification(message);

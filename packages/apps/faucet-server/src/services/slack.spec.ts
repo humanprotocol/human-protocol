@@ -9,7 +9,7 @@ describe('sendSlackNotification', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
   });
-  
+
   it('should send Slack notification with the provided message', async () => {
     const mockResponse = { data: 'mockResponseData' };
     (axios.post as jest.Mock).mockResolvedValue(mockResponse);
