@@ -152,7 +152,12 @@ const WalletAddress = () => {
 							<Typography>N/A</Typography>
 						)}
 					</TitleSectionWrapper>
-					<TitleSectionWrapper title="Stake" tooltip={{ description: 'Base' }}>
+					<TitleSectionWrapper
+						title="Stake"
+						tooltip={{
+							description: 'Amount of HMT locked to secure the Protocol',
+						}}
+					>
 						{HARDCODED_WALLET_ADDRESS.stake ? (
 							<Typography>
 								{HARDCODED_WALLET_ADDRESS.stake}
@@ -190,12 +195,7 @@ const WalletAddress = () => {
 					KV Store
 				</Typography>
 				<Stack gap={4}>
-					<TitleSectionWrapper
-						title="Key"
-						tooltip={{
-							description: 'Same',
-						}}
-					>
+					<TitleSectionWrapper title="Key">
 						<Typography>{HARDCODED_WALLET_ADDRESS.key ?? 'N/A'}</Typography>
 					</TitleSectionWrapper>
 				</Stack>
@@ -209,7 +209,12 @@ const WalletAddress = () => {
 					>
 						<Typography>{HARDCODED_WALLET_ADDRESS.role ?? 'N/A'}</Typography>
 					</TitleSectionWrapper>
-					<TitleSectionWrapper title="Stake" tooltip={{ description: 'Base' }}>
+					<TitleSectionWrapper
+						title="Stake"
+						tooltip={{
+							description: 'Amount of HMT locked to secure the Protocol',
+						}}
+					>
 						<Typography>{HARDCODED_WALLET_ADDRESS.name ?? 'N/A'}</Typography>
 					</TitleSectionWrapper>
 				</Stack>
@@ -248,7 +253,7 @@ const WalletAddress = () => {
 										}}
 									>
 										<Stack direction="row" alignItems="center">
-											<Tooltip title="same">
+											<Tooltip title="Transaction identifier">
 												<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 													<HelpOutlineIcon fontSize="small" />
 												</IconButton>
@@ -258,7 +263,7 @@ const WalletAddress = () => {
 									</TableCell>
 									<TableCell>
 										<Stack direction="row" alignItems="center">
-											<Tooltip title="same">
+											<Tooltip title="Function executed in the transaction">
 												<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 													<HelpOutlineIcon fontSize="small" />
 												</IconButton>
@@ -268,7 +273,7 @@ const WalletAddress = () => {
 									</TableCell>
 									<TableCell>
 										<Stack direction="row" alignItems="center">
-											<Tooltip title="same">
+											<Tooltip title="Identifier of the block that contains the transaction">
 												<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 													<HelpOutlineIcon fontSize="small" />
 												</IconButton>
@@ -277,7 +282,14 @@ const WalletAddress = () => {
 										</Stack>
 									</TableCell>
 									<TableCell>
-										<Typography fontWeight={600}>Value</Typography>
+										<Stack direction="row" alignItems="center">
+											<Tooltip title="Amount of HMT transferred in the transaction">
+												<IconButton sx={{ padding: 0, paddingRight: 1 }}>
+													<HelpOutlineIcon fontSize="small" />
+												</IconButton>
+											</Tooltip>
+											<Typography fontWeight={600}>Value</Typography>
+										</Stack>
 									</TableCell>
 									<TableCell>
 										<Stack direction="row" alignItems="center">

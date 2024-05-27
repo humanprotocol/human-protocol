@@ -1,8 +1,8 @@
 import PageWrapper from '@components/PageWrapper';
 import Stack from '@mui/material/Stack';
 import ShadowIcon from '@components/ShadowIcon';
-import WalletIcon from '@assets/icons/shadowed/wallet.svg';
-import EscrowIcon from '@assets//icons/shadowed/escrow.svg';
+import WalletIcon from '@assets/icons/excluded/wallet.svg';
+import EscrowIcon from '@assets/icons/excluded/escrow.svg';
 import Clipboard from '@components/Clipboard';
 import { useState } from 'react';
 import RoleDetails from '@pages/SearchResults/RoleDetails';
@@ -10,6 +10,8 @@ import { useParams } from 'react-router-dom';
 import EscrowAddress from '@pages/SearchResults/EscrowAddress';
 import WalletAddress from '@pages/SearchResults/WalletAddress';
 import NothingFound from '@components/NothingFound';
+import Breadcrumbs from '@components/Breadcrumbs';
+import Search from '@components/Search';
 
 // const TOKEN_ID = '0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031';
 
@@ -51,6 +53,8 @@ const SearchResults = () => {
 	>(null);
 	return (
 		<PageWrapper displaySearchBar>
+			<Breadcrumbs title="Search Results" />
+			<Search />
 			<Stack
 				sx={{ marginBottom: 2 }}
 				direction={{ xs: 'column', md: 'row' }}

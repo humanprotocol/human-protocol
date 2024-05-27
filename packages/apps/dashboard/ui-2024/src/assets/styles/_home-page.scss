@@ -6,7 +6,6 @@
 }
 
 .home-page-boxes{
-  margin-top: 62px;
   display: flex;
   gap: 24px;
 
@@ -18,12 +17,13 @@
     width: calc(38% - 24px);
     .box-title{
       font-size: 14px;
+      height: 32px;
+      margin-bottom: 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .box-content{
-      padding: 24px 0;
       display: flex;
       .count{
         font-size: 20px;

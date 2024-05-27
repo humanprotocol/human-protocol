@@ -19,6 +19,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Divider from '@mui/material/Divider';
 
 import SimpleBar from 'simplebar-react';
 import { Link } from 'react-router-dom';
@@ -34,7 +35,6 @@ import human from '@assets/human.png';
 import exchange from '@assets/exchange.png';
 import recording from '@assets/recording.png';
 import reputation from '@assets/reputation.png';
-import ethereum from '@assets/ethereum.png';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
 
 import MoonbaseAlphaIcon from '@components/Icons/MoonbaseAlphaIcon';
@@ -108,11 +108,22 @@ interface Item {
 	operator: string;
 }
 
+type networkTypes =
+	| 'ethereum'
+	| 'goerli'
+	| 'binance'
+	| 'testnet'
+	| 'polygon'
+	| 'mumbai'
+	| 'moonbeam'
+	| 'all'
+	| 'alpha';
+
 const Home: React.FC = () => {
-	const [network, setNetwork] = useState('all');
+	const [network, setNetwork] = useState<networkTypes>('all');
 
 	const handleChange = (event: SelectChangeEvent) => {
-		setNetwork(event.target.value as string);
+		setNetwork(event.target.value as networkTypes);
 	};
 
 	const renderIcon: React.FC<Item> = (item) => {
@@ -145,6 +156,72 @@ const Home: React.FC = () => {
 			<div className="icon-table">
 				<img src={src} alt="logo" />
 			</div>
+		);
+	};
+
+	//TODO rendering all images and text when all networkType is selected
+	const renderNetworkDetails = (network: networkTypes) => {
+		const networkDetails = {
+			ethereum: {
+				title: 'Ethereum',
+				icon: <EthereumIcon />,
+			},
+			goerli: {
+				title: 'Ethereum Goreli',
+				icon: <EthereumIcon />,
+			},
+			binance: {
+				title: 'Binance Smart Chain',
+				icon: <BinanceSmartChainIcon />,
+			},
+			testnet: {
+				title: 'Smart Chain (Testnet)',
+				icon: <BinanceSmartChainIcon />,
+			},
+			polygon: {
+				title: 'Polygon',
+				icon: <PolygonIcon />,
+			},
+			mumbai: {
+				title: 'Polygon Mumbai',
+				icon: <PolygonIcon />,
+			},
+			moonbeam: {
+				title: 'Moonbeam',
+				icon: <MoonbeamIcon />,
+			},
+			alpha: {
+				title: 'Moonbase Alpha',
+				icon: <MoonbeamIcon />,
+			},
+			celo: {
+				title: 'Celo',
+				icon: <MoonbeamIcon />,
+			},
+			alfajores: {
+				title: 'alfajores',
+				icon: <MoonbeamIcon />,
+			},
+		};
+
+		if (network === undefined) {
+			return null;
+		}
+
+		if (network === 'all') {
+			return (
+				<>
+					{networkDetails['ethereum'].icon}
+					{networkDetails['ethereum'].title}
+				</>
+			);
+		}
+
+		return (
+			<>
+				{networkDetails[network].icon}
+				{networkDetails[network].title}
+			</>
 		);
 	};
 
@@ -255,7 +332,7 @@ const Home: React.FC = () => {
 					<div className="box-title">Token</div>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="HMT token price" arrow>
+							<Tooltip title="Token Current Price" arrow>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
@@ -264,9 +341,14 @@ const Home: React.FC = () => {
 							<div className="count">$0.0455</div>
 						</div>
 					</div>
+					<Divider
+						sx={{
+							marginY: 3,
+						}}
+					/>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Number if users holding HMT" arrow>
+							<Tooltip title="Number of users holding HMT" arrow>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
@@ -291,10 +373,7 @@ const Home: React.FC = () => {
 					</div>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip
-								title="Total transaction count. Transactions include actions like transferring HMT or initiating new escrows."
-								arrow
-							>
+							<Tooltip title="Total number of transactions" arrow>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
@@ -305,12 +384,14 @@ const Home: React.FC = () => {
 							</div>
 						</div>
 					</div>
+					<Divider
+						sx={{
+							marginY: 3,
+						}}
+					/>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip
-								title="Total number of tasks solved by HUMAN Protocol workers."
-								arrow
-							>
+							<Tooltip title="Number of tasks that have been launched" arrow>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
@@ -436,8 +517,7 @@ const Home: React.FC = () => {
 											alignItems="center"
 											sx={{ gap: '18px' }}
 										>
-											<img src={ethereum} alt="logo" />
-											{row.networks}
+											{renderNetworkDetails(network)}
 										</Grid>
 									</TableCell>
 									<TableCell>{renderReputation(row)}</TableCell>

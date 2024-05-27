@@ -29,6 +29,9 @@ interface StakeInfo {
 interface RoleDetails {
 	overview: Overview;
 	stakeInfo: StakeInfo;
+	escrows: {
+		escrowId: string;
+	}[];
 }
 //TEMPORARY INTERFACE AND DATA
 const HARDCODED_ROLE_DETAILS: RoleDetails = {
@@ -43,6 +46,16 @@ const HARDCODED_ROLE_DETAILS: RoleDetails = {
 		tokensLocked: 40404,
 		jobsLaunched: null,
 	},
+	escrows: [
+		{
+			escrowId:
+				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
+		},
+		{
+			escrowId:
+				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
+		},
+	],
 };
 
 interface RoleInfoProps {
@@ -230,11 +243,6 @@ const RoleDetails = () => {
 							direction="row"
 							alignItems="center"
 						>
-							<Tooltip title="Same">
-								<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-									<HelpOutlineIcon fontSize="small" />
-								</IconButton>
-							</Tooltip>
 							<Typography fontWeight={600}>Role</Typography>
 						</Stack>
 						<Stack gap={2} direction="column">
@@ -265,8 +273,14 @@ const RoleDetails = () => {
 							direction="row"
 							alignItems="center"
 						>
-							<Tooltip title="Same">
-								<IconButton sx={{ padding: 0, paddingRight: 1 }}>
+							<Tooltip title="Reputation of the role as per their activities">
+								<IconButton
+									sx={{
+										padding: 0,
+										paddingRight: 1,
+										color: colorPalette.fog.main,
+									}}
+								>
 									<HelpOutlineIcon fontSize="small" />
 								</IconButton>
 							</Tooltip>
@@ -439,19 +453,36 @@ const RoleDetails = () => {
 				<Box>
 					<Typography
 						sx={{
-							marginBottom: 1.5,
+							marginBottom: 3,
 						}}
 						variant="h5"
 					>
 						Escrows
 					</Typography>
-					<Typography
-						variant="h6"
-						component="p"
-						textAlign={{ xs: 'left', md: 'center' }}
-					>
-						No escrows launched yet
-					</Typography>
+					{HARDCODED_ROLE_DETAILS.escrows.length > 1 ? (
+						<>
+							{HARDCODED_ROLE_DETAILS.escrows.map((elem) => (
+								<Typography
+									variant="h6"
+									component="p"
+									sx={{
+										marginBottom: 3,
+										'&:last-child': { marginBottom: 0 },
+									}}
+								>
+									{elem.escrowId}
+								</Typography>
+							))}
+						</>
+					) : (
+						<Typography
+							variant="h6"
+							component="p"
+							textAlign={{ xs: 'left', md: 'center' }}
+						>
+							No escrows launched yet
+						</Typography>
+					)}
 				</Box>
 			</Card>
 		</>

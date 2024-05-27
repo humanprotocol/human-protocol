@@ -32,7 +32,10 @@ const EscrowAddress = () => {
 				<TitleSectionWrapper title="Token">
 					<Typography>{HARDCODED_ESCROW_ADDRESS.token ?? 'N/A'}</Typography>
 				</TitleSectionWrapper>
-				<TitleSectionWrapper title="Balance">
+				<TitleSectionWrapper
+					tooltip={{ description: 'Amount of HMT in Escrow' }}
+					title="Balance"
+				>
 					{HARDCODED_ESCROW_ADDRESS.balance ? (
 						<Typography>
 							{HARDCODED_ESCROW_ADDRESS.balance}
@@ -52,7 +55,7 @@ const EscrowAddress = () => {
 				</TitleSectionWrapper>
 				<TitleSectionWrapper
 					title="Factory Address"
-					tooltip={{ description: 'Same' }}
+					tooltip={{ description: 'Address of EscrowFactory contract' }}
 				>
 					<Typography>{HARDCODED_ESCROW_ADDRESS.factoryAddress}</Typography>
 				</TitleSectionWrapper>
@@ -93,7 +96,7 @@ const EscrowAddress = () => {
 					)}
 				</TitleSectionWrapper>
 
-				<TitleSectionWrapper title="Status" tooltip={{ description: 'same' }}>
+				<TitleSectionWrapper title="Status">
 					<Box
 						sx={{
 							paddingX: 2,
@@ -111,7 +114,7 @@ const EscrowAddress = () => {
 				<TitleSectionWrapper
 					title="Job Launcher"
 					tooltip={{
-						description: 'Same',
+						description: 'Address of the Job Launcher that created the escrow',
 					}}
 				>
 					<Typography sx={{ wordBreak: 'break-word' }}>
@@ -122,7 +125,8 @@ const EscrowAddress = () => {
 				<TitleSectionWrapper
 					title="Exchange Oracle"
 					tooltip={{
-						description: 'Same',
+						description:
+							"The Exchange Oracle is HUMAN Protocol's powerhouse, routing tasks to skilled workers ensuring smooth communication.",
 					}}
 				>
 					<Typography>{HARDCODED_ESCROW_ADDRESS.exchangeOracle}</Typography>
@@ -131,7 +135,10 @@ const EscrowAddress = () => {
 				<TitleSectionWrapper
 					title="Recording Oracle"
 					tooltip={{
-						description: 'Same',
+						description:
+							'The Recording Oracle is where task solutions get the green light. It is storing, and recording task solutions on the blockchain.\n' +
+							'\n' +
+							"From quality checks to reputation adjustments, it's the assurance you need for dependable results.",
 					}}
 				>
 					<Typography>{HARDCODED_ESCROW_ADDRESS.recordingOracle}</Typography>
@@ -140,7 +147,9 @@ const EscrowAddress = () => {
 				<TitleSectionWrapper
 					title="Reputation Oracle"
 					tooltip={{
-						description: 'Same',
+						description:
+							'The Reputation Oracle is the trust engine of the HUMAN Protocol. It cross-checks validated solutions from the Recording Oracle, adjusts reputation scores, and manages payments.\n' +
+							"It's the final seal of quality and trust within the ecosystem.",
 					}}
 				>
 					<Typography>{HARDCODED_ESCROW_ADDRESS.reputationOracle}</Typography>
@@ -149,7 +158,7 @@ const EscrowAddress = () => {
 				<TitleSectionWrapper
 					title="Manifest Oracle"
 					tooltip={{
-						description: 'Same',
+						description: 'Metadata file containing job information',
 					}}
 				>
 					<Typography>{HARDCODED_ESCROW_ADDRESS.manifest}</Typography>

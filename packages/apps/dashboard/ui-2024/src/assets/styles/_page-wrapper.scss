@@ -1,12 +1,11 @@
 .page-wrapper{
-  background-color: $maWhite;
   margin: 0 56px;
   min-height: calc(100vh - 206px);
-  padding: 30px 0 100px;
 
   .container{
     width: 90%;
     margin: auto;
+    padding: 30px 0 100px;
   }
 
   @media (max-width: 1100px) {
@@ -18,7 +17,7 @@
   }
 
   @media (max-width: 600px) {
-    margin: 0 16px;
+    margin: 0;
   }
 }
 
@@ -27,4 +26,9 @@
   border-top-left-radius: 20px;
   background-size: 100% 100%;
   background: linear-gradient(to bottom, $primary 252px, $maWhite 1px);
+
+  @media (max-width: 600px) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
 }
