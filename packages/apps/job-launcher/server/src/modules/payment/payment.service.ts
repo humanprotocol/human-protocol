@@ -26,11 +26,11 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { getRate } from '../../common/utils';
 import { add, div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from './rate.service';
 
 @Injectable()
 export class PaymentService {
@@ -42,6 +42,7 @@ export class PaymentService {
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private stripeConfigService: StripeConfigService,
+    private rateService: RateService,
   ) {
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,
@@ -85,7 +86,7 @@ export class PaymentService {
       );
     }
 
-    const rate = await getRate(currency, Currency.USD);
+    const rate = await this.rateService.getRate(currency, Currency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -236,7 +237,7 @@ export class PaymentService {
       );
     }
 
-    const rate = await getRate(tokenId, Currency.USD);
+    const rate = await this.rateService.getRate(tokenId, Currency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -255,21 +256,26 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number): Promise<number> {
+  public async getUserBalance(userId: number, rate?: number): Promise<number> {
     const paymentEntities = await this.paymentRepository.findByUserAndStatus(
       userId,
       PaymentStatus.SUCCEEDED,
     );
-
+    if (!rate) {
+      rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
+    }
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return add(total, mul(payment.amount, payment.rate));
+      if (payment.currency === TokenId.HMT) {
+        return add(total, mul(payment.amount, rate));
+      }
+      return add(total, payment.amount);
     }, 0);
 
     return totalAmount;
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {
-    const rate = await getRate(TokenId.HMT, Currency.USD);
+    const rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
 
     const paymentEntity = new PaymentEntity();
     Object.assign(paymentEntity, {

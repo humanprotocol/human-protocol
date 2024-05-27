@@ -7,7 +7,6 @@ import {
   StakingClient,
   IAllocation,
   EscrowUtils,
-  NETWORKS,
   Encryption,
   KVStoreClient,
 } from '@human-protocol/sdk';
@@ -31,6 +30,7 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
   JobStatus,
   JobStatusFilter,
@@ -121,6 +121,7 @@ import { S3ConfigService } from '../../common/config/s3-config.service';
 import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from '../payment/rate.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -151,7 +152,6 @@ jest.mock('@human-protocol/sdk', () => ({
 
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
-  getRate: jest.fn().mockImplementation(() => rate),
   parseUrl: jest.fn().mockImplementation(() => {
     return {
       useSSL: false,
@@ -255,6 +255,12 @@ describe('JobService', () => {
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
+        {
+          provide: RateService,
+          useValue: {
+            getRate: jest.fn().mockResolvedValue(rate),
+          },
+        },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: WebhookRepository,
@@ -311,6 +317,7 @@ describe('JobService', () => {
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fundAmount: 10,
+      currency: JobCurrency.HMT,
     };
 
     let getUserBalanceMock: any;
@@ -358,7 +365,10 @@ describe('JobService', () => {
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -435,7 +445,10 @@ describe('JobService', () => {
       expect(jobService.createHCaptchaManifest).toHaveBeenCalledTimes(0);
       expect(jobService.uploadManifest).toHaveBeenCalledTimes(0);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -483,7 +496,10 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -562,6 +578,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_BOXES;
@@ -610,6 +627,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES_FROM_POINTS,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
@@ -659,6 +677,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
@@ -703,6 +722,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: requestType,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const tokenFundAmount = 100;
@@ -726,6 +746,7 @@ describe('JobService', () => {
         groundTruth: MOCK_STORAGE_DATA,
         type: requestType,
         fundAmount: 10,
+        currency: JobCurrency.HMT,
       };
 
       const tokenFundAmount = 100;
@@ -1174,6 +1195,7 @@ describe('JobService', () => {
       groundTruth: MOCK_STORAGE_DATA,
       userGuide: MOCK_FILE_URL,
       type: JobRequestType.IMAGE_POINTS,
+      currency: JobCurrency.HMT,
     };
 
     let getUserBalanceMock: any;
@@ -1236,7 +1258,10 @@ describe('JobService', () => {
         imageLabelBinaryJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -1290,6 +1315,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1309,7 +1335,10 @@ describe('JobService', () => {
         ),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should throw an error for invalid region', async () => {
@@ -1342,6 +1371,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1358,7 +1388,10 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.InvalidRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should throw an error for empty region', async () => {
@@ -1389,6 +1422,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1405,7 +1439,10 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should throw an error for empty bucket', async () => {
@@ -1436,6 +1473,7 @@ describe('JobService', () => {
         groundTruth: storageGtMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
+        currency: JobCurrency.HMT,
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(() => ({
@@ -1452,7 +1490,10 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
     });
 
     it('should create a image label job successfully on network selected from round robin logic', async () => {
@@ -1491,7 +1532,10 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -1622,7 +1666,10 @@ describe('JobService', () => {
         hCaptchaJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -1665,7 +1712,10 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userId,
+        div(1, rate),
+      );
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -2729,42 +2779,80 @@ describe('JobService', () => {
 
   describe('getJobsByStatus', () => {
     const userId = 1;
-    const skip = 0;
-    const limit = 5;
+    const page = 0;
+    const pageSize = 5;
 
     it('should call the database with PENDING status', async () => {
-      jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
+      const jobEntityMock = [
+        {
+          status: JobStatus.PENDING,
+          fundAmount: 100,
+          userId: 1,
+          id: 1,
+          escrowAddress: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+        },
+      ];
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
       );
-      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
-        [ChainId.LOCALHOST],
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
       );
     });
     it('should call the database with FAILED status', async () => {
-      jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
+      const jobEntityMock = [
+        {
+          status: JobStatus.FAILED,
+          fundAmount: 100,
+          userId: 1,
+          id: 1,
+          escrowAddress: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+        },
+      ];
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.FAILED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.FAILED,
-        skip,
-        limit,
       );
-      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
-        [ChainId.LOCALHOST],
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.FAILED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
         userId,
-        JobStatusFilter.FAILED,
-        skip,
-        limit,
       );
     });
-    it('should call subgraph and database with LAUNCHED status', async () => {
+    it('should call the database with LAUNCHED status', async () => {
       const jobEntityMock = [
         {
           status: JobStatus.LAUNCHED,
@@ -2775,61 +2863,35 @@ describe('JobService', () => {
           chainId: ChainId.LOCALHOST,
         },
       ];
-      const getEscrowsData = [
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
         {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Launched],
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.LAUNCHED,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ];
-      jobRepository.findByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.LAUNCHED,
-        skip,
-        limit,
       );
 
-      expect(results).toMatchObject([
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
         {
-          status: JobStatus.LAUNCHED,
-          fundAmount: 100,
-          jobId: 1,
-          escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.LAUNCHED,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ]);
-      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
-        MOCK_ADDRESS,
-        MOCK_ADDRESS,
-        MOCK_ADDRESS,
-      ]);
+        userId,
+      );
     });
     it('should call the database with CANCELLED status', async () => {
-      jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
-        userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
-      );
-      expect(jobRepository.findByStatusFilter).toHaveBeenCalledWith(
-        [ChainId.LOCALHOST],
-        userId,
-        JobStatusFilter.PENDING,
-        skip,
-        limit,
-      );
-    });
-
-    it('should call subgraph and database with COMPLETED status', async () => {
       const jobEntityMock = [
         {
-          status: JobStatus.LAUNCHED,
+          status: JobStatus.CANCELED,
           fundAmount: 100,
           userId: 1,
           id: 1,
@@ -2837,46 +2899,71 @@ describe('JobService', () => {
           chainId: ChainId.LOCALHOST,
         },
       ];
-      const getEscrowsData = [
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
         {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Complete],
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ];
-      jobRepository.findByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      jobRepository.updateOne = jest
-        .fn()
-        .mockResolvedValue({ status: JobStatus.COMPLETED });
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.COMPLETED,
-        skip,
-        limit,
       );
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PENDING,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
+        userId,
+      );
+    });
 
-      expect(results).toMatchObject([
+    it('should call the database with COMPLETED status', async () => {
+      const jobEntityMock = [
         {
           status: JobStatus.COMPLETED,
           fundAmount: 100,
-          jobId: 1,
+          userId: 1,
+          id: 1,
           escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
+          chainId: ChainId.LOCALHOST,
         },
-      ]);
-      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
-        MOCK_ADDRESS,
-      ]);
+      ];
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.COMPLETED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
+        userId,
+      );
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
+        {
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.COMPLETED,
+          page,
+          pageSize,
+          skip: page * pageSize,
+        },
+        userId,
+      );
     });
 
-    it('should call subgraph and database with PARTIAL status', async () => {
+    it('should call the database with PARTIAL status', async () => {
       const jobEntityMock = [
         {
-          status: JobStatus.LAUNCHED,
+          status: JobStatus.PARTIAL,
           fundAmount: 100,
           userId: 1,
           id: 1,
@@ -2884,40 +2971,30 @@ describe('JobService', () => {
           chainId: ChainId.LOCALHOST,
         },
       ];
-      const getEscrowsData = [
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValue({ entities: jobEntityMock as any, itemCount: 1 });
+      await jobService.getJobsByStatus(
         {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Partial],
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PARTIAL,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ];
-      jobRepository.findByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      jobRepository.updateOne = jest
-        .fn()
-        .mockResolvedValue({ status: JobStatus.PARTIAL });
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
-        [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.PARTIAL,
-        skip,
-        limit,
       );
 
-      expect(results).toMatchObject([
+      expect(jobRepository.fetchFiltered).toHaveBeenCalledWith(
         {
-          status: JobStatus.PARTIAL,
-          fundAmount: 100,
-          jobId: 1,
-          escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
+          chainId: [ChainId.LOCALHOST],
+          status: JobStatusFilter.PARTIAL,
+          page,
+          pageSize,
+          skip: page * pageSize,
         },
-      ]);
-      expect(jobRepository.findByEscrowAddresses).toHaveBeenCalledWith(userId, [
-        MOCK_ADDRESS,
-      ]);
+        userId,
+      );
     });
   });
 

@@ -1,4 +1,6 @@
 import Decimal from 'decimal.js';
+import { ControlledError } from '../errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 export function mul(a: number, b: number): number {
   const decimalA = new Decimal(a);
@@ -14,7 +16,10 @@ export function div(a: number, b: number): number {
   const decimalB = new Decimal(b);
 
   if (decimalB.isZero()) {
-    throw new Error('Division by zero is not allowed.');
+    throw new ControlledError(
+      'Division by zero is not allowed.',
+      HttpStatus.CONFLICT,
+    );
   }
 
   const result = decimalA.dividedBy(decimalB);
@@ -59,4 +64,13 @@ export function gt(a: number, b: number): boolean {
   const decimalB = new Decimal(b);
 
   return decimalA.gt(decimalB);
+}
+
+export function max(a: number, b: number): number {
+  const decimalA = new Decimal(a);
+  const decimalB = new Decimal(b);
+
+  const result = decimalA.gt(decimalB) ? decimalA : decimalB;
+
+  return result.toNumber();
 }

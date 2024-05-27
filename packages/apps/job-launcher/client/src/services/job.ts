@@ -1,5 +1,4 @@
 import { ChainId } from '@human-protocol/sdk';
-import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import {
   CreateFortuneJobRequest,
   CreateCvatJobRequest,
@@ -16,12 +15,14 @@ export const createFortuneJob = async (
   chainId: number,
   data: FortuneRequest,
   amount: number | string,
+  currency: string,
 ) => {
   const body: CreateFortuneJobRequest = {
     chainId,
     submissionsRequired: Number(data.fortunesRequested),
     requesterTitle: data.title,
     requesterDescription: data.description,
+    currency: currency,
     fundAmount: Number(amount),
   };
   await api.post('/job/fortune', body);
@@ -31,11 +32,13 @@ export const createCvatJob = async (
   chainId: number,
   data: CvatRequest,
   amount: number | string,
+  currency: string,
 ) => {
   const body: CreateCvatJobRequest = {
     chainId,
     requesterDescription: data.description,
     fundAmount: Number(amount),
+    currency: currency,
     data: data.data,
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
@@ -49,7 +52,6 @@ export const createCvatJob = async (
 export const createHCaptchaJob = async (
   chainId: number,
   data: HCaptchaRequest,
-  amount: number | string,
 ) => {
   await api.post('/job/hCaptcha', {
     chainId,
@@ -60,16 +62,21 @@ export const createHCaptchaJob = async (
 export const getJobList = async ({
   chainId = ChainId.ALL,
   status,
+  page,
+  pageSize,
 }: {
   chainId?: ChainId;
   status?: JobStatus;
+  page?: number;
+  pageSize?: number;
 }) => {
-  const networks = chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : [chainId];
-  let queryString = networks.map((n) => `networks=${n}`).join('&');
+  const networks = chainId === ChainId.ALL ? [] : [chainId];
+  let queryString = networks.map((n) => `chain_id=${n}`).join('&');
 
   if (status !== undefined) {
     queryString += `&status=${status}`;
   }
+  queryString += `&page=${page}&page_size=${pageSize}`;
   const { data } = await api.get(`/job/list?${queryString}`);
   return data;
 };

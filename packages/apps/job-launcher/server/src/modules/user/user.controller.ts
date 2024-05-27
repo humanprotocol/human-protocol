@@ -17,11 +17,13 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorUser } from '../../common/constants/errors';
 import { UserBalanceDto } from './user.dto';
+import { ApiKey } from '../../common/decorators';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('User')
 @Controller('/user')
+@ApiKey()
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 

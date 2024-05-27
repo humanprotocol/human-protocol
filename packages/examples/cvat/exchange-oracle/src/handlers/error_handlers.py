@@ -39,7 +39,9 @@ def setup_error_handlers(app: FastAPI):
     @app.exception_handler(Exception)
     async def generic_exception_handler(_, exc: Exception):
         message = (
-            "Something went wrong" if Config.environment != "development" else ".".join(exc.args)
+            "Something went wrong"
+            if Config.environment != "development"
+            else ".".join(map(str, exc.args))
         )
 
         return JSONResponse(content={"message": message}, status_code=500)

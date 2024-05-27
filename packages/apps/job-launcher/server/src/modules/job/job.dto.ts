@@ -10,6 +10,7 @@ import {
   IsOptional,
   IsObject,
   IsNumberString,
+  IsIn,
   Min,
   Max,
   IsNotEmpty,
@@ -24,13 +25,18 @@ import { ChainId } from '@human-protocol/sdk';
 import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
+  JobSortField,
   JobStatus,
+  JobStatusFilter,
   WorkerBrowser,
   WorkerLanguage,
   WorkerLocation,
 } from '../../common/enums/job';
+import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
+import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -82,6 +88,10 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class StorageDataDto {
@@ -154,6 +164,10 @@ export class JobCvatDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class JobCancelDto {
@@ -449,6 +463,40 @@ export class JobListDto {
   @ApiProperty()
   public status: JobStatus;
 }
+export class GetJobsDto extends PageOptionsDto {
+  @ApiPropertyOptional({
+    name: 'sort_field',
+    enum: JobSortField,
+    default: JobSortField.CREATED_AT,
+  })
+  @IsOptional()
+  @IsEnum(JobSortField)
+  sortField?: JobSortField = JobSortField.CREATED_AT;
+
+  @ApiPropertyOptional({
+    name: 'chain_id',
+    enum: ChainId,
+    type: [Number],
+    isArray: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value
+      ? (Array.isArray(value) ? value : [value]).map(
+          (v) => Number(v) as ChainId,
+        )
+      : value,
+  )
+  @IsIn(Object.values(ChainId).filter((value) => typeof value === 'number'), {
+    each: true,
+  })
+  chainId?: ChainId[];
+
+  @ApiPropertyOptional({ enum: JobStatusFilter })
+  @IsEnum(JobStatusFilter)
+  @IsOptional()
+  status?: JobStatusFilter;
+}
 
 export class EscrowCancelDto {
   @ApiProperty()
@@ -518,7 +566,7 @@ export class JobCaptchaAnnotationsDto {
 
 export class JobCaptchaDto extends JobDto {
   @ApiProperty()
-  @IsUrl()
+  @IsObject()
   data: StorageDataDto;
 
   @ApiProperty({ name: 'accuracy_target' })
@@ -546,7 +594,6 @@ export class JobCaptchaDto extends JobDto {
 
   @ApiProperty()
   @IsDefined()
-  @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
   @Type(() => JobCaptchaAdvancedDto)

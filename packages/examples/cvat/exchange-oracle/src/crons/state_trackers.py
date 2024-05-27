@@ -34,6 +34,7 @@ def track_completed_projects() -> None:
             projects = cvat_service.get_projects_by_status(
                 session,
                 ProjectStatuses.annotation,
+                task_status=TaskStatuses.completed,
                 limit=CronConfig.track_completed_projects_chunk_size,
                 for_update=ForUpdateParams(skip_locked=True),
             )
@@ -74,7 +75,12 @@ def track_completed_tasks() -> None:
         logger.debug("Starting cron job")
         with SessionLocal.begin() as session:
             tasks = cvat_service.get_tasks_by_status(
-                session, TaskStatuses.annotation, for_update=ForUpdateParams(skip_locked=True)
+                session,
+                TaskStatuses.annotation,
+                job_status=JobStatuses.completed,
+                project_status=ProjectStatuses.annotation,
+                limit=CronConfig.track_completed_tasks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             completed_task_ids = []

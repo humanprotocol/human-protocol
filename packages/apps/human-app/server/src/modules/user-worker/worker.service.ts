@@ -5,12 +5,12 @@ import { SigninWorkerCommand } from './model/worker-signin.model';
 
 @Injectable()
 export class WorkerService {
-  constructor(private reputationOracleService: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   async signupWorker(signupWorkerCommand: SignupWorkerCommand) {
-    return this.reputationOracleService.sendWorkerSignup(signupWorkerCommand);
+    return this.gateway.sendWorkerSignup(signupWorkerCommand);
   }
   async signinWorker(signinWorkerCommand: SigninWorkerCommand) {
-    return this.reputationOracleService.sendWorkerSignin(signinWorkerCommand);
+    return this.gateway.sendWorkerSignin(signinWorkerCommand);
   }
 }

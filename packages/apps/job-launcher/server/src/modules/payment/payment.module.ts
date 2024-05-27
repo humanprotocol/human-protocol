@@ -9,6 +9,7 @@ import { PaymentController } from './payment.controller';
 import { PaymentRepository } from './payment.repository';
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
+import { RateService } from './rate.service';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { Web3Module } from '../web3/web3.module';
     }),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, PaymentRepository],
-  exports: [PaymentService, PaymentRepository],
+  providers: [PaymentService, PaymentRepository, RateService],
+  exports: [PaymentService, PaymentRepository, RateService],
 })
 export class PaymentModule {}

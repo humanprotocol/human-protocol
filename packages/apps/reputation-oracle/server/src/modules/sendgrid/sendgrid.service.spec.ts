@@ -5,6 +5,8 @@ import { MailService } from '@sendgrid/mail';
 import { ErrorSendGrid } from '../../common/constants/errors';
 import { MOCK_SENDGRID_API_KEY } from '../../../test/constants';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
@@ -70,7 +72,7 @@ describe('SendGridService', () => {
       expect(mock).toHaveBeenCalledWith(
         expect.objectContaining({
           from: expect.objectContaining({
-            email: 'reputation-oracle@hmt.ai',
+            email: 'app@humanprotocol.org',
           }),
         }),
       );
@@ -78,7 +80,10 @@ describe('SendGridService', () => {
 
     it("should throw error if email wasn't sent", async () => {
       jest.spyOn(mailService, 'send').mockImplementationOnce(async () => {
-        throw new Error(ErrorSendGrid.EmailNotSent);
+        throw new ControlledError(
+          ErrorSendGrid.EmailNotSent,
+          HttpStatus.BAD_REQUEST,
+        );
       });
 
       await expect(

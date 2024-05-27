@@ -16,6 +16,15 @@ import {
 } from '../../src/common/enums/payment';
 import { PaymentRepository } from '../../src/modules/payment/payment.repository';
 import { JobRepository } from '../../src/modules/job/job.repository';
+import { ChainId } from '@human-protocol/sdk';
+import { NetworkConfigService } from '../../src/common/config/network-config.service';
+import { Web3ConfigService } from '../../src/common/config/web3-config.service';
+import {
+  MOCK_PRIVATE_KEY,
+  MOCK_WEB3_NODE_HOST,
+  MOCK_WEB3_RPC_URL,
+} from '../constants';
+import { StripeConfigService } from '../../src/common/config/stripe-config.service';
 
 describe('Fiat account deposit E2E workflow', () => {
   let app: INestApplication;
@@ -33,7 +42,22 @@ describe('Fiat account deposit E2E workflow', () => {
     setupE2eEnvironment();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(NetworkConfigService)
+      .useValue({
+        networks: [
+          {
+            chainId: ChainId.LOCALHOST,
+            rpcUrl: MOCK_WEB3_RPC_URL,
+          },
+        ],
+      })
+      .overrideProvider(Web3ConfigService)
+      .useValue({
+        privateKey: MOCK_PRIVATE_KEY,
+        env: MOCK_WEB3_NODE_HOST,
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
