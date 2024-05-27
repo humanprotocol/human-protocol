@@ -51,16 +51,10 @@ export class UserUpdateDto {
   public status?: UserStatus;
 }
 
-export class RegisterLabelerRequestDto {
-  @ApiProperty({ name: 'oracle_type' })
-  @IsEnum(OracleType)
-  public oracleType: OracleType;
-}
-
 export class RegisterLabelerResponseDto {
-  @ApiProperty({ name: 'signed_site_key' })
+  @ApiProperty({ name: 'site_key' })
   @IsString()
-  public signedSiteKey: string;
+  public siteKey: string;
 }
 
 export class RegisterAddressRequestDto {

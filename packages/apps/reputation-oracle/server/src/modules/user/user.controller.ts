@@ -20,7 +20,6 @@ import {
   RegisterAddressRequestDto,
   RegisterAddressResponseDto,
   SignatureBodyDto,
-  RegisterLabelerRequestDto,
   RegisterLabelerResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
@@ -41,7 +40,6 @@ export class UserController {
     summary: 'Register Labeler',
     description: 'Endpoint to register user as a labeler on hcaptcha services.',
   })
-  @ApiBody({ type: RegisterLabelerRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Labeler registered successfully',
@@ -61,14 +59,10 @@ export class UserController {
   })
   public async registerLabeler(
     @Req() request: RequestWithUser,
-    @Body() data: RegisterLabelerRequestDto,
   ): Promise<RegisterLabelerResponseDto> {
-    const signedSiteKey = await this.userService.registerLabeler(
-      request.user,
-      data,
-    );
+    const siteKey = await this.userService.registerLabeler(request.user);
 
-    return { signedSiteKey };
+    return { siteKey };
   }
 
   @Post('/register-address')

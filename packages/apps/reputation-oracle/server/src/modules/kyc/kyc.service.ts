@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { map } from 'rxjs/operators';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
@@ -12,6 +13,8 @@ import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { KycEntity } from './kyc.entity';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { countriesA3ToA2 } from '../../common/enums/countries';
 
 @Injectable()
 export class KycService {
@@ -21,6 +24,7 @@ export class KycService {
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
     private readonly synapsConfigService: SynapsConfigService,
+    private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {
     this.synapsBaseURL = 'https://api.synaps.io/v4';
   }
@@ -93,6 +97,24 @@ export class KycService {
     kycEntity.sessionId = data.session_id;
     kycEntity.status = KycStatus.NONE;
     kycEntity.userId = userEntity.id;
+
+    const sessionInfo = await firstValueFrom(
+      this.httpService
+        .get(`/individual/session/${data.session_id}/step/IDD613860734294946`, {
+          baseURL: this.synapsBaseURL,
+          headers: { 'Api-Key': this.synapsConfigService.apiKey },
+        })
+        .pipe(map((response) => response.data)),
+    );
+
+    if (
+      sessionInfo?.document?.country &&
+      sessionInfo.document.country.trim() !== ''
+    ) {
+      kycEntity.country = countriesA3ToA2[sessionInfo.document.country];
+    } else {
+      throw new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST);
+    }
 
     await this.kycRepository.createUnique(kycEntity);
 

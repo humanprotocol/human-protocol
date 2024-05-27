@@ -21,7 +21,6 @@ import { UserEntity } from './user.entity';
 import {
   RegisterAddressRequestDto,
   SignatureBodyDto,
-  RegisterLabelerRequestDto,
   UserCreateDto,
 } from './user.dto';
 import { UserRepository } from './user.repository';
@@ -36,6 +35,7 @@ import { SiteKeyRepository } from './site-key.repository';
 import { OracleType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 
 @Injectable()
 export class UserService {
@@ -47,6 +47,7 @@ export class UserService {
     private readonly web3Service: Web3Service,
     private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
+    private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -125,10 +126,7 @@ export class UserService {
     return userEntity.save();
   }
 
-  public async registerLabeler(
-    user: UserEntity,
-    data: RegisterLabelerRequestDto,
-  ) {
+  public async registerLabeler(user: UserEntity): Promise<string> {
     if (user.type !== UserType.WORKER) {
       throw new BadRequestException(ErrorUser.InvalidType);
     }
@@ -138,14 +136,14 @@ export class UserService {
     }
 
     if (user.siteKey) {
-      return user.siteKey;
+      return user.siteKey.siteKey;
     }
 
     // Register user as a labeler at hcaptcha foundation
     const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
-      language: 'en', // TODO: Retrieve from kyc
-      country: 'US', // TODO: Retrieve from kyc
+      language: this.hcaptchaConfigService.defaultLabelerLang,
+      country: user.kyc.country,
       address: user.evmAddress,
     });
 
@@ -165,7 +163,7 @@ export class UserService {
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = siteKey;
     newSiteKey.user = user;
-    newSiteKey.type = data.oracleType;
+    newSiteKey.type = OracleType.HCAPTCHA;
 
     await this.siteKeyRepository.createUnique(newSiteKey);
 

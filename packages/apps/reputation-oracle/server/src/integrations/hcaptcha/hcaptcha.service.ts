@@ -7,6 +7,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { TokenType } from '../../common/enums/hcaptcha';
 
 @Injectable()
 export class HCaptchaService {
@@ -38,7 +39,7 @@ export class HCaptchaService {
 
       const response = await firstValueFrom(
         await this.httpService.post(
-          `${this.hcaptchaConfigService.exchangeURL}/siteverify`,
+          `${data.type === TokenType.AUTH ? this.hcaptchaConfigService.protectionURL : this.hcaptchaConfigService.exchangeURL}/siteverify`,
           {},
           { params: queryParams },
         ),
@@ -90,6 +91,7 @@ export class HCaptchaService {
         return true;
       }
     } catch (error) {
+      console.log(error);
       this.logger.error('Error occurred during user registration:', error);
     }
 

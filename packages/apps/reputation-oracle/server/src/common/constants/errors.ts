@@ -64,7 +64,6 @@ export enum ErrorUser {
   IncorrectAddress = 'Incorrect address',
   KycNotApproved = 'KYC not approved',
   UserNotActive = 'User not active',
-  LabelerAlreadyRegistered = 'User has already been registered as a labeler and has a sitekey enabled',
   LabelingEnableFailed = 'Failed to enable labeling for this account.',
   InvalidType = 'User has invalid type',
 }
@@ -106,6 +105,7 @@ export enum ErrorKyc {
   Rejected = 'KYC session rejected',
   InvalidSynapsAPIResponse = 'Invalid Synaps API response',
   InvalidWebhookSecret = 'Invalid webhook secret',
+  CountryNotSet = 'Сountry is not set for the user',
 }
 
 /**

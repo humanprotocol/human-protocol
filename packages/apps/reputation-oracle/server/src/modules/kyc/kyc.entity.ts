@@ -17,6 +17,9 @@ export class KycEntity extends BaseEntity {
   })
   public status: KycStatus;
 
+  @Column({ type: 'varchar' })
+  country: string;
+
   @Column({ type: 'varchar', nullable: true })
   public message?: string;
 

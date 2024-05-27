@@ -54,7 +54,7 @@ describe('AuthService E2E', () => {
     await app.close();
   });
 
-  it.only('should test authentication workflow', async () => {
+  it('should test authentication workflow', async () => {
     const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
     const password = 'Password1!';
     const hCaptchaToken = 'string';

@@ -42,3 +42,11 @@ export function getRequestType(
 
   return requestType;
 }
+
+export function getJwtFromBearer(bearerString: string): string | null {
+  const prefix = 'Bearer ';
+  if (bearerString.startsWith(prefix)) {
+    return bearerString.slice(prefix.length);
+  }
+  return null;
+}

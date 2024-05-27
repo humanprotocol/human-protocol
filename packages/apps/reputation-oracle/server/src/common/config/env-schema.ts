@@ -18,12 +18,14 @@ export const envValidator = Joi.object({
   FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
   HCAPTCHA_SECRET: Joi.string().required(),
-  HCAPTCHA_EXCHANGE_URL: Joi.string()
-    .required()
-    .description('hcaptcha exchange url'),
+  HCAPTCHA_PROTECTION_URL: Joi.string().description(
+    'Hcaptcha URL for verifying guard tokens',
+  ),
+  HCAPTCHA_EXCHANGE_URL: Joi.string().description('hcaptcha exchange url'),
   HCAPTCHA_API_KEY: Joi.string()
     .required()
     .description('Account api key at hcaptcha foundation'),
+  HCAPTCHA_DEFAULT_LABELER_LANG: Joi.string(),
   // Database
   POSTGRES_HOST: Joi.string(),
   POSTGRES_USER: Joi.string(),

@@ -12,12 +12,14 @@ import { of } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
   let httpService: HttpService;
   let kycRepository: KycRepository;
   let synapsConfigService: SynapsConfigService;
+  let hcaptchaConfigService: HCaptchaConfigService;
 
   beforeAll(async () => {
     const mockHttpService: DeepPartial<HttpService> = {
@@ -31,6 +33,7 @@ describe('Kyc Service', () => {
         KycService,
         ConfigService,
         SynapsConfigService,
+        HCaptchaConfigService,
         {
           provide: HttpService,
           useValue: mockHttpService,
@@ -44,6 +47,9 @@ describe('Kyc Service', () => {
     kycRepository = moduleRef.get<KycRepository>(KycRepository);
     synapsConfigService =
       moduleRef.get<SynapsConfigService>(SynapsConfigService);
+    hcaptchaConfigService = moduleRef.get<HCaptchaConfigService>(
+      HCaptchaConfigService,
+    );
 
     jest
       .spyOn(SynapsConfigService.prototype, 'apiKey', 'get')
@@ -188,6 +194,38 @@ describe('Kyc Service', () => {
       );
     });
 
+    it('Should throw an error if country not set', async () => {
+      const mockUserEntity = {
+        kyc: {
+          sessionId: null,
+        },
+      };
+
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          data: {
+            session_id: '123',
+          },
+        });
+      });
+
+      httpService.get = jest.fn().mockImplementation(() => {
+        return of({
+          data: {
+            document: {
+              country: '',
+            },
+          },
+        });
+      });
+
+      await expect(
+        kycService.initSession(mockUserEntity as any),
+      ).rejects.toThrow(
+        new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST),
+      );
+    });
+
     it('Should start a Kyc session for the user', async () => {
       const mockUserEntity = {
         kyc: {
@@ -201,6 +239,16 @@ describe('Kyc Service', () => {
         return of({
           data: {
             session_id: '123',
+          },
+        });
+      });
+
+      httpService.get = jest.fn().mockImplementation(() => {
+        return of({
+          data: {
+            document: {
+              country: 'FRA',
+            },
           },
         });
       });
@@ -223,6 +271,7 @@ describe('Kyc Service', () => {
         },
       );
       expect(kycRepository.createUnique).toHaveBeenCalledWith({
+        country: 'FR',
         sessionId: '123',
         status: KycStatus.NONE,
         userId: 1,

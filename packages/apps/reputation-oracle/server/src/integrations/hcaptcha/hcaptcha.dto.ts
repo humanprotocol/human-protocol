@@ -1,8 +1,11 @@
+import { TokenType } from '../../common/enums/hcaptcha';
+
 export class hCaptchaApiParams {
   public ip?: string;
 }
 
 export class hCaptchaVerifyToken extends hCaptchaApiParams {
+  public type: TokenType;
   public token: string;
 }
 

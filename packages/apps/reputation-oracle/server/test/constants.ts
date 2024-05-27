@@ -234,4 +234,5 @@ export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
 
 export const MOCK_HCAPTCHA_TOKEN = 'test-token';
+export const HCAPTCHA_PROTECTION_URL = 'https://api.hcaptcha.com';
 export const HCAPTCHA_EXCHANGE_URL = 'https://foundation-exchange.hmt.ai';

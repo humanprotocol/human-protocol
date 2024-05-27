@@ -6,7 +6,11 @@ import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.servi
 import { DeepPartial } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
-import { HCAPTCHA_EXCHANGE_URL } from '../../../test/constants';
+import {
+  HCAPTCHA_PROTECTION_URL,
+  HCAPTCHA_EXCHANGE_URL,
+} from '../../../test/constants';
+import { TokenType } from '../../common/enums/hcaptcha';
 
 describe('hCaptchaService', () => {
   let hcaptchaService: HCaptchaService;
@@ -37,10 +41,65 @@ describe('hCaptchaService', () => {
   });
 
   describe('verifyToken', () => {
-    it('should verify hCaptcha token successfully', async () => {
+    it('should verify hCaptcha auth token successfully', async () => {
       const mockData = {
         ip: '127.0.0.1',
         token: 'token',
+        type: TokenType.AUTH,
+      };
+
+      const mockResponseData = { success: true };
+
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          status: 200,
+          data: mockResponseData,
+        });
+      });
+
+      const result = await hcaptchaService.verifyToken(mockData);
+
+      expect(result).toEqual(mockResponseData);
+      expect(httpService.post).toHaveBeenCalledWith(
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
+        {},
+        { params: expect.any(Object) },
+      );
+    });
+
+    it('should verify hCaptcha auth token successfully without IP', async () => {
+      const mockData = {
+        url: 'https://example.com',
+        secret: 'secret-key',
+        sitekey: 'site-key',
+        token: 'token',
+        type: TokenType.AUTH,
+      };
+
+      const mockResponseData = { success: true };
+
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          status: 200,
+          data: mockResponseData,
+        });
+      });
+
+      const result = await hcaptchaService.verifyToken(mockData);
+
+      expect(result).toEqual(mockResponseData);
+      expect(httpService.post).toHaveBeenCalledWith(
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
+        {},
+        { params: expect.any(Object) },
+      );
+    });
+
+    it('should verify hCaptcha labeling token successfully', async () => {
+      const mockData = {
+        ip: '127.0.0.1',
+        token: 'token',
+        type: TokenType.EXCHANGE,
       };
 
       const mockResponseData = { success: true };
@@ -62,12 +121,13 @@ describe('hCaptchaService', () => {
       );
     });
 
-    it('should verify hCaptcha token successfully without IP', async () => {
+    it('should verify hCaptcha labeling token successfully without IP', async () => {
       const mockData = {
         url: 'https://example.com',
         secret: 'secret-key',
         sitekey: 'site-key',
         token: 'token',
+        type: TokenType.EXCHANGE,
       };
 
       const mockResponseData = { success: true };
@@ -95,6 +155,7 @@ describe('hCaptchaService', () => {
         secret: 'secret-key',
         sitekey: 'site-key',
         token: 'token',
+        type: TokenType.AUTH,
       };
 
       const mockResponseData = { success: false };
@@ -110,7 +171,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(false);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/siteverify`,
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
@@ -122,6 +183,7 @@ describe('hCaptchaService', () => {
         secret: 'secret-key',
         sitekey: 'site-key',
         token: 'token',
+        type: TokenType.AUTH,
       };
 
       httpService.post = jest.fn().mockImplementation(() => {
@@ -134,7 +196,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(false);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/siteverify`,
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
@@ -146,6 +208,7 @@ describe('hCaptchaService', () => {
         secret: 'secret-key',
         sitekey: 'site-key',
         token: 'token',
+        type: TokenType.AUTH,
       };
 
       httpService.post = jest
@@ -157,7 +220,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(false);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/siteverify`,
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
