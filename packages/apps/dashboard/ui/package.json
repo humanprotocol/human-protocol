@@ -61,7 +61,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "happy-dom": "^12.9.1",
     "identity-obj-proxy": "^3.0.0",
-    "jsdom": "^22.1.0",
+    "jsdom": "^24.1.0",
     "merkletreejs": "^0.3.11",
     "resize-observer-polyfill": "^1.5.1",
     "sinon": "^17.0.1",
