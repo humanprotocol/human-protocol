@@ -34,7 +34,6 @@ import {
 import {
   JobRequestType,
   JobStatus,
-  JobStatusFilter,
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
@@ -69,6 +68,7 @@ import {
   JobQuickLaunchDto,
   CvatDataDto,
   StorageDataDto,
+  GetJobsDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -96,7 +96,6 @@ import {
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
-import { filterToEscrowStatus } from '../../common/utils/status';
 import { StorageService } from '../storage/storage.service';
 import stringify from 'json-stable-stringify';
 import {
@@ -121,6 +120,7 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
+import { PageDto } from '../../common/pagination/pagination.dto';
 
 @Injectable()
 export class JobService {
@@ -1133,54 +1133,31 @@ export class JobService {
   }
 
   public async getJobsByStatus(
-    networks: ChainId[],
+    data: GetJobsDto,
     userId: number,
-    status?: JobStatusFilter,
-    skip = 0,
-    limit = 10,
-  ): Promise<JobListDto[]> {
+  ): Promise<PageDto<JobListDto>> {
     try {
-      let jobs: JobEntity[] = [];
-      let escrows: EscrowData[] | undefined;
+      if (data.chainId && data.chainId.length > 0)
+        data.chainId.forEach((chainId) =>
+          this.web3Service.validateChainId(Number(chainId)),
+        );
 
-      networks.forEach((chainId) =>
-        this.web3Service.validateChainId(Number(chainId)),
+      const { entities, itemCount } = await this.jobRepository.fetchFiltered(
+        data,
+        userId,
       );
 
-      switch (status) {
-        case JobStatusFilter.FAILED:
-        case JobStatusFilter.PENDING:
-        case JobStatusFilter.CANCELED:
-          jobs = await this.jobRepository.findByStatusFilter(
-            networks,
-            userId,
-            status,
-            skip,
-            limit,
-          );
-          break;
-        case JobStatusFilter.LAUNCHED:
-        case JobStatusFilter.PARTIAL:
-        case JobStatusFilter.COMPLETED:
-          escrows = await this.findEscrowsByStatus(
-            networks,
-            userId,
-            status,
-            skip,
-            limit,
-          );
-          const escrowAddresses = escrows.map((escrow) =>
-            ethers.getAddress(escrow.address),
-          );
+      const jobs = entities.map((job) => {
+        return {
+          jobId: job.id,
+          escrowAddress: job.escrowAddress,
+          network: NETWORKS[job.chainId as ChainId]!.title,
+          fundAmount: job.fundAmount,
+          status: job.status,
+        };
+      });
 
-          jobs = await this.jobRepository.findByEscrowAddresses(
-            userId,
-            escrowAddresses,
-          );
-          break;
-      }
-
-      return this.transformJobs(jobs, escrows);
+      return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
     } catch (error) {
       throw new ControlledError(
         error.message,
@@ -1188,70 +1165,6 @@ export class JobService {
         error.stack,
       );
     }
-  }
-
-  private async findEscrowsByStatus(
-    networks: ChainId[],
-    userId: number,
-    status: JobStatusFilter,
-    skip: number,
-    limit: number,
-  ): Promise<EscrowData[]> {
-    const escrows: EscrowData[] = [];
-    const statuses = filterToEscrowStatus(status);
-
-    for (const escrowStatus of statuses) {
-      escrows.push(
-        ...(await EscrowUtils.getEscrows({
-          networks,
-          jobRequesterId: userId.toString(),
-          status: escrowStatus,
-          launcher: this.web3Service.signerAddress,
-        })),
-      );
-    }
-
-    if (statuses.length > 1) {
-      escrows.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
-    }
-
-    return escrows.slice(skip, limit);
-  }
-
-  private async transformJobs(
-    jobs: JobEntity[],
-    escrows: EscrowData[] | undefined,
-  ): Promise<JobListDto[]> {
-    const jobPromises = jobs.map(async (job) => {
-      return {
-        jobId: job.id,
-        escrowAddress: job.escrowAddress,
-        network: NETWORKS[job.chainId as ChainId]!.title,
-        fundAmount: job.fundAmount,
-        status: await this.mapJobStatus(job, escrows),
-      };
-    });
-
-    return Promise.all(jobPromises);
-  }
-
-  private async mapJobStatus(job: JobEntity, escrows?: EscrowData[]) {
-    if (job.status === JobStatus.PAID) {
-      return JobStatus.PENDING;
-    }
-
-    if (escrows) {
-      const escrow = escrows.find(
-        (escrow) =>
-          escrow.address.toLowerCase() === job.escrowAddress.toLowerCase(),
-      );
-      if (escrow) {
-        const newJob = await this.updateJobStatus(job, escrow);
-        return newJob.status;
-      }
-    }
-
-    return job.status;
   }
 
   public async getResult(

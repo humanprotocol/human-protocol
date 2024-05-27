@@ -46,25 +46,18 @@ class LeaderFilter:
     A class used to filter leaders.
     """
 
-    def __init__(
-        self,
-        networks: List[ChainId],
-        role: Optional[str] = None,
-    ):
+    def __init__(self, chain_id: ChainId, role: Optional[str] = None):
         """
         Initializes a LeaderFilter instance.
 
-        :param networks: Networks to request data
+        :param chain_id: Chain Id to request data
         :param role: Leader role
         """
 
-        if not networks or any(
-            network.value not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise OperatorUtilsError(f"Invalid ChainId")
+        if chain_id not in ChainId:
+            raise OperatorUtilsError("Invalid ChainId")
 
-        self.networks = networks
+        self.chain_id = chain_id
         self.role = role
 
 
@@ -173,9 +166,7 @@ class OperatorUtils:
     """
 
     @staticmethod
-    def get_leaders(
-        filter: LeaderFilter = LeaderFilter(networks=[ChainId.POLYGON_AMOY]),
-    ) -> List[LeaderData]:
+    def get_leaders(filter: LeaderFilter) -> List[LeaderData]:
         """Get leaders data of the protocol
 
         :param filter: Leader filter
@@ -190,7 +181,7 @@ class OperatorUtils:
 
                 print(
                     OperatorUtils.get_leaders(
-                        LeaderFilter(networks=[ChainId.POLYGON_AMOY])
+                        LeaderFilter(chain_id=ChainId.POLYGON_AMOY)
                     )
                 )
         """
@@ -198,50 +189,60 @@ class OperatorUtils:
         from human_protocol_sdk.gql.operator import get_leaders_query
 
         leaders = []
-        for chain_id in filter.networks:
-            network = NETWORKS[chain_id]
+        network = NETWORKS[filter.chain_id]
 
-            leaders_data = get_data_from_subgraph(
-                network["subgraph_url"],
-                query=get_leaders_query(filter),
-                params={"role": filter.role},
-            )
-            leaders_raw = leaders_data["data"]["leaders"]
+        if not network.get("subgraph_url"):
+            return []
 
-            if not leaders_raw:
-                continue
+        leaders_data = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_leaders_query(filter),
+            params={"role": filter.role},
+        )
+        leaders_raw = leaders_data["data"]["leaders"]
 
-            leaders.extend(
-                [
-                    LeaderData(
-                        chain_id=chain_id,
-                        id=leader.get("id", ""),
-                        address=leader.get("address", ""),
-                        amount_staked=int(leader.get("amountStaked", 0)),
-                        amount_allocated=int(leader.get("amountAllocated", 0)),
-                        amount_locked=int(leader.get("amountLocked", 0)),
-                        locked_until_timestamp=int(
-                            leader.get("lockedUntilTimestamp", 0)
-                        ),
-                        amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
-                        amount_slashed=int(leader.get("amountSlashed", 0)),
-                        reputation=int(leader.get("reputation", 0)),
-                        reward=int(leader.get("reward", 0)),
-                        amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
-                        role=leader.get("role", None),
-                        fee=int(leader.get("fee")) if leader.get("fee", None) else None,
-                        public_key=leader.get("publicKey", None),
-                        webhook_url=leader.get("webhookUrl", None),
-                        url=leader.get("url", None),
-                        job_types=(
-                            leader.get("jobTypes").split(",")
-                            if leader.get("jobTypes", None)
-                            else None
-                        ),
-                    )
-                    for leader in leaders_raw
-                ]
-            )
+        if not leaders_raw:
+            return []
+
+        job_types = []
+        if isinstance(job_types, str):
+            job_types = job_types.split(",")
+        elif isinstance(job_types, list):
+            job_types = job_types
+
+        leaders.extend(
+            [
+                LeaderData(
+                    chain_id=filter.chain_id,
+                    id=leader.get("id", ""),
+                    address=leader.get("address", ""),
+                    amount_staked=int(leader.get("amountStaked", 0)),
+                    amount_allocated=int(leader.get("amountAllocated", 0)),
+                    amount_locked=int(leader.get("amountLocked", 0)),
+                    locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
+                    amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
+                    amount_slashed=int(leader.get("amountSlashed", 0)),
+                    reputation=int(leader.get("reputation", 0)),
+                    reward=int(leader.get("reward", 0)),
+                    amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                    role=leader.get("role", None),
+                    fee=int(leader.get("fee")) if leader.get("fee", None) else None,
+                    public_key=leader.get("publicKey", None),
+                    webhook_url=leader.get("webhookUrl", None),
+                    url=leader.get("url", None),
+                    job_types=(
+                        leader.get("jobTypes").split(",")
+                        if isinstance(leader.get("jobTypes"), str)
+                        else (
+                            leader.get("jobTypes", [])
+                            if isinstance(leader.get("jobTypes"), list)
+                            else []
+                        )
+                    ),
+                )
+                for leader in leaders_raw
+            ]
+        )
 
         return leaders
 
@@ -309,8 +310,12 @@ class OperatorUtils:
             url=leader.get("url", None),
             job_types=(
                 leader.get("jobTypes").split(",")
-                if leader.get("jobTypes", None)
-                else None
+                if isinstance(leader.get("jobTypes"), str)
+                else (
+                    leader.get("jobTypes", [])
+                    if isinstance(leader.get("jobTypes"), list)
+                    else []
+                )
             ),
         )
 
@@ -369,8 +374,12 @@ class OperatorUtils:
                 url=operator.get("url", ""),
                 job_types=(
                     operator.get("jobTypes").split(",")
-                    if operator.get("jobTypes", None)
-                    else []
+                    if isinstance(operator.get("jobTypes"), str)
+                    else (
+                        operator.get("jobTypes", [])
+                        if isinstance(operator.get("jobTypes"), list)
+                        else []
+                    )
                 ),
             )
             for operator in operators

@@ -1,6 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import copy from 'copy-to-clipboard';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
@@ -14,8 +15,26 @@ export const JobTable = ({
   status: JobStatus;
   chainId: ChainId;
 }) => {
-  const { data, isLoading } = useJobs({ status, chainId });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const { data, isLoading } = useJobs({
+    status,
+    chainId,
+    page: page,
+    pageSize: rowsPerPage,
+  });
+
   const navigate = useNavigate();
+
+  const handleChangePage = (event: any, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: any) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <Table
@@ -79,6 +98,10 @@ export const JobTable = ({
           </Button>
         </>
       }
+      page={page}
+      rowsPerPage={rowsPerPage}
+      onPageChange={handleChangePage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
     />
   );
 };
