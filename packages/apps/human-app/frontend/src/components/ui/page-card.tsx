@@ -49,6 +49,7 @@ interface FormCardProps {
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
   cancelBtnPath?: string | -1;
+  hiddenCancelButton?: boolean;
   withLayoutBackground?: boolean;
   loader?: boolean;
 }
@@ -61,6 +62,7 @@ export function PageCard({
   backArrowPath,
   cancelBtnPath = routerPaths.homePage,
   withLayoutBackground = true,
+  hiddenCancelButton = false,
 }: FormCardProps) {
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
@@ -82,22 +84,24 @@ export function PageCard({
 
   return (
     <Grid container sx={commonStyles}>
-      <Grid
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          width: '100%',
-          [breakpoints.mobile]: {
-            display: 'none',
-          },
-        }}
-      >
-        <Button onClick={goBack.bind(null, cancelBtnPath)}>
-          <Typography variant="buttonMedium">
-            {t('components.modal.header.closeBtn')}
-          </Typography>
-        </Button>
-      </Grid>
+      {!hiddenCancelButton && (
+        <Grid
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            width: '100%',
+            [breakpoints.mobile]: {
+              display: 'none',
+            },
+          }}
+        >
+          <Button onClick={goBack.bind(null, cancelBtnPath)}>
+            <Typography variant="buttonMedium">
+              {t('components.modal.header.closeBtn')}
+            </Typography>
+          </Button>
+        </Grid>
+      )}
       <Box
         sx={{
           flexGrow: 1,
@@ -132,11 +136,13 @@ export function PageCard({
                 <ArrowBackIcon />
               </IconWrapper>
             ) : null}
-            <Button onClick={goBack.bind(null, cancelBtnPath)}>
-              <Typography variant="buttonMedium">
-                {t('components.modal.header.closeBtn')}
-              </Typography>
-            </Button>
+            {!hiddenCancelButton && (
+              <Button onClick={goBack.bind(null, cancelBtnPath)}>
+                <Typography variant="buttonMedium">
+                  {t('components.modal.header.closeBtn')}
+                </Typography>
+              </Button>
+            )}
           </Grid>
           <Grid item md={1} order={{ xs: 3, md: 1 }} xs={12} />
           <Grid

@@ -6601,6 +6601,11 @@
   dependencies:
     tslib "^2.4.0"
 
+"@synaps-io/verify-sdk@^4.0.45":
+  version "4.0.45"
+  resolved "https://registry.yarnpkg.com/@synaps-io/verify-sdk/-/verify-sdk-4.0.45.tgz#f5622f7539494087dbc359ae1928233982795df7"
+  integrity sha512-eTS8o4ZTk6ZK/wGEMQYp7TrMQTLnMp+32YoNm1+kpk1L7X7XCFlppUaRGiA4LEUYrhPo1Ynu63ju3JggD6Aaeg==
+
 "@szmarczak/http-timer@^4.0.5":
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-4.0.6.tgz#b4a914bb62e7c272d4e5989fe4440f812ab1d807"
@@ -25205,22 +25210,6 @@ typeorm@^0.3.16, typeorm@^0.3.17:
   version "0.3.20"
   resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.3.20.tgz#4b61d737c6fed4e9f63006f88d58a5e54816b7ab"
   integrity sha512-sJ0T08dV5eoZroaq9uPKBoNcGslHBR4E4y+EBHs//SiGbblGe7IeduP/IH4ddCcj0qp3PHwDwGnuvqEAnKlq/Q==
-  dependencies:
-    "@sqltools/formatter" "^1.2.5"
-    app-root-path "^3.1.0"
-    buffer "^6.0.3"
-    chalk "^4.1.2"
-    cli-highlight "^2.1.11"
-    dayjs "^1.11.9"
-    debug "^4.3.4"
-    dotenv "^16.0.3"
-    glob "^10.3.10"
-    mkdirp "^2.1.3"
-    reflect-metadata "^0.2.1"
-    sha.js "^2.4.11"
-    tslib "^2.5.0"
-    uuid "^9.0.0"
-    yargs "^17.6.2"
 
 typescript@4.9.5, typescript@^4.9.3, typescript@^4.9.5:
   version "4.9.5"
