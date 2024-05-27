@@ -4,7 +4,6 @@
   max-width: 100%;
 
   #search-bar{
-    margin-bottom: 62px;
     background-color: $white;
     width: 100%;
     border-radius: 8px;
@@ -57,6 +56,14 @@
     &:hover{
       background-color: $primary;
     }
+  }
+}
+
+.search-results-bar {
+  display: block;
+
+  @media (max-width: 1100px) {
+    display: none;
   }
 }
 

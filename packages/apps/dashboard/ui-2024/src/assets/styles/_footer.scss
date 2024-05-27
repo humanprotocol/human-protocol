@@ -4,6 +4,9 @@ footer{
   align-items: center;
   min-height: 124px;
   padding: 0 44px;
+  @media(max-width: 1100px) {
+    background-color: $maWhite;
+  }
 
   .footer-link, .footer-icon{
     display: flex;

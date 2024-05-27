@@ -52,11 +52,11 @@ const SearchResults = () => {
 		'roleDetails' | 'escrowAddress' | 'walletAddress' | null
 	>(null);
 	return (
-		<PageWrapper displaySearchBar>
+		<PageWrapper displaySearchBar className="standard-background">
 			<Breadcrumbs title="Search Results" />
-			<Search />
+			<Search className="search-results-bar" />
 			<Stack
-				sx={{ marginBottom: 2 }}
+				sx={{ marginBottom: 2, marginTop: { xs: 0, md: 4 } }}
 				direction={{ xs: 'column', md: 'row' }}
 				gap={3}
 				alignItems={{ xs: 'stretch', md: 'center' }}

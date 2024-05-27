@@ -1,11 +1,19 @@
 .page-wrapper{
   margin: 0 56px;
   min-height: calc(100vh - 206px);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+
+  @media (max-width: 1100px) {
+  border-radius: 0;
+  }
 
   .container{
-    width: 90%;
     margin: auto;
-    padding: 30px 0 100px;
+    padding: 30px 80px 100px;
+    @media (max-width: 1100px) {
+      padding: 30px 16px;
+    }
   }
 
   @media (max-width: 1100px) {
@@ -22,6 +30,7 @@
 }
 
 .violet-header{
+  z-index: 10;
   border-top-right-radius: 20px;
   border-top-left-radius: 20px;
   background-size: 100% 100%;
@@ -31,4 +40,8 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
+}
+
+.standard-background {
+  background-color: $maWhite;
 }
