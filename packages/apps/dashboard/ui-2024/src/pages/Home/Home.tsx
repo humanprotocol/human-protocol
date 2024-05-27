@@ -36,14 +36,15 @@ import exchange from '@assets/exchange.png';
 import recording from '@assets/recording.png';
 import reputation from '@assets/reputation.png';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
-
 import MoonbaseAlphaIcon from '@components/Icons/MoonbaseAlphaIcon';
+
 import MoonbeamIcon from '@components/Icons/MoonbeamIcon';
 import BinanceSmartChainIcon from '@components/Icons/BinanceSmartChainIcon';
-import CeloIcon from '@components/Icons/CeloIcon';
 import EthereumIcon from '@components/Icons/EthereumIcon';
 import HumanIcon from '@components/Icons/HumanIcon';
 import PolygonIcon from '@components/Icons/PolygonIcon';
+import CeloIcon from '@assets/icons/celo.svg';
+import SvgIcon from '@mui/material/SvgIcon';
 
 function createData(
 	role: string,
@@ -196,11 +197,11 @@ const Home: React.FC = () => {
 			},
 			celo: {
 				title: 'Celo',
-				icon: <MoonbeamIcon />,
+				icon: <CeloIcon />,
 			},
 			alfajores: {
 				title: 'alfajores',
-				icon: <MoonbeamIcon />,
+				icon: <CeloIcon />,
 			},
 		};
 
@@ -307,11 +308,15 @@ const Home: React.FC = () => {
 						Moonbase Alpha
 					</MenuItem>
 					<MenuItem className="select-item" value={'celo'}>
-						<CeloIcon />
+						<SvgIcon>
+							<CeloIcon />
+						</SvgIcon>
 						Celo
 					</MenuItem>
 					<MenuItem className="select-item" value={'alfajores'}>
-						<CeloIcon />
+						<SvgIcon>
+							<CeloIcon />
+						</SvgIcon>
 						Celo Alfajores
 					</MenuItem>
 				</Select>
