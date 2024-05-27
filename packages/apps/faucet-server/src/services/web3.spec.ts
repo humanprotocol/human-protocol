@@ -9,11 +9,16 @@
 import dotenv from 'dotenv';
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol/HMToken.json';
 import { describe, expect, it } from '@jest/globals';
-import { checkFaucetBalance, getFaucetBalance, getHmtBalance, sendFunds } from './web3';
+import {
+  checkFaucetBalance,
+  getFaucetBalance,
+  getHmtBalance,
+  sendFunds,
+} from './web3';
 import { Contract } from 'web3-eth-contract';
 import Web3 from 'web3';
 
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+dotenv.config({ path: `.env.example` });
 
 let token: Contract<typeof HMToken.abi>;
 
@@ -24,7 +29,7 @@ const owner = web3.eth.accounts.privateKeyToAccount(
 web3.eth.defaultAccount = owner.address;
 const externalUser = '0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f';
 
-describe.only('Faucet', () => {
+describe('Faucet', () => {
   beforeEach(async () => {
     const tokenContract = new web3.eth.Contract(HMToken.abi);
     token = await (tokenContract.deploy as any)({
