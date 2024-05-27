@@ -158,7 +158,7 @@ export class JobService {
     const jobBounty = await this.calculateJobBounty({
       requestType,
       fundAmount: tokenFundAmount,
-      urls: urls,
+      urls,
       nodesTotal: dto.labels[0]?.nodes?.length,
     });
 
@@ -534,7 +534,6 @@ export class JobService {
         groundTruth: StorageDataDto,
       ): GenerateUrls => {
         const requestType = JobRequestType.IMAGE_BOXES;
-
         return {
           dataUrl: generateBucketUrl(data.dataset, requestType),
           gtUrl: generateBucketUrl(groundTruth, requestType),
