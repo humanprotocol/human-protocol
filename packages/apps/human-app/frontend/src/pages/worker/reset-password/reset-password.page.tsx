@@ -57,6 +57,7 @@ export function ResetPasswordWorkerPage() {
         ) : undefined
       }
       backArrowPath="/worker/profile"
+      hiddenCancelButton
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>
