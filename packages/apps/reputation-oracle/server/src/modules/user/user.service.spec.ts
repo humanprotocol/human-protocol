@@ -59,6 +59,7 @@ describe('UserService', () => {
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
           },
         },
         ConfigService,
