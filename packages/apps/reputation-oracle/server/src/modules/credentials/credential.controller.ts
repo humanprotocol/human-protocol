@@ -21,6 +21,7 @@ import {
   CredentialQueryDto,
   CredentialDto,
   AddCredentialOnChainDto,
+  ValidateCredentialDto,
 } from './credential.dto';
 import { Public } from '../../common/decorators';
 import { UserType } from '../../common/enums/user';
@@ -96,5 +97,17 @@ export class CredentialController {
       chainId,
       escrowAddress,
     );
+  }
+
+  @Post('validate')
+  @UseGuards(JwtAuthGuard)
+  async validateCredential(
+    @Body() validateCredentialDto: ValidateCredentialDto,
+  ) {
+    await this.credentialService.validateCredential(
+      validateCredentialDto.reference,
+      validateCredentialDto.worker_address,
+    );
+    return { message: 'Credential successfully validated' };
   }
 }

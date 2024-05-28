@@ -101,3 +101,13 @@ export class AddCredentialOnChainDto {
   @IsString()
   public escrowAddress: string;
 }
+
+export class ValidateCredentialDto {
+  @ApiProperty()
+  @IsString()
+  public reference: string;
+
+  @ApiProperty()
+  @IsString()
+  public worker_address: string;
+}

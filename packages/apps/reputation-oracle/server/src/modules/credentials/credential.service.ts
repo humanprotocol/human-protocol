@@ -74,7 +74,10 @@ export class CredentialService {
     return credentialEntity;
   }
 
-  public async validateCredential(reference: string): Promise<void> {
+  public async validateCredential(
+    reference: string,
+    workerAddress: string,
+  ): Promise<void> {
     const credential =
       await this.credentialRepository.findByReference(reference);
 
@@ -91,6 +94,7 @@ export class CredentialService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     credential.status = CredentialStatus.VALIDATED;
     await this.credentialRepository.save(credential);
 

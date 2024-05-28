@@ -1,7 +1,10 @@
 import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource } from 'typeorm';
-import { CredentialEntity } from './credential.entity';
+import {
+  CredentialEntity,
+  CredentialValidationEntity,
+} from './credential.entity';
 import { UserType } from '../../common/enums/user';
 import { CredentialStatus } from '../../common/enums/credential';
 import { ControlledError } from '../../common/errors/controlled';
@@ -28,6 +31,12 @@ export class CredentialRepository extends BaseRepository<CredentialEntity> {
     }
     const credentials = await queryBuilder.getMany();
     return credentials;
+  }
+
+  async saveValidation(validation: CredentialValidationEntity): Promise<void> {
+    await this.dataSource
+      .getRepository(CredentialValidationEntity)
+      .save(validation);
   }
 
   async findCredentials(
