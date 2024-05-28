@@ -292,14 +292,7 @@ const WalletAddress = () => {
 										</Stack>
 									</TableCell>
 									<TableCell>
-										<Stack direction="row" alignItems="center">
-											<Tooltip title="same">
-												<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-													<HelpOutlineIcon fontSize="small" />
-												</IconButton>
-											</Tooltip>
 											<Typography fontWeight={600}>Escrow Address</Typography>
-										</Stack>
 									</TableCell>
 								</TableRow>
 							</TableHead>
