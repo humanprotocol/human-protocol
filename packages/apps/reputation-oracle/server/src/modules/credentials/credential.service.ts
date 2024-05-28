@@ -1,7 +1,10 @@
 import { HttpStatus, Injectable, Logger, HttpException } from '@nestjs/common';
 import { CreateCredentialDto } from './credential.dto';
 import { CredentialRepository } from './credential.repository';
-import { CredentialEntity } from './credential.entity';
+import {
+  CredentialEntity,
+  CredentialValidationEntity,
+} from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { Web3Service } from '../web3/web3.service';
 import { verifySignature } from '../../common/utils/signature';
@@ -120,7 +123,10 @@ export class CredentialService {
     return credentialEntity;
   }
 
-  public async validateCredential(reference: string): Promise<void> {
+  public async validateCredential(
+    reference: string,
+    workerAddress: string,
+  ): Promise<void> {
     const credential =
       await this.credentialRepository.findByReference(reference);
 
@@ -137,6 +143,7 @@ export class CredentialService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     credential.status = CredentialStatus.VALIDATED;
     await this.credentialRepository.save(credential);
 

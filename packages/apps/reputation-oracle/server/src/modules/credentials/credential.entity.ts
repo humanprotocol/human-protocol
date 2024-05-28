@@ -37,7 +37,7 @@ export class CredentialEntity extends BaseEntity {
   validations: CredentialValidationEntity[];
 }
 
-@Entity({ schema: NS, name: 'credential_validations' })
+@Entity('credential_validations')
 export class CredentialValidationEntity extends BaseEntity {
   @ManyToOne(() => CredentialEntity, { eager: true })
   credential: CredentialEntity;

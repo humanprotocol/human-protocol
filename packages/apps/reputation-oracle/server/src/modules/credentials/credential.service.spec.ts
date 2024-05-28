@@ -19,7 +19,6 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { UserRepository } from '../user/user.repository';
 
 jest.mock('../../common/utils/signature', () => ({
   verifySignature: jest.fn(),
@@ -44,7 +43,6 @@ describe('CredentialService', () => {
   let credentialService: CredentialService;
   let credentialRepository: CredentialRepository;
   let userService: UserService;
-  let userRepository: UserRepository;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -369,21 +367,30 @@ describe('CredentialService', () => {
   describe('validateCredential', () => {
     it('should validate an active credential', async () => {
       const credential = { status: 'ACTIVE' } as CredentialEntity;
+      const workerAddress = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+
       jest
         .spyOn(credentialRepository, 'findByReference')
         .mockResolvedValue(credential);
-      jest.spyOn(credentialRepository, 'save').mockResolvedValue(credential);
+      jest
+        .spyOn(credentialRepository, 'save')
+        .mockImplementation(async (cred) => {
+          cred.status = 'VALIDATED' as any;
+          return cred as CredentialEntity;
+        });
 
-      await credentialService.validateCredential('ref123');
+      await credentialService.validateCredential('ref123', workerAddress);
       expect(credential.status).toEqual('VALIDATED');
     });
 
     it('should throw an error if the credential is not found', async () => {
+      const workerAddress = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+
       jest
         .spyOn(credentialRepository, 'findByReference')
         .mockResolvedValue(null);
       await expect(
-        credentialService.validateCredential('ref123'),
+        credentialService.validateCredential('ref123', workerAddress),
       ).rejects.toThrow('Credential not found.');
     });
   });
