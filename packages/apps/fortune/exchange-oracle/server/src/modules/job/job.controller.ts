@@ -89,13 +89,8 @@ export class JobController {
   solveJob(
     @Request() req: RequestWithUser,
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() body: SolveJobDto,
+    @Body() data: SolveJobDto,
   ): Promise<void> {
-    return this.jobService.solveJob(
-      body.chainId,
-      body.escrowAddress,
-      body.assignmentId,
-      body.solution,
-    );
+    return this.jobService.solveJob(data.assignmentId, data.solution);
   }
 }

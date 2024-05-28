@@ -127,22 +127,25 @@ export class JobService {
     return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
   }
 
-  public async solveJob(
-    chainId: number,
-    escrowAddress: string,
-    workerAddress: string,
-    solution: string,
-  ): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw new BadRequestException('Invalid address');
+  public async solveJob(assignmentId: string, solution: string): Promise<void> {
+    const assignment = await this.assignmentRepository.findOne({
+      where: { id: parseInt(assignmentId) },
+      relations: ['job'],
+    });
+
+    if (!assignment) {
+      throw new BadRequestException('Assignment not found');
     }
 
-    const assignment = await this.assignmentRepository.findOneByEscrowAndWorker(
-      escrowAddress,
-      workerAddress,
-    );
-    if (!assignment) {
-      throw new BadRequestException('User is not assigned to the job');
+    const { workerAddress, job } = assignment;
+    if (!job) {
+      throw new NotFoundException('Job not found for the assignment');
+    }
+
+    const { escrowAddress, chainId } = job;
+
+    if (!ethers.isAddress(escrowAddress)) {
+      throw new BadRequestException('Invalid address');
     }
 
     await this.addSolution(chainId, escrowAddress, workerAddress, solution);
@@ -281,31 +284,5 @@ export class JobService {
 
       throw new NotFoundException('Unable to get manifest');
     } else return manifest;
-  }
-
-  public async getAddressesByAssignmentId(assignmentId: number): Promise<{
-    workerAddress: string;
-    escrowAddress: string;
-    chainId: number;
-  }> {
-    const assignment = await this.assignmentRepository.findOne({
-      where: { id: assignmentId },
-      relations: ['job'],
-    });
-    if (!assignment) {
-      throw new NotFoundException('Assignment not found');
-    }
-
-    const { workerAddress, job } = assignment;
-    if (!job) {
-      throw new NotFoundException('Job not found for the assignment');
-    }
-
-    const { escrowAddress, chainId } = job;
-    return {
-      workerAddress,
-      escrowAddress,
-      chainId,
-    };
   }
 }

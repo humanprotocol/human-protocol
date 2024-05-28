@@ -6,18 +6,13 @@ import { GetJobsDto, SolveJobDto, JobDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobSortField, JobStatus, JobType } from '../../common/enums/job';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('../../common/utils/signature');
 
 describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
-
-  const chainId = 1;
-  const assignmentId = '1';
-  const signature = 'human-signature';
-  const escrowAddress = '0x1234567890123456789012345678901234567890';
-  const workerAddress = '0x1234567890123456789012345678901234567891';
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -69,27 +64,16 @@ describe('JobController', () => {
 
   describe('solveJob', () => {
     it('should call jobService.solveJob', async () => {
-      const solution = 'job-solution';
       const solveJobDto: SolveJobDto = {
-        chainId,
-        escrowAddress,
-        solution,
-        assignmentId,
+        assignmentId: '1',
+        escrowAddress: '0x1234567890123456789012345678901234567890',
+        chainId: ChainId.MAINNET,
+        solution: 'job-solution',
       };
 
-      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
-
-      await jobController.solveJob(
-        {
-          user: { address: workerAddress },
-        } as RequestWithUser,
-        signature,
-        solveJobDto,
-      );
+      await jobController.solveJob({} as any, 'signature', solveJobDto);
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
-        solveJobDto.chainId,
-        solveJobDto.escrowAddress,
         solveJobDto.assignmentId,
         solveJobDto.solution,
       );
