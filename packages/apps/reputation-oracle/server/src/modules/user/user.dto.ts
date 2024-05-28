@@ -51,10 +51,6 @@ export class UserUpdateDto {
 }
 
 export class RegisterAddressRequestDto {
-  @ApiProperty({ name: 'chain_id' })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
   @ApiProperty()
   @IsString()
   public address: string;
