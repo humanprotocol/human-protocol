@@ -79,13 +79,6 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
-    goerli: {
-      chainId: 5,
-      url: process.env.ETH_GOERLI_TESTNET_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-      timeout: 2000000,
-    },
     sepolia: {
       chainId: 11155111,
       url: process.env.ETH_SEPOLIA_URL || '',
@@ -96,13 +89,6 @@ const config: HardhatUserConfig = {
     polygon: {
       chainId: 137,
       url: process.env.ETH_POLYGON_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-      timeout: 2000000,
-    },
-    polygonMumbai: {
-      chainId: 80001,
-      url: process.env.ETH_POLYGON_MUMBAI_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
@@ -219,12 +205,9 @@ const config: HardhatUserConfig = {
   ],
   etherscan: {
     apiKey: {
-      // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
-      goerli: process.env.ETHERSCAN_API_KEY || '',
       sepolia: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
       polygonAmoy: process.env.AMOY_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',

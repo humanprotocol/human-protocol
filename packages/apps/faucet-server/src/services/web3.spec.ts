@@ -9,11 +9,16 @@
 import dotenv from 'dotenv';
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol/HMToken.json';
 import { describe, expect, it } from '@jest/globals';
-import { checkFaucetBalance, getFaucetBalance, sendFunds } from './web3';
+import {
+  checkFaucetBalance,
+  getFaucetBalance,
+  getHmtBalance,
+  sendFunds,
+} from './web3';
 import { Contract } from 'web3-eth-contract';
 import Web3 from 'web3';
 
-dotenv.config();
+dotenv.config({ path: `.env.example` });
 
 let token: Contract<typeof HMToken.abi>;
 
@@ -44,6 +49,12 @@ describe('Faucet', () => {
     const result = await getFaucetBalance(web3, token.options.address);
 
     expect(result).toBe(web3.utils.toWei('100000', 'ether'));
+  });
+
+  it('Check HMT balance', async () => {
+    const result = await getHmtBalance(web3, token.options.address);
+
+    expect(result).toBe(100000000000000000000000000000000000000000n);
   });
 
   it('Send balance', async () => {
@@ -81,5 +92,31 @@ describe('Faucet', () => {
     ).send({ from: owner.address });
 
     expect(await checkFaucetBalance(web3, token.options.address)).toBeFalsy();
+  });
+
+  it('Check min balance threshold for ERC20 token', async () => {
+    const oldFaucetBalance = await getFaucetBalance(
+      web3,
+      token.options.address
+    );
+    const oldUserBalance = await (token.methods.balanceOf as any)(
+      externalUser
+    ).call();
+
+    await sendFunds(web3, token.options.address, externalUser);
+
+    const newFaucetBalance = await getFaucetBalance(
+      web3,
+      token.options.address
+    );
+    const newUserBalance = await (token.methods.balanceOf as any)(
+      externalUser
+    ).call();
+
+    expect(Number(newFaucetBalance)).toBe(Number(oldFaucetBalance) - 10);
+    expect(oldUserBalance).toBe(
+      web3.utils.toBigInt(newUserBalance) -
+        web3.utils.toBigInt(web3.utils.toWei('10', 'ether'))
+    );
   });
 });

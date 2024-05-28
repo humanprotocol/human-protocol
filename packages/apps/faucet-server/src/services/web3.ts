@@ -28,6 +28,15 @@ export const getFaucetBalance = async (web3: Web3, hmtAddress: string) => {
   return balance;
 };
 
+export const getHmtBalance = async (web3: Web3, hmtAddress: string) => {
+  const HMT = new web3.eth.Contract(hmtAbi, hmtAddress);
+  return (HMT.methods.balanceOf as any)(web3.eth.defaultAccount).call();
+};
+
+export const getNativeBalance = async (web3: Web3) => {
+  return await web3.eth.getBalance(web3.eth.defaultAccount);
+};
+
 export const sendFunds = async (
   web3: Web3,
   hmtAddress: string,
