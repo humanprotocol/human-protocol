@@ -1,7 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource } from 'typeorm';
 import { CredentialEntity } from './credential.entity';
+import { UserType } from '../../common/enums/user';
+import { CredentialStatus } from '../../common/enums/credential';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class CredentialRepository extends BaseRepository<CredentialEntity> {
@@ -25,5 +28,54 @@ export class CredentialRepository extends BaseRepository<CredentialEntity> {
     }
     const credentials = await queryBuilder.getMany();
     return credentials;
+  }
+
+  async findCredentials(
+    user: any,
+    status?: string,
+    reference?: string,
+  ): Promise<CredentialEntity[]> {
+    let query = this.createQueryBuilder('credential');
+    query = query.where('credential.userId = :userId', { userId: user.id });
+
+    if (reference) {
+      query = query.andWhere('credential.reference = :reference', {
+        reference,
+      });
+    }
+
+    if (status) {
+      query = query.andWhere('credential.status = :status', { status });
+    }
+
+    if (user.role === UserType.WORKER) {
+      query = query
+        .leftJoinAndSelect('credential.validations', 'validation')
+        .leftJoinAndSelect('validation.user', 'user')
+        .andWhere('user.id = :userId', { userId: user.id });
+    }
+
+    const credentials = await query.getMany();
+
+    if (user.role === UserType.CREDENTIAL_VALIDATOR) {
+      return credentials.filter(
+        (credential) =>
+          credential.status === CredentialStatus.ACTIVE ||
+          credential.status === CredentialStatus.EXPIRED,
+      );
+    } else if (user.role === UserType.WORKER) {
+      return credentials.map((credential) => {
+        const validation = credential.validations.find(
+          (v) => v.user.id === user.id,
+        );
+        const credentialWithCertificate = new CredentialEntity();
+        Object.assign(credentialWithCertificate, credential, {
+          certificate: validation ? validation.certificate : null,
+        });
+        return credentialWithCertificate;
+      });
+    } else {
+      throw new ControlledError('Invalid user role', HttpStatus.UNAUTHORIZED);
+    }
   }
 }

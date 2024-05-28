@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger, HttpException } from '@nestjs/common';
+import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { CreateCredentialDto } from './credential.dto';
 import { CredentialRepository } from './credential.repository';
 import { CredentialEntity } from './credential.entity';
@@ -8,11 +8,8 @@ import { verifySignature } from '../../common/utils/signature';
 import { ChainId, KVStoreClient, EscrowClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { UserType } from '../../common/enums/user';
 import { UserService } from '../user/user.service';
 import { ControlledError } from '../../common/errors/controlled';
-import { UnauthorizedException } from '@nestjs/common';
-import { ErrorAuth } from '../../common/constants/errors';
 
 @Injectable()
 export class CredentialService {
@@ -53,55 +50,12 @@ export class CredentialService {
     user: any,
     status?: string,
     reference?: string,
-  ): Promise<any[]> {
-    let query = this.credentialRepository.createQueryBuilder('credential');
-
-    if (reference) {
-      query = query.andWhere('credential.reference = :reference', {
-        reference,
-      });
-    }
-
-    if (status) {
-      query = query.andWhere('credential.status = :status', { status });
-    }
-
-    if (user.role === UserType.WORKER) {
-      query = query
-        .leftJoinAndSelect('credential.validations', 'validation')
-        .leftJoinAndSelect('validation.user', 'user')
-        .andWhere('user.id = :userId', { userId: user.id });
-    }
-
-    try {
-      const credentials = await query.getMany();
-
-      if (user.role === UserType.CREDENTIAL_VALIDATOR) {
-        return credentials.filter(
-          (credential) =>
-            credential.status === CredentialStatus.ACTIVE ||
-            credential.status === CredentialStatus.EXPIRED,
-        );
-      } else if (user.role === UserType.WORKER) {
-        return credentials.map((credential) => {
-          const validation = credential.validations.find(
-            (v) => v.user.id === user.id,
-          );
-          return {
-            ...credential,
-            certificate: validation ? validation.certificate : null,
-          };
-        });
-      } else {
-        throw new UnauthorizedException('Invalid user role');
-      }
-      return query.getMany();
-    } catch (error) {
-      throw new ControlledError(
-        `Failed to fetch credentials: ${error.message}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  ): Promise<CredentialEntity[]> {
+    return await this.credentialRepository.findCredentials(
+      user,
+      status,
+      reference,
+    );
   }
 
   public async getByReference(
@@ -156,11 +110,11 @@ export class CredentialService {
     });
 
     if (!credential) {
-      throw new HttpException('Credential not found', HttpStatus.NOT_FOUND);
+      throw new ControlledError('Credential not found', HttpStatus.NOT_FOUND);
     }
 
     if (credential.status !== CredentialStatus.VALIDATED) {
-      throw new HttpException(
+      throw new ControlledError(
         'Credential is not in a valid state for on-chain addition.',
         HttpStatus.BAD_REQUEST,
       );
@@ -178,11 +132,7 @@ export class CredentialService {
     );
 
     if (!verifySignature(signatureBody.contents, signature, [workerAddress])) {
-      throw new UnauthorizedException('Invalid signature');
-      throw new ControlledError(
-        ErrorAuth.InvalidSignature,
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new ControlledError('Invalid signature', HttpStatus.UNAUTHORIZED);
     }
 
     const currentWeb3Env = this.web3ConfigService.env;

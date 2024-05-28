@@ -6,9 +6,7 @@ import {
   Query,
   UseGuards,
   Req,
-  HttpException,
   HttpStatus,
-  UseFilters,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -26,6 +24,8 @@ import {
 } from './credential.dto';
 import { Public } from '../../common/decorators';
 import { UserType } from '../../common/enums/user';
+import { ControlledError } from '../../common/errors/controlled';
+
 @Public()
 @ApiTags('Credentials')
 @Controller('credential')
@@ -46,21 +46,11 @@ export class CredentialController {
     @Body() createCredentialDto: CreateCredentialDto,
   ): Promise<{ credential_id: number }> {
     if (req.user.role !== UserType.CREDENTIAL_VALIDATOR) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
-    try {
-      const credential =
-        await this.credentialService.createCredential(createCredentialDto);
-      return { credential_id: credential.id };
-    } catch (error) {
-      if (error.code === '23505') {
-        throw new HttpException('Duplicate reference', HttpStatus.CONFLICT);
-      }
-      throw new HttpException(
-        'Failed to create credential',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const credential =
+      await this.credentialService.createCredential(createCredentialDto);
+    return { credential_id: credential.id };
   }
 
   @ApiBearerAuth()
@@ -77,19 +67,12 @@ export class CredentialController {
     @Query() query: CredentialQueryDto,
   ): Promise<any> {
     const { status, reference } = query;
-    try {
-      const credentials = await this.credentialService.getCredentials(
-        req.user,
-        status,
-        reference,
-      );
-      return credentials;
-    } catch (error) {
-      throw new HttpException(
-        'Failed to fetch credentials',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const credentials = await this.credentialService.getCredentials(
+      req.user,
+      status,
+      reference,
+    );
+    return credentials;
   }
 
   @ApiBearerAuth()
