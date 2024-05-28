@@ -164,7 +164,7 @@ describe('UserService', () => {
 
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        { chainId: ChainId.POLYGON_AMOY, address },
+        { address },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -182,7 +182,6 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(
@@ -204,7 +203,6 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(
