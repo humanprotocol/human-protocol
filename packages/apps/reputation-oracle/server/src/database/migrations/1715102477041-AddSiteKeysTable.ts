@@ -20,9 +20,17 @@ export class AddSiteKeysTable1715102477041 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" ADD CONSTRAINT "FK_178ba06ffb4808dbb40e782231e" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
+
+    await queryRunner.query(`
+      CREATE UNIQUE INDEX "IDX_031d62ae4b47ae1a15c3d68179" ON "hmt"."site_keys" ("site_key", "type")
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+        DROP INDEX "hmt"."IDX_031d62ae4b47ae1a15c3d68179"
+      `);
+
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" DROP CONSTRAINT "FK_178ba06ffb4808dbb40e782231e"`,
     );

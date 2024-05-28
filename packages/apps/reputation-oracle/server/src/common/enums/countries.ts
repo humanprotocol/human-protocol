@@ -1,3 +1,7 @@
+// Mapping of ISO-3166 alpha-3 country codes (used by Synaps) to alpha-2 country codes (used by hCaptcha).
+// Note: There is an issue where certain country codes returned by Synaps do not work with hCaptcha.
+// This mapping aims to ensure that all alpha-3 codes
+// are correctly converted to their alpha-2 counterparts to avoid such issues.
 export const countriesA3ToA2: { [key: string]: string } = {
   AFG: 'AF',
   ALA: 'AX',

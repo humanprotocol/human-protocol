@@ -64,7 +64,7 @@ export enum ErrorUser {
   IncorrectAddress = 'Incorrect address',
   KycNotApproved = 'KYC not approved',
   UserNotActive = 'User not active',
-  LabelingEnableFailed = 'Failed to enable labeling for this account.',
+  LabelingEnableFailed = 'Failed to enable labeling for this account',
   InvalidType = 'User has invalid type',
 }
 
