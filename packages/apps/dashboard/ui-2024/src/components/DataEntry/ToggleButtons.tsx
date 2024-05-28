@@ -38,6 +38,9 @@ const ToggleButtons = ({
 				<ToggleButton
 					key={elem.name}
 					sx={{
+						'.MuiTypography-root': {
+							wordBreak: 'normal',
+						},
 						'&.Mui-selected': {
 							backgroundColor: colorPalette.primary.main,
 							color: colorPalette.white,
