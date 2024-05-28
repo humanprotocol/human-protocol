@@ -4,6 +4,21 @@ import SmallGraph from '@components/Home/SmallGraph';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
+const firstGraphData = [
+	{
+		name: '2024-01-01',
+		value: 3000000,
+	},
+	{
+		name: '2024-01-02',
+		value: 4000000,
+	},
+	{
+		name: '2024-01-03',
+		value: 5000000,
+	},
+];
+
 const GraphSwiper = () => {
 	return (
 		<Swiper
@@ -13,13 +28,13 @@ const GraphSwiper = () => {
 			className="mySwiper"
 		>
 			<SwiperSlide>
-				<SmallGraph title="Transaction history" />
+				<SmallGraph graphData={firstGraphData} title="Transaction history" />
 			</SwiperSlide>
 			<SwiperSlide>
-				<SmallGraph title="Transaction history 2" />
+				<SmallGraph graphData={firstGraphData} title="Transaction history 2" />
 			</SwiperSlide>
 			<SwiperSlide>
-				<SmallGraph title="Transaction history 3" />
+				<SmallGraph graphData={firstGraphData} title="Transaction history 3" />
 			</SwiperSlide>
 		</Swiper>
 	);

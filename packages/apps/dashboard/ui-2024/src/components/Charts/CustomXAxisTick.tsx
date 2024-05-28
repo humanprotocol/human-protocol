@@ -1,6 +1,7 @@
 import { colorPalette } from '@assets/styles/color-palette';
 // @ts-expect-error -- import error, but this type work property
 import { ContentRenderer } from 'recharts';
+import { formatDate } from '@helpers/formatDate';
 
 const CustomXAxisTick = ({ x, y, payload }: ContentRenderer<string>) => {
 	return (
@@ -13,7 +14,7 @@ const CustomXAxisTick = ({ x, y, payload }: ContentRenderer<string>) => {
 				fontSize={10}
 				fontWeight={500}
 			>
-				{payload.value}
+				{formatDate(payload.value, 'D MMM')}
 			</text>
 		</g>
 	);

@@ -1,8 +1,8 @@
 import {
 	AreaChart,
 	Area,
-	// XAxis,
-	// YAxis,
+	XAxis,
+	YAxis,
 	CartesianGrid,
 	Tooltip,
 	ResponsiveContainer,
@@ -15,6 +15,8 @@ import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
 import { useState } from 'react';
+import { formatDate } from '@helpers/formatDate';
+import { formatNumber } from '@helpers/formatNumber';
 
 const TIME_PERIOD_OPTIONS = [
 	{
@@ -59,7 +61,7 @@ const CustomSmallChartTooltip = ({
 					{payload?.map((elem) => (
 						<>
 							<Typography fontWeight={500} variant="caption">
-								{elem.payload.name}
+								{formatDate(elem.payload.name, 'MMMM d, YYYY')}
 							</Typography>
 							<Typography fontWeight={500} variant="h6" component="p">
 								{elem.value ? elem.value.toLocaleString('en-US') : ''}
@@ -73,27 +75,16 @@ const CustomSmallChartTooltip = ({
 	return null;
 };
 
-const data = [
-	{
-		name: 'January 1, 2024',
-		value: 100000,
-	},
-	{
-		name: 'January 2, 2024',
-		value: 200000,
-	},
-	{
-		name: 'January 3, 2024',
-		value: 300000,
-	},
-];
-
 interface SmallGraphProps {
+	graphData: {
+		name: string;
+		value: number;
+	}[];
 	title: string;
 }
 
-const SmallGraph = ({ title }: SmallGraphProps) => {
-	const [selectedTimePeriod, selectTimePeriod] = useState<string>('1W');
+const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
+	const [selectedTimePeriod, selectTimePeriod] = useState<string>('24H');
 
 	const handleTimePeriod = (
 		_event: React.MouseEvent<HTMLElement>,
@@ -107,12 +98,11 @@ const SmallGraph = ({ title }: SmallGraphProps) => {
 		<>
 			<ResponsiveContainer height={150}>
 				<AreaChart
-					data={data}
+					data={graphData}
 					margin={{
 						top: 5,
 						right: 50,
-						left: 50,
-						bottom: 5,
+						left: 0,
 					}}
 				>
 					<defs>
@@ -121,10 +111,33 @@ const SmallGraph = ({ title }: SmallGraphProps) => {
 							<stop offset={'100%'} stopColor="#B4C2E505" stopOpacity={0} />
 						</linearGradient>
 					</defs>
-					//Todo y axis and x axis should have first and last value like in the
-					mockup
-					{/*<XAxis dataKey="name" />*/}
-					{/*<YAxis />*/}
+					<XAxis
+						style={{
+							fontSize: 10,
+							fontWeight: 500,
+						}}
+						axisLine={false}
+						interval="preserveStartEnd"
+						dataKey="name"
+						stroke={colorPalette.fog.main}
+						tickFormatter={(value) => formatDate(value, 'd MMM')}
+						tick={{ dy: 10 }}
+						tickSize={0}
+						ticks={[graphData[0].name, graphData[graphData.length - 1].name]}
+					/>
+					<YAxis
+						style={{
+							fontSize: 10,
+							fontWeight: 500,
+						}}
+						axisLine={false}
+						dataKey="value"
+						tick={{ dx: -10 }}
+						tickSize={0}
+						stroke={colorPalette.fog.main}
+						tickFormatter={formatNumber}
+						ticks={[0, graphData[graphData.length - 1].value]}
+					/>
 					<CartesianGrid stroke="#ccc" strokeDasharray="7" vertical={false} />
 					<Tooltip content={<CustomSmallChartTooltip />} />
 					<Area

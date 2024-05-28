@@ -23,7 +23,11 @@ const ToggleCharts = ({
 	onMouseEnter,
 }: ToggleChartsProps) => {
 	return (
-		<FormGroup>
+		<FormGroup
+			sx={{
+				marginX: { sx: 4, md: 0 },
+			}}
+		>
 			<Stack
 				gap={{ xs: 2, md: 6 }}
 				direction={{ xs: 'column', md: 'row' }}
@@ -56,11 +60,11 @@ const ToggleCharts = ({
 						label={
 							<>
 								<Typography fontWeight={600}>{elem.title}</Typography>
-								<Typography variant="h5" fontWeight={500} component="p">
+								<Typography variant="h4" component="p">
 									{elem.amount ? elem.amount.toLocaleString('en-US') : ''}
 									{elem.name === 'transferAmount' && elem.isAreaChart && (
 										<Typography
-											variant="h5"
+											variant="h4"
 											component="span"
 											sx={{
 												marginLeft: 1,

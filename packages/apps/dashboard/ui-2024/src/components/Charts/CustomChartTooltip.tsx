@@ -5,6 +5,7 @@ import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { colorPalette } from '@assets/styles/color-palette';
+import { formatDate } from '@helpers/formatDate';
 
 const renderTitle = (title: string) => {
 	const currentTitle: Record<string, string> = {
@@ -39,7 +40,7 @@ const CustomChartTooltip = ({
 						variant="subtitle1"
 						fontWeight={500}
 					>
-						{label}
+						{formatDate(label, 'MMMM d, YYYY')}
 					</Typography>
 					{payload?.map((elem) => (
 						<Stack key={elem.name} direction="row" alignItems="center" gap={2}>

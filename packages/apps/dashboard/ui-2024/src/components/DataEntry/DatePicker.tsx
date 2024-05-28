@@ -69,6 +69,9 @@ const CustomDaterPicker = ({ props }: CustomDatePickerProps) => {
 			onClose={() => setOpen(false)}
 			onOpen={() => setOpen(true)}
 			sx={{
+				'&. MuiPickersCalendarHeader-label': {
+					fontSize: 50,
+				},
 				'& .StaticDatePicker-calendarContainer .DayPicker-Day': {
 					fontSize: 14,
 				},
