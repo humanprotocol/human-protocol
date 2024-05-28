@@ -33,9 +33,6 @@ const ToggleButtons = ({
 			aria-label="text-alignment"
 			onChange={onValueChange}
 			exclusive
-			sx={{
-				gap: 1,
-			}}
 		>
 			{buttonOptions.map((elem) => (
 				<ToggleButton
