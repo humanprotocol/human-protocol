@@ -17,8 +17,8 @@ const Graph = () => {
 		setGraphType(newValue);
 	};
 	return (
-		<PageWrapper>
-			<Breadcrumbs title='Charts' />
+		<PageWrapper displaySearchBar className="standard-background">
+			<Breadcrumbs title="Charts" />
 			<TabContext value={graphType}>
 				<Tabs
 					textColor="primary"

@@ -16,6 +16,11 @@
     border-radius: 16px;
     padding: 24px 32px;
     width: calc(38% - 24px);
+
+    @media (max-width: 660px) {
+      padding: 24px 16px;
+    }
+
     .box-title{
       font-size: 14px;
       height: 32px;
@@ -43,7 +48,7 @@
   .home-page-box:first-child{
     width: 24%;
   }
-  @media (max-width: 1100px) {
+  @media (max-width: 1250px) {
     flex-wrap: wrap;
     .home-page-box, .home-page-box:first-child{
       width: 100%;
@@ -94,6 +99,7 @@
     align-items: center;
     gap: 8px;
   }
+
 }
 
 .home-page-table-row{
@@ -142,6 +148,12 @@
   .reputation-table-soon{
     color: $soon;
     border: 1px solid $soonBorder;
+  }
+
+  &:hover {
+    transition: opacity 8ms;
+    opacity: 0.8;
+    cursor: pointer;
   }
 }
 

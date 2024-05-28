@@ -22,7 +22,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 
 import SimpleBar from 'simplebar-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import bitfinex from '@assets/bitfinex.png';
 import probitGlobal from '@assets/probitGlobal.png';
@@ -45,6 +45,7 @@ import HumanIcon from '@components/Icons/HumanIcon';
 import PolygonIcon from '@components/Icons/PolygonIcon';
 import CeloIcon from '@assets/icons/celo.svg';
 import SvgIcon from '@mui/material/SvgIcon';
+import GraphSwiper from '@components/Home/GraphSwiper';
 
 function createData(
 	role: string,
@@ -122,6 +123,7 @@ type networkTypes =
 
 const Home: React.FC = () => {
 	const [network, setNetwork] = useState<networkTypes>('all');
+	const navigate = useNavigate();
 
 	const handleChange = (event: SelectChangeEvent) => {
 		setNetwork(event.target.value as networkTypes);
@@ -212,7 +214,7 @@ const Home: React.FC = () => {
 		if (network === 'all') {
 			return (
 				<>
-					{networkDetails['ethereum'].icon}
+					{networkDetails['alpha'].icon}
 					{networkDetails['ethereum'].title}
 				</>
 			);
@@ -327,7 +329,7 @@ const Home: React.FC = () => {
 	return (
 		<PageWrapper violetHeader>
 			<div className="home-page-header">
-				<Typography variant="h5" fontWeight={700}>
+				<Typography variant="h3" fontWeight={600}>
 					All HUMAN activity. In one place.
 				</Typography>
 				<Search className="home-page-search" />
@@ -342,7 +344,9 @@ const Home: React.FC = () => {
 							</Tooltip>
 						</div>
 						<div>
-							HMT Price
+							<Typography variant="h6" component="p">
+								HMT Price
+							</Typography>
 							<div className="count">$0.0455</div>
 						</div>
 					</div>
@@ -358,7 +362,9 @@ const Home: React.FC = () => {
 							</Tooltip>
 						</div>
 						<div>
-							Holders
+							<Typography variant="h6" component="p">
+								Holders
+							</Typography>
 							<div className="count">32,306</div>
 						</div>
 					</div>
@@ -383,7 +389,9 @@ const Home: React.FC = () => {
 							</Tooltip>
 						</div>
 						<div>
-							Total Transactions
+							<Typography variant="h6" component="p">
+								Total Transactions
+							</Typography>
 							<div className="count">
 								1,786,573 <span>(12.8 TPS)</span>
 							</div>
@@ -401,12 +409,16 @@ const Home: React.FC = () => {
 							</Tooltip>
 						</div>
 						<div>
-							Total Number of Tasks
+							<Typography variant="h6" component="p">
+								Total Number of Tasks
+							</Typography>
 							<div className="count">2,658,409</div>
 						</div>
 					</div>
 				</div>
-				<div className="home-page-box">Graf</div>
+				<div className="home-page-box">
+					<GraphSwiper />
+				</div>
 			</div>
 			<span className="home-page-find-title-mobile">Find HMT at</span>
 			<SimpleBar>
@@ -499,7 +511,11 @@ const Home: React.FC = () => {
 						</TableHead>
 						<TableBody>
 							{rows.map((row) => (
-								<TableRow key={row.role} className="home-page-table-row">
+								<TableRow
+									onClick={() => navigate(`/search/${row.address}`)}
+									key={row.role}
+									className="home-page-table-row"
+								>
 									<TableCell>
 										{renderIcon(row)}
 										{row.role}

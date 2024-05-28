@@ -18,73 +18,74 @@ import DatePicker from '@components/DataEntry/DatePicker';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
 import dayjs, { Dayjs } from 'dayjs';
 import ToggleCharts from '@components/Charts/ToggleCharts';
+import { formatNumber } from '@helpers/formatNumber';
 
 const HARDCODED_CHART_DATA = [
 	{
-		name: 'Jan 1',
+		name: '2024-01-01',
 		transferAmount: 100,
 		transactionsCount: 2000,
 		uniqueReceivers: 3000,
 		uniqueSenders: 200,
 	},
 	{
-		name: 'Jan 2',
+		name: '2024-01-02',
 		transferAmount: 150,
 		transactionsCount: 2200,
 		uniqueReceivers: 3200,
 		uniqueSenders: 250,
 	},
 	{
-		name: 'Jan 3',
+		name: '2024-01-03',
 		transferAmount: 200,
 		transactionsCount: 2500,
 		uniqueReceivers: 3500,
 		uniqueSenders: 300,
 	},
 	{
-		name: 'Jan 4',
+		name: '2024-01-04',
 		transferAmount: 120,
 		transactionsCount: 2100,
 		uniqueReceivers: 3100,
 		uniqueSenders: 220,
 	},
 	{
-		name: 'Jan 5',
+		name: '2024-01-05',
 		transferAmount: 180,
 		transactionsCount: 2300,
 		uniqueReceivers: 3400,
 		uniqueSenders: 270,
 	},
 	{
-		name: 'Jan 6',
+		name: '2024-01-06',
 		transferAmount: 130,
 		transactionsCount: 2400,
 		uniqueReceivers: 3300,
 		uniqueSenders: 230,
 	},
 	{
-		name: 'Jan 7',
+		name: '2024-01-07',
 		transferAmount: 170,
 		transactionsCount: 2600,
 		uniqueReceivers: 3600,
 		uniqueSenders: 280,
 	},
 	{
-		name: 'Jan 8',
+		name: '2024-01-08',
 		transferAmount: 140,
 		transactionsCount: 2700,
 		uniqueReceivers: 3700,
 		uniqueSenders: 2400,
 	},
 	{
-		name: 'Jan 9',
+		name: '2024-01-09',
 		transferAmount: 160,
 		transactionsCount: 2800,
 		uniqueReceivers: 3800,
 		uniqueSenders: 2900,
 	},
 	{
-		name: 'Jan 10',
+		name: '2024-01-10',
 		transferAmount: 190,
 		transactionsCount: 600,
 		uniqueReceivers: 1000,
@@ -137,7 +138,6 @@ export const AreaChart = () => {
 		CHECKED_CHARTS_DEFAULT_STATE
 	);
 	const chartRef = useRef<HTMLDivElement>(null);
-
 	const [currentHoveredChart, setCurrentHoveredChart] = useState(
 		HOVERED_CHARTS_DEFAULT_STATE
 	);
@@ -183,6 +183,9 @@ export const AreaChart = () => {
 			const handleScrollChangeDate = (event: WheelEvent) => {
 				if (event.deltaY < 0) {
 					setFromDate((prevState) => {
+						if (prevState.isAfter(toDate) || prevState.isSame(toDate)) {
+							return prevState;
+						}
 						return prevState.add(1, 'day');
 					});
 				} else if (event.deltaY > 0) {
@@ -198,7 +201,7 @@ export const AreaChart = () => {
 				currentRef.removeEventListener('wheel', handleScrollChangeDate);
 			};
 		}
-	}, []);
+	}, [toDate]);
 
 	return (
 		<Card
@@ -293,14 +296,20 @@ export const AreaChart = () => {
 							/>
 						</linearGradient>
 					</defs>
-					<YAxis />
+					<YAxis
+						tickFormatter={formatNumber}
+						tick={{ dx: -10 }}
+						tickSize={0}
+						axisLine={false}
+						stroke={colorPalette.fog.main}
+					/>
 					<CartesianGrid stroke="#ccc" strokeDasharray="5" vertical={false} />
 					<XAxis
+						axisLine={false}
 						tick={<CustomXAxisTick />}
 						height={50}
 						stroke={colorPalette.fog.dark}
 						tickSize={20}
-						axisLine={false}
 						dataKey="name"
 						tickMargin={10}
 					/>
@@ -347,7 +356,7 @@ export const AreaChart = () => {
 				sx={{
 					paddingY: 3,
 					marginTop: 3,
-					paddingX: 4,
+					marginLeft: { xs: 0, xl: 6 },
 					backgroundColor: colorPalette.overlay.light,
 				}}
 			>

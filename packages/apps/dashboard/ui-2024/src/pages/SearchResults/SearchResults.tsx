@@ -50,7 +50,7 @@ const SearchResults = () => {
 	const { tokenId } = useParams();
 	const [currentState] = useState<
 		'roleDetails' | 'escrowAddress' | 'walletAddress' | null
-	>(null);
+	>('roleDetails');
 	return (
 		<PageWrapper displaySearchBar className="standard-background">
 			<Breadcrumbs title="Search Results" />
