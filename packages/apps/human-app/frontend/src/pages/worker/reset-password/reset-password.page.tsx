@@ -56,7 +56,7 @@ export function ResetPasswordWorkerPage() {
           </Alert>
         ) : undefined
       }
-      backArrowPath={-1}
+      backArrowPath="/worker/profile"
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>
