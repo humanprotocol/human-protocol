@@ -69,11 +69,7 @@ app.get('/stats', async (_request: Request, response: Response) => {
   const web3 = getWeb3(network.rpcUrl);
   response.send({
     account: web3.eth.defaultAccount,
-    balance: await getFaucetBalance(
-      web3,
-      network.hmtAddress,
-      network?.faucetAddress
-    ),
+    balance: await getFaucetBalance(web3, network.hmtAddress),
     dailyLimit: process.env.DAILY_LIMIT,
   });
 });
@@ -160,13 +156,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
     sendSlackNotification(message);
   }
 
-  if (
-    !(await checkFaucetBalance(
-      web3,
-      network.hmtAddress,
-      network?.faucetAddress
-    ))
-  ) {
+  if (!(await checkFaucetBalance(web3, network.hmtAddress))) {
     const message = `Faucet out of balance on ${network.title}`;
     sendSlackNotification(message);
 
@@ -176,12 +166,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
     });
   }
 
-  const txHash = await sendFunds(
-    web3,
-    network.hmtAddress,
-    toAddress,
-    network?.faucetAddress
-  );
+  const txHash = await sendFunds(web3, network.hmtAddress, toAddress);
 
   if (txHash) {
     lastSend.push({
