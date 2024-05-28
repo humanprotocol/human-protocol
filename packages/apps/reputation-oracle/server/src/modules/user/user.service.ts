@@ -116,7 +116,6 @@ export class UserService {
   public async registerAddress(
     user: UserEntity,
     data: RegisterAddressRequestDto,
-    chainId: ChainId = ChainId.POLYGON_AMOY,
   ): Promise<string> {
     if (user.evmAddress && user.evmAddress !== data.address) {
       throw new ControlledError(
@@ -135,7 +134,9 @@ export class UserService {
     user.evmAddress = data.address;
     await user.save();
 
-    return await this.web3Service.getSigner(chainId).signMessage(data.address);
+    return await this.web3Service
+      .getSigner(this.web3Service.getValidChains()[0])
+      .signMessage(data.address);
   }
 
   public async disableOperator(
