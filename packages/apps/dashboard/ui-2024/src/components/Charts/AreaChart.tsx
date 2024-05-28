@@ -138,9 +138,6 @@ export const AreaChart = () => {
 		CHECKED_CHARTS_DEFAULT_STATE
 	);
 	const chartRef = useRef<HTMLDivElement>(null);
-
-	console.log(toDate);
-
 	const [currentHoveredChart, setCurrentHoveredChart] = useState(
 		HOVERED_CHARTS_DEFAULT_STATE
 	);

@@ -22,7 +22,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 
 import SimpleBar from 'simplebar-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import bitfinex from '@assets/bitfinex.png';
 import probitGlobal from '@assets/probitGlobal.png';
@@ -123,6 +123,7 @@ type networkTypes =
 
 const Home: React.FC = () => {
 	const [network, setNetwork] = useState<networkTypes>('all');
+	const navigate = useNavigate();
 
 	const handleChange = (event: SelectChangeEvent) => {
 		setNetwork(event.target.value as networkTypes);
@@ -511,7 +512,7 @@ const Home: React.FC = () => {
 						<TableBody>
 							{rows.map((row) => (
 								<TableRow
-									onClick={() => console.log(row)}
+									onClick={() => navigate(`/search/${row.address}`)}
 									key={row.role}
 									className="home-page-table-row"
 								>

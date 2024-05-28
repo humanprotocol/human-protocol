@@ -99,6 +99,7 @@
     align-items: center;
     gap: 8px;
   }
+
 }
 
 .home-page-table-row{
@@ -147,6 +148,12 @@
   .reputation-table-soon{
     color: $soon;
     border: 1px solid $soonBorder;
+  }
+
+  &:hover {
+    transition: opacity 8ms;
+    opacity: 0.8;
+    cursor: pointer;
   }
 }
 
