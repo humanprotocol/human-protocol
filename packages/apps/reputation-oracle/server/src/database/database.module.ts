@@ -15,6 +15,8 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ServerConfigService } from '../common/config/server-config.service';
+import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
+import { CredentialEntity } from '../modules/credentials/credential.entity';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { ServerConfigService } from '../common/config/server-config.service';
           entities: [
             WebhookIncomingEntity,
             ReputationEntity,
+            CredentialEntity,
+            CredentialValidationEntity,
             TokenEntity,
             UserEntity,
             KycEntity,

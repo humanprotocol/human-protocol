@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { ethers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
@@ -32,10 +26,11 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { getRate } from '../../common/utils';
 import { add, div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
+import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from './rate.service';
 
 @Injectable()
 export class PaymentService {
@@ -47,6 +42,7 @@ export class PaymentService {
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private stripeConfigService: StripeConfigService,
+    private rateService: RateService,
   ) {
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,
@@ -72,12 +68,11 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    if (!paymentIntent.client_secret) {
-      this.logger.log(
+    if (!paymentIntent?.client_secret) {
+      throw new ControlledError(
         ErrorPayment.ClientSecretDoesNotExist,
-        PaymentService.name,
+        HttpStatus.NOT_FOUND,
       );
-      throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
     }
 
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
@@ -85,14 +80,13 @@ export class PaymentService {
     );
 
     if (paymentEntity) {
-      this.logger.log(
+      throw new ControlledError(
         ErrorPayment.TransactionAlreadyExists,
-        PaymentRepository.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(currency, Currency.USD);
+    const rate = await this.rateService.getRate(currency, Currency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -119,8 +113,7 @@ export class PaymentService {
     );
 
     if (!paymentData) {
-      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
-      throw new NotFoundException(ErrorPayment.NotFound);
+      throw new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND);
     }
 
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
@@ -133,8 +126,7 @@ export class PaymentService {
       !eq(paymentEntity.amount, div(paymentData.amount_received, 100)) ||
       paymentEntity.currency !== paymentData.currency
     ) {
-      this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
-      throw new NotFoundException(ErrorPayment.NotFound);
+      throw new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND);
     }
 
     if (
@@ -143,8 +135,10 @@ export class PaymentService {
     ) {
       paymentEntity.status = PaymentStatus.FAILED;
       await this.paymentRepository.updateOne(paymentEntity);
-      this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
-      throw new BadRequestException(ErrorPayment.NotSuccess);
+      throw new ControlledError(
+        ErrorPayment.NotSuccess,
+        HttpStatus.BAD_REQUEST,
+      );
     } else if (paymentData?.status !== StripePaymentStatus.SUCCEEDED) {
       return false; // TODO: Handling other cases
     }
@@ -171,23 +165,28 @@ export class PaymentService {
     );
 
     if (!transaction) {
-      this.logger.error(ErrorPayment.TransactionNotFoundByHash);
-      throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
+      throw new ControlledError(
+        ErrorPayment.TransactionNotFoundByHash,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     verifySignature(dto, signature, [transaction.from]);
 
     if (!transaction.logs[0] || !transaction.logs[0].data) {
-      this.logger.error(ErrorPayment.InvalidTransactionData);
-      throw new NotFoundException(ErrorPayment.InvalidTransactionData);
+      throw new ControlledError(
+        ErrorPayment.InvalidTransactionData,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if ((await transaction.confirmations()) < TX_CONFIRMATION_TRESHOLD) {
       this.logger.error(
         `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
       );
-      throw new NotFoundException(
+      throw new ControlledError(
         ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+        HttpStatus.NOT_FOUND,
       );
     }
 
@@ -207,8 +206,10 @@ export class PaymentService {
         })?.args['_to'],
       ) !== ethers.hexlify(signer.address)
     ) {
-      this.logger.error(ErrorPayment.InvalidRecipient);
-      throw new ConflictException(ErrorPayment.InvalidRecipient);
+      throw new ControlledError(
+        ErrorPayment.InvalidRecipient,
+        HttpStatus.CONFLICT,
+      );
     }
 
     const tokenId = (await tokenContract.symbol()).toLowerCase();
@@ -218,8 +219,10 @@ export class PaymentService {
       network?.tokens[tokenId] != tokenAddress ||
       !CoingeckoTokenId[tokenId]
     ) {
-      this.logger.log(ErrorPayment.UnsupportedToken, PaymentRepository.name);
-      throw new ConflictException(ErrorPayment.UnsupportedToken);
+      throw new ControlledError(
+        ErrorPayment.UnsupportedToken,
+        HttpStatus.CONFLICT,
+      );
     }
 
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
@@ -228,14 +231,13 @@ export class PaymentService {
     );
 
     if (paymentEntity) {
-      this.logger.log(
+      throw new ControlledError(
         ErrorPayment.TransactionAlreadyExists,
-        PaymentRepository.name,
+        HttpStatus.BAD_REQUEST,
       );
-      throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(tokenId, Currency.USD);
+    const rate = await this.rateService.getRate(tokenId, Currency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -254,21 +256,26 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number): Promise<number> {
+  public async getUserBalance(userId: number, rate?: number): Promise<number> {
     const paymentEntities = await this.paymentRepository.findByUserAndStatus(
       userId,
       PaymentStatus.SUCCEEDED,
     );
-
+    if (!rate) {
+      rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
+    }
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return add(total, mul(payment.amount, payment.rate));
+      if (payment.currency === TokenId.HMT) {
+        return add(total, mul(payment.amount, rate));
+      }
+      return add(total, payment.amount);
     }, 0);
 
     return totalAmount;
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {
-    const rate = await getRate(TokenId.HMT, Currency.USD);
+    const rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
 
     const paymentEntity = new PaymentEntity();
     Object.assign(paymentEntity, {

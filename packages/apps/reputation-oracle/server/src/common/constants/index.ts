@@ -1,6 +1,6 @@
 import { JobRequestType } from '../enums';
 
-export const SERVICE_NAME = 'Reputation Oracle';
+export const SERVICE_NAME = 'App';
 export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
@@ -29,6 +29,7 @@ export const CVAT_JOB_TYPES = [
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+export const LOGOUT_PATH = '/auth/logout';
 
 export const CURSE_WORDS = [
   '4r5e',

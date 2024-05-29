@@ -8,6 +8,7 @@ export const envValidator = Joi.object({
   FE_URL: Joi.string(),
   SESSION_SECRET: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
+  MINIMUM_FEE_USD: Joi.number(),
   // Auth
   JWT_PRIVATE_KEY: Joi.string().required(),
   JWT_PUBLIC_KEY: Joi.string().required(),
@@ -44,6 +45,8 @@ export const envValidator = Joi.object({
   RPC_URL_BSC_MAINNET: Joi.string(),
   RPC_URL_BSC_TESTNET: Joi.string(),
   RPC_URL_MOONBEAM: Joi.string(),
+  RPC_URL_XLAYER_TESTNET: Joi.string(),
+  RPC_URL_XLAYER: Joi.string(),
   RPC_URL_LOCALHOST: Joi.string(),
   // S3
   S3_ENDPOINT: Joi.string(),
@@ -76,4 +79,8 @@ export const envValidator = Joi.object({
   APIKEY_KEY_LENGTH: Joi.number(),
   // Cron Job Secret
   CRON_SECRET: Joi.string().required(),
+  //COIN API KEYS
+  RATE_CACHE_TIME: Joi.number().optional(),
+  COINMARKETCAP_API_KEY: Joi.string().optional(),
+  COINGECKO_API_KEY: Joi.string().optional(),
 });

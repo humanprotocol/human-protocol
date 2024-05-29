@@ -101,7 +101,7 @@ contract MetaHumanGovernor is
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) public virtual override(Governor, IGovernor) returns (uint256) {
+    ) public virtual override(Governor) returns (uint256) {
         // First, perform the original cancellation logic.
         uint256 proposalId = super.cancel(
             targets,
@@ -263,36 +263,6 @@ contract MetaHumanGovernor is
     }
 
     /**
-     * @dev Executes operations before the execution of a proposal.
-     * @param proposalId The ID of the proposal.
-     * @param targets The array of target addresses.
-     * @param values The array of values to be sent in the transactions.
-     * @param calldatas The array of calldata for the transactions.
-     * @param descriptionHash The hash of the proposal description.
-     */
-    function _beforeExecute(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override {
-        _finishCollectionPhase(proposalId);
-
-        if (!collectionFinished[proposalId]) {
-            revert CollectionPhaseUnfinished();
-        }
-
-        super._beforeExecute(
-            proposalId,
-            targets,
-            values,
-            calldatas,
-            descriptionHash
-        );
-    }
-
-    /**
      * @dev Checks if the collection phase for a proposal has finished.
      *  @param proposalId The ID of the proposal.
      */
@@ -398,12 +368,8 @@ contract MetaHumanGovernor is
         //create snapshot of current spokes
         createSnapshot(proposalId);
 
-        uint256 voteStartTimestamp = estimateTimestampFromBlock(
-            proposalSnapshot(proposalId)
-        );
-        uint256 voteEndTimestamp = estimateTimestampFromBlock(
-            proposalDeadline(proposalId)
-        );
+        uint256 voteStartTimestamp = proposalSnapshot(proposalId);
+        uint256 voteEndTimestamp = proposalDeadline(proposalId);
 
         // Sends the proposal to all of the other spoke contracts
         if (spokeContractsSnapshots[proposalId].length > 0) {
@@ -468,31 +434,6 @@ contract MetaHumanGovernor is
         );
     }
 
-    /**
-     * @dev Estimates timestamp when given block number should be the current block.
-     *  @return blockToEstimate Block to estimate the timestamp for.
-     */
-    function estimateTimestampFromBlock(
-        uint256 blockToEstimate
-    ) internal view returns (uint256) {
-        uint256 currentTimestamp = block.timestamp;
-        uint256 currentBlock = block.number;
-        uint256 estimatedTimestamp = 0;
-        if (blockToEstimate > currentBlock) {
-            //future
-            uint256 blockDifference = blockToEstimate - currentBlock;
-            uint256 timeDifference = blockDifference * secondsPerBlock;
-            estimatedTimestamp = currentTimestamp + timeDifference;
-        } else {
-            //past
-            uint256 blockDifference = currentBlock - blockToEstimate;
-            uint256 timeDifference = blockDifference * secondsPerBlock;
-            estimatedTimestamp = currentTimestamp - timeDifference;
-        }
-
-        return estimatedTimestamp;
-    }
-
     // The following functions are overrides required by Solidity.
 
     /**
@@ -502,7 +443,7 @@ contract MetaHumanGovernor is
     function votingDelay()
         public
         view
-        override(IGovernor, GovernorSettings)
+        override(Governor, GovernorSettings)
         returns (uint256)
     {
         return super.votingDelay(); // Ensure this returns time in seconds
@@ -515,7 +456,7 @@ contract MetaHumanGovernor is
     function votingPeriod()
         public
         view
-        override(IGovernor, GovernorSettings)
+        override(Governor, GovernorSettings)
         returns (uint256)
     {
         return super.votingPeriod(); // Ensure this returns time in seconds
@@ -531,7 +472,7 @@ contract MetaHumanGovernor is
     )
         public
         view
-        override(IGovernor, GovernorVotesQuorumFraction)
+        override(Governor, GovernorVotesQuorumFraction)
         returns (uint256)
     {
         return super.quorum(blockNumber);
@@ -581,7 +522,7 @@ contract MetaHumanGovernor is
         uint256[] memory,
         bytes[] memory,
         string memory
-    ) public pure override(Governor, IGovernor) returns (uint256) {
+    ) public pure override(Governor) returns (uint256) {
         revert('Please use crossChainPropose instead.');
     }
 
@@ -623,24 +564,6 @@ contract MetaHumanGovernor is
     }
 
     /**
-     * @dev Executes a proposal.
-     *  @param proposalId The ID of the proposal.
-     *  @param targets The array of target addresses.
-     *  @param values The array of values to be sent in the transactions.
-     *  @param calldatas The array of calldata for the transactions.
-     */
-    function _execute(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) {
-        require(collectionFinished[proposalId]);
-        super._execute(proposalId, targets, values, calldatas, descriptionHash);
-    }
-
-    /**
      * @dev Cancels a proposal.
      *  @param targets The array of target addresses.
      *  @param values The array of values to be sent in the transactions.
@@ -670,6 +593,45 @@ contract MetaHumanGovernor is
         return super._executor();
     }
 
+    function _queueOperations(
+        uint256 proposalId,
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) internal override(Governor, GovernorTimelockControl) returns (uint48) {
+        return
+            super._queueOperations(
+                proposalId,
+                targets,
+                values,
+                calldatas,
+                descriptionHash
+            );
+    }
+
+    function _executeOperations(
+        uint256 proposalId,
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) internal override(Governor, GovernorTimelockControl) {
+        _finishCollectionPhase(proposalId);
+
+        if (!collectionFinished[proposalId]) {
+            revert CollectionPhaseUnfinished();
+        }
+
+        super._executeOperations(
+            proposalId,
+            targets,
+            values,
+            calldatas,
+            descriptionHash
+        );
+    }
+
     /**
      * @dev Checks if a contract supports a given interface.
      *  @param interfaceId The interface identifier.
@@ -677,7 +639,19 @@ contract MetaHumanGovernor is
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(Governor, GovernorTimelockControl) returns (bool) {
+    ) public view override(Governor) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function proposalNeedsQueuing(
+        uint256 proposalId
+    )
+        public
+        view
+        virtual
+        override(Governor, GovernorTimelockControl)
+        returns (bool)
+    {
+        return super.proposalNeedsQueuing(proposalId);
     }
 }

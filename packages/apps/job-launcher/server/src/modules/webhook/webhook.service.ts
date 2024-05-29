@@ -1,11 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
@@ -27,11 +21,9 @@ import { WebhookDataDto } from './webhook.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
-import { BadRequestException } from '@nestjs/common';
+import { ControlledError } from '../../common/errors/controlled';
 @Injectable()
 export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
-
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
@@ -58,8 +50,7 @@ export class WebhookService {
 
     // Check if the webhook URL was found.
     if (!webhookUrl) {
-      this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.UrlNotFound);
+      throw new ControlledError(ErrorWebhook.UrlNotFound, HttpStatus.NOT_FOUND);
     }
 
     // Build the webhook data object based on the oracle type.
@@ -88,8 +79,7 @@ export class WebhookService {
 
     // Check if the request was successful.
     if (status !== HttpStatus.CREATED && status !== HttpStatus.OK) {
-      this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.NotSent);
+      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -153,8 +143,9 @@ export class WebhookService {
         break;
 
       default:
-        throw new BadRequestException(
+        throw new ControlledError(
           `Invalid webhook event type: ${webhook.eventType}`,
+          HttpStatus.BAD_REQUEST,
         );
     }
   }

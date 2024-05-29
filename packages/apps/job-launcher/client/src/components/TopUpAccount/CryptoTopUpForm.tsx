@@ -12,7 +12,8 @@ import {
 } from '@mui/material';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
-import { useAccount, useSigner, useNetwork } from 'wagmi';
+import { Address } from 'viem';
+import { useAccount, useWalletClient } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
@@ -23,14 +24,13 @@ import { fetchUserBalanceAsync } from '../../state/auth/reducer';
 import { TopUpSuccess } from './TopUpSuccess';
 
 export const CryptoTopUpForm = () => {
-  const { isConnected } = useAccount();
-  const { chain } = useNetwork();
+  const { isConnected, chain } = useAccount();
   const dispatch = useAppDispatch();
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [amount, setAmount] = useState<string>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { data: signer } = useSigner();
+  const { data: signer } = useWalletClient();
   const { data: rate } = useTokenRate('hmt', 'usd');
   const { showError } = useSnackbar();
 
@@ -45,18 +45,15 @@ export const CryptoTopUpForm = () => {
     setIsLoading(true);
 
     try {
-      // send HMT token to operator and retrieve transaction hash
-      const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
-      const tokenAmount = ethers.utils.parseUnits(amount, 18);
-
-      const tx = await contract.transfer(
-        await paymentService.getOperatorAddress(),
-        tokenAmount,
-      );
-
-      await tx.wait();
-
-      const transactionHash = tx.hash;
+      const transactionHash = await signer.writeContract({
+        address: tokenAddress as Address,
+        abi: HMTokenABI,
+        functionName: 'transfer',
+        args: [
+          await paymentService.getOperatorAddress(),
+          ethers.parseUnits(amount, 18),
+        ],
+      });
 
       // create crypto payment record
       await paymentService.createCryptoPayment(signer, {
@@ -75,7 +72,7 @@ export const CryptoTopUpForm = () => {
     setIsLoading(false);
   };
 
-  if (!chain || chain.unsupported || !SUPPORTED_CHAIN_IDS.includes(chain.id))
+  if (!chain || !SUPPORTED_CHAIN_IDS.includes(chain.id))
     return (
       <Box>
         <Typography>

@@ -43,6 +43,10 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ErrorCronJob } from '../../common/constants/errors';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
+import { RateService } from '../payment/rate.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -120,6 +124,10 @@ describe('CronJobService', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: RateService,
+          useValue: createMock<RateService>(),
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
@@ -268,7 +276,9 @@ describe('CronJobService', () => {
         .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
-      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow();
+      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow(
+        new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST),
+      );
       expect(updateOneSpy).not.toHaveBeenCalled();
     });
   });

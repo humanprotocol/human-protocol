@@ -1,14 +1,20 @@
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
-import { createMap, Mapper } from '@automapper/core';
+import {
+  CamelCaseNamingConvention,
+  createMap,
+  Mapper,
+  namingConventions,
+  SnakeCaseNamingConvention,
+} from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerDto,
-} from './interfaces/worker-registration.interface';
+} from './model/worker-registration.model';
 import {
   SigninWorkerCommand,
   SigninWorkerDto,
-} from './interfaces/worker-signin.interface';
+} from './model/worker-signin.model';
 
 @Injectable()
 export class WorkerProfile extends AutomapperProfile {
@@ -18,8 +24,24 @@ export class WorkerProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, SignupWorkerDto, SignupWorkerCommand);
-      createMap(mapper, SigninWorkerDto, SigninWorkerCommand);
+      createMap(
+        mapper,
+        SignupWorkerDto,
+        SignupWorkerCommand,
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        SigninWorkerDto,
+        SigninWorkerCommand,
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
+      );
     };
   }
 }

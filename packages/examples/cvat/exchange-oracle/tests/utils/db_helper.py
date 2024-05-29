@@ -12,7 +12,7 @@ def create_project(
     cvat_id: int,
     *,
     status: ProjectStatuses = ProjectStatuses.annotation,
-) -> tuple:
+) -> Project:
     cvat_project = Project(
         id=str(uuid.uuid4()),
         cvat_id=cvat_id,
@@ -28,13 +28,15 @@ def create_project(
     return cvat_project
 
 
-def create_project_and_task(session: Session, escrow_address: str, cvat_id: int) -> tuple:
+def create_project_and_task(
+    session: Session, escrow_address: str, cvat_id: int
+) -> tuple[Project, Task]:
     cvat_project = create_project(session, escrow_address, cvat_id)
     cvat_task = create_task(session, cvat_project_id=cvat_project.cvat_id, cvat_id=cvat_id)
     return cvat_project, cvat_task
 
 
-def create_task(session: Session, cvat_id: int, cvat_project_id: str) -> tuple:
+def create_task(session: Session, cvat_id: int, cvat_project_id: str) -> Task:
     cvat_task = Task(
         id=str(uuid.uuid4()),
         cvat_id=cvat_id,
@@ -46,7 +48,9 @@ def create_task(session: Session, cvat_id: int, cvat_project_id: str) -> tuple:
     return cvat_task
 
 
-def create_project_task_and_job(session: Session, escrow_address: str, cvat_id: int) -> tuple:
+def create_project_task_and_job(
+    session: Session, escrow_address: str, cvat_id: int
+) -> tuple[Project, Task, Job]:
     cvat_project, cvat_task = create_project_and_task(session, escrow_address, cvat_id)
     cvat_job = create_job(
         session,
@@ -57,12 +61,12 @@ def create_project_task_and_job(session: Session, escrow_address: str, cvat_id: 
     return cvat_project, cvat_task, cvat_job
 
 
-def create_job(session: Session, cvat_id: int, cvat_task_id: int, cvat_project_id: int) -> tuple:
+def create_job(session: Session, cvat_id: int, cvat_task_id: int, cvat_project_id: int) -> Job:
     cvat_job = Job(
         id=str(uuid.uuid4()),
         cvat_id=cvat_id,
-        cvat_project_id=cvat_id,
-        cvat_task_id=cvat_id,
+        cvat_project_id=cvat_project_id,
+        cvat_task_id=cvat_task_id,
         status=JobStatuses.new,
     )
     session.add(cvat_job)

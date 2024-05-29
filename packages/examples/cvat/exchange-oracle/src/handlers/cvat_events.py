@@ -1,7 +1,7 @@
-from contextlib import suppress
 from typing import List
 
 from dateutil.parser import parse as parse_aware_datetime
+from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
@@ -125,7 +125,7 @@ def handle_create_job_event(payload: dict) -> None:
                 status=JobStatuses[payload.job["state"]],
             )
 
-        with suppress(db_errors.LockNotAvailable):
+        try:
             projects = cvat_service.get_projects_by_cvat_ids(
                 session, project_cvat_ids=[payload.job["project_id"]], for_update=True
             )
@@ -142,23 +142,27 @@ def handle_create_job_event(payload: dict) -> None:
             )
             if not escrow_creation:
                 return
-
-            created_jobs_count = cvat_service.count_jobs_by_escrow_address(
-                session,
-                escrow_address=escrow_creation.escrow_address,
-                chain_id=escrow_creation.chain_id,
-                status=JobStatuses.new,
-            )
-
-            if created_jobs_count != escrow_creation.total_jobs:
+        except sa_errors.OperationalError as e:
+            if isinstance(e.orig, db_errors.LockNotAvailable):
                 return
+            raise
 
-            cvat_service.update_project_statuses_by_escrow_address(
-                session=session,
-                escrow_address=escrow_creation.escrow_address,
-                chain_id=escrow_creation.chain_id,
-                status=ProjectStatuses.annotation,
-            )
+        created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+            session,
+            escrow_address=escrow_creation.escrow_address,
+            chain_id=escrow_creation.chain_id,
+            status=JobStatuses.new,
+        )
+
+        if created_jobs_count != escrow_creation.total_jobs:
+            return
+
+        cvat_service.update_project_statuses_by_escrow_address(
+            session=session,
+            escrow_address=escrow_creation.escrow_address,
+            chain_id=escrow_creation.chain_id,
+            status=ProjectStatuses.annotation,
+        )
 
 
 def cvat_webhook_handler(cvat_webhook: dict) -> None:

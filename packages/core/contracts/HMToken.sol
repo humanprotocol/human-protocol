@@ -41,7 +41,7 @@ contract HMToken is HMTokenInterface, Ownable {
         string memory _name,
         uint8 _decimals,
         string memory _symbol
-    ) {
+    ) Ownable(msg.sender) {
         totalSupply = _totalSupply * (10 ** uint256(_decimals));
         name = _name;
         decimals = _decimals;

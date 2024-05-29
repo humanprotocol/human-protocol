@@ -1,8 +1,9 @@
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApiKeyGuard } from './apikey.auth';
 import { AuthService } from '../../modules/auth/auth.service';
 import { UserEntity } from '../../modules/user/user.entity';
+import { ControlledError } from '../errors/controlled';
 
 describe('ApiKeyGuard', () => {
   let guard: ApiKeyGuard;
@@ -67,10 +68,10 @@ describe('ApiKeyGuard', () => {
 
       jest
         .spyOn(authService, 'validateAPIKeyAndGetUser')
-        .mockRejectedValue(new Error());
+        .mockResolvedValue(null);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        'Invalid API Key',
+        new ControlledError('Invalid API Key', HttpStatus.UNAUTHORIZED),
       );
     });
 

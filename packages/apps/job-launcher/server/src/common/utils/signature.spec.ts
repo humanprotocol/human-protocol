@@ -1,6 +1,8 @@
 import { verifySignature, recoverSigner, signMessage } from './signature';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { ErrorSignature } from '../constants/errors';
+import { ControlledError } from '../errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 jest.doMock('ethers', () => {
   return {
@@ -10,7 +12,10 @@ jest.doMock('ethers', () => {
           if (message === 'valid-message' && signature === 'valid-signature') {
             return 'recovered-address';
           } else {
-            throw new Error('Invalid signature');
+            throw new ControlledError(
+              'Invalid signature',
+              HttpStatus.BAD_REQUEST,
+            );
           }
         });
       },
@@ -37,7 +42,12 @@ describe('Signature utility', () => {
 
       expect(() => {
         verifySignature(message, invalidSignature, [invalidAddress]);
-      }).toThrow(ErrorSignature.SignatureNotVerified);
+      }).toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        ),
+      );
     });
 
     it('should throw conflict exception for invalid signature', () => {
@@ -46,7 +56,12 @@ describe('Signature utility', () => {
 
       expect(() => {
         verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
-      }).toThrow(ErrorSignature.InvalidSignature);
+      }).toThrow(
+        new ControlledError(
+          ErrorSignature.InvalidSignature,
+          HttpStatus.CONFLICT,
+        ),
+      );
     });
   });
 
@@ -66,7 +81,12 @@ describe('Signature utility', () => {
 
       expect(() => {
         recoverSigner(message, invalidSignature);
-      }).toThrow(ErrorSignature.InvalidSignature);
+      }).toThrow(
+        new ControlledError(
+          ErrorSignature.InvalidSignature,
+          HttpStatus.CONFLICT,
+        ),
+      );
     });
 
     it('should stringify message object if it is not already a string', async () => {

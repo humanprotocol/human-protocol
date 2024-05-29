@@ -9,5 +9,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(Config.port),
         workers=Config.workers_amount,
-        reload=is_dev,
+        # reload=is_dev,
     )

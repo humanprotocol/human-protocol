@@ -8,6 +8,14 @@ import { TokenRepository } from '../../src/modules/auth/token.repository';
 import { TokenType } from '../../src/modules/auth/token.entity';
 import { UserStatus } from '../../src/common/enums/user';
 import setupE2eEnvironment from './env-setup';
+import { NetworkConfigService } from '../../src/common/config/network-config.service';
+import { Web3ConfigService } from '../../src/common/config/web3-config.service';
+import { ChainId } from '@human-protocol/sdk';
+import {
+  MOCK_PRIVATE_KEY,
+  MOCK_WEB3_NODE_HOST,
+  MOCK_WEB3_RPC_URL,
+} from '../constants';
 
 describe('AuthService E2E', () => {
   let app: INestApplication;
@@ -18,7 +26,22 @@ describe('AuthService E2E', () => {
     setupE2eEnvironment();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(NetworkConfigService)
+      .useValue({
+        networks: [
+          {
+            chainId: ChainId.LOCALHOST,
+            rpcUrl: MOCK_WEB3_RPC_URL,
+          },
+        ],
+      })
+      .overrideProvider(Web3ConfigService)
+      .useValue({
+        privateKey: MOCK_PRIVATE_KEY,
+        env: MOCK_WEB3_NODE_HOST,
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -31,7 +54,7 @@ describe('AuthService E2E', () => {
     await app.close();
   });
 
-  it('should test authentication workflow', async () => {
+  it.only('should test authentication workflow', async () => {
     const email = `${crypto.randomBytes(16).toString('hex')}@hmt.ai`;
     const password = 'Password1!';
     const hCaptchaToken = 'string';
@@ -111,7 +134,6 @@ describe('AuthService E2E', () => {
     expect(refreshTokenResponse.body).toHaveProperty('refresh_token');
 
     const accessToken = refreshTokenResponse.body.access_token;
-    const refreshToken = refreshTokenResponse.body.refresh_token;
 
     // Resend Email Verification
     const resendEmailVerificationResponse = await request(app.getHttpServer())

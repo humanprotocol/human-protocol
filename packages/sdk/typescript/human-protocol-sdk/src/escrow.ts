@@ -1441,7 +1441,7 @@ export class EscrowUtils {
    *   AVALANCHE_TESTNET = 43113,
    *   CELO = 42220,
    *   CELO_ALFAJORES = 44787,
-   *   SKALE = 1273227453,
+   *    = 1273227453,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1586,7 +1586,6 @@ export class EscrowUtils {
    *   AVALANCHE_TESTNET = 43113,
    *   CELO = 42220,
    *   CELO_ALFAJORES = 44787,
-   *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
    * }
    * ```

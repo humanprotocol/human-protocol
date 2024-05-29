@@ -3,13 +3,14 @@ import {
   EncryptionUtils,
   StorageClient,
 } from '@human-protocol/sdk';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import stringify from 'json-stable-stringify';
 import { ErrorBucket } from '../../common/constants/errors';
 import { ContentType, Extension } from '../../common/enums/storage';
 import { UploadedFile } from '../../common/interfaces';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class StorageService {
@@ -54,7 +55,7 @@ export class StorageService {
     hash: string,
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new BadRequestException(ErrorBucket.NotExist);
+      throw new ControlledError(ErrorBucket.NotExist, HttpStatus.BAD_REQUEST);
     }
 
     const isStringData = typeof data === 'string';
@@ -77,7 +78,7 @@ export class StorageService {
 
       return { url: this.formatUrl(key), hash };
     } catch (e) {
-      throw new BadRequestException('File not uploaded');
+      throw new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST);
     }
   }
 }

@@ -1,5 +1,6 @@
-from contextlib import suppress
 from typing import List
+
+from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
@@ -34,6 +35,7 @@ def track_completed_projects() -> None:
             projects = cvat_service.get_projects_by_status(
                 session,
                 ProjectStatuses.annotation,
+                task_status=TaskStatuses.completed,
                 limit=CronConfig.track_completed_projects_chunk_size,
                 for_update=ForUpdateParams(skip_locked=True),
             )
@@ -74,7 +76,12 @@ def track_completed_tasks() -> None:
         logger.debug("Starting cron job")
         with SessionLocal.begin() as session:
             tasks = cvat_service.get_tasks_by_status(
-                session, TaskStatuses.annotation, for_update=ForUpdateParams(skip_locked=True)
+                session,
+                TaskStatuses.annotation,
+                job_status=JobStatuses.completed,
+                project_status=ProjectStatuses.annotation,
+                limit=CronConfig.track_completed_tasks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             completed_task_ids = []
@@ -318,14 +325,19 @@ def track_escrow_creation() -> None:
                 if created_jobs_count != creation.total_jobs:
                     continue
 
-                with suppress(db_errors.LockNotAvailable):
-                    cvat_service.update_project_statuses_by_escrow_address(
-                        session=session,
-                        escrow_address=creation.escrow_address,
-                        chain_id=creation.chain_id,
-                        status=ProjectStatuses.annotation,
-                    )
-                    finished.append(creation)
+                with session.begin_nested():
+                    try:
+                        cvat_service.update_project_statuses_by_escrow_address(
+                            session=session,
+                            escrow_address=creation.escrow_address,
+                            chain_id=creation.chain_id,
+                            status=ProjectStatuses.annotation,
+                        )
+                        finished.append(creation)
+                    except sa_errors.OperationalError as e:
+                        if isinstance(e.orig, db_errors.LockNotAvailable):
+                            continue
+                        raise
 
             if finished:
                 cvat_service.finish_escrow_creations(session, finished)

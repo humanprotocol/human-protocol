@@ -58,13 +58,13 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ___
 
 ### getLeaders
 
-▸ **getLeaders**(`filter?`): `Promise`\<`ILeader`[]\>
+▸ **getLeaders**(`filter`): `Promise`\<`ILeader`[]\>
 
 This function returns all the leader details of the protocol.
 
@@ -85,12 +85,15 @@ Returns an array with all the leader details.
 ```ts
 import { OperatorUtils } from '@human-protocol/sdk';
 
-const leaders = await OperatorUtils.getLeaders();
+const filter: ILeadersFilter = {
+ chainId: ChainId.POLYGON
+};
+const leaders = await OperatorUtils.getLeaders(filter);
 ```
 
 #### Defined in
 
-[operator.ts:88](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L88)
+[operator.ts:88](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L88)
 
 ___
 
@@ -124,7 +127,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-[operator.ts:132](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L132)
+[operator.ts:132](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L132)
 
 ___
 
@@ -157,4 +160,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
-[operator.ts:174](https://github.com/humanprotocol/human-protocol/blob/6c59a29a/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L174)
+[operator.ts:174](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L174)
