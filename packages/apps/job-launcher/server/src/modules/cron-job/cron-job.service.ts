@@ -20,6 +20,8 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
+import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class CronJobService {
@@ -30,6 +32,7 @@ export class CronJobService {
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
+    private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
     private readonly webhookRepository: WebhookRepository,
   ) {}
@@ -271,6 +274,52 @@ export class CronJobService {
     }
 
     this.logger.log('Pending webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/1 * * * *')
+  /**
+   * Process a pending webhook job.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async updateJobs(): Promise<void> {
+    const lastCronJob = await this.cronJobRepository.findOneByType(
+      CronJobType.UpdateJobs,
+    );
+
+    if (lastCronJob && !lastCronJob.completedAt) {
+      return;
+    }
+    this.logger.log('Update jobs START');
+    const cronJob = await this.startCronJob(CronJobType.UpdateJobs);
+
+    try {
+      const events = await EscrowUtils.getStatusEvents(
+        this.web3Service.getValidChains(),
+        [EscrowStatus.Partial, EscrowStatus.Complete],
+        lastCronJob?.startedAt || undefined,
+      );
+
+      for (const event of events) {
+        const job = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+          event.chainId,
+          ethers.getAddress(event.escrowAddress),
+        );
+
+        if (!job) continue;
+        if (event.status === EscrowStatus[EscrowStatus.Partial]) {
+          job.status = JobStatus.PARTIAL;
+          await this.jobRepository.updateOne(job);
+        } else if (event.status === EscrowStatus[EscrowStatus.Complete]) {
+          job.status = JobStatus.COMPLETED;
+          await this.jobRepository.updateOne(job);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
 }

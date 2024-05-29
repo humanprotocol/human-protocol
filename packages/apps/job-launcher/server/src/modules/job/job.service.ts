@@ -95,7 +95,6 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
-import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { StorageService } from '../storage/storage.service';
 import stringify from 'json-stable-stringify';
 import {
@@ -1330,7 +1329,7 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<JobDetailsDto> {
-    let jobEntity = await this.jobRepository.findOneByIdAndUserId(
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
       jobId,
       userId,
     );
@@ -1349,7 +1348,6 @@ export class JobService {
 
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
-      jobEntity = await this.updateJobStatus(jobEntity, escrow);
     }
 
     let manifestData = await this.storageService.download(manifestUrl);
@@ -1513,28 +1511,6 @@ export class JobService {
     const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
 
     return BigInt(feeValue ? feeValue : 1);
-  }
-
-  private async updateJobStatus(
-    job: JobEntity,
-    escrow: EscrowData,
-  ): Promise<JobEntity> {
-    let updatedJob = job;
-    if (
-      escrow.status === EscrowStatus[EscrowStatus.Complete] &&
-      job.status !== JobStatus.COMPLETED
-    ) {
-      job.status = JobStatus.COMPLETED;
-      updatedJob = await this.jobRepository.updateOne(job);
-    }
-    if (
-      escrow.status === EscrowStatus[EscrowStatus.Partial] &&
-      job.status !== JobStatus.PARTIAL
-    ) {
-      job.status = JobStatus.PARTIAL;
-      updatedJob = await this.jobRepository.updateOne(job);
-    }
-    return updatedJob;
   }
 
   public async completeJob(dto: WebhookDataDto): Promise<void> {

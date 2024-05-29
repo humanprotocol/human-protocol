@@ -2,7 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { SortDirection } from '../../common/enums/collection';
-import { DataSource, In, LessThanOrEqual } from 'typeorm';
+import { DataSource, LessThanOrEqual } from 'typeorm';
 import {
   JobSortField,
   JobStatus,
@@ -113,17 +113,5 @@ export class JobRepository extends BaseRepository<JobEntity> {
     const entities = await queryBuilder.getMany();
 
     return { entities, itemCount };
-  }
-
-  public async findByEscrowAddresses(
-    userId: number,
-    escrowAddresses: string[],
-  ): Promise<JobEntity[]> {
-    return this.find({
-      where: {
-        userId,
-        escrowAddress: In(escrowAddresses),
-      },
-    });
   }
 }
