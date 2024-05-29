@@ -67,10 +67,12 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    min-width: 121px;
   }
   @media (max-width: 1100px) {
     margin-top: 0;
+    span {
+      min-width: 120px;
+    }
     span:first-child{
       display: none;
     }
