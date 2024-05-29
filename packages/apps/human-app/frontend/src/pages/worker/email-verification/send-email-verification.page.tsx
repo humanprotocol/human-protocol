@@ -33,10 +33,6 @@ export function SendEmailVerificationWorkerPage() {
     }
   };
 
-  if (isEmailVerificationWorkerPending) {
-    return <PageCardLoader />;
-  }
-
   return (
     <PageCard
       alert={
@@ -54,7 +50,7 @@ export function SendEmailVerificationWorkerPage() {
             i18nKey="worker.sendEmailVerification.paragraph1"
             values={{ email: routerState?.email }}
           >
-            Strong <Typography variant="buttonMedium" />
+            Strong <Typography fontWeight={600} />
           </Trans>
         </Typography>
         <Typography color={colorPalette.primary.light} variant="body1">
@@ -62,7 +58,7 @@ export function SendEmailVerificationWorkerPage() {
         </Typography>
         <Typography variant="body1">
           <Trans i18nKey="worker.sendEmailVerification.paragraph3">
-            Strong <Typography variant="buttonMedium" />
+            Strong <Typography fontWeight={600} />
           </Trans>
         </Typography>
         <Button
