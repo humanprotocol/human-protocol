@@ -79,6 +79,7 @@ export class JobController {
   @ApiResponse({
     status: 200,
     description: 'Job solved successfully.',
+    type: SolveJobResponseDto,
   })
   @ApiResponse({
     status: 400,

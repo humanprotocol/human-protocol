@@ -116,7 +116,12 @@ export class JobDto {
 }
 
 export class SolveJobResponseDto {
+  @ApiProperty({ name: 'assignment_id' })
   assignmentId: string;
+
+  @ApiProperty({ name: 'solution' })
   solution: string;
+
+  @ApiProperty({ name: 'message' })
   message: string;
 }
