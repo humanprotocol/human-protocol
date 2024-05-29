@@ -13,7 +13,6 @@ import { RequestData } from './RequestData';
 import { Success } from './Success';
 
 const STEPS = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
-const STEPS_FOR_SKALE = ['Wallet Address', 'Send sFUEL', 'Confirmation'];
 
 export const FaucetView: FC = () => {
   const [step, setStep] = useState<number>(0);
@@ -48,20 +47,13 @@ export const FaucetView: FC = () => {
               HUMAN Faucet for testnet
             </Typography>
             <Paper sx={{ padding: { md: 2 }, marginBottom: 2 }}>
-              {' '}
               <Box sx={{ width: '100%' }}>
                 <Stepper activeStep={step}>
-                  {network?.chainId === ChainId.SKALE
-                    ? STEPS_FOR_SKALE.map((step) => (
-                        <Step key={step}>
-                          <StepLabel>{step}</StepLabel>
-                        </Step>
-                      ))
-                    : STEPS.map((step) => (
-                        <Step key={step}>
-                          <StepLabel>{step}</StepLabel>
-                        </Step>
-                      ))}
+                  {STEPS.map((step) => (
+                    <Step key={step}>
+                      <StepLabel>{step}</StepLabel>
+                    </Step>
+                  ))}
                 </Stepper>
               </Box>
             </Paper>

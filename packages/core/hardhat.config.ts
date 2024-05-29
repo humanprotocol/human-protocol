@@ -222,14 +222,6 @@ const config: HardhatUserConfig = {
     },
     customChains: [
       {
-        network: 'skale',
-        chainId: 1273227453,
-        urls: {
-          apiURL: process.env.SKALE_BROWSER_API_URL || '',
-          browserURL: process.env.SKALE_BROWSER_URL || '',
-        },
-      },
-      {
         network: 'polygonAmoy',
         chainId: 80002,
         urls: {
