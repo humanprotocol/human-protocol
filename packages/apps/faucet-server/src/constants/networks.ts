@@ -2,7 +2,6 @@ import { ChainId } from '@human-protocol/sdk';
 
 export interface IFaucetData {
   rpcUrl: string;
-  faucetAddress?: string;
 }
 
 export const FAUCET_NETWORKS: {
