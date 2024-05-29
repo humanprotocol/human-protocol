@@ -380,14 +380,19 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 		setOrderBy(property);
 	};
 
-	const visibleRows = React.useMemo(
-		() =>
-			stableSort(rows, getComparator(order, orderBy)).slice(
-				page * rowsPerPage,
-				page * rowsPerPage + rowsPerPage
-			),
-		[order, orderBy, page, rowsPerPage, network]
-	);
+	const visibleRows = React.useMemo(() => {
+		let filteredRows = rows;
+		if (network !== 'all') {
+			filteredRows = rows.filter((elem) => elem.network === network);
+		}
+
+		const sortedRows = stableSort(filteredRows, getComparator(order, orderBy));
+
+		return sortedRows.slice(
+			page * rowsPerPage,
+			page * rowsPerPage + rowsPerPage
+		);
+	}, [order, orderBy, page, rowsPerPage, network]);
 
 	const renderNetworkDetails = (network: networkTypes) => {
 		const networkDetails = {
