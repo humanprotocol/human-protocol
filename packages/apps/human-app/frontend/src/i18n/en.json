@@ -153,7 +153,9 @@
       },
       "title": "Reset Password",
       "description": "Please enter your email address. We will send you an email to reset your password.",
-      "submitBtn": "Send Email"
+      "submitBtn": "Send Email",
+      "invalidEmailError": "Please enter a valid email address.",
+      "noEmailError": "Please enter your email address."
     },
     "sendResetLinkSuccess": {
       "title": "Reset password",
@@ -173,7 +175,7 @@
       "btn": "Reset password"
     },
     "resetPasswordSuccess": {
-      "title": "Password changed",
+      "title": "Password Changed",
       "description": "Your password has been changed successfully.",
       "btn": "Sign In"
     },

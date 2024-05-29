@@ -1,12 +1,16 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 
 export const sendResetLinkDtoSchema = z.object({
-  email: z.string().email(),
+  email: z
+    .string()
+    .min(1, t('worker.sendResetLinkForm.noEmailError'))
+    .email(t('worker.sendResetLinkForm.invalidEmailError')),
 });
 
 export type SendResetLinkDto = z.infer<typeof sendResetLinkDtoSchema>;
