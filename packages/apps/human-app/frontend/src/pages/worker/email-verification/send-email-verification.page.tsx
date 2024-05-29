@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { colorPalette } from '@/styles/color-palette';
-import { PageCard, PageCardLoader } from '@/components/ui/page-card';
+import { PageCard } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
 import { Button } from '@/components/ui/button';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';

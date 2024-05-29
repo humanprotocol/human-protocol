@@ -105,7 +105,7 @@
     "signUpForm": {
       "fields": {
         "createPassword": "Create Password",
-        "password": "Password",
+        "password": "Create Password",
         "confirmPassword": "Confirm Password",
         "email": "your@email.com"
       },
