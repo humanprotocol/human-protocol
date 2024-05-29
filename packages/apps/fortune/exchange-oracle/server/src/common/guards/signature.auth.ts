@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
@@ -18,14 +19,12 @@ export class SignatureAuthGuard implements CanActivate {
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
 
-    console.log('Data:', data);
-    console.log('Signature:', signature);
-    console.log('Roles:', this.role);
+    console.log('Received request data:', data);
+    console.log('Received signature:', signature);
 
     try {
-      // Worker role verification
       if (this.role.includes(Role.Worker)) {
-        const isVerified = await verifySignature(data, signature, [
+        const isVerified = verifySignature(data, signature, [
           data.senderAddress,
         ]);
         console.log('Worker verification result:', isVerified);
@@ -54,11 +53,7 @@ export class SignatureAuthGuard implements CanActivate {
         oracleAddresses.push(escrowData.reputationOracle!);
       }
 
-      const isVerified = await verifySignature(
-        data,
-        signature,
-        oracleAddresses,
-      );
+      const isVerified = verifySignature(data, signature, oracleAddresses);
       console.log('Oracle verification result:', isVerified);
 
       if (isVerified) {
