@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -29,7 +29,7 @@ import TableBody from '@mui/material/TableBody';
 import Grid from '@mui/material/Grid';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
 import { useNavigate } from 'react-router-dom';
-import { TableFooter, TablePagination } from '@mui/material';
+import { TablePagination } from '@mui/material';
 
 type networkTypes =
 	| 'ethereum'
@@ -42,6 +42,7 @@ type networkTypes =
 	| 'alpha';
 
 interface Item {
+	id: number;
 	role: string;
 	address: string;
 	stake: string;
@@ -51,6 +52,7 @@ interface Item {
 }
 
 function createData(
+	id: number,
 	role: string,
 	address: string,
 	stake: string,
@@ -58,44 +60,67 @@ function createData(
 	reputation: string,
 	operator: string
 ) {
-	return { role, address, stake, network, reputation, operator };
+	return { id, role, address, stake, network, reputation, operator };
 }
 
 const rows = [
 	createData(
-		'Job Launcher',
+		1,
+		'Element 1',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'1e-18 HMT',
-		'testnet',
+		'ethereum',
 		'Medium',
 		'1%'
 	),
 	createData(
-		'Recording Oracle',
+		2,
+		'Element 2',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'1e-18 HMT',
-		'mumbai',
+		'goerli',
 		'High',
 		'1%'
 	),
 	createData(
-		'Reputation Oracle',
+		3,
+		'Element 3',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'3e-18 HMT',
-		'polygon',
+		'binance',
 		'Medium',
 		'2%'
 	),
 	createData(
-		'Exchange Oracle',
+		4,
+		'Element 4',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'4e-18 HMT',
-		'ethereum',
+		'testnet',
 		'Low',
 		'1%'
 	),
 	createData(
-		'HUMAN App',
+		5,
+		'Element 5',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
+		'2e-18 HMT',
+		'testnet',
+		'Coming soon',
+		'5%'
+	),
+	createData(
+		6,
+		'Element 6',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
+		'2e-18 HMT',
+		'mumbai',
+		'Coming soon',
+		'5%'
+	),
+	createData(
+		7,
+		'Element 7',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'2e-18 HMT',
 		'moonbeam',
@@ -103,34 +128,29 @@ const rows = [
 		'5%'
 	),
 	createData(
-		'HUMAN App',
+		8,
+		'Element 8',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'2e-18 HMT',
-		'moonbeam',
+		'alpha',
 		'Coming soon',
 		'5%'
 	),
 	createData(
-		'HUMAN App',
+		9,
+		'Element 9',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'2e-18 HMT',
-		'moonbeam',
+		'alpha',
 		'Coming soon',
 		'5%'
 	),
 	createData(
-		'HUMAN App',
+		10,
+		'Element 10',
 		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
 		'2e-18 HMT',
-		'moonbeam',
-		'Coming soon',
-		'5%'
-	),
-	createData(
-		'HUMAN App',
-		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
-		'2e-18 HMT',
-		'moonbeam',
+		'alpha',
 		'Coming soon',
 		'5%'
 	),
@@ -275,10 +295,7 @@ const EnhancedTableHead = ({
 	return (
 		<TableHead>
 			<TableRow className="home-page-table-header">
-				<TableCell
-					key="role"
-					sortDirection={orderBy === 'role' ? order : false}
-				>
+				<TableCell key="id" sortDirection={orderBy === 'role' ? order : false}>
 					<TableSortLabel
 						active={orderBy === 'role'}
 						direction={orderBy === 'role' ? order : 'asc'}
@@ -398,10 +415,10 @@ const renderIcon: React.FC<Item> = (item) => {
 const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 	const navigate = useNavigate();
 	const [network, setNetwork] = useState('all');
-	const [order, setOrder] = React.useState<Order>('asc');
-	const [orderBy, setOrderBy] = React.useState<keyof Item>('role');
-	const [page, setPage] = React.useState(0);
-	const [rowsPerPage, setRowsPerPage] = React.useState(5);
+	const [order, setOrder] = useState<Order>('asc');
+	const [orderBy, setOrderBy] = useState<keyof Item>('role');
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
 
 	const handleRequestSort = (
 		_event: React.MouseEvent<unknown>,
@@ -416,9 +433,7 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 	const emptyRows =
 		page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-
-	// TODO pagination is not working propertly.
-	const visibleRows = React.useMemo(() => {
+	const visibleRows = useMemo(() => {
 		let filteredRows = rows;
 		if (network !== 'all') {
 			filteredRows = rows.filter((elem) => elem.network === network);
@@ -565,7 +580,7 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 							{visibleRows.map((row) => (
 								<TableRow
 									onClick={() => navigate(`/search/${row.address}`)}
-									key={row.role}
+									key={row.id}
 									className="home-page-table-row"
 								>
 									<TableCell>
@@ -598,7 +613,7 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 								</TableRow>
 							))}
 							{emptyRows > 0 && (
-								<TableRow style={{ height: 53 * emptyRows }}>
+								<TableRow style={{ height: 50 * emptyRows }}>
 									<TableCell colSpan={6} />
 								</TableRow>
 							)}
