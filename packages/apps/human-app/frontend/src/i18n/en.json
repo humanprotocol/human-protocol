@@ -24,7 +24,8 @@
     "passwordUppercase": "1 uppercase (A-Z)",
     "passwordLowercase": "1 lowercase (a-z)",
     "passwordNumeric": "1 numeric (0-9)",
-    "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])"
+    "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])",
+    "captcha": "Please complete the captcha"
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
