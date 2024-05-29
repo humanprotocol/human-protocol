@@ -153,7 +153,7 @@ const Home: React.FC = () => {
 				img={cup}
 			/>
 
-			<Leaderboard />
+			<Leaderboard pagination />
 		</PageWrapper>
 	);
 };

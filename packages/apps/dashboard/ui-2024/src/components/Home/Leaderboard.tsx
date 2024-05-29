@@ -29,7 +29,7 @@ import TableBody from '@mui/material/TableBody';
 import Grid from '@mui/material/Grid';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
 import { useNavigate } from 'react-router-dom';
-import { TablePagination } from '@mui/material';
+import { TableFooter, TablePagination } from '@mui/material';
 
 type networkTypes =
 	| 'ethereum'
@@ -93,6 +93,38 @@ const rows = [
 		'ethereum',
 		'Low',
 		'1%'
+	),
+	createData(
+		'HUMAN App',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
+		'2e-18 HMT',
+		'moonbeam',
+		'Coming soon',
+		'5%'
+	),
+	createData(
+		'HUMAN App',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
+		'2e-18 HMT',
+		'moonbeam',
+		'Coming soon',
+		'5%'
+	),
+	createData(
+		'HUMAN App',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
+		'2e-18 HMT',
+		'moonbeam',
+		'Coming soon',
+		'5%'
+	),
+	createData(
+		'HUMAN App',
+		'0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
+		'2e-18 HMT',
+		'moonbeam',
+		'Coming soon',
+		'5%'
 	),
 	createData(
 		'HUMAN App',
@@ -228,13 +260,13 @@ interface EnhancedTableHeadProps {
 	setNetwork: Dispatch<SetStateAction<string>>;
 }
 
-function EnhancedTableHead({
+const EnhancedTableHead = ({
 	orderBy,
 	order,
 	onRequestSort,
 	network,
 	setNetwork,
-}: EnhancedTableHeadProps) {
+}: EnhancedTableHeadProps) => {
 	const createSortHandler =
 		(property: keyof Item) => (event: React.MouseEvent<unknown>) => {
 			onRequestSort(event, property);
@@ -328,7 +360,7 @@ function EnhancedTableHead({
 			</TableRow>
 		</TableHead>
 	);
-}
+};
 
 const renderIcon: React.FC<Item> = (item) => {
 	let src = '';
@@ -380,6 +412,12 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 		setOrderBy(property);
 	};
 
+	// Avoid a layout jump when reaching the last page with empty rows.
+	const emptyRows =
+		page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+
+	// TODO pagination is not working propertly.
 	const visibleRows = React.useMemo(() => {
 		let filteredRows = rows;
 		if (network !== 'all') {
@@ -485,17 +523,14 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 		}
 	};
 
-	const handleChangePage = (
-		_event: React.MouseEvent<HTMLButtonElement> | null,
-		newPage: number
-	) => {
+	const handleChangePage = (_event: unknown, newPage: number) => {
 		setPage(newPage);
 	};
 
 	const handleChangeRowsPerPage = (
-		event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+		event: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setRowsPerPage(parseInt(event.target.value));
+		setRowsPerPage(parseInt(event.target.value, 10));
 		setPage(0);
 	};
 
@@ -562,6 +597,11 @@ const Leaderboard = ({ pagination = false }: { pagination?: boolean }) => {
 									<TableCell>{row.operator}</TableCell>
 								</TableRow>
 							))}
+							{emptyRows > 0 && (
+								<TableRow style={{ height: 53 * emptyRows }}>
+									<TableCell colSpan={6} />
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				</SimpleBar>
