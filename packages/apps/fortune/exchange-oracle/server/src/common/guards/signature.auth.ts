@@ -21,28 +21,35 @@ export class SignatureAuthGuard implements CanActivate {
     try {
       const addresses: string[] = [];
 
-      if (this.roles.includes(Role.Worker)) {
-        const workerAddress = request.user?.address;
+      const user = request.user;
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (this.roles.includes(Role.Worker) && user.role === Role.Worker) {
+        const workerAddress = user.address;
         if (!workerAddress) {
           throw new UnauthorizedException('User address not found');
         }
         addresses.push(workerAddress);
-      } else {
+      } else if (this.roles.includes(user.role)) {
         const escrowData = await EscrowUtils.getEscrow(
           data.chain_id,
           data.escrow_address,
         );
         console.log('Escrow Data:', escrowData);
 
-        if (this.roles.includes(Role.JobLauncher)) {
+        if (user.role === Role.JobLauncher) {
           addresses.push(escrowData.launcher);
         }
-        if (this.roles.includes(Role.Recording)) {
+        if (user.role === Role.Recording) {
           addresses.push(escrowData.recordingOracle!);
         }
-        if (this.roles.includes(Role.Reputation)) {
+        if (user.role === Role.Reputation) {
           addresses.push(escrowData.reputationOracle!);
         }
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
 
       const isVerified = verifySignature(data, signature, addresses);
