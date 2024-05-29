@@ -25,6 +25,7 @@
     "passwordLowercase": "1 lowercase (a-z)",
     "passwordNumeric": "1 numeric (0-9)",
     "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])",
+    "passwordMissing": "Please enter your password.",
     "invalidEmail": "Please enter a valid email address."
   },
   "errors": {

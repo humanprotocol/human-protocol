@@ -79,7 +79,7 @@ export function SignInWorkerPage() {
             void methods.handleSubmit(handleWorkerSignIn)(event)
           }
         >
-          <Grid container gap="2rem">
+          <Grid container gap="2rem" sx={{ paddingTop: '1rem' }}>
             <Input
               fullWidth
               label={t('worker.signInForm.fields.email')}
