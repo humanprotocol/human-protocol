@@ -93,13 +93,16 @@ export class JobController {
   @UseGuards(new SignatureAuthGuard([Role.Worker]))
   async solveJob(
     @Request() req: RequestWithUser,
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: SolveJobDto,
+    @Headers(HEADER_SIGNATURE_KEY) signature: string,
+    @Body() solveJobDto: SolveJobDto,
   ): Promise<SolveJobResponseDto> {
-    await this.jobService.solveJob(data.assignmentId, data.solution);
+    const { assignmentId, solution } = solveJobDto;
+
+    await this.jobService.solveJob(assignmentId, solution);
+
     return {
-      assignmentId: data.assignmentId,
-      solution: data.solution,
+      assignmentId,
+      solution,
       message: 'Job solved successfully.',
     };
   }
