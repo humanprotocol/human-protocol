@@ -3,7 +3,6 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
@@ -12,54 +11,48 @@ import { Role } from '../enums/role';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  constructor(private readonly role: Role[]) {}
+  constructor(private readonly roles: Role[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
 
-    console.log('Received request data:', data);
-    console.log('Received signature:', signature);
-
     try {
-      if (this.role.includes(Role.Worker)) {
-        const isVerified = verifySignature(data, signature, [
-          data.senderAddress,
-        ]);
-        console.log('Worker verification result:', isVerified);
-        if (isVerified) {
-          return true;
+      const addresses: string[] = [];
+
+      if (this.roles.includes(Role.Worker)) {
+        const workerAddress = request.user?.address;
+        if (!workerAddress) {
+          throw new UnauthorizedException('User address not found');
         }
-        console.log('Worker verification failed');
-        throw new UnauthorizedException('Unauthorized');
+        addresses.push(workerAddress);
+      } else {
+        const escrowData = await EscrowUtils.getEscrow(
+          data.chain_id,
+          data.escrow_address,
+        );
+        console.log('Escrow Data:', escrowData);
+
+        if (this.roles.includes(Role.JobLauncher)) {
+          addresses.push(escrowData.launcher);
+        }
+        if (this.roles.includes(Role.Recording)) {
+          addresses.push(escrowData.recordingOracle!);
+        }
+        if (this.roles.includes(Role.Reputation)) {
+          addresses.push(escrowData.reputationOracle!);
+        }
       }
 
-      // Other roles verification
-      const escrowData = await EscrowUtils.getEscrow(
-        data.chain_id,
-        data.escrow_address,
-      );
-      console.log('Escrow Data:', escrowData);
-
-      const oracleAddresses: string[] = [];
-      if (this.role.includes(Role.JobLauncher)) {
-        oracleAddresses.push(escrowData.launcher);
-      }
-      if (this.role.includes(Role.Recording)) {
-        oracleAddresses.push(escrowData.recordingOracle!);
-      }
-      if (this.role.includes(Role.Reputation)) {
-        oracleAddresses.push(escrowData.reputationOracle!);
-      }
-
-      const isVerified = verifySignature(data, signature, oracleAddresses);
-      console.log('Oracle verification result:', isVerified);
+      const isVerified = verifySignature(data, signature, addresses);
+      console.log('Verification result:', isVerified);
 
       if (isVerified) {
         return true;
       }
-      console.log('Oracle verification failed');
+
+      console.log('Verification failed');
       throw new UnauthorizedException('Unauthorized');
     } catch (error) {
       console.error('Verification error:', error);
