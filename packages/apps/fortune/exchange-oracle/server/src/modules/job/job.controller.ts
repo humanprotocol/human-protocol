@@ -100,10 +100,11 @@ export class JobController {
 
     await this.jobService.solveJob(assignmentId, solution);
 
-    return {
+    const response: SolveJobResponseDto = {
       assignmentId,
       solution,
       message: 'Job solved successfully.',
     };
+    return response;
   }
 }
