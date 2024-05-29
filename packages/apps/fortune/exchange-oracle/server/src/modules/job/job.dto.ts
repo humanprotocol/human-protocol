@@ -114,3 +114,9 @@ export class JobDto {
     this.status = status;
   }
 }
+
+export class SolveJobResponseDto {
+  assignmentId: string;
+  solution: string;
+  message: string;
+}

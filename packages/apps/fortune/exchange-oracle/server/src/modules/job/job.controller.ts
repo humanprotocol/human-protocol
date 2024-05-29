@@ -17,7 +17,12 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
-import { GetJobsDto, JobDto, SolveJobDto } from './job.dto';
+import {
+  GetJobsDto,
+  JobDto,
+  SolveJobDto,
+  SolveJobResponseDto,
+} from './job.dto';
 import { JobService } from './job.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { RequestWithUser } from '../../common/types/jwt';
@@ -85,12 +90,17 @@ export class JobController {
   })
   @Post('solve')
   @Public()
-  // @UseGuards(new SignatureAuthGuard([Role.Worker]))
-  solveJob(
+  @UseGuards(new SignatureAuthGuard([Role.Worker]))
+  async solveJob(
     @Request() req: RequestWithUser,
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: SolveJobDto,
-  ): Promise<void> {
-    return this.jobService.solveJob(data.assignmentId, data.solution);
+  ): Promise<SolveJobResponseDto> {
+    await this.jobService.solveJob(data.assignmentId, data.solution);
+    return {
+      assignmentId: data.assignmentId,
+      solution: data.solution,
+      message: 'Job solved successfully.',
+    };
   }
 }
