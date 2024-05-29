@@ -14,7 +14,7 @@ import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { formatDate } from '@helpers/formatDate';
 import { formatNumber } from '@helpers/formatNumber';
 
@@ -59,14 +59,14 @@ const CustomSmallChartTooltip = ({
 					}}
 				>
 					{payload?.map((elem) => (
-						<>
+						<Fragment key={elem.name}>
 							<Typography fontWeight={500} variant="caption">
 								{formatDate(elem.payload.name, 'MMMM d, YYYY')}
 							</Typography>
 							<Typography fontWeight={500} variant="h6" component="p">
 								{elem.value ? elem.value.toLocaleString('en-US') : ''}
 							</Typography>
-						</>
+						</Fragment>
 					))}
 				</Box>
 			</Card>
