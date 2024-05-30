@@ -20,7 +20,7 @@ export const envValidator = Joi.object({
   WEB3_PRIVATE_KEY: Joi.string().required(),
   RPC_URL_POLYGON: Joi.string(),
   RPC_URL_BSC: Joi.string(),
-  RPC_URL_AMOY: Joi.string(),
+  RPC_URL_POLYGON_AMOY: Joi.string(),
   RPC_URL_SEPOLIA: Joi.string(),
   RPC_URL_MOONBEAM: Joi.string(),
   RPC_URL_BSC_TESTNET: Joi.string(),

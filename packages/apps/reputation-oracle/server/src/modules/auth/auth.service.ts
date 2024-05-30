@@ -156,6 +156,19 @@ export class AuthService {
       },
     );
 
+    console.log(
+      {
+        email: userEntity.email,
+        userId: userEntity.id,
+        address: userEntity.evmAddress,
+        kyc_status: userEntity.kyc?.status,
+        reputation_network: this.web3Service.getOperatorAddress(),
+      },
+      {
+        expiresIn: this.authConfigService.accessTokenExpiresIn,
+      },
+    );
+
     if (refreshTokenEntity) {
       await this.tokenRepository.deleteOne(refreshTokenEntity);
     }

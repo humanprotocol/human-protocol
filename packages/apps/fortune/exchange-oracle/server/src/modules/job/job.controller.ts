@@ -15,7 +15,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
-import { GetJobsDto, JobDto, SolveJobDto } from './job.dto';
+import { GetJobsDto, JobDto, ResignJobDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
 import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';

@@ -14,13 +14,11 @@ import { TOKEN } from '../../common/constant';
 import { JobService } from '../job/job.service';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
+import { ErrorAssignment } from 'src/common/constant/errors';
 
 @Injectable()
 export class AssignmentService {
   public readonly logger = new Logger(AssignmentService.name);
-  private storage: {
-    [key: string]: string[];
-  } = {};
 
   constructor(
     public readonly assignmentRepository: AssignmentRepository,
@@ -33,23 +31,33 @@ export class AssignmentService {
     data: CreateAssignmentDto,
     jwtUser: JwtUser,
   ): Promise<void> {
+    try {
+      console.log(9999)
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       data.chainId,
       data.escrowAddress,
     );
 
+    jwtUser = {
+      email: 'eugene-test@hmt.ai',
+      address: '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36',
+      kycStatus: 'APPROVED',
+      reputationNetwork: '0x6b4A1439F30E55ffcF9619a2ac5Fc3Bec571D4cb'
+    }
+    console.log(111111)
     if (!jobEntity) {
-      this.logger.log('Job not found', AssignmentService.name);
-      throw new BadRequestException('Job not found');
+      this.logger.log(ErrorAssignment.JobNotFound, AssignmentService.name);
+      throw new BadRequestException(ErrorAssignment.JobNotFound);
     } else if (jobEntity.reputationNetwork !== jwtUser.reputationNetwork) {
       this.logger.log(
-        'Requested job is not in your reputation network',
+        ErrorAssignment.ReputationNetworkMismatch,
         AssignmentService.name,
       );
       throw new BadRequestException(
-        'Requested job is not in your reputation network',
+        ErrorAssignment.ReputationNetworkMismatch,
       );
     }
+    console.log(222222)
     const assignmentEntity =
       await this.assignmentRepository.findOneByJobIdAndWorker(
         jobEntity.id,
@@ -57,37 +65,41 @@ export class AssignmentService {
       );
 
     if (assignmentEntity) {
-      this.logger.log('Assignment already exists', AssignmentService.name);
-      throw new BadRequestException('Assignment already exists');
+      this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
+      throw new BadRequestException(ErrorAssignment.AlreadyExists);
     }
-
+    console.log(333333)
     const currentAssignments = await this.assignmentRepository.countByJobId(
       jobEntity.id,
     );
+    console.log(444444)
     const manifest = await this.jobService.getManifest(
       data.chainId,
       data.escrowAddress,
     );
-
+    console.log(555555)
     if (currentAssignments >= manifest.submissionsRequired) {
-      this.logger.log('Fully assigned job', AssignmentService.name);
-      throw new BadRequestException('Fully assigned job');
+      this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
+      throw new BadRequestException(ErrorAssignment.FullyAssigned);
     }
 
     const signer = this.web3Service.getSigner(data.chainId);
     const escrow = Escrow__factory.connect(data.escrowAddress, signer);
     const expirationDate = new Date(Number(await escrow.duration()) * 1000);
     if (expirationDate < new Date()) {
-      this.logger.log('Expired escrow', AssignmentService.name);
-      throw new BadRequestException('Expired escrow');
+      this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
+      throw new BadRequestException(ErrorAssignment.ExpiredEscrow);
     }
-
+    console.log(jobEntity)
     const newAssignmentEntity = new AssignmentEntity();
     newAssignmentEntity.job = jobEntity;
     newAssignmentEntity.workerAddress = jwtUser.address;
     newAssignmentEntity.status = AssignmentStatus.ACTIVE;
     newAssignmentEntity.expiresAt = expirationDate;
     await this.assignmentRepository.createUnique(newAssignmentEntity);
+    } catch (e) {
+      console.log(0, e)
+    }
   }
 
   public async getAssignmentList(
