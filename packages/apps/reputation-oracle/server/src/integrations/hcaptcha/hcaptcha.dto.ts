@@ -5,7 +5,6 @@ export class hCaptchaApiParams {
 }
 
 export class hCaptchaVerifyToken extends hCaptchaApiParams {
-  public type: TokenType;
   public token: string;
 }
 

@@ -21,7 +21,7 @@ export const envValidator = Joi.object({
   HCAPTCHA_PROTECTION_URL: Joi.string().description(
     'Hcaptcha URL for verifying guard tokens',
   ),
-  HCAPTCHA_EXCHANGE_URL: Joi.string().description('hcaptcha exchange url'),
+  HCAPTCHA_LABELING_URL: Joi.string().description('hcaptcha labeling url'),
   HCAPTCHA_API_KEY: Joi.string()
     .required()
     .description('Account api key at hcaptcha foundation'),
@@ -68,4 +68,6 @@ export const envValidator = Joi.object({
   // Synaps Kyc
   SYNAPS_API_KEY: Joi.string().required(),
   SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
+  SYNAPS_BASE_URL: Joi.string(),
+  SYNAPS_STEP_DOCUMENT_ID: Joi.string().required(),
 });

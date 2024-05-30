@@ -37,10 +37,10 @@ export class AuthConfigService {
   get hCaptchaSecret(): string {
     return this.configService.get<string>('HCAPTCHA_SECRET', '');
   }
-  get hCaptchaExchangeURL(): string {
+  get hCaptchaLabelingURL(): string {
     return this.configService.get<string>(
-      'HCAPTCHA_EXCHANGE_URL',
-      'https://foundation-exchange.hmt.ai',
+      'HCAPTCHA_LABELING_URL',
+      'https://foundation-accounts.hmt.ai',
     );
   }
 }

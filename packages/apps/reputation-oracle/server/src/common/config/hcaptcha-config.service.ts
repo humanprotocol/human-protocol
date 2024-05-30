@@ -19,10 +19,10 @@ export class HCaptchaConfigService {
       'https://api.hcaptcha.com',
     );
   }
-  get exchangeURL(): string {
+  get labelingURL(): string {
     return this.configService.get<string>(
-      'HCAPTCHA_EXCHANGE_URL',
-      'https://foundation-exchange.hmt.ai',
+      'HCAPTCHA_LABELING_URL',
+      'https://foundation-accounts.hmt.ai',
     );
   }
   get defaultLabelerLang(): string {

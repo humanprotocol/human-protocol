@@ -13,21 +13,15 @@ import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { KycEntity } from './kyc.entity';
 import { ControlledError } from '../../common/errors/controlled';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { countriesA3ToA2 } from '../../common/enums/countries';
 
 @Injectable()
 export class KycService {
-  private readonly synapsBaseURL: string;
-
   constructor(
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
     private readonly synapsConfigService: SynapsConfigService,
-    private readonly hcaptchaConfigService: HCaptchaConfigService,
-  ) {
-    this.synapsBaseURL = 'https://api.synaps.io/v4';
-  }
+  ) {}
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
@@ -78,7 +72,7 @@ export class KycService {
           alias: userEntity.email,
         },
         {
-          baseURL: this.synapsBaseURL,
+          baseURL: this.synapsConfigService.baseUrl,
           headers: {
             'Api-Key': this.synapsConfigService.apiKey,
           },
@@ -100,10 +94,13 @@ export class KycService {
 
     const sessionInfo = await firstValueFrom(
       this.httpService
-        .get(`/individual/session/${data.session_id}/step/IDD613860734294946`, {
-          baseURL: this.synapsBaseURL,
-          headers: { 'Api-Key': this.synapsConfigService.apiKey },
-        })
+        .get(
+          `/individual/session/${data.session_id}/step/${this.synapsConfigService.documentID}`,
+          {
+            baseURL: this.synapsConfigService.baseUrl,
+            headers: { 'Api-Key': this.synapsConfigService.apiKey },
+          },
+        )
         .pipe(map((response) => response.data)),
     );
 
@@ -136,7 +133,7 @@ export class KycService {
 
     const { data: sessionData } = await firstValueFrom(
       await this.httpService.get(`/individual/session/${data.sessionId}`, {
-        baseURL: this.synapsBaseURL,
+        baseURL: this.synapsConfigService.baseUrl,
         headers: {
           'Api-Key': this.synapsConfigService.apiKey,
         },

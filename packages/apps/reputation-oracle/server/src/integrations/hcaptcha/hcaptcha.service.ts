@@ -7,7 +7,6 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { TokenType } from '../../common/enums/hcaptcha';
 
 @Injectable()
 export class HCaptchaService {
@@ -39,7 +38,7 @@ export class HCaptchaService {
 
       const response = await firstValueFrom(
         await this.httpService.post(
-          `${data.type === TokenType.AUTH ? this.hcaptchaConfigService.protectionURL : this.hcaptchaConfigService.exchangeURL}/siteverify`,
+          `${this.hcaptchaConfigService.protectionURL}/siteverify`,
           {},
           { params: queryParams },
         ),
@@ -74,7 +73,7 @@ export class HCaptchaService {
 
       const response = await firstValueFrom(
         await this.httpService.post(
-          `${this.hcaptchaConfigService.exchangeURL}/labeler/register`,
+          `${this.hcaptchaConfigService.labelingURL}/labeler/register`,
           {
             email,
             language,
@@ -92,7 +91,10 @@ export class HCaptchaService {
       }
     } catch (error) {
       console.log(error);
-      this.logger.error('Error occurred during user registration:', error);
+      this.logger.error(
+        `Error occured during labeling registration. User: ${data.email}`,
+        error,
+      );
     }
 
     return false;
@@ -109,7 +111,7 @@ export class HCaptchaService {
 
       const response = await firstValueFrom(
         await this.httpService.get(
-          `${this.hcaptchaConfigService.exchangeURL}/support/users`,
+          `${this.hcaptchaConfigService.labelingURL}/support/users`,
           {
             params: { api_key: this.hcaptchaConfigService.apiKey, email },
           },
@@ -120,7 +122,10 @@ export class HCaptchaService {
         return response.data;
       }
     } catch (error) {
-      this.logger.error('Error occurred while retrieving labeler data:', error);
+      this.logger.error(
+        `Error occurred while retrieving labeler data. User: ${data.email}`,
+        error,
+      );
     }
 
     return null;

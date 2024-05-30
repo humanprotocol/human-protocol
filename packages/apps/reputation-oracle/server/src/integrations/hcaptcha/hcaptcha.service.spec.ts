@@ -8,7 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
 import {
   HCAPTCHA_PROTECTION_URL,
-  HCAPTCHA_EXCHANGE_URL,
+  HCAPTCHA_LABELING_URL,
 } from '../../../test/constants';
 import { TokenType } from '../../common/enums/hcaptcha';
 
@@ -115,7 +115,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(mockResponseData);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/siteverify`,
+        `${HCAPTCHA_LABELING_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
@@ -143,7 +143,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(mockResponseData);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/siteverify`,
+        `${HCAPTCHA_LABELING_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
@@ -249,7 +249,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/labeler/register`,
+        `${HCAPTCHA_LABELING_URL}/labeler/register`,
         expect.any(Object),
         { params: expect.any(Object) },
       );
@@ -275,7 +275,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/labeler/register`,
+        `${HCAPTCHA_LABELING_URL}/labeler/register`,
         expect.any(Object),
         { params: expect.any(Object) },
       );
@@ -302,7 +302,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(false);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/labeler/register`,
+        `${HCAPTCHA_LABELING_URL}/labeler/register`,
         expect.any(Object),
         { params: expect.any(Object) },
       );
@@ -327,7 +327,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(false);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/labeler/register`,
+        `${HCAPTCHA_LABELING_URL}/labeler/register`,
         expect.any(Object),
         { params: expect.any(Object) },
       );
@@ -353,7 +353,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(mockResponseData);
       expect(httpService.get).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/support/users`,
+        `${HCAPTCHA_LABELING_URL}/support/users`,
         {
           params: expect.any(Object),
         },
@@ -380,7 +380,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(null);
       expect(httpService.get).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/support/users`,
+        `${HCAPTCHA_LABELING_URL}/support/users`,
         {
           params: expect.any(Object),
         },
@@ -404,7 +404,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(null);
       expect(httpService.get).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/support/users`,
+        `${HCAPTCHA_LABELING_URL}/support/users`,
         {
           params: expect.any(Object),
         },
@@ -423,7 +423,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(null);
       expect(httpService.get).toHaveBeenCalledWith(
-        `${HCAPTCHA_EXCHANGE_URL}/support/users`,
+        `${HCAPTCHA_LABELING_URL}/support/users`,
         {
           params: expect.any(Object),
         },
