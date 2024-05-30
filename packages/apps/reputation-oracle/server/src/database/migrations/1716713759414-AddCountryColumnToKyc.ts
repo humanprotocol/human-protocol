@@ -5,7 +5,7 @@ export class AddCountryColumnToKyc1716713759414 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "hmt"."kycs" ADD "country" character varying NOT NULL`,
+      `ALTER TABLE "hmt"."kycs" ADD "country" character varying NULL`,
     );
   }
 

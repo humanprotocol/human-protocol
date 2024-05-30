@@ -110,6 +110,7 @@ export class KycService {
       );
     }
 
+    console.log(1);
     const { data: sessionData } = await firstValueFrom(
       await this.httpService.get(`/individual/session/${data.sessionId}`, {
         baseURL: this.synapsConfigService.baseUrl,
