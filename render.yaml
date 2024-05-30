@@ -201,6 +201,8 @@ services:
         sync: false
       - key: RPC_URL_XLAYER_TESTNET
         sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
     region: frankfurt
     buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
     startCommand: yarn start:prod

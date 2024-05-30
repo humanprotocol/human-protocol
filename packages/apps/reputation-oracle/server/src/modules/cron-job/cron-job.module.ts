@@ -23,7 +23,6 @@ import { ReputationModule } from '../reputation/reputation.module';
     ReputationModule,
   ],
   providers: [CronJobService, CronJobRepository, WebhookRepository],
-  controllers: [CronJobController],
   exports: [CronJobService],
 })
 export class CronJobModule {}
