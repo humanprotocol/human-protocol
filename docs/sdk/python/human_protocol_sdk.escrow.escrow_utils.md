@@ -110,3 +110,36 @@ Get an array of escrow addresses based on the specified filter parameters.
       )
   )
   ```
+
+#### *static* get_status_events(networks, statuses=None, date_from=None, date_to=None)
+
+Retrieve status events for specified networks and statuses within a date range.
+
+* **Return type:**
+  `List`[[`StatusEvent`](#human_protocol_sdk.escrow.escrow_utils.StatusEvent)]
+
+Args:
+: networks (List[ChainId]): List of network chain IDs to query.
+  statuses (Optional[List[Status]]): List of statuses to filter by.
+  date_from (Optional[datetime]): Start date for the query range.
+  date_to (Optional[datetime]): End date for the query range.
+
+Returns:
+: List[Status]: List of status events matching the query parameters.
+
+Raises:
+: EscrowClientError: If an unsupported chain ID or status is provided.
+
+### *class* human_protocol_sdk.escrow.escrow_utils.StatusEvent(timestamp, status, chain_id, escrow_address)
+
+Bases: `object`
+
+Initializes a StatusEvent instance.
+
+* **Parameters:**
+  * **timestamp** (`int`) – The timestamp of the event.
+  * **status** (`str`) – The status of the escrow.
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – The chain identifier where the event occurred.
+  * **escrow_address** (`str`) – The address of the escrow.
+
+#### \_\_init_\_(timestamp, status, chain_id, escrow_address)

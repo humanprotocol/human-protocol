@@ -45,6 +45,7 @@
       * [Module](human_protocol_sdk.escrow.escrow_utils.md#module)
       * [`EscrowData`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.EscrowData)
       * [`EscrowUtils`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.EscrowUtils)
+      * [`StatusEvent`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.StatusEvent)
 * [human_protocol_sdk.kvstore package](human_protocol_sdk.kvstore.md)
   * [Submodules](human_protocol_sdk.kvstore.md#submodules)
     * [human_protocol_sdk.kvstore.kvstore_client module](human_protocol_sdk.kvstore.kvstore_client.md)

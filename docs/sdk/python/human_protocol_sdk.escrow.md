@@ -45,3 +45,6 @@ obtain information from both the contracts and subgraph.
   * [`EscrowUtils`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.EscrowUtils)
     * [`EscrowUtils.get_escrow()`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.EscrowUtils.get_escrow)
     * [`EscrowUtils.get_escrows()`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.EscrowUtils.get_escrows)
+    * [`EscrowUtils.get_status_events()`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.EscrowUtils.get_status_events)
+  * [`StatusEvent`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.StatusEvent)
+    * [`StatusEvent.__init__()`](human_protocol_sdk.escrow.escrow_utils.md#human_protocol_sdk.escrow.escrow_utils.StatusEvent.__init__)

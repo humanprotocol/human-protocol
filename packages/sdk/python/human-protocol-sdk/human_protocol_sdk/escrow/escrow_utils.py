@@ -122,6 +122,15 @@ class EscrowData:
 
 
 class StatusEvent:
+    """
+    Initializes a StatusEvent instance.
+
+    :param timestamp: The timestamp of the event.
+    :param status: The status of the escrow.
+    :param chain_id: The chain identifier where the event occurred.
+    :param escrow_address: The address of the escrow.
+    """
+
     def __init__(
         self, timestamp: int, status: str, chain_id: ChainId, escrow_address: str
     ):
