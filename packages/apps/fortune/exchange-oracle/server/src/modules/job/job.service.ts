@@ -33,7 +33,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { ErrorAssignment, ErrorJob } from 'src/common/constant/errors';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 
 @Injectable()
 export class JobService {
@@ -243,7 +243,6 @@ export class JobService {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-    console.log(escrowAddress)
     const manifestEncrypted =
       await StorageClient.downloadFileFromUrl(manifestUrl);
 

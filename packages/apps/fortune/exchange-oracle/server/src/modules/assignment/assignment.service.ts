@@ -14,7 +14,7 @@ import { TOKEN } from '../../common/constant';
 import { JobService } from '../job/job.service';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
-import { ErrorAssignment } from 'src/common/constant/errors';
+import { ErrorAssignment } from '../../common/constant/errors';
 
 @Injectable()
 export class AssignmentService {
@@ -31,20 +31,11 @@ export class AssignmentService {
     data: CreateAssignmentDto,
     jwtUser: JwtUser,
   ): Promise<void> {
-    try {
-      console.log(9999)
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       data.chainId,
       data.escrowAddress,
     );
 
-    jwtUser = {
-      email: 'eugene-test@hmt.ai',
-      address: '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36',
-      kycStatus: 'APPROVED',
-      reputationNetwork: '0x6b4A1439F30E55ffcF9619a2ac5Fc3Bec571D4cb'
-    }
-    console.log(111111)
     if (!jobEntity) {
       this.logger.log(ErrorAssignment.JobNotFound, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.JobNotFound);
@@ -57,7 +48,7 @@ export class AssignmentService {
         ErrorAssignment.ReputationNetworkMismatch,
       );
     }
-    console.log(222222)
+
     const assignmentEntity =
       await this.assignmentRepository.findOneByJobIdAndWorker(
         jobEntity.id,
@@ -68,16 +59,16 @@ export class AssignmentService {
       this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.AlreadyExists);
     }
-    console.log(333333)
+
     const currentAssignments = await this.assignmentRepository.countByJobId(
       jobEntity.id,
     );
-    console.log(444444)
+
     const manifest = await this.jobService.getManifest(
       data.chainId,
       data.escrowAddress,
     );
-    console.log(555555)
+
     if (currentAssignments >= manifest.submissionsRequired) {
       this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.FullyAssigned);
@@ -90,16 +81,13 @@ export class AssignmentService {
       this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.ExpiredEscrow);
     }
-    console.log(jobEntity)
+
     const newAssignmentEntity = new AssignmentEntity();
     newAssignmentEntity.job = jobEntity;
     newAssignmentEntity.workerAddress = jwtUser.address;
     newAssignmentEntity.status = AssignmentStatus.ACTIVE;
     newAssignmentEntity.expiresAt = expirationDate;
     await this.assignmentRepository.createUnique(newAssignmentEntity);
-    } catch (e) {
-      console.log(0, e)
-    }
   }
 
   public async getAssignmentList(

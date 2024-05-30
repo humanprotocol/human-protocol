@@ -27,8 +27,7 @@ export class Web3Service {
     const validNetworks = networkConfigService.networks.filter((network) =>
       validChains.includes(network.chainId),
     );
-    console.log(validChains)
-    console.log(validNetworks)
+
     for (const network of validNetworks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
