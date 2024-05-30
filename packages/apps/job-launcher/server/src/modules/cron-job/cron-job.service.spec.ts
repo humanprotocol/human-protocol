@@ -49,7 +49,7 @@ import { ErrorCronJob } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
 import { RateService } from '../payment/rate.service';
-import { Status } from '@human-protocol/sdk/dist/graphql';
+import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { ethers } from 'ethers';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -926,7 +926,7 @@ describe('CronJobService', () => {
   describe('updateJobs Cron Job', () => {
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock: Partial<JobEntity>;
-    let escrowEventMock: Partial<Status>;
+    let escrowEventMock: Partial<StatusEvent>;
 
     beforeEach(() => {
       cronJobEntityMock = {
