@@ -9,6 +9,7 @@ export interface AssignmentFilterData {
   escrowAddress?: string;
   status?: AssignmentStatus;
   sortField?: AssignmentSortField;
+  rewardAmount?: AssignmentSortField;
   sort?: SortDirection;
   skip: number;
   pageSize: number;
