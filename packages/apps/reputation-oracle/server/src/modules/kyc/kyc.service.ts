@@ -92,27 +92,6 @@ export class KycService {
     kycEntity.status = KycStatus.NONE;
     kycEntity.userId = userEntity.id;
 
-    const sessionInfo = await firstValueFrom(
-      this.httpService
-        .get(
-          `/individual/session/${data.session_id}/step/${this.synapsConfigService.documentID}`,
-          {
-            baseURL: this.synapsConfigService.baseUrl,
-            headers: { 'Api-Key': this.synapsConfigService.apiKey },
-          },
-        )
-        .pipe(map((response) => response.data)),
-    );
-
-    if (
-      sessionInfo?.document?.country &&
-      sessionInfo.document.country.trim() !== ''
-    ) {
-      kycEntity.country = countriesA3ToA2[sessionInfo.document.country];
-    } else {
-      throw new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST);
-    }
-
     await this.kycRepository.createUnique(kycEntity);
 
     return {
@@ -156,6 +135,33 @@ export class KycService {
     if (!kycEntity) {
       throw new ControlledError(ErrorKyc.NotFound, HttpStatus.BAD_REQUEST);
     }
+
+    if (data.state === KycStatus.APPROVED) {
+      const sessionInfo = await firstValueFrom(
+        this.httpService
+          .get(
+            `/individual/session/${data.sessionId}/step/${this.synapsConfigService.documentID}`,
+            {
+              baseURL: this.synapsConfigService.baseUrl,
+              headers: { 'Api-Key': this.synapsConfigService.apiKey },
+            },
+          )
+          .pipe(map((response) => response.data)),
+      );
+
+      if (
+        sessionInfo?.document?.country &&
+        sessionInfo.document.country.trim() !== ''
+      ) {
+        kycEntity.country = countriesA3ToA2[sessionInfo.document.country];
+      } else {
+        throw new ControlledError(
+          ErrorKyc.CountryNotSet,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
     kycEntity.status = data.state;
     kycEntity.message = data.reason;
 
