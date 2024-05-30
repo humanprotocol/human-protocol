@@ -1,3 +1,4 @@
+from datetime import datetime
 from human_protocol_sdk.filter import EscrowFilter
 
 escrow_fragment = """
@@ -89,4 +90,25 @@ query GetEscrow(
 {escrow_fragment}
 """.format(
         escrow_fragment=escrow_fragment
+    )
+
+
+def get_status_query(property_name: str, from_: datetime, to_: datetime):
+    return """
+query {{
+    {name}(
+        where: {{
+        {from_clause}
+        {to_clause}
+        }}
+    ) {{
+        id
+        escrowAddress
+        timestamp
+    }}
+}}
+""".format(
+        name=property_name,
+        from_clause="createdAt_gte: $from" if from_ else "",
+        to_clause="createdAt_lte: $to" if to_ else "",
     )

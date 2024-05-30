@@ -158,7 +158,7 @@ export type TaskStatistics = {
   dailyTasksData: DailyTaskData[];
 };
 
-export type Status = {
+export type StatusEvent = {
   timestamp: number;
   escrowAddress: string;
   status: string;

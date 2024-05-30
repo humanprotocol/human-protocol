@@ -43,7 +43,7 @@ import {
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_STATUS_UPDATES_QUERY,
-  Status,
+  StatusEvent,
 } from './graphql';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowCancel, EscrowStatus, NetworkData } from './types';
@@ -1694,7 +1694,7 @@ export class EscrowUtils {
    * @param {EscrowStatus[]} [statuses] Optional array of statuses to query for. If not provided, queries for all statuses.
    * @param {Date} [from] Optional start date to filter events
    * @param {Date} [to] Optional end date to filter events
-   * @returns {Promise<Status[]>} Array of status events with their corresponding statuses
+   * @returns {Promise<StatusEvent[]>} Array of status events with their corresponding statuses
    *
    * **Code example**
    *
@@ -1715,11 +1715,11 @@ export class EscrowUtils {
     statuses?: EscrowStatus[],
     from?: Date,
     to?: Date
-  ): Promise<Status[]> {
+  ): Promise<StatusEvent[]> {
     if (!networks?.length) {
       throw ErrorUnsupportedChainID;
     }
-    const escrowAddresses: Status[] = [];
+    const escrowAddresses: StatusEvent[] = [];
     const statusQueryMap: { [key in EscrowStatus]: string } = {
       [EscrowStatus.Launched]: '', // No query for Launched status
       [EscrowStatus.Pending]: 'pending',
@@ -1762,7 +1762,7 @@ export class EscrowUtils {
         if (!data || !data[responseProperty]) {
           continue;
         }
-        const statusEvents = data[responseProperty] as Status[];
+        const statusEvents = data[responseProperty] as StatusEvent[];
 
         const eventsWithStatus = statusEvents.map((event) => ({
           ...event,

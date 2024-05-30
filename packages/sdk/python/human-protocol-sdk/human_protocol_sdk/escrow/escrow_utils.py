@@ -27,11 +27,11 @@ Module
 from datetime import datetime
 import logging
 import os
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from web3 import Web3
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.filter import EscrowFilter
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
@@ -119,6 +119,16 @@ class EscrowData:
         self.total_funded_amount = total_funded_amount
         self.created_at = created_at
         self.chain_id = chain_id
+
+
+class StatusEvent:
+    def __init__(
+        self, timestamp: int, status: str, chain_id: ChainId, escrow_address: str
+    ):
+        self.timestamp = timestamp
+        self.status = status
+        self.chain_id = chain_id
+        self.escrow_address = escrow_address
 
 
 class EscrowUtils:
@@ -324,3 +334,96 @@ class EscrowUtils:
                 else None
             ),
         )
+
+    @staticmethod
+    def get_status_events(
+        networks: List[ChainId],
+        statuses: Optional[List[Status]] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+    ) -> List[StatusEvent]:
+        """
+        Retrieve status events for specified networks and statuses within a date range.
+
+        Args:
+            networks (List[ChainId]): List of network chain IDs to query.
+            statuses (Optional[List[Status]]): List of statuses to filter by.
+            date_from (Optional[datetime]): Start date for the query range.
+            date_to (Optional[datetime]): End date for the query range.
+
+        Returns:
+            List[Status]: List of status events matching the query parameters.
+
+        Raises:
+            EscrowClientError: If an unsupported chain ID or status is provided.
+        """
+        from human_protocol_sdk.gql.escrow import (
+            get_status_query,
+        )
+
+        if not networks:
+            raise EscrowClientError("Unsupported Chain ID")
+
+        status_query_map: Dict[Status, str] = {
+            Status.Launched: "",  # No query for Launched status
+            Status.Pending: "pending",
+            Status.Partial: "partial",
+            Status.Paid: "paid",
+            Status.Complete: "completed",
+            Status.Cancelled: "cancelled",
+        }
+
+        # If statuses are not provided, use all statuses except Launched
+        effective_statuses = statuses or [
+            Status.Pending,
+            Status.Partial,
+            Status.Paid,
+            Status.Complete,
+            Status.Cancelled,
+        ]
+
+        escrow_addresses: List[StatusEvent] = []
+
+        for chain_id in networks:
+            network_data = NETWORKS.get(chain_id)
+            if not network_data:
+                raise EscrowClientError("Unsupported Chain ID")
+
+            for status in effective_statuses:
+                query_status = status_query_map.get(status)
+                if query_status is None:
+                    raise EscrowClientError("Unsupported Status")
+
+                # Fetch data from the subgraph
+                response_property = f"{query_status}StatusEvents"
+
+                data = get_data_from_subgraph(
+                    network_data["subgraph_url"],
+                    get_status_query(response_property, date_from, date_to),
+                    {
+                        "from": int(date_from.timestamp()) if date_from else None,
+                        "to": int(date_to.timestamp()) if date_to else None,
+                    },
+                )
+
+                if (
+                    not data
+                    or "data" not in data
+                    or response_property not in data["data"]
+                ):
+                    continue
+                status_events = data["data"][response_property]
+                events_with_status = [
+                    StatusEvent(
+                        timestamp=event["timestamp"],
+                        escrow_address=event["escrowAddress"],
+                        status=status,
+                        chain_id=chain_id,
+                    )
+                    for event in status_events
+                ]
+                escrow_addresses.extend(events_with_status)
+
+        # Sort events by timestamp
+        escrow_addresses.sort(key=lambda x: x.timestamp)
+        return escrow_addresses
