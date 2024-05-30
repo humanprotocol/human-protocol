@@ -146,6 +146,27 @@ def get_projects_by_status(
     return projects
 
 
+def get_escrows_by_project_status(
+    session: Session,
+    project_status: ProjectStatuses,
+    *,
+    included_types: Optional[Sequence[TaskTypes]] = None,
+    limit: int = 5,
+) -> List[tuple[str, int]]:
+    escrows = (
+        session.query(Project.escrow_address, Project.chain_id)
+        .group_by(Project.escrow_address, Project.chain_id)
+        .where(Project.status == project_status.value)
+    )
+
+    if included_types:
+        escrows = escrows.where(Project.job_type.in_([t.value for t in included_types]))
+
+    escrows = escrows.limit(limit).all()
+
+    return escrows
+
+
 def get_available_projects(session: Session, *, limit: int = 10) -> List[Project]:
     return (
         session.query(Project)

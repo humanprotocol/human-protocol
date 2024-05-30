@@ -265,20 +265,6 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
-  [ChainId.SKALE]: {
-    chainId: ChainId.SKALE,
-    title: 'SKALE Human Protocol Chain',
-    scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
-    factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
-    hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
-    stakingAddress: '0x79F37FB9C210910733c16228AC4D14a8e32C11BD',
-    rewardPoolAddress: '0x881218246c25C6898aE96145259584340153aDA2',
-    kvstoreAddress: '0xE1055607327b1be2080D31211dCDC4D9338CaF4A',
-    subgraphUrl:
-      'https://graph-skale.humanprotocol.org/subgraphs/name/skale-human',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
-  },
   [ChainId.XLAYER]: {
     chainId: ChainId.XLAYER,
     title: 'XLayer',

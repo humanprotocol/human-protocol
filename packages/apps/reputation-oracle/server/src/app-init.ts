@@ -7,18 +7,18 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
+import { ServerConfigService } from './common/config/server-config.service';
 
 export default async function init(app: any) {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService: ConfigService = app.get(ConfigService);
+  const serverConfigService = new ServerConfigService(configService);
 
   app.use(cookieParser());
 
-  const sessionSecret = configService.get<string>('SESSION_SECRET', '');
-
   app.use(
     session({
-      secret: sessionSecret,
+      secret: serverConfigService.sessionSecret,
       resave: false,
       saveUninitialized: false,
       cookie: {

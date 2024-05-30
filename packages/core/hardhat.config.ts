@@ -79,13 +79,6 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
-    goerli: {
-      chainId: 5,
-      url: process.env.ETH_GOERLI_TESTNET_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-      timeout: 2000000,
-    },
     sepolia: {
       chainId: 11155111,
       url: process.env.ETH_SEPOLIA_URL || '',
@@ -96,13 +89,6 @@ const config: HardhatUserConfig = {
     polygon: {
       chainId: 137,
       url: process.env.ETH_POLYGON_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-      timeout: 2000000,
-    },
-    polygonMumbai: {
-      chainId: 80001,
-      url: process.env.ETH_POLYGON_MUMBAI_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
@@ -153,13 +139,6 @@ const config: HardhatUserConfig = {
       chainId: 43114,
       timeout: 2000000,
       url: process.env.ETH_AVALANCHE_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    skale: {
-      chainId: 1273227453,
-      timeout: 2000000,
-      url: process.env.ETH_SKALE_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -226,18 +205,14 @@ const config: HardhatUserConfig = {
   ],
   etherscan: {
     apiKey: {
-      // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
-      goerli: process.env.ETHERSCAN_API_KEY || '',
       sepolia: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
       polygonAmoy: process.env.AMOY_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
-      skale: process.env.SKALE_API_KEY || '',
       avalancheFujiTestnet: process.env.AVALANCHE_API_KEY || '',
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
@@ -246,14 +221,6 @@ const config: HardhatUserConfig = {
       xlayerTestnet: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
-      {
-        network: 'skale',
-        chainId: 1273227453,
-        urls: {
-          apiURL: process.env.SKALE_BROWSER_API_URL || '',
-          browserURL: process.env.SKALE_BROWSER_URL || '',
-        },
-      },
       {
         network: 'polygonAmoy',
         chainId: 80002,

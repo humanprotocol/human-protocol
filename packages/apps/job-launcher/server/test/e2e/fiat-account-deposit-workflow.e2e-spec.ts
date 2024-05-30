@@ -24,7 +24,6 @@ import {
   MOCK_WEB3_NODE_HOST,
   MOCK_WEB3_RPC_URL,
 } from '../constants';
-import { StripeConfigService } from '../../src/common/config/stripe-config.service';
 
 describe('Fiat account deposit E2E workflow', () => {
   let app: INestApplication;

@@ -1,5 +1,6 @@
-from contextlib import suppress
 from typing import List
+
+from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
@@ -324,14 +325,19 @@ def track_escrow_creation() -> None:
                 if created_jobs_count != creation.total_jobs:
                     continue
 
-                with suppress(db_errors.LockNotAvailable):
-                    cvat_service.update_project_statuses_by_escrow_address(
-                        session=session,
-                        escrow_address=creation.escrow_address,
-                        chain_id=creation.chain_id,
-                        status=ProjectStatuses.annotation,
-                    )
-                    finished.append(creation)
+                with session.begin_nested():
+                    try:
+                        cvat_service.update_project_statuses_by_escrow_address(
+                            session=session,
+                            escrow_address=creation.escrow_address,
+                            chain_id=creation.chain_id,
+                            status=ProjectStatuses.annotation,
+                        )
+                        finished.append(creation)
+                    except sa_errors.OperationalError as e:
+                        if isinstance(e.orig, db_errors.LockNotAvailable):
+                            continue
+                        raise
 
             if finished:
                 cvat_service.finish_escrow_creations(session, finished)
