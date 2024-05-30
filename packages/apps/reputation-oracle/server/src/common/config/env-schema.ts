@@ -18,10 +18,10 @@ export const envValidator = Joi.object({
   FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
   HCAPTCHA_SECRET: Joi.string().required(),
-  HCAPTCHA_PROTECTION_URL: Joi.string().description(
+  MOCK_HCAPTCHA_PROTECTION_URL: Joi.string().description(
     'Hcaptcha URL for verifying guard tokens',
   ),
-  HCAPTCHA_LABELING_URL: Joi.string().description('hcaptcha labeling url'),
+  MOCK_HCAPTCHA_LABELING_URL: Joi.string().description('hcaptcha labeling url'),
   HCAPTCHA_API_KEY: Joi.string()
     .required()
     .description('Account api key at hcaptcha foundation'),

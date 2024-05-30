@@ -39,7 +39,7 @@ export class AuthConfigService {
   }
   get hCaptchaLabelingURL(): string {
     return this.configService.get<string>(
-      'HCAPTCHA_LABELING_URL',
+      'MOCK_HCAPTCHA_LABELING_URL',
       'https://foundation-accounts.hmt.ai',
     );
   }
