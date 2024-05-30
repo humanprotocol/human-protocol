@@ -65,6 +65,7 @@ import { CredentialEntity } from '../modules/credentials/credential.entity';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
+          url: databaseConfigService.url,
           host: databaseConfigService.host,
           port: databaseConfigService.port,
           username: databaseConfigService.user,

@@ -4,6 +4,9 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class DatabaseConfigService {
   constructor(private configService: ConfigService) {}
+  get url(): string | undefined {
+    return this.configService.get<string>('POSTGRES_URL');
+  }
   get host(): string {
     return this.configService.get<string>('POSTGRES_HOST', '127.0.0.1');
   }
