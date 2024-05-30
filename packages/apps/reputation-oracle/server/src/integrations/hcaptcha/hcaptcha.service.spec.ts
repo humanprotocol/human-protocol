@@ -115,7 +115,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(mockResponseData);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_LABELING_URL}/siteverify`,
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
@@ -143,7 +143,7 @@ describe('hCaptchaService', () => {
 
       expect(result).toEqual(mockResponseData);
       expect(httpService.post).toHaveBeenCalledWith(
-        `${HCAPTCHA_LABELING_URL}/siteverify`,
+        `${HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
         { params: expect.any(Object) },
       );
