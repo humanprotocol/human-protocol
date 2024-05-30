@@ -16,6 +16,8 @@ services:
     value: 80
   - key: FE_URL
     sync: false
+  - key: SESSION_SECRET
+    sync: false
   - key: POSTGRES_URL
     fromDatabase:
       name: job-launcher-db
@@ -131,11 +133,90 @@ services:
   buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
   startCommand: yarn start:prod
   rootDir: packages/apps/job-launcher/client
+- type: web
+  name: reputation-oracle
+  runtime: node
+  repo: https://github.com/humanprotocol/human-protocol
+  plan: starter
+  envVars:
+  - key: NODE_VERSION
+    value: 18
+  - key: NODE_ENV
+    value: development
+  - key: HOST
+    value: 0.0.0.0
+  - key: PORT
+    value: 80
+  - key: SESSION_SECRET
+    sync: false
+  - key: POSTGRES_URL
+    fromDatabase:
+      name: reputation-oracle-db
+      property: connectionString
+  - key: POSTGRES_SSL
+    value: false # for internal db connections
+  - key: JWT_ACCESS_TOKEN_EXPIRES_IN
+    value: 600
+  - key: JWT_REFRESH_TOKEN_EXPIRES_IN
+    value: 3600
+  - key: JWT_PRIVATE_KEY
+    sync: false
+  - key: JWT_PUBLIC_KEY
+    sync: false
+  - key: S3_ENDPOINT
+    value: storage.googleapis.com
+  - key: S3_PORT
+    value: 80
+  - key: S3_ACCESS_KEY
+    sync: false
+  - key: S3_SECRET_KEY
+    sync: false
+  - key: S3_BUCKET
+    sync: false
+  - key: S3_USE_SSL
+    value: false
+  - key: HCAPTCHA_SITE_KEY
+    sync: false
+  - key: HCAPTCHA_SECRET
+    sync: false
+  - key: CRON_SECRET
+    sync: false
+  - key: SYNAPS_WEBHOOK_SECRET
+  sync: false
+  - key: SYNAPS_API_KEY
+    sync: false
+  - key: WEB3_PRIVATE_KEY
+    sync: false
+  - key: GAS_PRICE_MULTIPLIER
+    value: 1
+  - key: MAX_RETRY_COUNT
+    sync: false
+  - key: REPUTATION_LEVEL_LOW
+  sync: false
+  - key: REPUTATION_LEVEL_HIGH
+    sync: false
+  - key: RPC_URL_POLYGON
+    sync: false
+  - key: RPC_URL_POLYGON_AMOY
+    sync: false
+  - key: RPC_URL_XLAYER_TESTNET
+    sync: false
+  region: frankfurt
+  buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
+  startCommand: yarn start:prod
+  preDeployCommand: yarn migration:run
+  rootDir: packages/apps/reputation-oracle/server
 
 databases:
   # A database that allows only private network connections
   - name: job-launcher-db
     databaseName: job_launcher
+    plan: starter
+    previewPlan: starter
+    ipAllowList: [] # No entries in the IP allow list
+    region: frankfurt
+  - name: reputation-oracle-db
+    databaseName: reputation_oracle
     plan: starter
     previewPlan: starter
     ipAllowList: [] # No entries in the IP allow list
