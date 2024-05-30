@@ -480,7 +480,6 @@ describe('JobService', () => {
 
   describe('resignJob', () => {
     it('should successfully cancel an active assignment', async () => {
-      // Mock data
       const assignmentId = 1;
       const workerAddress = MOCK_ADDRESS;
       const mockAssignment = {
@@ -489,32 +488,23 @@ describe('JobService', () => {
         status: AssignmentStatus.ACTIVE,
       } as AssignmentEntity;
   
-      // Mock assignmentRepository.findOneByIdAndWorker to return the mock assignment
       jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(mockAssignment);
   
-      // Call the resignJob method
       await expect(jobService.resignJob(assignmentId, workerAddress)).resolves.toBeUndefined();
-  
-      // Verify that assignment status is updated to CANCELED
       expect(mockAssignment.status).toBe(AssignmentStatus.CANCELED);
-      // Verify that assignmentRepository.save is called with the updated assignment
       expect(assignmentRepository.save).toHaveBeenCalledWith(mockAssignment);
     });
   
     it('should throw NotFound if assignment does not exist', async () => {
-      // Mock data
       const assignmentId = 1;
       const workerAddress = MOCK_ADDRESS;
   
-      // Mock assignmentRepository.findOneByIdAndWorker to return null (assignment not found)
       jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(null);
   
-      // Call the resignJob method and expect it to throw BadRequestException
       await expect(jobService.resignJob(assignmentId, workerAddress)).rejects.toThrow(new BadRequestException(ErrorAssignment.NotFound));
     });
   
     it('should throw InvalidStatus if assignment status is not ACTIVE', async () => {
-      // Mock data
       const assignmentId = 1;
       const workerAddress = MOCK_ADDRESS;
       const mockAssignment = {
@@ -523,10 +513,8 @@ describe('JobService', () => {
         status: AssignmentStatus.COMPLETED,
       } as AssignmentEntity;
   
-      // Mock assignmentRepository.findOneByIdAndWorker to return the mock assignment
       jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(mockAssignment);
   
-      // Call the resignJob method and expect it to throw BadRequestException
       await expect(jobService.resignJob(assignmentId, workerAddress)).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
     });
   });
