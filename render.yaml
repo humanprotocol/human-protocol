@@ -224,6 +224,8 @@ services:
         value: 80
       - key: RPC_URL_POLYGON_AMOY
         sync: false
+      - key: WEB3_ENV
+        sync: false
       - key: WEB3_PRIVATE_KEY
         sync: false
       - key: S3_USE_SSL
