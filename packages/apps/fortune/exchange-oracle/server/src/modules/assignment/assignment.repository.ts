@@ -114,31 +114,30 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
   }
 
   public async fetchFiltered(data: AssignmentFilterData): Promise<ListResult> {
-    const queryBuilder = this.createQueryBuilder('assignment')
-      .leftJoinAndSelect('assignment.job', 'job')
-      .where('assignment.workerAddress = :workerAddress', {
-        workerAddress: data.workerAddress,
-      })
-      .andWhere('job.reputationNetwork = :reputationNetwork', {
-        reputationNetwork: data.reputationNetwork,
-      });
+    const queryBuilder = this.createQueryBuilder(
+      'assignment',
+    ).leftJoinAndSelect('assignment.job', 'job');
 
-    // Apply sorting
-    const sortFieldMapping: Record<AssignmentSortField, string> = {
-      [AssignmentSortField.CHAIN_ID]: 'job.chainId',
-      [AssignmentSortField.JOB_TYPE]: 'job.type',
-      [AssignmentSortField.STATUS]: 'assignment.status',
-      [AssignmentSortField.CREATED_AT]: 'assignment.createdAt',
-      [AssignmentSortField.EXPIRES_AT]: 'assignment.expiresAt',
-      [AssignmentSortField.REWARD_AMOUNT]: 'assignment.rewardAmount',
-    };
+    switch (data.sortField) {
+      case AssignmentSortField.CHAIN_ID:
+        queryBuilder.orderBy('job.chainId', data.sort);
+        break;
+      case AssignmentSortField.STATUS:
+        queryBuilder.orderBy('assignment.status', data.sort);
+        break;
+      case AssignmentSortField.CREATED_AT:
+        queryBuilder.orderBy('assignment.createdAt', data.sort);
+        break;
+      case AssignmentSortField.EXPIRES_AT:
+        queryBuilder.orderBy('assignment.expiresAt', data.sort);
+        break;
+      case AssignmentSortField.REWARD_AMOUNT:
+        queryBuilder.orderBy('assignment.rewardAmount', data.sort);
+        break;
+      default:
+        queryBuilder.orderBy('assignment.createdAt', data.sort);
+    }
 
-    const sortColumn =
-      sortFieldMapping[data.sortField as AssignmentSortField] ||
-      sortFieldMapping[AssignmentSortField.CREATED_AT];
-    queryBuilder.orderBy(sortColumn, data.sort);
-
-    // Apply filters
     if (data.chainId !== undefined) {
       queryBuilder.andWhere('job.chainId = :chainId', {
         chainId: data.chainId,
@@ -156,23 +155,27 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
         rewardAmount: data.rewardAmount,
       });
     }
-
     if (data.escrowAddress) {
       queryBuilder.andWhere('job.escrowAddress = :escrowAddress', {
         escrowAddress: data.escrowAddress,
       });
     }
-
     if (data.status !== undefined) {
       queryBuilder.andWhere('assignment.status = :status', {
         status: data.status,
       });
     }
 
-    // Apply pagination
-    queryBuilder.skip(data.skip).take(data.pageSize);
+    queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
+      reputationNetwork: data.reputationNetwork,
+    });
 
-    // Fetch results
+    queryBuilder.andWhere('assignment.workerAddress = :workerAddress', {
+      workerAddress: data.workerAddress,
+    });
+
+    queryBuilder.offset(data.skip).limit(data.pageSize);
+
     const [entities, itemCount] = await queryBuilder.getManyAndCount();
 
     return { entities, itemCount };
