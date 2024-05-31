@@ -231,9 +231,9 @@ services:
       - key: S3_SECRET_KEY
         sync: false
       - key: S3_PORT
-        sync: false
+        value: 80
       - key: S3_ENDPOINT
-        sync: false
+        value: storage.googleapis.com
       - key: S3_BUCKET
         sync: false
       - key: S3_ACCESS_KEY
@@ -282,9 +282,9 @@ services:
       - key: S3_SECRET_KEY
         sync: false
       - key: S3_PORT
-        sync: false
+        value: 80
       - key: S3_ENDPOINT
-        sync: false
+        value: storage.googleapis.com
       - key: S3_BUCKET
         sync: false
       - key: S3_ACCESS_KEY
@@ -304,7 +304,6 @@ services:
     region: frankfurt
     buildCommand: yarn install; yarn workspace @human-protocol/sdk build; yarn build
     startCommand: yarn start:prod
-    preDeployCommand: yarn migration:run
     rootDir: packages/apps/fortune/recording-oracle
 
 databases:
