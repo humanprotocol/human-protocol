@@ -19,6 +19,7 @@ import { createOrLoadEscrowStatistics } from '../Escrow';
 import { ONE_BI } from '../utils/number';
 import { toEventId } from '../utils/event';
 import { getEventDayData } from '../utils/dayUpdates';
+import { createTransaction } from '../utils/Transaction';
 
 enum EscrowStatuses {
   Launched,
@@ -30,6 +31,7 @@ enum EscrowStatuses {
 }
 
 export function handlePending(event: Pending): void {
+  createTransaction(event, 'setup');
   // Create SetupEvent entity
   const setupEventEntity = new SetupEvent(toEventId(event));
   setupEventEntity.block = event.block.number;
@@ -101,6 +103,7 @@ export function handlePending(event: Pending): void {
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
+  createTransaction(event, 'storeResults');
   // Create StoreResultsEvent entity
   const eventEntity = new StoreResultsEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -135,6 +138,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
+  createTransaction(event, 'bulkTransfer');
   // Create BulkPayoutEvent entity
   const eventEntity = new BulkPayoutEvent(toEventId(event));
   eventEntity.block = event.block.number;

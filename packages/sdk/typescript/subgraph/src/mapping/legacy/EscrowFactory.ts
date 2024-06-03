@@ -5,8 +5,10 @@ import { ONE_BI, ZERO_BI } from '../utils/number';
 import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
 import { createOrLoadLeader } from '../Staking';
+import { createTransaction } from '../utils/Transaction';
 
 export function handleLaunched(event: Launched): void {
+  createTransaction(event, 'createEscrow');
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 

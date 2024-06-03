@@ -9,6 +9,7 @@ import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { isValidEthAddress } from './utils/ethAdrress';
 import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { createTransaction } from './utils/Transaction';
 
 export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
   const entityId = `${leader.address.toHex()}-${key}`;
@@ -39,6 +40,7 @@ export function createOrLoadReputationNetwork(
 }
 
 export function handleDataSaved(event: DataSaved): void {
+  createTransaction(event, 'set');
   // Create KVStoreSetEvent entity
   const eventEntity = new KVStoreSetEvent(toEventId(event));
   eventEntity.block = event.block.number;
