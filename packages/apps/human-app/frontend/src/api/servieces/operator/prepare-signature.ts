@@ -5,6 +5,7 @@ import { apiPaths } from '@/api/api-paths';
 
 export enum PrepareSignatureType {
   SignUp = 'SIGNUP',
+  SignIn = 'SIGNIN',
   DisableOperator = 'DISABLE_OPERATOR',
 }
 
@@ -15,21 +16,22 @@ export const prepareSignatureSuccessSchema = z.object({
 });
 
 export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
-
-export function usePrepareSignature({
-  address,
-  type,
-}: {
+export interface PrepareSignatureBody {
   address: string;
   type: PrepareSignatureType;
-}) {
+}
+
+export const prepareSignature = (body: PrepareSignatureBody) => {
+  return apiClient(apiPaths.operator.web3Auth.prepareSignature.path, {
+    successSchema: prepareSignatureSuccessSchema,
+    options: { method: 'POST', body: JSON.stringify(body) },
+  });
+};
+
+export function usePrepareSignature(body: PrepareSignatureBody) {
   return useQuery({
-    queryFn: () =>
-      apiClient(apiPaths.operator.web3Auth.prepareSignature.path, {
-        successSchema: prepareSignatureSuccessSchema,
-        options: { method: 'POST', body: JSON.stringify({ address, type }) },
-      }),
-    queryKey: [address, type],
+    queryFn: () => prepareSignature(body),
+    queryKey: [body],
     refetchInterval: 0,
   });
 }
