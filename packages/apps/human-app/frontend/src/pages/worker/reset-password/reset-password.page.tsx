@@ -17,6 +17,7 @@ import {
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
+import { routerPaths } from '@/router/router-paths';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
@@ -56,7 +57,7 @@ export function ResetPasswordWorkerPage() {
           </Alert>
         ) : undefined
       }
-      backArrowPath="/worker/profile"
+      backArrowPath={routerPaths.worker.profile}
       hiddenCancelButton
       title={t('worker.resetPassword.title')}
     >
