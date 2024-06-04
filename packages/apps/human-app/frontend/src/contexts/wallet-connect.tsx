@@ -54,7 +54,7 @@ interface DisconnectedAccount {
   isConnected: false;
   chainId?: never;
   address?: never;
-  signMessage?: never;
+  signMessage?: (message: string) => Promise<string | undefined>;
 }
 
 export type WalletConnectContextConnectedAccount = CommonWalletConnectContext &
@@ -110,6 +110,12 @@ export function WalletConnectProvider({
               isConnected: false,
               web3ProviderMutation,
               openModal,
+              signMessage: (message: string) => {
+                if (web3ProviderMutation.data) {
+                  return web3ProviderMutation.data.signer.signMessage(message);
+                }
+                return Promise.resolve(undefined);
+              },
               initializing,
             }
       }
