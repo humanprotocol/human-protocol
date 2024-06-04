@@ -13,7 +13,10 @@ export const signUpDtoSchema = z
   .object({
     email: z.string().email(t('validation.invalidEmail')),
     // eslint-disable-next-line camelcase -- export vite config
-    h_captcha_token: z.string().default('token'),
+    h_captcha_token: z
+      .string()
+      .min(1, t('validation.captcha'))
+      .default('token'),
   })
   .and(
     z

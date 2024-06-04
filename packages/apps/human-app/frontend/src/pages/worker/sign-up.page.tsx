@@ -24,6 +24,7 @@ import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { useAuth } from '@/auth/use-auth';
+import { FormCaptcha } from '@/components/h-captcha';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -47,7 +48,7 @@ export function SignUpWorkerPage() {
       password: '',
       confirmPassword: '',
       // eslint-disable-next-line camelcase -- export vite config
-      h_captcha_token: 'token',
+      h_captcha_token: '',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -97,10 +98,7 @@ export function SignUpWorkerPage() {
               label={t('worker.signUpForm.fields.confirmPassword')}
               name="confirmPassword"
             />
-            {/*TODO add hcaptcha token if backend available*/}
-            {/*<Grid width="100%">*/}
-            {/*  <Captcha setCaptchaToken={setCaptchaToken} />*/}
-            {/*</Grid>*/}
+            <FormCaptcha name="h_captcha_token" />
             <Grid>
               <Typography fontSize="0.75rem" variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
