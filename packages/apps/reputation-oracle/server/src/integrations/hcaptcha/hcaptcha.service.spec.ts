@@ -5,12 +5,21 @@ import { ConfigService } from '@nestjs/config';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { DeepPartial } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
-import { of } from 'rxjs';
+import { of, firstValueFrom } from 'rxjs';
+import * as rxjs from 'rxjs';
 import {
   MOCK_HCAPTCHA_PROTECTION_URL,
   MOCK_HCAPTCHA_LABELING_URL,
 } from '../../../test/constants';
-import { TokenType } from '../../common/enums/hcaptcha';
+import { TokenType } from '../../common/enums';
+
+jest.mock('rxjs', () => {
+  const originalModule = jest.requireActual('rxjs');
+  return {
+    ...originalModule,
+    firstValueFrom: jest.fn(),
+  };
+});
 
 describe('hCaptchaService', () => {
   let hcaptchaService: HCaptchaService;
@@ -57,6 +66,11 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+        data: mockResponseData,
+      });
+
       const result = await hcaptchaService.verifyToken(mockData);
 
       expect(result).toEqual(mockResponseData);
@@ -85,6 +99,11 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+        data: mockResponseData,
+      });
+
       const result = await hcaptchaService.verifyToken(mockData);
 
       expect(result).toEqual(mockResponseData);
@@ -109,6 +128,11 @@ describe('hCaptchaService', () => {
           status: 200,
           data: mockResponseData,
         });
+      });
+
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+        data: mockResponseData,
       });
 
       const result = await hcaptchaService.verifyToken(mockData);
@@ -139,6 +163,11 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+        data: mockResponseData,
+      });
+
       const result = await hcaptchaService.verifyToken(mockData);
 
       expect(result).toEqual(mockResponseData);
@@ -167,6 +196,11 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 400,
+        data: mockResponseData,
+      });
+
       const result = await hcaptchaService.verifyToken(mockData);
 
       expect(result).toEqual(false);
@@ -192,6 +226,10 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+      });
+
       const result = await hcaptchaService.verifyToken(mockData);
 
       expect(result).toEqual(false);
@@ -211,11 +249,16 @@ describe('hCaptchaService', () => {
         type: TokenType.AUTH,
       };
 
-      httpService.post = jest
-        .fn()
-        .mockRejectedValueOnce(new Error('Network Error'));
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          status: 401,
+        });
+      });
 
-      httpService.get = jest.fn().mockRejectedValue(new Error('Network Error'));
+      (firstValueFrom as jest.Mock).mockRejectedValue(
+        new Error('Network Error'),
+      );
+
       const result = await hcaptchaService.verifyToken(mockData);
 
       expect(result).toEqual(false);
@@ -245,6 +288,10 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+      });
+
       const result = await hcaptchaService.registerLabeler(mockData);
 
       expect(result).toEqual(true);
@@ -269,6 +316,10 @@ describe('hCaptchaService', () => {
         return of({
           status: 200,
         });
+      });
+
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
       });
 
       const result = await hcaptchaService.registerLabeler(mockData);
@@ -298,6 +349,10 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 400,
+      });
+
       const result = await hcaptchaService.registerLabeler(mockData);
 
       expect(result).toEqual(false);
@@ -319,9 +374,15 @@ describe('hCaptchaService', () => {
         address: '0xabcdef1234567890',
       };
 
-      httpService.post = jest
-        .fn()
-        .mockRejectedValue(new Error('Network Error'));
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          status: 401,
+        });
+      });
+
+      (firstValueFrom as jest.Mock).mockRejectedValue(
+        new Error('Network Error'),
+      );
 
       const result = await hcaptchaService.registerLabeler(mockData);
 
@@ -347,6 +408,11 @@ describe('hCaptchaService', () => {
           status: 200,
           data: mockResponseData,
         });
+      });
+
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+        data: mockResponseData,
       });
 
       const result = await hcaptchaService.getLabelerData(mockData);
@@ -376,6 +442,11 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 400,
+        data: mockResponseData,
+      });
+
       const result = await hcaptchaService.getLabelerData(mockData);
 
       expect(result).toEqual(null);
@@ -400,6 +471,10 @@ describe('hCaptchaService', () => {
         });
       });
 
+      (firstValueFrom as jest.Mock).mockResolvedValue({
+        status: 200,
+      });
+
       const result = await hcaptchaService.getLabelerData(mockData);
 
       expect(result).toEqual(null);
@@ -418,7 +493,16 @@ describe('hCaptchaService', () => {
         email: 'test@example.com',
       };
 
-      httpService.get = jest.fn().mockRejectedValue(new Error('Network Error'));
+      httpService.post = jest.fn().mockImplementation(() => {
+        return of({
+          status: 400,
+        });
+      });
+
+      (firstValueFrom as jest.Mock).mockRejectedValue(
+        new Error('Network Error'),
+      );
+
       const result = await hcaptchaService.getLabelerData(mockData);
 
       expect(result).toEqual(null);

@@ -37,7 +37,7 @@ export class HCaptchaService {
       }
 
       const response = await firstValueFrom(
-        await this.httpService.post(
+        this.httpService.post(
           `${this.hcaptchaConfigService.protectionURL}/siteverify`,
           {},
           { params: queryParams },
@@ -65,14 +65,11 @@ export class HCaptchaService {
 
       const queryParams: any = {
         api_key: this.hcaptchaConfigService.apiKey,
+        remoteip: ip || undefined,
       };
 
-      if (ip) {
-        queryParams.remoteip = ip;
-      }
-
       const response = await firstValueFrom(
-        await this.httpService.post(
+        this.httpService.post(
           `${this.hcaptchaConfigService.labelingURL}/labeler/register`,
           {
             email,
@@ -90,9 +87,8 @@ export class HCaptchaService {
         return true;
       }
     } catch (error) {
-      console.log(error);
       this.logger.error(
-        `Error occured during labeling registration. User: ${data.email}`,
+        `Error occurred during labeling registration. User: ${data.email}`,
         error,
       );
     }
@@ -110,7 +106,7 @@ export class HCaptchaService {
       const { email } = data;
 
       const response = await firstValueFrom(
-        await this.httpService.get(
+        this.httpService.get(
           `${this.hcaptchaConfigService.labelingURL}/support/users`,
           {
             params: { api_key: this.hcaptchaConfigService.apiKey, email },

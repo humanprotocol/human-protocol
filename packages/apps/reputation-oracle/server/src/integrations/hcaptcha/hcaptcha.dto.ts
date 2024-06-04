@@ -1,5 +1,3 @@
-import { TokenType } from '../../common/enums/hcaptcha';
-
 export class hCaptchaApiParams {
   public ip?: string;
 }

@@ -14,6 +14,7 @@ import { signMessage } from '../../common/utils/signature';
 import {
   MOCK_ADDRESS,
   MOCK_EMAIL,
+  MOCK_HCAPTCHA_SITE_KEY,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
@@ -45,6 +46,24 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
 }));
+
+jest.mock('rxjs', () => {
+  const original = jest.requireActual('rxjs');
+
+  return {
+    ...original,
+    firstValueFrom: () =>
+      new Promise((resolve, reject) => {
+        resolve({
+          sitekeys: [
+            {
+              sitekey: MOCK_HCAPTCHA_SITE_KEY,
+            },
+          ],
+        });
+      }),
+  };
+});
 
 describe('UserService', () => {
   let userService: UserService;
