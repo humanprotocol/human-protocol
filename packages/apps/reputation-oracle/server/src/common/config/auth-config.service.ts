@@ -31,16 +31,4 @@ export class AuthConfigService {
       86400,
     );
   }
-  get hCaptchaSiteKey(): string {
-    return this.configService.get<string>('HCAPTCHA_SITE_KEY', '');
-  }
-  get hCaptchaSecret(): string {
-    return this.configService.get<string>('HCAPTCHA_SECRET', '');
-  }
-  get hCaptchaLabelingURL(): string {
-    return this.configService.get<string>(
-      'MOCK_HCAPTCHA_LABELING_URL',
-      'https://foundation-accounts.hmt.ai',
-    );
-  }
 }

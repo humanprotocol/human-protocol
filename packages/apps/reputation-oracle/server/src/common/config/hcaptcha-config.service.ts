@@ -15,13 +15,13 @@ export class HCaptchaConfigService {
   }
   get protectionURL(): string {
     return this.configService.get<string>(
-      'MOCK_HCAPTCHA_PROTECTION_URL',
+      'HCAPTCHA_PROTECTION_URL',
       'https://api.hcaptcha.com',
     );
   }
   get labelingURL(): string {
     return this.configService.get<string>(
-      'MOCK_HCAPTCHA_LABELING_URL',
+      'HCAPTCHA_LABELING_URL',
       'https://foundation-accounts.hmt.ai',
     );
   }
