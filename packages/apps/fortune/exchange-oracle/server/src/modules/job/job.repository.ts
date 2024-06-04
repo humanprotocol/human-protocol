@@ -37,7 +37,8 @@ export class JobRepository extends BaseRepository<JobEntity> {
   }
 
   public async fetchFiltered(data: JobFilterData): Promise<ListResult> {
-    const queryBuilder = await this.createQueryBuilder('job');
+    const queryBuilder = this.createQueryBuilder('job');
+
     if (
       data.sortField == JobSortField.CHAIN_ID ||
       data.sortField == JobSortField.CREATED_AT
