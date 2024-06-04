@@ -9,8 +9,3 @@ export enum WebhookStatus {
   FAILED = 'FAILED',
   PAID = 'PAID',
 }
-
-export enum OracleType {
-  FORTUNE = 'fortune',
-  CVAT = 'cvat',
-}

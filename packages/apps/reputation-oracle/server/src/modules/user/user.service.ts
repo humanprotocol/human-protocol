@@ -1,4 +1,9 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   ErrorAuth,
@@ -25,7 +30,12 @@ import { Wallet } from 'ethers';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { SiteKeyEntity } from './site-key.entity';
+import { SiteKeyRepository } from './site-key.repository';
+import { OracleType } from '../../common/enums';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 
 @Injectable()
 export class UserService {
@@ -33,8 +43,11 @@ export class UserService {
   private HASH_ROUNDS = 12;
   constructor(
     private userRepository: UserRepository,
+    private siteKeyRepository: SiteKeyRepository,
     private readonly web3Service: Web3Service,
+    private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
+    private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -111,6 +124,50 @@ export class UserService {
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.nonce = generateNonce();
     return userEntity.save();
+  }
+
+  public async registerLabeler(user: UserEntity): Promise<string> {
+    if (user.type !== UserType.WORKER) {
+      throw new BadRequestException(ErrorUser.InvalidType);
+    }
+
+    if (user.kyc?.status !== KycStatus.APPROVED) {
+      throw new BadRequestException(ErrorUser.KycNotApproved);
+    }
+
+    if (user.siteKey) {
+      return user.siteKey.siteKey;
+    }
+
+    // Register user as a labeler at hcaptcha foundation
+    const registeredLabeler = await this.hcaptchaService.registerLabeler({
+      email: user.email,
+      language: this.hcaptchaConfigService.defaultLabelerLang,
+      country: user.kyc.country,
+      address: user.evmAddress,
+    });
+
+    if (!registeredLabeler) {
+      throw new BadRequestException(ErrorUser.LabelingEnableFailed);
+    }
+
+    // Retrieve labeler site key from hcaptcha foundation
+    const labelerData = await this.hcaptchaService.getLabelerData({
+      email: user.email,
+    });
+    if (!labelerData || !labelerData.sitekeys.length) {
+      throw new BadRequestException(ErrorUser.LabelingEnableFailed);
+    }
+    const siteKey = labelerData.sitekeys[0].sitekey;
+
+    const newSiteKey = new SiteKeyEntity();
+    newSiteKey.siteKey = siteKey;
+    newSiteKey.user = user;
+    newSiteKey.type = OracleType.HCAPTCHA;
+
+    await this.siteKeyRepository.createUnique(newSiteKey);
+
+    return siteKey;
   }
 
   public async registerAddress(

@@ -11,6 +11,7 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ChainId } from '@human-protocol/sdk';
 import { SignatureType } from '../../common/enums/web3';
+import { OracleType } from '../../common/enums';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -48,6 +49,12 @@ export class UserUpdateDto {
   @IsOptional()
   @IsEnum(UserStatus)
   public status?: UserStatus;
+}
+
+export class RegisterLabelerResponseDto {
+  @ApiProperty({ name: 'site_key' })
+  @IsString()
+  public siteKey: string;
 }
 
 export class RegisterAddressRequestDto {
