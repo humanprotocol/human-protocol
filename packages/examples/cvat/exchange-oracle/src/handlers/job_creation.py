@@ -1824,18 +1824,52 @@ class SkeletonsFromBoxesTaskBuilder:
             f" (and {remainder_count} more)" if remainder_count > 0 else "",
         )
 
-    def _match_boxes(self, a: BboxCoords, b: BboxCoords):
+    def _match_boxes(self, a: BboxCoords, b: BboxCoords) -> bool:
         return bbox_iou(a, b) > 0
+
+    def _get_skeleton_bbox(
+        self, skeleton: dm.Skeleton, annotations: Sequence[dm.Annotation]
+    ) -> BboxCoords:
+        matching_bbox = None
+        if skeleton.group:
+            matching_bbox = next(
+                (
+                    bbox
+                    for bbox in annotations
+                    if isinstance(bbox, dm.Bbox) and bbox.group == skeleton.group
+                ),
+                None,
+            )
+
+        if matching_bbox:
+            bbox = matching_bbox.get_bbox()
+        else:
+            bbox = skeleton.get_bbox()
+
+            if any(
+                v != dm.Points.Visibility.absent for e in skeleton.elements for v in e.visibility
+            ):
+                # If there's only 1 visible point, the bbox will have 0 w and h
+                bbox = [bbox[0], bbox[1], max(1, bbox[2]), max(1, bbox[3])]
+
+        return bbox
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
             input_boxes: List[dm.Bbox],
             gt_skeletons: List[dm.Skeleton],
+            *,
+            gt_annotations: List[dm.Annotation],
         ) -> List[Tuple[dm.Bbox, dm.Skeleton]]:
             matches = [
                 [
                     (input_bbox.label == gt_skeleton.label)
-                    and (self._match_boxes(input_bbox.get_bbox(), gt_skeleton.get_bbox()))
+                    and (
+                        self._match_boxes(
+                            input_bbox.get_bbox(),
+                            self._get_skeleton_bbox(gt_skeleton, gt_annotations),
+                        )
+                    )
                     for gt_skeleton in gt_skeletons
                 ]
                 for input_bbox in input_boxes
@@ -1923,9 +1957,14 @@ class SkeletonsFromBoxesTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_skeletons(
-            input_boxes: List[dm.Bbox], gt_skeletons: List[dm.Skeleton]
+            input_boxes: List[dm.Bbox],
+            gt_skeletons: List[dm.Skeleton],
+            *,
+            gt_annotations: List[dm.Annotation],
         ) -> List[dm.Bbox]:
-            matches = _find_unambiguous_matches(input_boxes, gt_skeletons)
+            matches = _find_unambiguous_matches(
+                input_boxes, gt_skeletons, gt_annotations=gt_annotations
+            )
 
             matched_skeletons = []
             for input_bbox, gt_skeleton in matches:
@@ -1999,7 +2038,9 @@ class SkeletonsFromBoxesTaskBuilder:
             if not gt_skeletons:
                 continue
 
-            matched_skeletons = _find_good_gt_skeletons(input_boxes, gt_skeletons)
+            matched_skeletons = _find_good_gt_skeletons(
+                input_boxes, gt_skeletons, gt_annotations=gt_sample.annotations
+            )
             if not matched_skeletons:
                 continue
 
