@@ -19,6 +19,7 @@ import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { useAuth } from '@/auth/use-auth';
+import { FormCaptcha } from '@/components/h-captcha';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -42,7 +43,7 @@ export function SignInWorkerPage() {
       email: '',
       password: '',
       // eslint-disable-next-line camelcase -- export vite config
-      h_captcha_token: 'token',
+      h_captcha_token: '',
     },
     resolver: zodResolver(signInDtoSchema),
   });
@@ -90,6 +91,7 @@ export function SignInWorkerPage() {
               label={t('worker.signInForm.fields.password')}
               name="password"
             />
+            <FormCaptcha name="h_captcha_token" />
             <Typography variant="body1">
               <Link to={routerPaths.worker.sendResetLink}>
                 {t('worker.signInForm.forgotPassword')}
