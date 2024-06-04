@@ -307,10 +307,16 @@ export class CronJobService {
         );
 
         if (!job) continue;
-        if (event.status === EscrowStatus[EscrowStatus.Partial]) {
+        if (
+          event.status === EscrowStatus[EscrowStatus.Partial] &&
+          job.status !== JobStatus.PARTIAL
+        ) {
           job.status = JobStatus.PARTIAL;
           await this.jobRepository.updateOne(job);
-        } else if (event.status === EscrowStatus[EscrowStatus.Complete]) {
+        } else if (
+          event.status === EscrowStatus[EscrowStatus.Complete] &&
+          job.status !== JobStatus.COMPLETED
+        ) {
           job.status = JobStatus.COMPLETED;
           await this.jobRepository.updateOne(job);
         }
