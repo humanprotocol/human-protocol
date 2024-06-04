@@ -13,6 +13,7 @@ export const prepareSignatureSuccessSchema = z.object({
   from: z.string(),
   to: z.string(),
   contents: z.string(),
+  nonce: z.unknown(),
 });
 
 export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;

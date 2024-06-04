@@ -30,13 +30,7 @@ export function useWeb3SignIn() {
       if (!signMessage) {
         throw new Error(t('errors.unknown'));
       }
-      const signature = await signMessage(
-        JSON.stringify({
-          to: dataToSign.to,
-          from: dataToSign.from,
-          contents: dataToSign.contents,
-        })
-      );
+      const signature = await signMessage(JSON.stringify(dataToSign));
 
       return apiClient(apiPaths.operator.web3Auth.signIn.path, {
         successSchema: web3SignInSuccessResponseSchema,
