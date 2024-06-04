@@ -11,6 +11,7 @@ import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 import { routerPaths } from '@/router/router-paths';
+import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
 
 interface WelcomeProps {
   setStage: (step: HomePageStageType) => void;
@@ -118,15 +119,7 @@ export function Welcome({ setStage }: WelcomeProps) {
           >
             {t('homepage.workerSignIn')}
           </Button>
-          <Button
-            component={Link}
-            fullWidth
-            size="large"
-            to={routerPaths.operator.signIn}
-            variant="outlined"
-          >
-            {t('homepage.operatorSignIn')}
-          </Button>
+          <OperatorSignIn />
         </Paper>
       </Grid>
     </Grid>

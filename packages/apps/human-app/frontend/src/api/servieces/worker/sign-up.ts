@@ -11,7 +11,7 @@ import { useAuth } from '@/auth/use-auth';
 
 export const signUpDtoSchema = z
   .object({
-    email: z.string().email(),
+    email: z.string().email(t('validation.invalidEmail')),
     // eslint-disable-next-line camelcase -- export vite config
     h_captcha_token: z
       .string()

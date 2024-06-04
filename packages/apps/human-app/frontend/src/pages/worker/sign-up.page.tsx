@@ -100,7 +100,7 @@ export function SignUpWorkerPage() {
             />
             <FormCaptcha name="h_captcha_token" />
             <Grid>
-              <Typography variant="textField">
+              <Typography fontSize="0.75rem" variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
                   Terms
                   <Link href={env.VITE_TERMS_OF_SERVICE_URL} />

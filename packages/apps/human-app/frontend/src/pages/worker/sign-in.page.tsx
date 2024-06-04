@@ -80,7 +80,7 @@ export function SignInWorkerPage() {
             void methods.handleSubmit(handleWorkerSignIn)(event)
           }
         >
-          <Grid container gap="2rem">
+          <Grid container gap="2rem" sx={{ paddingTop: '1rem' }}>
             <Input
               fullWidth
               label={t('worker.signInForm.fields.email')}
@@ -93,7 +93,10 @@ export function SignInWorkerPage() {
             />
             <FormCaptcha name="h_captcha_token" />
             <Typography variant="body1">
-              <Link to={routerPaths.worker.sendResetLink}>
+              <Link
+                style={{ textDecoration: 'none', fontWeight: 600 }}
+                to={routerPaths.worker.sendResetLink}
+              >
                 {t('worker.signInForm.forgotPassword')}
               </Link>
             </Typography>

@@ -9,10 +9,10 @@ import { routerPaths } from '@/router/router-paths';
 import { useAuth } from '@/auth/use-auth';
 
 export const signInDtoSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email(t('validation.invalidEmail')),
   password: z
     .string()
-    .min(1, t('validation.required'))
+    .min(1, t('validation.passwordMissing'))
     .max(50, t('validation.max', { count: 50 })),
   // eslint-disable-next-line camelcase -- export vite config
   h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),

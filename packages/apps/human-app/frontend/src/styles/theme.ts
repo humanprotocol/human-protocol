@@ -321,6 +321,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        notchedOutline: {
+          borderColor: colorPalette.primary.main,
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

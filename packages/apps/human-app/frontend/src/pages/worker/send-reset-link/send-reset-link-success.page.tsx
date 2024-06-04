@@ -27,7 +27,7 @@ export function SendResetLinkWorkerSuccessPage() {
             i18nKey="worker.sendResetLinkSuccess.paragraph1"
             values={{ email }}
           >
-            Strong <Typography variant="buttonMedium" />
+            Strong <Typography fontWeight={600} />
           </Trans>
         </Typography>
         <Typography color={colorPalette.primary.light} variant="body1">
@@ -38,7 +38,7 @@ export function SendResetLinkWorkerSuccessPage() {
             i18nKey="worker.sendResetLinkSuccess.paragraph3"
             values={{ email }}
           >
-            Strong <Typography variant="buttonMedium" />
+            Strong <Typography fontWeight={600} />
           </Trans>
         </Typography>
         <Button
@@ -56,7 +56,7 @@ export function SendResetLinkWorkerSuccessPage() {
             values={{ email }}
           >
             Strong
-            <Typography variant="buttonMedium" />
+            <Typography />
             <Link
               rel="noreferrer"
               target="_blank"
