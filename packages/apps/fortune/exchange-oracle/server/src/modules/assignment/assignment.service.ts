@@ -86,6 +86,8 @@ export class AssignmentService {
     newAssignmentEntity.job = jobEntity;
     newAssignmentEntity.workerAddress = jwtUser.address;
     newAssignmentEntity.status = AssignmentStatus.ACTIVE;
+    newAssignmentEntity.rewardAmount =
+      manifest.fundAmount / manifest.submissionsRequired;
     newAssignmentEntity.expiresAt = expirationDate;
     await this.assignmentRepository.createUnique(newAssignmentEntity);
   }
@@ -102,10 +104,10 @@ export class AssignmentService {
     const { entities, itemCount } =
       await this.assignmentRepository.fetchFiltered({
         ...data,
-        pageSize: data.pageSize!,
-        skip: data.skip!,
         reputationNetwork,
         workerAddress,
+        skip: data.skip!,
+        pageSize: data.pageSize ?? 10,
       });
     const assignments = await Promise.all(
       entities.map(async (entity) => {
@@ -119,7 +121,7 @@ export class AssignmentService {
           entity.job.chainId,
           JobType.FORTUNE,
           entity.status,
-          manifest.fundAmount / manifest.submissionsRequired,
+          entity.rewardAmount,
           TOKEN,
           entity.createdAt.toISOString(),
           entity.expiresAt.toISOString(),

@@ -51,6 +51,7 @@ This class is used as a base class for other clients making on-chain calls.
 #### Defined in
 
 [base.ts:20](https://github.com/humanprotocol/human-protocol/blob/c5bdba8d09572dcd1b7eef0032edf59f6f0b1b0f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
@@ -61,6 +62,7 @@ This class is used as a base class for other clients making on-chain calls.
 #### Defined in
 
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c5bdba8d09572dcd1b7eef0032edf59f6f0b1b0f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -71,3 +73,4 @@ ___
 #### Defined in
 
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c5bdba8d09572dcd1b7eef0032edf59f6f0b1b0f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)

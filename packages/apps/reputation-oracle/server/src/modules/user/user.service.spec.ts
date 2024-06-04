@@ -59,6 +59,7 @@ describe('UserService', () => {
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
           },
         },
         ConfigService,
@@ -164,7 +165,7 @@ describe('UserService', () => {
 
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        { chainId: ChainId.POLYGON_AMOY, address },
+        { address },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -182,7 +183,6 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(
@@ -204,7 +204,6 @@ describe('UserService', () => {
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_AMOY,
           address,
         }),
       ).rejects.toThrow(

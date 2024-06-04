@@ -135,7 +135,7 @@ export class UserService {
     await user.save();
 
     return await this.web3Service
-      .getSigner(data.chainId)
+      .getSigner(this.web3Service.getValidChains()[0])
       .signMessage(data.address);
   }
 
