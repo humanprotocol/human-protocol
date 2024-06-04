@@ -74,7 +74,7 @@ query GetEscrows(
         ),
         status_clause="status: $status" if filter.status else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",
-        to_clause="createdAt_lte: $to" if filter.date_from else "",
+        to_clause="createdAt_lte: $to" if filter.date_to else "",
     )
 
 
@@ -95,7 +95,10 @@ query GetEscrow(
 
 def get_status_query(property_name: str, from_: datetime, to_: datetime):
     return """
-query {{
+query GetStatus(
+    $from: Int
+    $to: Int
+){{
     {name}(
         where: {{
         {from_clause}
@@ -109,6 +112,6 @@ query {{
 }}
 """.format(
         name=property_name,
-        from_clause="createdAt_gte: $from" if from_ else "",
-        to_clause="createdAt_lte: $to" if to_ else "",
+        from_clause="timestamp_gte: $from" if from_ else "",
+        to_clause="timestamp_lte: $to" if to_ else "",
     )

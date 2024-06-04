@@ -207,6 +207,12 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
+            if (
+                not escrows_data
+                or "data" not in escrows_data
+                or "escrows" not in escrows_data["data"]
+            ):
+                continue
             escrows_raw = escrows_data["data"]["escrows"]
 
             escrows.extend(
@@ -354,17 +360,30 @@ class EscrowUtils:
         """
         Retrieve status events for specified networks and statuses within a date range.
 
-        Args:
-            networks (List[ChainId]): List of network chain IDs to query.
-            statuses (Optional[List[Status]]): List of statuses to filter by.
-            date_from (Optional[datetime]): Start date for the query range.
-            date_to (Optional[datetime]): End date for the query range.
+        :param networks (List[ChainId]): List of network chain IDs to query.
+        :param statuses (Optional[List[Status]]): List of statuses to filter by.
+        :param date_from (Optional[datetime]): Start date for the query range.
+        :param date_to (Optional[datetime]): End date for the query range.
 
-        Returns:
-            List[Status]: List of status events matching the query parameters.
+        :return List[Status]: List of status events matching the query parameters.
 
-        Raises:
-            EscrowClientError: If an unsupported chain ID or status is provided.
+        :raise EscrowClientError: If an unsupported chain ID or status is provided.
+
+        :example:
+            .. code-block:: python
+
+                from datetime import datetime
+                from human_protocol_sdk.constants import ChainId, Status
+                from human_protocol_sdk.escrow import EscrowUtils
+
+                print(
+                    EscrowUtils.get_status_events(
+                        networks=[ChainId.POLYGON_AMOY, ChainId.ETHEREUM],
+                        statuses=[Status.Pending, Status.Paid],
+                        date_from=datetime(2023, 1, 1),
+                        date_to=datetime(2023, 12, 31)
+                    )
+                )
         """
         from human_protocol_sdk.gql.escrow import (
             get_status_query,
@@ -410,7 +429,7 @@ class EscrowUtils:
                     network_data["subgraph_url"],
                     get_status_query(response_property, date_from, date_to),
                     {
-                        "from": int(date_from.timestamp()) if date_from else None,
+                        "from": (int(date_from.timestamp()) if date_from else None),
                         "to": int(date_to.timestamp()) if date_to else None,
                     },
                 )
