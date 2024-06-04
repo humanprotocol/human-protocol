@@ -47,24 +47,6 @@ jest.mock('@human-protocol/sdk', () => ({
   },
 }));
 
-jest.mock('rxjs', () => {
-  const original = jest.requireActual('rxjs');
-
-  return {
-    ...original,
-    firstValueFrom: () =>
-      new Promise((resolve, reject) => {
-        resolve({
-          sitekeys: [
-            {
-              sitekey: MOCK_HCAPTCHA_SITE_KEY,
-            },
-          ],
-        });
-      }),
-  };
-});
-
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: UserRepository;
