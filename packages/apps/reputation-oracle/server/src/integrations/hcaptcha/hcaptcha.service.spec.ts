@@ -6,7 +6,6 @@ import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.servi
 import { DeepPartial } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { of, firstValueFrom } from 'rxjs';
-import * as rxjs from 'rxjs';
 import {
   MOCK_HCAPTCHA_PROTECTION_URL,
   MOCK_HCAPTCHA_LABELING_URL,
