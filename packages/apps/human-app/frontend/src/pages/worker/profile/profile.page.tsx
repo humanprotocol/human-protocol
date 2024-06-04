@@ -18,8 +18,6 @@ const getNotificationMessage = (
       return t('worker.profile.topNotifications.noKYC');
     case user.kyc_status === 'APPROVED' && !user.isWalletConnected:
       return t('worker.profile.topNotifications.noWalletConnected');
-    case !user.kyc_added_on_chain:
-      return t('worker.profile.topNotifications.noKYCOnChain');
     default:
       return null;
   }

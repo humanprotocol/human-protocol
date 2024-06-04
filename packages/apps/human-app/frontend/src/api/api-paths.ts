@@ -40,6 +40,9 @@ export const apiPaths = {
     assignJob: {
       path: '/assignment/job',
     },
+    registerAddress: {
+      path: '/user/register-address',
+    },
   },
   operator: {
     web3Auth: {

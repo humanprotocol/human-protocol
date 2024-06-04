@@ -2,8 +2,8 @@ import { Contract } from 'ethers';
 import EthKVStore from '@/smart-contracts/abi/EthKVStore.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 import type {
-  SetBulkKeys,
-  SetBulkValues,
+  SetKYCPayload,
+  SetOperatorPayload,
 } from '@/smart-contracts/EthKVStore/config';
 
 export async function ethKvStoreSetBulk({
@@ -11,10 +11,7 @@ export async function ethKvStoreSetBulk({
   values,
   contractAddress,
   signer,
-}: {
-  keys: SetBulkKeys;
-  values: SetBulkValues;
-} & ContractCallArguments) {
+}: (SetOperatorPayload | SetKYCPayload) & ContractCallArguments) {
   const ethKVStoreContract = new Contract(
     contractAddress,
     EthKVStore.abi,
