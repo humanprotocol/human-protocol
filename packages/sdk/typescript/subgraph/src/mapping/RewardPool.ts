@@ -2,7 +2,7 @@ import { RewardAddedEvent } from '../../generated/schema';
 import { RewardAdded } from '../../generated/RewardPool/RewardPool';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
-import { createTransaction } from './utils/Transaction';
+import { createTransaction } from './utils/transaction';
 
 export function handleRewardAdded(event: RewardAdded): void {
   createTransaction(event, 'addReward');

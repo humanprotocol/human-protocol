@@ -19,7 +19,7 @@ import {
 import { Address } from '@graphprotocol/graph-ts';
 import { ONE_BI, ZERO_BI } from './utils/number';
 import { toEventId } from './utils/event';
-import { createTransaction } from './utils/Transaction';
+import { createTransaction } from './utils/transaction';
 
 export const STATISTICS_ENTITY_ID = 'leader-statistics-id';
 

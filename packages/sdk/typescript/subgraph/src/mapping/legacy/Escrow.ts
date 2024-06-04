@@ -19,7 +19,7 @@ import { createOrLoadEscrowStatistics } from '../Escrow';
 import { ONE_BI } from '../utils/number';
 import { toEventId } from '../utils/event';
 import { getEventDayData } from '../utils/dayUpdates';
-import { createTransaction } from '../utils/Transaction';
+import { createTransaction } from '../utils/transaction';
 
 enum EscrowStatuses {
   Launched,

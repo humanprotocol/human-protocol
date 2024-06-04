@@ -6,7 +6,7 @@ import { Escrow } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
 import { createOrLoadLeader } from './Staking';
-import { createTransaction } from './utils/Transaction';
+import { createTransaction } from './utils/transaction';
 import { getEventDayData } from './utils/dayUpdates';
 import { ONE_BI, ZERO_BI } from './utils/number';
 

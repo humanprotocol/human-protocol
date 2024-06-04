@@ -22,7 +22,7 @@ import { toEventDayId, toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
 import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
-import { createTransaction } from './utils/Transaction';
+import { createTransaction } from './utils/transaction';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
 

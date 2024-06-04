@@ -24,7 +24,7 @@ import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
-import { createTransaction } from './utils/Transaction';
+import { createTransaction } from './utils/transaction';
 
 export const STATISTICS_ENTITY_ID = 'escrow-statistics-id';
 

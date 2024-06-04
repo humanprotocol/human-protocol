@@ -5,7 +5,7 @@ import { ONE_BI, ZERO_BI } from '../utils/number';
 import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
 import { createOrLoadLeader } from '../Staking';
-import { createTransaction } from '../utils/Transaction';
+import { createTransaction } from '../utils/transaction';
 
 export function handleLaunched(event: Launched): void {
   createTransaction(event, 'createEscrow');
