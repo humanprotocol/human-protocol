@@ -8,7 +8,6 @@ from human_protocol_sdk.gql.transaction import (
     get_transactions_query,
 )
 from human_protocol_sdk.transaction import (
-    TransactionUtilsError,
     TransactionUtils,
 )
 from human_protocol_sdk.filter import TransactionFilter
@@ -92,34 +91,6 @@ class TestTransactionUtils(unittest.TestCase):
                 },
             )
             self.assertEqual(len(transactions), 0)
-        with patch(
-            "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
-        ) as mock_function:
-            # Configuramos la función mock para que devuelva datos vacíos
-            mock_function.return_value = {"data": {"transactions": []}}
-
-            # Creamos dos filtros para las transacciones
-            filter = TransactionFilter(
-                networks=[ChainId.POLYGON_AMOY],
-                from_address="0x1234567890123456789012345678901234567890",
-            )
-
-            # Solicitamos las transacciones con los filtros creados
-            transactions = TransactionUtils.get_transactions(filter)
-
-            # Verificamos que se haya llamado a la función mock con los parámetros correctos
-            mock_function.assert_called_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
-                query=get_transactions_query(filter),
-                params={
-                    "fromAddress": "0x1234567890123456789012345678901234567890",
-                    "toAddress": None,
-                    "startDate": None,
-                    "endDate": None,
-                    "startBlock": None,
-                    "endBlock": None,
-                },
-            )
 
     def test_get_transactions_invalid_network(self):
         with self.assertRaises(ValueError) as cm:
