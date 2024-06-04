@@ -236,4 +236,3 @@ export const MOCK_BUCKET_FILE =
 export const MOCK_HCAPTCHA_TOKEN = 'test-token';
 export const MOCK_HCAPTCHA_PROTECTION_URL = 'https://api.hcaptcha.com';
 export const MOCK_HCAPTCHA_LABELING_URL = 'https://foundation-accounts.hmt.ai';
-export const MOCK_HCAPTCHA_SITE_KEY = '123';

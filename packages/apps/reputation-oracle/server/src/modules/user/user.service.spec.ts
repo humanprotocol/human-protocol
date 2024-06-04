@@ -14,7 +14,6 @@ import { signMessage } from '../../common/utils/signature';
 import {
   MOCK_ADDRESS,
   MOCK_EMAIL,
-  MOCK_HCAPTCHA_SITE_KEY,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
