@@ -13,8 +13,6 @@ import { AuthConfigService } from '../../../common/config/auth-config.service';
 import { ControlledError } from '../../../common/errors/controlled';
 import { TokenRepository } from '../token.repository';
 import { TokenType } from '../token.entity';
-import { JwtService } from '@nestjs/jwt';
-import { getJwtFromBearer } from 'src/common/utils';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -22,7 +20,6 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     private readonly userRepository: UserRepository,
     private readonly tokenRepository: TokenRepository,
     private readonly authConfigService: AuthConfigService,
-    private readonly jwtService: JwtService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -58,27 +55,6 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     if (!token) {
       throw new ControlledError(
         'User is not authorized',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    const jwt = getJwtFromBearer(request.headers.authorization);
-
-    if (!jwt) {
-      throw new ControlledError(
-        'User has invalid jwt data',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    const jwtData = await this.jwtService.decode(jwt);
-
-    if (
-      (user.evmAddress && user.evmAddress !== jwtData.address) ||
-      (!user.evmAddress && jwtData.address)
-    ) {
-      throw new ControlledError(
-        'User has invalid jwt data',
         HttpStatus.UNAUTHORIZED,
       );
     }
