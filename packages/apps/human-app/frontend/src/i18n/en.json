@@ -24,7 +24,9 @@
     "passwordUppercase": "1 uppercase (A-Z)",
     "passwordLowercase": "1 lowercase (a-z)",
     "passwordNumeric": "1 numeric (0-9)",
-    "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])"
+    "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])",
+    "passwordMissing": "Please enter your password.",
+    "invalidEmail": "Please enter a valid email address."
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
@@ -105,7 +107,7 @@
     "signUpForm": {
       "fields": {
         "createPassword": "Create Password",
-        "password": "Password",
+        "password": "Create Password",
         "confirmPassword": "Confirm Password",
         "email": "your@email.com"
       },
@@ -132,10 +134,11 @@
     "sendEmailVerification": {
       "title": "Verify Email",
       "btn": "Resend Verification Email",
-      "paragraph1": "We’ve sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
+      "paragraph1": "We’ve sent an email to <1>{{email}}</1>, please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
       "paragraph3": "<1>Cant find our email?</1> If you can’t find the inbox in your email please check the spam folder or click below and we will send you a new one.",
-      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent."
     },
     "sendEmailVerificationError": {
       "title": "Verification failed",
@@ -153,7 +156,9 @@
       },
       "title": "Reset Password",
       "description": "Please enter your email address. We will send you an email to reset your password.",
-      "submitBtn": "Send Email"
+      "submitBtn": "Send Email",
+      "invalidEmailError": "Please enter a valid email address.",
+      "noEmailError": "Please enter your email address."
     },
     "sendResetLinkSuccess": {
       "title": "Reset password",
@@ -173,7 +178,7 @@
       "btn": "Reset password"
     },
     "resetPasswordSuccess": {
-      "title": "Password changed",
+      "title": "Password Changed",
       "description": "Your password has been changed successfully.",
       "btn": "Sign In"
     },
@@ -303,7 +308,7 @@
       "nextBtn": "Next"
     },
     "stakeForm": {
-      "formBtn": "Stake",
+      "formBtn": "Add Stake",
       "backBtn": "Skip",
       "nextBtn": "Next",
       "label": "Stake amount",

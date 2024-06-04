@@ -81,7 +81,13 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
           <Typography color={colorPalette.primary.light} variant="h6">
             {t('homepage.iWantToEarn')}
           </Typography>
-          <List sx={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+          <List
+            sx={{
+              listStyleType: 'disc',
+              listStylePosition: 'inside',
+              paddingLeft: '0.5rem',
+            }}
+          >
             <ListItemText
               primary={t('homepage.completeTask')}
               primaryTypographyProps={{
@@ -101,6 +107,17 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
               }}
             />
           </List>
+          <Grid item xs={isMobile ? 12 : 6}>
+            <Button
+              component={Link}
+              fullWidth
+              size="large"
+              to={routerPaths.worker.signUp}
+              variant="contained"
+            >
+              {t('homepage.signUpToComplete')}
+            </Button>
+          </Grid>
         </Grid>
         <Grid
           item
@@ -112,7 +129,13 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
           <Typography color={colorPalette.primary.light} variant="h6">
             {t('homepage.joinAsOperator')}
           </Typography>
-          <List sx={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+          <List
+            sx={{
+              listStyleType: 'disc',
+              listStylePosition: 'inside',
+              paddingLeft: '0.5rem',
+            }}
+          >
             <ListItemText
               primary={t('homepage.runAsOracle')}
               primaryTypographyProps={{
@@ -132,17 +155,6 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
               }}
             />
           </List>
-        </Grid>
-        <Grid item xs={isMobile ? 12 : 6}>
-          <Button
-            component={Link}
-            fullWidth
-            size="large"
-            to={routerPaths.worker.signUp}
-            variant="contained"
-          >
-            {t('homepage.signUpToComplete')}
-          </Button>
         </Grid>
         <Grid item xs={isMobile ? 12 : 6}>
           <Button

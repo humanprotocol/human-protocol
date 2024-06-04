@@ -60,6 +60,7 @@ export function EditExistingKeysSuccessPage() {
           </Alert>
         ) : undefined
       }
+      hiddenCancelButton
       title={t('operator.editExistingKeysSuccess.title')}
     >
       <Grid container gap="2rem" marginTop="2rem">
