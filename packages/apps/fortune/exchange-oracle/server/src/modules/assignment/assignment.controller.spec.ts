@@ -3,7 +3,11 @@ import { Test } from '@nestjs/testing';
 import { AssignmentController } from './assignment.controller';
 import { AssignmentService } from './assignment.service';
 import { RequestWithUser } from '../../common/types/jwt';
-import { GetAssignmentsDto, CreateAssignmentDto, ResignDto } from './assignment.dto';
+import {
+  GetAssignmentsDto,
+  CreateAssignmentDto,
+  ResignDto,
+} from './assignment.dto';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { MOCK_EXCHANGE_ORACLE } from '../../../test/constants';
 
@@ -96,7 +100,7 @@ describe('assignmentController', () => {
 
       jest.spyOn(assignmentService, 'resign').mockResolvedValue();
 
-      await assignmentController.resignJob(
+      await assignmentController.resign(
         { user: { address: userAddress } } as RequestWithUser,
         resignJobDto,
       );
