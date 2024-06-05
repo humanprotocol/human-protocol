@@ -2,6 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
@@ -17,6 +18,10 @@ import { AssignmentDto, CreateAssignmentDto } from './assignment.dto';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { AssignmentSortField } from '../../common/enums/job';
 import { SortDirection } from '../../common/enums/collection';
+import { AssignmentEntity } from './assignment.entity';
+import { ErrorAssignment } from '../../common/constant/errors';
+import { BadRequestException } from '@nestjs/common';
+import { find } from 'rxjs';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),
@@ -35,19 +40,6 @@ describe('AssignmentService', () => {
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
   const reputationNetwork = '0x1234567890123456789012345678901234567892';
-
-  const assignments = [
-    {
-      id: 1,
-      job: {
-        chainId: 1,
-        escrowAddress,
-      },
-      status: AssignmentStatus.ACTIVE,
-      createdAt: new Date(),
-      expiresAt: new Date(),
-    },
-  ];
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -87,6 +79,8 @@ describe('AssignmentService', () => {
             createUnique: jest.fn(),
             findOneByJobIdAndWorker: jest.fn(),
             countByJobId: jest.fn(),
+            findOneByIdAndWorker: jest.fn(),
+            updateOne: jest.fn(),
           },
         },
       ],
@@ -144,6 +138,7 @@ describe('AssignmentService', () => {
         workerAddress: workerAddress,
         status: AssignmentStatus.ACTIVE,
         expiresAt: expect.any(Date),
+        rewardAmount: manifest.fundAmount / manifest.submissionsRequired,
       });
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
@@ -260,6 +255,7 @@ describe('AssignmentService', () => {
         status: AssignmentStatus.ACTIVE,
         createdAt: new Date(),
         expiresAt: new Date(),
+        rewardAmount: 20,
       },
     ];
 
@@ -390,6 +386,61 @@ describe('AssignmentService', () => {
         reputationNetwork,
         workerAddress,
       });
+    });
+  });
+
+  describe('resignJob', () => {
+    it('should successfully cancel an active assignment', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+      const mockAssignment = {
+        id: assignmentId,
+        workerAddress,
+        status: AssignmentStatus.ACTIVE,
+      } as AssignmentEntity;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .mockResolvedValue(mockAssignment);
+
+      await expect(
+        assignmentService.resign(assignmentId, workerAddress),
+      ).resolves.toBeUndefined();
+      expect(mockAssignment.status).toBe(AssignmentStatus.CANCELED);
+      expect(assignmentRepository.updateOne).toHaveBeenCalledWith(
+        mockAssignment,
+      );
+    });
+
+    it('should throw NotFound if assignment does not exist', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .mockResolvedValue(null);
+
+      await expect(
+        assignmentService.resign(assignmentId, workerAddress),
+      ).rejects.toThrow(new BadRequestException(ErrorAssignment.NotFound));
+    });
+
+    it('should throw InvalidStatus if assignment status is not ACTIVE', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+      const mockAssignment = {
+        id: assignmentId,
+        workerAddress,
+        status: AssignmentStatus.COMPLETED,
+      } as AssignmentEntity;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .mockResolvedValue(mockAssignment);
+
+      await expect(
+        assignmentService.resign(assignmentId, workerAddress),
+      ).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
     });
   });
 });
