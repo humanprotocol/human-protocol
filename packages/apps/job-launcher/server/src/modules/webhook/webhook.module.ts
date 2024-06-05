@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -14,10 +14,9 @@ import { WebhookController } from './webhook.controller';
   imports: [
     TypeOrmModule.forFeature([WebhookEntity]),
     ConfigModule,
-    JobModule,
+    forwardRef(() => JobModule),
     Web3Module,
     HttpModule,
-    JobModule,
   ],
   controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository],
