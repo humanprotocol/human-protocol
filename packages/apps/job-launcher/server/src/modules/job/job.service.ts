@@ -1568,7 +1568,8 @@ export class JobService {
     }
     if (
       escrow.status === EscrowStatus[EscrowStatus.Partial] &&
-      job.status !== JobStatus.PARTIAL
+      job.status !== JobStatus.PARTIAL &&
+      job.status !== JobStatus.TO_CANCEL
     ) {
       job.status = JobStatus.PARTIAL;
       updatedJob = await this.jobRepository.updateOne(job);
