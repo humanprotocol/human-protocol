@@ -296,8 +296,6 @@ class Role(Enum):
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
 
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
-
 
 class KVStoreKeys(Enum):
     """Enum for KVStore keys"""

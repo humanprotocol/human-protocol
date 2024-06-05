@@ -108,3 +108,8 @@ export interface IPayoutFilter {
   from?: Date;
   to?: Date;
 }
+
+export interface IKVStore {
+  key: string;
+  value: string;
+}
