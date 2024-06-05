@@ -36,6 +36,12 @@ export class SolveJobDto {
   public solution: string;
 }
 
+export class ResignJobDto {
+  @ApiProperty({ name: 'assignment_id' })
+  @IsNumber()
+  public assignmentId: number;
+}
+
 export class GetJobsDto extends PageOptionsDto {
   @ApiPropertyOptional({
     name: 'sort_field',
