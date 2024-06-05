@@ -374,7 +374,8 @@ class SkeletonDatasetComparator(DatasetComparator):
 
             dists = np.linalg.norm(p1 - p2, axis=1)
             return (
-                np.sum(
+                (visibility_a == visibility_b)
+                * np.sum(
                     visibility_a
                     * visibility_b
                     * np.exp(-(dists**2) / (2 * scale * ((2 * sigma) ** 2)))
