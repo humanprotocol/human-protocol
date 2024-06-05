@@ -44,9 +44,7 @@ export class AssignmentService {
         ErrorAssignment.ReputationNetworkMismatch,
         AssignmentService.name,
       );
-      throw new BadRequestException(
-        ErrorAssignment.ReputationNetworkMismatch,
-      );
+      throw new BadRequestException(ErrorAssignment.ReputationNetworkMismatch);
     }
 
     const assignmentEntity =
@@ -111,10 +109,6 @@ export class AssignmentService {
       });
     const assignments = await Promise.all(
       entities.map(async (entity) => {
-        const manifest = await this.jobService.getManifest(
-          entity.job.chainId,
-          entity.job.escrowAddress,
-        );
         const assignment = new AssignmentDto(
           entity.id,
           entity.job.escrowAddress,
@@ -135,5 +129,23 @@ export class AssignmentService {
       }),
     );
     return new PageDto(data.page!, data.pageSize!, itemCount, assignments);
+  }
+
+  async resign(assignmentId: number, workerAddress: string): Promise<void> {
+    const assignment = await this.assignmentRepository.findOneByIdAndWorker(
+      assignmentId,
+      workerAddress,
+    );
+
+    if (!assignment) {
+      throw new BadRequestException(ErrorAssignment.NotFound);
+    }
+
+    if (assignment.status !== AssignmentStatus.ACTIVE) {
+      throw new BadRequestException(ErrorAssignment.InvalidStatus);
+    }
+
+    assignment.status = AssignmentStatus.CANCELED;
+    await this.assignmentRepository.updateOne(assignment);
   }
 }

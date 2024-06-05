@@ -2,7 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { RequestWithUser } from 'src/common/types/jwt';
 import { JobController } from './job.controller';
-import { ResignJobDto, SolveJobDto } from './job.dto';
+import { SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
 
 jest.mock('../../common/utils/signature');
@@ -76,27 +76,6 @@ describe('JobController', () => {
         solveJobDto.escrowAddress,
         workerAddress,
         solveJobDto.solution,
-      );
-    });
-  });
-
-  describe('resignJob', () => {
-    it('should call jobService.resignJob', async () => {
-      const assignmentId = 123;
-      const resignJobDto: ResignJobDto = {
-        assignmentId,
-      };
-
-      jest.spyOn(jobService, 'resignJob').mockResolvedValue();
-
-      await jobController.resignJob(
-        { user: { address: workerAddress } } as RequestWithUser,
-        resignJobDto,
-      );
-
-      expect(jobService.resignJob).toHaveBeenCalledWith(
-        resignJobDto.assignmentId,
-        workerAddress,
       );
     });
   });
