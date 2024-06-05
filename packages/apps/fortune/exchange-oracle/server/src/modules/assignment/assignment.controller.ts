@@ -98,12 +98,12 @@ export class AssignmentController {
   }
 
   @ApiOperation({
-    summary: 'Resign Job',
-    description: 'Endpoint to resign from a job.',
+    summary: 'Resign Assignment',
+    description: 'Endpoint to resign from a assignment.',
   })
   @ApiBearerAuth()
   @ApiBody({
-    description: 'Details required to resign from the job.',
+    description: 'Details required to resign from the assginment.',
     type: ResignDto,
   })
   @ApiResponse({
@@ -119,7 +119,7 @@ export class AssignmentController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @Post('resign')
-  resignJob(
+  resign(
     @Request() req: RequestWithUser,
     @Body() body: ResignDto,
   ): Promise<void> {
