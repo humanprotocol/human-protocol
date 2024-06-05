@@ -20,11 +20,9 @@ import { ConfigModule } from '@nestjs/config';
     TypeOrmModule.forFeature([CronJobEntity, JobEntity]),
     ConfigModule,
     forwardRef(() => JobModule),
-    JobModule,
     PaymentModule,
     Web3Module,
     WebhookModule,
-    ConfigModule,
   ],
   providers: [
     CronJobService,
