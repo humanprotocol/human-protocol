@@ -1,4 +1,4 @@
-import { Logger, Module, forwardRef } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -15,7 +15,6 @@ import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
-import { CronJobModule } from '../cron-job/cron-job.module';
 
 @Module({
   imports: [
@@ -27,7 +26,6 @@ import { CronJobModule } from '../cron-job/cron-job.module';
     Web3Module,
     EncryptionModule,
     StorageModule,
-    forwardRef(() => CronJobModule),
   ],
   controllers: [JobController],
   providers: [
@@ -37,6 +35,6 @@ import { CronJobModule } from '../cron-job/cron-job.module';
     RoutingProtocolService,
     WebhookRepository,
   ],
-  exports: [JobService],
+  exports: [JobService, RoutingProtocolService],
 })
 export class JobModule {}

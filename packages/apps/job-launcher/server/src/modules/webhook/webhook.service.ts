@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
@@ -29,9 +29,9 @@ export class WebhookService {
     private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
-    public readonly commonConfigSerice: ServerConfigService,
-    public readonly web3ConfigService: Web3ConfigService,
-    public readonly httpService: HttpService,
+    private readonly commonConfigSerice: ServerConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   /**

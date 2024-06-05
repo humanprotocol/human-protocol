@@ -1,10 +1,9 @@
-import { Global, Module, forwardRef } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 
 import { CronJobService } from './cron-job.service';
 import { CronJobRepository } from './cron-job.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CronJobEntity } from './cron-job.entity';
-import { CronJobController } from './cron.job.controller';
 import { PaymentModule } from '../payment/payment.module';
 import { Web3Module } from '../web3/web3.module';
 import { WebhookModule } from '../webhook/webhook.module';
@@ -19,7 +18,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     TypeOrmModule.forFeature([CronJobEntity, JobEntity]),
     ConfigModule,
-    forwardRef(() => JobModule),
+    JobModule,
     PaymentModule,
     Web3Module,
     WebhookModule,

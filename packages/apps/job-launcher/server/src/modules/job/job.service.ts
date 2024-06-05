@@ -121,33 +121,40 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { CronJobService } from '../cron-job/cron-job.service';
 import { CronJobType } from 'src/common/enums/cron-job';
+import { CronJobRepository } from '../cron-job/cron-job.repository';
+import { ModuleRef } from '@nestjs/core';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
-
+  private cronJobRepository: CronJobRepository;
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
-    public readonly jobRepository: JobRepository,
-    public readonly webhookRepository: WebhookRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
-    private readonly cronJobService: CronJobService,
-    public readonly serverConfigService: ServerConfigService,
-    public readonly authConfigService: AuthConfigService,
-    public readonly web3ConfigService: Web3ConfigService,
-    public readonly cvatConfigService: CvatConfigService,
-    public readonly pgpConfigService: PGPConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly authConfigService: AuthConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly cvatConfigService: CvatConfigService,
+    private readonly pgpConfigService: PGPConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
     private readonly rateService: RateService,
+    private moduleRef: ModuleRef,
     @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
+
+  onModuleInit() {
+    this.cronJobRepository = this.moduleRef.get(CronJobRepository, {
+      strict: false,
+    });
+  }
 
   public async createCvatManifest(
     dto: JobCvatDto,
@@ -1031,6 +1038,15 @@ export class JobService {
     await this.requestToCancelJob(jobEntity);
   }
 
+  public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
+    const lastCronJob = await this.cronJobRepository.findOneByType(cronJobType);
+
+    if (!lastCronJob || lastCronJob.completedAt) {
+      return false;
+    }
+    return true;
+  }
+
   public async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
       throw new ControlledError(
@@ -1044,23 +1060,17 @@ export class JobService {
       case JobStatus.PENDING:
         break;
       case JobStatus.PAID:
-        if (
-          await this.cronJobService.isCronJobRunning(CronJobType.CreateEscrow)
-        ) {
+        if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
           status = JobStatus.TO_CANCEL;
         }
         break;
       case JobStatus.CREATED:
-        if (
-          await this.cronJobService.isCronJobRunning(CronJobType.SetupEscrow)
-        ) {
+        if (await this.isCronJobRunning(CronJobType.SetupEscrow)) {
           status = JobStatus.TO_CANCEL;
         }
         break;
       case JobStatus.SET_UP:
-        if (
-          await this.cronJobService.isCronJobRunning(CronJobType.FundEscrow)
-        ) {
+        if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
           status = JobStatus.TO_CANCEL;
         }
         break;
