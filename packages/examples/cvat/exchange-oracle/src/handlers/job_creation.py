@@ -1601,18 +1601,11 @@ class SkeletonsFromBoxesTaskBuilder:
             if skeleton.id in visited_ids:
                 raise DatasetValidationError(f"repeated annotation id {skeleton.id}")
 
-            if all(
-                v == dm.Points.Visibility.absent for p in skeleton.elements for v in p.visibility
-            ):
-                # Handle fully absent skeletons
-                # It's not the same as with all occluded points
-                raise InvisibleSkeletonError("no visible points")
-
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
                 assert len(element.points) == 2 and len(element.visibility) == 1
 
-                if element.visibility[0] != dm.Points.Visibility.visible:
+                if element.visibility[0] == dm.Points.Visibility.absent:
                     continue
 
                 px, py = element.points[:2]
@@ -1968,25 +1961,6 @@ class SkeletonsFromBoxesTaskBuilder:
 
             matched_skeletons = []
             for input_bbox, gt_skeleton in matches:
-                if all(
-                    v != dm.Points.Visibility.visible
-                    for p in gt_skeleton.elements
-                    for v in p.visibility
-                ):
-                    # Handle skeletons without visible points
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - "
-                        "no visible points".format(
-                            gt_sample.id, gt_skeleton.id, gt_label_cat[gt_skeleton.label].name
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    # not an error, should not be counted as excluded for an error
-                    # we skip it as we can't reliably annotate and validate occluded now.
-                    # TODO: figure out how to handle this, specifically is how to validate
-                    continue
-
                 gt_count_per_class[gt_skeleton.label] = (
                     gt_count_per_class.get(gt_skeleton.label, 0) + 1
                 )
