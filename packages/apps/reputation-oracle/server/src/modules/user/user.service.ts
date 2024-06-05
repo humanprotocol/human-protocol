@@ -5,11 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import {
-  ErrorAuth,
-  ErrorOperator,
-  ErrorUser,
-} from '../../common/constants/errors';
+import { ErrorOperator, ErrorUser } from '../../common/constants/errors';
 import {
   KycStatus,
   OperatorStatus,
@@ -188,6 +184,13 @@ export class UserService {
       );
     }
 
+    // Prepare signed data and verify the signature
+    const signedData = await this.prepareSignatureBody(
+      SignatureType.REGISTER_ADDRESS,
+      data.address,
+    );
+    verifySignature(signedData, data.signature, [data.address]);
+
     user.evmAddress = data.address;
     await user.save();
 
@@ -205,13 +208,7 @@ export class UserService {
       user.evmAddress,
     );
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
-    if (!verified) {
-      throw new ControlledError(
-        ErrorAuth.InvalidSignature,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    verifySignature(signedData, signature, [user.evmAddress]);
 
     let signer: Wallet;
     const currentWeb3Env = this.web3ConfigService.env;
@@ -270,6 +267,9 @@ export class UserService {
           reference: additionalData.reference,
           workerJson: additionalData.workerAddress,
         });
+        break;
+      case SignatureType.REGISTER_ADDRESS:
+        content = 'register-address';
         break;
       default:
         throw new ControlledError('Type not allowed', HttpStatus.BAD_REQUEST);
