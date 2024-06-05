@@ -121,6 +121,8 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { CronJobService } from '../cron-job/cron-job.service';
+import { CronJobType } from 'src/common/enums/cron-job';
 
 @Injectable()
 export class JobService {
@@ -135,6 +137,7 @@ export class JobService {
     public readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
+    private readonly cronJobService: CronJobService,
     public readonly serverConfigService: ServerConfigService,
     public readonly authConfigService: AuthConfigService,
     public readonly web3ConfigService: Web3ConfigService,
@@ -1036,19 +1039,45 @@ export class JobService {
       );
     }
 
-    if (
-      jobEntity.status === JobStatus.PENDING ||
-      jobEntity.status === JobStatus.PAID
-    ) {
+    let status = JobStatus.CANCELED;
+    switch (jobEntity.status) {
+      case JobStatus.PENDING:
+        break;
+      case JobStatus.PAID:
+        if (
+          await this.cronJobService.isCronJobRunning(CronJobType.CreateEscrow)
+        ) {
+          status = JobStatus.TO_CANCEL;
+        }
+        break;
+      case JobStatus.CREATED:
+        if (
+          await this.cronJobService.isCronJobRunning(CronJobType.SetupEscrow)
+        ) {
+          status = JobStatus.TO_CANCEL;
+        }
+        break;
+      case JobStatus.SET_UP:
+        if (
+          await this.cronJobService.isCronJobRunning(CronJobType.FundEscrow)
+        ) {
+          status = JobStatus.TO_CANCEL;
+        }
+        break;
+      default:
+        status = JobStatus.TO_CANCEL;
+        break;
+    }
+
+    if (status === JobStatus.CANCELED) {
       await this.paymentService.createRefundPayment({
         refundAmount: jobEntity.fundAmount,
         userId: jobEntity.userId,
         jobId: jobEntity.id,
       });
-      jobEntity.status = JobStatus.CANCELED;
-    } else {
-      jobEntity.status = JobStatus.TO_CANCEL;
     }
+    jobEntity.status = status;
+
     jobEntity.retriesCount = 0;
     await this.jobRepository.updateOne(jobEntity);
   }
