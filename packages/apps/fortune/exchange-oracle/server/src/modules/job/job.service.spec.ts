@@ -9,7 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_MANIFEST_URL } from '../../../test/constants';
+import { MOCK_ADDRESS, MOCK_MANIFEST_URL } from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -29,6 +29,8 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { BadRequestException } from '@nestjs/common';
+import { ErrorAssignment } from '../../common/constant/errors';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -475,4 +477,46 @@ describe('JobService', () => {
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });
   });
+
+  describe('resignJob', () => {
+    it('should successfully cancel an active assignment', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+      const mockAssignment = {
+        id: assignmentId,
+        workerAddress,
+        status: AssignmentStatus.ACTIVE,
+      } as AssignmentEntity;
+  
+      jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(mockAssignment);
+  
+      await expect(jobService.resignJob(assignmentId, workerAddress)).resolves.toBeUndefined();
+      expect(mockAssignment.status).toBe(AssignmentStatus.CANCELED);
+      expect(assignmentRepository.save).toHaveBeenCalledWith(mockAssignment);
+    });
+  
+    it('should throw NotFound if assignment does not exist', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+  
+      jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(null);
+  
+      await expect(jobService.resignJob(assignmentId, workerAddress)).rejects.toThrow(new BadRequestException(ErrorAssignment.NotFound));
+    });
+  
+    it('should throw InvalidStatus if assignment status is not ACTIVE', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+      const mockAssignment = {
+        id: assignmentId,
+        workerAddress,
+        status: AssignmentStatus.COMPLETED,
+      } as AssignmentEntity;
+  
+      jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(mockAssignment);
+  
+      await expect(jobService.resignJob(assignmentId, workerAddress)).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
+    });
+  });
+  
 });

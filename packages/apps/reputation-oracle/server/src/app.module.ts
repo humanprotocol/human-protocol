@@ -18,6 +18,7 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
+import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
 
 @Module({
@@ -60,6 +61,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     CronJobModule,
     PayoutModule,
     EnvConfigModule,
+    HCaptchaModule,
   ],
   controllers: [AppController],
 })
