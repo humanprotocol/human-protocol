@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Layout as LayoutProtected } from '@/components/layout/protected/layout';
 import { Layout as LayoutUnprotected } from '@/components/layout/unprotected/layout';
 import {
@@ -20,90 +20,88 @@ import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 export function Router() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<LayoutUnprotected />}>
-          {unprotectedRoutes.map((route) => (
-            <Route element={route.element} key={route.path} path={route.path} />
-          ))}
-        </Route>
-        <Route element={<LayoutUnprotected />}>
-          {walletConnectRoutes.map((route) => (
-            <Route
-              element={
-                <RequireWalletConnect>
-                  <>{route.element}</>
-                </RequireWalletConnect>
-              }
-              key={route.path}
-              path={route.path}
-            />
-          ))}
-        </Route>
-        {protectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+    <Routes>
+      <Route element={<LayoutUnprotected />}>
+        {unprotectedRoutes.map((route) => (
+          <Route element={route.element} key={route.path} path={route.path} />
+        ))}
+      </Route>
+      <Route element={<LayoutUnprotected />}>
+        {walletConnectRoutes.map((route) => (
           <Route
             element={
-              <LayoutProtected
-                pageHeaderProps={pageHeaderProps}
-                renderDrawer={(open) => (
-                  <DrawerNavigation
-                    bottomMenuItems={workerDrawerBottomMenuItems}
-                    open={open}
-                    signOut={() => {
-                      browserAuthProvider.signOut(() => {
-                        window.location.reload();
-                      });
-                    }}
-                    topMenuItems={workerDrawerTopMenuItems}
-                  />
-                )}
-              />
+              <RequireWalletConnect>
+                <>{route.element}</>
+              </RequireWalletConnect>
             }
-            key={routerProps.path}
-          >
-            <Route
-              element={
-                <RequireAuth>
+            key={route.path}
+            path={route.path}
+          />
+        ))}
+      </Route>
+      {protectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+        <Route
+          element={
+            <LayoutProtected
+              pageHeaderProps={pageHeaderProps}
+              renderDrawer={(open) => (
+                <DrawerNavigation
+                  bottomMenuItems={workerDrawerBottomMenuItems}
+                  open={open}
+                  signOut={() => {
+                    browserAuthProvider.signOut(() => {
+                      window.location.reload();
+                    });
+                  }}
+                  topMenuItems={workerDrawerTopMenuItems}
+                />
+              )}
+            />
+          }
+          key={routerProps.path}
+        >
+          <Route
+            element={
+              <RequireAuth>
+                <>{routerProps.element}</>
+              </RequireAuth>
+            }
+            path={routerProps.path}
+          />
+        </Route>
+      ))}
+      {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+        <Route
+          element={
+            <LayoutProtected
+              pageHeaderProps={pageHeaderProps}
+              renderDrawer={(open) => (
+                <DrawerNavigation
+                  bottomMenuItems={operatorDrawerBottomMenuItems}
+                  open={open}
+                  signOut={() => {
+                    browserAuthProvider.signOut(() => {
+                      window.location.reload();
+                    });
+                  }}
+                />
+              )}
+            />
+          }
+          key={routerProps.path}
+        >
+          <Route
+            element={
+              <RequireWalletConnect>
+                <RequireWeb3Auth>
                   <>{routerProps.element}</>
-                </RequireAuth>
-              }
-              path={routerProps.path}
-            />
-          </Route>
-        ))}
-        {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
-          <Route
-            element={
-              <LayoutProtected
-                pageHeaderProps={pageHeaderProps}
-                renderDrawer={(open) => (
-                  <DrawerNavigation
-                    bottomMenuItems={operatorDrawerBottomMenuItems}
-                    open={open}
-                    signOut={() => {
-                      browserAuthProvider.signOut(() => {
-                        window.location.reload();
-                      });
-                    }}
-                  />
-                )}
-              />
+                </RequireWeb3Auth>
+              </RequireWalletConnect>
             }
-            key={routerProps.path}
-          >
-            <Route
-              element={
-                <RequireWalletConnect>
-                  <RequireWeb3Auth>
-                    <>{routerProps.element}</>
-                  </RequireWeb3Auth>
-                </RequireWalletConnect>
-              }
-              path={routerProps.path}
-            />
-          </Route>
-        ))}
-      </Routes>
-    </BrowserRouter>
+            path={routerProps.path}
+          />
+        </Route>
+      ))}
+    </Routes>
   );
 }

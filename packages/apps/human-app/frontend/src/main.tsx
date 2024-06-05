@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import '@/i18n/i18n';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
+import { BrowserRouter } from 'react-router-dom';
 import { theme } from '@/styles/theme';
 import { DisplayModal } from '@/components/ui/modal/display-modal';
 import { AuthProvider } from '@/auth/auth-context';
@@ -29,15 +30,17 @@ createRoot(root).render(
     <ThemeProvider theme={themes}>
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
-        <WalletConnectProvider>
-          <Web3AuthProvider>
-            <AuthProvider>
-              <Router />
-            </AuthProvider>
-          </Web3AuthProvider>
-          <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
-          <DisplayModal />
-        </WalletConnectProvider>
+        <BrowserRouter>
+          <WalletConnectProvider>
+            <Web3AuthProvider>
+              <AuthProvider>
+                <Router />
+              </AuthProvider>
+            </Web3AuthProvider>
+            <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
+            <DisplayModal />
+          </WalletConnectProvider>
+        </BrowserRouter>
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>

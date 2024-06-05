@@ -13,7 +13,7 @@ export function Modal({ children, isOpen, ...rest }: ModalProps) {
       aria-describedby="modal-modal-description"
       aria-labelledby="modal-modal-title"
       fullWidth
-      maxWidth="md"
+      maxWidth="xl"
       open={isOpen}
     >
       <DialogContent>{children}</DialogContent>
