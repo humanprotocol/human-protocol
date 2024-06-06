@@ -3221,7 +3221,7 @@ describe('JobService', () => {
     });
 
     it('should throw not found exception when job not found', async () => {
-      jobService.jobRepository.findOneByIdAndUserId = jest
+      jobRepository.findOneByIdAndUserId = jest
         .fn()
         .mockResolvedValue(undefined);
 

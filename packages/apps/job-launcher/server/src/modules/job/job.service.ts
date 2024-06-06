@@ -121,7 +121,7 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { CronJobType } from 'src/common/enums/cron-job';
+import { CronJobType } from '../../common/enums/cron-job';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { ModuleRef } from '@nestjs/core';
 
