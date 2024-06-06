@@ -146,7 +146,10 @@ export class UserService {
     });
 
     if (!registeredLabeler) {
-      throw new BadRequestException(ErrorUser.LabelingEnableFailed);
+      throw new ControlledError(
+        ErrorUser.LabelingEnableFailed,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // Retrieve labeler site key from hcaptcha foundation
@@ -154,7 +157,10 @@ export class UserService {
       email: user.email,
     });
     if (!labelerData || !labelerData.sitekeys.length) {
-      throw new BadRequestException(ErrorUser.LabelingEnableFailed);
+      throw new ControlledError(
+        ErrorUser.LabelingEnableFailed,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const siteKey = labelerData.sitekeys[0].sitekey;
 

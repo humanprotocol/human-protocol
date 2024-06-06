@@ -292,7 +292,10 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new BadRequestException(ErrorUser.LabelingEnableFailed),
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
 
@@ -315,7 +318,10 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new BadRequestException(ErrorUser.LabelingEnableFailed),
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });

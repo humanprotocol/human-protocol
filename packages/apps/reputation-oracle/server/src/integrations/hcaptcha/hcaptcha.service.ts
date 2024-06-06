@@ -69,7 +69,7 @@ export class HCaptchaService {
       };
 
       const response = await firstValueFrom(
-        this.httpService.post(
+        await this.httpService.post(
           `${this.hcaptchaConfigService.labelingURL}/labeler/register`,
           {
             email,
