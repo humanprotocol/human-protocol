@@ -23,6 +23,7 @@ import { MyJobsRewardAmountSort } from '@/pages/worker/jobs/components/my-jobs/m
 import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-status-filter';
 import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-expires-at-sort';
 import { useMyJobsTableState } from '@/hooks/use-my-jobs-table-state';
+import { MyJobsFilterHeader } from '@/pages/worker/jobs/components/my-jobs/my-jobs-filter-header';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 
 const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
@@ -39,6 +40,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
+    Header: <MyJobsFilterHeader text={t('worker.jobs.network')} />,
     Cell: (props) => {
       return getNetworkName(props.row.original.chain_id);
     },
@@ -58,6 +60,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.rewardAmount'),
     size: 100,
     enableSorting: true,
+    Header: <MyJobsFilterHeader text={t('worker.jobs.rewardAmount')} />,
     Cell: (props) => {
       const { reward_amount, reward_token } = props.row.original;
       return (
@@ -81,6 +84,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.jobType'),
     size: 100,
     enableSorting: true,
+    Header: <MyJobsFilterHeader text={t('worker.jobs.jobType')} />,
     Cell: (props) => {
       return <Chip label={props.row.original.job_type} />;
     },
@@ -100,6 +104,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.expiresAt'),
     size: 100,
     enableSorting: true,
+    Header: <MyJobsFilterHeader text={t('worker.jobs.expiresAt')} />,
     Cell: (props) => {
       return formatDate(props.row.original.expires_at);
     },
@@ -119,6 +124,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.status'),
     size: 100,
     enableSorting: true,
+    Header: <MyJobsFilterHeader text={t('worker.jobs.status')} />,
     Cell: (props) => {
       const status = props.row.original.status;
       return (
