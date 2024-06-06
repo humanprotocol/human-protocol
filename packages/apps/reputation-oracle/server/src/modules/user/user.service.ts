@@ -131,7 +131,7 @@ export class UserService {
 
     if (!user.evmAddress) {
       throw new ControlledError(
-        ErrorUser.IncorrectAddress,
+        ErrorUser.NoWalletAddresRegistered,
         HttpStatus.BAD_REQUEST,
       );
     }

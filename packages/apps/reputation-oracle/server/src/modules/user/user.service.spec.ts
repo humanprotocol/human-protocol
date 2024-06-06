@@ -325,7 +325,7 @@ describe('UserService', () => {
       );
     });
 
-    it('should throw IncorrectAddress if user does not have an evm address', async () => {
+    it('should throw NoWalletAddresRegistered if user does not have an evm address', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
@@ -342,7 +342,10 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+        new ControlledError(
+          ErrorUser.NoWalletAddresRegistered,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
