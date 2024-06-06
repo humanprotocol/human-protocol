@@ -35,6 +35,7 @@ import {
   ErrorUser,
 } from '../../common/constants/errors';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -51,6 +52,15 @@ describe('UserService', () => {
   let userRepository: UserRepository;
   let web3Service: Web3Service;
   let hcaptchaService: HCaptchaService;
+
+  jest
+    .spyOn(NetworkConfigService.prototype, 'networks', 'get')
+    .mockReturnValue([
+      {
+        chainId: ChainId.POLYGON_AMOY,
+        rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
+      },
+    ]);
 
   beforeEach(async () => {
     const signerMock = {
@@ -84,6 +94,7 @@ describe('UserService', () => {
         ConfigService,
         Web3ConfigService,
         HCaptchaConfigService,
+        NetworkConfigService,
       ],
     }).compile();
 
