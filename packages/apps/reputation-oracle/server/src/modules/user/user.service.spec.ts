@@ -292,7 +292,10 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new BadRequestException(ErrorUser.LabelingEnableFailed),
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
 
@@ -315,7 +318,34 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new BadRequestException(ErrorUser.LabelingEnableFailed),
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('should throw NoWalletAddresRegistered if user does not have an evm address', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.NoWalletAddresRegistered,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
