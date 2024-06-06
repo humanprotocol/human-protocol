@@ -23,7 +23,10 @@ export const workerDrawerTopMenuItems: TopMenuItem[] = [
       {t('components.DrawerNavigation.jobs')}
     </Typography>
   </Grid>,
-  { label: t('components.DrawerNavigation.captchaLabelling') },
+  {
+    label: t('components.DrawerNavigation.captchaLabelling'),
+    link: routerPaths.worker.HcaptchaLabeling,
+  },
   {
     label: t('components.DrawerNavigation.jobsDiscovery'),
     link: routerPaths.worker.jobsDiscovery,

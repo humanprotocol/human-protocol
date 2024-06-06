@@ -8,8 +8,9 @@
   "dashboard": {},
   "protectedPagesHeaders": {
     "profile": "Profile",
-    "jobsDiscovery":"Jobs Discovery",
-    "jobs": "Jobs"
+    "jobsDiscovery": "Jobs Discovery",
+    "jobs": "Jobs",
+    "hcaptchaLabeling": "hCaptcha Labeling"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
@@ -256,6 +257,10 @@
           "fortune": "Fortune"
         }
       }
+    },
+    "hcaptchaLabeling": {
+      "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "noJobs": "No jobs available at the moment. Please come back in:"
     }
   },
   "operator": {

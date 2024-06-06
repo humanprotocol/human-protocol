@@ -20,9 +20,10 @@ import { SendEmailVerificationWorkerPage } from '@/pages/worker/email-verificati
 import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
-import { HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
+import { HandIcon, HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
 import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/pages/worker/jobs/jobs.page';
+import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -117,6 +118,16 @@ export const protectedRoutes: {
     pageHeaderProps: {
       headerIcon: <ProfileIcon />,
       headerText: t('protectedPagesHeaders.profile'),
+    },
+  },
+  {
+    routerProps: {
+      path: routerPaths.worker.HcaptchaLabeling,
+      element: <HcaptchaLabelingPage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <HandIcon />,
+      headerText: t('protectedPagesHeaders.hcaptchaLabeling'),
     },
   },
 ];
