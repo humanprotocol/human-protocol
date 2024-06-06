@@ -108,3 +108,9 @@ export interface IPayoutFilter {
   from?: Date;
   to?: Date;
 }
+
+export interface IDateParams {
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+}

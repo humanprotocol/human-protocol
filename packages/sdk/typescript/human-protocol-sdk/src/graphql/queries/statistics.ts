@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { IStatisticsParams } from '../../interfaces';
+import { IDateParams, IStatisticsParams } from '../../interfaces';
 
 const HMTOKEN_STATISTICS_FRAGMENT = gql`
   fragment HMTokenStatisticsFields on HMTokenStatistics {
@@ -92,5 +92,46 @@ export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsParams) => {
       }
     }
     ${EVENT_DAY_DATA_FRAGMENT}
+  `;
+};
+
+export const DAILY_STATS_FRAGMENT = gql`
+  fragment DailyStatsFields on DailyStats {
+    id
+    activeWorkers
+    transactions
+    uniqueSenders
+    uniqueReceivers
+    escrowsLaunched
+    escrowsCompleted
+    escrowPayouts
+    timestamp
+  }
+`;
+
+export const GET_DAILY_STATS_QUERY = (params: IDateParams) => {
+  const { startDate, endDate, limit } = params;
+  const WHERE_CLAUSE = `
+    where: {
+      ${startDate !== undefined ? `timestamp_gte: $startDate` : ''}
+      ${endDate !== undefined ? `timestamp_lte: $endDate` : ''}
+    }
+  `;
+  const LIMIT_CLAUSE = `
+    first: ${limit ? `$limit` : `1000`}
+  `;
+
+  return gql`
+    query GetDailyStats($startDate: Int, $endDate: Int) {
+      dailyStats(
+        ${WHERE_CLAUSE},
+        orderBy: timestamp,
+        orderDirection: desc,
+        ${LIMIT_CLAUSE}
+      ) {
+        ...DailyStatsFields
+      }
+    }
+    ${DAILY_STATS_FRAGMENT}
   `;
 };

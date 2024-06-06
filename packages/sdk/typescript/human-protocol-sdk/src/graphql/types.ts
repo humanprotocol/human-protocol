@@ -155,3 +155,15 @@ export type DailyTaskData = {
 export type TaskStatistics = {
   dailyTasksData: DailyTaskData[];
 };
+
+export type DailyStats = {
+  id: string;
+  activeWorkers: number;
+  transactions: number;
+  uniqueSenders: number;
+  uniqueReceivers: number;
+  escrowsLaunched: number;
+  escrowsCompleted: number;
+  escrowPayouts: number;
+  timestamp: bigint;
+};

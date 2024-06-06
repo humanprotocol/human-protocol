@@ -15,8 +15,10 @@ import {
   PaymentStatistics,
   WorkerStatistics,
   HMTHolderData,
+  DailyStats,
+  GET_DAILY_STATS_QUERY,
 } from './graphql';
-import { IStatisticsParams } from './interfaces';
+import { IDateParams, IStatisticsParams } from './interfaces';
 import { NetworkData } from './types';
 import { throwError } from './utils';
 
@@ -428,6 +430,34 @@ export class StatisticsClient {
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,
         })),
       };
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  async getDailyStats(params: IDateParams = {}): Promise<DailyStats[]> {
+    try {
+      const { startDate, endDate } = params;
+      const { dailyStats } = await gqlFetch<{ dailyStats: DailyStats[] }>(
+        this.networkData.subgraphUrl,
+        GET_DAILY_STATS_QUERY(params),
+        {
+          startDate: startDate ? startDate.getTime() / 1000 : undefined,
+          endDate: endDate ? endDate.getTime() / 1000 : undefined,
+        }
+      );
+
+      return dailyStats.map((stat) => ({
+        id: stat.id,
+        activeWorkers: stat.activeWorkers,
+        transactions: stat.transactions,
+        uniqueSenders: stat.uniqueSenders,
+        uniqueReceivers: stat.uniqueReceivers,
+        escrowsLaunched: stat.escrowsLaunched,
+        escrowsCompleted: stat.escrowsCompleted,
+        escrowPayouts: stat.escrowPayouts,
+        timestamp: BigInt(stat.timestamp),
+      }));
     } catch (e: any) {
       return throwError(e);
     }
