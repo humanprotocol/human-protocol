@@ -14,4 +14,13 @@ export class SynapsConfigService {
   get webhookSecret(): string {
     return this.configService.get<string>('SYNAPS_WEBHOOK_SECRET', '');
   }
+  get baseUrl(): string {
+    return this.configService.get<string>(
+      'SYNAPS_BASE_URL',
+      'https://api.synaps.io/v4',
+    );
+  }
+  get documentID(): string {
+    return this.configService.get<string>('SYNAPS_STEP_DOCUMENT_ID', '');
+  }
 }

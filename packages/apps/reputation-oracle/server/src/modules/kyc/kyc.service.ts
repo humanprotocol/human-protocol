@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { map } from 'rxjs/operators';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
@@ -12,18 +13,15 @@ import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { KycEntity } from './kyc.entity';
 import { ControlledError } from '../../common/errors/controlled';
+import { countriesA3ToA2 } from '../../common/enums/countries';
 
 @Injectable()
 export class KycService {
-  private readonly synapsBaseURL: string;
-
   constructor(
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
     private readonly synapsConfigService: SynapsConfigService,
-  ) {
-    this.synapsBaseURL = 'https://api.synaps.io/v4';
-  }
+  ) {}
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
@@ -74,7 +72,7 @@ export class KycService {
           alias: userEntity.email,
         },
         {
-          baseURL: this.synapsBaseURL,
+          baseURL: this.synapsConfigService.baseUrl,
           headers: {
             'Api-Key': this.synapsConfigService.apiKey,
           },
@@ -114,7 +112,7 @@ export class KycService {
 
     const { data: sessionData } = await firstValueFrom(
       await this.httpService.get(`/individual/session/${data.sessionId}`, {
-        baseURL: this.synapsBaseURL,
+        baseURL: this.synapsConfigService.baseUrl,
         headers: {
           'Api-Key': this.synapsConfigService.apiKey,
         },
@@ -137,6 +135,33 @@ export class KycService {
     if (!kycEntity) {
       throw new ControlledError(ErrorKyc.NotFound, HttpStatus.BAD_REQUEST);
     }
+
+    if (data.state === KycStatus.APPROVED) {
+      const sessionInfo = await firstValueFrom(
+        this.httpService
+          .get(
+            `/individual/session/${data.sessionId}/step/${this.synapsConfigService.documentID}`,
+            {
+              baseURL: this.synapsConfigService.baseUrl,
+              headers: { 'Api-Key': this.synapsConfigService.apiKey },
+            },
+          )
+          .pipe(map((response) => response.data)),
+      );
+
+      if (
+        sessionInfo?.document?.country &&
+        sessionInfo.document.country.trim() !== ''
+      ) {
+        kycEntity.country = countriesA3ToA2[sessionInfo.document.country];
+      } else {
+        throw new ControlledError(
+          ErrorKyc.CountryNotSet,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
     kycEntity.status = data.state;
     kycEntity.message = data.reason;
 
