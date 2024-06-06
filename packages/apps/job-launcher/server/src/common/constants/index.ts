@@ -44,6 +44,9 @@ export const CANCEL_JOB_STATUSES = [
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,
+  JobStatus.SET_UP,
+  JobStatus.CREATED,
+  JobStatus.PARTIAL,
 ];
 
 export const SENDGRID_TEMPLATES = {

@@ -32,6 +32,7 @@ import { OracleType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class UserService {
@@ -44,6 +45,7 @@ export class UserService {
     private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly hcaptchaConfigService: HCaptchaConfigService,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -195,7 +197,7 @@ export class UserService {
     await user.save();
 
     return await this.web3Service
-      .getSigner(this.web3Service.getValidChains()[0])
+      .getSigner(this.networkConfigService.networks[0].chainId)
       .signMessage(data.address);
   }
 
