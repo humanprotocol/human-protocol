@@ -324,6 +324,27 @@ describe('UserService', () => {
         ),
       );
     });
+
+    it('should throw IncorrectAddress if user does not have an evm address', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+      );
+    });
   });
 
   describe('registerAddress', () => {

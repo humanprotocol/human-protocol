@@ -129,6 +129,13 @@ export class UserService {
       throw new BadRequestException(ErrorUser.InvalidType);
     }
 
+    if (!user.evmAddress) {
+      throw new ControlledError(
+        ErrorUser.IncorrectAddress,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     if (user.kyc?.status !== KycStatus.APPROVED) {
       throw new BadRequestException(ErrorUser.KycNotApproved);
     }
