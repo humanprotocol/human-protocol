@@ -8,7 +8,7 @@
   "dashboard": {},
   "protectedPagesHeaders": {
     "profile": "Profile",
-    "jobsDiscovery":"Jobs Discovery",
+    "jobsDiscovery": "Jobs Discovery",
     "jobs": "Jobs"
   },
   "web3ProtectedPagesHeaders": {
@@ -38,7 +38,8 @@
   "components": {
     "multiSelect": {
       "allFields": "All fields",
-      "andMore": "(and {{number}} more)"
+      "andMore": "(and {{number}} more)",
+      "clearAll": "Clear all"
     },
     "breadcrumb": {
       "back": "Back"
@@ -332,6 +333,7 @@
         "publicKey": "Public Key",
         "webhookUrl": "Webhook URL",
         "role": "Role",
+        "jobType": "Job type",
         "noValue": "no value",
         "editBtn": "Edit"
       },

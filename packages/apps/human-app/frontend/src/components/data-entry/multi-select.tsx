@@ -8,7 +8,14 @@ import InputLabel from '@mui/material/InputLabel';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import { useTranslation } from 'react-i18next';
-import { Box, Chip, FormHelperText, OutlinedInput } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Divider,
+  FormHelperText,
+  OutlinedInput,
+  Typography,
+} from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { colorPalette } from '@/styles/color-palette';
 
@@ -20,7 +27,8 @@ interface MultiSelectProps extends Omit<SelectProps, 'name'> {
 
 type FieldType = ControllerRenderProps<FieldValues, string>;
 
-const CHECK_ALL_NAME = 'CHECK_ALL';
+const CLEAR_ALL_VALUE = 'CLEAR_ALL_VALUE';
+const CHECK_ALL_VALUE = 'CHECK_ALL_VALUE';
 
 export function MultiSelect({
   name,
@@ -34,13 +42,6 @@ export function MultiSelect({
   const isFieldChecked = (field: FieldType, option: string) => {
     if (Array.isArray(field.value)) {
       return field.value.includes(option);
-    }
-    return false;
-  };
-
-  const isAllFieldsChecked = (field: FieldType) => {
-    if (Array.isArray(field.value)) {
-      return field.value.length === options.length;
     }
     return false;
   };
@@ -83,8 +84,14 @@ export function MultiSelect({
     field: FieldType
   ) => {
     const value = event.target.value;
+
+    if (value.includes(CLEAR_ALL_VALUE)) {
+      context.setValue(name, []);
+      return;
+    }
+
     if (
-      value[value.length - 1] === CHECK_ALL_NAME &&
+      value[value.length - 1] === CHECK_ALL_VALUE &&
       Array.isArray(field.value)
     ) {
       context.setValue(
@@ -118,18 +125,18 @@ export function MultiSelect({
                 handleChange(event, field);
               }}
             >
-              <MenuItem value={CHECK_ALL_NAME}>
-                <Checkbox checked={isAllFieldsChecked(field)} />
-                <ListItemText>
-                  {t('components.multiSelect.allFields')}
-                </ListItemText>
-              </MenuItem>
               {options.map((option) => (
                 <MenuItem key={option} value={option}>
                   <Checkbox checked={isFieldChecked(field, option)} />
                   <ListItemText>{option}</ListItemText>
                 </MenuItem>
               ))}
+              <Divider component="li" variant="fullWidth" />
+              <MenuItem sx={{ paddingLeft: '1.8rem' }} value={CLEAR_ALL_VALUE}>
+                <Typography variant="buttonMedium">
+                  {t('components.multiSelect.clearAll')}
+                </Typography>
+              </MenuItem>
             </Select>
             <FormHelperText sx={{ color: colorPalette.error.main }}>
               {fieldState.error?.message}

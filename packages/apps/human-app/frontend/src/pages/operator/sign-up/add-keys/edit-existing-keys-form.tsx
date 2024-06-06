@@ -6,6 +6,8 @@ import { colorPalette } from '@/styles/color-palette';
 import { Input } from '@/components/data-entry/input';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
 import { Select } from '@/components/data-entry/select';
+import { MultiSelect } from '@/components/data-entry/multi-select';
+import { JOB_TYPES } from '@/shared/consts';
 
 const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
@@ -55,6 +57,11 @@ export function EditExistingKeysForm({
             value: role,
             id: i,
           }))}
+        />
+        <MultiSelect
+          label={t('operator.addKeysPage.existingKeys.jobType')}
+          name={EthKVStoreKeys.JobTypes}
+          options={JOB_TYPES}
         />
         <div>
           <Button

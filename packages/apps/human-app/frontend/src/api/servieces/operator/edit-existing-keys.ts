@@ -9,7 +9,11 @@ import type { JsonRpcSigner } from 'ethers';
 import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
-import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
+import {
+  EthKVStoreKeys,
+  JobTypes,
+  Role,
+} from '@/smart-contracts/EthKVStore/config';
 import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 
@@ -17,6 +21,7 @@ export const editEthKVStoreValuesMutationSchema = z.object({
   [EthKVStoreKeys.PublicKey]: z.string().min(1),
   [EthKVStoreKeys.WebhookUrl]: z.string().url(),
   [EthKVStoreKeys.Role]: z.nativeEnum(Role),
+  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobTypes)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
 });
 
@@ -41,12 +46,14 @@ function editExistingKeysMutationFn(
       EthKVStoreKeys.PublicKey,
       EthKVStoreKeys.WebhookUrl,
       EthKVStoreKeys.Role,
+      EthKVStoreKeys.JobTypes,
       EthKVStoreKeys.Fee,
     ],
     values: [
       data[EthKVStoreKeys.PublicKey],
       data[EthKVStoreKeys.WebhookUrl],
       data[EthKVStoreKeys.Role],
+      data[EthKVStoreKeys.JobTypes].join(','),
       data[EthKVStoreKeys.Fee].toString(),
     ],
     contractAddress,

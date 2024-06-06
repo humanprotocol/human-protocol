@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Grid } from '@mui/material';
 import { Chip } from '@/components/ui/chip';
 
 interface ChipsProps {
@@ -7,10 +7,10 @@ interface ChipsProps {
 
 export function Chips({ data }: ChipsProps) {
   return (
-    <Stack direction="row" spacing={1}>
+    <Grid container spacing={1} sx={{ flexWrap: 'wrap', gap: '0.5rem' }}>
       {data.map((chipLabel) => (
         <Chip key={crypto.randomUUID()} label={chipLabel} />
       ))}
-    </Stack>
+    </Grid>
   );
 }
