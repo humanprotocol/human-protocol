@@ -1038,7 +1038,8 @@ export class JobService {
     await this.requestToCancelJob(jobEntity);
   }
 
-  public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
+  /// This is a duplicate from CronJobService.isCronJobRunning to avoid circular dependency
+  private async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
     const lastCronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!lastCronJob || lastCronJob.completedAt) {
@@ -1047,7 +1048,7 @@ export class JobService {
     return true;
   }
 
-  public async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
+  private async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
       throw new ControlledError(
         ErrorJob.InvalidStatusCancellation,
