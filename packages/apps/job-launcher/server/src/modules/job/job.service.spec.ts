@@ -2190,18 +2190,20 @@ describe('JobService', () => {
           cronJobType: CronJobType.CreateEscrow,
         });
 
-      await jobService.requestToCancelJobByAddress(
-        userId,
-        chainId,
-        escrowAddress,
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.CancelWhileProcessing,
+          HttpStatus.CONFLICT,
+        ),
       );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
       ).toHaveBeenCalledWith(chainId, escrowAddress);
       expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
-      mockJobEntity.status = JobStatus.TO_CANCEL;
-      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
 
     it('should cancel the job when status is Created', async () => {
@@ -2273,18 +2275,20 @@ describe('JobService', () => {
           cronJobType: CronJobType.CreateEscrow,
         });
 
-      await jobService.requestToCancelJobByAddress(
-        userId,
-        chainId,
-        escrowAddress,
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.CancelWhileProcessing,
+          HttpStatus.CONFLICT,
+        ),
       );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
       ).toHaveBeenCalledWith(chainId, escrowAddress);
       expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
-      mockJobEntity.status = JobStatus.TO_CANCEL;
-      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
 
     it('should cancel the job when status is Setup', async () => {
@@ -2356,18 +2360,20 @@ describe('JobService', () => {
           cronJobType: CronJobType.CreateEscrow,
         });
 
-      await jobService.requestToCancelJobByAddress(
-        userId,
-        chainId,
-        escrowAddress,
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.CancelWhileProcessing,
+          HttpStatus.CONFLICT,
+        ),
       );
 
       expect(
         jobRepository.findOneByChainIdAndEscrowAddress,
       ).toHaveBeenCalledWith(chainId, escrowAddress);
       expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
-      mockJobEntity.status = JobStatus.TO_CANCEL;
-      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
 
     it('should set to cancel the job when status is Launched', async () => {

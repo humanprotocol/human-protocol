@@ -1062,22 +1062,29 @@ export class JobService {
         break;
       case JobStatus.PAID:
         if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
-          status = JobStatus.TO_CANCEL;
+          status = JobStatus.FAILED;
         }
         break;
       case JobStatus.CREATED:
         if (await this.isCronJobRunning(CronJobType.SetupEscrow)) {
-          status = JobStatus.TO_CANCEL;
+          status = JobStatus.FAILED;
         }
         break;
       case JobStatus.SET_UP:
         if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
-          status = JobStatus.TO_CANCEL;
+          status = JobStatus.FAILED;
         }
         break;
       default:
         status = JobStatus.TO_CANCEL;
         break;
+    }
+
+    if (status === JobStatus.FAILED) {
+      throw new ControlledError(
+        ErrorJob.CancelWhileProcessing,
+        HttpStatus.CONFLICT,
+      );
     }
 
     if (status === JobStatus.CANCELED) {
