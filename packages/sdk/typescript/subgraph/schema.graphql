@@ -387,3 +387,14 @@ type LeaderStatistics @entity {
   id: ID!
   leaders: BigInt!
 }
+
+type Transaction @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  from: Bytes!
+  to: Bytes
+  value: BigInt
+  method: String!
+}

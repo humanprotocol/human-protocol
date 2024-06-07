@@ -42,3 +42,24 @@ Initializes a PayoutFilter instance.
   * **recipient** (`Optional`[`str`]) – Recipient address
   * **date_from** (`Optional`[`datetime`]) – Created from date
   * **date_to** (`Optional`[`datetime`]) – Created to date
+
+### *class* human_protocol_sdk.filter.TransactionFilter(networks, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None)
+
+Bases: `object`
+
+A class used to filter transactions.
+
+#### \_\_init_\_(networks, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None)
+
+Initializes a TransactionsFilter instance.
+
+* **Parameters:**
+  * **networks** (`List`[[`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)]) – List of chain IDs to filter transactions from
+  * **from_address** (`Optional`[`str`]) – Sender address
+  * **to_address** (`Optional`[`str`]) – Receiver address
+  * **start_date** (`Optional`[`datetime`]) – Start date for filtering transactions
+  * **end_date** (`Optional`[`datetime`]) – End date for filtering transactions
+  * **start_block** (`Optional`[`int`]) – Start block number for filtering transactions
+  * **end_block** (`Optional`[`int`]) – End block number for filtering transactions
+* **Raises:**
+  **ValueError** – If start_date is after end_date

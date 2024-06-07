@@ -10,7 +10,7 @@ import {
   UserStatus,
   UserType,
 } from '../../common/enums/user';
-import { signMessage } from '../../common/utils/signature';
+import { signMessage, verifySignature } from '../../common/utils/signature';
 import {
   MOCK_ADDRESS,
   MOCK_EMAIL,
@@ -35,6 +35,7 @@ import {
   ErrorUser,
 } from '../../common/constants/errors';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -51,6 +52,15 @@ describe('UserService', () => {
   let userRepository: UserRepository;
   let web3Service: Web3Service;
   let hcaptchaService: HCaptchaService;
+
+  jest
+    .spyOn(NetworkConfigService.prototype, 'networks', 'get')
+    .mockReturnValue([
+      {
+        chainId: ChainId.POLYGON_AMOY,
+        rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
+      },
+    ]);
 
   beforeEach(async () => {
     const signerMock = {
@@ -84,6 +94,7 @@ describe('UserService', () => {
         ConfigService,
         Web3ConfigService,
         HCaptchaConfigService,
+        NetworkConfigService,
       ],
     }).compile();
 
@@ -281,7 +292,10 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new BadRequestException(ErrorUser.LabelingEnableFailed),
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
 
@@ -304,12 +318,43 @@ describe('UserService', () => {
       await expect(
         userService.registerLabeler(userEntity as UserEntity),
       ).rejects.toThrow(
-        new BadRequestException(ErrorUser.LabelingEnableFailed),
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('should throw NoWalletAddresRegistered if user does not have an evm address', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.NoWalletAddresRegistered,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
 
   describe('registerAddress', () => {
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('should update evm address and sign the address', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
@@ -322,14 +367,26 @@ describe('UserService', () => {
       };
 
       const address = '0x123';
+      const signature = 'valid-signature';
 
+      // Mock web3Service methods
       web3Service.getSigner = jest.fn().mockReturnValue({
         signMessage: jest.fn().mockResolvedValue('signature'),
       });
 
+      // Mock signature verification
+      jest.spyOn(userService, 'prepareSignatureBody').mockResolvedValue({
+        from: address,
+        to: 'operator-address',
+        contents: 'register-address',
+        nonce: undefined,
+      });
+
+      (verifySignature as jest.Mock) = jest.fn().mockReturnValue(true);
+
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        { address },
+        { address, signature },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -344,10 +401,12 @@ describe('UserService', () => {
       };
 
       const address = '0x456';
+      const signature = 'valid-signature';
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
           address,
+          signature,
         }),
       ).rejects.toThrow(
         new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
@@ -366,13 +425,62 @@ describe('UserService', () => {
       };
 
       const address = '0x123';
+      const signature = 'valid-signature';
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
           address,
+          signature,
         }),
       ).rejects.toThrow(
         new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('should fail if the signature is invalid', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      const address = '0x123';
+      const signature = 'invalid-signature';
+
+      // Mock web3Service methods
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        signMessage: jest.fn().mockResolvedValue('signature'),
+      });
+
+      // Mock signature verification
+      jest.spyOn(userService, 'prepareSignatureBody').mockResolvedValue({
+        from: address,
+        to: 'operator-address',
+        contents: 'register-address',
+        nonce: undefined,
+      });
+
+      (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
+        throw new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        );
+      });
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          address,
+          signature,
+        }),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        ),
       );
     });
   });
@@ -397,7 +505,7 @@ describe('UserService', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      jest.resetAllMocks();
     });
 
     it('should disable an user', async () => {
@@ -434,6 +542,21 @@ describe('UserService', () => {
     });
 
     it("should throw ConflictException if signature doesn't match", async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
+        set: jest.fn(),
+      };
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+
+      (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
+        throw new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        );
+      });
+
       const invalidSignature = await signMessage(
         'invalid message',
         MOCK_PRIVATE_KEY,
@@ -448,6 +571,7 @@ describe('UserService', () => {
         ),
       );
     });
+
     it('should throw BadRequestException if operator already disabled in KVStore', async () => {
       const kvstoreClientMock = {
         get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
@@ -484,6 +608,22 @@ describe('UserService', () => {
 
       const result = await userService.prepareSignatureBody(
         SignatureType.SIGNUP,
+        MOCK_ADDRESS,
+      );
+
+      expect(result).toStrictEqual(expectedData);
+    });
+
+    it('should prepare web3 pre register address payload and return typed structured data', async () => {
+      const expectedData: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'register-address',
+        nonce: undefined,
+      };
+
+      const result = await userService.prepareSignatureBody(
+        SignatureType.REGISTER_ADDRESS,
         MOCK_ADDRESS,
       );
 

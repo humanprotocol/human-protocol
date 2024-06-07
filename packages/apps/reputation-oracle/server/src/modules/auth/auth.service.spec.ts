@@ -30,7 +30,7 @@ import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { KVStoreClient, Role } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient, Role } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -41,6 +41,7 @@ import { SiteKeyRepository } from '../user/site-key.repository';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -55,6 +56,13 @@ jest.mock('@human-protocol/sdk', () => ({
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
 }));
+
+jest.spyOn(NetworkConfigService.prototype, 'networks', 'get').mockReturnValue([
+  {
+    chainId: ChainId.POLYGON_AMOY,
+    rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
+  },
+]);
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -106,6 +114,7 @@ describe('AuthService', () => {
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
+        NetworkConfigService,
       ],
     }).compile();
 

@@ -1601,18 +1601,11 @@ class SkeletonsFromBoxesTaskBuilder:
             if skeleton.id in visited_ids:
                 raise DatasetValidationError(f"repeated annotation id {skeleton.id}")
 
-            if all(
-                v == dm.Points.Visibility.absent for p in skeleton.elements for v in p.visibility
-            ):
-                # Handle fully absent skeletons
-                # It's not the same as with all occluded points
-                raise InvisibleSkeletonError("no visible points")
-
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
                 assert len(element.points) == 2 and len(element.visibility) == 1
 
-                if element.visibility[0] != dm.Points.Visibility.visible:
+                if element.visibility[0] == dm.Points.Visibility.absent:
                     continue
 
                 px, py = element.points[:2]
@@ -1824,18 +1817,52 @@ class SkeletonsFromBoxesTaskBuilder:
             f" (and {remainder_count} more)" if remainder_count > 0 else "",
         )
 
-    def _match_boxes(self, a: BboxCoords, b: BboxCoords):
+    def _match_boxes(self, a: BboxCoords, b: BboxCoords) -> bool:
         return bbox_iou(a, b) > 0
+
+    def _get_skeleton_bbox(
+        self, skeleton: dm.Skeleton, annotations: Sequence[dm.Annotation]
+    ) -> BboxCoords:
+        matching_bbox = None
+        if skeleton.group:
+            matching_bbox = next(
+                (
+                    bbox
+                    for bbox in annotations
+                    if isinstance(bbox, dm.Bbox) and bbox.group == skeleton.group
+                ),
+                None,
+            )
+
+        if matching_bbox:
+            bbox = matching_bbox.get_bbox()
+        else:
+            bbox = skeleton.get_bbox()
+
+            if any(
+                v != dm.Points.Visibility.absent for e in skeleton.elements for v in e.visibility
+            ):
+                # If there's only 1 visible point, the bbox will have 0 w and h
+                bbox = [bbox[0], bbox[1], max(1, bbox[2]), max(1, bbox[3])]
+
+        return bbox
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
             input_boxes: List[dm.Bbox],
             gt_skeletons: List[dm.Skeleton],
+            *,
+            gt_annotations: List[dm.Annotation],
         ) -> List[Tuple[dm.Bbox, dm.Skeleton]]:
             matches = [
                 [
                     (input_bbox.label == gt_skeleton.label)
-                    and (self._match_boxes(input_bbox.get_bbox(), gt_skeleton.get_bbox()))
+                    and (
+                        self._match_boxes(
+                            input_bbox.get_bbox(),
+                            self._get_skeleton_bbox(gt_skeleton, gt_annotations),
+                        )
+                    )
                     for gt_skeleton in gt_skeletons
                 ]
                 for input_bbox in input_boxes
@@ -1923,31 +1950,17 @@ class SkeletonsFromBoxesTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_skeletons(
-            input_boxes: List[dm.Bbox], gt_skeletons: List[dm.Skeleton]
+            input_boxes: List[dm.Bbox],
+            gt_skeletons: List[dm.Skeleton],
+            *,
+            gt_annotations: List[dm.Annotation],
         ) -> List[dm.Bbox]:
-            matches = _find_unambiguous_matches(input_boxes, gt_skeletons)
+            matches = _find_unambiguous_matches(
+                input_boxes, gt_skeletons, gt_annotations=gt_annotations
+            )
 
             matched_skeletons = []
             for input_bbox, gt_skeleton in matches:
-                if all(
-                    v != dm.Points.Visibility.visible
-                    for p in gt_skeleton.elements
-                    for v in p.visibility
-                ):
-                    # Handle skeletons without visible points
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - "
-                        "no visible points".format(
-                            gt_sample.id, gt_skeleton.id, gt_label_cat[gt_skeleton.label].name
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    # not an error, should not be counted as excluded for an error
-                    # we skip it as we can't reliably annotate and validate occluded now.
-                    # TODO: figure out how to handle this, specifically is how to validate
-                    continue
-
                 gt_count_per_class[gt_skeleton.label] = (
                     gt_count_per_class.get(gt_skeleton.label, 0) + 1
                 )
@@ -1999,7 +2012,9 @@ class SkeletonsFromBoxesTaskBuilder:
             if not gt_skeletons:
                 continue
 
-            matched_skeletons = _find_good_gt_skeletons(input_boxes, gt_skeletons)
+            matched_skeletons = _find_good_gt_skeletons(
+                input_boxes, gt_skeletons, gt_annotations=gt_sample.annotations
+            )
             if not matched_skeletons:
                 continue
 

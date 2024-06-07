@@ -48,9 +48,9 @@ const KVStoreAddresses = new KVStoreUtils.getData({
 
 ## Methods
 
-### getData()
+### getKVStoreData()
 
-> `static` **getData**(`chainId`, `address`): `Promise`\<`IKVStore`[]\>
+> `static` **getKVStoreData**(`chainId`, `address`): `Promise`\<`IKVStore`[]\>
 
 This function returns the KVStore data for a given address.
 
@@ -107,10 +107,10 @@ KVStore data
 ```ts
 import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
-const kvStoreData = await KVStoreUtils.getData(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
+const kvStoreData = await KVStoreUtils.getKVStoreData(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
 console.log(kvStoreData);
 ```
 
 #### Source
 
-[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/3079e59cd59b547edc435eec9c75196ff7532363/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)
+[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)

@@ -15,7 +15,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
-import { GetJobsDto, JobDto, ResignJobDto, SolveJobDto } from './job.dto';
+import { GetJobsDto, JobDto, SolveJobDto } from './job.dto';
 import { JobService } from './job.service';
 import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -83,38 +83,6 @@ export class JobController {
       body.escrowAddress,
       req.user.address,
       body.solution,
-    );
-  }
-
-  @ApiOperation({
-    summary: 'Resign Job',
-    description: 'Endpoint to resign from a job.',
-  })
-  @ApiBearerAuth()
-  @ApiBody({
-    description: 'Details required to resign from the job.',
-    type: ResignJobDto,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Job resigned successfully.',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @Post('resign')
-  resignJob(
-    @Request() req: RequestWithUser,
-    @Body() body: ResignJobDto,
-  ): Promise<void> {
-    return this.jobService.resignJob(
-      body.assignmentId,
-      req.user.address,
     );
   }
 }

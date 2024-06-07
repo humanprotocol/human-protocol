@@ -5,11 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import {
-  ErrorAuth,
-  ErrorOperator,
-  ErrorUser,
-} from '../../common/constants/errors';
+import { ErrorOperator, ErrorUser } from '../../common/constants/errors';
 import {
   KycStatus,
   OperatorStatus,
@@ -36,6 +32,7 @@ import { OracleType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class UserService {
@@ -48,6 +45,7 @@ export class UserService {
     private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly hcaptchaConfigService: HCaptchaConfigService,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -131,6 +129,13 @@ export class UserService {
       throw new BadRequestException(ErrorUser.InvalidType);
     }
 
+    if (!user.evmAddress) {
+      throw new ControlledError(
+        ErrorUser.NoWalletAddresRegistered,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     if (user.kyc?.status !== KycStatus.APPROVED) {
       throw new BadRequestException(ErrorUser.KycNotApproved);
     }
@@ -148,7 +153,10 @@ export class UserService {
     });
 
     if (!registeredLabeler) {
-      throw new BadRequestException(ErrorUser.LabelingEnableFailed);
+      throw new ControlledError(
+        ErrorUser.LabelingEnableFailed,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // Retrieve labeler site key from hcaptcha foundation
@@ -156,7 +164,10 @@ export class UserService {
       email: user.email,
     });
     if (!labelerData || !labelerData.sitekeys.length) {
-      throw new BadRequestException(ErrorUser.LabelingEnableFailed);
+      throw new ControlledError(
+        ErrorUser.LabelingEnableFailed,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const siteKey = labelerData.sitekeys[0].sitekey;
 
@@ -188,11 +199,18 @@ export class UserService {
       );
     }
 
+    // Prepare signed data and verify the signature
+    const signedData = await this.prepareSignatureBody(
+      SignatureType.REGISTER_ADDRESS,
+      data.address,
+    );
+    verifySignature(signedData, data.signature, [data.address]);
+
     user.evmAddress = data.address;
     await user.save();
 
     return await this.web3Service
-      .getSigner(this.web3Service.getValidChains()[0])
+      .getSigner(this.networkConfigService.networks[0].chainId)
       .signMessage(data.address);
   }
 
@@ -205,13 +223,7 @@ export class UserService {
       user.evmAddress,
     );
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
-    if (!verified) {
-      throw new ControlledError(
-        ErrorAuth.InvalidSignature,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    verifySignature(signedData, signature, [user.evmAddress]);
 
     let signer: Wallet;
     const currentWeb3Env = this.web3ConfigService.env;
@@ -270,6 +282,9 @@ export class UserService {
           reference: additionalData.reference,
           workerJson: additionalData.workerAddress,
         });
+        break;
+      case SignatureType.REGISTER_ADDRESS:
+        content = 'register-address';
         break;
       default:
         throw new ControlledError('Type not allowed', HttpStatus.BAD_REQUEST);

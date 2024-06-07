@@ -116,3 +116,9 @@ export class AssignmentDto {
     this.expiresAt = expiresAt;
   }
 }
+
+export class ResignDto {
+  @ApiProperty({ name: 'assignment_id' })
+  @IsNumber()
+  public assignmentId: number;
+}
