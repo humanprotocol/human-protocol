@@ -20,6 +20,7 @@ const Main = styled('main', {
   isMobile?: boolean;
 }>(({ theme, open, isMobile }) => ({
   width: '100%',
+  display: 'flex',
   flex: '1',
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing.sharp,
@@ -95,6 +96,7 @@ export function Layout({
               gap: '2rem',
               flexDirection: 'column',
               padding: '0 2rem',
+              flexWrap: 'nowrap',
               [breakpoints.mobile]: {
                 gap: '1rem',
                 padding: '0 1rem',
@@ -125,7 +127,9 @@ export function Layout({
             <Grid item>
               <PageHeader {...pageHeaderProps} />
             </Grid>
-            <Outlet />
+            <Grid sx={{ height: '100%' }}>
+              <Outlet />
+            </Grid>
           </Grid>
         </Main>
         <Footer isProtected />

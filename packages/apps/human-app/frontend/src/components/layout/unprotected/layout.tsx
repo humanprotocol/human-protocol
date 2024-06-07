@@ -20,7 +20,6 @@ export function Layout({ withNavigation = true }: LayoutProps) {
       container
       direction="column"
       flexWrap="nowrap"
-      justifyContent="space-between"
       sx={{
         height: '100%',
         minHeight: '100vh',
@@ -34,7 +33,12 @@ export function Layout({ withNavigation = true }: LayoutProps) {
       <Container
         component="main"
         maxWidth="xl"
-        sx={{ p: '0', display: 'flex', justifyContent: 'center' }}
+        sx={{
+          p: '0',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
       >
         <Outlet />
       </Container>

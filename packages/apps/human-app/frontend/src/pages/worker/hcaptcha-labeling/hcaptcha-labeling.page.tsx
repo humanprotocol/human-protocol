@@ -22,62 +22,67 @@ export function HcaptchaLabelingPage() {
   };
 
   return (
-    <Grid alignItems="center" container justifyContent="center">
-      <Grid item xs={12}>
-        <Paper
+    <Grid
+      alignItems="center"
+      height="100%"
+      item
+      justifyContent="center"
+      xs={12}
+    >
+      <Paper
+        sx={{
+          backgroundColor: isMobile
+            ? colorPalette.paper.main
+            : colorPalette.white,
+          height: '100%',
+          boxShadow: 'none',
+          padding: '40px',
+          borderRadius: '20px',
+        }}
+      >
+        <Grid
+          container
           sx={{
-            backgroundColor: isMobile
-              ? colorPalette.paper.main
-              : colorPalette.white,
             height: '100%',
-            boxShadow: 'none',
-            padding: '40px',
-            borderRadius: '20px',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Grid
-            container
-            sx={{ justifyContent: 'center', alignItems: 'center' }}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              justifyContent: 'center',
+              height: '100%',
+              width: '376px',
+              gap: '52px',
+            }}
           >
-            <Grid
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                justifyContent: 'center',
-                height: '100%',
-                width: '376px',
-                gap: '52px',
-              }}
-            >
-              <Typography variant="body1">
-                {t('worker.hcaptchaLabeling.description')}
-              </Typography>
-              {JOB_STATS.available ? (
-                <Grid
-                  container
-                  sx={{ width: '100%', justifyContent: 'center' }}
-                >
-                  <HCaptcha
-                    onError={hcaptchaOnError}
-                    onVerify={hcaptchaOnSuccess}
-                    sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
-                  />
-                </Grid>
-              ) : (
-                <Grid container sx={{ flexDirection: 'column', gap: '24px' }}>
-                  <Typography variant="subtitle2">
-                    {t('worker.hcaptchaLabeling.noJobs')}
-                  </Typography>
-                  <Typography color={colorPalette.primary.light} variant="h4">
-                    02:41:52
-                  </Typography>
-                </Grid>
-              )}
-            </Grid>
+            <Typography variant="body1">
+              {t('worker.hcaptchaLabeling.description')}
+            </Typography>
+            {JOB_STATS.available ? (
+              <Grid container sx={{ width: '100%', justifyContent: 'center' }}>
+                <HCaptcha
+                  onError={hcaptchaOnError}
+                  onVerify={hcaptchaOnSuccess}
+                  sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
+                />
+              </Grid>
+            ) : (
+              <Grid container sx={{ flexDirection: 'column', gap: '24px' }}>
+                <Typography variant="subtitle2">
+                  {t('worker.hcaptchaLabeling.noJobs')}
+                </Typography>
+                <Typography color={colorPalette.primary.light} variant="h4">
+                  02:41:52
+                </Typography>
+              </Grid>
+            )}
           </Grid>
-        </Paper>
-      </Grid>
+        </Grid>
+      </Paper>
     </Grid>
   );
 }
