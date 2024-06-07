@@ -21,7 +21,9 @@ export type ResendEmailVerificationDto = z.infer<
 
 const ResendEmailVerificationSuccessResponseSchema = z.unknown();
 
-function resendEmailVerificationMutationFn(data: ResendEmailVerificationDto) {
+async function resendEmailVerificationMutationFn(
+  data: ResendEmailVerificationDto
+) {
   return apiClient(apiPaths.worker.resendEmailVerification.path, {
     authenticated: true,
     successSchema: ResendEmailVerificationSuccessResponseSchema,
