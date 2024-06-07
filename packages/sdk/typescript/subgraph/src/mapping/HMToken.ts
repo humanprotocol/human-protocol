@@ -22,6 +22,7 @@ import { toEventDayId, toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
 import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
+import { createTransaction } from './utils/transaction';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
 
@@ -132,6 +133,10 @@ export function handleTransfer(event: Transfer): void {
       event.params._value
     );
     escrow.save();
+
+    createTransaction(event, 'fund', event.params._to, event.params._value);
+  } else {
+    createTransaction(event, 'transfer', event.params._to, event.params._value);
   }
 
   // Update holders
@@ -197,6 +202,7 @@ export function handleTransfer(event: Transfer): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
+  createTransaction(event, 'transferBulk');
   // Create HMTBulkTransferEvent entity
   const eventEntity = new HMTBulkTransferEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -214,6 +220,12 @@ export function handleBulkTransfer(event: BulkTransfer): void {
 }
 
 export function handleApproval(event: Approval): void {
+  createTransaction(
+    event,
+    'approve',
+    event.params._spender,
+    event.params._value
+  );
   // Create HMTApprovalEvent entity
   const eventEntity = new HMTApprovalEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -232,6 +244,7 @@ export function handleApproval(event: Approval): void {
 }
 
 export function handleBulkApproval(event: BulkApproval): void {
+  createTransaction(event, 'increaseApprovalBulk');
   // Create HMTBulkApprovalEvent entity
   const eventEntity = new HMTBulkApprovalEvent(toEventId(event));
   eventEntity.block = event.block.number;

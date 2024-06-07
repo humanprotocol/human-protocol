@@ -123,5 +123,53 @@ describe('RewardPool', () => {
     assert.fieldEquals('Leader', data1.params.slasher.toHex(), 'reward', '30');
 
     assert.fieldEquals('Leader', data2.params.slasher.toHex(), 'reward', '50');
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'method',
+      'addReward'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'from',
+      data1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'addReward'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
   });
 });
