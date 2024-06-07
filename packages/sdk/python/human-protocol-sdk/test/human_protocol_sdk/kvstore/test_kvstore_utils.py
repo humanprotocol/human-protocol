@@ -41,7 +41,7 @@ class TestKVStoreUtils(unittest.TestCase):
             )
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_kvstore_by_address_query(),
                 params={
                     "address": "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
@@ -66,7 +66,7 @@ class TestKVStoreUtils(unittest.TestCase):
                 "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
             )
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_kvstore_by_address_query(),
                 params={
                     "address": "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",

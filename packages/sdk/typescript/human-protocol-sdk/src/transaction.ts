@@ -13,6 +13,7 @@ import {
   GET_TRANSACTION_QUERY,
 } from './graphql/queries/transaction';
 import { ITransaction, ITransactionsFilter } from './interfaces';
+import { getSubgraphUrl } from './utils';
 
 export class TransactionUtils {
   /**
@@ -45,7 +46,7 @@ export class TransactionUtils {
 
     const { transaction } = await gqlFetch<{
       transaction: ITransaction;
-    }>(networkData.subgraphUrl, GET_TRANSACTION_QUERY, {
+    }>(getSubgraphUrl(networkData), GET_TRANSACTION_QUERY, {
       hash: hash.toLowerCase(),
     });
 
@@ -115,14 +116,9 @@ export class TransactionUtils {
       if (!networkData) {
         throw ErrorUnsupportedChainID;
       }
-
-      if (!networkData.subgraphUrl) {
-        continue;
-      }
-
       const { transactions } = await gqlFetch<{
         transactions: ITransaction[];
-      }>(networkData.subgraphUrl, GET_TRANSACTIONS_QUERY(filter), {
+      }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
         fromAddress: filter?.fromAddress,
         toAddress: filter?.toAddress,
         startDate: filter?.startDate

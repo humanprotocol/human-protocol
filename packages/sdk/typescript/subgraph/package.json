@@ -9,7 +9,7 @@
     "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
     "codegen": "graph codegen",
     "build": "graph build",
-    "pretest": "NETWORK=mumbai-v2 yarn generate",
+    "pretest": "NETWORK=polygon yarn generate",
     "test": "graph test ",
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",

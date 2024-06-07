@@ -132,7 +132,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Source
 
-[escrow.ts:1633](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1633)
+[escrow.ts:1633](https://github.com/humanprotocol/human-protocol/blob/5c3ff98d933709d76ff6e1e712664f4ec3029081/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1633)
 
 ***
 
@@ -246,4 +246,4 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Source
 
-[escrow.ts:1505](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1505)
+[escrow.ts:1505](https://github.com/humanprotocol/human-protocol/blob/5c3ff98d933709d76ff6e1e712664f4ec3029081/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1505)

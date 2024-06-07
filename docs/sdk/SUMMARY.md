@@ -2,22 +2,22 @@
 
 ## Typescript SDK​
 
-- [Encryption](typescript/modules/encryption.md)
-  - [Encryption](typescript/classes/encryption.Encryption.md)
-  - [EncryptionUtils](typescript/classes/encryption.EncryptionUtils.md)
-- [Escrow](typescript/modules/escrow.md)
-  - [EscrowClient](typescript/classes/escrow.EscrowClient.md)
-  - [EscrowUtils](typescript/classes/escrow.EscrowUtils.md)
-- [KVStore](typescript/modules/kvstore.md)
-  - [KVStoreClient](typescript/classes/kvstore.KVStoreClient.md)
-- [Staking](typescript/modules/staking.md)
-  - [StakingClient](typescript/classes/staking.StakingClient.md)
-- [Operator](typescript/modules/operator.md)
-  - [OperatorUtils](typescript/classes/operator.OperatorUtils.md)
-- [Storage](typescript/modules/storage.md)
-  - [StorageClient](typescript/classes/storage.StorageClient.md)
-- [Statistics](typescript/modules/statistics.md)
-  - [StatisticsClient](typescript/classes/statistics.StatisticsClient.md)
+- [Encryption](typescript/encryption/README.md)
+  - [Encryption](typescript/encryption/classes/Encryption.md)
+  - [EncryptionUtils](typescript/encryption/classes/EncryptionUtils.md)
+- [Escrow](typescript/escrow/escrow.md)
+  - [EscrowClient](typescript/escrow/classes/EscrowClient.md)
+  - [EscrowUtils](typescript/escrow/classes/EscrowUtils.md)
+- [KVStore](typescript/kvstore/kvstore.md)
+  - [KVStoreClient](typescript/kvstore/classes/KVStoreClient.md)
+- [Staking](typescript/staking/staking.md)
+  - [StakingClient](typescript/staking/classes/StakingClient.md)
+- [Operator](typescript/operator/operator.md)
+  - [OperatorUtils](typescript/operator/classes/OperatorUtils.md)
+- [Storage](typescript/storage/storage.md)
+  - [StorageClient](typescript/storage/classes/StorageClient.md)
+- [Statistics](typescript/statistics/statistics.md)
+  - [StatisticsClient](typescript/statistics/classes/StatisticsClient.md)
 
 ## Python SDK
 

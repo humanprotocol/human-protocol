@@ -159,7 +159,7 @@ class EscrowUtils:
         for chain_id in filter.networks:
             network = NETWORKS[chain_id]
             escrows_data = get_data_from_subgraph(
-                network["subgraph_url"],
+                network,
                 query=get_escrows_query(filter),
                 params={
                     "launcher": filter.launcher.lower() if filter.launcher else None,
@@ -281,7 +281,7 @@ class EscrowUtils:
         network = NETWORKS[ChainId(chain_id)]
 
         escrow_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_escrow_query(),
             params={
                 "escrowAddress": escrow_address.lower(),

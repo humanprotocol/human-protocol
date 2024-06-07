@@ -50,7 +50,7 @@ class TestTransactionUtils(unittest.TestCase):
             transactions = TransactionUtils.get_transactions(filter)
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_transactions_query(filter),
                 params={
                     "fromAddress": "0x1234567890123456789012345678901234567890",
@@ -79,7 +79,7 @@ class TestTransactionUtils(unittest.TestCase):
             transactions = TransactionUtils.get_transactions(filter)
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_transactions_query(filter),
                 params={
                     "fromAddress": "0x1234567890123456789012345678901234567890",
@@ -140,7 +140,7 @@ class TestTransactionUtils(unittest.TestCase):
             )
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_transaction_query(),
                 params={
                     "hash": "0x1234567890123456789012345678901234567890123456789012345678901234"
@@ -168,7 +168,7 @@ class TestTransactionUtils(unittest.TestCase):
             )
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=ANY,
                 params={"hash": "transaction_hash"},
             )
