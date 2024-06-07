@@ -61,11 +61,11 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_ESCROW_STATISTICS_QUERY
       );
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -124,7 +124,7 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -180,7 +180,7 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -254,7 +254,7 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
