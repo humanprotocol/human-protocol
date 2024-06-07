@@ -97,7 +97,7 @@ class TransactionUtils:
         from human_protocol_sdk.gql.transaction import get_transaction_query
 
         transaction_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_transaction_query(),
             params={"hash": hash.lower()},
         )
@@ -155,7 +155,7 @@ class TransactionUtils:
                 raise TransactionUtilsError("Unsupported Chain ID")
 
             data = get_data_from_subgraph(
-                network_data["subgraph_url"],
+                network_data,
                 query=get_transactions_query(filter),
                 params={
                     "fromAddress": (

@@ -88,7 +88,7 @@ class KVStoreUtils:
         network = NETWORKS[ChainId(chain_id)]
 
         kvstore_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_kvstore_by_address_query(),
             params={
                 "address": address.lower(),
