@@ -39,8 +39,6 @@ from human_protocol_sdk.utils import (
 
 from human_protocol_sdk.escrow.escrow_client import EscrowClientError
 
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
-
 LOG = logging.getLogger("human_protocol_sdk.escrow")
 
 
@@ -188,6 +186,13 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
+
+            if (
+                not escrows_data
+                or "data" not in escrows_data
+                or "escrows" not in escrows_data["data"]
+            ):
+                return []
             escrows_raw = escrows_data["data"]["escrows"]
 
             escrows.extend(
@@ -283,10 +288,15 @@ class EscrowUtils:
             },
         )
 
-        escrow = escrow_data["data"]["escrow"]
-
-        if not escrow:
+        if (
+            not escrow_data
+            or "data" not in escrow_data
+            or "escrow" not in escrow_data["data"]
+            or not escrow_data["data"]["escrow"]
+        ):
             return None
+
+        escrow = escrow_data["data"]["escrow"]
 
         return EscrowData(
             chain_id=chain_id,

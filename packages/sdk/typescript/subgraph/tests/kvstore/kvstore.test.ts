@@ -430,4 +430,48 @@ describe('KVStore', () => {
       data1.params.sender.toHexString()
     );
   });
+
+  test('Should properly update KVStore entity', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Reputation Oracle',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Job Launcher',
+      BigInt.fromI32(11)
+    );
+    handleDataSaved(data1);
+
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'key',
+      'role'
+    );
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'value',
+      'Reputation Oracle'
+    );
+
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'key',
+      'role'
+    );
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'value',
+      'Job Launcher'
+    );
+  });
 });

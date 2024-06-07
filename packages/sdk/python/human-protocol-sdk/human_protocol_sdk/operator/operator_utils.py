@@ -28,8 +28,6 @@ from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.utils import get_data_from_subgraph
 from web3 import Web3
 
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
-
 LOG = logging.getLogger("human_protocol_sdk.operator")
 
 

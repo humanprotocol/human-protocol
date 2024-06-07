@@ -62,7 +62,7 @@ The network information required to connect to the Statistics contract
 
 #### Source
 
-[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/4fdfdddcf617469b657582a44683ec62e5f33c71/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
+[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
 
 ## Properties
 
@@ -72,7 +72,7 @@ The network information required to connect to the Statistics contract
 
 #### Source
 
-[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/4fdfdddcf617469b657582a44683ec62e5f33c71/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
 
 ## Methods
 
@@ -136,7 +136,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Source
 
-[statistics.ts:121](https://github.com/humanprotocol/human-protocol/blob/4fdfdddcf617469b657582a44683ec62e5f33c71/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L121)
+[statistics.ts:121](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L121)
 
 ***
 
@@ -232,7 +232,7 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Source
 
-[statistics.ts:394](https://github.com/humanprotocol/human-protocol/blob/4fdfdddcf617469b657582a44683ec62e5f33c71/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L394)
+[statistics.ts:394](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L394)
 
 ***
 
@@ -314,7 +314,7 @@ console.log(
 
 #### Source
 
-[statistics.ts:285](https://github.com/humanprotocol/human-protocol/blob/4fdfdddcf617469b657582a44683ec62e5f33c71/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L285)
+[statistics.ts:285](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L285)
 
 ***
 
@@ -373,4 +373,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Source
 
-[statistics.ts:196](https://github.com/humanprotocol/human-protocol/blob/4fdfdddcf617469b657582a44683ec62e5f33c71/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L196)
+[statistics.ts:196](https://github.com/humanprotocol/human-protocol/blob/c31b0fe05d1fe8709b826dd2d3d55568a13b7bf9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L196)

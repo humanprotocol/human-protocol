@@ -109,6 +109,11 @@ export interface IPayoutFilter {
   to?: Date;
 }
 
+export interface IKVStore {
+  key: string;
+  value: string;
+}
+
 export interface ITransaction {
   block: bigint;
   hash: string;

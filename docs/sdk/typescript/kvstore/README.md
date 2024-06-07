@@ -11,3 +11,4 @@
 ### Classes
 
 - [KVStoreClient](classes/KVStoreClient.md)
+- [KVStoreUtils](classes/KVStoreUtils.md)
