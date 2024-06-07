@@ -1,7 +1,15 @@
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { MutationState } from '@tanstack/react-query';
+import {
+  useMutation,
+  useMutationState,
+  useQueryClient,
+} from '@tanstack/react-query';
+import last from 'lodash/last';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
+import type { ResponseError } from '@/shared/types/global.type';
 
 export const resendEmailVerificationDtoSchema = z.object({
   email: z.string().email(),
@@ -21,8 +29,11 @@ function resendEmailVerificationMutationFn(data: ResendEmailVerificationDto) {
   });
 }
 
+const resendEmailVerificationKey = 'resendEmailVerification';
+
 export function useResendEmailVerificationWorkerMutation() {
   const queryClient = useQueryClient();
+  const { user } = useAuthenticatedUser();
 
   return useMutation({
     mutationFn: resendEmailVerificationMutationFn,
@@ -32,5 +43,19 @@ export function useResendEmailVerificationWorkerMutation() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
+    mutationKey: [resendEmailVerificationKey, user.email],
   });
+}
+
+export function useResendEmailVerificationWorkerMutationState() {
+  const { user } = useAuthenticatedUser();
+
+  const state = useMutationState({
+    filters: { mutationKey: [resendEmailVerificationKey, user.email] },
+    select: (mutation) => mutation.state,
+  });
+
+  return last(state) as
+    | MutationState<unknown, ResponseError, ResendEmailVerificationDto>
+    | undefined;
 }
