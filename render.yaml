@@ -210,17 +210,14 @@ services:
     rootDir: packages/apps/reputation-oracle/server
 
 databases:
-  # A database that allows only private network connections
   - name: job-launcher-db
     databaseName: job_launcher
     plan: starter
-    previewPlan: starter
     ipAllowList: [] # No entries in the IP allow list
     region: frankfurt
   - name: reputation-oracle-db
     databaseName: reputation_oracle
     plan: starter
-    previewPlan: starter
     ipAllowList: [] # No entries in the IP allow list
     region: frankfurt
 version: "1"

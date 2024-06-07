@@ -11,6 +11,7 @@ import { Web3ConfigService } from './web3-config.service';
 import { ReputationConfigService } from './reputation-config.service';
 import { SynapsConfigService } from './synaps-config.service';
 import { NetworkConfigService } from './network-config.service';
+import { HCaptchaConfigService } from './hcaptcha-config.service';
 
 @Global()
 @Module({
@@ -26,6 +27,7 @@ import { NetworkConfigService } from './network-config.service';
     SynapsConfigService,
     PGPConfigService,
     NetworkConfigService,
+    HCaptchaConfigService,
   ],
   exports: [
     ConfigService,
@@ -39,6 +41,7 @@ import { NetworkConfigService } from './network-config.service';
     SynapsConfigService,
     PGPConfigService,
     NetworkConfigService,
+    HCaptchaConfigService,
   ],
 })
 export class EnvConfigModule {}

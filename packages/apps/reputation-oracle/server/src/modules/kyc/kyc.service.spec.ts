@@ -12,12 +12,14 @@ import { of } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
   let httpService: HttpService;
   let kycRepository: KycRepository;
   let synapsConfigService: SynapsConfigService;
+  let hcaptchaConfigService: HCaptchaConfigService;
 
   beforeAll(async () => {
     const mockHttpService: DeepPartial<HttpService> = {
@@ -31,6 +33,7 @@ describe('Kyc Service', () => {
         KycService,
         ConfigService,
         SynapsConfigService,
+        HCaptchaConfigService,
         {
           provide: HttpService,
           useValue: mockHttpService,
@@ -44,6 +47,9 @@ describe('Kyc Service', () => {
     kycRepository = moduleRef.get<KycRepository>(KycRepository);
     synapsConfigService =
       moduleRef.get<SynapsConfigService>(SynapsConfigService);
+    hcaptchaConfigService = moduleRef.get<HCaptchaConfigService>(
+      HCaptchaConfigService,
+    );
 
     jest
       .spyOn(SynapsConfigService.prototype, 'apiKey', 'get')
@@ -222,11 +228,6 @@ describe('Kyc Service', () => {
           headers: { 'Api-Key': synapsConfigService.apiKey },
         },
       );
-      expect(kycRepository.createUnique).toHaveBeenCalledWith({
-        sessionId: '123',
-        status: KycStatus.NONE,
-        userId: 1,
-      });
     });
   });
 
@@ -274,16 +275,27 @@ describe('Kyc Service', () => {
     it('Should update the Kyc status of the user', async () => {
       jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
 
-      httpService.get = jest.fn().mockImplementation(() => {
-        return of({
-          data: {
-            session: {
-              id: '123',
-              status: KycStatus.APPROVED,
+      httpService.get = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          return of({
+            data: {
+              session: {
+                id: '123',
+                status: KycStatus.APPROVED,
+              },
             },
-          },
+          });
+        })
+        .mockImplementationOnce(() => {
+          return of({
+            data: {
+              document: {
+                country: 'FRA',
+              },
+            },
+          });
         });
-      });
 
       await kycService.updateKycStatus(
         synapsConfigService.webhookSecret,
@@ -293,6 +305,76 @@ describe('Kyc Service', () => {
       expect(kycRepository.updateOne).toHaveBeenCalledWith({
         status: KycStatus.APPROVED,
       });
+    });
+
+    it('Should update the Kyc status of the user', async () => {
+      jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
+
+      httpService.get = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          return of({
+            data: {
+              session: {
+                id: '123',
+                status: KycStatus.APPROVED,
+              },
+            },
+          });
+        })
+        .mockImplementationOnce(() => {
+          return of({
+            data: {
+              document: {
+                country: 'FRA',
+              },
+            },
+          });
+        });
+
+      await kycService.updateKycStatus(
+        synapsConfigService.webhookSecret,
+        mockKycUpdate,
+      );
+
+      expect(kycRepository.updateOne).toHaveBeenCalledWith({
+        status: KycStatus.APPROVED,
+      });
+    });
+
+    it('Should throw an error when country is not set', async () => {
+      jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
+
+      httpService.get = jest
+        .fn()
+        .mockImplementationOnce((url: string, config?: any) => {
+          return of({
+            data: {
+              session: {
+                id: '123',
+                status: KycStatus.APPROVED,
+              },
+            },
+          });
+        })
+        .mockImplementationOnce((url: string, config?: any) => {
+          return of({
+            data: {
+              document: {
+                country: '',
+              },
+            },
+          });
+        });
+
+      await expect(
+        kycService.updateKycStatus(
+          synapsConfigService.webhookSecret,
+          mockKycUpdate,
+        ),
+      ).rejects.toThrow(
+        new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 });

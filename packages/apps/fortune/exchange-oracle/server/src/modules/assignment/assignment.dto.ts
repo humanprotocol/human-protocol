@@ -5,7 +5,6 @@ import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
-  JobSortField,
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
@@ -27,8 +26,8 @@ export class CreateAssignmentDto {
 export class GetAssignmentsDto extends PageOptionsDto {
   @ApiPropertyOptional({
     name: 'sort_field',
-    enum: JobSortField,
-    default: JobSortField.CREATED_AT,
+    enum: AssignmentSortField,
+    default: AssignmentSortField.CREATED_AT,
   })
   @IsOptional()
   @IsEnum(AssignmentSortField)
@@ -116,4 +115,10 @@ export class AssignmentDto {
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
   }
+}
+
+export class ResignDto {
+  @ApiProperty({ name: 'assignment_id' })
+  @IsNumber()
+  public assignmentId: number;
 }

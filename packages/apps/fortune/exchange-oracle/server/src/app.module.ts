@@ -15,6 +15,7 @@ import { AssignmentModule } from './modules/assignment/assignment.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { HealthModule } from './modules/health/health.module';
 import { EnvConfigModule } from './common/config/config.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   providers: [
@@ -29,6 +30,7 @@ import { EnvConfigModule } from './common/config/config.module';
     JwtHttpStrategy,
   ],
   imports: [
+    ScheduleModule.forRoot(),
     HealthModule,
     AssignmentModule,
     JobModule,

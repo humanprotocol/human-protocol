@@ -23,6 +23,9 @@ export class AssignmentEntity extends BaseEntity {
   @Column({ type: 'timestamptz' })
   public expiresAt: Date;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'reward_amount' })
+  public rewardAmount: number;
+
   @ManyToOne(() => JobEntity, (job) => job.assignments, { eager: true })
   job: JobEntity;
 }

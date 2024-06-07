@@ -96,6 +96,73 @@ describe('KVStore', () => {
     assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Validator');
   });
 
+  test('Should properly create a transaction', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Operator',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'role',
+      'Validator',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'method',
+      'set'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'set'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'from',
+      data1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+  });
+
   test('Should properly update leader role', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
@@ -361,6 +428,50 @@ describe('KVStore', () => {
       data2.params.sender.toHexString(),
       'reputationNetwork',
       data1.params.sender.toHexString()
+    );
+  });
+
+  test('Should properly update KVStore entity', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Reputation Oracle',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Job Launcher',
+      BigInt.fromI32(11)
+    );
+    handleDataSaved(data1);
+
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'key',
+      'role'
+    );
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'value',
+      'Reputation Oracle'
+    );
+
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'key',
+      'role'
+    );
+    assert.fieldEquals(
+      'KVStore',
+      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      'value',
+      'Job Launcher'
     );
   });
 });
