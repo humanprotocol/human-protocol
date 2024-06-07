@@ -33,8 +33,7 @@ export class TransactionUtils {
    */
   public static async getTransaction(
     chainId: ChainId,
-    hash: string,
-    subgraphApiKey?: string
+    hash: string
   ): Promise<ITransaction> {
     if (!ethers.isHexString(hash)) {
       throw ErrorInvalidHahsProvided;
@@ -47,7 +46,7 @@ export class TransactionUtils {
 
     const { transaction } = await gqlFetch<{
       transaction: ITransaction;
-    }>(getSubgraphUrl(networkData, subgraphApiKey), GET_TRANSACTION_QUERY, {
+    }>(getSubgraphUrl(networkData), GET_TRANSACTION_QUERY, {
       hash: hash.toLowerCase(),
     });
 
@@ -102,8 +101,7 @@ export class TransactionUtils {
    * ```
    */
   public static async getTransactions(
-    filter: ITransactionsFilter,
-    subgraphApiKey?: string
+    filter: ITransactionsFilter
   ): Promise<ITransaction[]> {
     if (
       (!!filter.startDate || !!filter.endDate) &&
@@ -120,22 +118,18 @@ export class TransactionUtils {
       }
       const { transactions } = await gqlFetch<{
         transactions: ITransaction[];
-      }>(
-        getSubgraphUrl(networkData, subgraphApiKey),
-        GET_TRANSACTIONS_QUERY(filter),
-        {
-          fromAddress: filter?.fromAddress,
-          toAddress: filter?.toAddress,
-          startDate: filter?.startDate
-            ? Math.floor(filter?.startDate.getTime() / 1000)
-            : undefined,
-          endDate: filter.endDate
-            ? Math.floor(filter.endDate.getTime() / 1000)
-            : undefined,
-          startBlock: filter.startBlock ? filter.startBlock : undefined,
-          endBlock: filter.endBlock ? filter.endBlock : undefined,
-        }
-      );
+      }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
+        fromAddress: filter?.fromAddress,
+        toAddress: filter?.toAddress,
+        startDate: filter?.startDate
+          ? Math.floor(filter?.startDate.getTime() / 1000)
+          : undefined,
+        endDate: filter.endDate
+          ? Math.floor(filter.endDate.getTime() / 1000)
+          : undefined,
+        startBlock: filter.startBlock ? filter.startBlock : undefined,
+        endBlock: filter.endBlock ? filter.endBlock : undefined,
+      });
 
       if (!transactions) {
         continue;

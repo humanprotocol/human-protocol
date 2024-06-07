@@ -60,12 +60,12 @@ export const isValidUrl = (url: string) => {
  * @param {string} apiKey
  * @returns
  */
-export const getSubgraphUrl = (networkData: NetworkData, apiKey?: string) => {
+export const getSubgraphUrl = (networkData: NetworkData) => {
   let subgraphUrl = networkData.subgraphUrl;
-  if (apiKey) {
+  if (process.env.SUBGRAPH_API_KEY) {
     subgraphUrl = networkData.subgraphUrlApiKey.replace(
       SUBGRAPH_API_KEY_PLACEHOLDER,
-      apiKey
+      process.env.SUBGRAPH_API_KEY
     );
   } else {
     // eslint-disable-next-line no-console

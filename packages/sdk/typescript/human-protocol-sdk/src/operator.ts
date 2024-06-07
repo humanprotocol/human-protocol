@@ -43,8 +43,7 @@ export class OperatorUtils {
    */
   public static async getLeader(
     chainId: ChainId,
-    address: string,
-    subgraphApiKey?: string
+    address: string
   ): Promise<ILeader> {
     if (!ethers.isAddress(address)) {
       throw ErrorInvalidStakerAddressProvided;
@@ -58,7 +57,7 @@ export class OperatorUtils {
     try {
       const { leader } = await gqlFetch<{
         leader: ILeaderSubgraph;
-      }>(getSubgraphUrl(networkData, subgraphApiKey), GET_LEADER_QUERY, {
+      }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
         address: address.toLowerCase(),
       });
 
@@ -97,10 +96,7 @@ export class OperatorUtils {
    * const leaders = await OperatorUtils.getLeaders(filter);
    * ```
    */
-  public static async getLeaders(
-    filter: ILeadersFilter,
-    subgraphApiKey?: string
-  ): Promise<ILeader[]> {
+  public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
     try {
       let leaders_data: ILeader[] = [];
 
@@ -112,13 +108,9 @@ export class OperatorUtils {
 
       const { leaders } = await gqlFetch<{
         leaders: ILeaderSubgraph[];
-      }>(
-        getSubgraphUrl(networkData, subgraphApiKey),
-        GET_LEADERS_QUERY(filter),
-        {
-          role: filter?.role,
-        }
-      );
+      }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
+        role: filter?.role,
+      });
 
       if (!leaders) {
         return [];
@@ -163,8 +155,7 @@ export class OperatorUtils {
   public static async getReputationNetworkOperators(
     chainId: ChainId,
     address: string,
-    role?: string,
-    subgraphApiKey?: string
+    role?: string
   ): Promise<IOperator[]> {
     const networkData = NETWORKS[chainId];
 
@@ -174,14 +165,10 @@ export class OperatorUtils {
     try {
       const { reputationNetwork } = await gqlFetch<{
         reputationNetwork: IReputationNetworkSubgraph;
-      }>(
-        getSubgraphUrl(networkData, subgraphApiKey),
-        GET_REPUTATION_NETWORK_QUERY(role),
-        {
-          address: address.toLowerCase(),
-          role: role,
-        }
-      );
+      }>(getSubgraphUrl(networkData), GET_REPUTATION_NETWORK_QUERY(role), {
+        address: address.toLowerCase(),
+        role: role,
+      });
 
       return reputationNetwork.operators.map((operator) => {
         let jobTypes: string[] = [];
@@ -219,8 +206,7 @@ export class OperatorUtils {
    */
   public static async getRewards(
     chainId: ChainId,
-    slasherAddress: string,
-    subgraphApiKey?: string
+    slasherAddress: string
   ): Promise<IReward[]> {
     if (!ethers.isAddress(slasherAddress)) {
       throw ErrorInvalidSlasherAddressProvided;
@@ -234,13 +220,9 @@ export class OperatorUtils {
     try {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
-      }>(
-        getSubgraphUrl(networkData, subgraphApiKey),
-        GET_REWARD_ADDED_EVENTS_QUERY,
-        {
-          slasherAddress: slasherAddress.toLowerCase(),
-        }
-      );
+      }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
+        slasherAddress: slasherAddress.toLowerCase(),
+      });
 
       return rewardAddedEvents.map((reward: any) => {
         return {

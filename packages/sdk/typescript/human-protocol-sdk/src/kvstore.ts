@@ -497,8 +497,7 @@ export class KVStoreUtils {
    */
   public static async getKVStoreData(
     chainId: ChainId,
-    address: string,
-    subgraphApiKey?: string
+    address: string
   ): Promise<IKVStore[]> {
     const networkData = NETWORKS[chainId];
 
@@ -511,7 +510,7 @@ export class KVStoreUtils {
     }
 
     const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
-      getSubgraphUrl(networkData, subgraphApiKey),
+      getSubgraphUrl(networkData),
       GET_KVSTORE_BY_ADDRESS_QUERY(),
       { address: address.toLowerCase() }
     );

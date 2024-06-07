@@ -66,9 +66,9 @@ export class StatisticsClient {
    *
    * @param {NetworkData} networkData - The network information required to connect to the Statistics contract
    */
-  constructor(networkData: NetworkData, subgraphApiKey?: string) {
+  constructor(networkData: NetworkData) {
     this.networkData = networkData;
-    this.subgraphUrl = getSubgraphUrl(networkData, subgraphApiKey);
+    this.subgraphUrl = getSubgraphUrl(networkData);
   }
 
   /**
