@@ -61,8 +61,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
     kvstoreAddress: '0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BtC96WCK6ZpZ35v94MK6rZNiBzDEZYHFzDmhMYyZ369D',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -106,8 +107,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
     kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
     subgraphUrl:
-      'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/UMLaZHtLE9LxzDyvBLBgfWj4erzYzYMeGUbQtxtyMaE',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -120,8 +122,10 @@ export const NETWORKS: {
     stakingAddress: '0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C',
     rewardPoolAddress: '0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e',
     kvstoreAddress: '0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1',
-    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v2',
-    subgraphUrlApiKey: '',
+    subgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/JBJPC3YmRSNjyjRTTpazhhSX5CCZ4CeBx6ptRsM8PCBb',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -135,8 +139,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
     kvstoreAddress: '0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BnaC4CDqgdbGvcgM7KoZ6d7Yeebsm7NvLFrr61Lxg6Ao',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -151,8 +156,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
     kvstoreAddress: '0xbcB28672F826a50B03EE91B28145EAbddA73B2eD',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HHYwCHBvDrjckpNB4jbB8k63pSot6rGtBYLBygGji3vD',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -199,8 +205,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
     kvstoreAddress: '0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/moonbeam/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BH5Sm6exn76o5frV5VeCufChB43DCfMXCQsdtWt4AuQP',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
     oldFactoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
@@ -215,8 +222,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
     kvstoreAddress: '0xcC561f4482f4Ff051D2Dcc65c2cE1A0f291bbA46',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/moonbase-alpha/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/AmmRkJszUbjfUwHubcRkU6CfG1Q9psRWRbbHADVmsLjE',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -230,8 +238,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
     kvstoreAddress: '0x3aD4B091E054f192a822D1406f4535eAd38580e4',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/fuji/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CnZCDsWziQF3jNoqgQMkmJbF9frof5osM3hN5eUgyL5u',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji',
     oldFactoryAddress: '0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88',
@@ -246,8 +255,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
     kvstoreAddress: '0x9Bc7bff35B2Be2413708d48c3B0aEF5c43646728',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche-v2',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/avalanche/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FweDaDWZ6ZDcsA63wsjnWgdgw4aCbkiVQYMYvtcP5p2u',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche',
     oldFactoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
@@ -262,8 +272,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0xA9545C2530BD5bdb464d5E274F59ACceAa73eD86',
     kvstoreAddress: '0x938335006ea6F9Eb0e8020969cFF94404425e298',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/celo-alfajores/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/EGWCWuzBNkbypW8ipRKuyGwq8azoCy6LKKosGgSPMGRD',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -276,8 +287,10 @@ export const NETWORKS: {
     stakingAddress: '0x34cD3Bd6B16c559f321799b516dE61E12017fFd1',
     rewardPoolAddress: '0xb9344bAD98E3d26a4d83900922baf395a2Ec154c',
     kvstoreAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
-    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/celo',
-    subgraphUrlApiKey: '',
+    subgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/celo/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HTgMnYWGsdsw41o8dyph1bwhotuXh6va3L8r8DGgLjsA',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -291,8 +304,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0x7ABa5F75b2b530cB0c8927C86591c21dF44f06b6',
     kvstoreAddress: '0x6512d894cc3d3FE93Da9d0420430136fA889FaB9',
     subgraphUrl:
-      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/xlayer/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -306,8 +320,9 @@ export const NETWORKS: {
     rewardPoolAddress: '0x6daccd1f3a68945f8a7ac6d20260953f7a97fae4',
     kvstoreAddress: '0xdE8BE9E3C12E9F546309A429cd88d026a25EaF8C',
     subgraphUrl:
-      'https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93',
-    subgraphUrlApiKey: '',
+      'https://api.studio.thegraph.com/query/74256/xlayer-testnet/version/latest',
+    subgraphUrlApiKey:
+      'https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/9zd1LcywWjuSUtde4ofC8oyyzpawPwGUiPsvqTq247xk',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
