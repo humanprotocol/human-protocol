@@ -17,6 +17,15 @@ from human_protocol_sdk.constants import ARTIFACTS_FOLDER, SUBGRAPH_API_KEY_PLAC
 
 logger = logging.getLogger("human_protocol_sdk.utils")
 
+# Try to load environment variables from the .env file if python-dotenv is available
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    print("python-dotenv is not installed, skipping .env file loading")
+    pass
+
 
 def with_retry(fn, retries=3, delay=5, backoff=2):
     """Retry a function
