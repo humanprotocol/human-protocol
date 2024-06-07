@@ -32,10 +32,15 @@ export interface ILeader {
   publicKey?: string;
   webhookUrl?: string;
   url?: string;
+  jobTypes?: string[];
+}
+
+export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+  jobTypes?: string;
 }
 
 export interface ILeadersFilter {
-  networks: ChainId[];
+  chainId: ChainId;
   role?: string;
 }
 
@@ -45,9 +50,20 @@ export interface IReputationNetwork {
   operators: IOperator[];
 }
 
+export interface IReputationNetworkSubgraph
+  extends Omit<IReputationNetwork, 'operators'> {
+  operators: IOperatorSubgraph[];
+}
+
 export interface IOperator {
   address: string;
   role?: string;
+  url?: string;
+  jobTypes?: string[];
+}
+
+export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {
+  jobTypes?: string;
 }
 
 export interface IEscrowsFilter {
@@ -91,4 +107,29 @@ export interface IPayoutFilter {
   recipient?: string;
   from?: Date;
   to?: Date;
+}
+
+export interface IKVStore {
+  key: string;
+  value: string;
+}
+
+export interface ITransaction {
+  block: bigint;
+  hash: string;
+  from: string;
+  to: string;
+  timestamp: bigint;
+  value: string;
+  method: string;
+}
+
+export interface ITransactionsFilter {
+  networks: ChainId[];
+  startBlock?: number;
+  endBlock?: number;
+  startDate?: Date;
+  endDate?: Date;
+  fromAddress?: string;
+  toAddress?: string;
 }

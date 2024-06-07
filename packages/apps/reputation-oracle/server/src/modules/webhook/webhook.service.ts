@@ -1,24 +1,26 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { WebhookIncomingDto } from './webhook.dto';
+import { WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
 import { EventType, WebhookStatus } from '../../common/enums';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
+import { firstValueFrom } from 'rxjs';
+import { signMessage } from '../../common/utils/signature';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { HttpService } from '@nestjs/axios';
+import { CaseConverter } from '../../common/utils/case-converter';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
   constructor(
+    private readonly httpService: HttpService,
     private readonly webhookRepository: WebhookRepository,
-    public readonly configService: ConfigService,
+    public readonly serverConfigService: ServerConfigService,
+    public readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   /**
@@ -27,27 +29,25 @@ export class WebhookService {
    * @returns {Promise<void>} - Return the boolean result of the method.
    * @throws {Error} - An error object if an error occurred.
    */
-  public async createIncomingWebhook(dto: WebhookIncomingDto): Promise<void> {
-    try {
-      if (dto.eventType !== EventType.TASK_COMPLETED) {
-        this.logger.log(ErrorWebhook.InvalidEventType, WebhookService.name);
-        throw new BadRequestException(ErrorWebhook.InvalidEventType);
-      }
+  public async createIncomingWebhook(dto: WebhookDto): Promise<void> {
+    if (dto.eventType !== EventType.TASK_COMPLETED) {
+      throw new ControlledError(
+        ErrorWebhook.InvalidEventType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-      const webhookEntity = await this.webhookRepository.create({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
-        status: WebhookStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      });
+    let webhookEntity = new WebhookIncomingEntity();
+    webhookEntity.chainId = dto.chainId;
+    webhookEntity.escrowAddress = dto.escrowAddress;
+    webhookEntity.status = WebhookStatus.PENDING;
+    webhookEntity.waitUntil = new Date();
+    webhookEntity.retriesCount = 0;
 
-      if (!webhookEntity) {
-        this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
-        throw new NotFoundException(ErrorWebhook.NotCreated);
-      }
-    } catch (e) {
-      throw new Error(e);
+    webhookEntity = await this.webhookRepository.createUnique(webhookEntity);
+
+    if (!webhookEntity) {
+      throw new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -61,15 +61,32 @@ export class WebhookService {
   public async handleWebhookError(
     webhookEntity: WebhookIncomingEntity,
   ): Promise<void> {
-    if (
-      webhookEntity.retriesCount >=
-      this.configService.get(ConfigNames.MAX_RETRY_COUNT)
-    ) {
+    if (webhookEntity.retriesCount >= this.serverConfigService.maxRetryCount) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {
       webhookEntity.waitUntil = new Date();
       webhookEntity.retriesCount = webhookEntity.retriesCount + 1;
     }
     this.webhookRepository.updateOne(webhookEntity);
+  }
+
+  public async sendWebhook(
+    webhookUrl: string,
+    webhookBody: WebhookDto,
+  ): Promise<void> {
+    const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
+    const signedBody = await signMessage(
+      snake_case_body,
+      this.web3ConfigService.privateKey,
+    );
+    const { status } = await firstValueFrom(
+      await this.httpService.post(webhookUrl, snake_case_body, {
+        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+      }),
+    );
+
+    if (status !== HttpStatus.CREATED) {
+      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
+    }
   }
 }

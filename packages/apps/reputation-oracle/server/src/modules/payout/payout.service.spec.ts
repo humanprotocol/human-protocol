@@ -14,14 +14,16 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { JobRequestType } from '../../common/enums';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
+import { ConfigModule, registerAs } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
 import { createMock } from '@golevelup/ts-jest';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ErrorResults } from '../../common/constants/errors';
+import { CvatAnnotationMeta } from '../../common/dto/result';
+import { HttpStatus } from '@nestjs/common';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -43,17 +45,6 @@ describe('PayoutService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case ConfigNames.REPUTATION_LEVEL_LOW:
-            return 300;
-          case ConfigNames.REPUTATION_LEVEL_HIGH:
-            return 700;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -78,10 +69,6 @@ describe('PayoutService', () => {
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
         PayoutService,
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
       ],
     }).compile();
 
@@ -95,6 +82,12 @@ describe('PayoutService', () => {
         calculateResults: jest.fn(),
       },
       [JobRequestType.IMAGE_POINTS]: {
+        calculateResults: jest.fn(),
+      },
+      [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+        calculateResults: jest.fn(),
+      },
+      [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
         calculateResults: jest.fn(),
       },
     };
@@ -235,7 +228,12 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.processFortune(manifest, chainId, escrowAddress),
-      ).rejects.toThrow(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
@@ -263,19 +261,23 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const results = {
+      const results: CvatAnnotationMeta = {
         jobs: [
           {
-            id: 1,
             job_id: 1,
-            annotator_wallet_address: MOCK_ADDRESS,
-            annotation_quality: 0.96,
+            final_result_id: 3,
           },
         ],
         results: [
           {
             id: 2,
-            job_id: 2,
+            job_id: 1,
+            annotator_wallet_address: MOCK_ADDRESS,
+            annotation_quality: 0.6,
+          },
+          {
+            id: 3,
+            job_id: 1,
             annotator_wallet_address: MOCK_ADDRESS,
             annotation_quality: 0.96,
           },
@@ -299,6 +301,8 @@ describe('PayoutService', () => {
         url: expect.any(String),
         hash: expect.any(String),
       });
+      expect(result.recipients.length).toEqual(1);
+      expect(result.amounts.length).toEqual(1);
     });
   });
 });

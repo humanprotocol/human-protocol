@@ -1,18 +1,20 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
+import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { WebhookService } from '../webhook/webhook.service';
-import { WebhookStatus } from '../../common/enums/webhook';
+import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import { EscrowClient } from '@human-protocol/sdk';
+import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
+import { WebhookDto } from '../webhook/webhook.dto';
+import { ControlledError } from '../../common/errors/controlled';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -68,25 +70,24 @@ export class CronJobService {
    * Throws an error if the cron job entity is already marked as completed.
    * @param cronJobEntity The cron job entity to mark as completed.
    * @returns {Promise<CronJobEntity>} A Promise containing the updated cron job entity.
-   * @throws {BadRequestException} if the cron job is already completed.
+   * @throws {ControlledError} if the cron job is already completed.
    */
   public async completeCronJob(
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.Completed);
+      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
     }
 
     cronJobEntity.completedAt = new Date();
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,
@@ -130,11 +131,11 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('1-59/2 * * * *')
   /**
    * Process a paid webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPaidWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPaidWebhook,
@@ -167,6 +168,37 @@ export class CronJobService {
           await escrowClient.complete(escrowAddress, {
             gasPrice: await this.web3Service.calculateGasPrice(chainId),
           });
+
+          const webhookUrls = [
+            (
+              await OperatorUtils.getLeader(
+                chainId,
+                await escrowClient.getJobLauncherAddress(escrowAddress),
+              )
+            ).webhookUrl,
+            // Temporarily disable sending webhook to Recording Oracle
+            // (
+            //   await OperatorUtils.getLeader(
+            //     chainId,
+            //     await escrowClient.getRecordingOracleAddress(escrowAddress),
+            //   )
+            // ).webhookUrl,
+          ];
+          const webhookBody: WebhookDto = {
+            chainId,
+            escrowAddress,
+            eventType: EventType.ESCROW_COMPLETED,
+          };
+          for (const webhookUrl of webhookUrls) {
+            if (!webhookUrl) {
+              throw new ControlledError(
+                ErrorWebhook.UrlNotFound,
+                HttpStatus.NOT_FOUND,
+              );
+            }
+
+            await this.webhookService.sendWebhook(webhookUrl, webhookBody);
+          }
         } catch (err) {
           this.logger.error(`Error sending webhook: ${err.message}`);
           await this.webhookService.handleWebhookError(webhookEntity);

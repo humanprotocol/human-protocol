@@ -6,11 +6,11 @@ import {
   IsPositive,
   IsString,
   IsUrl,
-  IsDate,
   IsDateString,
   IsOptional,
   IsObject,
   IsNumberString,
+  IsIn,
   Min,
   Max,
   IsNotEmpty,
@@ -25,59 +25,49 @@ import { ChainId } from '@human-protocol/sdk';
 import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  JobCurrency,
   JobRequestType,
+  JobSortField,
   JobStatus,
+  JobStatusFilter,
   WorkerBrowser,
   WorkerLanguage,
   WorkerLocation,
 } from '../../common/enums/job';
+import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
-export class JobCreateDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  @IsNotEmpty()
-  public chainId: ChainId;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public userId: number;
-
-  @ApiProperty()
-  @IsUrl()
-  @IsNotEmpty()
-  public manifestUrl: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  public manifestHash: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fee: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
-
-  @ApiProperty({ enum: JobStatus })
-  @IsEnum(JobStatus)
-  @IsNotEmpty()
-  public status: JobStatus;
-
-  @ApiProperty()
-  @IsDate()
-  public waitUntil: Date;
-}
+import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
   @IsEnum(ChainId)
   @IsOptional()
   public chainId?: ChainId;
+}
+
+export class JobQuickLaunchDto extends JobDto {
+  @ApiProperty({
+    description: 'Request type',
+    name: 'request_type',
+    enum: JobRequestType,
+  })
+  @IsEnum(JobRequestType)
+  public requestType: JobRequestType;
+
+  @ApiProperty({ name: 'manifest_url' })
+  @IsUrl()
+  @IsNotEmpty()
+  public manifestUrl: string;
+
+  @ApiProperty({ name: 'manifest_hash' })
+  @IsString()
+  @IsOptional()
+  public manifestHash: string;
+
+  @ApiProperty({ name: 'fund_amount' })
+  @IsNumber()
+  @IsPositive()
+  public fundAmount: number;
 }
 
 export class JobFortuneDto extends JobDto {
@@ -98,6 +88,10 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class StorageDataDto {
@@ -119,6 +113,22 @@ export class StorageDataDto {
   public path: string;
 }
 
+export class CvatDataDto {
+  @ApiProperty()
+  @IsObject()
+  public dataset: StorageDataDto;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  public points?: StorageDataDto;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  public boxes?: StorageDataDto;
+}
+
 export class JobCvatDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
@@ -126,12 +136,12 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty()
   @IsObject()
-  public data: StorageDataDto;
+  public data: CvatDataDto;
 
   @ApiProperty()
   @IsArray()
   @ArrayMinSize(1)
-  public labels: string[];
+  public labels: Label[];
 
   @ApiProperty({ name: 'min_quality' })
   @IsNumber()
@@ -154,6 +164,10 @@ export class JobCvatDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnum(JobCurrency)
+  public currency: JobCurrency;
 }
 
 export class JobCancelDto {
@@ -166,20 +180,6 @@ export class JobIdDto {
   @ApiProperty()
   @IsNumberString()
   public id: number;
-}
-
-export class JobUpdateDto {
-  @ApiPropertyOptional({ enum: JobStatus })
-  @IsEnum(JobStatus)
-  public status: JobStatus;
-}
-
-export class JobUpdateDataDto extends JobUpdateDto {
-  @IsNumber()
-  public retriesCount: number;
-
-  @IsDate()
-  public waitUntil: Date;
 }
 
 export class StakingDetails {
@@ -357,75 +357,75 @@ export class FortuneManifestDto {
 }
 
 export class CvatData {
-  @ApiProperty()
-  @IsString()
+  @IsUrl()
   public data_url: string;
+
+  @IsUrl()
+  @IsOptional()
+  public points_url?: string;
+
+  @IsUrl()
+  @IsOptional()
+  public boxes_url?: string;
 }
 
 export class Label {
   @ApiProperty()
   @IsString()
   public name: string;
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public nodes?: string[];
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public joints?: string[];
 }
 
 export class Annotation {
-  @ApiProperty()
   @IsArray()
   public labels: Label[];
 
-  @ApiProperty()
   @IsString()
   public description: string;
 
-  @ApiProperty()
   @IsString()
   public user_guide: string;
 
-  @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
   public type: JobRequestType;
 
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public job_size: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public max_time: number;
 }
 
 export class Validation {
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public min_quality: number;
 
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public val_size: number;
 
-  @ApiProperty()
   @IsString()
   public gt_url: string;
 }
 
 export class CvatManifestDto {
-  @ApiProperty()
   @IsObject()
   public data: CvatData;
 
-  @ApiProperty()
   @IsObject()
   public annotation: Annotation;
 
-  @ApiProperty()
   @IsObject()
   public validation: Validation;
 
-  @ApiProperty()
   @IsString()
   public job_bounty: string;
 }
@@ -447,24 +447,6 @@ export class FortuneFinalResultDto {
   public error?: string;
 }
 
-export class CvatFinalResultDto {
-  @ApiProperty()
-  @IsString()
-  public url: string;
-
-  @ApiProperty()
-  @IsString()
-  public final_answer: string;
-
-  @ApiProperty()
-  @IsArray()
-  public correct: string[];
-
-  @ApiProperty()
-  @IsArray()
-  public wrong: string[];
-}
-
 export class JobListDto {
   @ApiProperty({ name: 'job_id' })
   public jobId: number;
@@ -480,6 +462,40 @@ export class JobListDto {
 
   @ApiProperty()
   public status: JobStatus;
+}
+export class GetJobsDto extends PageOptionsDto {
+  @ApiPropertyOptional({
+    name: 'sort_field',
+    enum: JobSortField,
+    default: JobSortField.CREATED_AT,
+  })
+  @IsOptional()
+  @IsEnum(JobSortField)
+  sortField?: JobSortField = JobSortField.CREATED_AT;
+
+  @ApiPropertyOptional({
+    name: 'chain_id',
+    enum: ChainId,
+    type: [Number],
+    isArray: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value
+      ? (Array.isArray(value) ? value : [value]).map(
+          (v) => Number(v) as ChainId,
+        )
+      : value,
+  )
+  @IsIn(Object.values(ChainId).filter((value) => typeof value === 'number'), {
+    each: true,
+  })
+  chainId?: ChainId[];
+
+  @ApiPropertyOptional({ enum: JobStatusFilter })
+  @IsEnum(JobStatusFilter)
+  @IsOptional()
+  status?: JobStatusFilter;
 }
 
 export class EscrowCancelDto {
@@ -551,7 +567,7 @@ export class JobCaptchaAnnotationsDto {
 export class JobCaptchaDto extends JobDto {
   @ApiProperty()
   @IsObject()
-  public data: StorageDataDto;
+  data: StorageDataDto;
 
   @ApiProperty({ name: 'accuracy_target' })
   @IsNumber()
@@ -577,6 +593,7 @@ export class JobCaptchaDto extends JobDto {
   public maxRequests: number;
 
   @ApiProperty()
+  @IsDefined()
   @IsObject()
   //@ValidateNested()
   //@Type(() => JobCaptchaAdvancedDto)
@@ -746,4 +763,8 @@ class TaskData {
   datapoint_text?: DatapointText;
 }
 
-export type CreateJob = JobFortuneDto | JobCvatDto | JobCaptchaDto;
+export type CreateJob =
+  | JobQuickLaunchDto
+  | JobFortuneDto
+  | JobCvatDto
+  | JobCaptchaDto;

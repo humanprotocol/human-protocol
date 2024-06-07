@@ -1,41 +1,39 @@
-import { Test } from '@nestjs/testing';
-import { HttpService } from '@nestjs/axios';
-import { JobService } from './job.service';
-import { Web3Service } from '../web3/web3.service';
-import { ErrorJob } from '../../common/constants/errors';
+import { Web3ConfigService } from '@/common/config/web3-config.service';
 import {
   ChainId,
+  EncryptionUtils,
   EscrowClient,
   EscrowStatus,
   KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { JobRequestType, SolutionError } from '../../common/enums/job';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { of } from 'rxjs';
 import {
   MOCK_ADDRESS,
-  MOCK_ENCRYPTION_PASSPHRASE,
-  MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_URL,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
   MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
   MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
-import { ConfigModule, registerAs } from '@nestjs/config';
-import { IManifest, ISolution } from '../../common/interfaces/job';
-import { of } from 'rxjs';
-import { StorageService } from '../storage/storage.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { ErrorJob } from '../../common/constants/errors';
+import { JobRequestType, SolutionError } from '../../common/enums/job';
+import { EventType } from '../../common/enums/webhook';
+import { IManifest, ISolution } from '../../common/interfaces/job';
 import { signMessage } from '../../common/utils/signature';
-import { EventType } from '@/common/enums/webhook';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from '../webhook/webhook.dto';
+import { JobService } from './job.service';
 
 jest.mock('minio', () => {
   class Client {
@@ -69,12 +67,8 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
+      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
     })),
-  },
-  OperatorUtils: {
-    getLeader: jest.fn().mockResolvedValue({
-      publicKey: 'public-key',
-    }),
   },
   EncryptionUtils: {
     encrypt: jest.fn().mockResolvedValue('encrypted'),
@@ -84,6 +78,10 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('JobService', () => {
   let jobService: JobService;
 
+  jest
+    .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
+    .mockReturnValue(MOCK_WEB3_PRIVATE_KEY);
+
   const signerMock = {
     address: MOCK_ADDRESS,
     getAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
@@ -92,37 +90,17 @@ describe('JobService', () => {
 
   const httpServicePostMock = jest
     .fn()
-    .mockReturnValue(of({ status: 200, data: {} }));
+    .mockReturnValue(of({ status: 201, data: {} }));
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('web3', () => ({
-            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-            encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
-            encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
-          })),
-        ),
-      ],
       providers: [
         JobService,
         StorageService,
+        ConfigService,
+        Web3ConfigService,
+        S3ConfigService,
+        PGPConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -234,6 +212,7 @@ describe('JobService', () => {
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValue(JSON.stringify(invalidManifest));
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
 
       const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -323,6 +302,7 @@ describe('JobService', () => {
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest
           .fn()
@@ -330,6 +310,7 @@ describe('JobService', () => {
         getIntermediateResultsUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/results'),
+        storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -376,6 +357,7 @@ describe('JobService', () => {
     it('should return solution are recorded when one solution is sent', async () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest
           .fn()
@@ -424,21 +406,29 @@ describe('JobService', () => {
       };
 
       const result = await jobService.processJobSolution(jobSolution);
-      expect(result).toEqual('Solution are recorded.');
+      expect(result).toEqual('Solutions recorded.');
       expect(httpServicePostMock).not.toHaveBeenCalled();
     });
 
     it('should call send webhook method when all solutions are recorded', async () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+        getIntermediateResultsUrl: jest
+          .fn()
+          .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+
+      const kvStoreClient = {
+        get: jest.fn().mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL),
+      };
+      (KVStoreClient.build as jest.Mock).mockResolvedValue(kvStoreClient);
 
       const manifest: IManifest = {
         submissionsRequired: 2,
@@ -483,7 +473,7 @@ describe('JobService', () => {
       const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
-        event_type: EventType.ESCROW_RECORDED,
+        event_type: EventType.TASK_COMPLETED,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -504,11 +494,14 @@ describe('JobService', () => {
   it('should take one solution more when one is marked as invalid', async () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
@@ -572,7 +565,7 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.ESCROW_RECORDED,
+      event_type: EventType.TASK_COMPLETED,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -593,16 +586,20 @@ describe('JobService', () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     (KVStoreClient.build as jest.Mock).mockResolvedValue({
       get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
     });
 
     const manifest: IManifest = {
@@ -657,7 +654,7 @@ describe('JobService', () => {
         ],
       },
     };
-    expect(result).toEqual('Solution are recorded.');
+    expect(result).toEqual('Solutions recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
       MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
@@ -673,16 +670,20 @@ describe('JobService', () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifestUrl: jest
         .fn()
         .mockResolvedValue('http://example.com/manifest'),
-      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      getIntermediateResultsUrl: jest
+        .fn()
+        .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     (KVStoreClient.build as jest.Mock).mockResolvedValue({
       get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
     });
 
     const manifest: IManifest = {
@@ -736,7 +737,7 @@ describe('JobService', () => {
       },
     };
     const result = await jobService.processJobSolution(jobSolution);
-    expect(result).toEqual('Solution are recorded.');
+    expect(result).toEqual('Solutions recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
       MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,

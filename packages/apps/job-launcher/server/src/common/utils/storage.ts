@@ -1,49 +1,70 @@
-import { BadRequestException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ErrorBucket } from '../constants/errors';
 import { JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { parseString } from 'xml2js';
+import { ControlledError } from '../errors/controlled';
 
 export function generateBucketUrl(
   storageData: StorageDataDto,
   jobType: JobRequestType,
-  addPath = true,
-): string {
-  console.log(1111, storageData);
+): URL {
   if (
     (jobType === JobRequestType.IMAGE_BOXES ||
-      jobType === JobRequestType.IMAGE_POINTS) &&
-    storageData.provider != StorageProviders.AWS
+      jobType === JobRequestType.IMAGE_POINTS ||
+      jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
+      jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
+    storageData.provider != StorageProviders.AWS &&
+    storageData.provider != StorageProviders.LOCAL
   ) {
-    throw new BadRequestException(ErrorBucket.InvalidProvider);
+    throw new ControlledError(
+      ErrorBucket.InvalidProvider,
+      HttpStatus.BAD_REQUEST,
+    );
   }
   if (!storageData.bucketName) {
-    console.log(33333, storageData.bucketName);
-    throw new BadRequestException(ErrorBucket.EmptyBucket);
+    throw new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST);
   }
   switch (storageData.provider) {
     case StorageProviders.AWS:
       if (!storageData.region) {
-        throw new BadRequestException(ErrorBucket.EmptyRegion);
+        throw new ControlledError(
+          ErrorBucket.EmptyRegion,
+          HttpStatus.BAD_REQUEST,
+        );
       }
       if (!isRegion(storageData.region)) {
-        throw new BadRequestException(ErrorBucket.InvalidRegion);
+        throw new ControlledError(
+          ErrorBucket.InvalidRegion,
+          HttpStatus.BAD_REQUEST,
+        );
       }
-      return `https://${storageData.bucketName}.s3.${
-        storageData.region
-      }.amazonaws.com${
-        storageData.path && addPath
-          ? `/${storageData.path.replace(/\/$/, '')}`
-          : ''
-      }`;
+      return new URL(
+        `https://${storageData.bucketName}.s3.${
+          storageData.region
+        }.amazonaws.com${
+          storageData.path ? `/${storageData.path.replace(/\/$/, '')}` : ''
+        }`,
+      );
     case StorageProviders.GCS:
-      return `https://${storageData.bucketName}.storage.googleapis.com${
-        storageData.path && addPath ? `/${storageData.path}` : ''
-      }`;
+      return new URL(
+        `https://${storageData.bucketName}.storage.googleapis.com${
+          storageData.path ? `/${storageData.path}` : ''
+        }`,
+      );
+    case StorageProviders.LOCAL:
+      return new URL(
+        `http://${process.env.S3_ENDPOINT}:${process.env.S3_PORT}/${storageData.bucketName}${
+          storageData.path ? `/${storageData.path}` : ''
+        }`,
+      );
     default:
-      throw new BadRequestException(ErrorBucket.InvalidProvider);
+      throw new ControlledError(
+        ErrorBucket.InvalidProvider,
+        HttpStatus.BAD_REQUEST,
+      );
   }
 }
 
@@ -51,28 +72,36 @@ function isRegion(value: string): value is AWSRegions {
   return Object.values(AWSRegions).includes(value as AWSRegions);
 }
 
-export async function listObjectsInBucket(
-  storageData: StorageDataDto,
-  jobType: JobRequestType,
-): Promise<string[]> {
+export async function listObjectsInBucket(url: URL): Promise<string[]> {
   return new Promise(async (resolve, reject) => {
     try {
       let objects: string[] = [];
-      const url = generateBucketUrl(storageData, jobType, false);
       let nextContinuationToken: string | undefined;
-
+      const baseUrl = `${url.protocol}//${url.host}`;
       do {
-        const response = await axios.get(
-          `${url}?list-type=2${
+        let requestOptions = `${baseUrl}`;
+
+        if (url.hostname !== 'localhost') {
+          requestOptions += `?list-type=2${
             nextContinuationToken
               ? `&continuation-token=${encodeURIComponent(
                   nextContinuationToken,
                 )}`
               : ''
-          }${storageData.path ? `&prefix=${storageData.path}` : ''}`,
-        );
+          }${url.pathname ? `&prefix=${url.pathname}` : ''}`;
+        } else {
+          requestOptions += `${url.pathname ? `${url.pathname}` : ''}?list-type=2${
+            nextContinuationToken
+              ? `&continuation-token=${encodeURIComponent(
+                  nextContinuationToken,
+                )}`
+              : ''
+          }`;
+        }
 
-        if (response.status === 200 && response.data) {
+        const response = await axios.get(requestOptions);
+
+        if (response.status === HttpStatus.OK && response.data) {
           parseString(response.data, (err: any, result: any) => {
             if (err) {
               reject(err);

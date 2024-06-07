@@ -19,7 +19,8 @@ fragment LeaderFields on Leader {
     fee
     publicKey
     webhookUrl
-    url
+    url,
+    jobTypes
 }
 """
 
@@ -69,7 +70,9 @@ query getReputationNetwork(
       }} 
     ) {{
       address,
-      role
+      role,
+      url,
+      jobTypes
     }}
   }}
 }}

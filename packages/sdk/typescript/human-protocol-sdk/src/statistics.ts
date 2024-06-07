@@ -54,7 +54,7 @@ import { throwError } from './utils';
  * ```ts
  * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
  *
- * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+ * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
  * ```
  */
 export class StatisticsClient {
@@ -109,7 +109,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * const escrowStatistics = await statisticsClient.getEscrowStatistics();
    * const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
@@ -184,7 +184,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * const workerStatistics = await statisticsClient.getWorkerStatistics();
    * const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
@@ -252,7 +252,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * console.log(
    *   'Payment statistics:',
@@ -355,7 +355,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * const hmtStatistics = await statisticsClient.getHMTStatistics();
    *

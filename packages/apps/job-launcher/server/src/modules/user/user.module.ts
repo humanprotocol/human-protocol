@@ -7,6 +7,7 @@ import { UserEntity } from './user.entity';
 import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 import { PaymentModule } from '../payment/payment.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [

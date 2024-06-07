@@ -23,6 +23,11 @@ import { WebhookService } from './webhook.service';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { JobService } from '../job/job.service';
+import { WebhookDataDto } from './webhook.dto';
+import { HttpStatus } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -38,6 +43,7 @@ describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
     web3Service: Web3Service,
+    jobService: JobService,
     httpService: HttpService;
 
   const signerMock = {
@@ -64,6 +70,8 @@ describe('WebhookService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,
+        ServerConfigService,
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -87,6 +95,7 @@ describe('WebhookService', () => {
     webhookRepository = moduleRef.get(WebhookRepository);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
+    jobService = moduleRef.get<JobService>(JobService);
   });
 
   afterEach(() => {
@@ -111,7 +120,9 @@ describe('WebhookService', () => {
         .mockResolvedValue('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.UrlNotFound);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.UrlNotFound, HttpStatus.NOT_FOUND),
+      );
     });
 
     it('should handle error if any exception is thrown', async () => {
@@ -125,7 +136,9 @@ describe('WebhookService', () => {
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.NotSent);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND),
+      );
     });
 
     it('should successfully process a fortune webhook', async () => {
@@ -134,7 +147,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -159,7 +172,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -185,7 +198,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -211,7 +224,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -288,6 +301,59 @@ describe('WebhookService', () => {
       expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
       expect(webhookEntity.retriesCount).toBe(1);
       expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('handleWebhook', () => {
+    const chainId = 1;
+    const escrowAddress = '0x1234567890123456789012345678901234567890';
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should handle an incoming escrow completed webhook', async () => {
+      const webhook: WebhookDataDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_COMPLETED,
+      };
+
+      jest.spyOn(jobService, 'completeJob');
+
+      expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
+
+      expect(jobService.completeJob).toHaveBeenCalledWith(webhook);
+    });
+
+    it('should handle an escrow failed webhook', async () => {
+      const webhook: WebhookDataDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_FAILED,
+        eventData: { reason: 'Manifest cannot be downloaded' },
+      };
+
+      jest.spyOn(jobService, 'escrowFailedWebhook');
+
+      expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
+
+      expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(webhook);
+    });
+
+    it('should return an error when the event type is invalid', async () => {
+      const webhook: WebhookDataDto = {
+        chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_CANCELED,
+      };
+
+      await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
+        new ControlledError(
+          'Invalid webhook event type: escrow_canceled',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 });

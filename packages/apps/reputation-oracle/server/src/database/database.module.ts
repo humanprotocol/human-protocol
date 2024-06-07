@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -8,26 +8,32 @@ import { NS } from '../common/constants';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
-import { AuthEntity } from '../modules/auth/auth.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
 import { KycEntity } from '../modules/kyc/kyc.entity';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
-import { ConfigNames } from '../common/config';
+import { DatabaseConfigService } from '../common/config/database-config.service';
+import { ServerConfigService } from '../common/config/server-config.service';
+import { SiteKeyEntity } from '../modules/user/site-key.entity';
+import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
+import { CredentialEntity } from '../modules/credentials/credential.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [TypeOrmLoggerModule, ConfigModule],
-      inject: [TypeOrmLoggerService, ConfigService],
+      inject: [
+        TypeOrmLoggerService,
+        DatabaseConfigService,
+        ServerConfigService,
+      ],
       useFactory: (
         typeOrmLoggerService: TypeOrmLoggerService,
-        configService: ConfigService,
+        databaseConfigService: DatabaseConfigService,
+        serverConfigService: ServerConfigService,
       ) => {
-        const loggerOptions = configService
-          .get<string>(ConfigNames.POSTGRES_LOGGING)
-          ?.split(', ');
+        const loggerOptions = databaseConfigService.logging?.split(', ');
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
@@ -39,11 +45,13 @@ import { ConfigNames } from '../common/config';
           entities: [
             WebhookIncomingEntity,
             ReputationEntity,
-            AuthEntity,
+            CredentialEntity,
+            CredentialValidationEntity,
             TokenEntity,
             UserEntity,
             KycEntity,
             CronJobEntity,
+            SiteKeyEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
@@ -59,30 +67,15 @@ import { ConfigNames } from '../common/config';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
-          host: configService.get<string>(
-            ConfigNames.POSTGRES_HOST,
-            'localhost',
-          ),
-          port: configService.get<number>(ConfigNames.POSTGRES_PORT, 5432),
-          username: configService.get<string>(
-            ConfigNames.POSTGRES_USER,
-            'operator',
-          ),
-          password: configService.get<string>(
-            ConfigNames.POSTGRES_PASSWORD,
-            'qwerty',
-          ),
-          database: configService.get<string>(
-            ConfigNames.POSTGRES_DATABASE,
-            'reputation-oracle',
-          ),
-          keepConnectionAlive:
-            configService.get<string>(ConfigNames.NODE_ENV) === 'test',
+          url: databaseConfigService.url,
+          host: databaseConfigService.host,
+          port: databaseConfigService.port,
+          username: databaseConfigService.user,
+          password: databaseConfigService.password,
+          database: databaseConfigService.database,
+          keepConnectionAlive: serverConfigService.nodeEnv === 'test',
           migrationsRun: false,
-          ssl:
-            configService
-              .get<string>(ConfigNames.POSTGRES_SSL)
-              ?.toLowerCase() === 'true',
+          ssl: databaseConfigService.ssl,
         };
       },
     }),

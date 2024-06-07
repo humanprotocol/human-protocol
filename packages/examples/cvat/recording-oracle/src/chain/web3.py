@@ -21,9 +21,9 @@ def get_web3(chain_id: Networks):
             )
             w3.eth.default_account = gas_payer.address
             return w3
-        case Config.polygon_mumbai.chain_id:
-            w3 = Web3(HTTPProvider(Config.polygon_mumbai.rpc_api))
-            gas_payer = w3.eth.account.from_key(Config.polygon_mumbai.private_key)
+        case Config.polygon_amoy.chain_id:
+            w3 = Web3(HTTPProvider(Config.polygon_amoy.rpc_api))
+            gas_payer = w3.eth.account.from_key(Config.polygon_amoy.private_key)
             w3.middleware_onion.add(
                 construct_sign_and_send_raw_middleware(gas_payer),
                 "construct_sign_and_send_raw_middleware",
@@ -53,8 +53,8 @@ def sign_message(chain_id: Networks, message) -> str:
     match chain_id:
         case Config.polygon_mainnet.chain_id:
             private_key = Config.polygon_mainnet.private_key
-        case Config.polygon_mumbai.chain_id:
-            private_key = Config.polygon_mumbai.private_key
+        case Config.polygon_amoy.chain_id:
+            private_key = Config.polygon_amoy.private_key
         case Config.localhost.chain_id:
             private_key = Config.localhost.private_key
         case _:

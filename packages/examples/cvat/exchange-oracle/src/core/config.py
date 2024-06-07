@@ -1,19 +1,19 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
 """ Project configuration from env vars """
 import os
+from typing import ClassVar, Optional
 
+from attrs.converters import to_bool
 from dotenv import load_dotenv
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
-load_dotenv()
+dotenv_path = os.getenv("DOTENV_PATH", None)
+if dotenv_path and not os.path.exists(dotenv_path):
+    raise FileNotFoundError(dotenv_path)
 
-
-def str_to_bool(val: str) -> bool:
-    from distutils.util import strtobool
-
-    return val is True or strtobool(val)
+load_dotenv(dotenv_path)
 
 
 class PostgresConfig:
@@ -36,11 +36,11 @@ class PolygonMainnetConfig:
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
 
-class PolygonMumbaiConfig:
-    chain_id = 80001
-    rpc_api = os.environ.get("POLYGON_MUMBAI_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_MUMBAI_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_MUMBAI_ADDR")
+class PolygonAmoyConfig:
+    chain_id = 80002
+    rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
+    private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
+    addr = os.environ.get("POLYGON_AMOY_ADDR")
 
 
 class LocalhostConfig:
@@ -50,9 +50,11 @@ class LocalhostConfig:
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get("LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = os.environ.get("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     job_launcher_url = os.environ.get("LOCALHOST_JOB_LAUNCHER_URL")
+
+    recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
 
 
@@ -70,13 +72,38 @@ class CronConfig:
     track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
     track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 30))
-    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+    track_completed_tasks_chunk_size = os.environ.get("TRACK_COMPLETED_TASKS_CHUNK_SIZE", 20)
     track_creating_tasks_int = int(os.environ.get("TRACK_CREATING_TASKS_INT", 300))
+    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
     track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
-    retrieve_annotations_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60))
-    retrieve_annotations_chunk_size = os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5)
+    track_completed_escrows_int = int(
+        # backward compatibility
+        os.environ.get(
+            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
+        )
+    )
+    track_completed_escrows_chunk_size = os.environ.get(
+        # backward compatibility
+        "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
+        os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
+    )
+    track_completed_escrows_max_downloading_retries = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
+    )
+    "Maximum number of downloading attempts per job during results downloading"
+
+    track_completed_escrows_jobs_downloading_batch_size = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
+    )
+    "Maximum number of parallel downloading requests during results downloading"
+
+    rejected_projects_chunk_size = os.environ.get("REJECTED_PROJECTS_CHUNK_SIZE", 20)
+    accepted_projects_chunk_size = os.environ.get("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
+
+    track_escrow_creation_chunk_size = os.environ.get("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20)
+    track_escrow_creation_int = int(os.environ.get("TRACK_ESCROW_CREATION_INT", 300))
 
 
 class CvatConfig:
@@ -94,39 +121,66 @@ class CvatConfig:
 
 
 class StorageConfig:
-    endpoint_url = os.environ.get("STORAGE_ENDPOINT_URL", "storage.googleapis.com")
-    region = os.environ.get("STORAGE_REGION", "")
-    access_key = os.environ.get("STORAGE_ACCESS_KEY", "")
-    secret_key = os.environ.get("STORAGE_SECRET_KEY", "")
-    results_bucket_name = os.environ.get("STORAGE_RESULTS_BUCKET_NAME", "")
-    secure = str_to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    provider: ClassVar[str] = os.environ["STORAGE_PROVIDER"].lower()
+    data_bucket_name: ClassVar[str] = (
+        os.environ.get("STORAGE_RESULTS_BUCKET_NAME")  # backward compatibility
+        or os.environ["STORAGE_BUCKET_NAME"]
+    )
+    endpoint_url: ClassVar[str] = os.environ[
+        "STORAGE_ENDPOINT_URL"
+    ]  # TODO: probably should be optional
+    region: ClassVar[Optional[str]] = os.environ.get("STORAGE_REGION")
+    results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
+    secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+
+    # S3 specific attributes
+    access_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_ACCESS_KEY")
+    secret_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_SECRET_KEY")
+
+    # GCS specific attributes
+    key_file_path: ClassVar[Optional[str]] = os.environ.get("STORAGE_KEY_FILE_PATH")
+
+    @classmethod
+    def get_scheme(cls) -> str:
+        return "https://" if cls.secure else "http://"
 
     @classmethod
     def provider_endpoint_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
-        return f"{scheme}{cls.endpoint_url}"
+        return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
     def bucket_url(cls):
-        scheme = "https://" if cls.secure else "http://"
-
         if is_ipv4(cls.endpoint_url):
-            return f"{scheme}{cls.endpoint_url}/{cls.results_bucket_name}/"
+            return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
-            return f"{scheme}{cls.results_bucket_name}.{cls.endpoint_url}/"
+            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = str_to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
+    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", False))
+    "Allow to log request details for each request"
+
+    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
+    "Allow to profile specific requests"
+
 
 class CoreConfig:
-    default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 300))
+    default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
+
+    skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
+    "Assignment size multiplier for IMAGE_SKELETONS_FROM_BOXES tasks"
+
+    min_roi_size_w = int(os.environ.get("MIN_ROI_SIZE_W", 350))
+    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+
+    min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
+    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
 
 
 class HumanAppConfig:
@@ -142,7 +196,7 @@ class Config:
     loglevel = parse_log_level(os.environ.get("LOGLEVEL", "info"))
 
     polygon_mainnet = PolygonMainnetConfig
-    polygon_mumbai = PolygonMumbaiConfig
+    polygon_amoy = PolygonAmoyConfig
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig

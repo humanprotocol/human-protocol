@@ -1,6 +1,7 @@
 import logging
 
 import httpx
+from datumaro.util import take_by
 from sqlalchemy.orm import Session
 
 import src.services.cvat as cvat_db_service
@@ -12,8 +13,8 @@ from src.core.types import (
     JobStatuses,
     OracleWebhookTypes,
     ProjectStatuses,
-    RecordingOracleEventType,
-    TaskStatus,
+    RecordingOracleEventTypes,
+    TaskStatuses,
 )
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
@@ -60,11 +61,12 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
     assert webhook.type == OracleWebhookTypes.recording_oracle
 
     match webhook.event_type:
-        case RecordingOracleEventType.task_completed:
-            project = cvat_db_service.get_project_by_escrow_address(
-                db_session, webhook.escrow_address, for_update=True
+        case RecordingOracleEventTypes.task_completed:
+            chunk_size = CronConfig.accepted_projects_chunk_size
+            project_ids = cvat_db_service.get_project_cvat_ids_by_escrow_address(
+                db_session, webhook.escrow_address
             )
-            if not project:
+            if not project_ids:
                 logger.error(
                     "Unexpected event {} received for an unknown project, "
                     "ignoring (escrow_address={})".format(
@@ -73,54 +75,77 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 )
                 return
 
-            if project.status != ProjectStatuses.validation:
-                logger.error(
-                    "Unexpected event {} received for a project in the {} status, "
-                    "ignoring (escrow_address={})".format(
-                        webhook.event_type, project.status, webhook.escrow_address
+            for ids_chunk in take_by(project_ids, chunk_size):
+                projects_chunk = cvat_db_service.get_projects_by_cvat_ids(
+                    db_session, ids_chunk, for_update=True, limit=chunk_size
+                )
+
+                for project in projects_chunk:
+                    if project.status != ProjectStatuses.validation:
+                        logger.error(
+                            "Unexpected event {} received for a project in the {} status, "
+                            "ignoring (escrow_address={}, project={})".format(
+                                webhook.event_type,
+                                project.status,
+                                webhook.escrow_address,
+                                project.cvat_id,
+                            )
+                        )
+                        return
+
+                    new_status = ProjectStatuses.recorded
+                    logger.info(
+                        "Changing project status to {} (escrow_address={}, project={})".format(
+                            new_status, webhook.escrow_address, project.cvat_id
+                        )
                     )
-                )
-                return
+                    cvat_db_service.update_project_status(db_session, project.id, new_status)
 
-            new_status = ProjectStatuses.recorded
-            logger.info(
-                "Changing project status to {} (escrow_address={})".format(
-                    new_status, webhook.escrow_address
-                )
-            )
-
-            cvat_db_service.update_project_status(db_session, project.id, new_status)
-
-        case RecordingOracleEventType.task_rejected:
+        case RecordingOracleEventTypes.task_rejected:
             event = RecordingOracleEvent_TaskRejected.parse_obj(webhook.event_data)
 
-            project = cvat_db_service.get_project_by_escrow_address(
-                db_session, webhook.escrow_address, for_update=True
-            )
-
-            if project.status != ProjectStatuses.validation:
-                logger.error(
-                    "Unexpected event {} received for a project in the {} status, "
-                    "ignoring (escrow_address={})".format(
-                        webhook.event_type, project.status, webhook.escrow_address
-                    )
-                )
-                return
-
             rejected_jobs = cvat_db_service.get_jobs_by_cvat_id(db_session, event.rejected_job_ids)
+            rejected_project_cvat_ids = set(j.cvat_project_id for j in rejected_jobs)
 
-            tasks_to_update = set()
+            chunk_size = CronConfig.rejected_projects_chunk_size
+            for chunk_ids in take_by(rejected_project_cvat_ids, chunk_size):
+                projects_chunk = cvat_db_service.get_projects_by_cvat_ids(
+                    db_session, chunk_ids, for_update=True, limit=chunk_size
+                )
 
-            for job in rejected_jobs:
-                tasks_to_update.add(job.task.id)
-                cvat_db_service.update_job_status(db_session, job.id, JobStatuses.new)
+                for project in projects_chunk:
+                    if project.status != ProjectStatuses.validation:
+                        logger.error(
+                            "Unexpected event {} received for a project in the {} status, "
+                            "ignoring (escrow_address={}, project_id={})".format(
+                                webhook.event_type,
+                                project.status,
+                                webhook.escrow_address,
+                                project.cvat_id,
+                            )
+                        )
+                        continue
 
-            for task_id in tasks_to_update:
-                cvat_db_service.update_task_status(db_session, task_id, TaskStatus.annotation)
+                    rejected_jobs_in_project = [
+                        j for j in rejected_jobs if j.cvat_project_id == project.cvat_id
+                    ]
+                    tasks_to_update = set()
+                    for job in rejected_jobs_in_project:
+                        tasks_to_update.add(job.task.id)
+                        cvat_db_service.update_job_status(db_session, job.id, JobStatuses.new)
 
-            cvat_db_service.update_project_status(
-                db_session, project.id, ProjectStatuses.annotation
-            )
+                    for task_id in tasks_to_update:
+                        cvat_db_service.update_task_status(
+                            db_session, task_id, TaskStatuses.annotation
+                        )
+
+                    new_status = ProjectStatuses.annotation
+                    logger.info(
+                        "Changing project status to {} (escrow_address={}, project={})".format(
+                            new_status, webhook.escrow_address, project.cvat_id
+                        )
+                    )
+                    cvat_db_service.update_project_status(db_session, project.id, new_status)
 
         case _:
             assert False, f"Unknown recording oracle event {webhook.event_type}"

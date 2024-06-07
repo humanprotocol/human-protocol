@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import pytest
-from human_protocol_sdk.escrow import EscrowClientError, EscrowData
+from human_protocol_sdk.escrow import EscrowClientError
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
@@ -19,7 +19,7 @@ from src.core.config import Config
 from tests.utils.constants import (
     DEFAULT_GAS_PAYER_PRIV,
     DEFAULT_HASH,
-    DEFAULT_URL,
+    DEFAULT_MANIFEST_URL,
     REPUTATION_ORACLE_ADDRESS,
 )
 from tests.utils.setup_escrow import (
@@ -69,9 +69,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 validate_escrow(-1, "", allow_no_funds=False)
 
             # should not throw an exception
-            validate_escrow(
-                self.network_config.chain_id, self.escrow_address, allow_no_funds=True
-            )
+            validate_escrow(self.network_config.chain_id, self.escrow_address, allow_no_funds=True)
 
     def test_validate_escrow_invalid_status(self):
         escrow_address = create_escrow(self.w3)
@@ -85,21 +83,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.escrow.get_escrow") as mock_get_escrow:
             mock_get_escrow.return_value = self.escrow("Partial", 0.95)
 
-            with pytest.raises(
-                ValueError, match="Escrow is not in any of the accepted states"
-            ):
+            with pytest.raises(ValueError, match="Escrow is not in any of the accepted states"):
                 validate_escrow(self.w3.eth.chain_id, escrow_address)
 
     def test_get_escrow_manifest(self):
         with patch("src.chain.escrow.get_escrow") as mock_get_escrow, patch(
-            "src.chain.escrow.StorageClient.download_files"
-        ) as mock_storage:
-            mock_storage.return_value = [json.dumps({"title": "test"}).encode()]
+            "src.chain.escrow.StorageUtils.download_file_from_url"
+        ) as mock_download:
+            mock_download.return_value = json.dumps({"title": "test"}).encode()
 
             mock_get_escrow.return_value = self.escrow()
-            manifest = get_escrow_manifest(
-                self.network_config.chain_id, self.escrow_address
-            )
+            manifest = get_escrow_manifest(self.network_config.chain_id, self.escrow_address)
             self.assertIsInstance(manifest, dict)
             self.assertIsNotNone(manifest)
 
@@ -108,22 +102,18 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             results = store_results(
-                self.w3.eth.chain_id, escrow_address, DEFAULT_URL, DEFAULT_HASH
+                self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, DEFAULT_HASH
             )
             self.assertIsNone(results)
-            intermediate_results_url = get_intermediate_results_url(
-                self.w3, escrow_address
-            )
-            self.assertEqual(intermediate_results_url, DEFAULT_URL)
+            intermediate_results_url = get_intermediate_results_url(self.w3, escrow_address)
+            self.assertEqual(intermediate_results_url, DEFAULT_MANIFEST_URL)
 
     def test_store_results_invalid_url(self):
         escrow_address = create_escrow(self.w3)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             with self.assertRaises(EscrowClientError) as error:
-                store_results(
-                    self.w3.eth.chain_id, escrow_address, "invalid_url", DEFAULT_HASH
-                )
+                store_results(self.w3.eth.chain_id, escrow_address, "invalid_url", DEFAULT_HASH)
         self.assertEqual(f"Invalid URL: invalid_url", str(error.exception))
 
     def test_store_results_invalid_hash(self):
@@ -131,7 +121,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             with self.assertRaises(EscrowClientError) as error:
-                store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_URL, "")
+                store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, "")
         self.assertEqual(f"Invalid empty hash", str(error.exception))
 
     def test_get_reputation_oracle_address(self):
@@ -143,9 +133,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_escrow = MagicMock()
             mock_escrow.reputation_oracle = REPUTATION_ORACLE_ADDRESS
             mock_get_escrow.return_value = mock_escrow
-            address = get_reputation_oracle_address(
-                self.w3.eth.chain_id, escrow_address
-            )
+            address = get_reputation_oracle_address(self.w3.eth.chain_id, escrow_address)
             self.assertIsInstance(address, str)
             self.assertIsNotNone(address)
 
@@ -157,6 +145,4 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_reputation_oracle_address_invalid_chain_id(self):
         with pytest.raises(Exception, match="Can't find escrow"):
-            get_reputation_oracle_address(
-                1, "0x1234567890123456789012345678901234567890"
-            )
+            get_reputation_oracle_address(1, "0x1234567890123456789012345678901234567890")

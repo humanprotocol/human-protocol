@@ -29,5 +29,9 @@ deployments_tenderly
 !.openzeppelin/unknown-1284.json
 # moonbaseAlpha
 !.openzeppelin/unknown-1287.json
-# skale
+# amoy
 !.openzeppelin/unknown-1273227453.json
+# xlayer
+!.openzeppelin/unknown-196.json
+# xlayer-testnet
+!.openzeppelin/unknown-195.json

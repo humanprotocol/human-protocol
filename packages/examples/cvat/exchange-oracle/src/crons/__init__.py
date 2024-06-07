@@ -11,10 +11,11 @@ from src.crons.process_recording_oracle_webhooks import (
     process_outgoing_recording_oracle_webhooks,
 )
 from src.crons.state_trackers import (
-    retrieve_annotations,
     track_assignments,
+    track_completed_escrows,
     track_completed_projects,
     track_completed_tasks,
+    track_escrow_creation,
     track_task_creation,
 )
 
@@ -54,14 +55,19 @@ def setup_cron_jobs(app: FastAPI):
             seconds=Config.cron_config.track_completed_tasks_int,
         )
         scheduler.add_job(
-            retrieve_annotations,
+            track_completed_escrows,
             "interval",
-            seconds=Config.cron_config.retrieve_annotations_int,
+            seconds=Config.cron_config.track_completed_escrows_int,
         )
         scheduler.add_job(
             track_task_creation,
             "interval",
             seconds=Config.cron_config.track_creating_tasks_int,
+        )
+        scheduler.add_job(
+            track_escrow_creation,
+            "interval",
+            seconds=Config.cron_config.track_escrow_creation_int,
         )
         scheduler.add_job(
             track_assignments,

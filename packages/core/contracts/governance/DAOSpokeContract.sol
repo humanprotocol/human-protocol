@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/Timers.sol';
-import '@openzeppelin/contracts/utils/Checkpoints.sol';
+import '@openzeppelin/contracts/utils/structs/Checkpoints.sol';
 import '@openzeppelin/contracts/governance/utils/IVotes.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
+
 import './MetaHumanGovernor.sol';
 import './wormhole/IWormholeRelayer.sol';
 import './wormhole/IWormholeReceiver.sol';
@@ -15,6 +16,7 @@ import './magistrate/Magistrate.sol';
  *   It integrates with the MetaHumanGovernor contract for governance operations.
  */
 contract DAOSpokeContract is IWormholeReceiver, Magistrate {
+    using Address for address payable;
     bytes32 public immutable hubContractAddress;
     uint16 public immutable hubContractChainId;
     IVotes public immutable token;
@@ -87,7 +89,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      * @dev Allows the magistrate address to withdraw all funds from the contract
      */
     function withdrawFunds() public onlyMagistrate {
-        payable(msg.sender).transfer(address(this).balance);
+        payable(msg.sender).sendValue(address(this).balance);
     }
 
     function hasVoted(
@@ -127,7 +129,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
 
         uint256 weight = token.getPastVotes(
             msg.sender,
-            proposal.localVoteStartBlock
+            proposal.localVoteStart
         );
         _countVote(proposalId, msg.sender, support, weight);
 
@@ -292,9 +294,50 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
                 address(uint160(uint256(hubContractAddress))),
                 payloadToSend,
                 0, // no receiver value needed
-                GAS_LIMIT
+                GAS_LIMIT,
+                hubContractChainId,
+                address(uint160(uint256(hubContractAddress)))
             );
         }
+    }
+
+    function sendVoteResultToHub(
+        uint256 proposalId
+    ) public payable onlyMagistrate {
+        require(
+            proposals[proposalId].voteFinished,
+            'DAOSpokeContract: vote is not finished'
+        );
+
+        ProposalVote storage votes = proposalVotes[proposalId];
+        bytes memory messageToSend = abi.encode(
+            0,
+            proposalId,
+            votes.forVotes,
+            votes.againstVotes,
+            votes.abstainVotes
+        );
+        bytes memory payloadToSend = abi.encode(
+            hubContractAddress,
+            hubContractChainId,
+            msg.sender,
+            messageToSend
+        );
+
+        // Send a message to other contracts
+        // Cost of requesting a message to be sent to
+        // chain 'targetChain' with a gasLimit of 'GAS_LIMIT'
+        uint256 cost = quoteCrossChainMessage(hubContractChainId);
+
+        wormholeRelayer.sendPayloadToEvm{value: cost}(
+            hubContractChainId,
+            address(uint160(uint256(hubContractAddress))),
+            payloadToSend,
+            0, // no receiver value needed
+            GAS_LIMIT,
+            hubContractChainId,
+            address(uint160(uint256(hubContractAddress)))
+        );
     }
 
     /**

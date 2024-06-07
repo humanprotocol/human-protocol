@@ -1,14 +1,8 @@
 import { Test } from '@nestjs/testing';
-import {
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
-import { ErrorUser } from '../../common/constants/errors';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { UserCreateDto, UserUpdateDto } from './user.dto';
+import { UserCreateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import {
   KycStatus,
@@ -16,14 +10,32 @@ import {
   UserStatus,
   UserType,
 } from '../../common/enums/user';
-import { getNonce, signMessage } from '../../common/utils/signature';
-import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
+import { signMessage, verifySignature } from '../../common/utils/signature';
+import {
+  MOCK_ADDRESS,
+  MOCK_EMAIL,
+  MOCK_PRIVATE_KEY,
+} from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
-import { SignatureBodyDto } from '../web3/web3.dto';
+import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { SiteKeyRepository } from './site-key.repository';
+import { SiteKeyEntity } from './site-key.entity';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HttpService } from '@nestjs/axios';
+import { ControlledError } from '../../common/errors/controlled';
+import {
+  ErrorOperator,
+  ErrorSignature,
+  ErrorUser,
+} from '../../common/constants/errors';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -36,23 +48,21 @@ jest.mock('@human-protocol/sdk', () => ({
 }));
 
 describe('UserService', () => {
-  let mockConfigService: Partial<ConfigService>;
   let userService: UserService;
   let userRepository: UserRepository;
   let web3Service: Web3Service;
+  let hcaptchaService: HCaptchaService;
+
+  jest
+    .spyOn(NetworkConfigService.prototype, 'networks', 'get')
+    .mockReturnValue([
+      {
+        chainId: ChainId.POLYGON_AMOY,
+        rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
+      },
+    ]);
 
   beforeEach(async () => {
-    mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'WEB3_ENV':
-            return 'testnet';
-          default:
-            return defaultValue;
-        }
-      }),
-    };
-
     const signerMock = {
       address: MOCK_ADDRESS,
       getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
@@ -61,53 +71,37 @@ describe('UserService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         UserService,
+        HCaptchaService,
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: SiteKeyRepository,
+          useValue: createMock<SiteKeyRepository>(),
+        },
         {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
           },
         },
         {
-          provide: ConfigService,
-          useValue: mockConfigService,
+          provide: HttpService,
+          useValue: createMock<HttpService>(),
         },
+        ConfigService,
+        Web3ConfigService,
+        HCaptchaConfigService,
+        NetworkConfigService,
       ],
     }).compile();
 
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get(UserRepository);
     web3Service = moduleRef.get(Web3Service);
-  });
-
-  describe('update', () => {
-    it('should update a user and return the updated user entity', async () => {
-      const userId = 1;
-      const dto: UserUpdateDto = {
-        email: 'test@example.com',
-        status: UserStatus.ACTIVE,
-      };
-
-      const updatedUser: Partial<UserEntity> = {
-        id: userId,
-        email: dto.email,
-        status: dto.status,
-      };
-
-      jest
-        .spyOn(userRepository, 'updateOne')
-        .mockResolvedValue(updatedUser as UserEntity);
-
-      const result = await userService.update(userId, dto);
-
-      expect(userRepository.updateOne).toHaveBeenCalledWith(
-        { id: userId },
-        dto,
-      );
-      expect(result).toBe(updatedUser);
-    });
+    hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
   });
 
   describe('create', () => {
@@ -115,52 +109,23 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        type: UserType.WORKER,
+        hCaptchaToken: 'test',
       };
-      const hashedPassword =
-        '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
       const createdUser: Partial<UserEntity> = {
-        id: 1,
         email: dto.email,
-        password: hashedPassword,
+        password: expect.any(String),
+        type: UserType.WORKER,
+        status: UserStatus.PENDING,
       };
-
-      jest.spyOn(userService, 'checkEmail').mockResolvedValue(undefined);
-      jest
-        .spyOn(userRepository, 'create')
-        .mockResolvedValue(createdUser as UserEntity);
 
       const result = await userService.create(dto);
-
-      expect(userService.checkEmail).toHaveBeenCalledWith(dto.email, 0);
-      expect(userRepository.create).toHaveBeenCalledWith({
-        ...dto,
+      expect(userRepository.createUnique).toHaveBeenCalledWith({
         email: dto.email,
         password: expect.any(String),
         type: UserType.WORKER,
         status: UserStatus.PENDING,
       });
-      expect(result).toBe(createdUser);
-    });
-
-    it('should throw ConflictException if the email is already taken', async () => {
-      const dto: UserCreateDto = {
-        email: 'test@example.com',
-        password: 'password123',
-        type: UserType.WORKER,
-      };
-
-      jest
-        .spyOn(userService, 'checkEmail')
-        .mockRejectedValue(
-          new ConflictException(ErrorUser.AccountCannotBeRegistered),
-        );
-
-      await expect(userService.create(dto)).rejects.toThrow(
-        ErrorUser.AccountCannotBeRegistered,
-      );
-
-      expect(userService.checkEmail).toHaveBeenCalledWith(dto.email, 0);
+      expect(result).toMatchObject(createdUser);
     });
   });
 
@@ -175,132 +140,253 @@ describe('UserService', () => {
       email,
       password: hashedPassword,
     };
-
     it('should return the user entity if credentials are valid', async () => {
       jest
-        .spyOn(userRepository, 'findOne')
+        .spyOn(userRepository, 'findByEmail')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByCredentials(email, password);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        email,
-      });
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
       expect(result).toBe(userEntity);
     });
 
-    it('should throw NotFoundException if credentials are invalid', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(
-        userService.getByCredentials(email, password),
-      ).rejects.toThrow(NotFoundException);
-
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        email,
-      });
-    });
-  });
-
-  describe('createWeb3User', () => {
-    const address = '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36';
-    const type = UserType.WORKER;
-    const nonce = getNonce();
-
-    it('should create a new user and return the created user entity', async () => {
-      const createdUser: Partial<UserEntity> = {
-        id: 1,
-        evmAddress: address,
-        nonce,
-      };
-
-      jest
-        .spyOn(userRepository, 'createWeb3User')
-        .mockResolvedValue(createdUser as UserEntity);
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-
-      const result = await userService.createWeb3User(address, type);
-
-      expect(userRepository.createWeb3User).toHaveBeenCalledWith(
-        expect.objectContaining({
-          evmAddress: address,
-          type,
-          status: UserStatus.ACTIVE,
-        }),
-      );
-      expect(result).toBe(createdUser);
-    });
-
-    it('should throw ConflictException if the address is already taken', async () => {
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockResolvedValue({ evmAddress: MOCK_ADDRESS } as UserEntity);
-
-      await expect(userService.createWeb3User(address, type)).rejects.toThrow(
-        ConflictException,
-      );
-
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        evmAddress: address,
-      });
+    it('should return null if credentials are invalid', async () => {
+      jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+      const result = await userService.getByCredentials(email, password);
+      expect(result).toBe(null);
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
     });
   });
 
   describe('getByAddress', () => {
-    const address = '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36';
-
     it('should return the user entity if the address exists', async () => {
+      const address = '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36';
       const userEntity: Partial<UserEntity> = {
         id: 1,
         evmAddress: address,
       };
 
       jest
-        .spyOn(userRepository, 'findOne')
+        .spyOn(userRepository, 'findOneByEvmAddress')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByAddress(address);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        evmAddress: address,
-      });
+      expect(userRepository.findOneByEvmAddress).toHaveBeenCalledWith(address);
       expect(result).toBe(userEntity);
     });
+  });
 
-    it('should throw NotFoundException if the address does not exist', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+  describe('registerLabeler', () => {
+    it('should register labeler successfully and return site key', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
 
-      await expect(userService.getByAddress(address)).rejects.toThrow(
-        NotFoundException,
+      const mockLabelerData = { sitekeys: [{ sitekey: 'site_key' }] };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(true);
+      hcaptchaService.getLabelerData = jest
+        .fn()
+        .mockResolvedValueOnce(mockLabelerData);
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        signMessage: jest.fn().mockResolvedValue('site_key'),
+      });
+
+      const result = await userService.registerLabeler(
+        userEntity as UserEntity,
       );
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        evmAddress: address,
-      });
+      expect(result).toEqual('site_key');
+    });
+
+    it('should throw InvalidType if user type is invalid', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.OPERATOR, // Invalid type
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(new BadRequestException(ErrorUser.InvalidType));
+    });
+
+    it('should throw KycNotApproved if user KYC status is not approved', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.PENDING_VERIFICATION,
+        },
+        save: jest.fn(),
+      };
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(new BadRequestException(ErrorUser.KycNotApproved));
+    });
+
+    it('should return site key if user is already registered as a labeler', async () => {
+      const siteKeyEntity: DeepPartial<SiteKeyEntity> = {
+        id: 1,
+        siteKey: 'site_key',
+      };
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        siteKey: siteKeyEntity,
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn();
+
+      const result = await userService.registerLabeler(
+        userEntity as UserEntity,
+      );
+
+      expect(result).toEqual('site_key');
+      expect(hcaptchaService.registerLabeler).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw LabelingEnableFailed if registering labeler fails', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('should throw LabelingEnableFailed if retrieving labeler data fails', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        evmAddress: MOCK_ADDRESS,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(true);
+      hcaptchaService.getLabelerData = jest.fn().mockResolvedValueOnce(null);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.LabelingEnableFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('should throw NoWalletAddresRegistered if user does not have an evm address', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: MOCK_EMAIL,
+        type: UserType.WORKER,
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
+
+      await expect(
+        userService.registerLabeler(userEntity as UserEntity),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.NoWalletAddresRegistered,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
   describe('registerAddress', () => {
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('should update evm address and sign the address', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: '',
         kyc: {
+          country: 'FR',
           status: KycStatus.APPROVED,
         },
         save: jest.fn(),
       };
 
       const address = '0x123';
+      const signature = 'valid-signature';
 
+      // Mock web3Service methods
       web3Service.getSigner = jest.fn().mockReturnValue({
         signMessage: jest.fn().mockResolvedValue('signature'),
       });
 
+      // Mock signature verification
+      jest.spyOn(userService, 'prepareSignatureBody').mockResolvedValue({
+        from: address,
+        to: 'operator-address',
+        contents: 'register-address',
+        nonce: undefined,
+      });
+
+      (verifySignature as jest.Mock) = jest.fn().mockReturnValue(true);
+
       const result = await userService.registerAddress(
         userEntity as UserEntity,
-        { chainId: ChainId.POLYGON_MUMBAI, address },
+        { address, signature },
       );
 
       expect(userEntity.save).toHaveBeenCalledWith();
@@ -315,13 +401,16 @@ describe('UserService', () => {
       };
 
       const address = '0x456';
+      const signature = 'valid-signature';
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_MUMBAI,
           address,
+          signature,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it("should fail if user's kyc is not approved", async () => {
@@ -330,18 +419,69 @@ describe('UserService', () => {
         email: '',
         evmAddress: '0x123',
         kyc: {
+          country: 'FR',
           status: KycStatus.PENDING_VERIFICATION,
         },
       };
 
       const address = '0x123';
+      const signature = 'valid-signature';
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
-          chainId: ChainId.POLYGON_MUMBAI,
           address,
+          signature,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('should fail if the signature is invalid', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+        save: jest.fn(),
+      };
+
+      const address = '0x123';
+      const signature = 'invalid-signature';
+
+      // Mock web3Service methods
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        signMessage: jest.fn().mockResolvedValue('signature'),
+      });
+
+      // Mock signature verification
+      jest.spyOn(userService, 'prepareSignatureBody').mockResolvedValue({
+        from: address,
+        to: 'operator-address',
+        contents: 'register-address',
+        nonce: undefined,
+      });
+
+      (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
+        throw new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        );
+      });
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          address,
+          signature,
+        }),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        ),
+      );
     });
   });
 
@@ -349,7 +489,8 @@ describe('UserService', () => {
     const signatureBody: SignatureBodyDto = {
       from: MOCK_ADDRESS,
       to: MOCK_ADDRESS,
-      contents: 'signup',
+      contents: 'disable-operator',
+      nonce: undefined,
     };
 
     const userEntity: DeepPartial<UserEntity> = {
@@ -359,12 +500,12 @@ describe('UserService', () => {
 
     beforeEach(() => {
       jest
-        .spyOn(web3Service as any, 'prepareSignatureBody')
+        .spyOn(userService as any, 'prepareSignatureBody')
         .mockReturnValue(signatureBody);
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      jest.resetAllMocks();
     });
 
     it('should disable an user', async () => {
@@ -384,13 +525,11 @@ describe('UserService', () => {
       );
 
       expect(result).toBe(undefined);
-      expect(web3Service.prepareSignatureBody).toHaveBeenCalledWith(
+      expect(userService.prepareSignatureBody).toHaveBeenCalledWith(
         SignatureType.DISABLE_OPERATOR,
         MOCK_ADDRESS,
       );
-      expect(web3Service.getSigner).toHaveBeenCalledWith(
-        ChainId.POLYGON_MUMBAI,
-      );
+      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
       expect(kvstoreClientMock.get).toHaveBeenCalledWith(
         MOCK_ADDRESS,
@@ -398,11 +537,26 @@ describe('UserService', () => {
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
         MOCK_ADDRESS,
-        'ACTIVE',
+        OperatorStatus.INACTIVE,
       );
     });
 
     it("should throw ConflictException if signature doesn't match", async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
+        set: jest.fn(),
+      };
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+
+      (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
+        throw new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        );
+      });
+
       const invalidSignature = await signMessage(
         'invalid message',
         MOCK_PRIVATE_KEY,
@@ -410,8 +564,14 @@ describe('UserService', () => {
 
       await expect(
         userService.disableOperator(userEntity as any, invalidSignature),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
+
     it('should throw BadRequestException if operator already disabled in KVStore', async () => {
       const kvstoreClientMock = {
         get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
@@ -424,7 +584,50 @@ describe('UserService', () => {
 
       await expect(
         userService.disableOperator(userEntity as any, signature),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorOperator.OperatorNotActive,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+  });
+
+  describe('prepareSignatureBody', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should prepare web3 pre sign up payload and return typed structured data', async () => {
+      const expectedData: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'signup',
+        nonce: undefined,
+      };
+
+      const result = await userService.prepareSignatureBody(
+        SignatureType.SIGNUP,
+        MOCK_ADDRESS,
+      );
+
+      expect(result).toStrictEqual(expectedData);
+    });
+
+    it('should prepare web3 pre register address payload and return typed structured data', async () => {
+      const expectedData: SignatureBodyDto = {
+        from: MOCK_ADDRESS,
+        to: MOCK_ADDRESS,
+        contents: 'register-address',
+        nonce: undefined,
+      };
+
+      const result = await userService.prepareSignatureBody(
+        SignatureType.REGISTER_ADDRESS,
+        MOCK_ADDRESS,
+      );
+
+      expect(result).toStrictEqual(expectedData);
     });
   });
 });

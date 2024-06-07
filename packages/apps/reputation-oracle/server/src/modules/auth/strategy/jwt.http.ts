@@ -1,69 +1,64 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { HttpStatus, Injectable, Req } from '@nestjs/common';
 
 import { UserEntity } from '../../user/user.entity';
+import {
+  LOGOUT_PATH,
+  RESEND_EMAIL_VERIFICATION_PATH,
+} from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
-import { ConfigNames } from '../../../common/config';
-import { AuthRepository } from '../auth.repository';
-import { AuthService } from '../auth.service';
-import { JWT_PREFIX } from '../../../common/constants';
+import { UserRepository } from '../../user/user.repository';
+import { AuthConfigService } from '../../../common/config/auth-config.service';
+import { ControlledError } from '../../../common/errors/controlled';
+import { TokenRepository } from '../token.repository';
+import { TokenType } from '../token.entity';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    private readonly userRepository: UserRepository,
+    private readonly tokenRepository: TokenRepository,
+    private readonly authConfigService: AuthConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>(
-        ConfigNames.JWT_SECRET,
-        'secretkey',
-      ),
+      secretOrKey: authConfigService.jwtPublicKey,
       passReqToCallback: true,
     });
   }
 
   public async validate(
     @Req() request: any,
-    payload: { email: string; userId: number },
+    payload: { userId: number },
   ): Promise<UserEntity> {
-    const auth = await this.authRepository.findOne(
-      {
-        userId: payload.userId,
-      },
-      {
-        relations: ['user', 'user.kyc'],
-      },
+    const user = await this.userRepository.findById(payload.userId);
+
+    if (!user) {
+      throw new ControlledError('User not found', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (
+      user.status !== UserStatus.ACTIVE &&
+      request.url !== RESEND_EMAIL_VERIFICATION_PATH &&
+      request.url !== LOGOUT_PATH
+    ) {
+      throw new ControlledError('User not active', HttpStatus.UNAUTHORIZED);
+    }
+
+    const token = await this.tokenRepository.findOneByUserIdAndType(
+      user.id,
+      TokenType.REFRESH,
     );
 
-    if (!auth?.user) {
-      throw new UnauthorizedException('User not found');
+    if (!token) {
+      throw new ControlledError(
+        'User is not authorized',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
-    if (auth?.user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException('User not active');
-    }
-
-    //check that the jwt exists in the database
-    let jwt = request.headers['authorization'] as string;
-    if (jwt.toLowerCase().substring(0, JWT_PREFIX.length) === JWT_PREFIX) {
-      jwt = jwt.substring(JWT_PREFIX.length);
-    }
-    if (request.url === '/auth/refresh') {
-      if (!this.authService.compareToken(jwt, auth?.refreshToken)) {
-        throw new UnauthorizedException('Token expired');
-      }
-    } else {
-      if (!this.authService.compareToken(jwt, auth?.accessToken)) {
-        throw new UnauthorizedException('Token expired');
-      }
-    }
-
-    return auth?.user;
+    return user;
   }
 }

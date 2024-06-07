@@ -17,13 +17,13 @@ npm install
 1. Generate & deploy on matic
 
 ```bash
-npm run quickstart:matic
+yarn quickstart:matic
 ```
 
 2. Generate & deploy on goerli
 
 ```bash
-npm run quickstart:goerli
+yarn quickstart:goerli
 ```
 
 You can access it on `http://localhost:8020/`
@@ -37,11 +37,11 @@ The deployment of the graph on each network is automatically triggered by the gi
 To run tests next commands should be executed:
 
 ```bash
-npm run codegen
+yarn codegen
 
-npm run build
+yarn build
 
-npm test
+yarn test
 ```
 
 ### Supported networks
@@ -59,7 +59,7 @@ You can find networks configuration in the directory `config`. Each JSON file is
 1. Add your network configuration as `config/NETWORK.json`
 2. Run authentication command: `npx graph auth --product hosted-service [AUTH_TOKEN]`
 3. Generate `NETWORK=[NETWORK] yarn generate`
-4. Go to you hosted [service dashboard](https://thegraph.com/hosted-service/dashboard) and create the new subgraph
+4. Go to your hosted [service dashboard](https://thegraph.com/hosted-service/dashboard) and create the new subgraph
 5. Deploy the subgraph `npx graph deploy --product hosted-service humanprotocol/[SUBGRAPH_NAME]`
 6. On the `./.github/workflows/cd-subgraph.yaml` add your network name and graph name.
 
@@ -75,4 +75,7 @@ You can find networks configuration in the directory `config`. Each JSON file is
 - https://api.thegraph.com/subgraphs/name/humanprotocol/bsc
 - https://api.thegraph.com/subgraphs/name/humanprotocol/celo
 - https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores
-- https://graph-skale.humanprotocol.org/subgraphs/name/skale-human
+- https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet/graphql 
+
+
+

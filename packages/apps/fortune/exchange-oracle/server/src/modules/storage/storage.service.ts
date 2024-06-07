@@ -2,40 +2,45 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  OperatorUtils,
+  KVStoreClient,
+  EscrowClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import * as Minio from 'minio';
-import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import { ISolution } from '../../common/interfaces/job';
 import { Web3Service } from '../web3/web3.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Injectable()
 export class StorageService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    private readonly configService: ConfigService,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
-    @Inject(s3ConfigKey)
-    private s3Config: S3ConfigType,
+    private s3ConfigService: S3ConfigService,
+    private readonly pgpConfigService: PGPConfigService,
   ) {
     this.minioClient = new Minio.Client({
-      endPoint: this.s3Config.endPoint,
-      port: this.s3Config.port,
-      accessKey: this.s3Config.accessKey,
-      secretKey: this.s3Config.secretKey,
-      useSSL: this.s3Config.useSSL,
+      endPoint: this.s3ConfigService.endpoint,
+      port: this.s3ConfigService.port,
+      accessKey: this.s3ConfigService.accessKey,
+      secretKey: this.s3ConfigService.secretKey,
+      useSSL: this.s3ConfigService.useSSL,
     });
   }
   public getJobUrl(escrowAddress: string, chainId: ChainId): string {
-    return `${this.s3Config.useSSL ? 'https' : 'http'}://${
-      this.s3Config.endPoint
-    }:${this.s3Config.port}/${
-      this.s3Config.bucket
+    return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
+      this.s3ConfigService.endpoint
+    }:${this.s3ConfigService.port}/${
+      this.s3ConfigService.bucket
     }/${escrowAddress}-${chainId}.json`;
   }
 
@@ -45,16 +50,19 @@ export class StorageService {
   ): Promise<ISolution[]> {
     const url = this.getJobUrl(escrowAddress, chainId);
     try {
-      const encryption = await Encryption.build(
-        this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
-        this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
-      );
+      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      if (EncryptionUtils.isEncrypted(fileContent)) {
+        const encryption = await Encryption.build(
+          this.pgpConfigService.privateKey,
+          this.pgpConfigService.passphrase,
+        );
 
-      const encryptedSolution = await StorageClient.downloadFileFromUrl(url);
+        return JSON.parse(await encryption.decrypt(fileContent)) as ISolution[];
+      }
 
-      return JSON.parse(
-        await encryption.decrypt(encryptedSolution),
-      ) as ISolution[];
+      return typeof fileContent == 'string'
+        ? (JSON.parse(fileContent) as ISolution[])
+        : fileContent;
     } catch {
       return [];
     }
@@ -65,33 +73,48 @@ export class StorageService {
     chainId: ChainId,
     solutions: ISolution[],
   ): Promise<string> {
-    if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
+    if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
       throw new BadRequestException('Bucket not found');
     }
 
-    const signer = this.web3Service.getSigner(chainId);
-    const exchangeOracle = await OperatorUtils.getLeader(
-      chainId,
-      signer.address,
-    );
-    const recordingOracle = await OperatorUtils.getLeader(
-      chainId,
-      this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS, ''),
-    );
-    if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
-      throw new BadRequestException('Missing public key');
+    let fileToUpload = JSON.stringify(solutions);
+    if (this.pgpConfigService.encrypt) {
+      try {
+        const signer = this.web3Service.getSigner(chainId);
+        const escrowClient = await EscrowClient.build(signer);
+        const recordingOracleAddress =
+          await escrowClient.getRecordingOracleAddress(escrowAddress);
+
+        const kvstoreClient = await KVStoreClient.build(signer);
+
+        const exchangeOraclePublickKey = await kvstoreClient.getPublicKey(
+          signer.address,
+        );
+        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+          recordingOracleAddress,
+        );
+        if (
+          !exchangeOraclePublickKey.length ||
+          !recordingOraclePublicKey.length
+        ) {
+          throw new BadRequestException('Missing public key');
+        }
+
+        fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
+          exchangeOraclePublickKey,
+          recordingOraclePublicKey,
+        ]);
+      } catch (e) {
+        Logger.error(e);
+        throw new BadRequestException('Encryption error');
+      }
     }
 
     try {
-      const solutionsEncrypted = await EncryptionUtils.encrypt(
-        JSON.stringify(solutions),
-        [exchangeOracle.publicKey, recordingOracle.publicKey],
-      );
-
       await this.minioClient.putObject(
-        this.s3Config.bucket,
+        this.s3ConfigService.bucket,
         `${escrowAddress}-${chainId}.json`,
-        solutionsEncrypted,
+        fileToUpload,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -100,6 +123,7 @@ export class StorageService {
 
       return this.getJobUrl(escrowAddress, chainId);
     } catch (e) {
+      Logger.error(e);
       throw new BadRequestException('File not uploaded');
     }
   }

@@ -3,8 +3,10 @@
  */
 export enum ErrorWebhook {
   NotFound = 'Webhook not found',
+  UrlNotFound = 'Webhook url not found',
   NotCreated = 'Webhook has not been created',
   InvalidEventType = 'Invalid event type',
+  NotSent = 'Webhook was not sent',
 }
 
 /**
@@ -13,6 +15,15 @@ export enum ErrorWebhook {
 export enum ErrorReputation {
   NotFound = 'Reputation not found',
   NotCreated = 'Reputation has not been created',
+}
+
+/**
+ * Represents error messages related to credential.
+ */
+export enum ErrorCredential {
+  NotFound = 'Credential not found',
+  NotCreated = 'Credential has not been created',
+  InvalidCredential = 'Invalid credential',
 }
 
 /**
@@ -51,7 +62,11 @@ export enum ErrorUser {
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
   IncorrectAddress = 'Incorrect address',
+  NoWalletAddresRegistered = 'No wallet address registered on your account',
   KycNotApproved = 'KYC not approved',
+  UserNotActive = 'User not active',
+  LabelingEnableFailed = 'Failed to enable labeling for this account',
+  InvalidType = 'User has invalid type',
 }
 
 /**
@@ -61,9 +76,12 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
+  TokenExpired = 'Token has expired',
   UserNotActive = 'User not active',
   InvalidSignature = 'Invalid signature',
   InvalidRole = 'Invalid role in KVStore',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  InvalidToken = 'Invalid token',
 }
 
 /**
@@ -88,6 +106,7 @@ export enum ErrorKyc {
   Rejected = 'KYC session rejected',
   InvalidSynapsAPIResponse = 'Invalid Synaps API response',
   InvalidWebhookSecret = 'Invalid webhook secret',
+  CountryNotSet = 'Сountry is not set for the user',
 }
 
 /**
@@ -103,8 +122,8 @@ export enum ErrorCronJob {
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
-  InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
-  InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+  NoValidNetworks = 'No valid networks found',
+  InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
 }
 

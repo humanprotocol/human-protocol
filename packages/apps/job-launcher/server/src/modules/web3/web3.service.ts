@@ -1,29 +1,44 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
-import { ConfigNames, networks } from '../../common/config';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { Web3Env } from '../../common/enums/web3';
-import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/constants';
+import {
+  LOCALHOST_CHAIN_IDS,
+  MAINNET_CHAIN_IDS,
+  TESTNET_CHAIN_IDS,
+} from '../../common/constants';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ChainId } from '@human-protocol/sdk';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
-  public readonly logger = new Logger(Web3Service.name);
   public readonly signerAddress: string;
 
-  constructor(private readonly configService: ConfigService) {
-    const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
+  constructor(
+    public readonly web3ConfigService: Web3ConfigService,
+    public readonly networkConfigService: NetworkConfigService,
+  ) {
+    const privateKey = this.web3ConfigService.privateKey;
+
     const validChains = this.getValidChains();
-    const validNetworks = networks.filter((network) =>
+    const validNetworks = networkConfigService.networks.filter((network) =>
       validChains.includes(network.chainId),
     );
+
+    if (!validNetworks.length) {
+      throw new ControlledError(
+        ErrorWeb3.NoValidNetworks,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     for (const network of validNetworks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
-    this.signerAddress = this.signers[validChains[0]].address;
+    this.signerAddress = this.signers[validNetworks[0].chainId].address;
   }
 
   public getSigner(chainId: number): Wallet {
@@ -32,42 +47,35 @@ export class Web3Service {
   }
 
   public validateChainId(chainId: number): void {
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
     const validChainIds = this.getValidChains();
-
     if (!validChainIds.includes(chainId)) {
-      const errorType =
-        currentWeb3Env === Web3Env.MAINNET
-          ? ErrorWeb3.InvalidMainnetChainId
-          : ErrorWeb3.InvalidTestnetChainId;
-      this.logger.log(errorType, Web3Service.name);
-      throw new BadRequestException(errorType);
+      throw new ControlledError(
+        ErrorWeb3.InvalidChainId,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   public getValidChains(): ChainId[] {
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
-    const validChainIds =
-      currentWeb3Env === Web3Env.MAINNET
-        ? MAINNET_CHAIN_IDS
-        : TESTNET_CHAIN_IDS;
-
-    return validChainIds;
+    switch (this.web3ConfigService.env) {
+      case Web3Env.MAINNET:
+        return MAINNET_CHAIN_IDS;
+      case Web3Env.TESTNET:
+        return TESTNET_CHAIN_IDS;
+      case Web3Env.LOCALHOST:
+      default:
+        return LOCALHOST_CHAIN_IDS;
+    }
   }
 
   public async calculateGasPrice(chainId: number): Promise<bigint> {
     const signer = this.getSigner(chainId);
-    const multiplier = this.configService.get<number>(
-      ConfigNames.GAS_PRICE_MULTIPLIER,
-    );
-    if (multiplier && signer.provider) {
-      return (
-        ((await signer.provider.getFeeData())?.gasPrice || 1n) *
-        BigInt(multiplier)
-      );
+    const multiplier = this.web3ConfigService.gasPriceMultiplier;
+    const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
+    if (gasPrice) {
+      return gasPrice * BigInt(multiplier);
     }
-
-    return 1n;
+    throw new ControlledError(ErrorWeb3.GasPriceError, HttpStatus.CONFLICT);
   }
 
   public getOperatorAddress(): string {

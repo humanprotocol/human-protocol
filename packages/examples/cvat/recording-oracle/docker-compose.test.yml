@@ -22,7 +22,7 @@ services:
     healthcheck:
       # Using a magic nubmer of 28 here because this is a block number when blockchain-node container is ready to use
       test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://blockchain-node:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 28 ]; then exit 0; else exit 1; fi
-      interval: 5s
+      interval: 15s
       timeout: 5s
       retries: 15
     networks:
@@ -80,11 +80,18 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'recording_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
-      ENDPOINT_URL: 'host.docker.internal:9000'
-      ACCESS_KEY: 'dev'
-      SECRET_KEY: 'devdevdev'
-      RESULTS_BUCKET_NAME: 'results'
-      USE_SSL: False
+      STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
+      STORAGE_ACCESS_KEY: 'dev'
+      STORAGE_SECRET_KEY: 'devdevdev'
+      STORAGE_RESULTS_BUCKET_NAME: 'results'
+      STORAGE_PROVIDER: 'aws'
+      STORAGE_USE_SSL: False
+      EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
+      EXCHANGE_ORACLE_STORAGE_ACCESS_KEY: 'dev'
+      EXCHANGE_ORACLE_STORAGE_SECRET_KEY: 'devdevdev'
+      EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: 'results'
+      EXCHANGE_ORACLE_STORAGE_USE_SSL: False
+      EXCHANGE_ORACLE_STORAGE_PROVIDER: 'aws'
     depends_on:
       postgres:
         condition: service_started

@@ -10,18 +10,18 @@ from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 
 print(
     OperatorUtils.get_leaders(
-        LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
+        LeaderFilter(networks=[ChainId.POLYGON_AMOY], role="Job Launcher")
     )
 )
 ```
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None)
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None)
 
 Initializes an LeaderData instance.
 
@@ -43,26 +43,27 @@ Initializes an LeaderData instance.
   * **public_key** (`Optional`[`str`]) – Public key
   * **webhook_url** (`Optional`[`str`]) – Webhook url
   * **url** (`Optional`[`str`]) – Url
+  * **job_types** (`Optional`[`List`[`str`]]) – Job types
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(networks, role=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None)
 
 Bases: `object`
 
 A class used to filter leaders.
 
-#### \_\_init_\_(networks, role=None)
+#### \_\_init_\_(chain_id, role=None)
 
 Initializes a LeaderFilter instance.
 
 * **Parameters:**
-  * **networks** (`List`[[`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)]) – Networks to request data
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Id to request data
   * **role** (`Optional`[`str`]) – Leader role
 
-### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role)
+### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[])
 
 Bases: `object`
 
-#### \_\_init_\_(address, role)
+#### \_\_init_\_(address, role, url='', job_types=[])
 
 Initializes an Operator instance.
 
@@ -93,12 +94,12 @@ Get the leader details.
   from human_protocol_sdk.operator import OperatorUtils
 
   leader = OperatorUtils.get_leader(
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
 
-#### *static* get_leaders(filter=<human_protocol_sdk.operator.operator_utils.LeaderFilter object>)
+#### *static* get_leaders(filter)
 
 Get leaders data of the protocol
 
@@ -115,7 +116,7 @@ Get leaders data of the protocol
 
   print(
       OperatorUtils.get_leaders(
-          LeaderFilter(networks=[ChainId.POLYGON_MUMBAI])
+          LeaderFilter(chain_id=ChainId.POLYGON_AMOY)
       )
   )
   ```
@@ -128,6 +129,8 @@ Get the reputation network operators of the specified address.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the reputation network exists
   * **address** (`str`) – Address of the reputation oracle
   * **role** (`Optional`[`str`]) – (Optional) Role of the operator
+* **Parem job_types:**
+  (Optional) Job types of the operator
 * **Return type:**
   `List`[[`Operator`](#human_protocol_sdk.operator.operator_utils.Operator)]
 * **Returns:**
@@ -138,7 +141,7 @@ Get the reputation network operators of the specified address.
   from human_protocol_sdk.operator import OperatorUtils
 
   leader = OperatorUtils.get_reputation_network_operators(
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```
@@ -160,7 +163,7 @@ Get rewards of the given slasher
   from human_protocol_sdk.operator import OperatorUtils
 
   rewards_info = OperatorUtils.get_rewards_info(
-      ChainId.POLYGON_MUMBAI,
+      ChainId.POLYGON_AMOY,
       '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
   )
   ```

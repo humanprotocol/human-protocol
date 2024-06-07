@@ -49,7 +49,9 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
 
     event SpokesUpdated(CrossChainAddress[] indexed spokes);
 
-    constructor(CrossChainAddress[] memory _spokeContracts) {
+    constructor(
+        CrossChainAddress[] memory _spokeContracts
+    ) Ownable(msg.sender) {
         updateSpokeContracts(_spokeContracts);
     }
 
@@ -58,7 +60,8 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
      *   @param proposalId id of a proposal that will use the snapshot.
      */
     function createSnapshot(uint256 proposalId) internal {
-        for (uint256 i = 1; i <= spokeContracts.length; ++i) {
+        uint256 spokeContractsLength = spokeContracts.length;
+        for (uint256 i = 1; i <= spokeContractsLength; ++i) {
             CrossChainAddress memory addressToSnapshot = spokeContracts[i - 1];
             spokeContractsMappingSnapshots[proposalId][
                 addressToSnapshot.contractAddress

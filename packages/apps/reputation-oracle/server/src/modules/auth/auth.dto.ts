@@ -6,6 +6,7 @@ import {
   IsEthereumAddress,
   IsString,
   Matches,
+  IsUUID,
 } from 'class-validator';
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
@@ -28,6 +29,16 @@ export class SignInDto {
   @ApiProperty()
   @IsString()
   public password: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
+}
+
+export class RefreshDto {
+  @ApiProperty({ name: 'refresh_token' })
+  @IsUUID()
+  public refreshToken: string;
 }
 
 export class ValidatePasswordDto {
@@ -51,6 +62,10 @@ export class RestorePasswordDto extends ValidatePasswordDto {
   @ApiProperty()
   @IsString()
   public token: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class VerifyEmailDto {

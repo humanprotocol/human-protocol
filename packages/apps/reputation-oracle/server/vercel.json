@@ -1,30 +1,84 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "src/main.ts",
-      "use": "@vercel/node"
+  "buildCommand": "yarn workspace @human-protocol/sdk build && yarn build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/app.ts":{
+      "maxDuration": 300
     }
+  },
+  "redirects": [
+    { "source": "/", "destination": "/swagger" }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "src/main.ts",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "*",
-        "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
-      }
+      "source": "/swagger",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/swagger/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/reputation(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/web3/prepare-signature",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/webhook",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/user/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/kyc/(.*)",
+      "destination": "/api/app.ts"
+    },
+    {
+      "source": "/cron/(.*)",
+      "destination": "/api/app.ts"
     }
   ],
   "crons": [
     {
-      "path": "/webhook/cron/pending",
-      "schedule": "*/1 * * * *"
+      "path": "/cron/webhook/pending",
+      "schedule": "*/5 * * * *"
     },
     {
-      "path": "/webhook/cron/paid",
-      "schedule": "*/1 * * * *"
+      "path": "/cron/webhook/paid",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "*"
+        }
+      ]
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."

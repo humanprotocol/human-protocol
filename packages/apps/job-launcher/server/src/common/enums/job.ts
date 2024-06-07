@@ -4,6 +4,7 @@ export enum JobStatus {
   CREATED = 'CREATED',
   SET_UP = 'SET_UP',
   LAUNCHED = 'LAUNCHED',
+  PARTIAL = 'PARTIAL',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   TO_CANCEL = 'TO_CANCEL',
@@ -13,14 +14,22 @@ export enum JobStatus {
 export enum JobStatusFilter {
   PENDING = 'PENDING',
   LAUNCHED = 'LAUNCHED',
+  PARTIAL = 'PARTIAL',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   CANCELED = 'CANCELED',
 }
 
+export enum JobSortField {
+  CHAIN_ID = 'chain_id',
+  CREATED_AT = 'created_at',
+}
+
 export enum JobRequestType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
+  IMAGE_BOXES_FROM_POINTS = 'IMAGE_BOXES_FROM_POINTS',
+  IMAGE_SKELETONS_FROM_BOXES = 'IMAGE_SKELETONS_FROM_BOXES',
   HCAPTCHA = 'HCAPTCHA',
   FORTUNE = 'FORTUNE',
 }
@@ -417,4 +426,9 @@ export enum WorkerBrowser {
   DESKTOP = 'desktop',
   MOBILE = 'mobile',
   MODERN_BROWSER = 'modern_browser',
+}
+
+export enum JobCurrency {
+  HMT = 'hmt',
+  USD = 'usd',
 }

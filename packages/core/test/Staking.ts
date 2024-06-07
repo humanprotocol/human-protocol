@@ -121,17 +121,19 @@ describe('Staking', function () {
     await token.connect(owner).transfer(await staking.getAddress(), 1000);
 
     // Approve spend HMT tokens staking contract
-    [
-      validator,
-      operator,
-      operator2,
-      operator3,
-      exchangeOracle,
-      reputationOracle,
-      recordingOracle,
-    ].map(async (account) => {
-      await token.connect(account).approve(await staking.getAddress(), 1000);
-    });
+    await Promise.all(
+      [
+        validator,
+        operator,
+        operator2,
+        operator3,
+        exchangeOracle,
+        reputationOracle,
+        recordingOracle,
+      ].map(async (account) => {
+        await token.connect(account).approve(await staking.getAddress(), 1000);
+      })
+    );
   });
 
   describe('deployment', () => {
@@ -168,7 +170,7 @@ describe('Staking', function () {
 
     describe('Events', function () {
       it('Should emit an event on stake deposited', async function () {
-        await token.connect(operator).approve(await staking.getAddress(), 100); //!
+        await token.connect(operator).approve(await staking.getAddress(), 100);
 
         await expect(await staking.connect(operator).stake(2))
           .to.emit(staking, 'StakeDeposited')
@@ -848,20 +850,23 @@ describe('Staking', function () {
 
   describe('getListOfStakers', function () {
     const stakedTokens = 2;
+    let accounts: Signer[];
 
     this.beforeEach(async () => {
-      await Promise.all(
-        [
-          operator,
-          operator2,
-          operator3,
-          exchangeOracle,
-          reputationOracle,
-          recordingOracle,
-        ].map(async (account, index) => {
-          await staking.connect(account).stake(stakedTokens * (index + 1));
-        })
-      );
+      accounts = [
+        operator,
+        operator2,
+        operator3,
+        exchangeOracle,
+        reputationOracle,
+        recordingOracle,
+      ];
+
+      for (let index = 0; index < accounts.length; index++) {
+        await staking
+          .connect(accounts[index])
+          .stake(stakedTokens * (index + 1));
+      }
     });
 
     it('Should return list of stakers', async () => {
@@ -870,21 +875,12 @@ describe('Staking', function () {
       expect(stakers.length).to.equal(6);
       expect(stakes.length).to.equal(6);
 
-      await Promise.all(
-        [
-          operator,
-          operator2,
-          operator3,
-          exchangeOracle,
-          reputationOracle,
-          recordingOracle,
-        ].map(async (account, index) => {
-          expect(stakers[index]).to.equal(await account.getAddress());
-          expect(stakes[index].tokensStaked.toString()).to.equal(
-            (stakedTokens * (index + 1)).toString()
-          );
-        })
-      );
+      for (let index = 0; index < stakers.length; index++) {
+        expect(stakers[index]).to.equal(await accounts[index].getAddress());
+        expect(stakes[index].tokensStaked.toString()).to.equal(
+          (stakedTokens * (index + 1)).toString()
+        );
+      }
     });
   });
 

@@ -70,6 +70,7 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       chainId: 1338,
+      initialBaseFeePerGas: 0,
     },
     mainnet: {
       chainId: 1,
@@ -78,9 +79,9 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
-    goerli: {
-      chainId: 5,
-      url: process.env.ETH_GOERLI_TESTNET_URL || '',
+    sepolia: {
+      chainId: 11155111,
+      url: process.env.ETH_SEPOLIA_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
@@ -92,9 +93,9 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
-    polygonMumbai: {
-      chainId: 80001,
-      url: process.env.ETH_POLYGON_MUMBAI_URL || '',
+    polygonAmoy: {
+      chainId: 80002,
+      url: process.env.ETH_POLYGON_AMOY_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
@@ -141,13 +142,6 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    skale: {
-      chainId: 1273227453,
-      timeout: 2000000,
-      url: process.env.ETH_SKALE_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
     alfajores: {
       chainId: 44787,
       timeout: 2000000,
@@ -159,6 +153,20 @@ const config: HardhatUserConfig = {
       chainId: 42220,
       timeout: 2000000,
       url: process.env.ETH_CELO_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    xlayer: {
+      chainId: 196,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    xlayerTestnet: {
+      chainId: 195,
+      timeout: 20000000,
+      url: process.env.ETH_XLAYER_TESTNET_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -190,35 +198,53 @@ const config: HardhatUserConfig = {
       runOnCompile: true,
       clear: true,
       flat: true,
-      only: ['legacy'],
+      only: ['contracts/legacy/[a-zA-Z]*.sol'],
       spacing: 2,
       format: 'json',
     },
   ],
   etherscan: {
     apiKey: {
-      // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
-      goerli: process.env.ETHERSCAN_API_KEY || '',
+      sepolia: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
+      polygonAmoy: process.env.AMOY_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
-      skale: process.env.SKALE_API_KEY || '',
       avalancheFujiTestnet: process.env.AVALANCHE_API_KEY || '',
       avalanche: process.env.AVALANCHE_API_KEY || '',
       alfajores: process.env.CELOSCAN_API_KEY || '',
       celo: process.env.CELOSCAN_API_KEY || '',
+      xlayer: process.env.OKLINK_API_KEY || '',
+      xlayerTestnet: process.env.OKLINK_API_KEY || '',
     },
     customChains: [
       {
-        network: 'skale',
-        chainId: 1273227453,
+        network: 'polygonAmoy',
+        chainId: 80002,
         urls: {
-          apiURL: process.env.SKALE_BROWSER_API_URL || '',
-          browserURL: process.env.SKALE_BROWSER_URL || '',
+          apiURL: 'https://api-amoy.polygonscan.com/api',
+          browserURL: 'https://amoy.polygonscan.com',
+        },
+      },
+      {
+        network: 'xlayer',
+        chainId: 196,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER',
+          browserURL: 'https://www.oklink.com/xlayer',
+        },
+      },
+      {
+        network: 'xlayerTestnet',
+        chainId: 195,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET',
+          browserURL: 'https://www.oklink.com/xlayer-test',
         },
       },
     ],

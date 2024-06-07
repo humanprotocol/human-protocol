@@ -12,7 +12,7 @@ Code Example
     print(
         EscrowUtils.get_escrows(
             EscrowFilter(
-                networks=[ChainId.POLYGON_MUMBAI],
+                networks=[ChainId.POLYGON_AMOY],
                 status=Status.Pending,
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
@@ -38,8 +38,6 @@ from human_protocol_sdk.utils import (
 )
 
 from human_protocol_sdk.escrow.escrow_client import EscrowClientError
-
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 LOG = logging.getLogger("human_protocol_sdk.escrow")
 
@@ -128,7 +126,7 @@ class EscrowUtils:
 
     @staticmethod
     def get_escrows(
-        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI]),
+        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_AMOY]),
     ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
@@ -145,7 +143,7 @@ class EscrowUtils:
                 print(
                     EscrowUtils.get_escrows(
                         EscrowFilter(
-                            networks=[ChainId.POLYGON_MUMBAI],
+                            networks=[ChainId.POLYGON_AMOY],
                             status=Status.Pending,
                             date_from=datetime.datetime(2023, 5, 8),
                             date_to=datetime.datetime(2023, 6, 8),
@@ -188,6 +186,13 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
+
+            if (
+                not escrows_data
+                or "data" not in escrows_data
+                or "escrows" not in escrows_data["data"]
+            ):
+                return []
             escrows_raw = escrows_data["data"]["escrows"]
 
             escrows.extend(
@@ -258,7 +263,7 @@ class EscrowUtils:
 
                 print(
                     EscrowUtils.get_escrow(
-                        ChainId.POLYGON_MUMBAI,
+                        ChainId.POLYGON_AMOY,
                         "0x1234567890123456789012345678901234567890"
                     )
                 )
@@ -283,10 +288,15 @@ class EscrowUtils:
             },
         )
 
-        escrow = escrow_data["data"]["escrow"]
-
-        if not escrow:
+        if (
+            not escrow_data
+            or "data" not in escrow_data
+            or "escrow" not in escrow_data["data"]
+            or not escrow_data["data"]["escrow"]
+        ):
             return None
+
+        escrow = escrow_data["data"]["escrow"]
 
         return EscrowData(
             chain_id=chain_id,

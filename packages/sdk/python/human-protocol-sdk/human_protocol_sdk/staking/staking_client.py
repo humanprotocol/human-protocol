@@ -70,8 +70,6 @@ from human_protocol_sdk.utils import (
     handle_transaction,
 )
 
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
-
 LOG = logging.getLogger("human_protocol_sdk.staking")
 
 

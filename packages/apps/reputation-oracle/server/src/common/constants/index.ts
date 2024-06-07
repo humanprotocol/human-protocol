@@ -1,12 +1,14 @@
 import { JobRequestType } from '../enums';
 
-export const SERVICE_NAME = 'Reputation Oracle';
+export const SERVICE_NAME = 'App';
 export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
 export const JWT_PREFIX = 'bearer ';
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
+export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
+export const SYNAPS_API_KEY_DISABLED = 'synaps-disabled';
 
 export const SENDGRID_TEMPLATES = {
   signup: 'd-ca99cc7410aa4e6dab3e6042d5ecb9a3',
@@ -20,9 +22,14 @@ export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
 export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
+  JobRequestType.IMAGE_BOXES_FROM_POINTS,
+  JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
 ];
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
+
+export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+export const LOGOUT_PATH = '/auth/logout';
 
 export const CURSE_WORDS = [
   '4r5e',

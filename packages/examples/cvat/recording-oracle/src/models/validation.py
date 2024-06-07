@@ -18,8 +18,12 @@ class Task(Base):
     chain_id = Column(Integer, Enum(Networks), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    iteration = Column(Integer, server_default="0", nullable=False)
 
     jobs: Mapped[List["Job"]] = relationship(
+        back_populates="task", cascade="all, delete", passive_deletes=True
+    )
+    gt_stats: Mapped[List["GtStats"]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
 
@@ -45,3 +49,19 @@ class ValidationResult(Base):
     annotation_quality = Column(Float, nullable=False)
 
     job: Mapped["Job"] = relationship(back_populates="validation_results")
+
+
+class GtStats(Base):
+    __tablename__ = "gt_stats"
+
+    # A composite primary key is used
+    task_id = Column(
+        String, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True, nullable=False
+    )
+
+    # TODO: think how to store this better
+    gt_key = Column(String, index=True, primary_key=True, nullable=False)
+
+    failed_attempts = Column(Integer, default=0, nullable=False)
+
+    task: Mapped["Task"] = relationship(back_populates="gt_stats")

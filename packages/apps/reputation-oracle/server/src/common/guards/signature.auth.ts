@@ -1,13 +1,14 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { Role } from '../enums/role';
+import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -21,10 +22,10 @@ export class SignatureAuthGuard implements CanActivate {
     const oracleAdresses: string[] = [];
     try {
       const escrowData = await EscrowUtils.getEscrow(
-        data.chainId,
-        data.escrowAddress,
+        data.chain_id,
+        data.escrow_address,
       );
-      if (this.role.includes(Role.JobLaucher) && escrowData.launcher.length)
+      if (this.role.includes(Role.JobLauncher) && escrowData.launcher.length)
         oracleAdresses.push(escrowData.launcher);
       if (
         this.role.includes(Role.Exchange) &&
@@ -46,6 +47,6 @@ export class SignatureAuthGuard implements CanActivate {
       console.error(error);
     }
 
-    throw new UnauthorizedException('Unauthorized');
+    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
   }
 }

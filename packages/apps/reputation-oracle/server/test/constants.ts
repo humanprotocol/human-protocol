@@ -6,11 +6,11 @@ export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
 export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 export const MOCK_FILE_URL = 'mockedFileUrl';
+export const MOCK_WEBHOOK_URL = 'mockedWebhookUrl';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_LABEL = 'contains burnt area';
 export const MOCK_LABEL_NEGATIVE = '';
-export const MOCK_JOB_LAUNCHER_FEE = 5;
 export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
 export const MOCK_JOB_LAUNCHER_ADDRESS =
@@ -186,7 +186,7 @@ export const MOCK_ACCESS_TOKEN = 'access_token';
 export const MOCK_REFRESH_TOKEN = 'refresh_token';
 export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';
 export const MOCK_REFRESH_TOKEN_HASHED = 'refresh_token_hashed';
-export const MOCK_EXPIRES_IN = 1000000000000000;
+export const MOCK_EXPIRES_IN = 300000;
 export const MOCK_SENDGRID_API_KEY =
   'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
@@ -232,3 +232,7 @@ Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
 export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
+
+export const MOCK_HCAPTCHA_TOKEN = 'test-token';
+export const MOCK_HCAPTCHA_PROTECTION_URL = 'https://api.hcaptcha.com';
+export const MOCK_HCAPTCHA_LABELING_URL = 'https://foundation-accounts.hmt.ai';

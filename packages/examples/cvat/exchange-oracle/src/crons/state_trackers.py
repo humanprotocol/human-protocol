@@ -1,28 +1,19 @@
-from typing import Dict, List
+from typing import List
+
+from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
-import src.services.cloud.client as cloud_client
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
-from src.chain.escrow import get_escrow_manifest, validate_escrow
-from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
-from src.core.config import CronConfig, StorageConfig
-from src.core.oracle_events import (
-    ExchangeOracleEvent_TaskCreationFailed,
-    ExchangeOracleEvent_TaskFinished,
-)
-from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatus
+from src.core.config import CronConfig
+from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
+from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
 from src.db import SessionLocal
+from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
-from src.handlers.annotation import (
-    CVAT_EXPORT_FORMAT_MAPPING,
-    FileDescriptor,
-    postprocess_annotations,
-    prepare_annotation_metafile,
-)
+from src.handlers.completed_escrows import handle_completed_escrows
 from src.log import ROOT_LOGGER_NAME
-from src.utils.assignments import compose_output_annotation_filename, parse_manifest
 from src.utils.logging import get_function_logger
 
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
@@ -44,6 +35,7 @@ def track_completed_projects() -> None:
             projects = cvat_service.get_projects_by_status(
                 session,
                 ProjectStatuses.annotation,
+                task_status=TaskStatuses.completed,
                 limit=CronConfig.track_completed_projects_chunk_size,
                 for_update=ForUpdateParams(skip_locked=True),
             )
@@ -52,7 +44,7 @@ def track_completed_projects() -> None:
 
             for project in projects:
                 tasks = cvat_service.get_tasks_by_cvat_project_id(session, project.cvat_id)
-                if tasks and all(task.status == TaskStatus.completed for task in tasks):
+                if tasks and all(task.status == TaskStatuses.completed for task in tasks):
                     cvat_service.update_project_status(
                         session, project.id, ProjectStatuses.completed
                     )
@@ -84,7 +76,12 @@ def track_completed_tasks() -> None:
         logger.debug("Starting cron job")
         with SessionLocal.begin() as session:
             tasks = cvat_service.get_tasks_by_status(
-                session, TaskStatus.annotation, for_update=ForUpdateParams(skip_locked=True)
+                session,
+                TaskStatuses.annotation,
+                job_status=JobStatuses.completed,
+                project_status=ProjectStatuses.annotation,
+                limit=CronConfig.track_completed_tasks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             completed_task_ids = []
@@ -92,7 +89,7 @@ def track_completed_tasks() -> None:
             for task in tasks:
                 jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
                 if jobs and all(job.status == JobStatuses.completed for job in jobs):
-                    cvat_service.update_task_status(session, task.id, TaskStatus.completed)
+                    cvat_service.update_task_status(session, task.id, TaskStatuses.completed)
 
                     completed_task_ids.append(task.cvat_id)
 
@@ -183,141 +180,13 @@ def track_assignments() -> None:
         logger.debug("Finishing cron job")
 
 
-def retrieve_annotations() -> None:
-    """
-    Retrieves and stores completed annotations:
-    1. Retrieves annotations from projects with "completed" status
-    2. Postprocesses them
-    3. Stores annotations in s3 bucket
-    4. Prepares a webhook to recording oracle
-    """
+def track_completed_escrows() -> None:
     logger = get_function_logger(module_logger)
 
     try:
         logger.debug("Starting cron job")
-        with SessionLocal.begin() as session:
-            # Get completed projects from db
-            projects = cvat_service.get_projects_by_status(
-                session,
-                ProjectStatuses.completed,
-                limit=CronConfig.retrieve_annotations_chunk_size,
-                for_update=ForUpdateParams(skip_locked=True),
-            )
 
-            for project in projects:
-                # Check if all jobs within the project are completed
-                if not cvat_service.is_project_completed(session, project.id):
-                    cvat_service.update_project_status(
-                        session, project.id, ProjectStatuses.annotation
-                    )
-                    continue
-
-                validate_escrow(project.chain_id, project.escrow_address)
-
-                manifest = parse_manifest(
-                    get_escrow_manifest(project.chain_id, project.escrow_address)
-                )
-
-                logger.debug(
-                    f"Downloading results for the project (escrow_address={project.escrow_address})"
-                )
-
-                jobs = cvat_service.get_jobs_by_cvat_project_id(session, project.cvat_id)
-
-                annotation_format = CVAT_EXPORT_FORMAT_MAPPING[project.job_type]
-                job_annotations: Dict[int, FileDescriptor] = {}
-
-                # Request dataset preparation beforehand
-                for job in jobs:
-                    cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
-                cvat_api.request_project_annotations(project.cvat_id, format_name=annotation_format)
-
-                # Collect raw annotations from CVAT, validate and convert them
-                # into a recording oracle suitable format
-                for job in jobs:
-                    job_annotations_file = cvat_api.get_job_annotations(
-                        job.cvat_id, format_name=annotation_format
-                    )
-                    job_assignment = job.latest_assignment
-                    job_annotations[job.cvat_id] = FileDescriptor(
-                        filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
-                            project.cvat_id,
-                            job.cvat_task_id,
-                            job.cvat_id,
-                            job_assignment.user.cvat_id,
-                            job_assignment.id,
-                        ),
-                        file=job_annotations_file,
-                    )
-
-                project_annotations_file = cvat_api.get_project_annotations(
-                    project.cvat_id, format_name=annotation_format
-                )
-                project_annotations_file_desc = FileDescriptor(
-                    filename=RESULTING_ANNOTATIONS_FILE,
-                    file=project_annotations_file,
-                )
-
-                annotation_files: List[FileDescriptor] = []
-                annotation_files.append(project_annotations_file_desc)
-
-                annotation_metafile = prepare_annotation_metafile(
-                    jobs=jobs, job_annotations=job_annotations
-                )
-                annotation_files.extend(job_annotations.values())
-                postprocess_annotations(
-                    annotation_files,
-                    project_annotations_file_desc,
-                    manifest=manifest,
-                    project_images=cvat_service.get_project_images(session, project.cvat_id),
-                )
-
-                annotation_files.append(annotation_metafile)
-
-                storage_client = cloud_client.S3Client(
-                    StorageConfig.provider_endpoint_url(),
-                    access_key=StorageConfig.access_key,
-                    secret_key=StorageConfig.secret_key,
-                )
-                existing_storage_files = set(
-                    f.key
-                    for f in storage_client.list_files(
-                        StorageConfig.results_bucket_name,
-                        path=compose_output_annotation_filename(
-                            project.escrow_address,
-                            project.chain_id,
-                            "",
-                        ),
-                    )
-                )
-                for file_descriptor in annotation_files:
-                    if file_descriptor.filename in existing_storage_files:
-                        continue
-
-                    storage_client.create_file(
-                        StorageConfig.results_bucket_name,
-                        compose_output_annotation_filename(
-                            project.escrow_address,
-                            project.chain_id,
-                            file_descriptor.filename,
-                        ),
-                        file_descriptor.file.read(),
-                    )
-
-                oracle_db_service.outbox.create_webhook(
-                    session,
-                    project.escrow_address,
-                    project.chain_id,
-                    OracleWebhookTypes.recording_oracle,
-                    event=ExchangeOracleEvent_TaskFinished(),
-                )
-
-                cvat_service.update_project_status(session, project.id, ProjectStatuses.validation)
-
-                logger.info(
-                    f"The project (escrow_address={project.escrow_address}) "
-                    "is finished, resulting annotations are processed successfully"
-                )
+        handle_completed_escrows(logger)
     except Exception as error:
         logger.exception(error)
     finally:
@@ -343,6 +212,9 @@ def track_task_creation() -> None:
                 for_update=ForUpdateParams(skip_locked=True),
             )
 
+            if not uploads:
+                return
+
             logger.debug(
                 "Checking the data uploading status of CVAT tasks: {}".format(
                     ", ".join(str(u.task_id) for u in uploads)
@@ -353,10 +225,10 @@ def track_task_creation() -> None:
             failed: List[cvat_models.DataUpload] = []
             for upload in uploads:
                 status, reason = cvat_api.get_task_upload_status(upload.task_id)
+                project = upload.task.project
                 if not status or status == cvat_api.UploadStatus.FAILED:
+                    # TODO: add retries if 5xx
                     failed.append(upload)
-
-                    project = upload.task.project
 
                     oracle_db_service.outbox.create_webhook(
                         session,
@@ -398,9 +270,9 @@ def track_task_creation() -> None:
                             event=ExchangeOracleEvent_TaskCreationFailed(reason=str(e)),
                         )
 
-            cvat_service.finish_uploads(session, failed + completed)
-
             if completed or failed:
+                cvat_service.finish_data_uploads(session, failed + completed)
+
                 logger.info(
                     "Updated creation status of CVAT tasks: {}".format(
                         "; ".join(
@@ -411,6 +283,68 @@ def track_task_creation() -> None:
                             }.items()
                             if v
                         )
+                    )
+                )
+    except Exception as error:
+        logger.exception(error)
+    finally:
+        logger.debug("Finishing cron job")
+
+
+def track_escrow_creation() -> None:
+    logger = get_function_logger(module_logger)
+
+    try:
+        logger.debug("Starting cron job")
+
+        with SessionLocal.begin() as session:
+            creations = cvat_service.get_active_escrow_creations(
+                session,
+                limit=CronConfig.track_escrow_creation_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
+            )
+
+            if not creations:
+                return
+
+            logger.debug(
+                "Checking escrow creation statuses for escrows: {}".format(
+                    ", ".join(str(c.escrow_address) for c in creations)
+                )
+            )
+
+            finished: List[cvat_models.EscrowCreation] = []
+            for creation in creations:
+                created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+                    session,
+                    escrow_address=creation.escrow_address,
+                    chain_id=creation.chain_id,
+                    status=JobStatuses.new,
+                )
+
+                if created_jobs_count != creation.total_jobs:
+                    continue
+
+                with session.begin_nested():
+                    try:
+                        cvat_service.update_project_statuses_by_escrow_address(
+                            session=session,
+                            escrow_address=creation.escrow_address,
+                            chain_id=creation.chain_id,
+                            status=ProjectStatuses.annotation,
+                        )
+                        finished.append(creation)
+                    except sa_errors.OperationalError as e:
+                        if isinstance(e.orig, db_errors.LockNotAvailable):
+                            continue
+                        raise
+
+            if finished:
+                cvat_service.finish_escrow_creations(session, finished)
+
+                logger.info(
+                    "Updated creation status of escrows: {}".format(
+                        ", ".join(c.escrow_address for c in finished)
                     )
                 )
     except Exception as error:

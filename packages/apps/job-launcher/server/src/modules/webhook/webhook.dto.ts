@@ -10,12 +10,14 @@ import {
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
 
-export class EventData {
+export class FailedEventData {
   @ApiProperty()
   @IsString()
   @IsOptional()
   reason?: string;
 }
+
+export type EventData = FailedEventData;
 
 export class WebhookDto {
   @ApiProperty()
@@ -54,6 +56,7 @@ export class WebhookDataDto {
   public eventType: EventType;
 
   @ApiPropertyOptional({ name: 'event_data' })
+  @IsOptional()
   @IsObject()
   public eventData?: EventData;
 }

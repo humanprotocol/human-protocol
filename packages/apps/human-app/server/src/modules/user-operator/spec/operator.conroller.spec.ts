@@ -7,7 +7,7 @@ import { OperatorProfile } from '../operator.mapper';
 import {
   SignupOperatorCommand,
   SignupOperatorDto,
-} from '../interfaces/operator-registration.interface';
+} from '../model/operator-registration.model';
 import { UserType } from '../../../common/enums/user';
 import { operatorServiceMock } from './operator.service.mock';
 

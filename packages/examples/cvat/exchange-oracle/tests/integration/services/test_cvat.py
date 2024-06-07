@@ -7,12 +7,12 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 
 import src.services.cvat as cvat_service
 from src.core.types import (
-    AssignmentStatus,
+    AssignmentStatuses,
     JobStatuses,
     Networks,
     ProjectStatuses,
-    TaskStatus,
-    TaskType,
+    TaskStatuses,
+    TaskTypes,
 )
 from src.db import SessionLocal
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
@@ -33,7 +33,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_project(self):
         cvat_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         cvat_cloudstorage_id = 1
@@ -53,7 +53,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsNotNone(project)
         self.assertEqual(project.id, p_id)
         self.assertEqual(project.cvat_id, cvat_id)
-        self.assertEqual(project.status, ProjectStatuses.annotation.value)
+        self.assertEqual(project.status, ProjectStatuses.creation.value)
         self.assertEqual(project.job_type, job_type)
         self.assertEqual(project.escrow_address, escrow_address)
         self.assertEqual(project.chain_id, chain_id)
@@ -61,7 +61,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_duplicated_project(self):
         cvat_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         cvat_cloudstorage_id = 1
@@ -91,7 +91,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_project_none_cvat_id(self):
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
@@ -109,7 +109,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_project_none_cvat_cloudstorage_id(self):
         cvat_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
@@ -146,7 +146,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_create_project_none_escrow_address(self):
         cvat_id = 1
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
@@ -163,7 +163,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_project_none_chain_id(self):
         cvat_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         cvat_cloudstorage_id = 1
         bucket_url = "https://test.storage.googleapis.com/"
@@ -183,7 +183,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_create_project_none_bucket_url(self):
         cvat_id = 1
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         cvat_service.create_project(
@@ -201,7 +201,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_project_by_id(self):
         cvat_id = 1
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
@@ -213,6 +213,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         project = cvat_service.get_project_by_id(self.session, p_id)
@@ -250,7 +251,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_project_by_escrow_address(self):
         cvat_id = 1
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
@@ -262,6 +263,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         project = cvat_service.get_project_by_escrow_address(self.session, escrow_address)
@@ -282,7 +284,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_projects_by_status(self):
         cvat_id = 1
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
@@ -294,11 +296,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         cvat_id = 2
         cvat_cloudstorage_id = 2
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
         bucket_url = "https://test2.storage.googleapis.com/"
         cvat_service.create_project(
@@ -309,11 +312,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         cvat_id = 3
         cvat_cloudstorage_id = 3
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
         bucket_url = "https://test3.storage.googleapis.com/"
         cvat_service.create_project(
@@ -324,6 +328,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         projects = cvat_service.get_projects_by_status(self.session, ProjectStatuses.annotation)
@@ -391,7 +396,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address=wallet_address_1,
             cvat_job_id=cvat_id_1,
-            expires_at=datetime.now(),
+            expires_at=datetime.now() + timedelta(days=1),
         )
 
         wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
@@ -418,13 +423,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_2)
 
-        self.assertEqual(len(projects), 1)
-        self.assertEqual(projects[0].cvat_id, cvat_id_2)
+        self.assertEqual(
+            len(projects), 0
+        )  # expired should not be shown, https://github.com/humanprotocol/human-protocol/pull/1879
 
     def test_update_project_status(self):
         cvat_id = 1
         cvat_cloudstorage_id = 1
-        job_type = TaskType.image_label_binary.value
+        job_type = TaskTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
@@ -523,7 +529,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", cvat_id
         )
 
-        status = TaskStatus.annotation
+        status = TaskStatuses.annotation
 
         task_id = cvat_service.create_task(self.session, cvat_id, cvat_project.cvat_id, status)
 
@@ -541,7 +547,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", cvat_id
         )
 
-        status = TaskStatus.annotation
+        status = TaskStatuses.annotation
 
         cvat_service.create_task(self.session, cvat_id, cvat_project.cvat_id, status)
         self.session.commit()
@@ -551,17 +557,17 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.commit()
 
     def test_create_tas_without_project(self):
-        cvat_service.create_task(self.session, 123, 123, TaskStatus.annotation)
+        cvat_service.create_task(self.session, 123, 123, TaskStatuses.annotation)
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_task_none_cvat_id(self):
-        cvat_service.create_task(self.session, None, 123, TaskStatus.annotation)
+        cvat_service.create_task(self.session, None, 123, TaskStatuses.annotation)
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_task_none_cvat_project_id(self):
-        cvat_service.create_task(self.session, 123, None, TaskStatus.annotation)
+        cvat_service.create_task(self.session, 123, None, TaskStatuses.annotation)
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
@@ -569,7 +575,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
 
         task_id = cvat_service.create_task(
-            self.session, 1, cvat_project.cvat_id, TaskStatus.annotation
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
         )
         task = cvat_service.get_task_by_id(self.session, task_id)
 
@@ -577,7 +583,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(task.id, task_id)
         self.assertEqual(task.cvat_id, cvat_project.cvat_id)
         self.assertEqual(task.cvat_project_id, cvat_project.cvat_id)
-        self.assertEqual(task.status, TaskStatus.annotation.value)
+        self.assertEqual(task.status, TaskStatuses.annotation.value)
 
         task = cvat_service.get_task_by_id(self.session, "dummy_id")
 
@@ -586,9 +592,9 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_tasks_by_cvat_id(self):
         cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
 
-        cvat_service.create_task(self.session, 1, cvat_project.cvat_id, TaskStatus.annotation)
-        cvat_service.create_task(self.session, 2, cvat_project.cvat_id, TaskStatus.annotation)
-        cvat_service.create_task(self.session, 3, cvat_project.cvat_id, TaskStatus.annotation)
+        cvat_service.create_task(self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation)
+        cvat_service.create_task(self.session, 2, cvat_project.cvat_id, TaskStatuses.annotation)
+        cvat_service.create_task(self.session, 3, cvat_project.cvat_id, TaskStatuses.annotation)
 
         tasks = cvat_service.get_tasks_by_cvat_id(self.session, [1, 2])
 
@@ -605,15 +611,15 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_tasks_by_status(self):
         cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
 
-        cvat_service.create_task(self.session, 1, cvat_project.cvat_id, TaskStatus.annotation)
-        cvat_service.create_task(self.session, 2, cvat_project.cvat_id, TaskStatus.annotation)
-        cvat_service.create_task(self.session, 3, cvat_project.cvat_id, TaskStatus.completed)
+        cvat_service.create_task(self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation)
+        cvat_service.create_task(self.session, 2, cvat_project.cvat_id, TaskStatuses.annotation)
+        cvat_service.create_task(self.session, 3, cvat_project.cvat_id, TaskStatuses.completed)
 
-        tasks = cvat_service.get_tasks_by_status(self.session, TaskStatus.annotation)
+        tasks = cvat_service.get_tasks_by_status(self.session, TaskStatuses.annotation)
 
         self.assertEqual(len(tasks), 2)
 
-        tasks = cvat_service.get_tasks_by_status(self.session, TaskStatus.completed)
+        tasks = cvat_service.get_tasks_by_status(self.session, TaskStatuses.completed)
 
         self.assertEqual(len(tasks), 1)
 
@@ -621,10 +627,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
 
         task_id = cvat_service.create_task(
-            self.session, 1, cvat_project.cvat_id, TaskStatus.annotation
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
         )
 
-        cvat_service.update_task_status(self.session, task_id, TaskStatus.completed)
+        cvat_service.update_task_status(self.session, task_id, TaskStatuses.completed)
 
         task = cvat_service.get_task_by_id(self.session, task_id)
 
@@ -632,20 +638,20 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(task.id, task_id)
         self.assertEqual(task.cvat_id, cvat_project.cvat_id)
         self.assertEqual(task.cvat_project_id, cvat_project.cvat_id)
-        self.assertEqual(task.status, TaskStatus.completed.value)
+        self.assertEqual(task.status, TaskStatuses.completed.value)
 
     def test_get_tasks_by_cvat_project_id(self):
         cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
 
-        cvat_service.create_task(self.session, 1, cvat_project.cvat_id, TaskStatus.annotation)
-        cvat_service.create_task(self.session, 2, cvat_project.cvat_id, TaskStatus.annotation)
-        cvat_service.create_task(self.session, 3, cvat_project.cvat_id, TaskStatus.completed)
+        cvat_service.create_task(self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation)
+        cvat_service.create_task(self.session, 2, cvat_project.cvat_id, TaskStatuses.annotation)
+        cvat_service.create_task(self.session, 3, cvat_project.cvat_id, TaskStatuses.completed)
 
         cvat_project_2 = create_project(
             self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", 2
         )
 
-        cvat_service.create_task(self.session, 4, cvat_project_2.cvat_id, TaskStatus.annotation)
+        cvat_service.create_task(self.session, 4, cvat_project_2.cvat_id, TaskStatuses.annotation)
 
         tasks = cvat_service.get_tasks_by_cvat_project_id(self.session, cvat_project.cvat_id)
 
@@ -735,12 +741,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 2)
 
-        cvat_service.finish_uploads(self.session, [data_uploads[0]])
+        cvat_service.finish_data_uploads(self.session, [data_uploads[0]])
 
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 1)
 
-        cvat_service.finish_uploads(self.session, [data_uploads[0]])
+        cvat_service.finish_data_uploads(self.session, [data_uploads[0]])
 
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 0)
@@ -1200,7 +1206,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsNotNone(assignment)
         self.assertEqual(assignment.user_wallet_address, wallet_address)
         self.assertEqual(assignment.cvat_job_id, cvat_job.cvat_id)
-        self.assertEqual(assignment.status, AssignmentStatus.created.value)
+        self.assertEqual(assignment.status, AssignmentStatuses.created.value)
 
     def test_create_assignment_invalid_address(self):
         (_, _, cvat_job) = create_project_task_and_job(
@@ -1386,13 +1392,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         cvat_service.update_assignment(
-            self.session, assignment.id, status=AssignmentStatus.completed
+            self.session, assignment.id, status=AssignmentStatuses.completed
         )
 
         db_assignment = self.session.query(Assignment).filter_by(id=assignment.id).first()
 
         self.assertEqual(db_assignment.id, assignment.id)
-        self.assertEqual(db_assignment.status, AssignmentStatus.completed)
+        self.assertEqual(db_assignment.status, AssignmentStatuses.completed)
 
     def test_cancel_assignment(self):
         (_, _, cvat_job) = create_project_task_and_job(
@@ -1420,7 +1426,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignment = self.session.query(Assignment).filter_by(id=assignment.id).first()
 
         self.assertEqual(db_assignment.id, assignment.id)
-        self.assertEqual(db_assignment.status, AssignmentStatus.canceled)
+        self.assertEqual(db_assignment.status, AssignmentStatuses.canceled)
 
     def test_expire_assignment(self):
         (_, _, cvat_job) = create_project_task_and_job(
@@ -1448,7 +1454,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignment = self.session.query(Assignment).filter_by(id=assignment.id).first()
 
         self.assertEqual(db_assignment.id, assignment.id)
-        self.assertEqual(db_assignment.status, AssignmentStatus.expired)
+        self.assertEqual(db_assignment.status, AssignmentStatuses.expired)
 
     def test_complete_assignment(self):
         (_, _, cvat_job) = create_project_task_and_job(
@@ -1476,7 +1482,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignment = self.session.query(Assignment).filter_by(id=assignment.id).first()
 
         self.assertEqual(db_assignment.id, assignment.id)
-        self.assertEqual(db_assignment.status, AssignmentStatus.completed)
+        self.assertEqual(db_assignment.status, AssignmentStatuses.completed)
         self.assertEqual(db_assignment.completed_at, completed_date)
 
     def test_test_add_project_images(self):

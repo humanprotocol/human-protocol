@@ -1,5 +1,6 @@
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
-import { Address, useAccount, useBalance, useChainId } from 'wagmi';
+import { Address } from 'viem';
+import { useAccount, useBalance, useChainId } from 'wagmi';
 
 import { useHMTPrice } from './useHMTPrice';
 
@@ -10,7 +11,6 @@ export default function useWalletBalance() {
     address,
     chainId,
     token: NETWORKS[chainId as ChainId]?.hmtAddress as Address,
-    watch: true,
   });
   const price = useHMTPrice();
 

@@ -1,12 +1,14 @@
 from typing import List
 
 from dateutil.parser import parse as parse_aware_datetime
+from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
-from src.core.types import AssignmentStatus, CvatEventTypes, JobStatuses
+from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
+from src.db import errors as db_errors
 from src.log import ROOT_LOGGER_NAME
 from src.utils.logging import get_function_logger
 
@@ -29,6 +31,7 @@ def handle_update_job_event(payload: dict) -> None:
 
         if "state" in payload.before_update:
             job_assignments = job.assignments
+            new_status = JobStatuses(payload.job["state"])
 
             if not job_assignments:
                 logger.warning(
@@ -36,7 +39,6 @@ def handle_update_job_event(payload: dict) -> None:
                     "No assignments for this job, ignoring the update"
                 )
             else:
-                new_status = JobStatuses(payload.job["state"])
                 webhook_time = parse_aware_datetime(payload.job["updated_date"])
                 webhook_assignee_id = (payload.job["assignee"] or {}).get("id")
 
@@ -60,7 +62,7 @@ def handle_update_job_event(payload: dict) -> None:
                         "Can't find a matching assignment, ignoring the update"
                     )
                 elif matching_assignment.is_finished:
-                    if matching_assignment.status == AssignmentStatus.created:
+                    if matching_assignment.status == AssignmentStatuses.created:
                         logger.warning(
                             f"Received job #{job.cvat_id} status update: {new_status.value}. "
                             "Assignment is expired, rejecting the update"
@@ -78,7 +80,7 @@ def handle_update_job_event(payload: dict) -> None:
                 elif (
                     new_status == JobStatuses.completed
                     and matching_assignment.id == latest_assignment.id
-                    and matching_assignment.status == AssignmentStatus.created
+                    and matching_assignment.status == AssignmentStatuses.created
                 ):
                     logger.info(
                         f"Received job #{job.cvat_id} status update: {new_status.value}. "
@@ -122,6 +124,45 @@ def handle_create_job_event(payload: dict) -> None:
                 payload.job["project_id"],
                 status=JobStatuses[payload.job["state"]],
             )
+
+        try:
+            projects = cvat_service.get_projects_by_cvat_ids(
+                session, project_cvat_ids=[payload.job["project_id"]], for_update=True
+            )
+            if not projects:
+                return
+
+            project = projects[0]
+
+            escrow_creation = cvat_service.get_escrow_creation_by_escrow_address(
+                session,
+                escrow_address=project.escrow_address,
+                chain_id=project.chain_id,
+                for_update=True,
+            )
+            if not escrow_creation:
+                return
+        except sa_errors.OperationalError as e:
+            if isinstance(e.orig, db_errors.LockNotAvailable):
+                return
+            raise
+
+        created_jobs_count = cvat_service.count_jobs_by_escrow_address(
+            session,
+            escrow_address=escrow_creation.escrow_address,
+            chain_id=escrow_creation.chain_id,
+            status=JobStatuses.new,
+        )
+
+        if created_jobs_count != escrow_creation.total_jobs:
+            return
+
+        cvat_service.update_project_statuses_by_escrow_address(
+            session=session,
+            escrow_address=escrow_creation.escrow_address,
+            chain_id=escrow_creation.chain_id,
+            status=ProjectStatuses.annotation,
+        )
 
 
 def cvat_webhook_handler(cvat_webhook: dict) -> None:

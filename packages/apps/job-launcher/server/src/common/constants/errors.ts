@@ -17,6 +17,10 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+  ManifestHashNotExist = 'Manifest hash does not exist',
+  DataNotExist = 'Data does not exist',
+  ImageConsistency = 'Ground Truth images not found in dataset',
+  CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
 }
 
 /**
@@ -118,8 +122,9 @@ export enum ErrorBucket {
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
-  InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
-  InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+  NoValidNetworks = 'No valid networks found',
+  InvalidChainId = 'Invalid chain id provided for the configured environment',
+  GasPriceError = 'Error calculating gas price',
 }
 
 /**
@@ -149,7 +154,6 @@ export enum ErrorPostgres {
  * Represents error messages associated with a cron job.
  */
 export enum ErrorCronJob {
-  NotCreated = 'Cron job has not been created',
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
 }

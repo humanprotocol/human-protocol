@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, validator
 
 from src.chain.web3 import validate_address
-from src.core.types import ExchangeOracleEventType, Networks
+from src.core.types import ExchangeOracleEventTypes, Networks
 
 
 class OracleWebhook(BaseModel):
@@ -23,8 +23,8 @@ class OracleWebhook(BaseModel):
         schema_extra = {
             "example": {
                 "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
-                "chain_id": 80001,
-                "event_type": ExchangeOracleEventType.task_finished.value,
+                "chain_id": 80002,
+                "event_type": ExchangeOracleEventTypes.task_finished.value,
                 "event_data": {},
             }
         }

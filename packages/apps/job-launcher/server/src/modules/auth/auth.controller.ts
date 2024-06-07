@@ -7,12 +7,11 @@ import {
   UseGuards,
   UseInterceptors,
   Request,
-  UnprocessableEntityException,
   Logger,
   UsePipes,
   Ip,
-  UseFilters,
   HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -39,12 +38,27 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
-import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiTags('Auth')
-@UseFilters(AuthExceptionFilter)
+@ApiResponse({
+  status: 400,
+  description: 'Bad Request. Invalid input parameters.',
+})
+@ApiResponse({
+  status: 401,
+  description: 'Unauthorized. Missing or invalid credentials.',
+})
+@ApiResponse({
+  status: 404,
+  description: 'Not Found. Could not find the requested content.',
+})
+@ApiResponse({
+  status: 422,
+  description: 'Unprocessable entity.',
+})
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
@@ -71,10 +85,6 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
-  @ApiResponse({
-    status: 422,
-    description: 'Unprocessable entity.',
-  })
   public async signup(
     @Body() data: UserCreateDto,
     @Ip() ip: string,
@@ -94,14 +104,6 @@ export class AuthJwtController {
     status: 200,
     description: 'User authenticated successfully',
     type: AuthDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
   })
   public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
     return this.authService.signin(data, ip);
@@ -179,10 +181,6 @@ export class AuthJwtController {
     status: 204,
     description: 'Password restored successfully',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
   public async restorePassword(
     @Body() data: RestorePasswordDto,
     @Ip() ip: string,
@@ -245,23 +243,20 @@ export class AuthJwtController {
     description: 'API key created or updated successfully',
     type: ApiKeyDto,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
   public async createOrUpdateAPIKey(
     @Request() req: RequestWithUser,
   ): Promise<ApiKeyDto> {
     try {
-      const apiKey = await this.authService.createOrUpdateAPIKey(req.user.id);
+      const apiKey = await this.authService.createOrUpdateAPIKey(req.user);
       return { apiKey };
     } catch (e) {
       this.logger.log(
         e.message,
         `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
       );
-      throw new UnprocessableEntityException(
+      throw new ControlledError(
         ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

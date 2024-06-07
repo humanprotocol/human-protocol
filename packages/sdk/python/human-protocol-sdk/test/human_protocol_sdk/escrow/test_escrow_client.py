@@ -2204,7 +2204,7 @@ class TestEscrowClient(unittest.TestCase):
         date_from = datetime.fromtimestamp(1683811973)
         date_to = datetime.fromtimestamp(1683812007)
         escrow_filter = EscrowFilter(
-            networks=[ChainId.POLYGON_MUMBAI],
+            networks=[ChainId.POLYGON_AMOY],
             launcher=launcher,
             reputation_oracle=reputation_oracle,
             recording_oracle=recording_oracle,
@@ -2232,13 +2232,13 @@ class TestEscrowClient(unittest.TestCase):
 
     def test_escrow_filter_invalid_address_launcher(self):
         with self.assertRaises(FilterError) as cm:
-            EscrowFilter(networks=[ChainId.POLYGON_MUMBAI], launcher="invalid_address")
+            EscrowFilter(networks=[ChainId.POLYGON_AMOY], launcher="invalid_address")
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_reputation_oracle(self):
         with self.assertRaises(FilterError) as cm:
             EscrowFilter(
-                networks=[ChainId.POLYGON_MUMBAI],
+                networks=[ChainId.POLYGON_AMOY],
                 reputation_oracle="invalid_address",
             )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
@@ -2246,7 +2246,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_escrow_filter_invalid_address_recording_oracle(self):
         with self.assertRaises(FilterError) as cm:
             EscrowFilter(
-                networks=[ChainId.POLYGON_MUMBAI],
+                networks=[ChainId.POLYGON_AMOY],
                 recording_oracle="invalid_address",
             )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
@@ -2254,7 +2254,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_escrow_filter_invalid_dates(self):
         with self.assertRaises(FilterError) as cm:
             EscrowFilter(
-                networks=[ChainId.POLYGON_MUMBAI],
+                networks=[ChainId.POLYGON_AMOY],
                 date_from=datetime.fromtimestamp(1683812007),
                 date_to=datetime.fromtimestamp(1683811973),
             )

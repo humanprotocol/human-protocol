@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
-from human_protocol_sdk.storage import StorageClientError
 
 from src.chain.escrow import (
     get_escrow_manifest,
@@ -14,7 +13,7 @@ from src.chain.escrow import (
 )
 
 from tests.utils.constants import (
-    DEFAULT_URL,
+    DEFAULT_MANIFEST_URL,
     ESCROW_ADDRESS,
     FACTORY_ADDRESS,
     JOB_LAUNCHER_ADDRESS,
@@ -41,7 +40,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
             created_at="",
-            manifest_url=DEFAULT_URL,
+            manifest_url=DEFAULT_MANIFEST_URL,
             recording_oracle=RECORDING_ORACLE_ADDRESS,
         )
 
@@ -55,9 +54,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with self.assertRaises(EscrowClientError) as error:
             validate_escrow(chain_id, "invalid_address")
 
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_validate_escrow_invalid_status(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
@@ -83,9 +80,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_escrow_manifest(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function, patch(
-            "src.chain.escrow.StorageClient.download_files"
-        ) as mock_storage:
-            mock_storage.return_value = [json.dumps({"title": "test"}).encode()]
+            "src.chain.escrow.StorageUtils.download_file_from_url"
+        ) as mock_download:
+            mock_download.return_value = json.dumps({"title": "test"}).encode()
             mock_function.return_value = self.escrow_data
             manifest = get_escrow_manifest(chain_id, escrow_address)
             self.assertIsInstance(manifest, dict)
@@ -94,9 +91,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_escrow_manifest_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:
             get_escrow_manifest(chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_address(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
@@ -108,9 +103,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_job_launcher_address_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:
             get_job_launcher_address(chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_address_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
@@ -122,26 +115,20 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_function.return_value = None
             with self.assertRaises(Exception) as error:
                 get_job_launcher_address(chain_id, escrow_address)
-            self.assertEqual(
-                f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception)
-            )
+            self.assertEqual(f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception))
 
     def test_get_recording_oracle_address(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
-            self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_function.return_value = self.escrow_data
-            recording_oracle_address = get_recording_oracle_address(
-                chain_id, escrow_address
-            )
+            recording_oracle_address = get_recording_oracle_address(chain_id, escrow_address)
             self.assertIsInstance(recording_oracle_address, str)
             self.assertEqual(recording_oracle_address, RECORDING_ORACLE_ADDRESS)
 
     def test_get_recording_oracle_address_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:
             get_recording_oracle_address(chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_recording_oracle_address_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
@@ -153,6 +140,4 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_function.return_value = None
             with self.assertRaises(Exception) as error:
                 get_recording_oracle_address(chain_id, escrow_address)
-            self.assertEqual(
-                f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception)
-            )
+            self.assertEqual(f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception))

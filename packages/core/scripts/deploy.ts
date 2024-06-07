@@ -9,7 +9,7 @@ async function main() {
   );
   const HMTokenContract = await HMToken.deploy(
     1000000000,
-    'Human Token',
+    'HUMAN Token',
     18,
     'HMT'
   );
