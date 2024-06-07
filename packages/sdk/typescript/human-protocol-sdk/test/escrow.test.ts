@@ -28,7 +28,6 @@ import {
   ErrorRecipientCannotBeEmptyArray,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
-  ErrorUnsupportedStatus,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from '../src/error';
@@ -2405,10 +2404,16 @@ describe('EscrowUtils', () => {
       );
     });
 
-    test('should throw an error if status is invalid', async () => {
+    test('should throw an error if launcher address is invalid', async () => {
       await expect(
-        EscrowUtils.getStatusEvents([ChainId.POLYGON_AMOY], [1000 as any])
-      ).rejects.toThrow(ErrorUnsupportedStatus);
+        EscrowUtils.getStatusEvents(
+          [ChainId.POLYGON_AMOY],
+          undefined,
+          undefined,
+          undefined,
+          'invalid_address'
+        )
+      ).rejects.toThrow(ErrorInvalidAddress);
     });
 
     test('should successfully getStatusEvents with default statuses', async () => {
@@ -2417,71 +2422,23 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x1',
           timestamp: '1234567890',
           status: 'Pending',
-          chainId: ChainId.POLYGON_AMOY,
+          chainId: ChainId.LOCALHOST,
         },
         {
           escrowAddress: '0x2',
           timestamp: '1234567891',
           status: 'Pending',
-          chainId: ChainId.POLYGON_AMOY,
+          chainId: ChainId.LOCALHOST,
         },
       ];
 
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({ pendingStatusEvents: pendingEvents });
+        .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
-      const result = await EscrowUtils.getStatusEvents([ChainId.POLYGON_AMOY]);
-
+      const result = await EscrowUtils.getStatusEvents([ChainId.LOCALHOST]);
       expect(result).toEqual(pendingEvents);
       expect(gqlFetchSpy).toHaveBeenCalled();
-    });
-
-    test('should successfully getStatusEvents with specified statuses', async () => {
-      const partialEvents = [
-        {
-          escrowAddress: '0x1',
-          timestamp: '1234567890',
-          status: 'Partial',
-          chainId: ChainId.POLYGON_AMOY,
-        },
-        {
-          escrowAddress: '0x2',
-          timestamp: '1234567891',
-          status: 'Partial',
-          chainId: ChainId.POLYGON_AMOY,
-        },
-      ];
-
-      const completeEvents = [
-        {
-          escrowAddress: '0x3',
-          timestamp: '1234567892',
-          status: 'Complete',
-          chainId: ChainId.POLYGON_AMOY,
-        },
-        {
-          escrowAddress: '0x4',
-          timestamp: '1234567893',
-          status: 'Complete',
-          chainId: ChainId.POLYGON_AMOY,
-        },
-      ];
-
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({ partialStatusEvents: partialEvents })
-        .mockResolvedValueOnce({
-          completedStatusEvents: completeEvents,
-        });
-
-      const result = await EscrowUtils.getStatusEvents(
-        [ChainId.POLYGON_AMOY],
-        [EscrowStatus.Partial, EscrowStatus.Complete]
-      );
-
-      expect(result).toEqual([...partialEvents, ...completeEvents]);
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(2);
     });
 
     test('should successfully getStatusEvents with specified dates', async () => {
@@ -2505,7 +2462,7 @@ describe('EscrowUtils', () => {
 
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({ pendingStatusEvents: pendingEvents });
+        .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
       const result = await EscrowUtils.getStatusEvents(
         [ChainId.POLYGON_AMOY],
@@ -2539,7 +2496,7 @@ describe('EscrowUtils', () => {
 
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({ partialStatusEvents: partialEvents });
+        .mockResolvedValueOnce({ escrowStatusEvents: partialEvents });
 
       const result = await EscrowUtils.getStatusEvents(
         [ChainId.POLYGON_AMOY],
@@ -2573,7 +2530,7 @@ describe('EscrowUtils', () => {
 
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({ pendingStatusEvents: pendingEvents });
+        .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
       const result = await EscrowUtils.getStatusEvents(
         [ChainId.POLYGON_AMOY],
@@ -2622,10 +2579,10 @@ describe('EscrowUtils', () => {
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default');
       gqlFetchSpy.mockResolvedValueOnce({
-        pendingStatusEvents: pendingEventsNetwork1,
+        escrowStatusEvents: pendingEventsNetwork1,
       });
       gqlFetchSpy.mockResolvedValueOnce({
-        pendingStatusEvents: pendingEventsNetwork2,
+        escrowStatusEvents: pendingEventsNetwork2,
       });
 
       const result = await EscrowUtils.getStatusEvents(
@@ -2666,23 +2623,23 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x3',
           timestamp: '1234567892',
           status: 'Partial',
-          chainId: ChainId.POLYGON_AMOY,
+          chainId: ChainId.POLYGON_MUMBAI,
         },
         {
           escrowAddress: '0x4',
           timestamp: '1234567893',
           status: 'Partial',
-          chainId: ChainId.POLYGON_AMOY,
+          chainId: ChainId.POLYGON_MUMBAI,
         },
       ];
 
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
         .mockResolvedValueOnce({
-          pendingStatusEvents: pendingEvents,
+          escrowStatusEvents: pendingEvents,
         })
         .mockResolvedValueOnce({
-          partialStatusEvents: partialEvents,
+          escrowStatusEvents: partialEvents,
         });
 
       const result = await EscrowUtils.getStatusEvents(
@@ -2693,7 +2650,7 @@ describe('EscrowUtils', () => {
       );
 
       expect(result).toEqual([...pendingEvents, ...partialEvents]);
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(4);
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

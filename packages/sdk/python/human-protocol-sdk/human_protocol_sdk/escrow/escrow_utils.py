@@ -356,6 +356,7 @@ class EscrowUtils:
         statuses: Optional[List[Status]] = None,
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
+        launcher: Optional[str] = None,
     ) -> List[StatusEvent]:
         """
         Retrieve status events for specified networks and statuses within a date range.
@@ -364,10 +365,11 @@ class EscrowUtils:
         :param statuses (Optional[List[Status]]): List of statuses to filter by.
         :param date_from (Optional[datetime]): Start date for the query range.
         :param date_to (Optional[datetime]): End date for the query range.
+        :param launcher (Optional[str]): Address of the launcher to filter by.
 
-        :return List[Status]: List of status events matching the query parameters.
+        :return List[StatusEvent]: List of status events matching the query parameters.
 
-        :raise EscrowClientError: If an unsupported chain ID or status is provided.
+        :raise EscrowClientError: If an unsupported chain ID or invalid launcher address is provided.
 
         :example:
             .. code-block:: python
@@ -381,7 +383,8 @@ class EscrowUtils:
                         networks=[ChainId.POLYGON_AMOY, ChainId.ETHEREUM],
                         statuses=[Status.Pending, Status.Paid],
                         date_from=datetime(2023, 1, 1),
-                        date_to=datetime(2023, 12, 31)
+                        date_to=datetime(2023, 12, 31),
+                        launcher="0x1234567890abcdef1234567890abcdef12345678"
                     )
                 )
         """
@@ -392,17 +395,14 @@ class EscrowUtils:
         if not networks:
             raise EscrowClientError("Unsupported Chain ID")
 
-        status_query_map: Dict[Status, str] = {
-            Status.Launched: "",  # No query for Launched status
-            Status.Pending: "pending",
-            Status.Partial: "partial",
-            Status.Paid: "paid",
-            Status.Complete: "completed",
-            Status.Cancelled: "cancelled",
-        }
+        if launcher and not Web3.is_address(launcher):
+            raise EscrowClientError("Invalid Address")
+
+        escrow_addresses: List[StatusEvent] = []
 
         # If statuses are not provided, use all statuses except Launched
         effective_statuses = statuses or [
+            Status.Launched,
             Status.Pending,
             Status.Partial,
             Status.Paid,
@@ -410,48 +410,44 @@ class EscrowUtils:
             Status.Cancelled,
         ]
 
-        escrow_addresses: List[StatusEvent] = []
-
         for chain_id in networks:
             network_data = NETWORKS.get(chain_id)
             if not network_data:
                 raise EscrowClientError("Unsupported Chain ID")
 
-            for status in effective_statuses:
-                query_status = status_query_map.get(status)
-                if query_status is None:
-                    raise EscrowClientError("Unsupported Status")
+            status_names = [status.name for status in effective_statuses]
 
-                # Fetch data from the subgraph
-                response_property = f"{query_status}StatusEvents"
+            data = get_data_from_subgraph(
+                network_data["subgraph_url"],
+                get_status_query(date_from, date_to, launcher),
+                {
+                    "status": status_names,
+                    "from": int(date_from.timestamp()) if date_from else None,
+                    "to": int(date_to.timestamp()) if date_to else None,
+                    "launcher": launcher or None,
+                },
+            )
 
-                data = get_data_from_subgraph(
-                    network_data["subgraph_url"],
-                    get_status_query(response_property, date_from, date_to),
-                    {
-                        "from": (int(date_from.timestamp()) if date_from else None),
-                        "to": int(date_to.timestamp()) if date_to else None,
-                    },
+            if (
+                not data
+                or "data" not in data
+                or "escrowStatusEvents" not in data["data"]
+            ):
+                continue
+
+            status_events = data["data"]["escrowStatusEvents"]
+
+            events_with_chain_id = [
+                StatusEvent(
+                    timestamp=event["timestamp"],
+                    escrow_address=event["escrowAddress"],
+                    status=event["status"],
+                    chain_id=chain_id,
                 )
+                for event in status_events
+            ]
+            escrow_addresses.extend(events_with_chain_id)
 
-                if (
-                    not data
-                    or "data" not in data
-                    or response_property not in data["data"]
-                ):
-                    continue
-                status_events = data["data"][response_property]
-                events_with_status = [
-                    StatusEvent(
-                        timestamp=event["timestamp"],
-                        escrow_address=event["escrowAddress"],
-                        status=status,
-                        chain_id=chain_id,
-                    )
-                    for event in status_events
-                ]
-                escrow_addresses.extend(events_with_status)
-
-        # Sort events by timestamp
         escrow_addresses.sort(key=lambda x: x.timestamp)
+
         return escrow_addresses

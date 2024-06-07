@@ -93,25 +93,32 @@ query GetEscrow(
     )
 
 
-def get_status_query(property_name: str, from_: datetime, to_: datetime):
+def get_status_query(
+    from_: datetime = None, to_: datetime = None, launcher: str = None
+):
     return """
-query GetStatus(
+query getStatus(
+    $status: [String!]!
     $from: Int
     $to: Int
-){{
-    {name}(
+    $launcher: String
+) {{
+    escrowStatusEvents(
         where: {{
-        {from_clause}
-        {to_clause}
+            status_in: $status
+            {from_clause}
+            {to_clause}
+            {launcher_clause}
         }}
     ) {{
         id
         escrowAddress
         timestamp
+        status
     }}
 }}
 """.format(
-        name=property_name,
         from_clause="timestamp_gte: $from" if from_ else "",
         to_clause="timestamp_lte: $to" if to_ else "",
+        launcher_clause=f"launcher: $launcher" if launcher else "",
     )

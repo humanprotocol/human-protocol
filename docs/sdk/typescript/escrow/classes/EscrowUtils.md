@@ -132,7 +132,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Source
 
-[escrow.ts:1632](https://github.com/humanprotocol/human-protocol/blob/764d3947831525b832eddab130899f2c80986254/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1632)
+[escrow.ts:1631](https://github.com/humanprotocol/human-protocol/blob/1dec254dbb448c0dbabfd2a64fcc9e7b26c65395/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1631)
 
 ***
 
@@ -246,13 +246,13 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Source
 
-[escrow.ts:1508](https://github.com/humanprotocol/human-protocol/blob/764d3947831525b832eddab130899f2c80986254/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1508)
+[escrow.ts:1507](https://github.com/humanprotocol/human-protocol/blob/1dec254dbb448c0dbabfd2a64fcc9e7b26c65395/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1507)
 
 ***
 
 ### getStatusEvents()
 
-> `static` **getStatusEvents**(`networks`, `statuses`?, `from`?, `to`?): `Promise`\<`StatusEvent`[]\>
+> `static` **getStatusEvents**(`networks`, `statuses`?, `from`?, `to`?, `launcher`?): `Promise`\<`StatusEvent`[]\>
 
 This function returns the status events for a given set of networks within an optional date range.
 
@@ -266,6 +266,7 @@ enum ChainId {
   MAINNET = 1,
   RINKEBY = 4,
   GOERLI = 5,
+  SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
@@ -277,8 +278,9 @@ enum ChainId {
   AVALANCHE_TESTNET = 43113,
   CELO = 42220,
   CELO_ALFAJORES = 44787,
-  SKALE = 1273227453,
   LOCALHOST = 1338,
+  XLAYER_TESTNET = 195,
+  XLAYER = 196,
 }
 ```
 
@@ -295,7 +297,7 @@ type Status = {
 
 • **networks**: `ChainId`[]
 
-List of network IDs to query for status events
+List of network IDs to query for status events.
 
 • **statuses?**: `EscrowStatus`[]
 
@@ -303,17 +305,21 @@ Optional array of statuses to query for. If not provided, queries for all status
 
 • **from?**: `Date`
 
-Optional start date to filter events
+Optional start date to filter events.
 
 • **to?**: `Date`
 
-Optional end date to filter events
+Optional end date to filter events.
+
+• **launcher?**: `string`
+
+Optional launcher address to filter events. Must be a valid Ethereum address.
 
 #### Returns
 
 `Promise`\<`StatusEvent`[]\>
 
-Array of status events with their corresponding statuses
+- Array of status events with their corresponding statuses.
 
 **Code example**
 
@@ -323,11 +329,16 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 (async () => {
   const fromDate = new Date('2023-01-01');
   const toDate = new Date('2023-12-31');
-  const statusEvents = await EscrowUtils.getStatusEvents([ChainId.POLYGON, ChainId.MAINNET], [EscrowStatus.Pending, EscrowStatus.Complete], fromDate, toDate);
+  const statusEvents = await EscrowUtils.getStatusEvents(
+    [ChainId.POLYGON, ChainId.MAINNET],
+    [EscrowStatus.Pending, EscrowStatus.Complete],
+    fromDate,
+    toDate
+  );
   console.log(statusEvents);
 })();
 ```
 
 #### Source
 
-[escrow.ts:1713](https://github.com/humanprotocol/human-protocol/blob/764d3947831525b832eddab130899f2c80986254/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1713)
+[escrow.ts:1720](https://github.com/humanprotocol/human-protocol/blob/1dec254dbb448c0dbabfd2a64fcc9e7b26c65395/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1720)

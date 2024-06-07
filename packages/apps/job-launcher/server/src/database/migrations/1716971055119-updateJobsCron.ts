@@ -22,6 +22,11 @@ export class UpdateJobsCron1716971055119 implements MigrationInterface {
             ALTER TABLE "hmt"."cron-jobs"
             ALTER COLUMN "cron_job_type" TYPE "hmt"."cron-jobs_cron_job_type_enum" USING "cron_job_type"::"text"::"hmt"."cron-jobs_cron_job_type_enum"
         `);
+
+    await queryRunner.query(`
+            ALTER TABLE "hmt"."cron-jobs"
+            ADD "last_subgraph_time" TIMESTAMP WITH TIME ZONE
+        `);
     await queryRunner.query(`
             DROP TYPE "hmt"."cron-jobs_cron_job_type_enum_old"
         `);
@@ -41,6 +46,9 @@ export class UpdateJobsCron1716971055119 implements MigrationInterface {
             ALTER TABLE "hmt"."cron-jobs"
             ALTER COLUMN "cron_job_type" TYPE "hmt"."cron-jobs_cron_job_type_enum_old" USING "cron_job_type"::"text"::"hmt"."cron-jobs_cron_job_type_enum_old"
         `);
+    await queryRunner.query(`
+        ALTER TABLE "hmt"."cron-jobs" DROP COLUMN "last_subgraph_time"
+    `);
     await queryRunner.query(`
             DROP TYPE "hmt"."cron-jobs_cron_job_type_enum"
         `);

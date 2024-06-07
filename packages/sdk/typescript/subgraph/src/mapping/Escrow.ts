@@ -9,13 +9,9 @@ import {
 import { LegacyEscrow as LegacyEscrowContract } from '../../generated/templates/Escrow/LegacyEscrow';
 import {
   BulkPayoutEvent,
-  CancelledStatusEvent,
-  CompletedStatusEvent,
   Escrow,
   EscrowStatistics,
-  PaidStatusEvent,
-  PartialStatusEvent,
-  PendingStatusEvent,
+  EscrowStatusEvent,
   SetupEvent,
   StoreResultsEvent,
   Worker,
@@ -78,14 +74,14 @@ export function handlePending(event: Pending): void {
   setupEventEntity.sender = event.transaction.from;
   setupEventEntity.save();
 
-  // Create PendingStatusEvent entity
-  const statusEventEntity = new PendingStatusEvent(toEventId(event));
+  // Create EscrowStatusEvent entity
+  const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;
   statusEventEntity.timestamp = event.block.timestamp;
   statusEventEntity.txHash = event.transaction.hash;
   statusEventEntity.escrowAddress = event.address;
   statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.save();
+  statusEventEntity.status = 'Pending';
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
@@ -168,7 +164,9 @@ export function handlePending(event: Pending): void {
     }
 
     escrowEntity.save();
+    statusEventEntity.launcher = escrowEntity.launcher;
   }
+  statusEventEntity.save();
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
@@ -230,6 +228,14 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
+  // Create EscrowStatusEvent entity
+  const statusEventEntity = new EscrowStatusEvent(toEventId(event));
+  statusEventEntity.block = event.block.number;
+  statusEventEntity.timestamp = event.block.timestamp;
+  statusEventEntity.txHash = event.transaction.hash;
+  statusEventEntity.escrowAddress = event.address;
+  statusEventEntity.sender = event.transaction.from;
+
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
@@ -243,16 +249,11 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     }
 
     escrowEntity.save();
+    statusEventEntity.launcher = escrowEntity.launcher;
   }
 
   if (event.params._isPartial) {
-    const statusEventEntity = new PartialStatusEvent(toEventId(event));
-    statusEventEntity.block = event.block.number;
-    statusEventEntity.timestamp = event.block.timestamp;
-    statusEventEntity.txHash = event.transaction.hash;
-    statusEventEntity.escrowAddress = event.address;
-    statusEventEntity.sender = event.transaction.from;
-    statusEventEntity.save();
+    statusEventEntity.status = 'Partial';
 
     statsEntity.partialStatusEventCount =
       statsEntity.partialStatusEventCount.plus(ONE_BI);
@@ -263,13 +264,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     eventDayData.dailyTotalEventCount =
       eventDayData.dailyTotalEventCount.plus(ONE_BI);
   } else {
-    const statusEventEntity = new PaidStatusEvent(toEventId(event));
-    statusEventEntity.block = event.block.number;
-    statusEventEntity.timestamp = event.block.timestamp;
-    statusEventEntity.txHash = event.transaction.hash;
-    statusEventEntity.escrowAddress = event.address;
-    statusEventEntity.sender = event.transaction.from;
-    statusEventEntity.save();
+    statusEventEntity.status = 'Paid';
 
     statsEntity.paidStatusEventCount =
       statsEntity.paidStatusEventCount.plus(ONE_BI);
@@ -284,17 +279,18 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   // Save statistics, and event day data
   statsEntity.save();
   eventDayData.save();
+  statusEventEntity.save();
 }
 
 export function handleCancelled(event: Cancelled): void {
-  // Create CancelledStatusEvent entity
-  const eventEntity = new CancelledStatusEvent(toEventId(event));
+  // Create EscrowStatusEvent entity
+  const eventEntity = new EscrowStatusEvent(toEventId(event));
   eventEntity.block = event.block.number;
   eventEntity.timestamp = event.block.timestamp;
   eventEntity.txHash = event.transaction.hash;
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
-  eventEntity.save();
+  eventEntity.status = 'Cancelled';
 
   // Update statistics
   const statsEntity = createOrLoadEscrowStatistics();
@@ -316,18 +312,20 @@ export function handleCancelled(event: Cancelled): void {
   if (escrowEntity) {
     escrowEntity.status = 'Cancelled';
     escrowEntity.save();
+    eventEntity.launcher = escrowEntity.launcher;
   }
+  eventEntity.save();
 }
 
 export function handleCompleted(event: Completed): void {
-  // Create CompletedStatusEvent entity
-  const eventEntity = new CompletedStatusEvent(toEventId(event));
+  // Create EscrowStatusEvent entity
+  const eventEntity = new EscrowStatusEvent(toEventId(event));
   eventEntity.block = event.block.number;
   eventEntity.timestamp = event.block.timestamp;
   eventEntity.txHash = event.transaction.hash;
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
-  eventEntity.save();
+  eventEntity.status = 'Complete';
 
   // Update statistics
   const statsEntity = createOrLoadEscrowStatistics();
@@ -349,5 +347,7 @@ export function handleCompleted(event: Completed): void {
   if (escrowEntity) {
     escrowEntity.status = 'Complete';
     escrowEntity.save();
+    eventEntity.launcher = escrowEntity.launcher;
   }
+  eventEntity.save();
 }

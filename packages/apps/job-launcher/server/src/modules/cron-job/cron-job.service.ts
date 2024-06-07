@@ -22,6 +22,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
 import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
+import { JobEntity } from '../job/job.entity';
 
 @Injectable()
 export class CronJobService {
@@ -290,6 +291,7 @@ export class CronJobService {
     if (lastCronJob && !lastCronJob.completedAt) {
       return;
     }
+
     this.logger.log('Update jobs START');
     const cronJob = await this.startCronJob(CronJobType.UpdateJobs);
 
@@ -297,29 +299,72 @@ export class CronJobService {
       const events = await EscrowUtils.getStatusEvents(
         this.web3Service.getValidChains(),
         [EscrowStatus.Partial, EscrowStatus.Complete],
-        lastCronJob?.startedAt || undefined,
+        lastCronJob?.lastSubgraphTime || undefined,
+        undefined,
+        this.web3Service.getOperatorAddress(),
       );
 
-      for (const event of events) {
-        const job = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-          event.chainId,
-          ethers.getAddress(event.escrowAddress),
+      if (events.length === 0) {
+        this.logger.log('No events to process');
+        await this.completeCronJob(cronJob);
+        return;
+      }
+
+      const escrowAddresses = events.map((event) =>
+        ethers.getAddress(event.escrowAddress),
+      );
+      const chainIds = events.map((event) => event.chainId);
+
+      const jobs =
+        await this.jobRepository.findManyByChainIdsAndEscrowAddresses(
+          chainIds,
+          escrowAddresses,
         );
 
-        if (!job) continue;
+      const jobMap = new Map<string, JobEntity>();
+      for (const job of jobs) {
+        jobMap.set(`${job.chainId}-${job.escrowAddress}`, job);
+      }
+
+      const jobsToUpdate: JobEntity[] = [];
+      let latestEventTimestamp = 0;
+
+      for (const event of events) {
+        const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
+        const job = jobMap.get(key);
+
+        if (!job || job.status === JobStatus.TO_CANCEL) continue;
+
+        let newStatus: JobStatus | null = null;
         if (
           event.status === EscrowStatus[EscrowStatus.Partial] &&
           job.status !== JobStatus.PARTIAL
         ) {
-          job.status = JobStatus.PARTIAL;
-          await this.jobRepository.updateOne(job);
+          newStatus = JobStatus.PARTIAL;
         } else if (
           event.status === EscrowStatus[EscrowStatus.Complete] &&
           job.status !== JobStatus.COMPLETED
         ) {
-          job.status = JobStatus.COMPLETED;
-          await this.jobRepository.updateOne(job);
+          newStatus = JobStatus.COMPLETED;
         }
+
+        if (newStatus && newStatus !== job.status) {
+          job.status = newStatus;
+          jobsToUpdate.push(job);
+        }
+        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
+        if (eventTimestamp > latestEventTimestamp) {
+          latestEventTimestamp = eventTimestamp;
+        }
+      }
+
+      if (jobsToUpdate.length > 0) {
+        await this.jobRepository.updateMany(jobsToUpdate);
+      }
+
+      if (latestEventTimestamp > 0) {
+        cronJob.lastSubgraphTime = new Date(latestEventTimestamp + 1000); // Add one sec to avoid getting the last processed event
+        await this.cronJobRepository.save(cronJob);
       }
     } catch (e) {
       this.logger.error(e);

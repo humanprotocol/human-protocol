@@ -34,7 +34,6 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
-  ErrorUnsupportedStatus,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from './error';
@@ -1665,6 +1664,7 @@ export class EscrowUtils {
    *   MAINNET = 1,
    *   RINKEBY = 4,
    *   GOERLI = 5,
+   *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
@@ -1676,8 +1676,9 @@ export class EscrowUtils {
    *   AVALANCHE_TESTNET = 43113,
    *   CELO = 42220,
    *   CELO_ALFAJORES = 44787,
-   *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
+   *   XLAYER_TESTNET = 195,
+   *   XLAYER = 196,
    * }
    * ```
    *
@@ -1690,11 +1691,12 @@ export class EscrowUtils {
    * };
    * ```
    *
-   * @param {ChainId[]} networks List of network IDs to query for status events
-   * @param {EscrowStatus[]} [statuses] Optional array of statuses to query for. If not provided, queries for all statuses.
-   * @param {Date} [from] Optional start date to filter events
-   * @param {Date} [to] Optional end date to filter events
-   * @returns {Promise<StatusEvent[]>} Array of status events with their corresponding statuses
+   * @param {ChainId[]} networks - List of network IDs to query for status events.
+   * @param {EscrowStatus[]} [statuses] - Optional array of statuses to query for. If not provided, queries for all statuses.
+   * @param {Date} [from] - Optional start date to filter events.
+   * @param {Date} [to] - Optional end date to filter events.
+   * @param {string} [launcher] - Optional launcher address to filter events. Must be a valid Ethereum address.
+   * @returns {Promise<StatusEvent[]>} - Array of status events with their corresponding statuses.
    *
    * **Code example**
    *
@@ -1704,7 +1706,12 @@ export class EscrowUtils {
    * (async () => {
    *   const fromDate = new Date('2023-01-01');
    *   const toDate = new Date('2023-12-31');
-   *   const statusEvents = await EscrowUtils.getStatusEvents([ChainId.POLYGON, ChainId.MAINNET], [EscrowStatus.Pending, EscrowStatus.Complete], fromDate, toDate);
+   *   const statusEvents = await EscrowUtils.getStatusEvents(
+   *     [ChainId.POLYGON, ChainId.MAINNET],
+   *     [EscrowStatus.Pending, EscrowStatus.Complete],
+   *     fromDate,
+   *     toDate
+   *   );
    *   console.log(statusEvents);
    * })();
    * ```
@@ -1714,23 +1721,22 @@ export class EscrowUtils {
     networks: ChainId[],
     statuses?: EscrowStatus[],
     from?: Date,
-    to?: Date
+    to?: Date,
+    launcher?: string
   ): Promise<StatusEvent[]> {
     if (!networks?.length) {
       throw ErrorUnsupportedChainID;
     }
-    const escrowAddresses: StatusEvent[] = [];
-    const statusQueryMap: { [key in EscrowStatus]: string } = {
-      [EscrowStatus.Launched]: '', // No query for Launched status
-      [EscrowStatus.Pending]: 'pending',
-      [EscrowStatus.Partial]: 'partial',
-      [EscrowStatus.Paid]: 'paid',
-      [EscrowStatus.Complete]: 'completed',
-      [EscrowStatus.Cancelled]: 'cancelled',
-    };
 
-    // If statuses is not provided, use all statuses except Launched
+    if (launcher && !ethers.isAddress(launcher)) {
+      throw ErrorInvalidAddress;
+    }
+
+    const escrowAddresses: StatusEvent[] = [];
+
+    // If statuses are not provided, use all statuses except Launched
     const effectiveStatuses = statuses ?? [
+      EscrowStatus.Launched,
       EscrowStatus.Pending,
       EscrowStatus.Partial,
       EscrowStatus.Paid,
@@ -1744,34 +1750,33 @@ export class EscrowUtils {
         throw ErrorUnsupportedChainID;
       }
 
-      for (const status of effectiveStatuses) {
-        const queryStatus = statusQueryMap[status];
-        if (!queryStatus) {
-          throw ErrorUnsupportedStatus;
-        }
+      const statusNames = effectiveStatuses.map(
+        (status) => EscrowStatus[status]
+      );
 
-        const data = await gqlFetch<any>(
-          networkData.subgraphUrl,
-          GET_STATUS_UPDATES_QUERY(queryStatus, from, to),
-          {
-            from: from ? Math.floor(from.getTime() / 1000) : undefined,
-            to: to ? Math.floor(to.getTime() / 1000) : undefined,
-          }
-        );
-        const responseProperty = `${queryStatus}StatusEvents`;
-        if (!data || !data[responseProperty]) {
-          continue;
+      const data = await gqlFetch<any>(
+        networkData.subgraphUrl,
+        GET_STATUS_UPDATES_QUERY(from, to, launcher),
+        {
+          status: statusNames,
+          from: from ? Math.floor(from.getTime() / 1000) : undefined,
+          to: to ? Math.floor(to.getTime() / 1000) : undefined,
+          launcher: launcher || undefined,
         }
-        const statusEvents = data[responseProperty] as StatusEvent[];
+      );
 
-        const eventsWithStatus = statusEvents.map((event) => ({
-          ...event,
-          status: EscrowStatus[status],
-          chainId,
-        }));
-        escrowAddresses.push(...eventsWithStatus);
+      if (!data || !data['escrowStatusEvents']) {
+        continue;
       }
+      const statusEvents = data['escrowStatusEvents'] as StatusEvent[];
+
+      const eventsWithChainId = statusEvents.map((event) => ({
+        ...event,
+        chainId,
+      }));
+      escrowAddresses.push(...eventsWithChainId);
     }
+
     escrowAddresses.sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
 
     return escrowAddresses;
