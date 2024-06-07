@@ -19,14 +19,6 @@ export function ProfileData() {
         </Typography>
       </Grid>
       <Grid>
-        <Typography
-          sx={{
-            marginBottom: '10px',
-          }}
-          variant="subtitle2"
-        >
-          {t('worker.profile.password')}
-        </Typography>
         <Button
           color="secondary"
           component={Link}
