@@ -378,3 +378,15 @@ type LeaderStatistics @entity {
   id: ID!
   leaders: BigInt!
 }
+
+type DailyStats @entity {
+  id: ID!
+  activeWorkers: Int!
+  transactions: Int!
+  uniqueSenders: Int!
+  uniqueReceivers: Int!
+  escrowsLaunched: Int!
+  escrowsCompleted: Int!
+  escrowPayouts: Int!
+  timestamp: Int!
+}

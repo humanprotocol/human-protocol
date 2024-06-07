@@ -24,6 +24,7 @@ import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
+import { getDailyStats } from './utils/dailyStats';
 
 export const STATISTICS_ENTITY_ID = 'escrow-statistics-id';
 
@@ -196,6 +197,9 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
   eventDayData.save();
+
+  // Update daily stats
+  const dailyStats = getDailyStats(event);
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
