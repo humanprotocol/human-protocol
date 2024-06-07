@@ -325,6 +325,25 @@ describe('JobService', () => {
       expect(assignment.status).toBe(AssignmentStatus.VALIDATION);
     });
 
+    it('should fail if assignment status is not ACTIVE', async () => {
+      const assignment = {
+        jobId: 1,
+        workerAddress: workerAddress,
+        status: AssignmentStatus.CANCELED,
+      };
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
+        .mockResolvedValue(assignment as AssignmentEntity);
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
+
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
+      ).rejects.toThrow('Invalid assignment status');
+      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
+    });
+
     it('should fail if user is not assigned to the job', async () => {
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
@@ -342,13 +361,18 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
+      const assignment = {
+        jobId: 1,
+        workerAddress: workerAddress,
+        status: AssignmentStatus.ACTIVE,
+      };
+
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
         .mockResolvedValue(assignment as AssignmentEntity);
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
         {
-          exchangeAddress: '0x1234567890123456789012345678901234567892',
           workerAddress: '0x1234567890123456789012345678901234567892',
           solution: 'test',
         },
@@ -361,12 +385,6 @@ describe('JobService', () => {
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
       }));
-
-      const recordingOracleURLMock = 'https://example.com/recordingoracle';
-
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        webhookUrl: recordingOracleURLMock,
-      });
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
@@ -385,31 +403,40 @@ describe('JobService', () => {
     });
 
     it('should fail if user has already submitted a solution', async () => {
-      const solution = 'job-solution';
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      const assignment = {
+        jobId: 1,
+        workerAddress: workerAddress,
+        status: AssignmentStatus.ACTIVE,
+      };
 
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
         .mockResolvedValue(assignment as AssignmentEntity);
 
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getRecordingOracleAddress: jest
-          .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
-      }));
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        webhookUrl: 'https://example.com/recordingoracle',
-      });
-
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
         {
-          exchangeAddress: '0x1234567890123456789012345678901234567892',
-          workerAddress: '0x1234567890123456789012345678901234567891',
+          workerAddress: workerAddress,
           solution: 'test',
         },
       ]);
 
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(manifest);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
+
       await expect(
-        jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
       ).rejects.toThrow('User has already submitted a solution');
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
