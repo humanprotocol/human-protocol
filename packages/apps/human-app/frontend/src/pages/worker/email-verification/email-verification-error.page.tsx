@@ -11,13 +11,13 @@ import { Button } from '@/components/ui/button';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
 
 export function EmailVerificationErrorPage({ error }: { error: unknown }) {
-  const { user, isPending } = useAuth();
+  const { user, status } = useAuth();
   const navigate = useNavigate();
 
   const { mutate: resendEmailVerificationWorkerMutation } =
     useResendEmailVerificationWorkerMutation();
 
-  if (isPending) {
+  if (status === 'loading') {
     return <PageCardLoader />;
   }
 
