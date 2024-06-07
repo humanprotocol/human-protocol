@@ -29,6 +29,8 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors'; 
+import { BadRequestException } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -340,7 +342,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
-      ).rejects.toThrow('Invalid assignment status');
+      ).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
@@ -437,7 +439,9 @@ describe('JobService', () => {
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
-      ).rejects.toThrow('User has already submitted a solution');
+      ).rejects.toThrow(
+        new BadRequestException(ErrorJob.SolutionAlreadySubmitted),
+      );
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
   });
