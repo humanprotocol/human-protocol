@@ -44,7 +44,7 @@ import {
 } from './graphql';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowCancel, EscrowStatus, NetworkData } from './types';
-import { isValidUrl, throwError } from './utils';
+import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 
 /**
  * ## Introduction
@@ -1503,7 +1503,8 @@ export class EscrowUtils {
    * ```
    */
   public static async getEscrows(
-    filter: IEscrowsFilter
+    filter: IEscrowsFilter,
+    subgraphApiKey?: string
   ): Promise<EscrowData[]> {
     if (!filter?.networks?.length) {
       throw ErrorUnsupportedChainID;
@@ -1534,7 +1535,7 @@ export class EscrowUtils {
         }
 
         const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
-          networkData.subgraphUrl,
+          getSubgraphUrl(networkData, subgraphApiKey),
           GET_ESCROWS_QUERY(filter),
           {
             ...filter,
@@ -1632,7 +1633,8 @@ export class EscrowUtils {
    */
   public static async getEscrow(
     chainId: ChainId,
-    escrowAddress: string
+    escrowAddress: string,
+    subgraphApiKey?: string
   ): Promise<EscrowData> {
     const networkData = NETWORKS[chainId];
 
@@ -1646,7 +1648,7 @@ export class EscrowUtils {
 
     try {
       const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
-        networkData.subgraphUrl,
+        getSubgraphUrl(networkData, subgraphApiKey),
         GET_ESCROW_BY_ADDRESS_QUERY(),
         { escrowAddress: escrowAddress.toLowerCase() }
       );

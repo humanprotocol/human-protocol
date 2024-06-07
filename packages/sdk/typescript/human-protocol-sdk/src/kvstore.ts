@@ -18,7 +18,7 @@ import {
 } from './error';
 import gqlFetch from 'graphql-request';
 import { NetworkData } from './types';
-import { isValidUrl } from './utils';
+import { getSubgraphUrl, isValidUrl } from './utils';
 import { GET_KVSTORE_BY_ADDRESS_QUERY } from './graphql/queries/kvstore';
 import { KVStoreData } from './graphql';
 import { IKVStore } from './interfaces';
@@ -497,7 +497,8 @@ export class KVStoreUtils {
    */
   public static async getKVStoreData(
     chainId: ChainId,
-    address: string
+    address: string,
+    subgraphApiKey?: string
   ): Promise<IKVStore[]> {
     const networkData = NETWORKS[chainId];
 
@@ -510,7 +511,7 @@ export class KVStoreUtils {
     }
 
     const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
-      networkData.subgraphUrl,
+      getSubgraphUrl(networkData, subgraphApiKey),
       GET_KVSTORE_BY_ADDRESS_QUERY(),
       { address: address.toLowerCase() }
     );

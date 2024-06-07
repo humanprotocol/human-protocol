@@ -13,6 +13,7 @@ import {
   GET_TRANSACTION_QUERY,
 } from './graphql/queries/transaction';
 import { ITransaction, ITransactionsFilter } from './interfaces';
+import { getSubgraphUrl } from './utils';
 
 export class TransactionUtils {
   /**
@@ -32,7 +33,8 @@ export class TransactionUtils {
    */
   public static async getTransaction(
     chainId: ChainId,
-    hash: string
+    hash: string,
+    subgraphApiKey?: string
   ): Promise<ITransaction> {
     if (!ethers.isHexString(hash)) {
       throw ErrorInvalidHahsProvided;
@@ -45,7 +47,7 @@ export class TransactionUtils {
 
     const { transaction } = await gqlFetch<{
       transaction: ITransaction;
-    }>(networkData.subgraphUrl, GET_TRANSACTION_QUERY, {
+    }>(getSubgraphUrl(networkData, subgraphApiKey), GET_TRANSACTION_QUERY, {
       hash: hash.toLowerCase(),
     });
 
@@ -100,7 +102,8 @@ export class TransactionUtils {
    * ```
    */
   public static async getTransactions(
-    filter: ITransactionsFilter
+    filter: ITransactionsFilter,
+    subgraphApiKey?: string
   ): Promise<ITransaction[]> {
     if (
       (!!filter.startDate || !!filter.endDate) &&
@@ -115,25 +118,24 @@ export class TransactionUtils {
       if (!networkData) {
         throw ErrorUnsupportedChainID;
       }
-
-      if (!networkData.subgraphUrl) {
-        continue;
-      }
-
       const { transactions } = await gqlFetch<{
         transactions: ITransaction[];
-      }>(networkData.subgraphUrl, GET_TRANSACTIONS_QUERY(filter), {
-        fromAddress: filter?.fromAddress,
-        toAddress: filter?.toAddress,
-        startDate: filter?.startDate
-          ? Math.floor(filter?.startDate.getTime() / 1000)
-          : undefined,
-        endDate: filter.endDate
-          ? Math.floor(filter.endDate.getTime() / 1000)
-          : undefined,
-        startBlock: filter.startBlock ? filter.startBlock : undefined,
-        endBlock: filter.endBlock ? filter.endBlock : undefined,
-      });
+      }>(
+        getSubgraphUrl(networkData, subgraphApiKey),
+        GET_TRANSACTIONS_QUERY(filter),
+        {
+          fromAddress: filter?.fromAddress,
+          toAddress: filter?.toAddress,
+          startDate: filter?.startDate
+            ? Math.floor(filter?.startDate.getTime() / 1000)
+            : undefined,
+          endDate: filter.endDate
+            ? Math.floor(filter.endDate.getTime() / 1000)
+            : undefined,
+          startBlock: filter.startBlock ? filter.startBlock : undefined,
+          endBlock: filter.endBlock ? filter.endBlock : undefined,
+        }
+      );
 
       if (!transactions) {
         continue;
