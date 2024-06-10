@@ -199,7 +199,9 @@ def get_data_from_subgraph(network: dict, query: str, params: dict = None):
             SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
         )
     else:
-        logger.warning("Warning: SUBGRAPH_API_KEY is not provided")
+        logger.warning(
+            "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
+        )
         subgraph_url = network["subgraph_url"]
 
     request = requests.post(subgraph_url, json={"query": query, "variables": params})
