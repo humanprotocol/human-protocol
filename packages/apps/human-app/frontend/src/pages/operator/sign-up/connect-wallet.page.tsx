@@ -1,16 +1,17 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 import { PageCard } from '@/components/ui/page-card';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
+import { useModalStore } from '@/components/ui/modal/modal.store';
 
 export function ConnectWalletOperatorPage() {
   const { t } = useTranslation();
+  const { openModal } = useModalStore();
   const {
     isConnected,
     web3ProviderMutation: {
@@ -49,7 +50,14 @@ export function ConnectWalletOperatorPage() {
         <Typography variant="body1">
           {t('operator.connectWallet.description')}
         </Typography>
-        <ConnectWalletBtn />
+        <Button
+          onClick={() => {
+            openModal('WALLET_CONNECT');
+          }}
+          variant="contained"
+        >
+          {t('components.wallet.connectBtn.connect')}
+        </Button>
         {isConnected ? (
           <Button
             component={Link}
