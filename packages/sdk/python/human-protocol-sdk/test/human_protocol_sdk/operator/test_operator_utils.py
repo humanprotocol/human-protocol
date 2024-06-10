@@ -51,7 +51,7 @@ class TestOperatorUtils(unittest.TestCase):
             leaders = OperatorUtils.get_leaders(filter)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
                 params={"role": filter.role},
             )
@@ -113,7 +113,7 @@ class TestOperatorUtils(unittest.TestCase):
             leaders = OperatorUtils.get_leaders(filter)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
                 params={"role": filter.role},
             )
@@ -135,7 +135,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].public_key, None)
             self.assertEqual(leaders[0].webhook_url, None)
             self.assertEqual(leaders[0].url, None)
-            self.assertEqual(leaders[0].job_types, [])  # Should rerutn empty array
+            # Should rerutn empty array
+            self.assertEqual(leaders[0].job_types, [])
 
     def test_get_leaders_when_job_types_is_array(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -175,7 +176,7 @@ class TestOperatorUtils(unittest.TestCase):
             leaders = OperatorUtils.get_leaders(filter)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
                 params={"role": filter.role},
             )
@@ -219,7 +220,7 @@ class TestOperatorUtils(unittest.TestCase):
             leaders = OperatorUtils.get_leaders(filter)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
                 params={"role": filter.role},
             )
@@ -263,7 +264,7 @@ class TestOperatorUtils(unittest.TestCase):
             leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leader_query,
                 params={"address": staker_address},
             )
@@ -324,7 +325,7 @@ class TestOperatorUtils(unittest.TestCase):
             leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leader_query,
                 params={"address": staker_address},
             )
@@ -385,7 +386,7 @@ class TestOperatorUtils(unittest.TestCase):
             leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leader_query,
                 params={"address": staker_address},
             )
@@ -422,7 +423,7 @@ class TestOperatorUtils(unittest.TestCase):
             leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_leader_query,
                 params={"address": staker_address},
             )
@@ -465,7 +466,7 @@ class TestOperatorUtils(unittest.TestCase):
             )
 
         mock_function.assert_any_call(
-            NETWORKS[ChainId.POLYGON]["subgraph_url"],
+            NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
         )
@@ -512,7 +513,7 @@ class TestOperatorUtils(unittest.TestCase):
             )
 
         mock_function.assert_any_call(
-            NETWORKS[ChainId.POLYGON]["subgraph_url"],
+            NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
         )
@@ -559,7 +560,7 @@ class TestOperatorUtils(unittest.TestCase):
             )
 
         mock_function.assert_any_call(
-            NETWORKS[ChainId.POLYGON]["subgraph_url"],
+            NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
         )
@@ -585,7 +586,7 @@ class TestOperatorUtils(unittest.TestCase):
             )
 
         mock_function.assert_any_call(
-            NETWORKS[ChainId.POLYGON]["subgraph_url"],
+            NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
         )
@@ -616,7 +617,7 @@ class TestOperatorUtils(unittest.TestCase):
             rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
             )
@@ -638,7 +639,7 @@ class TestOperatorUtils(unittest.TestCase):
             rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
             )

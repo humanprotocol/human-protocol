@@ -163,6 +163,38 @@ describe('Staking', () => {
       'amountStaked',
       '200'
     );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'stake'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'value',
+      '200'
+    );
   });
 
   test('Should properly index StakeLocked events', () => {
@@ -290,6 +322,38 @@ describe('Staking', () => {
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '31'
+    );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'unstake'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'value',
+      '100'
     );
   });
 
@@ -425,6 +489,38 @@ describe('Staking', () => {
       'Leader',
       data2.params.staker.toHex(),
       'amountWithdrawn',
+      '100'
+    );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'withdraw'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'value',
       '100'
     );
   });
@@ -589,6 +685,38 @@ describe('Staking', () => {
       'Leader',
       data2.params.staker.toHex(),
       'amountAllocated',
+      '50'
+    );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'allocate'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'value',
       '50'
     );
   });
@@ -779,6 +907,38 @@ describe('Staking', () => {
       'amountSlashed',
       '10'
     );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'slash'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'value',
+      '10'
+    );
   });
 
   test('Should properly index AllocationClosed events', () => {
@@ -955,6 +1115,38 @@ describe('Staking', () => {
       data2.params.staker.toHex(),
       'amountSlashed',
       '10'
+    );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'closeAllocation'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'value',
+      '40'
     );
   });
 });

@@ -182,6 +182,36 @@ describe('Escrow', () => {
       'recordingOracle',
       recordingOracleAddressString
     );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'txHash',
+      newPending1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'method',
+      'setup'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'block',
+      newPending1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'from',
+      newPending1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
   });
 
   test('should properly handle IntermediateStorage event', () => {
@@ -220,6 +250,36 @@ describe('Escrow', () => {
     );
     assert.fieldEquals('StoreResultsEvent', id, 'sender', workerAddressString);
     assert.fieldEquals('StoreResultsEvent', id, 'intermediateResultsUrl', URL);
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'txHash',
+      newIS.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'method',
+      'storeResults'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'block',
+      newIS.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'from',
+      newIS.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
   });
 
   test('Should properly handle BulkTransfer events with partially paid status', () => {
@@ -309,6 +369,36 @@ describe('Escrow', () => {
       'status',
       'Partially Paid'
     );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'from',
+      bulk1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
   });
 
   test('Should properly handle BulkTransfer events with fully paid status', () => {
@@ -388,6 +478,36 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Paid');
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'from',
+      bulk1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
   });
 
   describe('Statistics', () => {

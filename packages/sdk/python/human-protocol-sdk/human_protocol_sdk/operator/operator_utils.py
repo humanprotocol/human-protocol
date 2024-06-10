@@ -28,8 +28,6 @@ from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.utils import get_data_from_subgraph
 from web3 import Web3
 
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
-
 LOG = logging.getLogger("human_protocol_sdk.operator")
 
 
@@ -195,7 +193,7 @@ class OperatorUtils:
             return []
 
         leaders_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_leaders_query(filter),
             params={"role": filter.role},
         )
@@ -281,7 +279,7 @@ class OperatorUtils:
         network = NETWORKS[chain_id]
 
         leader_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_leader_query,
             params={"address": leader_address.lower()},
         )
@@ -357,7 +355,7 @@ class OperatorUtils:
         network = NETWORKS[chain_id]
 
         reputation_network_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_reputation_network_query(role),
             params={"address": address.lower(), "role": role},
         )
@@ -415,7 +413,7 @@ class OperatorUtils:
         network = NETWORKS[chain_id]
 
         reward_added_events_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},
         )

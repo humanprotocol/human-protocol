@@ -13,12 +13,20 @@ import {
   ErrorSigner,
   ErrorUnsupportedChainID,
 } from '../src/error';
-import { KVStoreClient } from '../src/kvstore';
+import { KVStoreClient, KVStoreUtils } from '../src/kvstore';
 import { NetworkData } from '../src/types';
 import { DEFAULT_GAS_PAYER_PRIVKEY } from './utils/constants';
+import * as gqlFetch from 'graphql-request';
+import { GET_KVSTORE_BY_ADDRESS_QUERY } from '../src/graphql/queries/kvstore';
 
 global.fetch = vi.fn().mockResolvedValue({
   text: () => Promise.resolve('example'),
+});
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
 });
 
 describe('KVStoreClient', () => {
@@ -583,6 +591,72 @@ describe('KVStoreClient', () => {
       expect(mockKVStoreContract.get).toHaveBeenCalledWith(
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key'
+      );
+    });
+  });
+});
+
+describe('KVStoreUtils', () => {
+  describe('getKVStoreData', () => {
+    test('should throw an error if chain id is an unsupported id', async () => {
+      const chainId = -1;
+      const address = ethers.ZeroAddress;
+
+      await expect(
+        KVStoreUtils.getKVStoreData(chainId, address)
+      ).rejects.toThrow(ErrorUnsupportedChainID);
+    });
+
+    test('should throw an error if escrow address is an invalid address', async () => {
+      const chainId = ChainId.LOCALHOST;
+      const address = '0x0';
+
+      await expect(
+        KVStoreUtils.getKVStoreData(chainId, address)
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should successfully get all data for the filter', async () => {
+      const chainId = ChainId.LOCALHOST;
+
+      const kvstores = [
+        {
+          id: ethers.ZeroAddress + '-fee',
+          block: '31',
+          timestamp: '1717510736',
+          address: ethers.ZeroAddress,
+          key: 'fee',
+          value: '1',
+        },
+        {
+          id: ethers.ZeroAddress + '-jwt_public_key',
+          block: '33',
+          timestamp: '1717510740',
+          address: ethers.ZeroAddress,
+          key: 'jwt_public_key',
+          value: 'http://localhost:9000/bucket/public-key.txt',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ kvstores });
+
+      const result = await KVStoreUtils.getKVStoreData(
+        chainId,
+        ethers.ZeroAddress
+      );
+
+      expect(result).toEqual(
+        kvstores.map((item) => ({
+          key: item.key,
+          value: item.value,
+        }))
+      );
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_KVSTORE_BY_ADDRESS_QUERY(),
+        { address: ethers.ZeroAddress }
       );
     });
   });

@@ -133,5 +133,55 @@ describe('EscrowFactory', () => {
       'amountJobsLaunched',
       '2'
     );
+
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'method',
+      'createEscrow'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'from',
+      data1.transaction.from.toHex()
+    );
+
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'createEscrow'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
   });
 });
