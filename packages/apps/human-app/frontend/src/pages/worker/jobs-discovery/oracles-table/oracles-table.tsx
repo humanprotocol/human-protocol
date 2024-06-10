@@ -6,10 +6,7 @@ import {
 } from 'material-react-table';
 import Grid from '@mui/material/Grid';
 import { useNavigate } from 'react-router-dom';
-import {
-  useGetOracles,
-  type OracleSuccessResponse,
-} from '@/api/servieces/worker/oracles';
+import { type OracleSuccessResponse } from '@/api/servieces/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
@@ -18,6 +15,7 @@ import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { routerPaths } from '@/router/router-paths';
 import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
+import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 
 const getColumns = (
   selectOracle: (oracleAddress: string, jobTypes: string[]) => void
@@ -70,13 +68,18 @@ const getColumns = (
   ];
 };
 
-export function OraclesTable() {
+export function OraclesTable({
+  oraclesQueryDataResult,
+}: {
+  oraclesQueryDataResult: OraclesDataQueryResult;
+}) {
   const {
     data: oraclesData,
     isError: isOraclesDataError,
-    isPending: isOraclesDataPending,
     isRefetching: isOraclesDataRefetching,
-  } = useGetOracles();
+    isPending: isOraclesDataPending,
+  } = oraclesQueryDataResult;
+
   const { setOracleAddress: setOracleAddressForMyJobs, setAvailableJobTypes } =
     useMyJobsFilterStore();
   const { setOracleAddress: setOracleAddressForJobs } = useJobsFilterStore();
@@ -107,7 +110,10 @@ export function OraclesTable() {
   return (
     <>
       {isMobile ? (
-        <OraclesTableMobile selectOracle={selectOracle} />
+        <OraclesTableMobile
+          oraclesQueryDataResult={oraclesQueryDataResult}
+          selectOracle={selectOracle}
+        />
       ) : (
         <MaterialReactTable table={table} />
       )}
