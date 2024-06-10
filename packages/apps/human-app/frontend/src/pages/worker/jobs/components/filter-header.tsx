@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid/Grid';
 import { FilersIcon } from '@/components/ui/icons';
 
-export function MyJobsFilterHeader({ text }: { text: string }) {
+export function FilterHeader({ text }: { text: string }) {
   return (
     <Grid
       container

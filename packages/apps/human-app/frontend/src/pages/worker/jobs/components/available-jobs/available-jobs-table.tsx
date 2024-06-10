@@ -20,6 +20,11 @@ import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
 import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
 import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
+import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
+import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/available-jobs-reward-amount-sort';
+import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-network-filter';
+import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-job-type-filter';
+import { FilterHeader } from '@/pages/worker/jobs/components/filter-header';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -52,15 +57,27 @@ const getColumns = (callbacks: {
       header: t('worker.jobs.network'),
       size: 100,
       enableSorting: false,
+      Header: <FilterHeader text={t('worker.jobs.network')} />,
       Cell: (props) => {
         return getNetworkName(props.row.original.chain_id);
       },
+      muiTableHeadCellProps: () => ({
+        component: (props) => {
+          return (
+            <TableHeaderCell
+              {...props}
+              popoverContent={<AvailableJobsNetworkFilter />}
+            />
+          );
+        },
+      }),
     },
     {
       accessorKey: 'reward_amount',
       header: t('worker.jobs.rewardAmount'),
       size: 100,
       enableSorting: false,
+      Header: <FilterHeader text={t('worker.jobs.rewardAmount')} />,
       Cell: (props) => {
         const { reward_amount, reward_token } = props.row.original;
         return (
@@ -70,15 +87,37 @@ const getColumns = (callbacks: {
           />
         );
       },
+      muiTableHeadCellProps: () => ({
+        component: (props) => (
+          <TableHeaderCell
+            {...props}
+            popoverContent={<AvailableJobsRewardAmountSort />}
+          />
+        ),
+      }),
     },
     {
       accessorKey: 'job_type',
       header: t('worker.jobs.jobType'),
       size: 200,
       enableSorting: false,
+      Header: <FilterHeader text={t('worker.jobs.jobType')} />,
       Cell: (props) => {
         return <Chip label={props.row.original.job_type} />;
       },
+      muiTableHeadCellProps: () => ({
+        component: (props) => {
+          return (
+            <TableHeaderCell
+              {...props}
+              popoverContent={
+                // TODO add available job types
+                <AvailableJobsJobTypeFilter jobTypes={['FORTUNE', 'TEST']} />
+              }
+            />
+          );
+        },
+      }),
     },
     {
       accessorKey: 'escrow_address',
