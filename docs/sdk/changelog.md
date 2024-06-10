@@ -1,34 +1,42 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+* **Transactions module:** add a transactions module for protocol related transactions tracking.
+* **getKVStoreData:** new function to fetch the KVStore for a given address in a given network.
 
-### Removed
+#### Changed
 
-### Fixed
+* **Subgraphs:** use the graph decentralized network. It requires to set the environment variable `SUBGRAPH_API_KEY`.
+* **getLeaders:** the filter only accepts a chainId now.
 
-### Security
+#### Deprecated
 
-# How to upgrade
+#### Removed
 
-## Typescript
+#### Fixed
 
-### yarn
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
