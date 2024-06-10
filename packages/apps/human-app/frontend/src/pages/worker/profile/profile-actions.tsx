@@ -14,6 +14,7 @@ import { routerPaths } from '@/router/router-paths';
 import { startSynapsKyc } from '@/pages/worker/profile/start-synaps-kyc';
 import { RegisterAddressAction } from '@/pages/worker/profile/register-address-action';
 import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
+import { WalletConnectDone } from '@/pages/worker/profile/wallet-connect-done';
 
 export function ProfileActions({
   setNotifications,
@@ -97,7 +98,11 @@ export function ProfileActions({
       <Grid>
         <ProfileAction
           done={Boolean(isWalletConnected && kycApproved)}
-          doneLabel={t('worker.profile.walletConnected')}
+          doneLabel={
+            <RequireWalletConnect>
+              <WalletConnectDone />
+            </RequireWalletConnect>
+          }
           toDoComponent={
             <ConnectWalletBtn
               disabled={user.kyc_status !== 'APPROVED'}
