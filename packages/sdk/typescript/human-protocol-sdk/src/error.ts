@@ -336,4 +336,4 @@ export class InvalidEthereumAddressError extends Error {
 export const ErrorInvalidHash = new Error('Invalid hash');
 
 export const WarnSubgraphApiKeyNotProvided =
-  '"subgraphApiKey" is not being provided. It might cause issues with the subgraph.';
+  '"SUBGRAPH_API_KEY" is not being provided. It might cause issues with the subgraph.';
