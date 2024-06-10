@@ -328,17 +328,12 @@ describe('JobService', () => {
     });
 
     it('should fail if assignment status is not ACTIVE', async () => {
-      const assignment = {
-        jobId: 1,
-        workerAddress: workerAddress,
-        status: AssignmentStatus.CANCELED,
-      };
+
+      assignment.status = AssignmentStatus.CANCELED;
 
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
         .mockResolvedValue(assignment as AssignmentEntity);
-
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
@@ -363,11 +358,7 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
-      const assignment = {
-        jobId: 1,
-        workerAddress: workerAddress,
-        status: AssignmentStatus.ACTIVE,
-      };
+      assignment.status = AssignmentStatus.ACTIVE;
 
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
@@ -412,11 +403,7 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
-      const assignment = {
-        jobId: 1,
-        workerAddress: workerAddress,
-        status: AssignmentStatus.ACTIVE,
-      };
+      assignment.status = AssignmentStatus.ACTIVE;
 
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
