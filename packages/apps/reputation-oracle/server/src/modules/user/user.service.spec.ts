@@ -389,7 +389,7 @@ describe('UserService', () => {
         { address, signature },
       );
 
-      expect(userEntity.save).toHaveBeenCalledWith();
+      expect(userRepository.updateOne).toHaveBeenCalledWith(userEntity);
       expect(result).toBe('signature');
     });
 
