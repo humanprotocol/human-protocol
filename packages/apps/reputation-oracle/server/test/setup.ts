@@ -22,7 +22,7 @@ export async function setup(): Promise<void> {
     secretKey: process.env.S3_SECRET_KEY || 'secret-key',
   });
   const bucket = process.env.S3_BUCKET || 'bucket';
-  const fileName = 'public-key.txt';
+  const fileName = 'repo-jwt-public-key.txt';
   const exists = await minioClient.bucketExists(bucket);
   if (!exists) {
     throw new Error('Bucket does not exists');
@@ -43,11 +43,30 @@ export async function setup(): Promise<void> {
   await kvStoreClient.setBulk(
     [KVStoreKeys.role, KVStoreKeys.fee, KVStoreKeys.webhookUrl],
     [Role.ReputationOracle, '1', 'http://localhost:5003/webhook'],
+    { nonce: 0 },
   );
   await kvStoreClient.setFileUrlAndHash(
     `http://localhost:9000/bucket/${fileName}`,
     'jwt_public_key',
+    { nonce: 1 },
   );
+
+  if (process.env.PGP_ENCRYPT && process.env.PGP_ENCRYPT === 'true') {
+    if (!process.env.PGP_PUBLIC_KEY) {
+      throw new Error('PGP public key is empty');
+    }
+    const fileName = 'repo-pgp-public-key.txt';
+
+    await minioClient.putObject(bucket, fileName, process.env.PGP_PUBLIC_KEY, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+    });
+    await kvStoreClient.setFileUrlAndHash(
+      `http://localhost:9000/bucket/${fileName}`,
+      KVStoreKeys.publicKey,
+      { nonce: 2 },
+    );
+  }
 }
 
 setup();
