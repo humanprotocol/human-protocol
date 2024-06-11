@@ -33,7 +33,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { ErrorJob } from '../../common/constant/errors';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 
 @Injectable()
 export class JobService {
@@ -144,6 +144,10 @@ export class JobService {
     );
     if (!assignment) {
       throw new BadRequestException(ErrorJob.NotAssigned);
+    }
+
+    if (assignment.status !== AssignmentStatus.ACTIVE) {
+      throw new BadRequestException(ErrorAssignment.InvalidStatus);
     }
 
     await this.addSolution(chainId, escrowAddress, workerAddress, solution);

@@ -28,7 +28,7 @@ export enum ErrorCronJob {
  */
 export enum ErrorAssignment {
   NotFound = 'Assignment not found',
-  InvalidStatus = 'Invalid assigment status',
+  InvalidStatus = 'Invalid assignment status',
   InvalidUser = 'Assignment does not belong to the user',
   AlreadyExists = 'Assignment already exists',
   FullyAssigned = 'Fully assigned job',
