@@ -12,6 +12,7 @@
   },
   "devDependencies": {},
   "dependencies": {
+    "@human-protocol/core": "^3.0.0",
     "@human-protocol/sdk": "^3.0.0",
     "@strapi/plugin-i18n": "4.16.2",
     "@strapi/plugin-users-permissions": "4.24.1",
