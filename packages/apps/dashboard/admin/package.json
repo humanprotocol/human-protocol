@@ -6,12 +6,13 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
+    "prebuild": "yarn workspace @human-protocol/dashboard-admin install",
     "build": "strapi build",
     "strapi": "strapi"
   },
   "devDependencies": {},
   "dependencies": {
-    "@human-protocol/sdk": "3.0.0",
+    "@human-protocol/sdk": "^3.0.0",
     "@strapi/plugin-i18n": "4.16.2",
     "@strapi/plugin-users-permissions": "4.24.1",
     "@strapi/strapi": "4.24.2",

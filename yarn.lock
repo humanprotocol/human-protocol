@@ -2867,7 +2867,7 @@
     "@babel/runtime" "^7.17.9"
     "@hcaptcha/loader" "^1.2.1"
 
-"@human-protocol/sdk@3.0.0":
+"@human-protocol/sdk@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@human-protocol/sdk/-/sdk-3.0.0.tgz#0d2da8a41df24aee268fbac85b075557fff9c95e"
   integrity sha512-5ny/+/oYEiXTllDlq0N2R/aniFsoJa36krQX3KzLv4wQU/OPZOAzmL9+WRaSS6QA/TclkqPVmOwNHt+6ucL2BA==
