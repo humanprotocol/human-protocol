@@ -182,7 +182,7 @@ describe('JobService', () => {
     webhookRepository: WebhookRepository,
     cronJobRepository: CronJobRepository;
 
-  let encrypt = 'true';
+  let encrypt = true;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -2812,7 +2812,7 @@ describe('JobService', () => {
       (KVStoreClient.build as any).mockImplementation(() => ({
         getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
-      encrypt = 'false';
+      encrypt = false;
     });
 
     afterEach(() => {
@@ -2820,7 +2820,7 @@ describe('JobService', () => {
     });
 
     afterAll(() => {
-      encrypt = 'true';
+      encrypt = true;
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
