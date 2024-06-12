@@ -95,12 +95,12 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   });
 };
 
-const getDailyStats = async (statisticsClient: StatisticsClient) => {
-  const dailyStats = await statisticsClient.getDailyStats();
+const getDailyStatsData = async (statisticsClient: StatisticsClient) => {
+  const dailyStats = await statisticsClient.getDailyStatsData();
 
   console.log('Daily statistics:', dailyStats);
 
-  const dailyStatsRange = await statisticsClient.getDailyStats({
+  const dailyStatsRange = await statisticsClient.getDailyStatsData({
     startDate: new Date(2023, 4, 8),
     endDate: new Date(2023, 5, 8),
   });
@@ -119,5 +119,5 @@ const getDailyStats = async (statisticsClient: StatisticsClient) => {
   await getWorkerStatistics(statisticsClient);
   await getPaymentStatistics(statisticsClient);
   await getHMTStatistics(statisticsClient);
-  await getDailyStats(statisticsClient);
+  await getDailyStatsData(statisticsClient);
 })();

@@ -1,4 +1,4 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 
 import {
   Approval,
@@ -17,11 +17,14 @@ import {
   HMTokenStatistics,
   Holder,
   Payout,
+  UniqueReceiver,
+  UniqueSender,
 } from '../../generated/schema';
 import { toEventDayId, toEventId } from './utils/event';
-import { ONE_BI, ZERO_BI } from './utils/number';
+import { ONE_BI, ONE_DAY, ZERO_BI } from './utils/number';
 import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
+import { getDailyStatsData } from './utils/dailyStats';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
 
@@ -36,6 +39,40 @@ function constructStatsEntity(): HMTokenStatistics {
   entity.holders = BigInt.fromI32(0);
 
   return entity;
+}
+
+export function createOrLoadUniqueSender(
+  dayStartTimestamp: string,
+  address: Address
+): UniqueSender {
+  const id = `${dayStartTimestamp}-${address.toHex()}`;
+  let uniqueSender = UniqueSender.load(id);
+
+  if (!uniqueSender) {
+    uniqueSender = new UniqueSender(id);
+    uniqueSender.address = address;
+    uniqueSender.transferCount = ZERO_BI;
+    uniqueSender.save();
+  }
+
+  return uniqueSender;
+}
+
+export function createOrLoadUniqueReceiver(
+  dayStartTimestamp: string,
+  address: Address
+): UniqueReceiver {
+  const id = `${dayStartTimestamp}-${address.toHex()}`;
+  let uniqueReceiver = UniqueReceiver.load(id);
+
+  if (!uniqueReceiver) {
+    uniqueReceiver = new UniqueReceiver(id);
+    uniqueReceiver.address = address;
+    uniqueReceiver.receiveCount = ZERO_BI;
+    uniqueReceiver.save();
+  }
+
+  return uniqueReceiver;
 }
 
 function updateHolders(
@@ -148,6 +185,47 @@ export function handleTransfer(event: Transfer): void {
   eventDayData.dailyHMTTransferAmount =
     eventDayData.dailyHMTTransferAmount.plus(event.params._value);
 
+  // Update daily stats
+  const dailyStats = getDailyStatsData(event);
+  dailyStats.transactions = dailyStats.transactions.plus(ONE_BI);
+  dailyStats.save();
+
+  const timestamp = event.block.timestamp.toI32();
+  const dayID = timestamp / ONE_DAY;
+  const dayStartTimestamp = dayID * ONE_DAY;
+
+  // Update unique sender
+  const uniqueSender = createOrLoadUniqueSender(
+    dayStartTimestamp.toString(),
+    event.params._from
+  );
+  if (uniqueSender.transferCount === ONE_BI) {
+    // Update daily stats
+    const dailyStats = getDailyStatsData(event);
+    dailyStats.uniqueSenders = dailyStats.uniqueSenders.plus(ONE_BI);
+    dailyStats.save();
+  }
+  uniqueSender.transferCount = uniqueSender.transferCount.plus(
+    event.params._value
+  );
+  uniqueSender.save();
+
+  // Update unique receiver
+  const uniqueReceiver = createOrLoadUniqueReceiver(
+    dayStartTimestamp.toString(),
+    event.params._to
+  );
+  if (uniqueReceiver.receiveCount === ZERO_BI) {
+    // Update daily stats
+    const dailyStats = getDailyStatsData(event);
+    dailyStats.uniqueReceivers = dailyStats.uniqueReceivers.plus(ONE_BI);
+    dailyStats.save();
+  }
+  uniqueReceiver.receiveCount = uniqueReceiver.receiveCount.plus(
+    event.params._value
+  );
+  uniqueReceiver.save();
+
   // Track HMT transfer from Escrow for paidAmount, balance, and payout items
   const fromEscrow = Escrow.load(event.params._from.toHex());
   if (fromEscrow) {
@@ -190,6 +268,11 @@ export function handleTransfer(event: Transfer): void {
       eventDayData.dailyWorkerCount =
         eventDayData.dailyWorkerCount.plus(ONE_BI);
     }
+
+    // Update daily stats
+    const dailyStats = getDailyStatsData(event);
+    dailyStats.activeWorkers = dailyStats.activeWorkers.plus(ONE_BI);
+    dailyStats.save();
   }
 
   eventDayData.save();

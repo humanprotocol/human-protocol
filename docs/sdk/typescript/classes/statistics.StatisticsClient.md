@@ -52,6 +52,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 ### Methods
 
+- [getDailyStatsData](statistics.StatisticsClient.md#getdailystatsdata)
 - [getEscrowStatistics](statistics.StatisticsClient.md#getescrowstatistics)
 - [getHMTStatistics](statistics.StatisticsClient.md#gethmtstatistics)
 - [getPaymentStatistics](statistics.StatisticsClient.md#getpaymentstatistics)
@@ -77,7 +78,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 #### Defined in
 
-[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
+[statistics.ts:70](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L70)
 
 ## Properties
 
@@ -87,9 +88,75 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 #### Defined in
 
-[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+[statistics.ts:63](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L63)
 
 ## Methods
+
+### getDailyStatsData
+
+▸ **getDailyStatsData**(`params?`): `Promise`\<`DailyStatsData`[]\>
+
+This function returns the daily statistics data.
+
+**Input parameters**
+
+```ts
+interface IDateParams {
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+}
+```
+
+```ts
+type DailyStatsData = {
+  id: string;
+  activeWorkers: number;
+  transactions: number;
+  uniqueSenders: number;
+  uniqueReceivers: number;
+  escrowsLaunched: number;
+  escrowsCompleted: number;
+  escrowPayouts: number;
+  timestamp: bigint;
+};
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `params` | `IDateParams` | Parameters including start and end dates for the data retrieval |
+
+#### Returns
+
+`Promise`\<`DailyStatsData`[]\>
+
+Daily statistics data.
+
+**Code example**
+
+```ts
+import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+
+const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+
+// Fetch daily statistics data without specifying date range
+const statsWithoutParams = await statisticsClient.getDailyStatsData();
+console.log('Daily Statistics without Params:', statsWithoutParams);
+
+// Fetch daily statistics data with specified date range
+const startDate = new Date(2023, 4, 8);
+const endDate = new Date(2023, 5, 8);
+const statsWithParams = await statisticsClient.getDailyStatsData({ startDate, endDate });
+console.log('Daily Statistics from 5/8 - 6/8:', statsWithParams);
+```
+
+#### Defined in
+
+[statistics.ts:486](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L486)
+
+___
 
 ### getEscrowStatistics
 
@@ -151,7 +218,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:121](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L121)
+[statistics.ts:123](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L123)
 
 ___
 
@@ -247,7 +314,7 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Defined in
 
-[statistics.ts:394](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L394)
+[statistics.ts:396](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L396)
 
 ___
 
@@ -329,7 +396,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:285](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L285)
+[statistics.ts:287](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L287)
 
 ___
 
@@ -388,4 +455,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:196](https://github.com/humanprotocol/human-protocol/blob/a1de62e8e746c43536740f191a75d8b701d507a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L196)
+[statistics.ts:198](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L198)

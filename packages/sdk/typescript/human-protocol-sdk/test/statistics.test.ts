@@ -6,7 +6,7 @@ import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 import { StatisticsClient } from '../src/statistics';
 import {
-  GET_DAILY_STATS_QUERY,
+  GET_DAILY_STATS_DATA_QUERY,
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
 } from '../src/graphql/queries';
@@ -299,72 +299,54 @@ describe('StatisticsClient', () => {
     });
   });
 
-  describe('getDailyStats', () => {
+  describe('getDailyStatsData', () => {
     test('should successfully get daily statistics', async () => {
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({
-          hmtokenStatistics: {
-            totalValueTransfered: '100',
-            totalTransferEventCount: '4',
-            holders: '2',
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        dailyStatsDatas: [
+          {
+            id: 1,
+            activeWorkers: 10,
+            transactions: 1,
+            uniqueSenders: 5,
+            uniqueReceivers: 5,
+            escrowsLaunched: 100,
+            escrowsCompleted: 100,
+            escrowPayouts: 1000,
+            timestamp: new Date(2024, 4, 8),
           },
-        })
-        .mockResolvedValueOnce({
-          holders: [
-            {
-              address: '0x123',
-              balance: '10',
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          eventDayDatas: [
-            {
-              timestamp: 1,
-              dailyHMTTransferCount: '4',
-              dailyHMTTransferAmount: '100',
-            },
-          ],
-        });
+        ],
+      });
 
       const startDate = new Date();
       const endDate = new Date(startDate.setDate(startDate.getDate() + 1));
 
-      const result = await statisticsClient.getDailyStats({
+      const result = await statisticsClient.getDailyStatsData({
         startDate,
         endDate,
       });
 
-      console.log(123, result);
-
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
-        GET_DAILY_STATS_QUERY({ startDate, endDate }),
+        GET_DAILY_STATS_DATA_QUERY({ startDate, endDate }),
         {
-          from: startDate.getTime() / 1000,
-          to: endDate.getTime() / 1000,
+          startDate: startDate.getTime() / 1000,
+          endDate: endDate.getTime() / 1000,
         }
       );
 
-      expect(result).toEqual({
-        totalTransferAmount: ethers.toBigInt(100),
-        totalTransferCount: 4,
-        totalHolders: 2,
-        holders: [
-          {
-            address: '0x123',
-            balance: ethers.toBigInt(10),
-          },
-        ],
-        dailyHMTData: [
-          {
-            timestamp: new Date(1000),
-            totalTransactionAmount: ethers.toBigInt(100),
-            totalTransactionCount: 4,
-          },
-        ],
-      });
+      expect(result).toEqual([
+        {
+          id: 1,
+          activeWorkers: 10,
+          transactions: 1,
+          uniqueSenders: 5,
+          uniqueReceivers: 5,
+          escrowsLaunched: 100,
+          escrowsCompleted: 100,
+          escrowPayouts: 1000,
+          timestamp: expect.any(Date),
+        },
+      ]);
     });
 
     test('should throw error in case gql fetch fails from subgraph', async () => {
@@ -373,7 +355,7 @@ describe('StatisticsClient', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        statisticsClient.getDailyStats({
+        statisticsClient.getDailyStatsData({
           from: new Date(),
           to: new Date(),
         })

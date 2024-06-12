@@ -4,7 +4,11 @@ import json
 from human_protocol_sdk.constants import ChainId
 from human_protocol_sdk.escrow import EscrowUtils
 from human_protocol_sdk.filter import EscrowFilter
-from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+from human_protocol_sdk.statistics import (
+    StatisticsClient,
+    StatisticsParam,
+    DailyStatsParam,
+)
 from human_protocol_sdk.storage import StorageClient
 from human_protocol_sdk.agreement import agreement
 
@@ -55,6 +59,20 @@ def get_hmt_statistics(statistics_client: StatisticsClient):
             )
         )
     )
+
+
+def get_daily_stats(statistics_client: StatisticsClient):
+    stats_without_params = statistics_client.get_daily_stats_data()
+    print("Daily Statistics without Params:")
+    print(stats_without_params)
+
+    start_date = datetime.datetime(2023, 5, 8)
+    end_date = datetime.datetime(2023, 6, 8)
+    stats_with_params = statistics_client.get_daily_stats_data(
+        DailyStatsParam(start_date=start_date, end_date=end_date)
+    )
+    print("Daily Statistics with Params:")
+    print(stats_with_params)
 
 
 def get_escrows():
@@ -113,4 +131,5 @@ if __name__ == "__main__":
 
     # Run single example while testing, and remove comments before commit
 
-    get_rep()
+    # get_rep()
+    get_daily_stats(statistics_client)

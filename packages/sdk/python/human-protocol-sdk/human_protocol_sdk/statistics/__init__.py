@@ -6,6 +6,7 @@ from .statistics_client import (
     StatisticsClient,
     StatisticsClientError,
     StatisticsParam,
+    DailyStatsParam,
     DailyEscrowData,
     EscrowStatistics,
     DailyWorkerData,
@@ -15,4 +16,5 @@ from .statistics_client import (
     HMTHolder,
     DailyHMTData,
     HMTStatistics,
+    DailyStatsData,
 )

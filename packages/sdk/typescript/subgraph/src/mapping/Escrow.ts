@@ -24,7 +24,7 @@ import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
-import { getDailyStats } from './utils/dailyStats';
+import { getDailyStatsData } from './utils/dailyStats';
 
 export const STATISTICS_ENTITY_ID = 'escrow-statistics-id';
 
@@ -198,9 +198,6 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
   eventDayData.save();
 
-  // Update daily stats
-  const dailyStats = getDailyStats(event);
-
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
@@ -233,6 +230,11 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     eventDayData.dailyBulkPayoutEventCount.plus(ONE_BI);
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
+
+  // Update daily stats
+  const dailyStats = getDailyStatsData(event);
+  dailyStats.escrowPayouts = dailyStats.escrowPayouts.plus(ONE_BI);
+  dailyStats.save();
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
@@ -347,6 +349,11 @@ export function handleCompleted(event: Completed): void {
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
   eventDayData.save();
+
+  // Update daily stats
+  const dailyStats = getDailyStatsData(event);
+  dailyStats.escrowsCompleted = dailyStats.escrowsCompleted.plus(ONE_BI);
+  dailyStats.save();
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());

@@ -60,6 +60,30 @@ class StatisticsParam:
         self.limit = limit
 
 
+class DailyStatsParam:
+    """
+    A class used to specify daily stats params.
+    """
+
+    def __init__(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        limit: Optional[int] = None,
+    ):
+        """
+        Initializes a StatisticsParam instance.
+
+        :param start_date: Start date for daily stats data
+        :param end_date: End date for daily stats data
+        :param limit: Limit of daily stats data
+        """
+
+        self.start_date = start_date
+        self.end_date = end_date
+        self.limit = limit
+
+
 class DailyEscrowData:
     """
     A class used to specify daily escrow data.
@@ -273,12 +297,54 @@ class HMTStatistics:
         self.daily_hmt_data = daily_hmt_data
 
 
+class DailyStatsData:
+    """
+    A class used to specify daily statistics data.
+    """
+
+    def __init__(
+        self,
+        id: str,
+        active_workers: int,
+        transactions: int,
+        unique_senders: int,
+        unique_receivers: int,
+        escrows_launched: int,
+        escrows_completed: int,
+        escrow_payouts: int,
+        timestamp: int,
+    ):
+        """
+        Initializes a DailyStatsData instance.
+
+        :param id: ID of the daily statistics data
+        :param active_workers: Number of active workers
+        :param transactions: Number of transactions
+        :param unique_senders: Number of unique senders
+        :param unique_receivers: Number of unique receivers
+        :param escrows_launched: Number of escrows launched
+        :param escrows_completed: Number of escrows completed
+        :param escrow_payouts: Number of escrow payouts
+        :param timestamp: Timestamp
+        """
+
+        self.id = id
+        self.active_workers = active_workers
+        self.transactions = transactions
+        self.unique_senders = unique_senders
+        self.unique_receivers = unique_receivers
+        self.escrows_launched = escrows_launched
+        self.escrows_completed = escrows_completed
+        self.escrow_payouts = escrow_payouts
+        self.timestamp = timestamp
+
+
 class StatisticsClient:
     """
     A client used to get statistical data.
     """
 
-    def __init__(self, chain_id: ChainId = ChainId.POLYGON_AMOY):
+    def __init__(self, chain_id: ChainId = ChainId.LOCALHOST):
         """Initializes a Statistics instance
 
         :param chain_id: Chain ID to get statistical data from
@@ -565,3 +631,61 @@ class StatisticsClient:
                 for event_day_data in event_day_datas
             ],
         )
+
+    def get_daily_stats_data(
+        self, param: DailyStatsParam = DailyStatsParam()
+    ) -> List[DailyStatsData]:
+        """
+        Get daily statistics data for the given date range.
+
+        :param param: Object containing the date range
+        :return: List of DailyStatsData instances
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, DailyStatsParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+                stats_without_params = await statistics_client.get_daily_stats_data()
+                print("Daily Statistics without Params:")
+                print(stats_without_params)
+
+                start_date = datetime.datetime(2024, 5, 8)
+                end_date = datetime.datetime(2023, 6, 8)
+                stats_with_params = await statistics_client.get_daily_stats_data(
+                    DailyStatsParam(start_date=start_date, end_date=end_date)
+                )
+                print("Daily Statistics with Params:")
+                print(stats_with_params)
+        """
+        from human_protocol_sdk.gql.statistics import get_daily_stats_data_query
+
+        daily_stats_datas_data = get_data_from_subgraph(
+            self.network["subgraph_url"],
+            query=get_daily_stats_data_query(param),
+            params={
+                "startDate": (
+                    int(param.start_date.timestamp()) if param.start_date else None
+                ),
+                "endDate": int(param.end_date.timestamp()) if param.end_date else None,
+            },
+        )
+        daily_stats_datas = daily_stats_datas_data["data"]["dailyStatsDatas"]
+
+        return [
+            DailyStatsData(
+                id=stats["id"],
+                active_workers=stats["activeWorkers"],
+                transactions=stats["transactions"],
+                unique_senders=stats["uniqueSenders"],
+                unique_receivers=stats["uniqueReceivers"],
+                escrows_launched=stats["escrowsLaunched"],
+                escrows_completed=stats["escrowsCompleted"],
+                escrow_payouts=stats["escrowPayouts"],
+                timestamp=stats["timestamp"],
+            )
+            for stats in daily_stats_datas
+        ]

@@ -15,6 +15,18 @@ type Worker @entity {
   payoutCount: BigInt!
 }
 
+type UniqueSender @entity {
+  id: ID!
+  address: Bytes!
+  transferCount: BigInt!
+}
+
+type UniqueReceiver @entity {
+  id: ID!
+  address: Bytes!
+  receiveCount: BigInt!
+}
+
 type Leader @entity {
   id: ID!
   address: Bytes!
@@ -379,14 +391,14 @@ type LeaderStatistics @entity {
   leaders: BigInt!
 }
 
-type DailyStats @entity {
+type DailyStatsData @entity {
   id: ID!
-  activeWorkers: Int!
-  transactions: Int!
-  uniqueSenders: Int!
-  uniqueReceivers: Int!
-  escrowsLaunched: Int!
-  escrowsCompleted: Int!
-  escrowPayouts: Int!
+  activeWorkers: BigInt!
+  transactions: BigInt!
+  uniqueSenders: BigInt!
+  uniqueReceivers: BigInt!
+  escrowsLaunched: BigInt!
+  escrowsCompleted: BigInt!
+  escrowPayouts: BigInt!
   timestamp: Int!
 }
