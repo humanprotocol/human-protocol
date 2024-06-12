@@ -107,6 +107,7 @@ describe('CronJobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
             validateChainId: jest.fn().mockReturnValue(new Error()),
             getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         JobService,
@@ -990,19 +991,25 @@ describe('CronJobService', () => {
     });
 
     it('should update job statuses based on escrow events', async () => {
+      jest
+        .spyOn(jobRepository, 'findManyByChainIdsAndEscrowAddresses')
+        .mockResolvedValueOnce([jobEntityMock as any]);
+
       await service.updateJobs();
 
       expect(EscrowUtils.getStatusEvents).toHaveBeenCalled();
       expect(
-        jobRepository.findOneByChainIdAndEscrowAddress,
+        jobRepository.findManyByChainIdsAndEscrowAddresses,
       ).toHaveBeenCalledWith(
-        escrowEventMock.chainId,
-        ethers.getAddress(MOCK_ADDRESS),
+        [escrowEventMock.chainId],
+        [ethers.getAddress(MOCK_ADDRESS)],
       );
-      expect(jobRepository.updateOne).toHaveBeenCalledWith({
-        ...jobEntityMock,
-        status: JobStatus.PARTIAL,
-      });
+      expect(jobRepository.updateMany).toHaveBeenCalledWith([
+        {
+          ...jobEntityMock,
+          status: JobStatus.PARTIAL,
+        },
+      ]);
     });
 
     it('should handle errors and log them', async () => {
