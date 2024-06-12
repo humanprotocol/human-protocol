@@ -53,6 +53,7 @@ export enum ErrorUser {
   BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
   UserNotActive = 'User not active',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
 }
 
 /**

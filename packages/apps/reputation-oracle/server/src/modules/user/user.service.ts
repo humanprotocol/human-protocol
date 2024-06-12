@@ -199,6 +199,14 @@ export class UserService {
       );
     }
 
+    const dbUser = await this.userRepository.findByAddress(data.address);
+    if (dbUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedAddress,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     // Prepare signed data and verify the signature
     const signedData = await this.prepareSignatureBody(
       SignatureType.REGISTER_ADDRESS,
