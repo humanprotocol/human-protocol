@@ -1,4 +1,4 @@
-import { ChainId } from 'src/enums';
+import { ChainId } from '../enums';
 
 export type EscrowData = {
   id: string;

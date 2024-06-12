@@ -23,6 +23,7 @@ import { Cron } from '@nestjs/schedule';
 import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { JobEntity } from '../job/job.entity';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class CronJobService {
@@ -36,6 +37,7 @@ export class CronJobService {
     private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
     private readonly webhookRepository: WebhookRepository,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
@@ -280,12 +282,12 @@ export class CronJobService {
 
   @Cron('*/1 * * * *')
   /**
-   * Process a pending webhook job.
+   * Process a job that syncs job statuses.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  public async updateJobs(): Promise<void> {
+  public async syncJobStuses(): Promise<void> {
     const lastCronJob = await this.cronJobRepository.findOneByType(
-      CronJobType.UpdateJobs,
+      CronJobType.SyncJobStatuses,
     );
 
     if (lastCronJob && !lastCronJob.completedAt) {
@@ -293,11 +295,11 @@ export class CronJobService {
     }
 
     this.logger.log('Update jobs START');
-    const cronJob = await this.startCronJob(CronJobType.UpdateJobs);
+    const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
 
     try {
       const events = await EscrowUtils.getStatusEvents(
-        this.web3Service.getValidChains(),
+        this.networkConfigService.networks.map((network) => network.chainId),
         [EscrowStatus.Partial, EscrowStatus.Complete],
         lastCronJob?.lastSubgraphTime || undefined,
         undefined,

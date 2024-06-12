@@ -15,7 +15,7 @@ export class UpdateJobsCron1716971055119 implements MigrationInterface {
                 'fund-escrow',
                 'cancel-escrow',
                 'process-pending-webhook',
-                'update-jobs'
+                'sync-job-statuses'
             )
         `);
     await queryRunner.query(`
