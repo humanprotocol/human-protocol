@@ -29,7 +29,7 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
-import { ErrorJob, ErrorAssignment } from '../../common/constant/errors'; 
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 import { BadRequestException } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -328,7 +328,6 @@ describe('JobService', () => {
     });
 
     it('should fail if assignment status is not ACTIVE', async () => {
-
       assignment.status = AssignmentStatus.CANCELED;
 
       jest

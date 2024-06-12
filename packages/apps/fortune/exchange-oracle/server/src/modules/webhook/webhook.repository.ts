@@ -4,6 +4,7 @@ import { WebhookStatus } from '../../common/enums/webhook';
 import { BaseRepository } from '../../database/base.repository';
 import { WebhookEntity } from './webhook.entity';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { EventType } from '../../common/enums/webhook';
 
 @Injectable()
 export class WebhookRepository extends BaseRepository<WebhookEntity> {
@@ -13,6 +14,15 @@ export class WebhookRepository extends BaseRepository<WebhookEntity> {
   ) {
     super(WebhookEntity, dataSource);
   }
+
+  public findByEventType(eventType: EventType): Promise<WebhookEntity[]> {
+    return this.find({
+      where: {
+        eventType,
+      },
+    });
+  }
+
   public findByStatus(status: WebhookStatus): Promise<WebhookEntity[]> {
     return this.find({
       where: {

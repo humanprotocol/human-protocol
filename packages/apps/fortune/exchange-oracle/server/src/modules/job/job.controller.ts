@@ -6,6 +6,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,

@@ -50,6 +50,16 @@ export class JobService {
     public readonly webhookRepository: WebhookRepository,
   ) {}
 
+  public async hasSolutionSubmitted(escrowAddress: string): Promise<boolean> {
+    const webhook = await this.webhookRepository.findOne({
+      where: {
+        escrowAddress,
+        eventType: EventType.SUBMISSION_IN_REVIEW,
+      },
+    });
+    return !!webhook;
+  }
+
   public async createJob(webhook: WebhookDto): Promise<void> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       webhook.chainId,
@@ -95,6 +105,11 @@ export class JobService {
           JobType.FORTUNE,
           entity.status,
         );
+
+        const hasSolution = await this.hasSolutionSubmitted(
+          entity.escrowAddress,
+        );
+        job.hasSolution = hasSolution;
 
         if (data.fields) {
           if (data.fields.includes(JobFieldName.CreatedAt)) {

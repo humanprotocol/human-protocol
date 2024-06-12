@@ -4,6 +4,7 @@ import { NS } from '../../common/constant';
 import { JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { AssignmentEntity } from '../assignment/assignment.entity';
+import { JobType } from '../../common/enums/job';
 
 @Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })

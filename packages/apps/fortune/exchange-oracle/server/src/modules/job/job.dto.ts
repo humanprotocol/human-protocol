@@ -98,6 +98,9 @@ export class JobDto {
   @ApiProperty({ name: 'created_at' })
   createdAt?: string;
 
+  @ApiProperty()
+  hasSolution?: boolean;
+
   constructor(
     escrowAddress: string,
     chainId: number,
