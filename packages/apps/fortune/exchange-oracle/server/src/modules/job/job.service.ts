@@ -106,9 +106,11 @@ export class JobService {
           entity.status,
         );
 
-        const hasSolution = await this.hasSolutionSubmitted(
+        const solutions = await this.storageService.downloadJobSolutions(
           entity.escrowAddress,
+          entity.chainId,
         );
+        const hasSolution = solutions.length > 0;
         job.hasSolution = hasSolution;
 
         if (data.fields) {
