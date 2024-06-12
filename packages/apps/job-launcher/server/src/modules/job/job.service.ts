@@ -1114,7 +1114,7 @@ export class JobService {
       const kvstore = await KVStoreClient.build(signer);
       const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
       const oracleAddresses = getOracleAddresses();
-      for (const address in Object.values(oracleAddresses)) {
+      for (const address of Object.values(oracleAddresses)) {
         const publicKey = await kvstore.getPublicKey(address);
         if (publicKey) publicKeys.push(publicKey);
       }
