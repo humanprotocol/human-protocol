@@ -64,7 +64,8 @@
       "./src/operator.ts",
       "./src/staking.ts",
       "./src/storage.ts",
-      "./src/statistics.ts"
+      "./src/statistics.ts",
+      "./src/transaction.ts"
     ]
   }
 }

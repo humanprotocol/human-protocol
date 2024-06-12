@@ -207,6 +207,15 @@ type KVStoreSetEvent @entity {
   value: String!
 }
 
+type KVStore @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  address: Bytes!
+  key: String!
+  value: String!
+}
+
 # Staking
 type StakeDepositedEvent @entity {
   id: ID!
@@ -339,4 +348,15 @@ type EventDayData @entity {
 type LeaderStatistics @entity {
   id: ID!
   leaders: BigInt!
+}
+
+type Transaction @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  from: Bytes!
+  to: Bytes
+  value: BigInt
+  method: String!
 }

@@ -16,8 +16,12 @@ import {
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
 } from './error';
+import gqlFetch from 'graphql-request';
 import { NetworkData } from './types';
-import { isValidUrl } from './utils';
+import { getSubgraphUrl, isValidUrl } from './utils';
+import { GET_KVSTORE_BY_ADDRESS_QUERY } from './graphql/queries/kvstore';
+import { KVStoreData } from './graphql';
+import { IKVStore } from './interfaces';
 /**
  * ## Introduction
  *
@@ -408,5 +412,114 @@ export class KVStoreClient extends BaseEthersClient {
     const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
 
     return publicKey;
+  }
+}
+
+/**
+ * ## Introduction
+ *
+ * Utility class for KVStore-related operations.
+ *
+ * ## Installation
+ *
+ * ### npm
+ * ```bash
+ * npm install @human-protocol/sdk
+ * ```
+ *
+ * ### yarn
+ * ```bash
+ * yarn install @human-protocol/sdk
+ * ```
+ *
+ * ## Code example
+ *
+ * ### Signer
+ *
+ * **Using private key (backend)**
+ *
+ * ```ts
+ * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+ *
+ * const KVStoreAddresses = new KVStoreUtils.getData({
+ *   networks: [ChainId.POLYGON_AMOY]
+ * });
+ * ```
+ */
+export class KVStoreUtils {
+  /**
+   * This function returns the KVStore data for a given address.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *   ALL = -1,
+   *   MAINNET = 1,
+   *   RINKEBY = 4,
+   *   GOERLI = 5,
+   *   BSC_MAINNET = 56,
+   *   BSC_TESTNET = 97,
+   *   POLYGON = 137,
+   *   POLYGON_MUMBAI = 80001,
+   *   POLYGON_AMOY = 80002,
+   *   MOONBEAM = 1284,
+   *   MOONBASE_ALPHA = 1287,
+   *   AVALANCHE = 43114,
+   *   AVALANCHE_TESTNET = 43113,
+   *   CELO = 42220,
+   *   CELO_ALFAJORES = 44787,
+   *   LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * interface IKVStore {
+   *   key: string;
+   *   value: string;
+   * }
+   * ```
+   *
+   * @param {ChainId} chainId Network in which the KVStore is deployed
+   * @param {string} address Address of the KVStore
+   * @returns {Promise<IKVStore[]>} KVStore data
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+   *
+   * const kvStoreData = await KVStoreUtils.getKVStoreData(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
+   * console.log(kvStoreData);
+   * ```
+   */
+  public static async getKVStoreData(
+    chainId: ChainId,
+    address: string
+  ): Promise<IKVStore[]> {
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    if (address && !ethers.isAddress(address)) {
+      throw ErrorInvalidAddress;
+    }
+
+    const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
+      getSubgraphUrl(networkData),
+      GET_KVSTORE_BY_ADDRESS_QUERY(),
+      { address: address.toLowerCase() }
+    );
+
+    const kvStoreData = kvstores.map((item) => ({
+      key: item.key,
+      value: item.value,
+    }));
+
+    return kvStoreData || [];
   }
 }

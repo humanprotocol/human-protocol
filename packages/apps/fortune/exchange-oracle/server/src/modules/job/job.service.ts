@@ -33,7 +33,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 
 @Injectable()
 export class JobService {
@@ -144,6 +144,10 @@ export class JobService {
     );
     if (!assignment) {
       throw new BadRequestException(ErrorJob.NotAssigned);
+    }
+
+    if (assignment.status !== AssignmentStatus.ACTIVE) {
+      throw new BadRequestException(ErrorAssignment.InvalidStatus);
     }
 
     await this.addSolution(chainId, escrowAddress, workerAddress, solution);
@@ -282,20 +286,5 @@ export class JobService {
 
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     } else return manifest;
-  }
-
-  async resignJob(assignmentId: number, workerAddress: string): Promise<void> {
-    const assignment = await this.assignmentRepository.findOneByIdAndWorker(assignmentId, workerAddress);
-
-    if (!assignment) {
-      throw new BadRequestException(ErrorAssignment.NotFound);
-    }
-
-    if (assignment.status !== AssignmentStatus.ACTIVE) {
-      throw new BadRequestException(ErrorAssignment.InvalidStatus);
-    }
-    
-    assignment.status = AssignmentStatus.CANCELED;
-    await this.assignmentRepository.save(assignment);
   }
 }

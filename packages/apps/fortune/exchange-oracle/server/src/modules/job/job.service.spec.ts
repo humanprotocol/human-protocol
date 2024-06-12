@@ -9,7 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_ADDRESS, MOCK_MANIFEST_URL } from '../../../test/constants';
+import { MOCK_MANIFEST_URL } from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -29,8 +29,8 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors'; 
 import { BadRequestException } from '@nestjs/common';
-import { ErrorAssignment } from '../../common/constant/errors';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -327,6 +327,20 @@ describe('JobService', () => {
       expect(assignment.status).toBe(AssignmentStatus.VALIDATION);
     });
 
+    it('should fail if assignment status is not ACTIVE', async () => {
+
+      assignment.status = AssignmentStatus.CANCELED;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
+        .mockResolvedValue(assignment as AssignmentEntity);
+
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
+      ).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
+      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
+    });
+
     it('should fail if user is not assigned to the job', async () => {
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
@@ -344,13 +358,14 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
+      assignment.status = AssignmentStatus.ACTIVE;
+
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
         .mockResolvedValue(assignment as AssignmentEntity);
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
         {
-          exchangeAddress: '0x1234567890123456789012345678901234567892',
           workerAddress: '0x1234567890123456789012345678901234567892',
           solution: 'test',
         },
@@ -363,12 +378,6 @@ describe('JobService', () => {
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
       }));
-
-      const recordingOracleURLMock = 'https://example.com/recordingoracle';
-
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        webhookUrl: recordingOracleURLMock,
-      });
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
@@ -387,32 +396,39 @@ describe('JobService', () => {
     });
 
     it('should fail if user has already submitted a solution', async () => {
-      const solution = 'job-solution';
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      assignment.status = AssignmentStatus.ACTIVE;
 
       jest
         .spyOn(assignmentRepository, 'findOneByEscrowAndWorker')
         .mockResolvedValue(assignment as AssignmentEntity);
 
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getRecordingOracleAddress: jest
-          .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
-      }));
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
-        webhookUrl: 'https://example.com/recordingoracle',
-      });
-
-      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
         {
-          exchangeAddress: '0x1234567890123456789012345678901234567892',
-          workerAddress: '0x1234567890123456789012345678901234567891',
+          workerAddress: workerAddress,
           solution: 'test',
         },
       ]);
 
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(manifest);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
+
       await expect(
-        jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
-      ).rejects.toThrow('User has already submitted a solution');
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
+      ).rejects.toThrow(
+        new BadRequestException(ErrorJob.SolutionAlreadySubmitted),
+      );
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
   });
@@ -477,46 +493,4 @@ describe('JobService', () => {
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });
   });
-
-  describe('resignJob', () => {
-    it('should successfully cancel an active assignment', async () => {
-      const assignmentId = 1;
-      const workerAddress = MOCK_ADDRESS;
-      const mockAssignment = {
-        id: assignmentId,
-        workerAddress,
-        status: AssignmentStatus.ACTIVE,
-      } as AssignmentEntity;
-  
-      jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(mockAssignment);
-  
-      await expect(jobService.resignJob(assignmentId, workerAddress)).resolves.toBeUndefined();
-      expect(mockAssignment.status).toBe(AssignmentStatus.CANCELED);
-      expect(assignmentRepository.save).toHaveBeenCalledWith(mockAssignment);
-    });
-  
-    it('should throw NotFound if assignment does not exist', async () => {
-      const assignmentId = 1;
-      const workerAddress = MOCK_ADDRESS;
-  
-      jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(null);
-  
-      await expect(jobService.resignJob(assignmentId, workerAddress)).rejects.toThrow(new BadRequestException(ErrorAssignment.NotFound));
-    });
-  
-    it('should throw InvalidStatus if assignment status is not ACTIVE', async () => {
-      const assignmentId = 1;
-      const workerAddress = MOCK_ADDRESS;
-      const mockAssignment = {
-        id: assignmentId,
-        workerAddress,
-        status: AssignmentStatus.COMPLETED,
-      } as AssignmentEntity;
-  
-      jest.spyOn(assignmentRepository, 'findOneByIdAndWorker').mockResolvedValue(mockAssignment);
-  
-      await expect(jobService.resignJob(assignmentId, workerAddress)).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
-    });
-  });
-  
 });

@@ -243,6 +243,8 @@ export enum JobStatus {
   COMPLETED = 'COMPLETED',
   TO_CANCEL = 'TO_CANCEL',
   PAID = 'PAID',
+  SET_UP = 'SET_UP',
+  CREATED = 'CREATED',
 }
 
 export type JobDetailsResponse = {

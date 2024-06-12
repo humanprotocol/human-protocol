@@ -108,3 +108,28 @@ export interface IPayoutFilter {
   from?: Date;
   to?: Date;
 }
+
+export interface IKVStore {
+  key: string;
+  value: string;
+}
+
+export interface ITransaction {
+  block: bigint;
+  hash: string;
+  from: string;
+  to: string;
+  timestamp: bigint;
+  value: string;
+  method: string;
+}
+
+export interface ITransactionsFilter {
+  networks: ChainId[];
+  startBlock?: number;
+  endBlock?: number;
+  startDate?: Date;
+  endDate?: Date;
+  fromAddress?: string;
+  toAddress?: string;
+}

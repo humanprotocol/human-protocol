@@ -324,6 +324,8 @@ class SkeletonDatasetComparator(DatasetComparator):
                 b,
                 sigma=self.sigma,
                 bbox=bbox,
+                # Our current annotation approach
+                # doesn't allow to distinguish between 'occluded' and 'absent' points
                 visibility_a=[v == dm.Points.Visibility.visible for v in a.visibility],
                 visibility_b=[v == dm.Points.Visibility.visible for v in b.visibility],
             )
@@ -337,8 +339,8 @@ class SkeletonDatasetComparator(DatasetComparator):
             sigma: Union[float, np.ndarray] = 0.1,
             bbox: Optional[BboxCoords] = None,
             scale: Union[None, float, np.ndarray] = None,
-            visibility_a: Union[None, bool, np.ndarray] = None,
-            visibility_b: Union[None, bool, np.ndarray] = None,
+            visibility_a: Union[None, bool, Sequence[bool]] = None,
+            visibility_b: Union[None, bool, Sequence[bool]] = None,
         ) -> float:
             """
             Computes Object Keypoint Similarity metric for a pair of point sets.
@@ -368,16 +370,18 @@ class SkeletonDatasetComparator(DatasetComparator):
             total_vis = np.sum(visibility_a | visibility_b, dtype=float)
             if not total_vis:
                 # We treat this situation as match. It's possible to use alternative approaches,
-                # such as add weight for occluded points. Our current annotation approach
-                # doesn't allow to distinguish between 'occluded' and 'absent' points.
+                # such as add weight for occluded points.
                 return 1.0
 
             dists = np.linalg.norm(p1 - p2, axis=1)
             return (
                 np.sum(
-                    visibility_a
-                    * visibility_b
-                    * np.exp(-(dists**2) / (2 * scale * ((2 * sigma) ** 2)))
+                    (visibility_a == visibility_b)
+                    * np.exp(
+                        (visibility_a * visibility_b)
+                        * -(dists**2)
+                        / (2 * scale * ((2 * sigma) ** 2))
+                    )
                 )
                 / total_vis
             )

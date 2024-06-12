@@ -50,6 +50,7 @@ pip install human-protocol-sdk[agreement]
       * [`EscrowFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.EscrowFilter)
       * [`FilterError`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.FilterError)
       * [`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)
+      * [`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)
     * [human_protocol_sdk.legacy_encryption module](human_protocol_sdk.legacy_encryption.md)
       * [`DecryptionError`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.DecryptionError)
       * [`Encryption`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.Encryption)

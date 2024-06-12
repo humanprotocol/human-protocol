@@ -20,6 +20,7 @@ import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
+import { createTransaction } from './utils/transaction';
 
 export const STATISTICS_ENTITY_ID = 'escrow-statistics-id';
 
@@ -65,6 +66,7 @@ export function createOrLoadWorker(address: Address): Worker {
 }
 
 export function handlePending(event: Pending): void {
+  createTransaction(event, 'setup');
   // Create SetupEvent entity
   const setupEventEntity = new SetupEvent(toEventId(event));
   setupEventEntity.block = event.block.number;
@@ -170,6 +172,7 @@ export function handlePending(event: Pending): void {
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
+  createTransaction(event, 'storeResults');
   // Create StoreResultsEvent entity
   const eventEntity = new StoreResultsEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -204,6 +207,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
+  createTransaction(event, 'bulkTransfer');
   // Create BulkPayoutEvent entity
   const eventEntity = new BulkPayoutEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -283,6 +287,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
 }
 
 export function handleCancelled(event: Cancelled): void {
+  createTransaction(event, 'cancel');
   // Create EscrowStatusEvent entity
   const eventEntity = new EscrowStatusEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -318,6 +323,7 @@ export function handleCancelled(event: Cancelled): void {
 }
 
 export function handleCompleted(event: Completed): void {
+  createTransaction(event, 'complete');
   // Create EscrowStatusEvent entity
   const eventEntity = new EscrowStatusEvent(toEventId(event));
   eventEntity.block = event.block.number;

@@ -164,3 +164,12 @@ export type StatusEvent = {
   status: string;
   chainId: ChainId;
 };
+
+export type KVStoreData = {
+  id: string;
+  address: string;
+  key: string;
+  value: string;
+  timestamp: Date;
+  block: number;
+};

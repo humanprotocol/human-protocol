@@ -46,7 +46,7 @@ import {
 } from './graphql';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowCancel, EscrowStatus, NetworkData } from './types';
-import { isValidUrl, throwError } from './utils';
+import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 
 /**
  * ## Introduction
@@ -1535,7 +1535,7 @@ export class EscrowUtils {
       }
 
       const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
-        networkData.subgraphUrl,
+        getSubgraphUrl(networkData),
         GET_ESCROWS_QUERY(filter),
         {
           ...filter,
@@ -1643,7 +1643,7 @@ export class EscrowUtils {
     }
 
     const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
-      networkData.subgraphUrl,
+      getSubgraphUrl(networkData),
       GET_ESCROW_BY_ADDRESS_QUERY(),
       { escrowAddress: escrowAddress.toLowerCase() }
     );
@@ -1755,7 +1755,7 @@ export class EscrowUtils {
       );
 
       const data = await gqlFetch<any>(
-        networkData.subgraphUrl,
+        getSubgraphUrl(networkData),
         GET_STATUS_UPDATES_QUERY(from, to, launcher),
         {
           status: statusNames,

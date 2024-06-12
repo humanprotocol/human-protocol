@@ -6,8 +6,10 @@ import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
 import { createOrLoadLeader } from '../Staking';
 import { toEventId } from '../utils/event';
+import { createTransaction } from '../utils/transaction';
 
 export function handleLaunched(event: Launched): void {
+  createTransaction(event, 'createEscrow');
   // Create LaunchedStatusEvent entity
   const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;

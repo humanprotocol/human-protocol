@@ -128,6 +128,10 @@ export type NetworkData = {
    */
   subgraphUrl: string;
   /**
+   * Subgraph URL
+   */
+  subgraphUrlApiKey: string;
+  /**
    * Old subgraph URL
    */
   oldSubgraphUrl: string;

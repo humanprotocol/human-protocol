@@ -20,6 +20,7 @@ export enum ErrorJob {
   ManifestHashNotExist = 'Manifest hash does not exist',
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
+  CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
 }
 
 /**
