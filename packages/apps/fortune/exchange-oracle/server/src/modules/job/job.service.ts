@@ -50,7 +50,6 @@ export class JobService {
     public readonly webhookRepository: WebhookRepository,
   ) {}
 
-
   public async createJob(webhook: WebhookDto): Promise<void> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       webhook.chainId,
