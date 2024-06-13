@@ -78,7 +78,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 #### Defined in
 
-[statistics.ts:70](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L70)
+[statistics.ts:70](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L70)
 
 ## Properties
 
@@ -88,7 +88,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 #### Defined in
 
-[statistics.ts:63](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L63)
+[statistics.ts:63](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L63)
 
 ## Methods
 
@@ -154,7 +154,7 @@ console.log('Daily Statistics from 5/8 - 6/8:', statsWithParams);
 
 #### Defined in
 
-[statistics.ts:486](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L486)
+[statistics.ts:486](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L486)
 
 ___
 
@@ -218,7 +218,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:123](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L123)
+[statistics.ts:123](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L123)
 
 ___
 
@@ -314,7 +314,7 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Defined in
 
-[statistics.ts:396](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L396)
+[statistics.ts:396](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L396)
 
 ___
 
@@ -396,7 +396,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:287](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L287)
+[statistics.ts:287](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L287)
 
 ___
 
@@ -455,4 +455,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:198](https://github.com/humanprotocol/human-protocol/blob/8bacaf25ffaf5949b20bd5b824beee360806a13c/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L198)
+[statistics.ts:198](https://github.com/humanprotocol/human-protocol/blob/2ba83cf8d6e95f49ead07ac04d84d9dda4eae492/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L198)
