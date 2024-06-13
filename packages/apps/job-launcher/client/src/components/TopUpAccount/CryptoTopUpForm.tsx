@@ -13,7 +13,7 @@ import {
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { Address } from 'viem';
-import { useAccount, useWalletClient } from 'wagmi';
+import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
@@ -30,6 +30,7 @@ export const CryptoTopUpForm = () => {
   const [amount, setAmount] = useState<string>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const publicClient = usePublicClient();
   const { data: signer } = useWalletClient();
   const { data: rate } = useTokenRate('hmt', 'usd');
   const { showError } = useSnackbar();
@@ -53,6 +54,11 @@ export const CryptoTopUpForm = () => {
           await paymentService.getOperatorAddress(),
           ethers.parseUnits(amount, 18),
         ],
+      });
+
+      await publicClient?.waitForTransactionReceipt({
+        hash: transactionHash,
+        confirmations: Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
       });
 
       // create crypto payment record
