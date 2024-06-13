@@ -280,7 +280,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/1 * * * *')
+  @Cron('30 */2 * * * *')
   /**
    * Process a job that syncs job statuses.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
