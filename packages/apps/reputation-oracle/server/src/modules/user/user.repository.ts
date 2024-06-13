@@ -23,6 +23,13 @@ export class UserRepository extends BaseRepository<UserEntity> {
     });
   }
 
+  async findByAddress(address: string): Promise<UserEntity | null> {
+    return this.findOne({
+      where: { evmAddress: address },
+      relations: { kyc: true, siteKey: true },
+    });
+  }
+
   public async findOneByEvmAddress(
     evmAddress: string,
   ): Promise<UserEntity | null> {

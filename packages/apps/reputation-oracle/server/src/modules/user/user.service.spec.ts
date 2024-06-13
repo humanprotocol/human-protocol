@@ -351,6 +351,10 @@ describe('UserService', () => {
   });
 
   describe('registerAddress', () => {
+    beforeEach(() => {
+      jest.spyOn(userRepository, 'findByAddress').mockResolvedValue(null);
+    });
+
     afterEach(() => {
       jest.resetAllMocks();
     });
@@ -389,7 +393,7 @@ describe('UserService', () => {
         { address, signature },
       );
 
-      expect(userEntity.save).toHaveBeenCalledWith();
+      expect(userRepository.updateOne).toHaveBeenCalledWith(userEntity);
       expect(result).toBe('signature');
     });
 
@@ -434,6 +438,37 @@ describe('UserService', () => {
         }),
       ).rejects.toThrow(
         new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it("should fail if user's email already exists", async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        evmAddress: '0x123',
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+      };
+
+      const address = '0x123';
+      const signature = 'valid-signature';
+
+      jest
+        .spyOn(userRepository, 'findByAddress')
+        .mockResolvedValue(userEntity as any);
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          address,
+          signature,
+        }),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.DuplicatedAddress,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
 

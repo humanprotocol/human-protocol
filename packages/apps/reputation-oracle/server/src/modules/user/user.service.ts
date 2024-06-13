@@ -81,7 +81,7 @@ export class UserService {
 
   public activate(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.status = UserStatus.ACTIVE;
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
   }
 
   public async createWeb3User(address: string): Promise<UserEntity> {
@@ -121,7 +121,7 @@ export class UserService {
 
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.nonce = generateNonce();
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
   }
 
   public async registerLabeler(user: UserEntity): Promise<string> {
@@ -199,6 +199,14 @@ export class UserService {
       );
     }
 
+    const dbUser = await this.userRepository.findByAddress(data.address);
+    if (dbUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedAddress,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     // Prepare signed data and verify the signature
     const signedData = await this.prepareSignatureBody(
       SignatureType.REGISTER_ADDRESS,
@@ -207,7 +215,7 @@ export class UserService {
     verifySignature(signedData, data.signature, [data.address]);
 
     user.evmAddress = data.address;
-    await user.save();
+    await this.userRepository.updateOne(user);
 
     return await this.web3Service
       .getSigner(this.networkConfigService.networks[0].chainId)
