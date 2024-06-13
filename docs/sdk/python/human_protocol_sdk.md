@@ -150,6 +150,8 @@
   * [`FilterError`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.FilterError)
   * [`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)
     * [`PayoutFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter.__init__)
+  * [`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)
+    * [`TransactionFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter.__init__)
 * [human_protocol_sdk.legacy_encryption module](human_protocol_sdk.legacy_encryption.md)
   * [`DecryptionError`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.DecryptionError)
   * [`Encryption`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.Encryption)

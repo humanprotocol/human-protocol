@@ -21,7 +21,6 @@ import { SortDirection } from '../../common/enums/collection';
 import { AssignmentEntity } from './assignment.entity';
 import { ErrorAssignment } from '../../common/constant/errors';
 import { BadRequestException } from '@nestjs/common';
-import { find } from 'rxjs';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),

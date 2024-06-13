@@ -62,6 +62,7 @@ export enum ErrorUser {
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
   IncorrectAddress = 'Incorrect address',
+  NoWalletAddresRegistered = 'No wallet address registered on your account',
   KycNotApproved = 'KYC not approved',
   UserNotActive = 'User not active',
   LabelingEnableFailed = 'Failed to enable labeling for this account',

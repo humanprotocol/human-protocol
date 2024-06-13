@@ -65,7 +65,7 @@ class TestEscrowUtils(unittest.TestCase):
             }
 
             def side_effect(subgraph_url, query, params):
-                if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"]:
+                if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"escrows": [mock_escrow_1]}}
                 else:
                     return {"data": {"escrows": [mock_escrow_2]}}
@@ -83,7 +83,7 @@ class TestEscrowUtils(unittest.TestCase):
             filtered = EscrowUtils.get_escrows(filter)
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_escrows_query(filter),
                 params={
                     "launcher": "0x1234567890123456789012345678901234567891",
@@ -104,7 +104,7 @@ class TestEscrowUtils(unittest.TestCase):
             filtered = EscrowUtils.get_escrows(filter)
 
             mock_function.assert_called_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_escrows_query(filter),
                 params={
                     "launcher": None,
@@ -160,7 +160,7 @@ class TestEscrowUtils(unittest.TestCase):
             )
 
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_escrow_query(),
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
@@ -185,7 +185,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "0x1234567890123456789012345678901234567890",
             )
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.POLYGON_AMOY]["subgraph_url"],
+                NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_escrow_query(),
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",

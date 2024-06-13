@@ -9,7 +9,7 @@ import { UserController } from './user.controller';
 import { Web3Module } from '../web3/web3.module';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyEntity } from './site-key.entity';
-import { HCaptchaModule } from 'src/integrations/hcaptcha/hcaptcha.module';
+import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
 
 @Module({
   imports: [

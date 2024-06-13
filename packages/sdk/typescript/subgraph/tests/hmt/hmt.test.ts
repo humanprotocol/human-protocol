@@ -131,6 +131,42 @@ describe('HMToken', () => {
         'totalFundedAmount',
         '101'
       );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'txHash',
+        transfer.transaction.hash.toHex()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'method',
+        'fund'
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'block',
+        transfer.block.number.toString()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'from',
+        transfer.transaction.from.toHex()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'to',
+        escrowAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'value',
+        '1'
+      );
     });
 
     test('Should properly handle Transfer event to Holder', () => {
@@ -248,6 +284,42 @@ describe('HMToken', () => {
         operatorAddressString
       );
       assert.fieldEquals('Payout', payoutId, 'amount', '1');
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'txHash',
+        transfer.transaction.hash.toHex()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'method',
+        'transfer'
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'block',
+        transfer.block.number.toString()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'from',
+        transfer.transaction.from.toHex()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'to',
+        operatorAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'value',
+        '1'
+      );
     });
   });
 
@@ -281,6 +353,30 @@ describe('HMToken', () => {
     );
     assert.fieldEquals('HMTBulkTransferEvent', id, 'txId', '1');
     assert.fieldEquals('HMTBulkTransferEvent', id, 'bulkCount', '3');
+    assert.fieldEquals(
+      'Transaction',
+      bulkTransfer.transaction.hash.toHex(),
+      'txHash',
+      bulkTransfer.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulkTransfer.transaction.hash.toHex(),
+      'method',
+      'transferBulk'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulkTransfer.transaction.hash.toHex(),
+      'block',
+      bulkTransfer.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulkTransfer.transaction.hash.toHex(),
+      'from',
+      bulkTransfer.transaction.from.toHex()
+    );
   });
 
   test('Should properly handle Approval event', () => {
@@ -324,6 +420,42 @@ describe('HMToken', () => {
       operatorAddressString
     );
     assert.fieldEquals('HMTApprovalEvent', id, 'amount', '1');
+    assert.fieldEquals(
+      'Transaction',
+      approval.transaction.hash.toHex(),
+      'txHash',
+      approval.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      approval.transaction.hash.toHex(),
+      'method',
+      'approve'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      approval.transaction.hash.toHex(),
+      'block',
+      approval.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      approval.transaction.hash.toHex(),
+      'from',
+      approval.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      approval.transaction.hash.toHex(),
+      'to',
+      operatorAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      approval.transaction.hash.toHex(),
+      'value',
+      '1'
+    );
   });
 
   test('Should properly handle BulkApproval event', () => {
@@ -356,6 +488,30 @@ describe('HMToken', () => {
     );
     assert.fieldEquals('HMTBulkApprovalEvent', id, 'txId', '1');
     assert.fieldEquals('HMTBulkApprovalEvent', id, 'bulkCount', '3');
+    assert.fieldEquals(
+      'Transaction',
+      bulkApproval.transaction.hash.toHex(),
+      'txHash',
+      bulkApproval.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulkApproval.transaction.hash.toHex(),
+      'method',
+      'increaseApprovalBulk'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulkApproval.transaction.hash.toHex(),
+      'block',
+      bulkApproval.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulkApproval.transaction.hash.toHex(),
+      'from',
+      bulkApproval.transaction.from.toHex()
+    );
   });
 
   describe('Statistics', () => {

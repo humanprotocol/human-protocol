@@ -156,6 +156,15 @@ export type TaskStatistics = {
   dailyTasksData: DailyTaskData[];
 };
 
+export type KVStoreData = {
+  id: string;
+  address: string;
+  key: string;
+  value: string;
+  timestamp: Date;
+  block: number;
+};
+
 export type DailyStatsData = {
   id: string;
   activeWorkers: number;

@@ -39,8 +39,6 @@ from human_protocol_sdk.utils import (
 
 from human_protocol_sdk.escrow.escrow_client import EscrowClientError
 
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
-
 LOG = logging.getLogger("human_protocol_sdk.escrow")
 
 
@@ -161,7 +159,7 @@ class EscrowUtils:
         for chain_id in filter.networks:
             network = NETWORKS[chain_id]
             escrows_data = get_data_from_subgraph(
-                network["subgraph_url"],
+                network,
                 query=get_escrows_query(filter),
                 params={
                     "launcher": filter.launcher.lower() if filter.launcher else None,
@@ -188,6 +186,13 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
+
+            if (
+                not escrows_data
+                or "data" not in escrows_data
+                or "escrows" not in escrows_data["data"]
+            ):
+                return []
             escrows_raw = escrows_data["data"]["escrows"]
 
             escrows.extend(
@@ -276,17 +281,22 @@ class EscrowUtils:
         network = NETWORKS[ChainId(chain_id)]
 
         escrow_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_escrow_query(),
             params={
                 "escrowAddress": escrow_address.lower(),
             },
         )
 
-        escrow = escrow_data["data"]["escrow"]
-
-        if not escrow:
+        if (
+            not escrow_data
+            or "data" not in escrow_data
+            or "escrow" not in escrow_data["data"]
+            or not escrow_data["data"]["escrow"]
+        ):
             return None
+
+        escrow = escrow_data["data"]["escrow"]
 
         return EscrowData(
             chain_id=chain_id,

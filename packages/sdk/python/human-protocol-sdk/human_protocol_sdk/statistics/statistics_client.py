@@ -393,13 +393,13 @@ class StatisticsClient:
         )
 
         escrow_statistics_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_escrow_statistics_query,
         )
         escrow_statistics = escrow_statistics_data["data"]["escrowStatistics"]
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -465,7 +465,7 @@ class StatisticsClient:
         )
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -519,7 +519,7 @@ class StatisticsClient:
         )
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -580,19 +580,19 @@ class StatisticsClient:
         )
 
         hmtoken_statistics_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_hmtoken_statistics_query,
         )
         hmtoken_statistics = hmtoken_statistics_data["data"]["hmtokenStatistics"]
 
         holders_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_holders_query,
         )
         holders = holders_data["data"]["holders"]
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,

@@ -6,11 +6,13 @@ import { Escrow } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
 import { createOrLoadLeader } from './Staking';
+import { createTransaction } from './utils/transaction';
 import { getDailyStatsData } from './utils/dailyStats';
 import { getEventDayData } from './utils/dayUpdates';
 import { ONE_BI, ZERO_BI } from './utils/number';
 
 export function handleLaunched(event: Launched): void {
+  createTransaction(event, 'createEscrow');
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 
@@ -54,6 +56,7 @@ export function handleLaunched(event: Launched): void {
 }
 
 export function handleLaunchedV2(event: LaunchedV2): void {
+  createTransaction(event, 'createEscrow');
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 
