@@ -28,6 +28,10 @@
     "styled-components": "5.3.3",
     "viem": "^2.10.2"
   },
+  "resolutions": {
+    "braces": "^3.0.3",
+    "tar": "^6.2.1"
+  },
   "author": {
     "name": "HUMAN Protocol"
   },
