@@ -3374,6 +3374,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
+        failedReason: ErrorEscrow.NotCanceled,
       };
 
       const expectedJobDetailsDto: JobDetailsDto = {
@@ -3384,6 +3385,7 @@ describe('JobService', () => {
           balance: expect.any(Number),
           paidOut: expect.any(Number),
           status: JobStatus.TO_CANCEL,
+          failedReason: ErrorEscrow.NotCanceled,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
@@ -3448,6 +3450,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         escrowAddress: null,
         chainId: ChainId.LOCALHOST,
+        failedReason: null,
       };
 
       const expectedJobDetailsDto: JobDetailsDto = {
@@ -3458,6 +3461,7 @@ describe('JobService', () => {
           balance: 0,
           paidOut: 0,
           status: JobStatus.TO_CANCEL,
+          failedReason: null,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,

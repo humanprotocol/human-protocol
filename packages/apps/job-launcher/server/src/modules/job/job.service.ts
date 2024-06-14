@@ -1474,6 +1474,7 @@ export class JobService {
           balance: 0,
           paidOut: 0,
           status: jobEntity.status,
+          failedReason: jobEntity.failedReason,
         },
         manifest: manifestDetails,
         staking: {
@@ -1492,6 +1493,7 @@ export class JobService {
         balance: Number(ethers.formatEther(escrow?.balance || 0)),
         paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
         status: jobEntity.status,
+        failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
       staking: {
