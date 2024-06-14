@@ -19,7 +19,7 @@ logger = logging.getLogger("human_protocol_sdk.utils")
 
 # Try to load environment variables from the .env file if python-dotenv is available
 try:
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv  # type: ignore
 
     load_dotenv()
 except ImportError:
