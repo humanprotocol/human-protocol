@@ -1,7 +1,11 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
+import {
+  ErrorCronJob,
+  ErrorEscrow,
+  ErrorJob,
+} from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
@@ -88,6 +92,7 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (err) {
+          jobEntity.failedReason = ErrorEscrow.NotCreated;
           this.logger.error(`Error creating escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
         }
@@ -122,6 +127,7 @@ export class CronJobService {
         try {
           await this.jobService.setupEscrow(jobEntity);
         } catch (err) {
+          jobEntity.failedReason = ErrorEscrow.NotSetup;
           this.logger.error(`Error setting up escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
         }
@@ -156,6 +162,7 @@ export class CronJobService {
         try {
           await this.jobService.fundEscrow(jobEntity);
         } catch (err) {
+          jobEntity.failedReason = ErrorEscrow.NotFunded;
           this.logger.error(`Error funding escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
         }
@@ -221,6 +228,7 @@ export class CronJobService {
             await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
+          jobEntity.failedReason = ErrorEscrow.NotCanceled;
           this.logger.error(`Error canceling escrow: ${err.message}`);
           await this.jobService.handleProcessJobFailure(jobEntity);
         }
