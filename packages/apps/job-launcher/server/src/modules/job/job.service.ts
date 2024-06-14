@@ -1277,10 +1277,14 @@ export class JobService {
     return finalResultUrl;
   }
 
-  public handleProcessJobFailure = async (jobEntity: JobEntity) => {
+  public handleProcessJobFailure = async (
+    jobEntity: JobEntity,
+    failedReason: string,
+  ) => {
     if (jobEntity.retriesCount < this.serverConfigService.maxRetryCount) {
       jobEntity.retriesCount += 1;
     } else {
+      jobEntity.failedReason = failedReason;
       jobEntity.status = JobStatus.FAILED;
     }
     await this.jobRepository.updateOne(jobEntity);

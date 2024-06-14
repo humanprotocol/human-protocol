@@ -1,11 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-
+import { v4 as uuidv4 } from 'uuid';
 import { CronJobType } from '../../common/enums/cron-job';
-import {
-  ErrorCronJob,
-  ErrorEscrow,
-  ErrorJob,
-} from '../../common/constants/errors';
+import { ErrorCronJob, ErrorEscrow } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
@@ -92,9 +88,15 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (err) {
-          jobEntity.failedReason = ErrorEscrow.NotCreated;
-          this.logger.error(`Error creating escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotCreated} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error creating escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -127,9 +129,15 @@ export class CronJobService {
         try {
           await this.jobService.setupEscrow(jobEntity);
         } catch (err) {
-          jobEntity.failedReason = ErrorEscrow.NotSetup;
-          this.logger.error(`Error setting up escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotSetup} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error setting up escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -162,9 +170,15 @@ export class CronJobService {
         try {
           await this.jobService.fundEscrow(jobEntity);
         } catch (err) {
-          jobEntity.failedReason = ErrorEscrow.NotFunded;
-          this.logger.error(`Error funding escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotFunded} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error funding escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -228,9 +242,15 @@ export class CronJobService {
             await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
-          jobEntity.failedReason = ErrorEscrow.NotCanceled;
-          this.logger.error(`Error canceling escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotCanceled} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error canceling escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
