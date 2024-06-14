@@ -23,7 +23,6 @@ try:
 
     load_dotenv()
 except ImportError:
-    print("python-dotenv is not installed, skipping .env file loading")
     pass
 
 
