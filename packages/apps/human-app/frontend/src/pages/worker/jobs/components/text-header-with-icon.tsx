@@ -25,6 +25,7 @@ export function TextHeaderWithIcon({
         alignItems: 'center',
         flexWrap: 'nowrap',
         gap: '0.5rem',
+        whiteSpace: 'nowrap',
       }}
     >
       <span>{text}</span>

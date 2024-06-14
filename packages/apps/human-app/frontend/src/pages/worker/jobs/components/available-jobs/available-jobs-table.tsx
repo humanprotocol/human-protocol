@@ -65,7 +65,7 @@ const getColumns = (callbacks: {
           return (
             <TableHeaderCell
               {...props}
-              iconText={t('worker.jobs.network')}
+              headerText={t('worker.jobs.network')}
               iconType="filter"
               popoverContent={<AvailableJobsNetworkFilter />}
             />
@@ -92,6 +92,8 @@ const getColumns = (callbacks: {
         component: (props) => (
           <TableHeaderCell
             {...props}
+            headerText={t('worker.jobs.rewardAmount')}
+            iconType="filter"
             popoverContent={<AvailableJobsRewardAmountSort />}
           />
         ),
@@ -111,7 +113,7 @@ const getColumns = (callbacks: {
           return (
             <TableHeaderCell
               {...props}
-              iconText={t('worker.jobs.jobType')}
+              headerText={t('worker.jobs.jobType')}
               iconType="filter"
               popoverContent={
                 // TODO add available job types

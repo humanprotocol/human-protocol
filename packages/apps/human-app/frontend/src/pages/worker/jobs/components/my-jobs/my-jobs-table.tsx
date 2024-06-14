@@ -48,7 +48,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
-            iconText={t('worker.jobs.network')}
+            headerText={t('worker.jobs.network')}
             iconType="filter"
             popoverContent={<MyJobsNetworkFilter />}
           />
@@ -75,7 +75,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
       component: (props) => (
         <TableHeaderCell
           {...props}
-          iconText={t('worker.jobs.rewardAmount')}
+          headerText={t('worker.jobs.rewardAmount')}
           iconType="filter"
           popoverContent={<MyJobsRewardAmountSort />}
         />
@@ -96,7 +96,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
-            iconText={t('worker.jobs.jobType')}
+            headerText={t('worker.jobs.jobType')}
             iconType="filter"
             popoverContent={<MyJobsJobTypeFilter jobTypes={jobTypes} />}
           />
@@ -118,7 +118,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
-            iconText={t('worker.jobs.expiresAt')}
+            headerText={t('worker.jobs.expiresAt')}
             iconType="filter"
             popoverContent={<MyJobsExpiresAtSort />}
           />
@@ -146,7 +146,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
-            iconText={t('worker.jobs.status')}
+            headerText={t('worker.jobs.status')}
             iconType="filter"
             popoverContent={<MyJobsStatusFilter />}
           />

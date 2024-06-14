@@ -9,11 +9,11 @@ type CommonProps = TableCellBaseProps & {
 };
 
 type PropsWithIcon = CommonProps & {
-  iconText: string;
+  headerText: string;
   iconType: IconType;
 };
 type PropsWithoutIcon = CommonProps & {
-  iconText?: never;
+  headerText?: never;
   iconType?: never;
 };
 
@@ -23,7 +23,7 @@ export const TableHeaderCell = forwardRef<
   HTMLTableDataCellElement,
   HeaderCellProps
 >(function TableHeaderCell(
-  { popoverContent, iconText, iconType, ...rest },
+  { popoverContent, headerText, iconType, ...rest },
   ref
 ) {
   const [anchorEl, setAnchorEl] = useState<HTMLTableDataCellElement | null>(
@@ -47,7 +47,7 @@ export const TableHeaderCell = forwardRef<
     }
     return (
       <td onClick={handleClick} {...rest}>
-        <TextHeaderWithIcon iconType={iconType} text={iconText} />
+        <TextHeaderWithIcon iconType={iconType} text={headerText} />
       </td>
     );
   };
