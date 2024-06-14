@@ -23,7 +23,6 @@ import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/my-jo
 import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-expires-at-sort';
 import { useMyJobsTableState } from '@/hooks/use-my-jobs-table-state';
 import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-network-filter';
-import { FilterHeader } from '@/pages/worker/jobs/components/filter-header';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 
 const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
@@ -40,7 +39,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
-    Header: <FilterHeader text={t('worker.jobs.network')} />,
+    Header: t('worker.jobs.network'),
     Cell: (props) => {
       return getNetworkName(props.row.original.chain_id);
     },
@@ -49,6 +48,8 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
+            iconText={t('worker.jobs.network')}
+            iconType="filter"
             popoverContent={<MyJobsNetworkFilter />}
           />
         );
@@ -60,7 +61,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.rewardAmount'),
     size: 100,
     enableSorting: true,
-    Header: <FilterHeader text={t('worker.jobs.rewardAmount')} />,
+    Header: t('worker.jobs.rewardAmount'),
     Cell: (props) => {
       const { reward_amount, reward_token } = props.row.original;
       return (
@@ -74,6 +75,8 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
       component: (props) => (
         <TableHeaderCell
           {...props}
+          iconText={t('worker.jobs.rewardAmount')}
+          iconType="filter"
           popoverContent={<MyJobsRewardAmountSort />}
         />
       ),
@@ -84,7 +87,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.jobType'),
     size: 100,
     enableSorting: true,
-    Header: <FilterHeader text={t('worker.jobs.jobType')} />,
+    Header: t('worker.jobs.jobType'),
     Cell: (props) => {
       return <Chip label={props.row.original.job_type} />;
     },
@@ -93,6 +96,8 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
+            iconText={t('worker.jobs.jobType')}
+            iconType="filter"
             popoverContent={<MyJobsJobTypeFilter jobTypes={jobTypes} />}
           />
         );
@@ -104,7 +109,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.expiresAt'),
     size: 100,
     enableSorting: true,
-    Header: <FilterHeader text={t('worker.jobs.expiresAt')} />,
+    Header: t('worker.jobs.expiresAt'),
     Cell: (props) => {
       return formatDate(props.row.original.expires_at);
     },
@@ -113,6 +118,8 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
         return (
           <TableHeaderCell
             {...props}
+            iconText={t('worker.jobs.expiresAt')}
+            iconType="filter"
             popoverContent={<MyJobsExpiresAtSort />}
           />
         );
@@ -124,7 +131,7 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.status'),
     size: 100,
     enableSorting: true,
-    Header: <FilterHeader text={t('worker.jobs.status')} />,
+    Header: t('worker.jobs.status'),
     Cell: (props) => {
       const status = props.row.original.status;
       return (
@@ -137,7 +144,12 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     muiTableHeadCellProps: () => ({
       component: (props) => {
         return (
-          <TableHeaderCell {...props} popoverContent={<MyJobsStatusFilter />} />
+          <TableHeaderCell
+            {...props}
+            iconText={t('worker.jobs.status')}
+            iconType="filter"
+            popoverContent={<MyJobsStatusFilter />}
+          />
         );
       },
     }),
