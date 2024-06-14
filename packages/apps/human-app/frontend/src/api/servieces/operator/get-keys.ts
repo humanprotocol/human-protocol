@@ -10,6 +10,13 @@ export const getEthKVStoreValuesSuccessSchema = z.object({
   [EthKVStoreKeys.WebhookUrl]: z.string().optional(),
   [EthKVStoreKeys.Role]: z.string().optional(),
   [EthKVStoreKeys.Fee]: z.string().optional(),
+  [EthKVStoreKeys.JobTypes]: z
+    .string()
+    .transform((jobTypes) => {
+      if (!jobTypes) return undefined;
+      return jobTypes.split(',');
+    })
+    .optional(),
 });
 
 export type GetEthKVStoreValuesSuccessResponse = z.infer<
