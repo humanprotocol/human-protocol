@@ -23,6 +23,7 @@ import type { PageHeaderProps } from '@/components/layout/protected/page-header'
 import { HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
 import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/pages/worker/jobs/jobs.page';
+import { RequireAuth } from '@/auth/require-auth';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -55,7 +56,11 @@ export const unprotectedRoutes: RouteProps[] = [
   },
   {
     path: routerPaths.worker.sendEmailVerification,
-    element: <SendEmailVerificationWorkerPage />,
+    element: (
+      <RequireAuth>
+        <SendEmailVerificationWorkerPage />
+      </RequireAuth>
+    ),
   },
   {
     path: routerPaths.worker.sendResetLink,
