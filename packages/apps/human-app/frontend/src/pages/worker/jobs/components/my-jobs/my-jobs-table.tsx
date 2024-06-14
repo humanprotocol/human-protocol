@@ -39,7 +39,6 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
-    Header: t('worker.jobs.network'),
     Cell: (props) => {
       return getNetworkName(props.row.original.chain_id);
     },
@@ -61,7 +60,6 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.rewardAmount'),
     size: 100,
     enableSorting: true,
-    Header: t('worker.jobs.rewardAmount'),
     Cell: (props) => {
       const { reward_amount, reward_token } = props.row.original;
       return (
@@ -87,7 +85,6 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.jobType'),
     size: 100,
     enableSorting: true,
-    Header: t('worker.jobs.jobType'),
     Cell: (props) => {
       return <Chip label={props.row.original.job_type} />;
     },
@@ -109,7 +106,6 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.expiresAt'),
     size: 100,
     enableSorting: true,
-    Header: t('worker.jobs.expiresAt'),
     Cell: (props) => {
       return formatDate(props.row.original.expires_at);
     },
@@ -131,7 +127,6 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     header: t('worker.jobs.status'),
     size: 100,
     enableSorting: true,
-    Header: t('worker.jobs.status'),
     Cell: (props) => {
       const status = props.row.original.status;
       return (

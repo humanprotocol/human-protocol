@@ -56,7 +56,6 @@ const getColumns = (callbacks: {
       header: t('worker.jobs.network'),
       size: 100,
       enableSorting: false,
-      Header: t('worker.jobs.network'),
       Cell: (props) => {
         return getNetworkName(props.row.original.chain_id);
       },
@@ -78,7 +77,6 @@ const getColumns = (callbacks: {
       header: t('worker.jobs.rewardAmount'),
       size: 100,
       enableSorting: false,
-      Header: t('worker.jobs.rewardAmount'),
       Cell: (props) => {
         const { reward_amount, reward_token } = props.row.original;
         return (
@@ -104,7 +102,6 @@ const getColumns = (callbacks: {
       header: t('worker.jobs.jobType'),
       size: 200,
       enableSorting: false,
-      Header: t('worker.jobs.jobType'),
       Cell: (props) => {
         return <Chip label={props.row.original.job_type} />;
       },
