@@ -23,12 +23,6 @@ export enum ErrorJob {
   CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
 }
 
-export enum ErrorJob {
-  ERR_ESCROW_NOT_CREATED = 'Failed to create escrow. Please try again later.',
-  ERR_GAS_PRICE_CALCULATION = 'Failed to calculate gas price.',
-  // Add other errors here...
-}
-
 /**
  * Represents error messages associated to webhook.
  */
