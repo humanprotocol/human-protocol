@@ -20,6 +20,10 @@ import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
 import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
 import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
+import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
+import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/available-jobs-reward-amount-sort';
+import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-network-filter';
+import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-job-type-filter';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -55,6 +59,18 @@ const getColumns = (callbacks: {
       Cell: (props) => {
         return getNetworkName(props.row.original.chain_id);
       },
+      muiTableHeadCellProps: () => ({
+        component: (props) => {
+          return (
+            <TableHeaderCell
+              {...props}
+              headerText={t('worker.jobs.network')}
+              iconType="filter"
+              popoverContent={<AvailableJobsNetworkFilter />}
+            />
+          );
+        },
+      }),
     },
     {
       accessorKey: 'reward_amount',
@@ -70,6 +86,16 @@ const getColumns = (callbacks: {
           />
         );
       },
+      muiTableHeadCellProps: () => ({
+        component: (props) => (
+          <TableHeaderCell
+            {...props}
+            headerText={t('worker.jobs.rewardAmount')}
+            iconType="filter"
+            popoverContent={<AvailableJobsRewardAmountSort />}
+          />
+        ),
+      }),
     },
     {
       accessorKey: 'job_type',
@@ -79,6 +105,21 @@ const getColumns = (callbacks: {
       Cell: (props) => {
         return <Chip label={props.row.original.job_type} />;
       },
+      muiTableHeadCellProps: () => ({
+        component: (props) => {
+          return (
+            <TableHeaderCell
+              {...props}
+              headerText={t('worker.jobs.jobType')}
+              iconType="filter"
+              popoverContent={
+                // TODO add available job types
+                <AvailableJobsJobTypeFilter jobTypes={['FORTUNE', 'TEST']} />
+              }
+            />
+          );
+        },
+      }),
     },
     {
       accessorKey: 'escrow_address',

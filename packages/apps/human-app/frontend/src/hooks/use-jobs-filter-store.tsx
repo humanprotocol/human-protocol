@@ -11,7 +11,8 @@ export interface JobsFilterStoreProps {
     sort?: 'ASC' | 'DESC';
     sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
     network?: 'MATIC' | 'POLYGON';
-    job_type?: 'FORTUNE';
+    // TODO add allowed job types
+    job_type?: string;
     status?:
       | 'ACTIVE'
       | 'COMPLETED'
@@ -24,6 +25,7 @@ export interface JobsFilterStoreProps {
     page_size: number;
     fields: string[];
     oracle_address?: string;
+    chain_id?: number;
   };
   setFilterParams: (
     partialParams: Partial<JobsFilterStoreProps['filterParams']>
