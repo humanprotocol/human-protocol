@@ -5,6 +5,7 @@ export const colorPalette = {
     primary: '#320A8D',
     secondary: '#858EC6',
     disabled: '#CBCFE6',
+    disabledSecondary: '#8494C3',
   },
   primary: {
     main: '#320A8D',

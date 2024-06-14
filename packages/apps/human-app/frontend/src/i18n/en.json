@@ -8,7 +8,7 @@
   "dashboard": {},
   "protectedPagesHeaders": {
     "profile": "Profile",
-    "jobsDiscovery":"Jobs Discovery",
+    "jobsDiscovery": "Jobs Discovery",
     "jobs": "Jobs"
   },
   "web3ProtectedPagesHeaders": {
@@ -38,7 +38,8 @@
   "components": {
     "multiSelect": {
       "allFields": "All fields",
-      "andMore": "(and {{number}} more)"
+      "andMore": "(and {{number}} more)",
+      "clearAll": "Clear all"
     },
     "breadcrumb": {
       "back": "Back"
@@ -332,6 +333,7 @@
         "publicKey": "Public Key",
         "webhookUrl": "Webhook URL",
         "role": "Role",
+        "jobType": "Job type",
         "noValue": "no value",
         "editBtn": "Edit"
       },
@@ -345,5 +347,11 @@
       "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
       "btn": "Finish"
     }
+  },
+  "walletConnectModal": {
+    "header": "Connect Wallet",
+    "paragraph": "The HUMAN App runs on Polygon. Please make sure you enter your Polygon wallet address. <1>Learn more.</1>",
+    "connectBtn": "Connect Wallet",
+    "cancelBtn": "Cancel"
   }
 }

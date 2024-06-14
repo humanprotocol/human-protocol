@@ -14,6 +14,7 @@ interface ModalState {
 
 export const MODAL_STATE = {
   MODAL_EXAMPLE: 'MODAL_EXAMPLE',
+  WALLET_CONNECT: 'WALLET_CONNECT',
 } as const;
 
 export type ModalStateUnion = (typeof MODAL_STATE)[keyof typeof MODAL_STATE];

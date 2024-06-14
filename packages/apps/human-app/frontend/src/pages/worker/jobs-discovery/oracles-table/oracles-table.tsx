@@ -5,10 +5,8 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import { useNavigate } from 'react-router-dom';
-import type { OracleSuccessResponse } from '@/api/servieces/worker/oracles';
-import { colorPalette } from '@/styles/color-palette';
+import { type OracleSuccessResponse } from '@/api/servieces/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
@@ -16,8 +14,8 @@ import { TableButton } from '@/components/ui/table-button';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { routerPaths } from '@/router/router-paths';
-import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-job-types-select';
 import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
+import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 
 const getColumns = (
   selectOracle: (oracleAddress: string, jobTypes: string[]) => void
@@ -71,10 +69,17 @@ const getColumns = (
 };
 
 export function OraclesTable({
-  oraclesData,
+  oraclesQueryDataResult,
 }: {
-  oraclesData: OracleSuccessResponse[];
+  oraclesQueryDataResult: OraclesDataQueryResult;
 }) {
+  const {
+    data: oraclesData,
+    isError: isOraclesDataError,
+    isRefetching: isOraclesDataRefetching,
+    isPending: isOraclesDataPending,
+  } = oraclesQueryDataResult;
+
   const { setOracleAddress: setOracleAddressForMyJobs, setAvailableJobTypes } =
     useMyJobsFilterStore();
   const { setOracleAddress: setOracleAddressForJobs } = useJobsFilterStore();
@@ -88,8 +93,13 @@ export function OraclesTable({
   };
 
   const table = useMaterialReactTable({
+    state: {
+      isLoading: isOraclesDataPending,
+      showAlertBanner: isOraclesDataError,
+      showProgressBars: isOraclesDataRefetching,
+    },
     columns: getColumns(selectOracle),
-    data: oraclesData,
+    data: oraclesData || [],
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
@@ -98,35 +108,15 @@ export function OraclesTable({
   });
 
   return (
-    <Grid alignItems="center" container justifyContent="center">
-      <Grid item xs={12}>
-        <Paper
-          sx={{
-            backgroundColor: isMobile
-              ? colorPalette.paper.main
-              : colorPalette.white,
-            height: '100%',
-            boxShadow: 'none',
-            padding: '40px',
-            minHeight: '800px',
-            borderRadius: '20px',
-          }}
-        >
-          <OraclesTableJobTypesSelect
-            jobTypes={oraclesData
-              .flatMap(({ jobTypes }) => jobTypes)
-              .map((jobType, i) => ({ value: jobType, name: jobType, id: i }))}
-          />
-          {isMobile ? (
-            <OraclesTableMobile
-              oraclesData={oraclesData}
-              selectOracle={selectOracle}
-            />
-          ) : (
-            <MaterialReactTable table={table} />
-          )}
-        </Paper>
-      </Grid>
-    </Grid>
+    <>
+      {isMobile ? (
+        <OraclesTableMobile
+          oraclesQueryDataResult={oraclesQueryDataResult}
+          selectOracle={selectOracle}
+        />
+      ) : (
+        <MaterialReactTable table={table} />
+      )}
+    </>
   );
 }

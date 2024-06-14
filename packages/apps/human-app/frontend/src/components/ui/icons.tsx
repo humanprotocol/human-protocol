@@ -22,6 +22,7 @@ import CheckmarkIcon from '@/assets/icons/checkmark-icon.svg';
 import LockerIcon from '@/assets/icons/locker-icon.svg';
 import FiltersButtonIcon from '@/assets/icons/filters-button-icon.svg';
 import SortArrow from '@/assets/icons/sort-arrow.svg';
+import FilersIcon from '@/assets/icons/filters-icon.svg';
 
 export {
   HomepageLogoIcon,
@@ -48,4 +49,5 @@ export {
   LockerIcon,
   FiltersButtonIcon,
   SortArrow,
+  FilersIcon,
 };
