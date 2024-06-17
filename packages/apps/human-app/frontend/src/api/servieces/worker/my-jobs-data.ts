@@ -14,7 +14,18 @@ const myJobSchema = z.object({
   chain_id: z.number(),
   job_type: z.string(),
   status: z.string(),
-  reward_amount: z.number(),
+  reward_amount: z.string().transform((value, ctx) => {
+    const parsedNumber = Number(value);
+    if (Number.isNaN(parsedNumber)) {
+      ctx.addIssue({
+        path: ['results', 'reward_amount'],
+        message: 'Not a numeric string',
+        code: 'custom',
+      });
+    }
+
+    return parsedNumber;
+  }),
   reward_token: z.string(),
   created_at: z.string(),
   expires_at: z.string(),

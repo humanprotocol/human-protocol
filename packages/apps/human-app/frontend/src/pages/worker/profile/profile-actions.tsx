@@ -14,6 +14,8 @@ import { routerPaths } from '@/router/router-paths';
 import { startSynapsKyc } from '@/pages/worker/profile/start-synaps-kyc';
 import { RegisterAddressAction } from '@/pages/worker/profile/register-address-action';
 import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
+import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
+import { WalletConnectDone } from '@/pages/worker/profile/wallet-connect-done';
 
 export function ProfileActions({
   setNotifications,
@@ -21,6 +23,8 @@ export function ProfileActions({
   setNotifications: () => void;
 }) {
   const navigation = useNavigate();
+  const { mutate: resendEmailVerificationMutation } =
+    useResendEmailVerificationWorkerMutation();
   const { setTopNotification } = useProtectedLayoutNotification();
   const {
     data: kycSessionIdData,
@@ -63,6 +67,7 @@ export function ProfileActions({
           <Button
             fullWidth
             onClick={() => {
+              resendEmailVerificationMutation({ email: user.email });
               navigation(routerPaths.worker.sendEmailVerification, {
                 state: { routerState: { email: user.email } },
               });
@@ -97,7 +102,11 @@ export function ProfileActions({
       <Grid>
         <ProfileAction
           done={Boolean(isWalletConnected && kycApproved)}
-          doneLabel={t('worker.profile.walletConnected')}
+          doneLabel={
+            <RequireWalletConnect>
+              <WalletConnectDone />
+            </RequireWalletConnect>
+          }
           toDoComponent={
             <ConnectWalletBtn
               disabled={user.kyc_status !== 'APPROVED'}

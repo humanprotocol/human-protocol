@@ -9,8 +9,8 @@
   "protectedPagesHeaders": {
     "profile": "Profile",
     "jobsDiscovery": "Jobs Discovery",
-    "jobs": "Jobs",
-    "hcaptchaLabeling": "hCaptcha Labeling"
+    "hcaptchaLabeling": "hCaptcha Labeling",
+    "jobs": "Jobs"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
@@ -39,7 +39,8 @@
   "components": {
     "multiSelect": {
       "allFields": "All fields",
-      "andMore": "(and {{number}} more)"
+      "andMore": "(and {{number}} more)",
+      "clearAll": "Clear all"
     },
     "breadcrumb": {
       "back": "Back"
@@ -138,7 +139,7 @@
       "btn": "Resend Verification Email",
       "paragraph1": "We’ve sent an email to <1>{{email}}</1>, please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
-      "paragraph3": "<1>Cant find our email?</1> If you can’t find the inbox in your email please check the spam folder or click below and we will send you a new one.",
+      "paragraph3": "<1>Cant find our email?</1> If you can’t find the email in your inbox please check the spam folder.",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
       "successResent": "Verification email has been successfully resent."
     },
@@ -352,6 +353,7 @@
         "publicKey": "Public Key",
         "webhookUrl": "Webhook URL",
         "role": "Role",
+        "jobType": "Job type",
         "noValue": "no value",
         "editBtn": "Edit"
       },
@@ -365,5 +367,11 @@
       "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
       "btn": "Finish"
     }
+  },
+  "walletConnectModal": {
+    "header": "Connect Wallet",
+    "paragraph": "The HUMAN App runs on Polygon. Please make sure you enter your Polygon wallet address. <1>Learn more.</1>",
+    "connectBtn": "Connect Wallet",
+    "cancelBtn": "Cancel"
   }
 }

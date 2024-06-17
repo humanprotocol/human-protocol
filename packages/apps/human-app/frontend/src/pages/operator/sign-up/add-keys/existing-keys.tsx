@@ -1,4 +1,4 @@
-import { Chip, Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { useFormContext } from 'react-hook-form';
@@ -8,6 +8,8 @@ import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 import { OptionalText } from '@/components/ui/optional-text';
 import { EmptyPlaceholder } from '@/components/ui/empty-placeholder';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import { Chips } from '@/components/ui/chips';
+import { Chip } from '@/components/ui/chip';
 
 export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
   const { getValues } = useFormContext<GetEthKVStoreValuesSuccessResponse>();
@@ -15,6 +17,7 @@ export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
   const webhookUrl = getValues(EthKVStoreKeys.WebhookUrl);
   const role = getValues(EthKVStoreKeys.Role);
   const fee = getValues(EthKVStoreKeys.Fee);
+  const jobTypes = getValues(EthKVStoreKeys.JobTypes);
 
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
@@ -50,6 +53,12 @@ export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
           {t('operator.addKeysPage.existingKeys.role')}
         </Typography>
         <div>{role ? <Chip label={role} /> : <EmptyPlaceholder />}</div>
+      </Grid>
+      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+        <Typography variant="subtitle2" width="100%">
+          {t('operator.addKeysPage.existingKeys.jobType')}
+        </Typography>
+        <div>{jobTypes ? <Chips data={jobTypes} /> : <EmptyPlaceholder />}</div>
       </Grid>
       <div>
         <Button

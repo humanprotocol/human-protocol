@@ -17,6 +17,7 @@ export async function ethKVStoreGetKeys({
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.PublicKey),
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.WebhookUrl),
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.Role),
+    ethKVStoreContract.get(accountAddress, EthKVStoreKeys.JobTypes),
     ethKVStoreContract.get(accountAddress, EthKVStoreKeys.Fee),
   ])) as unknown as string[];
 
@@ -24,6 +25,7 @@ export async function ethKVStoreGetKeys({
     [EthKVStoreKeys.PublicKey]: keys[0],
     [EthKVStoreKeys.WebhookUrl]: keys[1],
     [EthKVStoreKeys.Role]: keys[2],
-    [EthKVStoreKeys.Fee]: keys[3],
+    [EthKVStoreKeys.JobTypes]: keys[3],
+    [EthKVStoreKeys.Fee]: keys[4],
   };
 }

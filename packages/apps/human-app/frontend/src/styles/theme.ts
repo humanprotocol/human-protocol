@@ -374,6 +374,16 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: '20px',
+        },
+        root: {
+          zIndex: 20,
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

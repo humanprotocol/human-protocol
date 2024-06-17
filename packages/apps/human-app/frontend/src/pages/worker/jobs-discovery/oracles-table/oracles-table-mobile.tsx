@@ -3,17 +3,44 @@ import { t } from 'i18next';
 import { ProfileListItem } from '@/components/ui/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
-import type { OraclesSuccessResponse } from '@/api/servieces/worker/oracles';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
+import { Loader } from '@/components/ui/loader';
+import { Alert } from '@/components/ui/alert';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 
 export function OraclesTableMobile({
-  oraclesData,
   selectOracle,
+  oraclesQueryDataResult: {
+    data: oraclesData,
+    isError: isOraclesDataError,
+    error: oraclesDataError,
+    isPending: isOraclesDataPending,
+  },
 }: {
-  oraclesData: OraclesSuccessResponse;
   selectOracle: (oracleAddress: string, jobTypes: string[]) => void;
+  oraclesQueryDataResult: OraclesDataQueryResult;
 }) {
+  if (isOraclesDataPending) {
+    return (
+      <Grid
+        container
+        sx={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Loader />
+      </Grid>
+    );
+  }
+
+  if (isOraclesDataError) {
+    return (
+      <Alert color="error" severity="error">
+        {defaultErrorMessage(oraclesDataError)}
+      </Alert>
+    );
+  }
+
   return (
     <Stack flexDirection="column">
       {oraclesData.map((d) => (

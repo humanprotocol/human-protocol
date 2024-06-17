@@ -4,7 +4,7 @@ import { CheckmarkIcon } from '@/components/ui/icons';
 
 interface ProfileActionProps {
   done: boolean;
-  doneLabel: string;
+  doneLabel: string | React.ReactElement;
   toDoComponent: React.ReactElement;
 }
 
@@ -14,12 +14,16 @@ export function ProfileAction({
   toDoComponent,
 }: ProfileActionProps) {
   if (done) {
-    return (
-      <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">
-        <Typography variant="buttonLarge">{doneLabel}</Typography>
-        <CheckmarkIcon />
-      </Grid>
-    );
+    if (typeof doneLabel === 'string') {
+      return (
+        <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">
+          <Typography variant="buttonLarge">{doneLabel}</Typography>
+          <CheckmarkIcon />
+        </Grid>
+      );
+    }
+
+    return doneLabel;
   }
 
   return toDoComponent;
