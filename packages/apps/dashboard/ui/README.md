@@ -34,8 +34,6 @@ Use the `.env.example` file as an example to create a configuration file with ce
 $ cp .env.example .env.development
 ```
 
-Next, the requirement that the application puts forward is to set up a database, for this there are two different options, `manually` or using `docker`.
-
 ## 🚀 Usage
 
 ### Running the app
@@ -53,11 +51,11 @@ $ yarn run test
 
 # Branching
 
-[GitFlow convention](https://www.gitkraken.com/learn/git/git-flow) is to be followed (and feature PRs should target `develop` branch rather than `master`)
+[GitFlow convention](https://www.gitkraken.com/learn/git/git-flow) is to be followed (and feature PRs should target `develop` branch rather than `main`)
 
 ## Deployment Endpoints
 
-`master` branch → production: https://dashboard.humanprotocol.org/
+`main` branch → production: https://dashboard.humanprotocol.org/
 
 ## License
 

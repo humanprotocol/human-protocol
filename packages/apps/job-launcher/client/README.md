@@ -93,16 +93,6 @@ To run the tests, use:
 $ yarn test
 ```
 
-### Vercel Build
-
-To build the project for Vercel deployment, run:
-
-```bash
-$ yarn vercel-build
-```
-
-For a complete list of dependencies, refer to the package.json file.
-
 ## 📝 License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
