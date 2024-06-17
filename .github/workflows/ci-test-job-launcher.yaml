@@ -28,5 +28,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn workspace @human-protocol/job-launcher-server test test
+      - run: yarn workspace @human-protocol/job-launcher-server test
         name: Run Job Launcher Server test
