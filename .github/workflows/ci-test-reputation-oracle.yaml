@@ -3,12 +3,12 @@ name: Reputation Oracle Check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
     paths:
-      - "packages/core/**"
-      - "packages/sdk/typescript/human-protocol-sdk/**"
-      - "packages/apps/reputation-oracle/**"
+      - 'packages/core/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/apps/reputation-oracle/**'
   workflow_dispatch:
 
 jobs:
@@ -19,5 +19,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn reputation-oracle:test
+      - run: yarn workspace @human-protocol/reputation-oracle test
         name: Run reputation oracle test
