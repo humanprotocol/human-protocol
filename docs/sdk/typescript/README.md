@@ -1,6 +1,4 @@
-**@human-protocol/sdk** • [**Docs**](modules.md)
-
-***
+@human-protocol/sdk / [Modules](modules.md)
 
 # Human Protocol Node.js SDK
 
