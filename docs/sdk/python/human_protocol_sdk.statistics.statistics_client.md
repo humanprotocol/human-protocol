@@ -31,13 +31,13 @@ Initializes a DailyEscrowData instance.
   * **escrows_paid** (`int`) – Paid escrows
   * **escrows_cancelled** (`int`) – Cancelled escrows
 
-### *class* human_protocol_sdk.statistics.statistics_client.DailyHMTData(timestamp, total_transaction_amount, total_transaction_count)
+### *class* human_protocol_sdk.statistics.statistics_client.DailyHMTData(timestamp, total_transaction_amount, total_transaction_count, unique_senders, unique_receivers)
 
 Bases: `object`
 
 A class used to specify daily HMT data.
 
-#### \_\_init_\_(timestamp, total_transaction_amount, total_transaction_count)
+#### \_\_init_\_(timestamp, total_transaction_amount, total_transaction_count, unique_senders, unique_receivers)
 
 Initializes a DailyHMTData instance.
 
@@ -45,6 +45,8 @@ Initializes a DailyHMTData instance.
   * **timestamp** (`datetime`) – Timestamp
   * **total_transaction_amount** (`int`) – Total transaction amount
   * **total_transaction_count** (`int`) – Total transaction count
+  * **unique_senders** (`int`) – Total unique senders
+  * **unique_receivers** (`int`) – Total unique receivers
 
 ### *class* human_protocol_sdk.statistics.statistics_client.DailyPaymentData(timestamp, total_amount_paid, total_count, average_amount_per_worker)
 
@@ -61,42 +63,6 @@ Initializes a DailyPaymentData instance.
   * **total_amount_paid** (`int`) – Total amount paid
   * **total_count** (`int`) – Total count
   * **average_amount_per_worker** (`int`) – Average amount per worker
-
-### *class* human_protocol_sdk.statistics.statistics_client.DailyStatsData(id, active_workers, transactions, unique_senders, unique_receivers, escrows_launched, escrows_completed, escrow_payouts, timestamp)
-
-Bases: `object`
-
-A class used to specify daily statistics data.
-
-#### \_\_init_\_(id, active_workers, transactions, unique_senders, unique_receivers, escrows_launched, escrows_completed, escrow_payouts, timestamp)
-
-Initializes a DailyStatsData instance.
-
-* **Parameters:**
-  * **id** (`str`) – ID of the daily statistics data
-  * **active_workers** (`int`) – Number of active workers
-  * **transactions** (`int`) – Number of transactions
-  * **unique_senders** (`int`) – Number of unique senders
-  * **unique_receivers** (`int`) – Number of unique receivers
-  * **escrows_launched** (`int`) – Number of escrows launched
-  * **escrows_completed** (`int`) – Number of escrows completed
-  * **escrow_payouts** (`int`) – Number of escrow payouts
-  * **timestamp** (`int`) – Timestamp
-
-### *class* human_protocol_sdk.statistics.statistics_client.DailyStatsParam(start_date=None, end_date=None, limit=None)
-
-Bases: `object`
-
-A class used to specify daily stats params.
-
-#### \_\_init_\_(start_date=None, end_date=None, limit=None)
-
-Initializes a StatisticsParam instance.
-
-* **Parameters:**
-  * **start_date** (`Optional`[`datetime`]) – Start date for daily stats data
-  * **end_date** (`Optional`[`datetime`]) – End date for daily stats data
-  * **limit** (`Optional`[`int`]) – Limit of daily stats data
 
 ### *class* human_protocol_sdk.statistics.statistics_client.DailyWorkerData(timestamp, active_workers)
 
@@ -182,36 +148,6 @@ Initializes a Statistics instance
 
 * **Parameters:**
   **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to get statistical data from
-
-#### get_daily_stats_data(param=<human_protocol_sdk.statistics.statistics_client.DailyStatsParam object>)
-
-Get daily statistics data for the given date range.
-
-* **Parameters:**
-  **param** ([`DailyStatsParam`](#human_protocol_sdk.statistics.statistics_client.DailyStatsParam)) – Object containing the date range
-* **Return type:**
-  `List`[[`DailyStatsData`](#human_protocol_sdk.statistics.statistics_client.DailyStatsData)]
-* **Returns:**
-  List of DailyStatsData instances
-* **Example:**
-  ```python
-  from human_protocol_sdk.contants import ChainId
-  from human_protocol_sdk.statistics import StatisticsClient, DailyStatsParam
-
-  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-  stats_without_params = await statistics_client.get_daily_stats_data()
-  print("Daily Statistics without Params:")
-  print(stats_without_params)
-
-  start_date = datetime.datetime(2024, 5, 8)
-  end_date = datetime.datetime(2023, 6, 8)
-  stats_with_params = await statistics_client.get_daily_stats_data(
-      DailyStatsParam(start_date=start_date, end_date=end_date)
-  )
-  print("Daily Statistics with Params:")
-  print(stats_with_params)
-  ```
 
 #### get_escrow_statistics(param=<human_protocol_sdk.statistics.statistics_client.StatisticsParam object>)
 
