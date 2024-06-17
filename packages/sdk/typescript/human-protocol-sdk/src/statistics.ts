@@ -16,7 +16,7 @@ import {
   WorkerStatistics,
   HMTHolderData,
 } from './graphql';
-import { IDateParams, IStatisticsParams } from './interfaces';
+import { IStatisticsParams } from './interfaces';
 import { NetworkData } from './types';
 import { getSubgraphUrl, throwError } from './utils';
 

@@ -118,4 +118,4 @@ console.log(kvStoreData);
 
 #### Defined in
 
-[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/228cb42bcd420546605e48ae309510bc59209d10/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)
+[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)

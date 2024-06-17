@@ -136,13 +136,13 @@ Initializes a PaymentStatistics instance.
 * **Parameters:**
   **daily_payments_data** (`List`[[`DailyPaymentData`](#human_protocol_sdk.statistics.statistics_client.DailyPaymentData)]) – Daily payments data
 
-### *class* human_protocol_sdk.statistics.statistics_client.StatisticsClient(chain_id=ChainId.LOCALHOST)
+### *class* human_protocol_sdk.statistics.statistics_client.StatisticsClient(chain_id=ChainId.POLYGON_AMOY)
 
 Bases: `object`
 
 A client used to get statistical data.
 
-#### \_\_init_\_(chain_id=ChainId.LOCALHOST)
+#### \_\_init_\_(chain_id=ChainId.POLYGON_AMOY)
 
 Initializes a Statistics instance
 
