@@ -25,7 +25,7 @@ export const workerDrawerTopMenuItems: TopMenuItem[] = [
   </Grid>,
   {
     label: t('components.DrawerNavigation.captchaLabelling'),
-    link: routerPaths.worker.HcaptchaLabeling,
+    link: routerPaths.worker.enableLabeler,
   },
   {
     label: t('components.DrawerNavigation.jobsDiscovery'),

@@ -2,18 +2,21 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import Grid from '@mui/material/Grid';
 import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
+import { useNavigate } from 'react-router-dom';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
+import { breakpoints } from '@/styles/theme';
+import { Counter } from '@/components/ui/counter';
 
 const JOB_STATS = {
-  available: true,
+  available: false,
   counter: 10000,
 };
 
 export function HcaptchaLabelingPage() {
   const isMobile = useIsMobile();
-
+  const navigate = useNavigate();
   const hcaptchaOnError = (_: string) => {
     // TODO
   };
@@ -57,6 +60,9 @@ export function HcaptchaLabelingPage() {
               height: '100%',
               width: '376px',
               gap: '52px',
+              [breakpoints.mobile]: {
+                width: 'unset',
+              },
             }}
           >
             <Typography variant="body1">
@@ -76,7 +82,12 @@ export function HcaptchaLabelingPage() {
                   {t('worker.hcaptchaLabeling.noJobs')}
                 </Typography>
                 <Typography color={colorPalette.primary.light} variant="h4">
-                  02:41:52
+                  <Counter
+                    date="2024-06-27T16:50:11+0000"
+                    onFinish={() => {
+                      navigate(0);
+                    }}
+                  />
                 </Typography>
               </Grid>
             )}

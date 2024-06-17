@@ -261,6 +261,21 @@
     "hcaptchaLabeling": {
       "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",
       "noJobs": "No jobs available at the moment. Please come back in:"
+    },
+    "enableHCaptchaLabeling": {
+      "description": "To earn HMT, you must enable data-labeling. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "enableButton": "Enable labeling"
+    },
+    "hcaptchaLabelingStats": {
+      "statistics": "Statistics",
+      "allTime": "All Time",
+      "jobsServed": "Jobs served",
+      "jobsComplete": "Jobs complete",
+      "hmtEarned": "HMT earned",
+      "thisSession": "This Session",
+      "earnedSinceLogged": "HMT earned since logged in",
+      "statisticsNotLive": "Statistics are not live.",
+      "refresh": "Please refresh to view live statistics."
     }
   },
   "operator": {

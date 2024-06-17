@@ -23,7 +23,9 @@ import type { PageHeaderProps } from '@/components/layout/protected/page-header'
 import { HandIcon, HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
 import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/pages/worker/jobs/jobs.page';
-import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling.page';
+import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.pager';
+import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/hcaptcha-labeling.page';
+import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -128,6 +130,18 @@ export const protectedRoutes: {
     pageHeaderProps: {
       headerIcon: <HandIcon />,
       headerText: t('protectedPagesHeaders.hcaptchaLabeling'),
+      headerItem: <UserStatsAccordion />,
+    },
+  },
+  {
+    routerProps: {
+      path: routerPaths.worker.enableLabeler,
+      element: <EnableLabeler />,
+    },
+    pageHeaderProps: {
+      headerIcon: <HandIcon />,
+      headerText: t('protectedPagesHeaders.hcaptchaLabeling'),
+      headerItem: <UserStatsAccordion />,
     },
   },
 ];

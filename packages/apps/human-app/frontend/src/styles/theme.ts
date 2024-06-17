@@ -9,6 +9,8 @@ declare module '@mui/material/Typography' {
     body4: true;
     body5: true;
     body6: true;
+    body7: true;
+    body8: true;
     buttonLarge: true;
     buttonMedium: true;
     buttonSmall: true;
@@ -31,6 +33,8 @@ declare module '@mui/material/styles' {
     body4: CSSProperties;
     body5: CSSProperties;
     body6: CSSProperties;
+    body7: CSSProperties;
+    body8: CSSProperties;
     buttonLarge: CSSProperties;
     buttonMedium: CSSProperties;
     buttonSmall: CSSProperties;
@@ -52,6 +56,8 @@ declare module '@mui/material/styles' {
     body4?: CSSProperties;
     body5?: CSSProperties;
     body6?: CSSProperties;
+    body7?: CSSProperties;
+    body8?: CSSProperties;
     buttonLarge?: CSSProperties;
     buttonMedium?: CSSProperties;
     buttonSmall?: CSSProperties;
@@ -69,6 +75,7 @@ declare module '@mui/material/styles' {
 
 export const breakpoints = {
   mobile: '@media (max-width:900px)',
+  tablet: '@media (max-width:1200px)',
 };
 
 export const theme: ThemeOptions = {
@@ -185,6 +192,18 @@ export const theme: ThemeOptions = {
     body6: {
       fontSize: 24,
       fontWeight: 600,
+      letterSpacing: 0.15,
+    },
+    body7: {
+      fontSize: 18,
+      fontWeight: 500,
+      letterSpacing: 0.15,
+    },
+    body8: {
+      fontSize: 10,
+      fontWeight: 400,
+      fontStyle: 'italic',
+      lineHeight: '0.1rem',
       letterSpacing: 0.15,
     },
     buttonLarge: {
@@ -325,6 +344,33 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         notchedOutline: {
           borderColor: colorPalette.primary.main,
+        },
+      },
+    },
+    MuiAccordionSummary: {
+      styleOverrides: {
+        root: {
+          padding: '24px',
+        },
+      },
+    },
+    MuiAccordionDetails: {
+      styleOverrides: {
+        root: {
+          padding: '0 24px 24px 24px',
+        },
+      },
+    },
+    MuiAccordion: {
+      styleOverrides: {
+        gutters: {
+          borderRadius: '20px',
+          border: '1px',
+        },
+        root: {
+          boxShadow: 'none',
+          borderRadius: '16px !important',
+          border: 'solid 1px rgba(218, 222, 240, 0.8) !important',
         },
       },
     },

@@ -1,14 +1,27 @@
 import { Grid, Typography } from '@mui/material';
 import React from 'react';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 export interface PageHeaderProps {
   headerIcon: React.ReactNode;
   headerText: string;
+  headerItem?: React.ReactNode;
 }
 
-export function PageHeader({ headerIcon, headerText }: PageHeaderProps) {
+export function PageHeader({
+  headerIcon,
+  headerText,
+  headerItem,
+}: PageHeaderProps) {
+  const isMobile = useIsMobile();
   return (
-    <Grid container>
+    <Grid
+      alignContent="space-between"
+      container
+      flexWrap="nowrap"
+      gap="1rem"
+      justifyContent="center"
+    >
       <Grid alignContent="center" container gap="1rem" justifyContent="start">
         <Grid
           sx={{
@@ -33,11 +46,15 @@ export function PageHeader({ headerIcon, headerText }: PageHeaderProps) {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
+            flexWrap: 'nowrap',
           }}
         >
-          <Typography variant="h3">{headerText}</Typography>
+          <Typography sx={{ textWrap: 'nowrap' }} variant="h3">
+            {headerText}
+          </Typography>
         </div>
       </Grid>
+      {!isMobile ? <Grid>{headerItem}</Grid> : null}
     </Grid>
   );
 }

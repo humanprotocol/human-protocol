@@ -14,6 +14,7 @@ export const routerPaths = {
     jobsDiscovery: '/worker/jobs-discovery',
     jobs: '/worker/jobs',
     HcaptchaLabeling: '/worker/hcaptcha-labeling',
+    enableLabeler: '/worker/enable-labeler',
   },
   operator: {
     signIn: '/operator/sign-in',

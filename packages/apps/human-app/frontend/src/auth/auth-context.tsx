@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
@@ -7,14 +8,10 @@ import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 const userDataSchema = z.object({
   email: z.string(),
   userId: z.number(),
+  site_key: z.string().optional().nullable(),
   address: z.string().nullable(),
-  // eslint-disable-next-line camelcase -- camel case defined by api
   reputation_network: z.string(),
-  // eslint-disable-next-line camelcase -- camel case defined by api
   kyc_status: z.string().optional().nullable(),
-  // eslint-disable-next-line camelcase -- camel case defined by api
-  kyc_added_on_chain: z.boolean().optional(), // TODO that should be verified when adding KYC info on chain feature is done
-  // eslint-disable-next-line camelcase -- camel case defined by api
   email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
 });
 
