@@ -8,21 +8,63 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
 import { breakpoints } from '@/styles/theme';
 import { Counter } from '@/components/ui/counter';
-
-const JOB_STATS = {
-  available: false,
-  counter: 10000,
-};
+import { useHCaptchaUserStats } from '@/api/servieces/worker/hcaptcha-user-stats';
+import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useDailyHmtSpent } from '@/api/servieces/worker/daily-hmt-spent';
+import { getTomorrowDate } from '@/shared/helpers/counter-helpers';
+import { useSolveHCaptchaMutation } from '@/api/servieces/worker/solve-hcaptcha';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 
 export function HcaptchaLabelingPage() {
+  const { user } = useAuthenticatedUser();
+  const { mutate: solveHCaptchaMutation } = useSolveHCaptchaMutation();
+
+  const {
+    data: _hcaptchaUserStats,
+    isPending: isHcaptchaUserStatsPending,
+    isError: isHcaptchaUserStatsError,
+    error: hcaptchaUserStatsError,
+  } = useHCaptchaUserStats();
+
+  const {
+    data: dailyHmtSpent,
+    isPending: isDailyHmtSpentPending,
+    isError: isDailyHmtSpentError,
+    error: dailyHmtSpentError,
+  } = useDailyHmtSpent();
+
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+
+  const canSolveCaptcha =
+    dailyHmtSpent &&
+    (dailyHmtSpent.currentDateSolvedCaptchas <
+      env.VITE_DAILY_SOLVED_CAPTCHA_LIMIT ||
+      dailyHmtSpent.dailyHmtSpend < env.VITE_HMT_DAILY_SPENT_LIMIT);
+
   const hcaptchaOnError = (_: string) => {
     // TODO
   };
-  const hcaptchaOnSuccess = (_: string) => {
+  const hcaptchaOnSuccess = (token: string) => {
+    console.log({ token });
     // TODO
   };
+
+  if (isHcaptchaUserStatsPending || isDailyHmtSpentPending) {
+    return <PageCardLoader />;
+  }
+
+  if (isHcaptchaUserStatsError || isDailyHmtSpentError) {
+    return (
+      <PageCardError
+        errorMessage={defaultErrorMessage(
+          hcaptchaUserStatsError || dailyHmtSpentError
+        )}
+      />
+    );
+  }
+  console.log({ user });
 
   return (
     <Grid
@@ -68,12 +110,14 @@ export function HcaptchaLabelingPage() {
             <Typography variant="body1">
               {t('worker.hcaptchaLabeling.description')}
             </Typography>
-            {JOB_STATS.available ? (
+            {canSolveCaptcha ? (
               <Grid container sx={{ width: '100%', justifyContent: 'center' }}>
                 <HCaptcha
                   onError={hcaptchaOnError}
                   onVerify={hcaptchaOnSuccess}
-                  sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
+                  endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
+                  reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
+                  sitekey={user.site_key || ''}
                 />
               </Grid>
             ) : (
@@ -83,7 +127,7 @@ export function HcaptchaLabelingPage() {
                 </Typography>
                 <Typography color={colorPalette.primary.light} variant="h4">
                   <Counter
-                    date="2024-06-27T16:50:11+0000"
+                    date={getTomorrowDate().toISOString()}
                     onFinish={() => {
                       navigate(0);
                     }}

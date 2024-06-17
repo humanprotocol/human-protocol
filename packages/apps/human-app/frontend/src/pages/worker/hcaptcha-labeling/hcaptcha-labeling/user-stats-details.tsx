@@ -2,8 +2,13 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 import { RefreshIcon } from '@/components/ui/icons';
+import type { HCaptchaUserStatsSuccess } from '@/api/servieces/worker/hcaptcha-user-stats';
 
-export function UserStatsDetails() {
+export function UserStatsDetails({
+  stats,
+}: {
+  stats: HCaptchaUserStatsSuccess;
+}) {
   return (
     <Grid>
       <Divider sx={{ borderBottomWidth: '2px' }} />
@@ -27,17 +32,17 @@ export function UserStatsDetails() {
                 {t('worker.hcaptchaLabelingStats.jobsServed')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                16,234
+                {stats.jobsServed}
               </Typography>
             </Grid>
             <Grid
               sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
             >
               <Typography variant="caption">
-                {t('worker.hcaptchaLabelingStats.jobsServed')}
+                {t('worker.hcaptchaLabelingStats.jobsComplete')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                13,234
+                {stats.jobsComplete}
               </Typography>
             </Grid>
             <Grid
@@ -47,7 +52,7 @@ export function UserStatsDetails() {
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                16,234
+                {stats.hmtEarned}
               </Typography>
             </Grid>
           </Grid>
@@ -65,7 +70,7 @@ export function UserStatsDetails() {
                 {t('worker.hcaptchaLabelingStats.earnedSinceLogged')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                16,234
+                {stats.hmtEarnedSinceLogged}
               </Typography>
             </Grid>
           </Grid>

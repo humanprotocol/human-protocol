@@ -44,6 +44,7 @@ export const apiPaths = {
       path: '/user/register-address',
     },
     enableHCaptchaLabeling: '/labeling/h-captcha/enable',
+    hCaptchaUserStats: '/labeling/h-captcha/user-stats',
   },
   operator: {
     web3Auth: {

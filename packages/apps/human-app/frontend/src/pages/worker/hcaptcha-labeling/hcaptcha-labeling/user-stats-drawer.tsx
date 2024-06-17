@@ -2,13 +2,51 @@ import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Grid, Typography } from '@mui/material';
+import { t } from 'i18next';
 import { UserStatsDetails } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-details';
+import type { HCaptchaUserStatsSuccess } from '@/api/servieces/worker/hcaptcha-user-stats';
+import { useHCaptchaUserStats } from '@/api/servieces/worker/hcaptcha-user-stats';
+import { Loader } from '@/components/ui/loader';
+import { Alert } from '@/components/ui/alert';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 export interface UserStatsDrawerNavigationProps {
   isOpen: boolean;
 }
 
+function UserStatsDrawerContent({
+  stats,
+}: {
+  stats: HCaptchaUserStatsSuccess;
+}) {
+  return (
+    <Grid
+      container
+      sx={{
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '2rem',
+        flexDirection: 'column',
+        gap: '2rem',
+        marginTop: '50px',
+      }}
+    >
+      <Typography variant="mobileHeaderLarge">
+        {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
+      </Typography>
+      <UserStatsDetails stats={stats} />
+    </Grid>
+  );
+}
+
 export function UserStatsDrawer({ isOpen }: UserStatsDrawerNavigationProps) {
+  const {
+    data: hcaptchaUserStats,
+    error: hcaptchaUserStatsError,
+    status: hcaptchaUserStatsStatus,
+  } = useHCaptchaUserStats();
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <CssBaseline />
@@ -38,10 +76,17 @@ export function UserStatsDrawer({ isOpen }: UserStatsDrawerNavigationProps) {
             marginTop: '50px',
           }}
         >
-          <Typography variant="mobileHeaderLarge">
-            hCapcha Statistics
-          </Typography>
-          <UserStatsDetails />
+          {hcaptchaUserStatsStatus === 'success' ? (
+            <UserStatsDrawerContent stats={hcaptchaUserStats} />
+          ) : null}
+          {hcaptchaUserStatsStatus === 'error' ? (
+            <Alert color="error" severity="error">
+              {defaultErrorMessage(hcaptchaUserStatsError)}
+            </Alert>
+          ) : null}
+          {hcaptchaUserStatsStatus === 'pending' ? (
+            <Loader sx={{ zIndex: '55' }} />
+          ) : null}
         </Grid>
       </Drawer>
     </Box>

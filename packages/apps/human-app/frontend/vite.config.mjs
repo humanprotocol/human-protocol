@@ -25,6 +25,10 @@ const config = defineConfig({
   build: {
     target: 'esnext',
   },
+  server: {
+    host: '127.0.0.1',
+    port: 3001
+  }
 });
 
 // eslint-disable-next-line import/no-default-export -- export vite config
