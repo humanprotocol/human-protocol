@@ -285,7 +285,7 @@ class StatisticsClient:
     A client used to get statistical data.
     """
 
-    def __init__(self, chain_id: ChainId = ChainId.LOCALHOST):
+    def __init__(self, chain_id: ChainId = ChainId.POLYGON_AMOY):
         """Initializes a Statistics instance
 
         :param chain_id: Chain ID to get statistical data from

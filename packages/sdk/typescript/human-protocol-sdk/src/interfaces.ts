@@ -133,9 +133,3 @@ export interface ITransactionsFilter {
   fromAddress?: string;
   toAddress?: string;
 }
-
-export interface IDateParams {
-  startDate?: Date;
-  endDate?: Date;
-  limit?: number;
-}

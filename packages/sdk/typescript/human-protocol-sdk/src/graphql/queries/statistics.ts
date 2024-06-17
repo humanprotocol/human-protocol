@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { IDateParams, IStatisticsParams } from '../../interfaces';
+import { IStatisticsParams } from '../../interfaces';
 
 const HMTOKEN_STATISTICS_FRAGMENT = gql`
   fragment HMTokenStatisticsFields on HMTokenStatistics {
