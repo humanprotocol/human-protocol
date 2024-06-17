@@ -1,7 +1,7 @@
 import { Box, Link } from '@mui/material';
 import { FC } from 'react';
 
-import { DiscordIcon, GithubIcon, LinkedinIcon, TwitterIcon } from '../Icons';
+import { DiscordIcon, GithubIcon, LinkedinIcon, XIcon } from '../Icons';
 
 type SocialIconProps = {
   direction?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
@@ -28,7 +28,7 @@ export const SocialIcons: FC<SocialIconProps> = ({ direction = 'row' }) => (
       target="_blank"
       sx={{ m: direction === 'row' ? '0px 15px' : '15px 0px' }}
     >
-      <TwitterIcon />
+      <XIcon />
     </Link>
     <Link
       href="http://hmt.ai/linkedin"
