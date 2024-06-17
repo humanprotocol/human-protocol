@@ -1,6 +1,9 @@
 import { t } from 'i18next';
+import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
 
-export function jsonRpcErrorHandler(_: unknown) {
-  // TODO handle JSON RPC errors
+export function jsonRpcErrorHandler(unknownError: unknown) {
+  if (unknownError instanceof JsonRpcError) {
+    return unknownError.message;
+  }
   return t('errors.unknown');
 }
