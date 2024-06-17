@@ -50,7 +50,7 @@ export function Layout({
     useState<TopNotificationPayload | null>(null);
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
-  const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(!isMobile);
+  const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
   const { backgroundColor } = useBackgroundColorStore();
   const toggleUserStatsDrawer = isHCaptchaLabelingPage
     ? () => {

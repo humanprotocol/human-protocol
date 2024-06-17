@@ -1,21 +1,24 @@
+/* eslint-disable camelcase -- ...*/
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
-import { wait } from '@/shared/helpers/wait';
-import { env } from '@/shared/env';
-// TODO add endpoint
-// const enableHCaptchaLabelingSuccessSchema = z.unknown();
+import { apiClient } from '@/api/api-client';
+import { apiPaths } from '@/api/api-paths';
+
+const enableHCaptchaLabelingSuccessSchema = z.object({
+  site_key: z.string(),
+});
+
+export type EnableHCaptchaLabelingSuccessResponse = z.infer<
+  typeof enableHCaptchaLabelingSuccessSchema
+>;
 
 async function enableHCaptchaLabeling() {
-  // TODO add endpoint
-  // return apiClient(apiPaths.worker.enableHCaptchaLabeling, {
-  //   successSchema: ResetPasswordSuccessResponseSchema,
-  //   options: { method: 'POST', body: JSON.stringify(data) },
-  // });
-  await wait(1000);
-  return Promise.resolve({
-    // eslint-disable-next-line camelcase --- ...
-    site_key: env.VITE_H_CAPTCHA_SITE_KEY,
+  return apiClient(apiPaths.worker.enableHCaptchaLabeling, {
+    successSchema: enableHCaptchaLabelingSuccessSchema,
+    authenticated: true,
+    options: { method: 'POST' },
   });
 }
 

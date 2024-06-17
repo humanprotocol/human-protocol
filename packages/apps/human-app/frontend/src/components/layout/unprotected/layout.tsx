@@ -38,6 +38,7 @@ export function Layout({ withNavigation = true }: LayoutProps) {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          flex: 1,
         }}
       >
         <Outlet />
