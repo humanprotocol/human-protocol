@@ -219,3 +219,11 @@ yarn upgrade:proxy --network [NETWORK_NAME]
 ```bash
 npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
+
+## Documentation
+
+For detailed information about core, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/smart-contracts).
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.

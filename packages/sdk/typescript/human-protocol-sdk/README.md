@@ -104,3 +104,11 @@ const { ethers } = require('ethers');
   });
 })();
 ```
+
+## Documentation
+
+For detailed information about core, please refer to the [Human Protocol Docs](https://sdk.humanprotocol.org/).
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.
