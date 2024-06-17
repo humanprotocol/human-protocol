@@ -115,6 +115,7 @@ export function HcaptchaLabelingPage() {
                 <HCaptcha
                   onError={hcaptchaOnError}
                   onVerify={hcaptchaOnSuccess}
+                  custom
                   endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
                   sitekey={user.site_key || ''}
