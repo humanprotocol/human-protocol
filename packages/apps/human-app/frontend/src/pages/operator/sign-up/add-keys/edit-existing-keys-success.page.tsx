@@ -48,7 +48,7 @@ export function EditExistingKeysSuccessPage() {
   }
 
   if (isSignatureDataPending) {
-    return <PageCardLoader />;
+    return <PageCardLoader cardMaxWidth="100%" />;
   }
 
   return (

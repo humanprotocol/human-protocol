@@ -15,13 +15,19 @@ import { useDailyHmtSpent } from '@/api/servieces/worker/daily-hmt-spent';
 import { getTomorrowDate } from '@/shared/helpers/counter-helpers';
 import { useSolveHCaptchaMutation } from '@/api/servieces/worker/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
+import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
 
 export function HcaptchaLabelingPage() {
   const { user } = useAuthenticatedUser();
-  const { mutate: solveHCaptchaMutation } = useSolveHCaptchaMutation();
+  const { onSuccess, onError } = useHCaptchaLabelingNotifications();
+
+  const { mutate: solveHCaptchaMutation } = useSolveHCaptchaMutation({
+    onSuccess,
+    onError,
+  });
 
   const {
-    data: _hcaptchaUserStats,
+    data: hcaptchaUserStats,
     isPending: isHcaptchaUserStatsPending,
     isError: isHcaptchaUserStatsError,
     error: hcaptchaUserStatsError,
@@ -39,32 +45,28 @@ export function HcaptchaLabelingPage() {
 
   const canSolveCaptcha =
     dailyHmtSpent &&
-    (dailyHmtSpent.currentDateSolvedCaptchas <
-      env.VITE_DAILY_SOLVED_CAPTCHA_LIMIT ||
-      dailyHmtSpent.dailyHmtSpend < env.VITE_HMT_DAILY_SPENT_LIMIT);
+    hcaptchaUserStats &&
+    (hcaptchaUserStats.solved < env.VITE_DAILY_SOLVED_CAPTCHA_LIMIT ||
+      dailyHmtSpent.spend < env.VITE_HMT_DAILY_SPENT_LIMIT);
 
-  const hcaptchaOnError = (_: string) => {
-    // TODO
-  };
   const hcaptchaOnSuccess = (token: string) => {
-    console.log({ token });
-    // TODO
+    solveHCaptchaMutation({ token });
   };
 
   if (isHcaptchaUserStatsPending || isDailyHmtSpentPending) {
-    return <PageCardLoader />;
+    return <PageCardLoader cardMaxWidth="100%" />;
   }
 
   if (isHcaptchaUserStatsError || isDailyHmtSpentError) {
     return (
       <PageCardError
+        cardMaxWidth="100%"
         errorMessage={defaultErrorMessage(
           hcaptchaUserStatsError || dailyHmtSpentError
         )}
       />
     );
   }
-  console.log({ user });
 
   return (
     <Grid
@@ -113,10 +115,10 @@ export function HcaptchaLabelingPage() {
             {canSolveCaptcha ? (
               <Grid container sx={{ width: '100%', justifyContent: 'center' }}>
                 <HCaptcha
-                  onError={hcaptchaOnError}
-                  onVerify={hcaptchaOnSuccess}
+                  // @ts-expect-error -- ...
                   custom
                   endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
+                  onVerify={hcaptchaOnSuccess}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
                   sitekey={user.site_key || ''}
                 />

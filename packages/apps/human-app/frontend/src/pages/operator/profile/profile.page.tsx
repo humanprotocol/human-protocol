@@ -48,7 +48,7 @@ export function OperatorProfilePage() {
   }, [setGrayBackground]);
 
   if (isKeysDataPending) {
-    return <PageCardLoader />;
+    return <PageCardLoader cardMaxWidth="100%" />;
   }
 
   if (isKeysError) {

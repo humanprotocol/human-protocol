@@ -277,7 +277,8 @@
       "thisSession": "This Session",
       "earnedSinceLogged": "HMT earned since logged in",
       "statisticsNotLive": "Statistics are not live.",
-      "refresh": "Please refresh to view live statistics."
+      "refresh": "Please refresh to view live statistics.",
+      "solvedSuccess": "HCaptcha solved!"
     }
   },
   "operator": {

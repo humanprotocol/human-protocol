@@ -3,12 +3,14 @@ import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 import { RefreshIcon } from '@/components/ui/icons';
 import type { HCaptchaUserStatsSuccess } from '@/api/servieces/worker/hcaptcha-user-stats';
+import { useHCaptchaUserStats } from '@/api/servieces/worker/hcaptcha-user-stats';
 
 export function UserStatsDetails({
   stats,
 }: {
   stats: HCaptchaUserStatsSuccess;
 }) {
+  const { refetch } = useHCaptchaUserStats();
   return (
     <Grid>
       <Divider sx={{ borderBottomWidth: '2px' }} />
@@ -32,7 +34,7 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.jobsServed')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.jobsServed}
+                {stats.served}
               </Typography>
             </Grid>
             <Grid
@@ -42,7 +44,7 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.jobsComplete')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.jobsComplete}
+                {stats.solved}
               </Typography>
             </Grid>
             <Grid
@@ -52,7 +54,7 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.hmtEarned}
+                {stats.currentEarningsStats.hmtEarned || 0}
               </Typography>
             </Grid>
           </Grid>
@@ -70,7 +72,7 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.earnedSinceLogged')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.hmtEarnedSinceLogged}
+                {stats.currentEarningsStats.hmtEarned}
               </Typography>
             </Grid>
           </Grid>
@@ -94,6 +96,9 @@ export function UserStatsDetails({
           </Grid>
           <Grid
             component="a"
+            onClick={() => {
+              void refetch();
+            }}
             sx={{
               display: 'flex',
               justifyContent: 'center',

@@ -78,7 +78,7 @@ export function AddStakeOperatorPage() {
     isDecimalsDataPending ||
     decimalsData === undefined
   ) {
-    return <PageCardLoader />;
+    return <PageCardLoader cardMaxWidth="100%" />;
   }
 
   return (

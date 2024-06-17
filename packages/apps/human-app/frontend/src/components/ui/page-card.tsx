@@ -38,9 +38,6 @@ const commonStyles: SxProps<Theme> = {
   maxWidth: '1200px',
   width: '100%',
   background: colorPalette.white,
-  [breakpoints.mobile]: {
-    borderRadius: '0',
-  },
 };
 
 interface FormCardProps {
@@ -202,6 +199,7 @@ export function PageCard({
 
 export function PageCardLoader({
   withLayoutBackground = true,
+  cardMaxWidth,
 }: {
   cardMaxWidth?: string;
   withLayoutBackground?: boolean;
@@ -214,8 +212,12 @@ export function PageCardLoader({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
   }, []);
+  const sx = cardMaxWidth
+    ? { ...commonStyles, maxWidth: cardMaxWidth }
+    : commonStyles;
+
   return (
-    <Grid container sx={commonStyles}>
+    <Grid container sx={sx}>
       <Loader size={90} />
     </Grid>
   );

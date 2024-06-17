@@ -13,7 +13,7 @@ export function RequireWeb3Auth({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (web3Auth.status === 'loading') {
-    return <PageCardLoader />;
+    return <PageCardLoader cardMaxWidth="100%" />;
   }
 
   if (!web3Auth.user) {

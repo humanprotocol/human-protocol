@@ -1,30 +1,38 @@
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { wait } from '@/shared/helpers/wait';
+import { apiPaths } from '@/api/api-paths';
+import { apiClient } from '@/api/api-client';
 
 const hcaptchaUserStatsSchema = z.object({
-  jobsServed: z.number(),
-  jobsComplete: z.number(),
-  hmtEarned: z.number(),
-  hmtEarnedSinceLogged: z.number(),
+  balance: z.object({
+    available: z.number(),
+    estimated: z.number(),
+    recent: z.number(),
+    total: z.number(),
+  }),
+  served: z.number(),
+  solved: z.number(),
+  verified: z.number(),
+  // TODO verify response
+  currentDateStats: z.object({
+    served: z.number().optional(),
+    solved: z.number().optional(),
+    verified: z.number().optional(),
+  }),
+  // TODO verify response
+  currentEarningsStats: z.object({
+    hmtEarned: z.number().optional(),
+  }),
 });
 
 export type HCaptchaUserStatsSuccess = z.infer<typeof hcaptchaUserStatsSchema>;
 
-export async function getHCaptchaUsersStats(): Promise<HCaptchaUserStatsSuccess> {
-  // TODO connect with api
-  // return apiClient(apiPaths.worker.hCaptchaUserStats, {
-  //   successSchema: z.unknown(),
-  //   options: { method: 'GET' },
-  // });
-  await wait(10000);
-
-  return {
-    jobsServed: 14724,
-    jobsComplete: 13845,
-    hmtEarned: 14.690886,
-    hmtEarnedSinceLogged: 2.64302,
-  };
+export async function getHCaptchaUsersStats() {
+  return apiClient(apiPaths.worker.hCaptchaUserStats, {
+    authenticated: true,
+    successSchema: hcaptchaUserStatsSchema,
+    options: { method: 'GET' },
+  });
 }
 
 export function useHCaptchaUserStats() {
