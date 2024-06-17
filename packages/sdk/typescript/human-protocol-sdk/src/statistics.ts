@@ -428,8 +428,8 @@ export class StatisticsClient {
             eventDayData.dailyHMTTransferAmount
           ),
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,
-          uniqueSenders: +eventDayData.uniqueSenders,
-          uniqueReceivers: +eventDayData.uniqueReceivers,
+          dailyUniqueSenders: +eventDayData.dailyUniqueSenders,
+          dailyUniqueReceivers: +eventDayData.dailyUniqueReceivers,
         })),
       };
     } catch (e: any) {

@@ -125,7 +125,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
+[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
 
 ## Properties
 
@@ -135,7 +135,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:96](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L96)
+[kvstore.ts:96](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L96)
 
 ___
 
@@ -149,7 +149,7 @@ ___
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -163,7 +163,7 @@ ___
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -204,7 +204,7 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:305](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L305)
+[kvstore.ts:305](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L305)
 
 ___
 
@@ -247,7 +247,7 @@ const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
 
 #### Defined in
 
-[kvstore.ts:344](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L344)
+[kvstore.ts:344](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L344)
 
 ___
 
@@ -285,7 +285,7 @@ const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB882
 
 #### Defined in
 
-[kvstore.ts:402](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L402)
+[kvstore.ts:402](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L402)
 
 ___
 
@@ -329,7 +329,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:167](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L167)
+[kvstore.ts:167](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L167)
 
 ___
 
@@ -375,7 +375,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:210](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L210)
+[kvstore.ts:210](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L210)
 
 ___
 
@@ -418,7 +418,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 
 #### Defined in
 
-[kvstore.ts:253](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L253)
+[kvstore.ts:253](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L253)
 
 ___
 
@@ -450,4 +450,4 @@ Creates an instance of KVStoreClient from a runner.
 
 #### Defined in
 
-[kvstore.ts:122](https://github.com/humanprotocol/human-protocol/blob/87af7759dee96e786e48903fbc94b6b72c5de23a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L122)
+[kvstore.ts:122](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L122)

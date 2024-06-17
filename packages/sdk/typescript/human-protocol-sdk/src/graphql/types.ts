@@ -72,8 +72,8 @@ export type EventDayData = {
   dailyPayoutAmount: string;
   dailyHMTTransferCount: string;
   dailyHMTTransferAmount: string;
-  uniqueSenders: string;
-  uniqueReceivers: string;
+  dailyUniqueSenders: string;
+  dailyUniqueReceivers: string;
 };
 
 export type RewardAddedEventData = {
@@ -131,8 +131,8 @@ export type DailyHMTData = {
   timestamp: Date;
   totalTransactionAmount: bigint;
   totalTransactionCount: number;
-  uniqueSenders: number;
-  uniqueReceivers: number;
+  dailyUniqueSenders: number;
+  dailyUniqueReceivers: number;
 };
 
 export type HMTStatistics = {

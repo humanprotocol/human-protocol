@@ -199,7 +199,8 @@ export function handleTransfer(event: Transfer): void {
     event.params._from
   );
   if (uniqueSender.transferCount === ONE_BI) {
-    eventDayData.uniqueSenders = eventDayData.uniqueSenders.plus(ONE_BI);
+    eventDayData.dailyUniqueSenders =
+      eventDayData.dailyUniqueSenders.plus(ONE_BI);
   }
   uniqueSender.transferCount = uniqueSender.transferCount.plus(
     event.params._value
@@ -212,7 +213,8 @@ export function handleTransfer(event: Transfer): void {
     event.params._to
   );
   if (uniqueReceiver.receiveCount === ZERO_BI) {
-    eventDayData.uniqueReceivers = eventDayData.uniqueReceivers.plus(ONE_BI);
+    eventDayData.dailyUniqueReceivers =
+      eventDayData.dailyUniqueReceivers.plus(ONE_BI);
   }
   uniqueReceiver.receiveCount = uniqueReceiver.receiveCount.plus(
     event.params._value

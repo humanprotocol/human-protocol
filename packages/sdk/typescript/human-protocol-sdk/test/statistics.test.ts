@@ -241,8 +241,8 @@ describe('StatisticsClient', () => {
               timestamp: 1,
               dailyHMTTransferCount: '4',
               dailyHMTTransferAmount: '100',
-              uniqueSenders: '100',
-              uniqueReceivers: '100',
+              dailyUniqueSenders: '100',
+              dailyUniqueReceivers: '100',
             },
           ],
         });
@@ -279,8 +279,8 @@ describe('StatisticsClient', () => {
             timestamp: new Date(1000),
             totalTransactionAmount: ethers.toBigInt(100),
             totalTransactionCount: 4,
-            uniqueSenders: 100,
-            uniqueReceivers: 100,
+            dailyUniqueSenders: 100,
+            dailyUniqueReceivers: 100,
           },
         ],
       });
