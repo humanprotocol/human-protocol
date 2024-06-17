@@ -25,7 +25,6 @@ import { ONE_BI, ONE_DAY, ZERO_BI } from './utils/number';
 import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
-import { getDailyStatsData } from './utils/dailyStats';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
 
@@ -190,11 +189,6 @@ export function handleTransfer(event: Transfer): void {
   eventDayData.dailyHMTTransferAmount =
     eventDayData.dailyHMTTransferAmount.plus(event.params._value);
 
-  // Update daily stats
-  const dailyStats = getDailyStatsData(event);
-  dailyStats.transactions = dailyStats.transactions.plus(ONE_BI);
-  dailyStats.save();
-
   const timestamp = event.block.timestamp.toI32();
   const dayID = timestamp / ONE_DAY;
   const dayStartTimestamp = dayID * ONE_DAY;
@@ -205,10 +199,7 @@ export function handleTransfer(event: Transfer): void {
     event.params._from
   );
   if (uniqueSender.transferCount === ONE_BI) {
-    // Update daily stats
-    const dailyStats = getDailyStatsData(event);
-    dailyStats.uniqueSenders = dailyStats.uniqueSenders.plus(ONE_BI);
-    dailyStats.save();
+    eventDayData.uniqueSenders = eventDayData.uniqueSenders.plus(ONE_BI);
   }
   uniqueSender.transferCount = uniqueSender.transferCount.plus(
     event.params._value
@@ -221,10 +212,7 @@ export function handleTransfer(event: Transfer): void {
     event.params._to
   );
   if (uniqueReceiver.receiveCount === ZERO_BI) {
-    // Update daily stats
-    const dailyStats = getDailyStatsData(event);
-    dailyStats.uniqueReceivers = dailyStats.uniqueReceivers.plus(ONE_BI);
-    dailyStats.save();
+    eventDayData.uniqueReceivers = eventDayData.uniqueReceivers.plus(ONE_BI);
   }
   uniqueReceiver.receiveCount = uniqueReceiver.receiveCount.plus(
     event.params._value
@@ -273,11 +261,6 @@ export function handleTransfer(event: Transfer): void {
       eventDayData.dailyWorkerCount =
         eventDayData.dailyWorkerCount.plus(ONE_BI);
     }
-
-    // Update daily stats
-    const dailyStats = getDailyStatsData(event);
-    dailyStats.activeWorkers = dailyStats.activeWorkers.plus(ONE_BI);
-    dailyStats.save();
   }
 
   eventDayData.save();

@@ -47,20 +47,8 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
     dailyPayoutAmount
     dailyHMTTransferCount
     dailyHMTTransferAmount
-  }
-`;
-
-export const DAILY_STATS_DATA_FRAGMENT = gql`
-  fragment DailyStatsDataFields on DailyStatsData {
-    id
-    activeWorkers
-    transactions
     uniqueSenders
     uniqueReceivers
-    escrowsLaunched
-    escrowsCompleted
-    escrowPayouts
-    timestamp
   }
 `;
 
@@ -106,32 +94,5 @@ export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsParams) => {
       }
     }
     ${EVENT_DAY_DATA_FRAGMENT}
-  `;
-};
-
-export const GET_DAILY_STATS_DATA_QUERY = (params: IDateParams) => {
-  const { startDate, endDate, limit } = params;
-  const WHERE_CLAUSE = `
-    where: {
-      ${startDate !== undefined ? `timestamp_gte: $startDate` : ''}
-      ${endDate !== undefined ? `timestamp_lte: $endDate` : ''}
-    }
-  `;
-  const LIMIT_CLAUSE = `
-    first: ${limit ? `$limit` : `1000`}
-  `;
-
-  return gql`
-    query GetDailyStatsData($startDate: Int, $endDate: Int) {
-      dailyStatsDatas(
-        ${WHERE_CLAUSE},
-        orderBy: timestamp,
-        orderDirection: desc,
-        ${LIMIT_CLAUSE}
-      ) {
-        ...DailyStatsDataFields
-      }
-    }
-    ${DAILY_STATS_DATA_FRAGMENT}
   `;
 };

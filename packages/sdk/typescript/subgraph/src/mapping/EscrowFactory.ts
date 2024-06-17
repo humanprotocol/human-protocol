@@ -7,7 +7,6 @@ import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
 import { createOrLoadLeader } from './Staking';
 import { createTransaction } from './utils/transaction';
-import { getDailyStatsData } from './utils/dailyStats';
 import { getEventDayData } from './utils/dayUpdates';
 import { ONE_BI, ZERO_BI } from './utils/number';
 
@@ -43,11 +42,6 @@ export function handleLaunched(event: Launched): void {
   const eventDayData = getEventDayData(event);
   eventDayData.dailyEscrowCount = eventDayData.dailyEscrowCount.plus(ONE_BI);
   eventDayData.save();
-
-  // Update daily stats
-  const dailyStats = getDailyStatsData(event);
-  dailyStats.escrowsLaunched = dailyStats.escrowsLaunched.plus(ONE_BI);
-  dailyStats.save();
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);
@@ -88,11 +82,6 @@ export function handleLaunchedV2(event: LaunchedV2): void {
   const eventDayData = getEventDayData(event);
   eventDayData.dailyEscrowCount = eventDayData.dailyEscrowCount.plus(ONE_BI);
   eventDayData.save();
-
-  // Update daily stats
-  const dailyStats = getDailyStatsData(event);
-  dailyStats.escrowsLaunched = dailyStats.escrowsLaunched.plus(ONE_BI);
-  dailyStats.save();
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);

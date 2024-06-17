@@ -1,4 +1,4 @@
-from human_protocol_sdk.statistics import StatisticsParam, DailyStatsParam
+from human_protocol_sdk.statistics import StatisticsParam
 
 hmtoken_statistics_fragment = """
 fragment HMTokenStatisticsFields on HMTokenStatistics {
@@ -46,20 +46,8 @@ fragment EventDayDataFields on EventDayData {
     dailyPayoutAmount
     dailyHMTTransferCount
     dailyHMTTransferAmount
-}
-"""
-
-daily_stats_fragment = """
-fragment DailyStatsDataFields on DailyStatsData {
-    id
-    activeWorkers
-    transactions
     uniqueSenders
     uniqueReceivers
-    escrowsLaunched
-    escrowsCompleted
-    escrowPayouts
-    timestamp
 }
 """
 
@@ -107,28 +95,4 @@ query GetEscrowDayData($from: Int, $to: Int) {{
         from_clause="timestamp_gte: $from" if param.date_from else "",
         to_clause="timestamp_lte: $to" if param.date_to else "",
         limit_clause="first: $limit" if param.limit else "first: 1000",
-    )
-
-
-def get_daily_stats_data_query(params: DailyStatsParam):
-    return """
-query GetDailyStatsData($startDate: Int, $endDate: Int) {{
-    dailyStatsDatas(
-        where: {{
-            {start_date_clause}
-            {end_date_clause}
-        }},
-        orderBy: timestamp,
-        orderDirection: desc,
-        {limit_clause}
-    ) {{
-      ...DailyStatsDataFields
-    }}
-}}
-{daily_stats_fragment}
-""".format(
-        daily_stats_fragment=daily_stats_fragment,
-        start_date_clause="timestamp_gte: $startDate" if params.start_date else "",
-        end_date_clause="timestamp_lte: $endDate" if params.end_date else "",
-        limit_clause="first: $limit" if params.limit else "first: 1000",
     )

@@ -6,7 +6,6 @@ import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 import { StatisticsClient } from '../src/statistics';
 import {
-  GET_DAILY_STATS_DATA_QUERY,
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
 } from '../src/graphql/queries';
@@ -242,6 +241,8 @@ describe('StatisticsClient', () => {
               timestamp: 1,
               dailyHMTTransferCount: '4',
               dailyHMTTransferAmount: '100',
+              uniqueSenders: '100',
+              uniqueReceivers: '100',
             },
           ],
         });
@@ -278,6 +279,8 @@ describe('StatisticsClient', () => {
             timestamp: new Date(1000),
             totalTransactionAmount: ethers.toBigInt(100),
             totalTransactionCount: 4,
+            uniqueSenders: 100,
+            uniqueReceivers: 100,
           },
         ],
       });
@@ -290,72 +293,6 @@ describe('StatisticsClient', () => {
 
       await expect(
         statisticsClient.getHMTStatistics({
-          from: new Date(),
-          to: new Date(),
-        })
-      ).rejects.toThrow('Error');
-
-      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getDailyStatsData', () => {
-    test('should successfully get daily statistics', async () => {
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        dailyStatsDatas: [
-          {
-            id: 1,
-            activeWorkers: 10,
-            transactions: 1,
-            uniqueSenders: 5,
-            uniqueReceivers: 5,
-            escrowsLaunched: 100,
-            escrowsCompleted: 100,
-            escrowPayouts: 1000,
-            timestamp: new Date(2024, 4, 8),
-          },
-        ],
-      });
-
-      const startDate = new Date();
-      const endDate = new Date(startDate.setDate(startDate.getDate() + 1));
-
-      const result = await statisticsClient.getDailyStatsData({
-        startDate,
-        endDate,
-      });
-
-      expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
-        GET_DAILY_STATS_DATA_QUERY({ startDate, endDate }),
-        {
-          startDate: startDate.getTime() / 1000,
-          endDate: endDate.getTime() / 1000,
-        }
-      );
-
-      expect(result).toEqual([
-        {
-          id: 1,
-          activeWorkers: 10,
-          transactions: 1,
-          uniqueSenders: 5,
-          uniqueReceivers: 5,
-          escrowsLaunched: 100,
-          escrowsCompleted: 100,
-          escrowPayouts: 1000,
-          timestamp: expect.any(Date),
-        },
-      ]);
-    });
-
-    test('should throw error in case gql fetch fails from subgraph', async () => {
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockRejectedValueOnce(new Error('Error'));
-
-      await expect(
-        statisticsClient.getDailyStatsData({
           from: new Date(),
           to: new Date(),
         })

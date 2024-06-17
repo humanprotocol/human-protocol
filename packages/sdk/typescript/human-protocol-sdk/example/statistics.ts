@@ -95,19 +95,6 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   });
 };
 
-const getDailyStatsData = async (statisticsClient: StatisticsClient) => {
-  const dailyStats = await statisticsClient.getDailyStatsData();
-
-  console.log('Daily statistics:', dailyStats);
-
-  const dailyStatsRange = await statisticsClient.getDailyStatsData({
-    startDate: new Date(2023, 4, 8),
-    endDate: new Date(2023, 5, 8),
-  });
-
-  console.log('Daily statistics from 5/8 - 6/8:', dailyStatsRange);
-};
-
 (async () => {
   if (!NETWORKS[ChainId.POLYGON]) {
     return;
@@ -119,5 +106,4 @@ const getDailyStatsData = async (statisticsClient: StatisticsClient) => {
   await getWorkerStatistics(statisticsClient);
   await getPaymentStatistics(statisticsClient);
   await getHMTStatistics(statisticsClient);
-  await getDailyStatsData(statisticsClient);
 })();

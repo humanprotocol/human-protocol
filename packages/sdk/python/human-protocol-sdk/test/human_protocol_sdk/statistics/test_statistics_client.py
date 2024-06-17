@@ -8,12 +8,10 @@ from human_protocol_sdk.gql.statistics import (
     get_event_day_data_query,
     get_escrow_statistics_query,
     get_hmtoken_statistics_query,
-    get_daily_stats_data_query,
 )
 from human_protocol_sdk.statistics import (
     StatisticsClient,
     StatisticsParam,
-    DailyStatsParam,
 )
 
 
@@ -217,6 +215,8 @@ class TestStatisticsClient(unittest.TestCase):
                                 "timestamp": 1,
                                 "dailyHMTTransferCount": "4",
                                 "dailyHMTTransferAmount": "100",
+                                "uniqueSenders": "5",
+                                "uniqueReceivers": "5",
                             },
                         ],
                     }
@@ -260,57 +260,8 @@ class TestStatisticsClient(unittest.TestCase):
             self.assertEqual(
                 hmt_statistics.daily_hmt_data[0].total_transaction_count, 4
             )
-
-    def test_get_daily_stats(self):
-        param = DailyStatsParam(
-            start_date=datetime.fromtimestamp(1683811973),
-            end_date=datetime.fromtimestamp(1683812007),
-        )
-        mock_function = MagicMock()
-
-        with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
-        ) as mock_function:
-            mock_function.side_effect = [
-                {
-                    "data": {
-                        "dailyStatsDatas": [
-                            {
-                                "id": "1",
-                                "activeWorkers": 10,
-                                "transactions": 1,
-                                "uniqueSenders": 5,
-                                "uniqueReceivers": 5,
-                                "escrowsLaunched": 100,
-                                "escrowsCompleted": 100,
-                                "escrowPayouts": 1000,
-                                "timestamp": 1,
-                            }
-                        ]
-                    }
-                }
-            ]
-
-            daily_stats = self.statistics.get_daily_stats_data(param)
-
-            mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
-                query=get_daily_stats_data_query(param),
-                params={
-                    "startDate": 1683811973,
-                    "endDate": 1683812007,
-                },
-            )
-
-            self.assertEqual(daily_stats[0].id, "1")
-            self.assertEqual(daily_stats[0].active_workers, 10)
-            self.assertEqual(daily_stats[0].transactions, 1)
-            self.assertEqual(daily_stats[0].unique_senders, 5)
-            self.assertEqual(daily_stats[0].unique_receivers, 5)
-            self.assertEqual(daily_stats[0].escrows_launched, 100)
-            self.assertEqual(daily_stats[0].escrows_completed, 100)
-            self.assertEqual(daily_stats[0].escrow_payouts, 1000)
-            self.assertEqual(daily_stats[0].timestamp, 1)
+            self.assertEqual(hmt_statistics.daily_hmt_data[0].unique_senders, 5)
+            self.assertEqual(hmt_statistics.daily_hmt_data[0].unique_receivers, 5)
 
 
 if __name__ == "__main__":

@@ -393,6 +393,8 @@ type EventDayData @entity {
   dailyPayoutAmount: BigInt!
   dailyHMTTransferCount: BigInt!
   dailyHMTTransferAmount: BigInt!
+  uniqueSenders: BigInt!
+  uniqueReceivers: BigInt!
 }
 
 type LeaderStatistics @entity {
@@ -409,16 +411,4 @@ type Transaction @entity {
   to: Bytes
   value: BigInt
   method: String!
-}
-
-type DailyStatsData @entity {
-  id: ID!
-  activeWorkers: BigInt!
-  transactions: BigInt!
-  uniqueSenders: BigInt!
-  uniqueReceivers: BigInt!
-  escrowsLaunched: BigInt!
-  escrowsCompleted: BigInt!
-  escrowPayouts: BigInt!
-  timestamp: Int!
 }

@@ -7,7 +7,6 @@ import {
   GET_EVENT_DAY_DATA_QUERY,
   GET_HOLDERS_QUERY,
   GET_HMTOKEN_STATISTICS_QUERY,
-  GET_DAILY_STATS_DATA_QUERY,
   EscrowStatistics,
   EscrowStatisticsData,
   EventDayData,
@@ -16,7 +15,6 @@ import {
   PaymentStatistics,
   WorkerStatistics,
   HMTHolderData,
-  DailyStatsData,
 } from './graphql';
 import { IDateParams, IStatisticsParams } from './interfaces';
 import { NetworkData } from './types';
@@ -430,82 +428,10 @@ export class StatisticsClient {
             eventDayData.dailyHMTTransferAmount
           ),
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,
+          uniqueSenders: +eventDayData.uniqueSenders,
+          uniqueReceivers: +eventDayData.uniqueReceivers,
         })),
       };
-    } catch (e: any) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function returns the daily statistics data.
-   *
-   * **Input parameters**
-   *
-   * ```ts
-   * interface IDateParams {
-   *   startDate?: Date;
-   *   endDate?: Date;
-   *   limit?: number;
-   * }
-   * ```
-   *
-   * ```ts
-   * type DailyStatsData = {
-   *   id: string;
-   *   activeWorkers: number;
-   *   transactions: number;
-   *   uniqueSenders: number;
-   *   uniqueReceivers: number;
-   *   escrowsLaunched: number;
-   *   escrowsCompleted: number;
-   *   escrowPayouts: number;
-   *   timestamp: bigint;
-   * };
-   * ```
-   *
-   * @param {IDateParams} params Parameters including start and end dates for the data retrieval
-   * @returns {Promise<DailyStatsData[]>} Daily statistics data.
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
-   *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
-   *
-   * // Fetch daily statistics data without specifying date range
-   * const statsWithoutParams = await statisticsClient.getDailyStatsData();
-   * console.log('Daily Statistics without Params:', statsWithoutParams);
-   *
-   * // Fetch daily statistics data with specified date range
-   * const startDate = new Date(2023, 4, 8);
-   * const endDate = new Date(2023, 5, 8);
-   * const statsWithParams = await statisticsClient.getDailyStatsData({ startDate, endDate });
-   * console.log('Daily Statistics from 5/8 - 6/8:', statsWithParams);
-   * ```
-   */
-  async getDailyStatsData(params: IDateParams = {}): Promise<DailyStatsData[]> {
-    try {
-      const { startDate, endDate } = params;
-      const { dailyStatsDatas } = await gqlFetch<{
-        dailyStatsDatas: DailyStatsData[];
-      }>(this.networkData.subgraphUrl, GET_DAILY_STATS_DATA_QUERY(params), {
-        startDate: startDate ? startDate.getTime() / 1000 : undefined,
-        endDate: endDate ? endDate.getTime() / 1000 : undefined,
-      });
-
-      return dailyStatsDatas.map((stats) => ({
-        id: stats.id,
-        activeWorkers: stats.activeWorkers,
-        transactions: stats.transactions,
-        uniqueSenders: stats.uniqueSenders,
-        uniqueReceivers: stats.uniqueReceivers,
-        escrowsLaunched: stats.escrowsLaunched,
-        escrowsCompleted: stats.escrowsCompleted,
-        escrowPayouts: stats.escrowPayouts,
-        timestamp: new Date(+stats.timestamp * 1000),
-      }));
     } catch (e: any) {
       return throwError(e);
     }

@@ -72,6 +72,8 @@ export type EventDayData = {
   dailyPayoutAmount: string;
   dailyHMTTransferCount: string;
   dailyHMTTransferAmount: string;
+  uniqueSenders: string;
+  uniqueReceivers: string;
 };
 
 export type RewardAddedEventData = {
@@ -129,6 +131,8 @@ export type DailyHMTData = {
   timestamp: Date;
   totalTransactionAmount: bigint;
   totalTransactionCount: number;
+  uniqueSenders: number;
+  uniqueReceivers: number;
 };
 
 export type HMTStatistics = {
@@ -163,16 +167,4 @@ export type KVStoreData = {
   value: string;
   timestamp: Date;
   block: number;
-};
-
-export type DailyStatsData = {
-  id: string;
-  activeWorkers: number;
-  transactions: number;
-  uniqueSenders: number;
-  uniqueReceivers: number;
-  escrowsLaunched: number;
-  escrowsCompleted: number;
-  escrowPayouts: number;
-  timestamp: Date;
 };
