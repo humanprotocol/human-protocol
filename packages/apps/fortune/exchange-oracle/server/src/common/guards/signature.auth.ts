@@ -31,23 +31,6 @@ export class SignatureAuthGuard implements CanActivate {
     const oracleAdresses: string[] = [];
 
     try {
-      const escrowData = await EscrowUtils.getEscrow(
-        data.chain_id,
-        data.escrow_address,
-      );
-
-      if (roles.includes(Role.JobLauncher)) {
-        oracleAdresses.push(escrowData.launcher);
-      }
-
-      if (roles.includes(Role.Recording)) {
-        oracleAdresses.push(escrowData.recordingOracle!);
-      }
-
-      if (roles.includes(Role.Reputation)) {
-        oracleAdresses.push(escrowData.reputationOracle!);
-      }
-
       if (roles.includes(Role.Worker)) {
         const assignment = await this.assignmentRepository.findOneById(
           data.assignment_id,
@@ -56,6 +39,23 @@ export class SignatureAuthGuard implements CanActivate {
           oracleAdresses.push(assignment.workerAddress);
         } else {
           throw new UnauthorizedException('Assignment not found');
+        }
+      } else {
+        const escrowData = await EscrowUtils.getEscrow(
+          data.chain_id,
+          data.escrow_address,
+        );
+
+        if (roles.includes(Role.JobLauncher)) {
+          oracleAdresses.push(escrowData.launcher);
+        }
+
+        if (roles.includes(Role.Recording)) {
+          oracleAdresses.push(escrowData.recordingOracle!);
+        }
+
+        if (roles.includes(Role.Reputation)) {
+          oracleAdresses.push(escrowData.reputationOracle!);
         }
       }
 
