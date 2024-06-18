@@ -20,23 +20,12 @@ function UserStatsDrawerContent({
   stats: HCaptchaUserStatsSuccess;
 }) {
   return (
-    <Grid
-      container
-      sx={{
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '2rem',
-        flexDirection: 'column',
-        gap: '2rem',
-        marginTop: '50px',
-      }}
-    >
+    <>
       <Typography variant="mobileHeaderLarge">
         {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
       </Typography>
       <UserStatsDetails stats={stats} />
-    </Grid>
+    </>
   );
 }
 

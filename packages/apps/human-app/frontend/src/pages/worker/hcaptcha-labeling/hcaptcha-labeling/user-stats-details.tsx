@@ -55,6 +55,9 @@ export function UserStatsDetails({
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
                 {stats.currentEarningsStats.hmtEarned || 0}
+                <span style={{ color: colorPalette.text.primary }}>
+                  {t('inputMasks.humanCurrencySuffix')}
+                </span>
               </Typography>
             </Grid>
           </Grid>
@@ -72,7 +75,10 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.earnedSinceLogged')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.currentEarningsStats.hmtEarned}
+                {stats.currentEarningsStats.hmtEarned || 0}
+                <span style={{ color: colorPalette.text.primary }}>
+                  {t('inputMasks.humanCurrencySuffix')}
+                </span>
               </Typography>
             </Grid>
           </Grid>
@@ -85,13 +91,13 @@ export function UserStatsDetails({
             gap: '2rem',
           }}
         >
-          <Grid container>
-            <Typography variant="body8">
+          <Grid>
+            <Typography
+              component="div"
+              sx={{ lineHeight: '1.3' }}
+              variant="body8"
+            >
               {t('worker.hcaptchaLabelingStats.statisticsNotLive')}
-            </Typography>
-            <br />
-            <Typography variant="body8">
-              {t('worker.hcaptchaLabelingStats.refresh')}
             </Typography>
           </Grid>
           <Grid
