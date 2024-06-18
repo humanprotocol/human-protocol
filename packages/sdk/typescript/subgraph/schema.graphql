@@ -197,54 +197,16 @@ type BulkPayoutEvent @entity {
   bulkCount: BigInt!
 }
 
-type PendingStatusEvent @entity {
+type EscrowStatusEvent @entity {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
 
   escrowAddress: Bytes! # address
+  launcher: Bytes # address
   sender: Bytes! # address
-}
-
-type CancelledStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type PartialStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type PaidStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type CompletedStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
+  status: String!
 }
 
 # KVStore

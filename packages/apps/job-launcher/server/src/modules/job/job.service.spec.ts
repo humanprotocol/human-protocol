@@ -1976,12 +1976,6 @@ describe('JobService', () => {
     const jobId = 1;
     const userId = 123;
 
-    beforeEach(() => {
-      web3Service.getValidChains = jest
-        .fn()
-        .mockReturnValue([ChainId.LOCALHOST]);
-    });
-
     it('should cancel the job when status is Launched', async () => {
       const escrowAddress = MOCK_ADDRESS;
       const mockJobEntity: Partial<JobEntity> = {

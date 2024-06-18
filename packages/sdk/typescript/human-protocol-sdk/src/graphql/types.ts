@@ -1,3 +1,5 @@
+import { ChainId } from '../enums';
+
 export type EscrowData = {
   id: string;
   address: string;
@@ -158,6 +160,13 @@ export type DailyTaskData = {
 
 export type TaskStatistics = {
   dailyTasksData: DailyTaskData[];
+};
+
+export type StatusEvent = {
+  timestamp: number;
+  escrowAddress: string;
+  status: string;
+  chainId: ChainId;
 };
 
 export type KVStoreData = {

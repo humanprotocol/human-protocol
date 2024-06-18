@@ -20,6 +20,10 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
+import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { Web3Service } from '../web3/web3.service';
+import { JobEntity } from '../job/job.entity';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class CronJobService {
@@ -30,8 +34,10 @@ export class CronJobService {
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
+    private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
     private readonly webhookRepository: WebhookRepository,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
@@ -299,6 +305,102 @@ export class CronJobService {
     }
 
     this.logger.log('Pending webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('30 */2 * * * *')
+  /**
+   * Process a job that syncs job statuses.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async syncJobStuses(): Promise<void> {
+    const lastCronJob = await this.cronJobRepository.findOneByType(
+      CronJobType.SyncJobStatuses,
+    );
+
+    if (lastCronJob && !lastCronJob.completedAt) {
+      return;
+    }
+
+    this.logger.log('Update jobs START');
+    const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
+
+    try {
+      const events = await EscrowUtils.getStatusEvents(
+        this.networkConfigService.networks.map((network) => network.chainId),
+        [EscrowStatus.Partial, EscrowStatus.Complete],
+        lastCronJob?.lastSubgraphTime || undefined,
+        undefined,
+        this.web3Service.getOperatorAddress(),
+      );
+
+      if (events.length === 0) {
+        this.logger.log('No events to process');
+        await this.completeCronJob(cronJob);
+        return;
+      }
+
+      const escrowAddresses = events.map((event) =>
+        ethers.getAddress(event.escrowAddress),
+      );
+      const chainIds = events.map((event) => event.chainId);
+
+      const jobs =
+        await this.jobRepository.findManyByChainIdsAndEscrowAddresses(
+          chainIds,
+          escrowAddresses,
+        );
+
+      const jobMap = new Map<string, JobEntity>();
+      for (const job of jobs) {
+        jobMap.set(`${job.chainId}-${job.escrowAddress}`, job);
+      }
+
+      const jobsToUpdate: JobEntity[] = [];
+      let latestEventTimestamp = 0;
+
+      for (const event of events) {
+        const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
+        const job = jobMap.get(key);
+
+        if (!job || job.status === JobStatus.TO_CANCEL) continue;
+
+        let newStatus: JobStatus | null = null;
+        if (
+          event.status === EscrowStatus[EscrowStatus.Partial] &&
+          job.status !== JobStatus.PARTIAL
+        ) {
+          newStatus = JobStatus.PARTIAL;
+        } else if (
+          event.status === EscrowStatus[EscrowStatus.Complete] &&
+          job.status !== JobStatus.COMPLETED
+        ) {
+          newStatus = JobStatus.COMPLETED;
+        }
+
+        if (newStatus && newStatus !== job.status) {
+          job.status = newStatus;
+          jobsToUpdate.push(job);
+        }
+        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
+        if (eventTimestamp > latestEventTimestamp) {
+          latestEventTimestamp = eventTimestamp;
+        }
+      }
+
+      if (jobsToUpdate.length > 0) {
+        await this.jobRepository.updateMany(jobsToUpdate);
+      }
+
+      if (latestEventTimestamp > 0) {
+        cronJob.lastSubgraphTime = new Date(latestEventTimestamp + 1000); // Add one sec to avoid getting the last processed event
+        await this.cronJobRepository.save(cronJob);
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
 }
