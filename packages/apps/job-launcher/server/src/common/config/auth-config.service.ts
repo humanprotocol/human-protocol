@@ -40,6 +40,9 @@ export class AuthConfigService {
   get hCaptchaSecret(): string {
     return this.configService.get<string>('HCAPTCHA_SECRET', '');
   }
+  get hCaptchaJobApiKey(): string {
+    return this.configService.get<string>('HCAPTHCHA_JOB_API_KEY', '');
+  }
   get hCaptchaExchangeURL(): string {
     return this.configService.get<string>(
       'HCAPTCHA_EXCHANGE_URL',

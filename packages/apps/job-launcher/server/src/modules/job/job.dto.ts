@@ -520,11 +520,11 @@ export class JobCaptchaAdvancedDto {
   })
   @IsEnum(WorkerLanguage)
   @IsOptional()
-  workerLanguage?: WorkerLanguage;
+  public workerLanguage?: WorkerLanguage;
 
   @ApiProperty({
     enum: WorkerLocation,
-    name: 'workerocation',
+    name: 'worker_location',
   })
   @IsEnum(WorkerLocation)
   @IsOptional()
@@ -580,39 +580,35 @@ export class JobCaptchaDto extends JobDto {
   @IsNumber()
   @IsPositive()
   @Max(1)
-  accuracyTarget: number;
+  public accuracyTarget: number;
 
   @ApiProperty({ name: 'completion_date' })
   @IsDateString()
   @IsOptional()
-  completionDate: Date;
+  public completionDate: Date;
 
   @ApiProperty({ name: 'min_requests' })
   @IsNumber()
   @IsPositive()
   @Max(100)
-  minRequests: number;
+  public minRequests: number;
 
   @ApiProperty({ name: 'max_requests' })
   @IsNumber()
   @IsPositive()
   @Max(100)
-  maxRequests: number;
+  public maxRequests: number;
 
   @ApiProperty()
   @IsDefined()
   @IsObject()
-  @ValidateNested()
-  @Type(() => JobCaptchaAdvancedDto)
-  advanced: JobCaptchaAdvancedDto;
+  //@ValidateNested()
+  //@Type(() => JobCaptchaAdvancedDto)
+  public advanced: JobCaptchaAdvancedDto;
 
   @ApiProperty()
-  @IsDefined()
-  @IsNotEmptyObject()
   @IsObject()
-  @ValidateNested()
-  @Type(() => JobCaptchaAnnotationsDto)
-  annotations: JobCaptchaAnnotationsDto;
+  public annotations: JobCaptchaAnnotationsDto;
 }
 
 export class RestrictedAudience {
@@ -685,6 +681,9 @@ class RequestConfig {
 
 export class HCaptchaManifestDto {
   @IsString()
+  job_api_key: string;
+
+  @IsString()
   job_mode: string;
 
   @IsEnum(JobCaptchaRequestType)
@@ -728,11 +727,13 @@ export class HCaptchaManifestDto {
   @IsNumber()
   oracle_stake: number;
 
+  // TODO: Remove
+  /*
   @IsString()
   repo_uri: string;
 
   @IsString()
-  ro_uri: string;
+  ro_uri: string;*/
 
   @IsObject()
   @ValidateNested()

@@ -206,6 +206,7 @@ export class JobService {
     const objectsInBucket = await listObjectsInBucket(dataUrl);
 
     const commonManifestProperties = {
+      job_api_key: this.authConfigService.hCaptchaJobApiKey,
       job_mode: JobCaptchaMode.BATCH,
       requester_accuracy_target: jobDto.accuracyTarget,
       request_config: {},
@@ -704,7 +705,6 @@ export class JobService {
     dto: CreateJob,
   ): Promise<number> {
     let { chainId } = dto;
-
     if (chainId) {
       this.web3Service.validateChainId(chainId);
     } else {
