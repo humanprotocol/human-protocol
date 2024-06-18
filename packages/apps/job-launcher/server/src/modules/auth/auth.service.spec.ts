@@ -170,6 +170,8 @@ describe('AuthService', () => {
       createUserMock = jest.spyOn(userService, 'create');
 
       createUserMock.mockResolvedValue(userEntity);
+
+      jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
     });
 
     afterEach(() => {
@@ -194,6 +196,18 @@ describe('AuthService', () => {
       await authService.signup(userCreateDto);
 
       expect(sendGridService.sendEmail).toHaveBeenCalled();
+    });
+
+    it('should fail if the user already exists', async () => {
+      jest
+        .spyOn(userRepository, 'findByEmail')
+        .mockResolvedValue(userEntity as any);
+
+      await expect(authService.signup(userCreateDto)).rejects.toThrow(
+        new ControlledError(ErrorUser.DuplicatedEmail, HttpStatus.BAD_REQUEST),
+      );
+
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(userEntity.email);
     });
   });
 

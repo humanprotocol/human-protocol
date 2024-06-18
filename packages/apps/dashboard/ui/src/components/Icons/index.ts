@@ -16,4 +16,4 @@ export { MoonbeamIcon } from './MoonbeamIcon';
 export { OpenInNewIcon } from './OpenInNewIcon';
 export { PolygonIcon } from './PolygonIcon';
 export { TelegramIcon } from './TelegramIcon';
-export { TwitterIcon } from './TwitterIcon';
+export { XIcon } from './XIcon';

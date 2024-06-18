@@ -28,9 +28,12 @@ export class ExceptionFilter implements IExceptionFilter {
       this.logger.error(`Reputation Oracle error: ${message}`, exception.stack);
     } else if (exception instanceof DatabaseError) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
-      message = `Database error: ${exception.message}`;
+      message = exception.message;
 
-      this.logger.error(message, exception.stack);
+      this.logger.error(
+        `Database error: ${exception.message}`,
+        exception.stack,
+      );
     } else {
       if (exception.statusCode === HttpStatus.BAD_REQUEST) {
         status = exception.statusCode;

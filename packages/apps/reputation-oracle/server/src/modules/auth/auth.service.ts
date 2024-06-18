@@ -91,6 +91,13 @@ export class AuthService {
     // ) {
     //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED)
     // }
+    const storedUser = await this.userRepository.findByEmail(data.email);
+    if (storedUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedEmail,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const userEntity = await this.userService.create(data);
 
     const tokenEntity = new TokenEntity();
@@ -143,18 +150,21 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
-    const accessToken = await this.jwtService.signAsync(
-      {
-        email: userEntity.email,
-        userId: userEntity.id,
-        address: userEntity.evmAddress,
-        kyc_status: userEntity.kyc?.status,
-        reputation_network: this.web3Service.getOperatorAddress(),
-      },
-      {
-        expiresIn: this.authConfigService.accessTokenExpiresIn,
-      },
-    );
+    const payload: any = {
+      email: userEntity.email,
+      userId: userEntity.id,
+      address: userEntity.evmAddress,
+      kyc_status: userEntity.kyc?.status,
+      reputation_network: this.web3Service.getOperatorAddress(),
+    };
+
+    if (userEntity.siteKey) {
+      payload.site_key = userEntity.siteKey.siteKey;
+    }
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: this.authConfigService.accessTokenExpiresIn,
+    });
 
     if (refreshTokenEntity) {
       await this.tokenRepository.deleteOne(refreshTokenEntity);
