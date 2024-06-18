@@ -1,11 +1,11 @@
 import { t } from 'i18next';
 import { useEffect } from 'react';
-import { useRegisterAddress } from '@/api/servieces/worker/register-address';
 import { Button } from '@/components/ui/button';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { ProfileAction } from '@/pages/worker/profile/profile-action';
 import { RegisterAddress } from '@/pages/worker/profile/register-address-btn';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
+import { useGetOnChainRegisteredAddress } from '@/api/servieces/worker/get-on-chain-registered-address';
 
 export function RegisterAddressAction({
   kycApproved,
@@ -20,12 +20,12 @@ export function RegisterAddressAction({
     isError: isRegisterAddressError,
     isPending: isRegisterAddressPending,
     status: registerAddressStatus,
-  } = useRegisterAddress();
+  } = useGetOnChainRegisteredAddress();
   const { isConnected } = useWalletConnect();
 
   useEffect(() => {
     if (
-      !registerAddressData?.kycRegisteredOnChain &&
+      !registerAddressData?.registeredAddressOnChain &&
       registerAddressStatus === 'success'
     ) {
       setTopNotification({
@@ -60,16 +60,10 @@ export function RegisterAddressAction({
 
   return (
     <ProfileAction
-      done={Boolean(
-        registerAddressData.registeredAddressOnChain ===
-          registerAddressData.signedAddress
-      )}
+      done={Boolean(registerAddressData.registeredAddressOnChain)}
       doneLabel={t('worker.profile.kycInfoOnChainAdded')}
       toDoComponent={
-        <RegisterAddress
-          disabled={!(isConnected && kycApproved)}
-          signed_address={registerAddressData.signedAddress}
-        />
+        <RegisterAddress disabled={!(isConnected && kycApproved)} />
       }
     />
   );

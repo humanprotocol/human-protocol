@@ -101,7 +101,10 @@ export function ProfileActions({
       </Grid>
       <Grid>
         <ProfileAction
-          done={Boolean(isWalletConnected && kycApproved)}
+          done={
+            Boolean(kycApproved && user.address) ||
+            Boolean(kycApproved && isWalletConnected)
+          }
           doneLabel={
             <RequireWalletConnect>
               <WalletConnectDone />
