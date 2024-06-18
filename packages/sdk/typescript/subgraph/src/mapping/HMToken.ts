@@ -198,7 +198,7 @@ export function handleTransfer(event: Transfer): void {
     dayStartTimestamp.toString(),
     event.params._from
   );
-  if (uniqueSender.transferCount === ONE_BI) {
+  if (uniqueSender.transferCount === ZERO_BI) {
     eventDayData.dailyUniqueSenders =
       eventDayData.dailyUniqueSenders.plus(ONE_BI);
   }
