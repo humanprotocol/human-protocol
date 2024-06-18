@@ -62,8 +62,13 @@ export enum ErrorUser {
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
   IncorrectAddress = 'Incorrect address',
+  NoWalletAddresRegistered = 'No wallet address registered on your account',
   KycNotApproved = 'KYC not approved',
   UserNotActive = 'User not active',
+  LabelingEnableFailed = 'Failed to enable labeling for this account',
+  InvalidType = 'User has invalid type',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
+  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address',
 }
 
 /**
@@ -103,6 +108,7 @@ export enum ErrorKyc {
   Rejected = 'KYC session rejected',
   InvalidSynapsAPIResponse = 'Invalid Synaps API response',
   InvalidWebhookSecret = 'Invalid webhook secret',
+  CountryNotSet = 'Сountry is not set for the user',
 }
 
 /**

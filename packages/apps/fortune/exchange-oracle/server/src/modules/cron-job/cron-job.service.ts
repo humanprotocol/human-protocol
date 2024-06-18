@@ -7,6 +7,7 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -54,6 +55,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.

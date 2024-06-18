@@ -9,7 +9,6 @@ import {
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { ChainId } from '@human-protocol/sdk';
 import { SignatureType } from '../../common/enums/web3';
 
 export class UserCreateDto extends ValidatePasswordDto {
@@ -50,10 +49,20 @@ export class UserUpdateDto {
   public status?: UserStatus;
 }
 
+export class RegisterLabelerResponseDto {
+  @ApiProperty({ name: 'site_key' })
+  @IsString()
+  public siteKey: string;
+}
+
 export class RegisterAddressRequestDto {
   @ApiProperty()
   @IsString()
   public address: string;
+
+  @ApiProperty()
+  @IsString()
+  public signature: string;
 }
 
 export class RegisterAddressResponseDto {

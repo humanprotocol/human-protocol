@@ -118,6 +118,18 @@ export const ErrorInvalidStakerAddressProvided = new Error(
 );
 
 /**
+ * @constant {Error} - Invalid hash provided.
+ */
+export const ErrorInvalidHahsProvided = new Error('Invalid hash provided');
+
+/**
+ * @constant {Error} - Cannot use both date and block filters simultaneously.
+ */
+export const ErrorCannotUseDateAndBlockSimultaneously = new Error(
+  'Cannot use both date and block filters simultaneously'
+);
+
+/**
  * @constant {Error} - Invalid escrow address provided.
  */
 export const ErrorInvalidEscrowAddressProvided = new Error(
@@ -322,3 +334,6 @@ export class InvalidEthereumAddressError extends Error {
  * @constant {Error} - The Hash does not match
  */
 export const ErrorInvalidHash = new Error('Invalid hash');
+
+export const WarnSubgraphApiKeyNotProvided =
+  '"SUBGRAPH_API_KEY" is not being provided. It might cause issues with the subgraph.';

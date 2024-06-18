@@ -1,6 +1,7 @@
 import { SortDirection } from '../../common/enums/collection';
 import { AssignmentSortField, AssignmentStatus } from '../../common/enums/job';
 import { AssignmentEntity } from './assignment.entity';
+import { JobType } from '../../common/enums/job';
 
 export interface AssignmentFilterData {
   chainId?: number;
@@ -8,11 +9,13 @@ export interface AssignmentFilterData {
   escrowAddress?: string;
   status?: AssignmentStatus;
   sortField?: AssignmentSortField;
+  rewardAmount?: AssignmentSortField;
   sort?: SortDirection;
   skip: number;
   pageSize: number;
   workerAddress: string;
   reputationNetwork: string;
+  jobType?: JobType;
 }
 
 export interface ListResult {

@@ -15,6 +15,20 @@ type Worker @entity {
   payoutCount: BigInt!
 }
 
+type UniqueSender @entity {
+  id: ID!
+  address: Bytes!
+  transferCount: BigInt!
+  timestamp: BigInt!
+}
+
+type UniqueReceiver @entity {
+  id: ID!
+  address: Bytes!
+  receiveCount: BigInt!
+  timestamp: BigInt!
+}
+
 type Leader @entity {
   id: ID!
   address: Bytes!
@@ -245,6 +259,15 @@ type KVStoreSetEvent @entity {
   value: String!
 }
 
+type KVStore @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  address: Bytes!
+  key: String!
+  value: String!
+}
+
 # Staking
 type StakeDepositedEvent @entity {
   id: ID!
@@ -372,9 +395,22 @@ type EventDayData @entity {
   dailyPayoutAmount: BigInt!
   dailyHMTTransferCount: BigInt!
   dailyHMTTransferAmount: BigInt!
+  dailyUniqueSenders: BigInt!
+  dailyUniqueReceivers: BigInt!
 }
 
 type LeaderStatistics @entity {
   id: ID!
   leaders: BigInt!
+}
+
+type Transaction @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  from: Bytes!
+  to: Bytes
+  value: BigInt
+  method: String!
 }

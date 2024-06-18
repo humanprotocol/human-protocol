@@ -83,3 +83,20 @@ fortune: check-core-folders minio
 	$(MAKE) reputation-oracle & PID_REPO=$$!; \
 	$(MAKE) subgraph & \
 	wait
+
+web3-subgraph:
+	docker compose -f ./web3/docker-compose.yml up -d graph-node
+	NETWORK=localhost yarn workspace @human-protocol/subgraph generate
+	@while [ $$(docker inspect --format='{{.State.Health.Status}}' graph-node) != "healthy" ]; do \
+		sleep 2; \
+	done; \
+	echo "Container is healthy."
+	yarn workspace @human-protocol/subgraph create-local
+	yarn workspace @human-protocol/subgraph deploy-local
+
+web3: check-core-folders
+	@echo "RUNNING WEB3..."
+	@trap 'echo "STOPPING WEB3.."; kill -9 $$PID_HARDHAT; docker compose -f ./web3/docker-compose.yml down; exit 0' SIGINT ERR; \
+	$(MAKE) hardhat-node & PID_HARDHAT=$$!; \
+	$(MAKE) web3-subgraph & \
+	wait

@@ -49,10 +49,9 @@ export class SignatureAuthGuard implements CanActivate {
       }
 
       if (roles.includes(Role.Worker)) {
-        const assignment = await this.assignmentRepository.findOne({
-          where: { id: parseInt(data.assignment_id) },
-          relations: ['job'],
-        });
+        const assignment = await this.assignmentRepository.findOneById(
+          data.assignment_id,
+        );
         if (assignment) {
           oracleAdresses.push(assignment.workerAddress);
         } else {

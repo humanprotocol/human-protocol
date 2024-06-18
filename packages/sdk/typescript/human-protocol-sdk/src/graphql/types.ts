@@ -72,6 +72,8 @@ export type EventDayData = {
   dailyPayoutAmount: string;
   dailyHMTTransferCount: string;
   dailyHMTTransferAmount: string;
+  dailyUniqueSenders: string;
+  dailyUniqueReceivers: string;
 };
 
 export type RewardAddedEventData = {
@@ -129,6 +131,8 @@ export type DailyHMTData = {
   timestamp: Date;
   totalTransactionAmount: bigint;
   totalTransactionCount: number;
+  dailyUniqueSenders: number;
+  dailyUniqueReceivers: number;
 };
 
 export type HMTStatistics = {
@@ -154,4 +158,13 @@ export type DailyTaskData = {
 
 export type TaskStatistics = {
   dailyTasksData: DailyTaskData[];
+};
+
+export type KVStoreData = {
+  id: string;
+  address: string;
+  key: string;
+  value: string;
+  timestamp: Date;
+  block: number;
 };

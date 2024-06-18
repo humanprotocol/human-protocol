@@ -2228,7 +2228,7 @@ describe('EscrowUtils', () => {
       const result = await EscrowUtils.getEscrows(filter);
       expect(result).toEqual(escrows);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api',
+        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_ESCROWS_QUERY(filter),
         filter
       );
