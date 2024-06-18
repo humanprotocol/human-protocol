@@ -31,13 +31,13 @@ Initializes a DailyEscrowData instance.
   * **escrows_paid** (`int`) – Paid escrows
   * **escrows_cancelled** (`int`) – Cancelled escrows
 
-### *class* human_protocol_sdk.statistics.statistics_client.DailyHMTData(timestamp, total_transaction_amount, total_transaction_count)
+### *class* human_protocol_sdk.statistics.statistics_client.DailyHMTData(timestamp, total_transaction_amount, total_transaction_count, daily_unique_senders, daily_unique_receivers)
 
 Bases: `object`
 
 A class used to specify daily HMT data.
 
-#### \_\_init_\_(timestamp, total_transaction_amount, total_transaction_count)
+#### \_\_init_\_(timestamp, total_transaction_amount, total_transaction_count, daily_unique_senders, daily_unique_receivers)
 
 Initializes a DailyHMTData instance.
 
@@ -45,6 +45,8 @@ Initializes a DailyHMTData instance.
   * **timestamp** (`datetime`) – Timestamp
   * **total_transaction_amount** (`int`) – Total transaction amount
   * **total_transaction_count** (`int`) – Total transaction count
+  * **daily_unique_senders** (`int`) – Total unique senders
+  * **daily_unique_receivers** (`int`) – Total unique receivers
 
 ### *class* human_protocol_sdk.statistics.statistics_client.DailyPaymentData(timestamp, total_amount_paid, total_count, average_amount_per_worker)
 

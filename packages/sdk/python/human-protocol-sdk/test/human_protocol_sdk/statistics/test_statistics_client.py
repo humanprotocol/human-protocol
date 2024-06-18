@@ -215,6 +215,8 @@ class TestStatisticsClient(unittest.TestCase):
                                 "timestamp": 1,
                                 "dailyHMTTransferCount": "4",
                                 "dailyHMTTransferAmount": "100",
+                                "dailyUniqueSenders": "5",
+                                "dailyUniqueReceivers": "5",
                             },
                         ],
                     }
@@ -258,6 +260,8 @@ class TestStatisticsClient(unittest.TestCase):
             self.assertEqual(
                 hmt_statistics.daily_hmt_data[0].total_transaction_count, 4
             )
+            self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_senders, 5)
+            self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_receivers, 5)
 
 
 if __name__ == "__main__":
