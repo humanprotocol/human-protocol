@@ -1276,10 +1276,14 @@ export class JobService {
     return finalResultUrl;
   }
 
-  public handleProcessJobFailure = async (jobEntity: JobEntity) => {
+  public handleProcessJobFailure = async (
+    jobEntity: JobEntity,
+    failedReason: string,
+  ) => {
     if (jobEntity.retriesCount < this.serverConfigService.maxRetryCount) {
       jobEntity.retriesCount += 1;
     } else {
+      jobEntity.failedReason = failedReason;
       jobEntity.status = JobStatus.FAILED;
     }
     await this.jobRepository.updateOne(jobEntity);
@@ -1472,6 +1476,7 @@ export class JobService {
           balance: 0,
           paidOut: 0,
           status: jobEntity.status,
+          failedReason: jobEntity.failedReason,
         },
         manifest: manifestDetails,
         staking: {
@@ -1490,6 +1495,7 @@ export class JobService {
         balance: Number(ethers.formatEther(escrow?.balance || 0)),
         paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
         status: jobEntity.status,
+        failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
       staking: {

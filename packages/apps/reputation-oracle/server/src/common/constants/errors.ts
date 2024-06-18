@@ -67,6 +67,8 @@ export enum ErrorUser {
   UserNotActive = 'User not active',
   LabelingEnableFailed = 'Failed to enable labeling for this account',
   InvalidType = 'User has invalid type',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
+  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address',
 }
 
 /**
