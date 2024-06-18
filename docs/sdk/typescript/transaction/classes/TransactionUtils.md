@@ -1,44 +1,38 @@
-[@human-protocol/sdk](../README.md) / [Modules](../modules.md) / [transaction](../modules/transaction.md) / TransactionUtils
+[**@human-protocol/sdk**](../../README.md) • **Docs**
+
+***
+
+[@human-protocol/sdk](../../modules.md) / [transaction](../README.md) / TransactionUtils
 
 # Class: TransactionUtils
 
-[transaction](../modules/transaction.md).TransactionUtils
-
-## Table of contents
-
-### Constructors
-
-- [constructor](transaction.TransactionUtils.md#constructor)
-
-### Methods
-
-- [getTransaction](transaction.TransactionUtils.md#gettransaction)
-- [getTransactions](transaction.TransactionUtils.md#gettransactions)
-
 ## Constructors
 
-### constructor
+### new TransactionUtils()
 
-• **new TransactionUtils**(): [`TransactionUtils`](transaction.TransactionUtils.md)
+> **new TransactionUtils**(): [`TransactionUtils`](TransactionUtils.md)
 
 #### Returns
 
-[`TransactionUtils`](transaction.TransactionUtils.md)
+[`TransactionUtils`](TransactionUtils.md)
 
 ## Methods
 
-### getTransaction
+### getTransaction()
 
-▸ **getTransaction**(`chainId`, `hash`): `Promise`\<`ITransaction`\>
+> `static` **getTransaction**(`chainId`, `hash`): `Promise`\<`ITransaction`\>
 
 This function returns the transaction data for the given hash.
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `chainId` | `ChainId` | The chain ID. |
-| `hash` | `string` | The transaction hash. |
+• **chainId**: `ChainId`
+
+The chain ID.
+
+• **hash**: `string`
+
+The transaction hash.
 
 #### Returns
 
@@ -54,15 +48,15 @@ import { TransactionUtils, ChainId } from '@human-protocol/sdk';
 const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Defined in
+#### Source
 
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/b55a32de7a2e80c54ac1d2de4a2a21eeebd93e98/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
-___
+***
 
-### getTransactions
+### getTransactions()
 
-▸ **getTransactions**(`filter`): `Promise`\<`ITransaction`[]\>
+> `static` **getTransactions**(`filter`): `Promise`\<`ITransaction`[]\>
 
 This function returns all transaction details based on the provided filter.
 
@@ -96,9 +90,9 @@ type ITransaction = {
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `filter` | `ITransactionsFilter` | Filter for the transactions. |
+• **filter**: `ITransactionsFilter`
+
+Filter for the transactions.
 
 #### Returns
 
@@ -119,6 +113,6 @@ const filter: ITransactionsFilter = {
 const transactions = await TransactionUtils.getTransactions(filter);
 ```
 
-#### Defined in
+#### Source
 
-[transaction.ts:103](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L103)
+[transaction.ts:103](https://github.com/humanprotocol/human-protocol/blob/b55a32de7a2e80c54ac1d2de4a2a21eeebd93e98/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L103)

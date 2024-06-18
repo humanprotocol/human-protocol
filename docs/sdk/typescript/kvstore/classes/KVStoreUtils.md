@@ -1,8 +1,10 @@
-[@human-protocol/sdk](../README.md) / [Modules](../modules.md) / [kvstore](../modules/kvstore.md) / KVStoreUtils
+[**@human-protocol/sdk**](../../README.md) • **Docs**
+
+***
+
+[@human-protocol/sdk](../../modules.md) / [kvstore](../README.md) / KVStoreUtils
 
 # Class: KVStoreUtils
-
-[kvstore](../modules/kvstore.md).KVStoreUtils
 
 ## Introduction
 
@@ -34,31 +36,21 @@ const KVStoreAddresses = new KVStoreUtils.getData({
 });
 ```
 
-## Table of contents
-
-### Constructors
-
-- [constructor](kvstore.KVStoreUtils.md#constructor)
-
-### Methods
-
-- [getKVStoreData](kvstore.KVStoreUtils.md#getkvstoredata)
-
 ## Constructors
 
-### constructor
+### new KVStoreUtils()
 
-• **new KVStoreUtils**(): [`KVStoreUtils`](kvstore.KVStoreUtils.md)
+> **new KVStoreUtils**(): [`KVStoreUtils`](KVStoreUtils.md)
 
 #### Returns
 
-[`KVStoreUtils`](kvstore.KVStoreUtils.md)
+[`KVStoreUtils`](KVStoreUtils.md)
 
 ## Methods
 
-### getKVStoreData
+### getKVStoreData()
 
-▸ **getKVStoreData**(`chainId`, `address`): `Promise`\<`IKVStore`[]\>
+> `static` **getKVStoreData**(`chainId`, `address`): `Promise`\<`IKVStore`[]\>
 
 This function returns the KVStore data for a given address.
 
@@ -96,10 +88,13 @@ interface IKVStore {
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `chainId` | `ChainId` | Network in which the KVStore is deployed |
-| `address` | `string` | Address of the KVStore |
+• **chainId**: `ChainId`
+
+Network in which the KVStore is deployed
+
+• **address**: `string`
+
+Address of the KVStore
 
 #### Returns
 
@@ -116,6 +111,6 @@ const kvStoreData = await KVStoreUtils.getKVStoreData(ChainId.POLYGON_AMOY, "0x1
 console.log(kvStoreData);
 ```
 
-#### Defined in
+#### Source
 
-[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/7379dee65afe4295d7d2e6645479f6b96881f712/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)
+[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/b55a32de7a2e80c54ac1d2de4a2a21eeebd93e98/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)
