@@ -19,12 +19,14 @@ type UniqueSender @entity {
   id: ID!
   address: Bytes!
   transferCount: BigInt!
+  timestamp: BigInt!
 }
 
 type UniqueReceiver @entity {
   id: ID!
   address: Bytes!
   receiveCount: BigInt!
+  timestamp: BigInt!
 }
 
 type Leader @entity {

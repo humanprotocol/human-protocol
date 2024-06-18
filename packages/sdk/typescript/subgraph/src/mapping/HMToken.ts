@@ -43,6 +43,7 @@ function constructStatsEntity(): HMTokenStatistics {
 
 export function createOrLoadUniqueSender(
   dayStartTimestamp: string,
+  timestamp: BigInt,
   address: Address
 ): UniqueSender {
   const id = `${dayStartTimestamp}-${address.toHex()}`;
@@ -52,6 +53,7 @@ export function createOrLoadUniqueSender(
     uniqueSender = new UniqueSender(id);
     uniqueSender.address = address;
     uniqueSender.transferCount = ZERO_BI;
+    uniqueSender.timestamp = timestamp;
     uniqueSender.save();
   }
 
@@ -60,6 +62,7 @@ export function createOrLoadUniqueSender(
 
 export function createOrLoadUniqueReceiver(
   dayStartTimestamp: string,
+  timestamp: BigInt,
   address: Address
 ): UniqueReceiver {
   const id = `${dayStartTimestamp}-${address.toHex()}`;
@@ -69,6 +72,7 @@ export function createOrLoadUniqueReceiver(
     uniqueReceiver = new UniqueReceiver(id);
     uniqueReceiver.address = address;
     uniqueReceiver.receiveCount = ZERO_BI;
+    uniqueReceiver.timestamp = timestamp;
     uniqueReceiver.save();
   }
 
@@ -196,6 +200,7 @@ export function handleTransfer(event: Transfer): void {
   // Update unique sender
   const uniqueSender = createOrLoadUniqueSender(
     dayStartTimestamp.toString(),
+    event.block.timestamp,
     event.params._from
   );
   if (uniqueSender.transferCount === ZERO_BI) {
@@ -210,6 +215,7 @@ export function handleTransfer(event: Transfer): void {
   // Update unique receiver
   const uniqueReceiver = createOrLoadUniqueReceiver(
     dayStartTimestamp.toString(),
+    event.block.timestamp,
     event.params._to
   );
   if (uniqueReceiver.receiveCount === ZERO_BI) {
