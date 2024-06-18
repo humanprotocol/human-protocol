@@ -21,6 +21,7 @@ const browserAuthProvider: BrowserAuthProvider = {
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
     localStorage.removeItem(authTypeKey);
+    localStorage.removeItem(userDataKey);
     if (callback) {
       callback();
     }
