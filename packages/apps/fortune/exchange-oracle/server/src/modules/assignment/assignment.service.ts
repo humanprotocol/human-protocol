@@ -32,7 +32,7 @@ export class AssignmentService {
   public async createAssignment(
     data: CreateAssignmentDto,
     jwtUser: JwtUser,
-  ): Promise<void> {
+  ): Promise<AssignmentEntity> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       data.chainId,
       data.escrowAddress,
@@ -87,7 +87,7 @@ export class AssignmentService {
     newAssignmentEntity.workerAddress = jwtUser.address;
     newAssignmentEntity.status = AssignmentStatus.ACTIVE;
     newAssignmentEntity.expiresAt = expirationDate;
-    await this.assignmentRepository.createUnique(newAssignmentEntity);
+    return this.assignmentRepository.createUnique(newAssignmentEntity);
   }
 
   public async getAssignmentList(

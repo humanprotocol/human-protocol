@@ -29,12 +29,10 @@ import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { Role } from '../../common/enums/role';
 import { SignatureAuthGuard } from '../../common/guards/signature.auth';
-import { Public } from '../../common/decorators';
+import { AllowedRoles } from 'src/common/decorators/role';
 
 @ApiTags('Job')
 @Controller('job')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
@@ -55,6 +53,8 @@ export class JobController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get()
   getJobs(
     @Request() req: RequestWithUser,
@@ -90,10 +90,9 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @Post('solve')
-  @Public()
-  @UseGuards(new SignatureAuthGuard([Role.Worker]))
+  @UseGuards(SignatureAuthGuard)
+  @AllowedRoles([Role.Worker])
   async solveJob(
-    @Request() req: RequestWithUser,
     @Headers(HEADER_SIGNATURE_KEY) signature: string,
     @Body() solveJobDto: SolveJobDto,
   ): Promise<SolveJobResponseDto> {

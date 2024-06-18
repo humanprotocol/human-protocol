@@ -117,3 +117,17 @@ export class AssignmentDto {
     this.expiresAt = expiresAt;
   }
 }
+
+export class AssignJobResponseDto {
+  @ApiProperty({ name: 'assignment_id' })
+  assignmentId: number;
+
+  @ApiProperty({ name: 'escrow_address' })
+  escrowAddress: string;
+
+  @ApiProperty({ name: 'chain_id' })
+  chainId: ChainId;
+
+  @ApiProperty({ name: 'worker_address' })
+  workerAddress: string;
+}

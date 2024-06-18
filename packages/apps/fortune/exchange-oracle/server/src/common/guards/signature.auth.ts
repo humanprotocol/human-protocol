@@ -2,68 +2,73 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { Role } from '../enums/role';
+import { Reflector } from '@nestjs/core';
+import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  constructor(private readonly roles: Role[]) {}
+  constructor(
+    private reflector: Reflector,
+    private readonly assignmentRepository: AssignmentRepository,
+  ) {}
 
-  public async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const roles = this.reflector.get<Role[]>('roles', context.getHandler());
+    if (!roles)
+      throw new NotImplementedException(
+        'Signature roles missing configuration',
+      );
     const request = context.switchToHttp().getRequest();
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
+    const oracleAdresses: string[] = [];
 
     try {
-      const addresses: string[] = [];
+      const escrowData = await EscrowUtils.getEscrow(
+        data.chain_id,
+        data.escrow_address,
+      );
 
-      const user = request.user;
-      if (!user) {
-        throw new UnauthorizedException('User not found');
+      if (roles.includes(Role.JobLauncher)) {
+        oracleAdresses.push(escrowData.launcher);
       }
 
-      if (this.roles.includes(Role.Worker) && user.role === Role.Worker) {
-        const workerAddress = user.address;
-        if (!workerAddress) {
-          throw new UnauthorizedException('User address not found');
-        }
-        addresses.push(workerAddress);
-      } else if (this.roles.includes(user.role)) {
-        const escrowData = await EscrowUtils.getEscrow(
-          data.chain_id,
-          data.escrow_address,
-        );
-        console.log('Escrow Data:', escrowData);
-
-        if (user.role === Role.JobLauncher) {
-          addresses.push(escrowData.launcher);
-        }
-        if (user.role === Role.Recording) {
-          addresses.push(escrowData.recordingOracle!);
-        }
-        if (user.role === Role.Reputation) {
-          addresses.push(escrowData.reputationOracle!);
-        }
-      } else {
-        throw new UnauthorizedException('Unauthorized');
+      if (roles.includes(Role.Recording)) {
+        oracleAdresses.push(escrowData.recordingOracle!);
       }
 
-      const isVerified = verifySignature(data, signature, addresses);
-      console.log('Verification result:', isVerified);
+      if (roles.includes(Role.Reputation)) {
+        oracleAdresses.push(escrowData.reputationOracle!);
+      }
+
+      if (roles.includes(Role.Worker)) {
+        const assignment = await this.assignmentRepository.findOne({
+          where: { id: parseInt(data.assignment_id) },
+          relations: ['job'],
+        });
+        if (assignment) {
+          oracleAdresses.push(assignment.workerAddress);
+        } else {
+          throw new UnauthorizedException('Assignment not found');
+        }
+      }
+
+      const isVerified = verifySignature(data, signature, oracleAdresses);
 
       if (isVerified) {
         return true;
       }
-
-      console.log('Verification failed');
-      throw new UnauthorizedException('Unauthorized');
     } catch (error) {
-      console.error('Verification error:', error);
-      throw new UnauthorizedException('Unauthorized');
+      console.error(error);
     }
+
+    throw new UnauthorizedException('Unauthorized');
   }
 }

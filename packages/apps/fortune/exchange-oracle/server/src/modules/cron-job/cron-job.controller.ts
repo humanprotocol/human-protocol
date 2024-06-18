@@ -7,9 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { CronJobService } from './cron-job.service';
 import { CronAuthGuard } from '../../common/guards/cron.auth';
-import { Public } from '../../common/decorators';
 
-@Public()
 @UseGuards(CronAuthGuard)
 @ApiTags('Cron')
 @Controller('/cron')
