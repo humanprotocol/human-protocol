@@ -52,7 +52,6 @@
     "@types/react-gtm-module": "^2.0.3",
     "@types/react-test-renderer": "^18.0.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "crypto-js": "^4.2.0",
     "dotenv": "^16.3.2",
     "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^3.5.2",
@@ -62,9 +61,7 @@
     "happy-dom": "^12.9.1",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^24.1.0",
-    "merkletreejs": "^0.3.11",
     "resize-observer-polyfill": "^1.5.1",
-    "sinon": "^17.0.1",
     "vite": "^5.0.12",
     "vite-plugin-node-polyfills": "^0.19.0",
     "vitest": "^1.6.0"
