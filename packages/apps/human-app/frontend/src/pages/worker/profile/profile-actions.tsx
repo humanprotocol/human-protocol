@@ -53,7 +53,8 @@ export function ProfileActions({
     if (user.kyc_status !== 'APPROVED') {
       kycSessionIdMutation();
     }
-  }, [kycSessionIdMutation, user.kyc_status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
+  }, [user.kyc_status]);
 
   useEffect(() => {
     setNotifications();

@@ -21,6 +21,7 @@ type KycSessionIdMutationResult =
   | { session_id?: never; error: KycError };
 
 // POST "kyc/start" responses:
+// 200 - response contains only "session-id", under verification, response contains many properties - KYC was approved
 // 401 - unauthenticated also means that email not verified
 // 400 - bad request also means that KYC already approved
 
@@ -29,69 +30,73 @@ type KycSessionIdMutationResult =
 // implement its own flow to handle that case because 401 that
 // can be revived for "kyc/start" doesn't mean that JWT token expired
 
-const kycSessionIdMutation = async (): Promise<KycSessionIdMutationResult> => {
-  const accessToken = browserAuthProvider.getAccessToken();
-  if (!accessToken) {
-    // unauthenticated
-    browserAuthProvider.signOut();
-    throw new Error();
-  }
-
-  const tokenPayload = jwtDecode(accessToken);
-  const tokenExpired = (tokenPayload.exp || 0) < new Date().getTime();
-
-  const tokenOrSignInResponseData = tokenExpired
-    ? accessToken
-    : await apiClient(apiPaths.worker.obtainAccessToken.path, {
-        successSchema: signInSuccessResponseSchema,
-        options: {
-          method: 'POST',
-          body: JSON.stringify({
-            refresh_token: browserAuthProvider.getRefreshToken(),
-          }),
-        },
-      });
-
-  if (typeof tokenOrSignInResponseData !== 'string') {
-    browserAuthProvider.signIn(
-      tokenOrSignInResponseData,
-      browserAuthProvider.authType
-    );
-  }
-
-  try {
-    const response = await apiClient(apiPaths.worker.kycSessionId.path, {
-      successSchema: kycSessionIdSchema,
-      options: {
-        method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- ...
-          Authorization: `Bearer ${tokenOrSignInResponseData.toString()}`,
-        }),
-      },
-    });
-    return response;
-  } catch (error) {
-    if (error instanceof FetchError) {
-      if (error.status === 401) {
-        return { error: 'emailNotVerified' };
-      }
-      if (error.status === 400) {
-        return { error: 'kycApproved' };
-      }
-    }
-
-    throw error;
-  }
-};
-
 export function useKycSessionIdMutation(callbacks: { onError?: () => void }) {
   const queryClient = useQueryClient();
-  const { user } = useAuthenticatedUser();
+  const { user, updateUserData } = useAuthenticatedUser();
 
   return useMutation({
-    mutationFn: kycSessionIdMutation,
+    mutationFn: async (): Promise<KycSessionIdMutationResult> => {
+      const accessToken = browserAuthProvider.getAccessToken();
+      if (!accessToken) {
+        // unauthenticated
+        browserAuthProvider.signOut();
+        throw new Error();
+      }
+
+      const tokenPayload = jwtDecode(accessToken);
+      const tokenExpired = (tokenPayload.exp || 0) < new Date().getTime();
+
+      const tokenOrSignInResponseData = tokenExpired
+        ? accessToken
+        : await apiClient(apiPaths.worker.obtainAccessToken.path, {
+            successSchema: signInSuccessResponseSchema,
+            options: {
+              method: 'POST',
+              body: JSON.stringify({
+                refresh_token: browserAuthProvider.getRefreshToken(),
+              }),
+            },
+          });
+
+      if (typeof tokenOrSignInResponseData !== 'string') {
+        browserAuthProvider.signIn(
+          tokenOrSignInResponseData,
+          browserAuthProvider.authType
+        );
+      }
+
+      try {
+        const response = await apiClient(apiPaths.worker.kycSessionId.path, {
+          successSchema: kycSessionIdSchema,
+          options: {
+            method: 'POST',
+            headers: new Headers({
+              'Content-Type': 'application/json',
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string -- ...
+              Authorization: `Bearer ${tokenOrSignInResponseData.toString()}`,
+            }),
+          },
+        });
+        return response;
+      } catch (error) {
+        if (error instanceof FetchError) {
+          if (error.status === 401) {
+            if (user.email) {
+              browserAuthProvider.signOut(() => {
+                window.location.reload();
+              });
+            }
+            return { error: 'emailNotVerified' };
+          }
+          if (error.status === 400) {
+            updateUserData({ kyc_status: 'APPROVED' });
+            return { error: 'kycApproved' };
+          }
+        }
+
+        throw error;
+      }
+    },
 
     onError: () => {
       void queryClient.invalidateQueries();
