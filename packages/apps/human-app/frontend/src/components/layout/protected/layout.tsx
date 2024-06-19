@@ -10,6 +10,7 @@ import { breakpoints } from '@/styles/theme';
 import { TopNotification } from '@/components/ui/top-notification';
 import type { TopNotificationPayload } from '@/components/layout/protected/layout-notification-context';
 import { ProtectedLayoutContext } from '@/components/layout/protected/layout-notification-context';
+import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -20,6 +21,7 @@ const Main = styled('main', {
   isMobile?: boolean;
 }>(({ theme, open, isMobile }) => ({
   width: '100%',
+  display: 'flex',
   flex: '1',
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing.sharp,
@@ -37,20 +39,31 @@ const Main = styled('main', {
 export function Layout({
   pageHeaderProps,
   renderDrawer,
+  renderHCaptchaStatisticsDrawer,
 }: {
   pageHeaderProps: PageHeaderProps;
   renderDrawer: (open: boolean) => JSX.Element;
+  renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
 }) {
+  const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
   const [notification, setNotification] =
     useState<TopNotificationPayload | null>(null);
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
+  const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
   const { backgroundColor } = useBackgroundColorStore();
+  const toggleUserStatsDrawer = isHCaptchaLabelingPage
+    ? () => {
+        setHcaptchaDrawerOpen((state) => !state);
+      }
+    : undefined;
 
   useEffect(() => {
     if (isMobile) {
+      setHcaptchaDrawerOpen(false);
       setDrawerOpen(false);
     } else {
+      setHcaptchaDrawerOpen(false);
       setDrawerOpen(true);
     }
   }, [isMobile]);
@@ -84,8 +97,16 @@ export function Layout({
           backgroundColor,
         }}
       >
-        <Navbar open={drawerOpen} setOpen={setDrawerOpen} />
+        <Navbar
+          open={drawerOpen}
+          setOpen={setDrawerOpen}
+          toggleUserStatsDrawer={toggleUserStatsDrawer}
+          userStatsDrawerOpen={hcaptchaDrawerOpen}
+        />
         {renderDrawer(drawerOpen)}
+        {isHCaptchaLabelingPage && renderHCaptchaStatisticsDrawer
+          ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
+          : null}
         <Main isMobile={isMobile} open={drawerOpen}>
           <Grid
             container
@@ -95,6 +116,7 @@ export function Layout({
               gap: '2rem',
               flexDirection: 'column',
               padding: '0 2rem',
+              flexWrap: 'nowrap',
               [breakpoints.mobile]: {
                 gap: '1rem',
                 padding: '0 1rem',
@@ -125,7 +147,9 @@ export function Layout({
             <Grid item>
               <PageHeader {...pageHeaderProps} />
             </Grid>
-            <Outlet />
+            <Grid sx={{ height: '100%' }}>
+              <Outlet />
+            </Grid>
           </Grid>
         </Main>
         <Footer isProtected />

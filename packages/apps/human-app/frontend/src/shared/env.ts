@@ -8,6 +8,16 @@ export const env = z
     VITE_HUMAN_PROTOCOL_URL: z.string(),
     VITE_HUMAN_PROTOCOL_HELP_URL: z.string(),
     VITE_H_CAPTCHA_SITE_KEY: z.string(),
+    VITE_HMT_DAILY_SPENT_LIMIT: z
+      .string()
+      .transform((value) => Number(value))
+      .pipe(z.number()),
+    VITE_DAILY_SOLVED_CAPTCHA_LIMIT: z
+      .string()
+      .transform((value) => Number(value))
+      .pipe(z.number()),
+    VITE_H_CAPTCHA_EXCHANGE_URL: z.string(),
+    VITE_H_CAPTCHA_LABELING_BASE_URL: z.string(),
     VITE_SYNAPS_KEY: z.string(),
     VITE_WALLET_CONNECT_PROJECT_ID: z.string(),
     VITE_DAPP_META_NAME: z.string(),

@@ -1,6 +1,6 @@
 import { Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -12,6 +12,8 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 import { routerPaths } from '@/router/router-paths';
 import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
+import { useAuth } from '@/auth/use-auth';
+import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 
 interface WelcomeProps {
   setStage: (step: HomePageStageType) => void;
@@ -19,9 +21,21 @@ interface WelcomeProps {
 
 export function Welcome({ setStage }: WelcomeProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('lg');
+  const { user: worker } = useAuth();
+  const { user: operator } = useWeb3Auth();
+
+  if (worker) {
+    navigate(routerPaths.worker.profile, { replace: true });
+  }
+
+  if (operator) {
+    navigate(routerPaths.operator.profile, { replace: true });
+  }
+
   return (
     <Grid
       container
