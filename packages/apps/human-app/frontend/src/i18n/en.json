@@ -33,7 +33,8 @@
     "errorWithMessage": "Error with message: {{message}}",
     "errorWithStatusCode": "Error with status code: {{code}}",
     "unknown": "An error occurred, please try again.",
-    "unknownNetwork": "Unknown network"
+    "unknownNetwork": "Unknown network",
+    "jsonRpcError": "JSON-RPC error"
   },
   "components": {
     "multiSelect": {
