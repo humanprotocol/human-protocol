@@ -18,7 +18,7 @@ export function EmailVerificationErrorPage({ error }: { error: unknown }) {
     useResendEmailVerificationWorkerMutation();
 
   if (status === 'loading') {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   if (!user) {

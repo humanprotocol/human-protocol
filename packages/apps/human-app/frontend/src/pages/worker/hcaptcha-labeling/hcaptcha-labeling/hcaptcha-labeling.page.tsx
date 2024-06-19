@@ -54,7 +54,7 @@ export function HcaptchaLabelingPage() {
   };
 
   if (isHcaptchaUserStatsPending || isDailyHmtSpentPending) {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   if (isHcaptchaUserStatsError || isDailyHmtSpentError) {
@@ -115,7 +115,7 @@ export function HcaptchaLabelingPage() {
             {canSolveCaptcha ? (
               <Grid container sx={{ width: '100%', justifyContent: 'center' }}>
                 <HCaptcha
-                  // @ts-expect-error -- ...
+                  // @ts-expect-error -- this props are not defined by TS by are used for enterprise version: https://github.com/hCaptcha/react-hcaptcha?tab=readme-ov-file#references
                   custom
                   endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
                   onVerify={hcaptchaOnSuccess}

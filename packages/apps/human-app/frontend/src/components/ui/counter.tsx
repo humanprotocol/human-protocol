@@ -8,7 +8,7 @@ export function Counter({
   date: string;
   onFinish?: () => void;
 }) {
-  const time = useCountDown(new Date(date).getTime(), onFinish);
+  const time = useCountDown(new Date(date).getTime() - Date.now(), onFinish);
   if (!time) {
     return null;
   }

@@ -2,7 +2,7 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useEnableHCaptchaLabelingMutation } from '@/api/servieces/worker/enable-hcaptcha-labeling';
@@ -15,12 +15,13 @@ import { routerPaths } from '@/router/router-paths';
 
 export function EnableLabeler() {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { user } = useAuthenticatedUser();
   const { mutate, error, isError, isPending } =
     useEnableHCaptchaLabelingMutation();
 
   if (user.site_key) {
-    return <Navigate replace to={routerPaths.worker.HcaptchaLabeling} />;
+    navigate(routerPaths.worker.HcaptchaLabeling, { replace: true });
   }
 
   if (isError) {

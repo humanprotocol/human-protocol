@@ -13,7 +13,7 @@ export function RequireWalletConnect({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (walletConnect.initializing) {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   if (!walletConnect.isConnected) {

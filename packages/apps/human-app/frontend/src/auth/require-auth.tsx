@@ -13,7 +13,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (auth.status === 'loading') {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   if (!auth.user) {

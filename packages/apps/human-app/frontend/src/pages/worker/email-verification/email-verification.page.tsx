@@ -35,7 +35,7 @@ export function EmailVerificationWorkerPage() {
   });
 
   if (token === undefined) {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   return <EmailVerificationWorker token={token} />;
@@ -57,7 +57,7 @@ export function EmailVerificationWorker({ token }: { token: string }) {
   }
 
   if (isEmailVerificationWorkerPending) {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   return (

@@ -1,14 +1,11 @@
-export interface CountDownResult {
+export interface ParsedDate {
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
 }
 
-export function countdown(futureTimestamp: number): CountDownResult {
-  const now = new Date().getTime();
-  const delta = futureTimestamp - now;
-
+export function parseDate(delta: number): ParsedDate {
   const days = Math.floor(delta / (1000 * 60 * 60 * 24));
   const hours = Math.floor((delta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((delta % (1000 * 60 * 60)) / (1000 * 60));
@@ -26,9 +23,9 @@ export function padZero(num: number): string {
   return num < 10 ? `0${num}` : `${num}`;
 }
 
+// implementation used like in prev version of human app
 export function getTomorrowDate() {
   const today = new Date();
-  // Need to calculate a timezone offset
   const timeZoneOffset = today.getTimezoneOffset();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
@@ -42,7 +39,6 @@ export function getTomorrowDate() {
     (tomorrow.getTime() - today.getTime()) / DAY_IN_MSS
   );
 
-  // We need to show countdown till 07:00 UTC time
   const newDateObj = new Date(
     tomorrow.getTime() - deltaDays * DAY_IN_MSS - timeZoneOffset * 60000
   );

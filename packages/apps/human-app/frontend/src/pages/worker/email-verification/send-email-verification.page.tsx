@@ -22,7 +22,7 @@ export function SendEmailVerificationWorkerPage() {
   const mutationState = useResendEmailVerificationWorkerMutationState();
 
   if (mutationState?.status === 'pending') {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   return (

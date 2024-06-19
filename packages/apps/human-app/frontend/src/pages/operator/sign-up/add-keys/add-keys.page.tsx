@@ -56,7 +56,7 @@ export function AddKeysOperatorPage() {
   }
 
   if (isGetKeysPending) {
-    return <PageCardLoader cardMaxWidth="100%" />;
+    return <PageCardLoader />;
   }
 
   return (

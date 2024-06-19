@@ -199,7 +199,7 @@ export function PageCard({
 
 export function PageCardLoader({
   withLayoutBackground = true,
-  cardMaxWidth,
+  cardMaxWidth = '100%',
 }: {
   cardMaxWidth?: string;
   withLayoutBackground?: boolean;
