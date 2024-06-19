@@ -31,6 +31,7 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { NDAService } from '../nda/nda.service';
 
 @Injectable()
 export class AuthService {
@@ -46,6 +47,7 @@ export class AuthService {
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
+    private readonly ndaService: NDAService,
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
@@ -155,6 +157,7 @@ export class AuthService {
       userId: userEntity.id,
       address: userEntity.evmAddress,
       kyc_status: userEntity.kyc?.status,
+      nda: await this.ndaService.isLatestSigned(userEntity),
       reputation_network: this.web3Service.getOperatorAddress(),
     };
 

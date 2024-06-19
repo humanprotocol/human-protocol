@@ -20,6 +20,7 @@ import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { NDAModule } from './modules/nda/nda.module';
 
 @Module({
   providers: [
@@ -62,6 +63,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     PayoutModule,
     EnvConfigModule,
     HCaptchaModule,
+    NDAModule,
   ],
   controllers: [AppController],
 })

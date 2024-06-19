@@ -42,6 +42,9 @@ import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NDAService } from '../nda/nda.service';
+import { NDAVersionRepository } from '../nda/nda-version.repository';
+import { NDARepository } from '../nda/nda.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -74,6 +77,7 @@ describe('AuthService', () => {
   let web3Service: Web3Service;
   let authConfigService: AuthConfigService;
   let hcaptchaService: HCaptchaService;
+  let ndaService: NDAService;
 
   beforeAll(async () => {
     const signerMock = {
@@ -115,6 +119,12 @@ describe('AuthService', () => {
           },
         },
         NetworkConfigService,
+        NDAService,
+        { provide: NDARepository, useValue: createMock<NDARepository>() },
+        {
+          provide: NDAVersionRepository,
+          useValue: createMock<NDAVersionRepository>(),
+        },
       ],
     }).compile();
 
@@ -127,6 +137,7 @@ describe('AuthService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
+    ndaService = moduleRef.get<NDAService>(NDAService);
 
     hcaptchaService.verifyToken = jest.fn().mockReturnValue({ success: true });
   });
@@ -259,6 +270,7 @@ describe('AuthService', () => {
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
+      ndas: [],
     };
 
     beforeEach(() => {
@@ -279,6 +291,8 @@ describe('AuthService', () => {
         .spyOn(web3Service, 'getOperatorAddress')
         .mockReturnValueOnce(MOCK_ADDRESS);
 
+      jest.spyOn(ndaService, 'isLatestSigned').mockResolvedValueOnce(false);
+
       const result = await authService.auth(userEntity as UserEntity);
       expect(findTokenMock).toHaveBeenCalledWith(
         userEntity.id,
@@ -290,6 +304,7 @@ describe('AuthService', () => {
           userId: userEntity.id,
           address: userEntity.evmAddress,
           kyc_status: userEntity.kyc?.status,
+          nda: false,
           reputation_network: MOCK_ADDRESS,
         },
         {

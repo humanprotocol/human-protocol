@@ -4,3 +4,4 @@ export * from './webhook';
 export * from './collection';
 export * from './oracle';
 export * from './hcaptcha';
+export * from './nda';
