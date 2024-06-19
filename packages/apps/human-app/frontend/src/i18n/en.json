@@ -274,8 +274,8 @@
       "jobsServed": "Jobs served",
       "jobsComplete": "Jobs complete",
       "hmtEarned": "HMT earned",
-      "thisSession": "This Session",
-      "earnedSinceLogged": "HMT earned since logged in",
+      "lastHour": "Last hour",
+      "earnedLastHour": "HMT earned in last hour",
       "statisticsNotLive": "Statistics are not live. Please refresh to view live statistics.",
       "solvedSuccess": "HCaptcha solved!"
     }

@@ -65,14 +65,14 @@ export function UserStatsDetails({
         <Divider />
         <Grid sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <Typography variant="body7">
-            {t('worker.hcaptchaLabelingStats.thisSession')}
+            {t('worker.hcaptchaLabelingStats.lastHour')}
           </Typography>
           <Grid container gap="1rem" justifyContent="space-between">
             <Grid
               sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
             >
               <Typography variant="caption">
-                {t('worker.hcaptchaLabelingStats.earnedSinceLogged')}
+                {t('worker.hcaptchaLabelingStats.earnedLastHour')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
                 {stats.balance.recent}
