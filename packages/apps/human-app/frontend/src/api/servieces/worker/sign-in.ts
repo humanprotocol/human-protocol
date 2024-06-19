@@ -49,6 +49,7 @@ export function useSignInMutation() {
     onSuccess: async (data) => {
       signIn(data);
       navigate(routerPaths.worker.profile);
+      window.location.reload();
       await queryClient.invalidateQueries();
     },
     onError: async () => {

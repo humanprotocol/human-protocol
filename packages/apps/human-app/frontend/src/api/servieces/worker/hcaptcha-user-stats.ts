@@ -14,14 +14,10 @@ const hcaptchaUserStatsSchema = z.object({
   solved: z.number(),
   verified: z.number(),
   // TODO verify response
-  currentDateStats: z.object({
-    served: z.number().optional(),
-    solved: z.number().optional(),
-    verified: z.number().optional(),
-  }),
+  currentDateStats: z.unknown(),
   // TODO verify response
   currentEarningsStats: z.object({
-    hmtEarned: z.number().optional(),
+    hmtEarned: z.unknown(),
   }),
 });
 
