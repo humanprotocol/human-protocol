@@ -1,13 +1,13 @@
 import { t } from 'i18next';
 import { Typography } from '@mui/material';
 import { useDisableWeb3Operator } from '@/api/servieces/operator/disable-operator';
-import type { SignatureData } from '@/api/servieces/operator/prepare-signature';
+import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
+import { Button } from '@/components/ui/button';
+import type { SignatureData } from '@/api/servieces/common/prepare-signature';
 import {
   PrepareSignatureType,
   usePrepareSignature,
-} from '@/api/servieces/operator/prepare-signature';
-import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
-import { Button } from '@/components/ui/button';
+} from '@/api/servieces/common/prepare-signature';
 
 export function ProfileDisableButton() {
   const { address, signMessage } = useConnectedWallet();

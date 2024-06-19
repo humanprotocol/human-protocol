@@ -6,6 +6,7 @@ import styled from '@mui/material/styles/styled';
 import { CheckmarkIcon } from '@/components/ui/icons';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { colorPalette } from '@/styles/color-palette';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 
 const CustomTextField = styled(TextField)(() => ({
   '& .Mui-disabled': {
@@ -16,13 +17,15 @@ const CustomTextField = styled(TextField)(() => ({
 
 export function WalletConnectDone() {
   const { address } = useConnectedWallet();
+  const { user } = useAuthenticatedUser();
+
   return (
     <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">
       <Typography variant="buttonLarge">
         {t('worker.profile.walletConnected')}
       </Typography>
       <CheckmarkIcon />
-      <CustomTextField disabled fullWidth value={address} />
+      <CustomTextField disabled fullWidth value={user.address || address} />
     </Grid>
   );
 }

@@ -7,9 +7,9 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
-import type { PrepareSignatureBody } from '@/api/servieces/operator/prepare-signature';
-import { prepareSignature } from '@/api/servieces/operator/prepare-signature';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
+import type { PrepareSignatureBody } from '@/api/servieces/common/prepare-signature';
+import { prepareSignature } from '@/api/servieces/common/prepare-signature';
 
 export const web3SignInSuccessResponseSchema = z.object({
   access_token: z.string(),
