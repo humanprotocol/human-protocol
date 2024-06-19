@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- ... */
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { JsonRpcSigner } from 'ethers';
 import { z } from 'zod';
 import { t } from 'i18next';
@@ -13,6 +13,7 @@ import {
   PrepareSignatureType,
   prepareSignature,
 } from '@/api/servieces/common/prepare-signature';
+import type { ResponseError } from '@/shared/types/global.type';
 
 async function registerAddressInKVStore({
   signed_address,
@@ -57,8 +58,14 @@ export const getSignedAddress = (address: string, signature: string) => {
   });
 };
 
-export function useSetKycOnChain() {
-  const { user } = useAuthenticatedUser();
+export function useRegisterAddress(callbacks?: {
+  onSuccess?: (() => void) | (() => Promise<void>);
+  onError?:
+    | ((error: ResponseError) => void)
+    | ((error: ResponseError) => Promise<void>);
+}) {
+  const queryClient = useQueryClient();
+  const { user, updateUserData } = useAuthenticatedUser();
   const { web3ProviderMutation, chainId, address, signMessage } =
     useConnectedWallet();
   return useMutation({
@@ -75,6 +82,7 @@ export function useSetKycOnChain() {
       }
 
       const signedAddress = await getSignedAddress(address, signature);
+      updateUserData({ address });
 
       await registerAddressInKVStore({
         signed_address: signedAddress.signed_address,
@@ -82,6 +90,18 @@ export function useSetKycOnChain() {
         oracleAddress: user.reputation_network,
         chainId,
       });
+    },
+    onSuccess: async () => {
+      if (callbacks?.onSuccess) {
+        await callbacks.onSuccess();
+      }
+      await queryClient.invalidateQueries();
+    },
+    onError: async (error) => {
+      if (callbacks?.onError) {
+        await callbacks.onError(error);
+      }
+      await queryClient.invalidateQueries();
     },
     mutationKey: [user.address],
   });
