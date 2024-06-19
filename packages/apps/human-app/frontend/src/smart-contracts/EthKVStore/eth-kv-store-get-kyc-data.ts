@@ -2,7 +2,6 @@ import { Contract } from 'ethers';
 import EthKVStore from '@/smart-contracts/abi/EthKVStore.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 import type { KYCKey } from '@/smart-contracts/EthKVStore/config';
-import type { RegisterAddressSuccess } from '@/api/servieces/worker/register-address';
 import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
 
 export async function ethKVStoreGetKycData({
@@ -10,8 +9,7 @@ export async function ethKVStoreGetKycData({
   accountAddress,
   contractAddress,
   signer,
-}: { kycKey: KYCKey; accountAddress: string } & RegisterAddressSuccess &
-  ContractCallArguments) {
+}: { kycKey: KYCKey; accountAddress: string } & ContractCallArguments) {
   try {
     const ethKVStoreContract = new Contract(
       contractAddress,

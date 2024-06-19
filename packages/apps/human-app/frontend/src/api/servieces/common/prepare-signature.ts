@@ -7,6 +7,7 @@ export enum PrepareSignatureType {
   SignUp = 'SIGNUP',
   SignIn = 'SIGNIN',
   DisableOperator = 'DISABLE_OPERATOR',
+  RegisterAddress = 'REGISTER_ADDRESS',
 }
 
 export const prepareSignatureSuccessSchema = z.object({
