@@ -54,7 +54,7 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.currentEarningsStats.hmtEarned || 0}
+                {stats.balance.total}
                 <span style={{ color: colorPalette.text.primary }}>
                   {t('inputMasks.humanCurrencySuffix')}
                 </span>
@@ -75,7 +75,7 @@ export function UserStatsDetails({
                 {t('worker.hcaptchaLabelingStats.earnedSinceLogged')}
               </Typography>
               <Typography color={colorPalette.primary.light} variant="h6">
-                {stats.currentEarningsStats.hmtEarned || 0}
+                {stats.balance.recent}
                 <span style={{ color: colorPalette.text.primary }}>
                   {t('inputMasks.humanCurrencySuffix')}
                 </span>
