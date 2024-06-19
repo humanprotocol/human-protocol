@@ -78,45 +78,62 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
           }}
           xs={isMobile ? 12 : 6}
         >
-          <Typography color={colorPalette.primary.light} variant="h6">
-            {t('homepage.iWantToEarn')}
-          </Typography>
-          <List
+          <Grid
             sx={{
-              listStyleType: 'disc',
-              listStylePosition: 'inside',
-              paddingLeft: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              justifyContent: 'space-between',
             }}
           >
-            <ListItemText
-              primary={t('homepage.completeTask')}
-              primaryTypographyProps={{
-                variant: 'subtitle2',
-                sx: {
-                  display: 'list-item',
-                },
+            <Typography color={colorPalette.primary.light} variant="h6">
+              {t('homepage.iWantToEarn')}
+            </Typography>
+            <List
+              sx={{
+                listStyleType: 'disc',
+                listStylePosition: 'inside',
+                paddingLeft: '0.5rem',
               }}
-            />
-            <ListItemText
-              primary={t('homepage.workAnywhere')}
-              primaryTypographyProps={{
-                variant: 'subtitle2',
-                sx: {
-                  display: 'list-item',
-                },
-              }}
-            />
-          </List>
-          <Grid item xs={isMobile ? 12 : 6}>
-            <Button
-              component={Link}
-              fullWidth
-              size="large"
-              to={routerPaths.worker.signUp}
-              variant="contained"
             >
-              {t('homepage.signUpToComplete')}
-            </Button>
+              <ListItemText
+                primary={t('homepage.completeTask')}
+                primaryTypographyProps={{
+                  variant: 'subtitle2',
+                  sx: {
+                    display: 'list-item',
+                  },
+                }}
+              />
+              <ListItemText
+                primary={t('homepage.workAnywhere')}
+                primaryTypographyProps={{
+                  variant: 'subtitle2',
+                  sx: {
+                    display: 'list-item',
+                  },
+                }}
+              />
+            </List>
+            <Grid
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'flex-end',
+                paddingTop: '2rem',
+              }}
+              xs={12}
+            >
+              <Button
+                component={Link}
+                fullWidth
+                size="large"
+                to={routerPaths.worker.signUp}
+                variant="contained"
+              >
+                {t('homepage.signUpToComplete')}
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
         <Grid
@@ -155,17 +172,25 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
               }}
             />
           </List>
-        </Grid>
-        <Grid item xs={isMobile ? 12 : 6}>
-          <Button
-            component={Link}
-            fullWidth
-            size="large"
-            to={routerPaths.operator.connectWallet}
-            variant="contained"
+          <Grid
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'flex-end',
+              paddingTop: '2rem',
+            }}
+            xs={12}
           >
-            {t('homepage.signAsOperator')}
-          </Button>
+            <Button
+              component={Link}
+              fullWidth
+              size="large"
+              to={routerPaths.operator.connectWallet}
+              variant="contained"
+            >
+              {t('homepage.signAsOperator')}
+            </Button>
+          </Grid>
         </Grid>
       </Grid>
     </Container>
