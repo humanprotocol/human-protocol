@@ -3,6 +3,7 @@ import Grid from '@mui/material/Grid';
 import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
@@ -18,12 +19,25 @@ import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
 
 export function HcaptchaLabelingPage() {
+  const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();
 
+  const resetCaptcha = () => {
+    if (captchaRef.current) {
+      captchaRef.current.resetCaptcha();
+    }
+  };
+
   const { mutate: solveHCaptchaMutation } = useSolveHCaptchaMutation({
-    onSuccess,
-    onError,
+    onSuccess: async () => {
+      await onSuccess();
+      resetCaptcha();
+    },
+    onError: async (e) => {
+      await onError(e);
+      resetCaptcha();
+    },
   });
 
   const {
@@ -119,6 +133,7 @@ export function HcaptchaLabelingPage() {
                   custom
                   endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
                   onVerify={hcaptchaOnSuccess}
+                  ref={captchaRef}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
                   sitekey={user.site_key || ''}
                 />
