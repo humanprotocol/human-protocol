@@ -131,7 +131,7 @@ export class JobService {
     const assignment =
       await this.assignmentRepository.findOneById(assignmentId);
     if (!assignment) {
-      throw new BadRequestException(ErrorJob.NotAssigned);
+      throw new BadRequestException(ErrorAssignment.NotFound);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {

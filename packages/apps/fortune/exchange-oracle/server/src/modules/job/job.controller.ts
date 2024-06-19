@@ -29,7 +29,7 @@ import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { Role } from '../../common/enums/role';
 import { SignatureAuthGuard } from '../../common/guards/signature.auth';
-import { AllowedRoles } from 'src/common/decorators/role';
+import { AllowedRoles } from '../../common/decorators/role';
 
 @ApiTags('Job')
 @Controller('job')

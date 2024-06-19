@@ -6,7 +6,7 @@ import { GetJobsDto, SolveJobDto, JobDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobSortField, JobStatus, JobType } from '../../common/enums/job';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { ChainId } from '@human-protocol/sdk';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 
 jest.mock('../../common/utils/signature');
 
@@ -18,7 +18,13 @@ describe('JobController', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [],
       controllers: [JobController],
-      providers: [{ provide: JobService, useValue: createMock<JobService>() }],
+      providers: [
+        { provide: JobService, useValue: createMock<JobService>() },
+        {
+          provide: AssignmentRepository,
+          useValue: createMock<AssignmentRepository>(),
+        },
+      ],
     }).compile();
 
     jobController = moduleRef.get<JobController>(JobController);
@@ -65,9 +71,7 @@ describe('JobController', () => {
   describe('solveJob', () => {
     it('should call jobService.solveJob', async () => {
       const solveJobDto: SolveJobDto = {
-        assignmentId: '1',
-        escrowAddress: '0x1234567890123456789012345678901234567890',
-        chainId: ChainId.MAINNET,
+        assignmentId: 1,
         solution: 'job-solution',
       };
 

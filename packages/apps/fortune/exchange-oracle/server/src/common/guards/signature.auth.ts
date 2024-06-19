@@ -11,6 +11,7 @@ import { EscrowUtils } from '@human-protocol/sdk';
 import { Role } from '../enums/role';
 import { Reflector } from '@nestjs/core';
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
+import { ErrorAssignment, ErrorSignature } from '../constant/errors';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -21,46 +22,41 @@ export class SignatureAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<Role[]>('roles', context.getHandler());
-    if (!roles)
-      throw new NotImplementedException(
-        'Signature roles missing configuration',
-      );
+    if (!roles) throw new NotImplementedException(ErrorSignature.MissingRoles);
     const request = context.switchToHttp().getRequest();
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
 
-    try {
-      if (roles.includes(Role.Worker)) {
-        const assignment = await this.assignmentRepository.findOneById(
-          data.assignment_id,
-        );
-        if (assignment) {
-          oracleAdresses.push(assignment.workerAddress);
-        } else {
-          throw new UnauthorizedException('Assignment not found');
-        }
+    if (roles.includes(Role.Worker)) {
+      const assignment = await this.assignmentRepository.findOneById(
+        data.assignment_id,
+      );
+      if (assignment) {
+        oracleAdresses.push(assignment.workerAddress);
       } else {
-        const escrowData = await EscrowUtils.getEscrow(
-          data.chain_id,
-          data.escrow_address,
-        );
+        throw new UnauthorizedException(ErrorAssignment.NotFound);
+      }
+    } else {
+      const escrowData = await EscrowUtils.getEscrow(
+        data.chain_id,
+        data.escrow_address,
+      );
 
-        if (roles.includes(Role.JobLauncher)) {
-          oracleAdresses.push(escrowData.launcher);
-        }
-
-        if (roles.includes(Role.Recording)) {
-          oracleAdresses.push(escrowData.recordingOracle!);
-        }
-
-        if (roles.includes(Role.Reputation)) {
-          oracleAdresses.push(escrowData.reputationOracle!);
-        }
+      if (roles.includes(Role.JobLauncher)) {
+        oracleAdresses.push(escrowData.launcher);
       }
 
-      const isVerified = verifySignature(data, signature, oracleAdresses);
+      if (roles.includes(Role.Recording)) {
+        oracleAdresses.push(escrowData.recordingOracle!);
+      }
 
+      if (roles.includes(Role.Reputation)) {
+        oracleAdresses.push(escrowData.reputationOracle!);
+      }
+    }
+    try {
+      const isVerified = verifySignature(data, signature, oracleAdresses);
       if (isVerified) {
         return true;
       }

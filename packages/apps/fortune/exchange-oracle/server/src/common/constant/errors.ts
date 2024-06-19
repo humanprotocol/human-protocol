@@ -50,3 +50,10 @@ export enum ErrorJob {
   ManifestDecryptionFailed = 'Unable to decrypt manifest',
   ManifestNotFound = 'Unable to get manifest',
 }
+
+/**
+ * Represents error messages associated with signatures.
+ */
+export enum ErrorSignature {
+  MissingRoles = 'Missing signature roles configuration',
+}
