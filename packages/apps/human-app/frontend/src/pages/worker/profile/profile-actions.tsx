@@ -14,13 +14,13 @@ import { RegisterAddressAction } from '@/pages/worker/profile/register-address-a
 import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
 import { WalletConnectDone } from '@/pages/worker/profile/wallet-connect-done';
-import { useKycNotifications } from '@/hooks/use-kyc-notification';
+import { useKycErrorNotifications } from '@/hooks/use-kyc-notification';
 
 export function ProfileActions() {
   const navigation = useNavigate();
   const { mutate: resendEmailVerificationMutation } =
     useResendEmailVerificationWorkerMutation();
-  const { onError } = useKycNotifications();
+  const onError = useKycErrorNotifications();
   const {
     data: kycSessionIdData,
     mutate: kycSessionIdMutation,

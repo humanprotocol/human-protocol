@@ -21,14 +21,6 @@ type KycSessionIdMutationResult =
   | (KycSessionIdSuccessSchema & { error?: never })
   | { session_id?: never; error: KycError };
 
-// 401 - unauthenticated also means that email not verified
-// 400 - bad request also means that KYC already approved
-
-// normally if app receives 401 status code it tries to obtain
-// access token with refresh token, kycSessionIdMutation has to
-// implement its own flow to handle that case because 401 that
-// can be revived for "kyc/start" doesn't mean that JWT token expired
-
 export function useKycSessionIdMutation(callbacks: {
   onError?: (error: ResponseError) => void;
   onSuccess?: () => void;
@@ -81,6 +73,13 @@ export function useKycSessionIdMutation(callbacks: {
         });
         return response;
       } catch (error) {
+        // 401 - unauthenticated also means that email not verified
+        // 400 - bad request also means that KYC already approved
+
+        // normally if app receives 401 status code it tries to obtain
+        // access token with refresh token, kycSessionIdMutation has to
+        // implement its own flow to handle that case because 401 that
+        // can be revived for "kyc/start" doesn't mean that JWT token expired
         if (error instanceof FetchError) {
           if (error.status === 401) {
             return { error: 'emailNotVerified' };
