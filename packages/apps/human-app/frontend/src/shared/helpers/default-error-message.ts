@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import { FetchError } from '@/api/fetcher';
+import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
 
 type CustomErrorHandler = (unknownError: unknown) => string | undefined;
 
@@ -15,6 +16,10 @@ export function defaultErrorMessage(
 
   if (customError) {
     return customError;
+  }
+
+  if (unknownError instanceof JsonRpcError) {
+    return t('errors.jsonRpcError');
   }
 
   if (unknownError instanceof FetchError) {

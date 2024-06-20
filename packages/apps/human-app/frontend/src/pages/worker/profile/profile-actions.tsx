@@ -17,11 +17,7 @@ import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
 import { WalletConnectDone } from '@/pages/worker/profile/wallet-connect-done';
 
-export function ProfileActions({
-  setNotifications,
-}: {
-  setNotifications: () => void;
-}) {
+export function ProfileActions() {
   const navigation = useNavigate();
   const { mutate: resendEmailVerificationMutation } =
     useResendEmailVerificationWorkerMutation();
@@ -55,11 +51,6 @@ export function ProfileActions({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
   }, [user.kyc_status]);
-
-  useEffect(() => {
-    setNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- correct dependency
-  }, [isWalletConnected]);
 
   return (
     <Grid container flexDirection="column" gap="1rem">

@@ -1,6 +1,6 @@
 import { Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -21,7 +21,6 @@ interface WelcomeProps {
 
 export function Welcome({ setStage }: WelcomeProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('lg');
@@ -29,11 +28,11 @@ export function Welcome({ setStage }: WelcomeProps) {
   const { user: operator } = useWeb3Auth();
 
   if (worker) {
-    navigate(routerPaths.worker.profile, { replace: true });
+    return <Navigate replace to={routerPaths.worker.profile} />;
   }
 
   if (operator) {
-    navigate(routerPaths.operator.profile, { replace: true });
+    return <Navigate replace to={routerPaths.operator.profile} />;
   }
 
   return (

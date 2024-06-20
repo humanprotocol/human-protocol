@@ -48,11 +48,7 @@ export function AddKeysOperatorPage() {
   ) : undefined;
 
   if (isGetKeysError) {
-    return (
-      <PageCardError
-        errorMessage={defaultErrorMessage(getKeysError, jsonRpcErrorHandler)}
-      />
-    );
+    return <PageCardError errorMessage={defaultErrorMessage(getKeysError)} />;
   }
 
   if (isGetKeysPending) {

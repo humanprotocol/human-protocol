@@ -35,12 +35,8 @@ export function RegisterAddressAction({
     } else {
       closeNotification();
     }
-  }, [
-    closeNotification,
-    registerAddressData,
-    registerAddressStatus,
-    setTopNotification,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
+  }, [registerAddressData, registerAddressStatus]);
 
   if (isRegisterAddressPending) {
     return (

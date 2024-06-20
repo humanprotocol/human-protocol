@@ -59,7 +59,7 @@ export function PageCard({
   childrenMaxWidth = '486px',
   backArrowPath,
   cancelBtnPath = routerPaths.homePage,
-  withLayoutBackground = false,
+  withLayoutBackground = true,
   hiddenCancelButton = false,
 }: FormCardProps) {
   const { setGrayBackground } = useBackgroundColorStore();

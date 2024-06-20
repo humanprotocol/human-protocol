@@ -18,6 +18,8 @@ export interface DrawerItem {
   label: string;
   link?: string;
   icon?: JSX.Element;
+  disabled?: boolean;
+  onClick?: () => void;
 }
 
 export type TopMenuItem = DrawerItem | JSX.Element;
@@ -87,12 +89,13 @@ export function DrawerNavigation({
                 );
               }
 
-              const { link, label } = item;
+              const { link, label, disabled } = item;
               return (
-                <ListItem disablePadding key={link}>
+                <ListItem disablePadding disabled={disabled} key={link}>
                   <ListItemButton
                     onClick={() => {
                       if (link) {
+                        if (disabled) return;
                         navigate(link);
                       }
                     }}

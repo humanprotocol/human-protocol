@@ -9,6 +9,7 @@ import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import type { UserData } from '@/auth/auth-context';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { ProfileEmailNotification } from '@/pages/worker/profile/profile-email-notifications';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 const getNotificationMessage = (
   user: UserData & { isWalletConnected: boolean }
@@ -26,6 +27,7 @@ const getNotificationMessage = (
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
   const { isConnected } = useWalletConnect();
+  const { setGrayBackground } = useBackgroundColorStore();
   const { setTopNotification: setTopNotificationInLayout } =
     useProtectedLayoutNotification();
 
@@ -41,6 +43,7 @@ export function WorkerProfilePage() {
 
   useEffect(() => {
     setNotifications();
+    setGrayBackground();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this once
   }, []);
 
@@ -66,7 +69,7 @@ export function WorkerProfilePage() {
         }}
       >
         <ProfileData />
-        <ProfileActions setNotifications={setNotifications} />
+        <ProfileActions />
         <ProfileEmailNotification />
       </Grid>
     </Paper>

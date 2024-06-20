@@ -12,8 +12,8 @@ import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 import { RequireWeb3Auth } from '@/auth-web3/require-web3-auth';
 import { DrawerNavigation } from '@/components/layout/protected/drawer-navigation';
 import {
+  WorkerDrawerTopMenuItems,
   workerDrawerBottomMenuItems,
-  workerDrawerTopMenuItems,
 } from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
@@ -54,7 +54,7 @@ export function Router() {
                       window.location.reload();
                     });
                   }}
-                  topMenuItems={workerDrawerTopMenuItems}
+                  topMenuItems={WorkerDrawerTopMenuItems()}
                 />
               )}
               renderHCaptchaStatisticsDrawer={(isOpen) => (
