@@ -4,9 +4,9 @@ import Typography from '@mui/material/Typography/Typography';
 import { t } from 'i18next';
 import styled from '@mui/material/styles/styled';
 import { CheckmarkIcon } from '@/components/ui/icons';
-import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { colorPalette } from '@/styles/color-palette';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
+import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 const CustomTextField = styled(TextField)(() => ({
   '& .Mui-disabled': {
@@ -16,7 +16,7 @@ const CustomTextField = styled(TextField)(() => ({
 }));
 
 export function WalletConnectDone() {
-  const { address } = useConnectedWallet();
+  const { address } = useWalletConnect();
   const { user } = useAuthenticatedUser();
 
   return (

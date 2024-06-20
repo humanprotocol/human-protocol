@@ -93,15 +93,8 @@ export function ProfileActions() {
       </Grid>
       <Grid>
         <ProfileAction
-          done={
-            Boolean(kycApproved && user.address) ||
-            Boolean(kycApproved && isWalletConnected)
-          }
-          doneLabel={
-            <RequireWalletConnect>
-              <WalletConnectDone />
-            </RequireWalletConnect>
-          }
+          done={Boolean(kycApproved && user.address && isWalletConnected)}
+          doneLabel={<WalletConnectDone />}
           toDoComponent={
             <ConnectWalletBtn
               disabled={user.kyc_status !== 'APPROVED'}
