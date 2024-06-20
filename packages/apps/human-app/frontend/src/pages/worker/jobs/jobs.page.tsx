@@ -65,7 +65,10 @@ export function JobsPage() {
 
   return (
     <>
-      <Modal isOpen={isMobileFilterDrawerOpen}>
+      <Modal
+        isOpen={isMobileFilterDrawerOpen}
+        sx={{ position: 'absolute', zIndex: '1400' }}
+      >
         <DrawerMobile
           selectedTab={selectedTab}
           setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
