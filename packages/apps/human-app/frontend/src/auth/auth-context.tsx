@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const userData = jwtDecode(accessToken);
       const userDataWithSavedData = savedUserData.data
-        ? { ...userData, ...savedUserData }
+        ? { ...userData, ...savedUserData.data }
         : userData;
 
       const validUserData = userDataSchema.parse(userDataWithSavedData);
