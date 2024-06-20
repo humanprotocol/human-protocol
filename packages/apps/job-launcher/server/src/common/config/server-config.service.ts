@@ -16,9 +16,6 @@ export class ServerConfigService {
   get feURL(): string {
     return this.configService.get<string>('FE_URL', 'http://localhost:3005');
   }
-  get sessionSecret(): string {
-    return this.configService.get<string>('SESSION_SECRET', 'session_key');
-  }
   get maxRetryCount(): number {
     return +this.configService.get<number>('MAX_RETRY_COUNT', 5);
   }
