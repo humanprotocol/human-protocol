@@ -4,6 +4,7 @@ import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
 const accessTokenKey = btoa('access_token');
 const refreshTokenKey = btoa('refresh_token');
 const authTypeKey = btoa('auth_type');
+const userDataKey = btoa('extendable_user_data');
 
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
@@ -20,6 +21,7 @@ const browserAuthProvider: BrowserAuthProvider = {
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
     localStorage.removeItem(authTypeKey);
+    localStorage.removeItem(userDataKey);
     if (callback) {
       callback();
     }
@@ -49,6 +51,24 @@ const browserAuthProvider: BrowserAuthProvider = {
     }
 
     return atob(result);
+  },
+  setUserData(userData) {
+    localStorage.setItem(userDataKey, btoa(JSON.stringify(userData)));
+  },
+  getUserData() {
+    const userData = localStorage.getItem(userDataKey);
+
+    if (!userData) {
+      return { data: {} as unknown };
+    }
+
+    try {
+      return {
+        data: JSON.parse(atob(userData)) as unknown,
+      };
+    } catch (error) {
+      return { data: {} as unknown };
+    }
   },
 };
 

@@ -1,24 +1,27 @@
+/* eslint-disable camelcase -- ... */
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
-const userDataSchema = z.object({
-  email: z.string(),
-  userId: z.number(),
-  address: z.string().nullable(),
-  // eslint-disable-next-line camelcase -- camel case defined by api
-  reputation_network: z.string(),
-  // eslint-disable-next-line camelcase -- camel case defined by api
+const extendableUserDataSchema = z.object({
+  site_key: z.string().optional().nullable(),
   kyc_status: z.string().optional().nullable(),
-  // eslint-disable-next-line camelcase -- camel case defined by api
-  kyc_added_on_chain: z.boolean().optional(), // TODO that should be verified when adding KYC info on chain feature is done
-  // eslint-disable-next-line camelcase -- camel case defined by api
-  email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
+  address: z.string().optional().nullable(),
 });
 
+const userDataSchema = z
+  .object({
+    email: z.string(),
+    userId: z.number(),
+    reputation_network: z.string(),
+    email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
+  })
+  .merge(extendableUserDataSchema);
+
 export type UserData = z.infer<typeof userDataSchema>;
+export type UpdateUserDataPayload = z.infer<typeof extendableUserDataSchema>;
 
 type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 export interface AuthenticatedUserContextType {
@@ -26,6 +29,7 @@ export interface AuthenticatedUserContextType {
   status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
+  updateUserData: (updateUserDataPayload: UpdateUserDataPayload) => void;
 }
 
 interface UnauthenticatedUserContextType {
@@ -44,18 +48,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: UserData | null;
     status: AuthStatus;
   }>({ user: null, status: 'loading' });
+  const updateUserData = (updateUserDataPayload: UpdateUserDataPayload) => {
+    setAuthState((state) => {
+      if (!state.user) {
+        return state;
+      }
+
+      const newUserData = {
+        ...state.user,
+        ...updateUserDataPayload,
+      };
+      browserAuthProvider.setUserData(newUserData);
+
+      return {
+        ...state,
+        user: newUserData,
+      };
+    });
+  };
 
   const handleSignIn = () => {
     try {
       const accessToken = browserAuthProvider.getAccessToken();
       const authType = browserAuthProvider.getAuthType();
+      const savedUserData = browserAuthProvider.getUserData();
 
       if (!accessToken || authType !== 'web2') {
         setAuthState({ user: null, status: 'idle' });
         return;
       }
       const userData = jwtDecode(accessToken);
-      const validUserData = userDataSchema.parse(userData);
+      const userDataWithSavedData = savedUserData.data
+        ? { ...userData, ...savedUserData }
+        : userData;
+
+      const validUserData = userDataSchema.parse(userDataWithSavedData);
       setAuthState({ user: validUserData, status: 'success' });
     } catch (e) {
       // eslint-disable-next-line no-console -- ...
@@ -84,12 +111,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={
         authState.user && authState.status === 'success'
           ? {
-              ...authState,
+              user: authState.user,
+              status: authState.status,
               signOut,
               signIn,
+              updateUserData,
             }
           : {
-              ...authState,
+              user: null,
+              status: authState.status,
               signOut,
               signIn,
             }

@@ -1,4 +1,5 @@
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
+import type { UserData } from '@/auth/auth-context';
 
 export type AuthType = 'web2' | 'web3';
 
@@ -13,4 +14,6 @@ export interface BrowserAuthProvider {
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
   getAuthType: () => string | null;
+  setUserData: (userData: UserData) => void;
+  getUserData: () => { data: unknown };
 }

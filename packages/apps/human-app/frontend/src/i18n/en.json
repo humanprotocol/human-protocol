@@ -9,6 +9,7 @@
   "protectedPagesHeaders": {
     "profile": "Profile",
     "jobsDiscovery": "Jobs Discovery",
+    "hcaptchaLabeling": "hCaptcha Labeling",
     "jobs": "Jobs"
   },
   "web3ProtectedPagesHeaders": {
@@ -258,6 +259,26 @@
           "fortune": "Fortune"
         }
       }
+    },
+    "hcaptchaLabeling": {
+      "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "noJobs": "No jobs available at the moment. Please come back in:"
+    },
+    "enableHCaptchaLabeling": {
+      "description": "To earn HMT, you must enable data-labeling. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "enableButton": "Enable labeling"
+    },
+    "hcaptchaLabelingStats": {
+      "hCapchaStatistics": "hCapcha Statistics",
+      "statistics": "Statistics",
+      "allTime": "All Time",
+      "jobsServed": "Jobs served",
+      "jobsComplete": "Jobs complete",
+      "hmtEarned": "HMT earned",
+      "lastHour": "Last hour",
+      "earnedLastHour": "HMT earned in last hour",
+      "statisticsNotLive": "Statistics are not live. Please refresh to view live statistics.",
+      "solvedSuccess": "HCaptcha solved!"
     }
   },
   "operator": {
