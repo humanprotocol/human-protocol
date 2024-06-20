@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
@@ -18,6 +19,7 @@ import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { routerPaths } from '@/router/router-paths';
+import { FormCaptcha } from '@/components/h-captcha';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
@@ -27,6 +29,7 @@ export function ResetPasswordWorkerPage() {
     defaultValues: {
       password: '',
       confirmPassword: '',
+      h_captcha_token: '',
     },
     resolver: zodResolver(resetPasswordDtoSchema),
   });
@@ -40,11 +43,7 @@ export function ResetPasswordWorkerPage() {
 
   const handleWorkerResetPassword = (data: ResetPasswordDto) => {
     resetPasswordWorkerMutate(
-      omit(
-        // eslint-disable-next-line camelcase -- api request
-        { ...data, token: token?.toString() || '', h_captcha_token: 'token' },
-        ['confirmPassword']
-      )
+      omit({ ...data, token: token?.toString() || '' }, ['confirmPassword'])
     );
   };
 
@@ -81,6 +80,7 @@ export function ResetPasswordWorkerPage() {
               label={t('worker.resetPassword.fields.confirm')}
               name="confirmPassword"
             />
+            <FormCaptcha name="h_captcha_token" />
             <Button
               fullWidth
               loading={isResetPasswordWorkerPending}
