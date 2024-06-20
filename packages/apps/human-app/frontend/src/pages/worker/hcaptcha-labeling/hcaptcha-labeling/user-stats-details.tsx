@@ -3,14 +3,14 @@ import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 import { RefreshIcon } from '@/components/ui/icons';
 import type { HCaptchaUserStatsSuccess } from '@/api/servieces/worker/hcaptcha-user-stats';
-import { useHCaptchaUserStats } from '@/api/servieces/worker/hcaptcha-user-stats';
 
 export function UserStatsDetails({
   stats,
+  refetch,
 }: {
   stats: HCaptchaUserStatsSuccess;
+  refetch: () => void;
 }) {
-  const { refetch } = useHCaptchaUserStats();
   return (
     <Grid>
       <Divider sx={{ borderBottomWidth: '2px' }} />
@@ -103,7 +103,7 @@ export function UserStatsDetails({
           <Grid
             component="a"
             onClick={() => {
-              void refetch();
+              refetch();
             }}
             sx={{
               display: 'flex',
