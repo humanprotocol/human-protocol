@@ -17,7 +17,6 @@ import { CronJobController } from './cron-job.controller';
     ConfigModule,
   ],
   providers: [CronJobService, CronJobRepository, WebhookRepository],
-  controllers: [CronJobController],
   exports: [CronJobService],
 })
 export class CronJobModule {}

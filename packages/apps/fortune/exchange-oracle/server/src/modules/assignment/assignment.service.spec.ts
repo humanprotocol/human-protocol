@@ -2,6 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
@@ -15,6 +16,11 @@ import { JobService } from '../job/job.service';
 import { Web3Service } from '../web3/web3.service';
 import { AssignmentDto, CreateAssignmentDto } from './assignment.dto';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
+import { AssignmentSortField } from '../../common/enums/job';
+import { SortDirection } from '../../common/enums/collection';
+import { AssignmentEntity } from './assignment.entity';
+import { ErrorAssignment } from '../../common/constant/errors';
+import { BadRequestException } from '@nestjs/common';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),
@@ -67,7 +73,14 @@ describe('AssignmentService', () => {
         { provide: JobService, useValue: createMock<JobService>() },
         {
           provide: AssignmentRepository,
-          useValue: createMock<AssignmentRepository>(),
+          useValue: {
+            fetchFiltered: jest.fn(),
+            createUnique: jest.fn(),
+            findOneByJobIdAndWorker: jest.fn(),
+            countByJobId: jest.fn(),
+            findOneByIdAndWorker: jest.fn(),
+            updateOne: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -124,6 +137,7 @@ describe('AssignmentService', () => {
         workerAddress: workerAddress,
         status: AssignmentStatus.ACTIVE,
         expiresAt: expect.any(Date),
+        rewardAmount: manifest.fundAmount / manifest.submissionsRequired,
       });
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
@@ -240,6 +254,7 @@ describe('AssignmentService', () => {
         status: AssignmentStatus.ACTIVE,
         createdAt: new Date(),
         expiresAt: new Date(),
+        rewardAmount: 20,
       },
     ];
 
@@ -269,6 +284,8 @@ describe('AssignmentService', () => {
           page: 0,
           pageSize: 10,
           skip: 0,
+          sortField: AssignmentSortField.CREATED_AT,
+          sort: SortDirection.ASC,
         },
         workerAddress,
         reputationNetwork,
@@ -292,6 +309,137 @@ describe('AssignmentService', () => {
         chainId,
         escrowAddress,
       );
+      expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
+        page: 0,
+        pageSize: 10,
+        skip: 0,
+        sort: SortDirection.ASC,
+        sortField: AssignmentSortField.CREATED_AT,
+        chainId,
+        jobType: JobType.FORTUNE,
+        escrowAddress,
+        status: AssignmentStatus.ACTIVE,
+        reputationNetwork,
+        workerAddress,
+      });
+    });
+
+    it('should return an empty array if no assignments are found', async () => {
+      jest
+        .spyOn(assignmentRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: [], itemCount: 0 });
+
+      const result = await assignmentService.getAssignmentList(
+        {
+          chainId,
+          jobType: JobType.FORTUNE,
+          escrowAddress,
+          status: AssignmentStatus.ACTIVE,
+          page: 1,
+          pageSize: 10,
+          skip: 0,
+          sortField: AssignmentSortField.CREATED_AT,
+          sort: SortDirection.ASC,
+        },
+        workerAddress,
+        reputationNetwork,
+        MOCK_EXCHANGE_ORACLE,
+      );
+
+      expect(result.totalResults).toEqual(0);
+      expect(result.results).toEqual([]);
+    });
+
+    it('should handle different sort orders correctly', async () => {
+      jest
+        .spyOn(assignmentRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: assignments as any, itemCount: 1 });
+
+      await assignmentService.getAssignmentList(
+        {
+          chainId,
+          jobType: JobType.FORTUNE,
+          escrowAddress,
+          status: AssignmentStatus.ACTIVE,
+          page: 1,
+          pageSize: 10,
+          skip: 0,
+          sortField: AssignmentSortField.CREATED_AT,
+          sort: SortDirection.DESC,
+        },
+        workerAddress,
+        reputationNetwork,
+        MOCK_EXCHANGE_ORACLE,
+      );
+
+      expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 10,
+        skip: 0,
+        sort: SortDirection.DESC,
+        sortField: AssignmentSortField.CREATED_AT,
+        chainId,
+        jobType: JobType.FORTUNE,
+        escrowAddress,
+        status: AssignmentStatus.ACTIVE,
+        reputationNetwork,
+        workerAddress,
+      });
+    });
+  });
+
+  describe('resignJob', () => {
+    it('should successfully cancel an active assignment', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+      const mockAssignment = {
+        id: assignmentId,
+        workerAddress,
+        status: AssignmentStatus.ACTIVE,
+      } as AssignmentEntity;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .mockResolvedValue(mockAssignment);
+
+      await expect(
+        assignmentService.resign(assignmentId, workerAddress),
+      ).resolves.toBeUndefined();
+      expect(mockAssignment.status).toBe(AssignmentStatus.CANCELED);
+      expect(assignmentRepository.updateOne).toHaveBeenCalledWith(
+        mockAssignment,
+      );
+    });
+
+    it('should throw NotFound if assignment does not exist', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .mockResolvedValue(null);
+
+      await expect(
+        assignmentService.resign(assignmentId, workerAddress),
+      ).rejects.toThrow(new BadRequestException(ErrorAssignment.NotFound));
+    });
+
+    it('should throw InvalidStatus if assignment status is not ACTIVE', async () => {
+      const assignmentId = 1;
+      const workerAddress = MOCK_ADDRESS;
+      const mockAssignment = {
+        id: assignmentId,
+        workerAddress,
+        status: AssignmentStatus.COMPLETED,
+      } as AssignmentEntity;
+
+      jest
+        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .mockResolvedValue(mockAssignment);
+
+      await expect(
+        assignmentService.resign(assignmentId, workerAddress),
+      ).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
     });
   });
 });

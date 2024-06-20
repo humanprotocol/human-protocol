@@ -1,10 +1,11 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import {
-  ErrorAuth,
-  ErrorOperator,
-  ErrorUser,
-} from '../../common/constants/errors';
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { ErrorOperator, ErrorUser } from '../../common/constants/errors';
 import {
   KycStatus,
   OperatorStatus,
@@ -25,7 +26,13 @@ import { Wallet } from 'ethers';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { SiteKeyEntity } from './site-key.entity';
+import { SiteKeyRepository } from './site-key.repository';
+import { OracleType } from '../../common/enums';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class UserService {
@@ -33,8 +40,12 @@ export class UserService {
   private HASH_ROUNDS = 12;
   constructor(
     private userRepository: UserRepository,
+    private siteKeyRepository: SiteKeyRepository,
     private readonly web3Service: Web3Service,
+    private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
+    private readonly hcaptchaConfigService: HCaptchaConfigService,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -70,7 +81,7 @@ export class UserService {
 
   public activate(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.status = UserStatus.ACTIVE;
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
   }
 
   public async createWeb3User(address: string): Promise<UserEntity> {
@@ -110,7 +121,64 @@ export class UserService {
 
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.nonce = generateNonce();
-    return userEntity.save();
+    return this.userRepository.updateOne(userEntity);
+  }
+
+  public async registerLabeler(user: UserEntity): Promise<string> {
+    if (user.type !== UserType.WORKER) {
+      throw new BadRequestException(ErrorUser.InvalidType);
+    }
+
+    if (!user.evmAddress) {
+      throw new ControlledError(
+        ErrorUser.NoWalletAddresRegistered,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (user.kyc?.status !== KycStatus.APPROVED) {
+      throw new BadRequestException(ErrorUser.KycNotApproved);
+    }
+
+    if (user.siteKey) {
+      return user.siteKey.siteKey;
+    }
+
+    // Register user as a labeler at hcaptcha foundation
+    const registeredLabeler = await this.hcaptchaService.registerLabeler({
+      email: user.email,
+      language: this.hcaptchaConfigService.defaultLabelerLang,
+      country: user.kyc.country,
+      address: user.evmAddress,
+    });
+
+    if (!registeredLabeler) {
+      throw new ControlledError(
+        ErrorUser.LabelingEnableFailed,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Retrieve labeler site key from hcaptcha foundation
+    const labelerData = await this.hcaptchaService.getLabelerData({
+      email: user.email,
+    });
+    if (!labelerData || !labelerData.sitekeys.length) {
+      throw new ControlledError(
+        ErrorUser.LabelingEnableFailed,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const siteKey = labelerData.sitekeys[0].sitekey;
+
+    const newSiteKey = new SiteKeyEntity();
+    newSiteKey.siteKey = siteKey;
+    newSiteKey.user = user;
+    newSiteKey.type = OracleType.HCAPTCHA;
+
+    await this.siteKeyRepository.createUnique(newSiteKey);
+
+    return siteKey;
   }
 
   public async registerAddress(
@@ -131,11 +199,26 @@ export class UserService {
       );
     }
 
+    const dbUser = await this.userRepository.findByAddress(data.address);
+    if (dbUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedAddress,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Prepare signed data and verify the signature
+    const signedData = await this.prepareSignatureBody(
+      SignatureType.REGISTER_ADDRESS,
+      data.address,
+    );
+    verifySignature(signedData, data.signature, [data.address]);
+
     user.evmAddress = data.address;
-    await user.save();
+    await this.userRepository.updateOne(user);
 
     return await this.web3Service
-      .getSigner(data.chainId)
+      .getSigner(this.networkConfigService.networks[0].chainId)
       .signMessage(data.address);
   }
 
@@ -148,13 +231,7 @@ export class UserService {
       user.evmAddress,
     );
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
-    if (!verified) {
-      throw new ControlledError(
-        ErrorAuth.InvalidSignature,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    verifySignature(signedData, signature, [user.evmAddress]);
 
     let signer: Wallet;
     const currentWeb3Env = this.web3ConfigService.env;
@@ -213,6 +290,9 @@ export class UserService {
           reference: additionalData.reference,
           workerJson: additionalData.workerAddress,
         });
+        break;
+      case SignatureType.REGISTER_ADDRESS:
+        content = 'register-address';
         break;
       default:
         throw new ControlledError('Type not allowed', HttpStatus.BAD_REQUEST);

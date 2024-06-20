@@ -18,7 +18,6 @@ class ChainId(Enum):
     MOONBASE_ALPHA = 1287
     AVALANCHE_TESTNET = 43113
     AVALANCHE = 43114
-    SKALE = 1273227453
     CELO = 42220
     CELO_ALFAJORES = 44787
     XLAYER_TESTNET = 195
@@ -31,7 +30,10 @@ NETWORKS = {
         "title": "Ethereum",
         "scan_url": "https://etherscan.io",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2"
+            "https://api.studio.thegraph.com/query/74256/ethereum/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BtC96WCK6ZpZ35v94MK6rZNiBzDEZYHFzDmhMYyZ369D"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -47,6 +49,7 @@ NETWORKS = {
         "subgraph_url": (
             "https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v2"
         ),
+        "subgraph_url_api_key": "",
         "hmt_address": "0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317",
         "factory_address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
         "staking_address": "0xf46B45Df3d956369726d8Bd93Ba33963Ab692920",
@@ -61,7 +64,10 @@ NETWORKS = {
         "title": "Sepolia",
         "scan_url": "https://sepolia.etherscan.io",
         "subgraph_url": (
-            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-sepolia/api"
+            "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/UMLaZHtLE9LxzDyvBLBgfWj4erzYzYMeGUbQtxtyMaE"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
@@ -74,7 +80,12 @@ NETWORKS = {
     ChainId.BSC_MAINNET: {
         "title": "Binance Smart Chain",
         "scan_url": "https://bscscan.com",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v2",
+        "subgraph_url": (
+            "https://api.studio.thegraph.com/query/74256/bsc/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/JBJPC3YmRSNjyjRTTpazhhSX5CCZ4CeBx6ptRsM8PCBb"
+        ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
         "staking_address": "0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C",
@@ -87,7 +98,10 @@ NETWORKS = {
         "title": "Binance Smart Chain (Testnet)",
         "scan_url": "https://testnet.bscscan.com",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v2"
+            "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BnaC4CDqgdbGvcgM7KoZ6d7Yeebsm7NvLFrr61Lxg6Ao"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -103,7 +117,10 @@ NETWORKS = {
         "title": "Polygon",
         "scan_url": "https://polygonscan.com",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2"
+            "https://api.studio.thegraph.com/query/74256/polygon/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HHYwCHBvDrjckpNB4jbB8k63pSot6rGtBYLBygGji3vD"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
@@ -121,6 +138,7 @@ NETWORKS = {
         "subgraph_url": (
             "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2"
         ),
+        "subgraph_url_api_key": "",
         "hmt_address": "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4",
         "factory_address": "0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d",
         "staking_address": "0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac",
@@ -135,7 +153,10 @@ NETWORKS = {
         "title": "Polygon Amoy",
         "scan_url": "https://www.oklink.com/amoy",
         "subgraph_url": (
-            "https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api"
+            "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FmdCVzHV3bB4abPVYtBALtBHr7ZRZmZ67m5c432S7GZH"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
@@ -149,7 +170,10 @@ NETWORKS = {
         "title": "Moonbeam",
         "scan_url": "https://moonbeam.moonscan.io",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v2"
+            "https://api.studio.thegraph.com/query/74256/moonbeam/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BH5Sm6exn76o5frV5VeCufChB43DCfMXCQsdtWt4AuQP"
         ),
         "hmt_address": "0x3b25BC1dC591D24d60560d0135D6750A561D4764",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -165,7 +189,10 @@ NETWORKS = {
         "title": "Moonbase Alpha",
         "scan_url": "https://moonbase.moonscan.io/",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v2"
+            "https://api.studio.thegraph.com/query/74256/moonbase-alpha/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/AmmRkJszUbjfUwHubcRkU6CfG1Q9psRWRbbHADVmsLjE"
         ),
         "hmt_address": "0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3",
         "factory_address": "0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed",
@@ -179,7 +206,10 @@ NETWORKS = {
         "title": "Avalanche C-Chain Mainnet",
         "scan_url": "https://snowtrace.io",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche-v2"
+            "https://api.studio.thegraph.com/query/74256/avalanche/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FweDaDWZ6ZDcsA63wsjnWgdgw4aCbkiVQYMYvtcP5p2u"
         ),
         "hmt_address": "0x12365293cb6477d4fc2686e46BB97E3Fb64f1550",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -194,7 +224,12 @@ NETWORKS = {
     ChainId.AVALANCHE_TESTNET: {
         "title": "Fuji C-Chain",
         "scan_url": "https://testnet.snowtrace.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji-v2",
+        "subgraph_url": (
+            "https://api.studio.thegraph.com/query/74256/fuji/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CnZCDsWziQF3jNoqgQMkmJbF9frof5osM3hN5eUgyL5u"
+        ),
         "hmt_address": "0x9406d5c635AD22b0d76c75E52De57A2177919ca3",
         "factory_address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
         "staking_address": "0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3",
@@ -208,7 +243,12 @@ NETWORKS = {
     ChainId.CELO: {
         "title": "Celo",
         "scan_url": "https://celoscan.io/",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/celo",
+        "subgraph_url": (
+            "https://api.studio.thegraph.com/query/74256/celo/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HTgMnYWGsdsw41o8dyph1bwhotuXh6va3L8r8DGgLjsA"
+        ),
         "hmt_address": "0x19Ead835951493A763c96910255d5eeF147E914F",
         "factory_address": "0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08",
         "staking_address": "0x34cD3Bd6B16c559f321799b516dE61E12017fFd1",
@@ -221,7 +261,10 @@ NETWORKS = {
         "title": "Celo",
         "scan_url": "https://alfajores.celoscan.io/",
         "subgraph_url": (
-            "https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores"
+            "https://api.studio.thegraph.com/query/74256/celo-alfajores/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/EGWCWuzBNkbypW8ipRKuyGwq8azoCy6LKKosGgSPMGRD"
         ),
         "hmt_address": "0x2736B33455A872dC478E1E004106D04c35472468",
         "factory_address": "0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569",
@@ -231,25 +274,14 @@ NETWORKS = {
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
-    ChainId.SKALE: {
-        "title": "SKALE Human Protocol Chain",
-        "scan_url": "https://wan-red-ain.explorer.mainnet.skalenodes.com/",
-        "subgraph_url": (
-            "https://graph-skale.humanprotocol.org/subgraphs/name/skale-human"
-        ),
-        "hmt_address": "0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd",
-        "factory_address": "0x319070b49C8d1cC015915D1E7Eb5fd8e22833885",
-        "staking_address": "0x79F37FB9C210910733c16228AC4D14a8e32C11BD",
-        "reward_pool_address": "0x881218246c25C6898aE96145259584340153aDA2",
-        "kvstore_address": "0xE1055607327b1be2080D31211dCDC4D9338CaF4A",
-        "old_subgraph_url": "",
-        "old_factory_address": "0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c",
-    },
     ChainId.XLAYER: {
         "title": "XLayer",
         "scan_url": "https://www.oklink.com/xlayer",
         "subgraph_url": (
-            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX"
+            "https://api.studio.thegraph.com/query/74256/xlayer/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX"
         ),
         "hmt_address": "0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa",
         "factory_address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",
@@ -263,7 +295,10 @@ NETWORKS = {
         "title": "X Layer Testnet",
         "scan_url": "https://www.oklink.com/oktc-test",
         "subgraph_url": (
-            "https://gateway-arbitrum.network.thegraph.com/api/b376e45c321d3fcd7d659f9532f0a464/subgraphs/id/EX5DU7VEVmkfNCzUG1gRRy8hBKtknA868NR2kSTF4D93"
+            "https://api.studio.thegraph.com/query/74256/xlayer-testnet/version/latest"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/9zd1LcywWjuSUtde4ofC8oyyzpawPwGUiPsvqTq247xk"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e",
@@ -277,6 +312,7 @@ NETWORKS = {
         "title": "Localhost",
         "scan_url": "",
         "subgraph_url": "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+        "subgraph_url_api_key": "",
         "hmt_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         "factory_address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
         "staking_address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
@@ -286,6 +322,9 @@ NETWORKS = {
         "old_factory_address": "",
     },
 }
+
+
+SUBGRAPH_API_KEY_PLACEHOLDER = "[SUBGRAPH_API_KEY]"
 
 
 class Status(Enum):
@@ -310,8 +349,6 @@ class Role(Enum):
 
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
-
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 
 class KVStoreKeys(Enum):

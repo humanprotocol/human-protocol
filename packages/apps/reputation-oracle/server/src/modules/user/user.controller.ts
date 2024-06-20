@@ -20,6 +20,7 @@ import {
   RegisterAddressRequestDto,
   RegisterAddressResponseDto,
   SignatureBodyDto,
+  RegisterLabelerResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
@@ -32,6 +33,38 @@ import { Public } from '../../common/decorators';
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('/register-labeler')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Register Labeler',
+    description: 'Endpoint to register user as a labeler on hcaptcha services.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Labeler registered successfully',
+    type: RegisterLabelerResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public async registerLabeler(
+    @Req() request: RequestWithUser,
+  ): Promise<RegisterLabelerResponseDto> {
+    const siteKey = await this.userService.registerLabeler(request.user);
+
+    return { siteKey };
+  }
+
   @Post('/register-address')
   @HttpCode(200)
   @ApiOperation({

@@ -16,7 +16,8 @@ export function generateBucketUrl(
       jobType === JobRequestType.IMAGE_POINTS ||
       jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
       jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
-    storageData.provider != StorageProviders.AWS
+    storageData.provider != StorageProviders.AWS &&
+    storageData.provider != StorageProviders.LOCAL
   ) {
     throw new ControlledError(
       ErrorBucket.InvalidProvider,
@@ -55,7 +56,9 @@ export function generateBucketUrl(
       );
     case StorageProviders.LOCAL:
       return new URL(
-        `http://${process.env.S3_ENDPOINT}:${process.env.S3_PORT}/${storageData.bucketName}`,
+        `http://${process.env.S3_ENDPOINT}:${process.env.S3_PORT}/${storageData.bucketName}${
+          storageData.path ? `/${storageData.path}` : ''
+        }`,
       );
     default:
       throw new ControlledError(

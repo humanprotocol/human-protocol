@@ -1,23 +1,26 @@
 # Table of contents
 
-## Typescript SDK​
+## Typescript SDK
 
-- [Encryption](typescript/modules/encryption.md)
-  - [Encryption](typescript/classes/encryption.Encryption.md)
-  - [EncryptionUtils](typescript/classes/encryption.EncryptionUtils.md)
-- [Escrow](typescript/modules/escrow.md)
-  - [EscrowClient](typescript/classes/escrow.EscrowClient.md)
-  - [EscrowUtils](typescript/classes/escrow.EscrowUtils.md)
-- [KVStore](typescript/modules/kvstore.md)
-  - [KVStoreClient](typescript/classes/kvstore.KVStoreClient.md)
-- [Staking](typescript/modules/staking.md)
-  - [StakingClient](typescript/classes/staking.StakingClient.md)
-- [Operator](typescript/modules/operator.md)
-  - [OperatorUtils](typescript/classes/operator.OperatorUtils.md)
-- [Storage](typescript/modules/storage.md)
-  - [StorageClient](typescript/classes/storage.StorageClient.md)
-- [Statistics](typescript/modules/statistics.md)
-  - [StatisticsClient](typescript/classes/statistics.StatisticsClient.md)
+- [Encryption](typescript/encryption/README.md)
+  - [Encryption](typescript/encryption/classes/Encryption.md)
+  - [EncryptionUtils](typescript/encryption/classes/EncryptionUtils.md)
+- [Escrow](typescript/escrow/README.md)
+  - [EscrowClient](typescript/escrow/classes/EscrowClient.md)
+  - [EscrowUtils](typescript/escrow/classes/EscrowUtils.md)
+- [KVStore](typescript/kvstore/README.md)
+  - [KVStoreClient](typescript/kvstore/classes/KVStoreClient.md)
+  - [KVStoreUtils](typescript/kvstore/classes/KVStoreUtils.md)
+- [Staking](typescript/staking/README.md)
+  - [StakingClient](typescript/staking/classes/StakingClient.md)
+- [Operator](typescript/operator/README.md)
+  - [OperatorUtils](typescript/operator/classes/OperatorUtils.md)
+- [Storage](typescript/storage/README.md)
+  - [StorageClient](typescript/storage/classes/StorageClient.md)
+- [Statistics](typescript/statistics/README.md)
+  - [StatisticsClient](typescript/statistics/classes/StatisticsClient.md)
+- [Transaction](typescript/transaction/README.md)
+  - [TransactionUtils](typescript/transaction/classes/TransactionUtils.md)
 
 ## Python SDK
 
@@ -34,6 +37,7 @@
   - [escrow_utils](python/human_protocol_sdk.escrow.escrow_utils.md)
 - [kvstore](python/human_protocol_sdk.kvstore.md)
   - [kvstore_client](python/human_protocol_sdk.kvstore.kvstore_client.md)
+  - [kvstore_utils](python/human_protocol_sdk.kvstore.kvstore_utils.md)
 - [staking](python/human_protocol_sdk.staking.md)
   - [staking_client](python/human_protocol_sdk.staking.staking_client.md)
   - [staking_utils](python/human_protocol_sdk.staking.staking_utils.md)
@@ -44,10 +48,12 @@
 - [storage](python/human_protocol_sdk.storage.md)
   - [storage_client](python/human_protocol_sdk.storage.storage_client.md)
   - [storage_utils](python/human_protocol_sdk.storage.storage_utils.md)
+- [transaction](python/human_protocol_sdk.transaction.md)
+  - [transaction_utils](python/human_protocol_sdk.transaction.transaction_utils.md)
 - [constants](python/human_protocol_sdk.constants.md)
 - [filter](python/human_protocol_sdk.filter.md)
 - [utils](python/human_protocol_sdk.utils.md)
 
 ---
 
-- [CHANGELOG](./changelog.md)
+- [CHANGELOG](changelog.md)

@@ -21,7 +21,7 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
 } from './error';
-import { throwError } from './utils';
+import { getSubgraphUrl, throwError } from './utils';
 import { ChainId } from './enums';
 import { NETWORKS } from './constants';
 
@@ -57,7 +57,7 @@ export class OperatorUtils {
     try {
       const { leader } = await gqlFetch<{
         leader: ILeaderSubgraph;
-      }>(networkData.subgraphUrl, GET_LEADER_QUERY, {
+      }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
         address: address.toLowerCase(),
       });
 
@@ -106,13 +106,9 @@ export class OperatorUtils {
         throw ErrorUnsupportedChainID;
       }
 
-      if (!networkData.subgraphUrl) {
-        return [];
-      }
-
       const { leaders } = await gqlFetch<{
         leaders: ILeaderSubgraph[];
-      }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
+      }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
         role: filter?.role,
       });
 
@@ -169,7 +165,7 @@ export class OperatorUtils {
     try {
       const { reputationNetwork } = await gqlFetch<{
         reputationNetwork: IReputationNetworkSubgraph;
-      }>(networkData.subgraphUrl, GET_REPUTATION_NETWORK_QUERY(role), {
+      }>(getSubgraphUrl(networkData), GET_REPUTATION_NETWORK_QUERY(role), {
         address: address.toLowerCase(),
         role: role,
       });
@@ -224,7 +220,7 @@ export class OperatorUtils {
     try {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
-      }>(networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
+      }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
         slasherAddress: slasherAddress.toLowerCase(),
       });
 

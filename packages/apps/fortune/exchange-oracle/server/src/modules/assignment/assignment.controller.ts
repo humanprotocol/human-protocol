@@ -20,6 +20,7 @@ import {
   AssignmentDto,
   CreateAssignmentDto,
   GetAssignmentsDto,
+  ResignDto,
 } from './assignment.dto';
 import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -94,5 +95,34 @@ export class AssignmentController {
       req.user.reputationNetwork,
       serverUrl,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Resign Assignment',
+    description: 'Endpoint to resign from a assignment.',
+  })
+  @ApiBearerAuth()
+  @ApiBody({
+    description: 'Details required to resign from the assginment.',
+    type: ResignDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job resigned successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @Post('resign')
+  resign(
+    @Request() req: RequestWithUser,
+    @Body() body: ResignDto,
+  ): Promise<void> {
+    return this.assignmentService.resign(body.assignmentId, req.user.address);
   }
 }

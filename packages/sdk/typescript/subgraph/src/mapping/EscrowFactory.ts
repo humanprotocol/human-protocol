@@ -2,14 +2,28 @@ import {
   Launched,
   LaunchedV2,
 } from '../../generated/EscrowFactory/EscrowFactory';
-import { Escrow } from '../../generated/schema';
+import { Escrow, EscrowStatusEvent } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
 import { createOrLoadLeader } from './Staking';
+import { createTransaction } from './utils/transaction';
 import { getEventDayData } from './utils/dayUpdates';
+import { toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
 
 export function handleLaunched(event: Launched): void {
+  createTransaction(event, 'createEscrow');
+  // Create LaunchedStatusEvent entity
+  const statusEventEntity = new EscrowStatusEvent(toEventId(event));
+  statusEventEntity.block = event.block.number;
+  statusEventEntity.timestamp = event.block.timestamp;
+  statusEventEntity.txHash = event.transaction.hash;
+  statusEventEntity.escrowAddress = event.params.escrow;
+  statusEventEntity.sender = event.transaction.from;
+  statusEventEntity.launcher = event.transaction.from;
+  statusEventEntity.status = 'Launched';
+  statusEventEntity.save();
+
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 
@@ -48,6 +62,7 @@ export function handleLaunched(event: Launched): void {
 }
 
 export function handleLaunchedV2(event: LaunchedV2): void {
+  createTransaction(event, 'createEscrow');
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 

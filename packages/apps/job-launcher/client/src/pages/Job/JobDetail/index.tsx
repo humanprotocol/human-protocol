@@ -50,6 +50,9 @@ export default function JobDetail() {
     data?.details.status === JobStatus.FAILED ||
     data?.details.status === JobStatus.PAID ||
     data?.details.status === JobStatus.PENDING ||
+    data?.details.status === JobStatus.PARTIAL ||
+    data?.details.status === JobStatus.SET_UP ||
+    data?.details.status === JobStatus.CREATED ||
     data?.details.status === JobStatus.LAUNCHED;
 
   if (isLoading) return <>Loading...</>;

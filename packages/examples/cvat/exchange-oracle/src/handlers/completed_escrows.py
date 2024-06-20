@@ -1,11 +1,12 @@
 import io
 import itertools
 import logging
+from collections import Counter
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional
 
 from datumaro.util import take_by
-from sqlalchemy import exc as db_exc
+from sqlalchemy import exc as sa_errors
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
@@ -20,6 +21,7 @@ from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
 from src.core.storage import compose_results_bucket_filename
 from src.core.types import OracleWebhookTypes, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
+from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.job_export import (
     CVAT_EXPORT_FORMAT_MAPPING,
@@ -87,19 +89,12 @@ class _CompletedEscrowsHandler:
             )
 
             for project in completed_projects:
-                # Check if all jobs within the project are completed
-                if not cvat_service.is_project_completed(session, project.id):
-                    cvat_service.update_project_status(
-                        session, project.id, ProjectStatuses.annotation
-                    )
-                    continue
-
                 try:
+                    validate_escrow(project.chain_id, project.escrow_address)
+                except Exception as e:
                     # TODO: such escrows can fill all the queried completed projects
                     # need to improve handling for such projects
                     # (e.g. cancel depending on the escrow status)
-                    validate_escrow(project.chain_id, project.escrow_address)
-                except Exception as e:
                     logger.error(
                         "Failed to handle completed project id {} for escrow {}: {}".format(
                             project.cvat_id, project.escrow_address, e
@@ -241,63 +236,59 @@ class _CompletedEscrowsHandler:
         logger = self.logger
 
         # Here we can have several projects per escrow, so the handling is done in project groups
+        # Find potentially finished escrows first
         with SessionLocal.begin() as session:
-            completed_projects = cvat_service.get_projects_by_status(
+            escrows_with_completed_projects = cvat_service.get_escrows_by_project_status(
                 session,
                 ProjectStatuses.completed,
                 included_types=[TaskTypes.image_skeletons_from_boxes],
                 limit=CronConfig.track_completed_escrows_chunk_size,
             )
 
-            escrows_with_completed_projects = set()
-            for completed_project in completed_projects:
-                # Check if all jobs within the project are completed
-                if not cvat_service.is_project_completed(session, completed_project.id):
-                    cvat_service.update_project_status(
-                        session, completed_project.id, ProjectStatuses.annotation
+        # Try to finish the escrows
+        for escrow_address, chain_id in escrows_with_completed_projects:
+            try:
+                validate_escrow(chain_id, escrow_address)
+            except Exception as e:
+                # TODO: such escrows can fill all the queried completed projects
+                # need to improve handling for such projects
+                # (e.g. cancel depending on the escrow status)
+                logger.error(
+                    "Failed to handle completed projects for escrow {}: {}".format(
+                        escrow_address, e
                     )
-                    continue
-
-                try:
-                    # TODO: such escrows can fill all the queried completed projects
-                    # need to improve handling for such projects
-                    # (e.g. cancel depending on the escrow status)
-                    validate_escrow(completed_project.chain_id, completed_project.escrow_address)
-                except Exception as e:
-                    logger.error(
-                        "Failed to handle completed projects for escrow {}: {}".format(
-                            completed_project.escrow_address, e
-                        )
-                    )
-                    continue
-
-                escrows_with_completed_projects.add(
-                    (completed_project.escrow_address, completed_project.chain_id)
                 )
+                continue
 
-            for escrow_address, chain_id in escrows_with_completed_projects:
-                # TODO: should throw a db lock exception if lock is not available
-                # need to skip the escrow in this case.
-                # Maybe there is a better way that utilizes skip_locked
+            # Need to work in separate transactions for each escrow, as a failing DB call
+            # (e.g. a failed lock attempt) will abort the transaction. A nested transaction
+            # can also be used for handling this.
+            with SessionLocal.begin() as session:
                 try:
                     escrow_projects = cvat_service.get_projects_by_escrow_address(
                         session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
                     )
-                except db_exc.OperationalError as ex:
-                    if "could not obtain lock on row" in str(ex):
+                except sa_errors.OperationalError as ex:
+                    if isinstance(ex.orig, db_errors.LockNotAvailable):
                         continue
                     raise
 
-                completed_escrow_projects = [
-                    p
-                    for p in escrow_projects
-                    if p.status
-                    in [
-                        ProjectStatuses.completed,
-                        ProjectStatuses.validation,  # TODO: think about this list
-                    ]
-                ]
-                if len(escrow_projects) != len(completed_escrow_projects):
+                # Some escrow projects can be in the validation status,
+                # e.g. if jobs from some projects were rejected
+                # (their projects have been reannotated and become completed now),
+                # and other jobs were validated successfully
+                # (they will hang in the validation state).
+                #
+                # We need to make sure that all the projects are in any of these 2 states,
+                # but also that there's at least 1 completed project in the list.
+                # It's possible that this function is entered 2 times sequentially
+                # before the validation, e.g. in 2 different threads.
+                escrow_project_statuses = Counter(p.status for p in escrow_projects)
+                completed_count = escrow_project_statuses.get(ProjectStatuses.completed.value, 0)
+                validation_count = escrow_project_statuses.get(ProjectStatuses.validation.value, 0)
+                if not (
+                    completed_count and completed_count + validation_count == len(escrow_projects)
+                ):
                     continue
 
                 manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))

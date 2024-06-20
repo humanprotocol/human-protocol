@@ -20,6 +20,9 @@ export class CronJobEntity extends BaseEntity implements ICronJob {
   @Column({ type: 'timestamptz', nullable: true })
   public completedAt?: Date | null;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  public lastSubgraphTime?: Date | null;
+
   @BeforeInsert()
   public beforeInsert(): void {
     const date = new Date();

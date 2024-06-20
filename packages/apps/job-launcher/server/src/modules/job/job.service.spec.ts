@@ -122,6 +122,8 @@ import { CvatCalculateJobBounty } from './job.interface';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
+import { CronJobRepository } from '../cron-job/cron-job.repository';
+import { CronJobType } from '../../common/enums/cron-job';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -177,9 +179,10 @@ describe('JobService', () => {
     web3Service: Web3Service,
     encryption: Encryption,
     storageService: StorageService,
-    webhookRepository: WebhookRepository;
+    webhookRepository: WebhookRepository,
+    cronJobRepository: CronJobRepository;
 
-  let encrypt = 'true';
+  let encrypt = true;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -270,6 +273,12 @@ describe('JobService', () => {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
         },
+        {
+          provide: CronJobRepository,
+          useValue: {
+            findOneByType: jest.fn(),
+          },
+        },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
@@ -289,12 +298,15 @@ describe('JobService', () => {
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
     paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
+    cronJobRepository = moduleRef.get<CronJobRepository>(CronJobRepository);
     paymentService = moduleRef.get(PaymentService);
     routingProtocolService = moduleRef.get(RoutingProtocolService);
     createPaymentMock = jest.spyOn(paymentRepository, 'createUnique');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     webhookRepository = moduleRef.get<WebhookRepository>(WebhookRepository);
     storageService = moduleRef.get<StorageService>(StorageService);
+
+    (jobService as any).cronJobRepository = cronJobRepository;
 
     storageService.uploadFile = jest.fn().mockResolvedValue({
       url: MOCK_FILE_URL,
@@ -1964,12 +1976,6 @@ describe('JobService', () => {
     const jobId = 1;
     const userId = 123;
 
-    beforeEach(() => {
-      web3Service.getValidChains = jest
-        .fn()
-        .mockReturnValue([ChainId.LOCALHOST]);
-    });
-
     it('should cancel the job when status is Launched', async () => {
       const escrowAddress = MOCK_ADDRESS;
       const mockJobEntity: Partial<JobEntity> = {
@@ -2073,34 +2079,6 @@ describe('JobService', () => {
       web3Service.validateChainId = jest.fn().mockResolvedValue(() => {});
     });
 
-    it('should cancel the job when status is Launched', async () => {
-      const escrowAddress = MOCK_ADDRESS;
-      const mockJobEntity: Partial<JobEntity> = {
-        id: 1,
-        userId,
-        status: JobStatus.LAUNCHED,
-        escrowAddress,
-        chainId: ChainId.LOCALHOST,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      jobRepository.findOneByChainIdAndEscrowAddress = jest
-        .fn()
-        .mockResolvedValue(mockJobEntity);
-
-      await jobService.requestToCancelJobByAddress(
-        userId,
-        chainId,
-        escrowAddress,
-      );
-
-      expect(
-        jobRepository.findOneByChainIdAndEscrowAddress,
-      ).toHaveBeenCalledWith(chainId, escrowAddress);
-      expect(jobRepository.updateOne).toHaveBeenCalled();
-      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
-    });
-
     it('should cancel the job when status is Pending', async () => {
       const fundAmount = 1000;
       const mockJobEntity: Partial<JobEntity> = {
@@ -2133,7 +2111,292 @@ describe('JobService', () => {
         userId,
         refundAmount: fundAmount,
       });
-      expect(jobRepository.updateOne).toHaveBeenCalled();
+      mockJobEntity.status = JobStatus.CANCELED;
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+    });
+
+    it('should cancel the job when status is Paid', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.PAID,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      (jobService as any).cronJobRepository.findOneByType = jest
+        .fn()
+        .mockResolvedValueOnce({
+          id: 1,
+          startedAt: new Date(),
+          completedAt: new Date(),
+          cronJobType: CronJobType.CreateEscrow,
+        });
+
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
+        jobId,
+        userId,
+        refundAmount: fundAmount,
+      });
+      mockJobEntity.status = JobStatus.CANCELED;
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+    });
+
+    it('should set to cancel the job when status is Paid and cron job is running', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.PAID,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      (jobService as any).cronJobRepository.findOneByType = jest
+        .fn()
+        .mockResolvedValueOnce({
+          id: 1,
+          startedAt: new Date(),
+          cronJobType: CronJobType.CreateEscrow,
+        });
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.CancelWhileProcessing,
+          HttpStatus.CONFLICT,
+        ),
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should cancel the job when status is Created', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.CREATED,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      (jobService as any).cronJobRepository.findOneByType = jest
+        .fn()
+        .mockResolvedValueOnce({
+          id: 1,
+          startedAt: new Date(),
+          completedAt: new Date(),
+          cronJobType: CronJobType.CreateEscrow,
+        });
+
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
+        jobId,
+        userId,
+        refundAmount: fundAmount,
+      });
+      mockJobEntity.status = JobStatus.CANCELED;
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+    });
+
+    it('should set to cancel the job when status is Created and cron job is running', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.CREATED,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      (jobService as any).cronJobRepository.findOneByType = jest
+        .fn()
+        .mockResolvedValueOnce({
+          id: 1,
+          startedAt: new Date(),
+          cronJobType: CronJobType.CreateEscrow,
+        });
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.CancelWhileProcessing,
+          HttpStatus.CONFLICT,
+        ),
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should cancel the job when status is Setup', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.SET_UP,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      (jobService as any).cronJobRepository.findOneByType = jest
+        .fn()
+        .mockResolvedValueOnce({
+          id: 1,
+          startedAt: new Date(),
+          completedAt: new Date(),
+          cronJobType: CronJobType.CreateEscrow,
+        });
+
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
+        jobId,
+        userId,
+        refundAmount: fundAmount,
+      });
+      mockJobEntity.status = JobStatus.CANCELED;
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+    });
+
+    it('should set to cancel the job when status is Setup and cron job is running', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.SET_UP,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+      (jobService as any).cronJobRepository.findOneByType = jest
+        .fn()
+        .mockResolvedValueOnce({
+          id: 1,
+          startedAt: new Date(),
+          cronJobType: CronJobType.CreateEscrow,
+        });
+
+      await expect(
+        jobService.requestToCancelJobByAddress(userId, chainId, escrowAddress),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.CancelWhileProcessing,
+          HttpStatus.CONFLICT,
+        ),
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should set to cancel the job when status is Launched', async () => {
+      const escrowAddress = MOCK_ADDRESS;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: 1,
+        userId,
+        status: JobStatus.LAUNCHED,
+        escrowAddress,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOneByChainIdAndEscrowAddress = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      await jobService.requestToCancelJobByAddress(
+        userId,
+        chainId,
+        escrowAddress,
+      );
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      mockJobEntity.status = JobStatus.TO_CANCEL;
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(mockJobEntity);
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
     });
 
     it('should throw not found exception if job not found', async () => {
@@ -2543,7 +2806,7 @@ describe('JobService', () => {
       (KVStoreClient.build as any).mockImplementation(() => ({
         getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
       }));
-      encrypt = 'false';
+      encrypt = false;
     });
 
     afterEach(() => {
@@ -2551,7 +2814,7 @@ describe('JobService', () => {
     });
 
     afterAll(() => {
-      encrypt = 'true';
+      encrypt = true;
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
@@ -3105,6 +3368,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
+        failedReason: ErrorEscrow.NotCanceled,
       };
 
       const expectedJobDetailsDto: JobDetailsDto = {
@@ -3115,6 +3379,7 @@ describe('JobService', () => {
           balance: expect.any(Number),
           paidOut: expect.any(Number),
           status: JobStatus.TO_CANCEL,
+          failedReason: ErrorEscrow.NotCanceled,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
@@ -3179,6 +3444,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         escrowAddress: null,
         chainId: ChainId.LOCALHOST,
+        failedReason: null,
       };
 
       const expectedJobDetailsDto: JobDetailsDto = {
@@ -3189,6 +3455,7 @@ describe('JobService', () => {
           balance: 0,
           paidOut: 0,
           status: JobStatus.TO_CANCEL,
+          failedReason: null,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
@@ -3221,7 +3488,7 @@ describe('JobService', () => {
     });
 
     it('should throw not found exception when job not found', async () => {
-      jobService.jobRepository.findOneByIdAndUserId = jest
+      jobRepository.findOneByIdAndUserId = jest
         .fn()
         .mockResolvedValue(undefined);
 

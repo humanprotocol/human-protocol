@@ -88,6 +88,13 @@ export class AuthService {
     // ) {
     //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
+    const storedUser = await this.userRepository.findByEmail(data.email);
+    if (storedUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedEmail,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const userEntity = await this.userService.create(data);
 
     const tokenEntity = new TokenEntity();

@@ -39,6 +39,18 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     });
   }
 
+  public async findOneByIdAndWorker(
+    assignmentId: number,
+    workerAddress: string,
+  ): Promise<AssignmentEntity | null> {
+    return this.findOne({
+      where: {
+        id: assignmentId,
+        workerAddress,
+      },
+    });
+  }
+
   public async findOneByEscrowAndWorker(
     escrowAddress: string,
     workerAddress: string,
@@ -114,27 +126,45 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
   }
 
   public async fetchFiltered(data: AssignmentFilterData): Promise<ListResult> {
-    const queryBuilder = await this.createQueryBuilder(
+    const queryBuilder = this.createQueryBuilder(
       'assignment',
-    ).leftJoinAndSelect('assignment.job', 'job', 'assignment.jobId = job.id');
+    ).leftJoinAndSelect('assignment.job', 'job');
 
-    if (data.sortField == AssignmentSortField.CHAIN_ID)
-      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
-    else if (data.sortField == AssignmentSortField.CREATED_AT)
-      queryBuilder.orderBy(`assignment.${data.sortField}`, data.sort);
-    else if (data.sortField == AssignmentSortField.STATUS)
-      queryBuilder.orderBy(`assignment.${data.sortField}`, data.sort);
-    else if (data.sortField == AssignmentSortField.EXPIRES_AT)
-      queryBuilder.orderBy(`assignment.${data.sortField}`, data.sort);
+    switch (data.sortField) {
+      case AssignmentSortField.CHAIN_ID:
+        queryBuilder.orderBy('job.chainId', data.sort);
+        break;
+      case AssignmentSortField.STATUS:
+        queryBuilder.orderBy('assignment.status', data.sort);
+        break;
+      case AssignmentSortField.CREATED_AT:
+        queryBuilder.orderBy('assignment.createdAt', data.sort);
+        break;
+      case AssignmentSortField.EXPIRES_AT:
+        queryBuilder.orderBy('assignment.expiresAt', data.sort);
+        break;
+      case AssignmentSortField.REWARD_AMOUNT:
+        queryBuilder.orderBy('assignment.rewardAmount', data.sort);
+        break;
+      default:
+        queryBuilder.orderBy('assignment.createdAt', data.sort);
+    }
 
     if (data.chainId !== undefined) {
       queryBuilder.andWhere('job.chainId = :chainId', {
         chainId: data.chainId,
       });
     }
+
     if (data.assignmentId !== undefined) {
       queryBuilder.andWhere('assignment.id = :assignmentId', {
         assignmentId: data.assignmentId,
+      });
+    }
+
+    if (data.rewardAmount !== undefined) {
+      queryBuilder.andWhere('assignment.rewardAmount = :rewardAmount', {
+        rewardAmount: data.rewardAmount,
       });
     }
     if (data.escrowAddress) {
@@ -158,8 +188,7 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
 
     queryBuilder.offset(data.skip).limit(data.pageSize);
 
-    const itemCount = await queryBuilder.getCount();
-    const { entities } = await queryBuilder.getRawAndEntities();
+    const [entities, itemCount] = await queryBuilder.getManyAndCount();
 
     return { entities, itemCount };
   }

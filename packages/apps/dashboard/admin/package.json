@@ -6,25 +6,31 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
-    "prebuild": "yarn workspace @human-protocol/core install && yarn workspace @human-protocol/sdk install && yarn workspace @human-protocol/sdk build",
+    "prebuild": "yarn install",
     "build": "strapi build",
     "strapi": "strapi"
   },
   "devDependencies": {},
   "dependencies": {
-    "@human-protocol/sdk": "*",
-    "@strapi/plugin-i18n": "4.16.2",
-    "@strapi/plugin-users-permissions": "4.24.1",
-    "@strapi/strapi": "4.24.2",
+    "@human-protocol/core": "^3.0.0",
+    "@human-protocol/sdk": "^3.0.0",
+    "@strapi/plugin-i18n": "4.25.0",
+    "@strapi/plugin-users-permissions": "4.25.0",
+    "@strapi/strapi": "4.25.0",
     "axios": "^1.5.1",
     "dayjs": "^1.11.10",
+    "ethers": "^6.13.0",
     "graphql-request": "^6.1.0",
-    "pg": "8.11.3",
+    "pg": "8.12.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
-    "viem": "^2.10.2"
+    "viem": "^2.14.2"
+  },
+  "resolutions": {
+    "braces": "^3.0.3",
+    "tar": "^6.2.1"
   },
   "author": {
     "name": "HUMAN Protocol"

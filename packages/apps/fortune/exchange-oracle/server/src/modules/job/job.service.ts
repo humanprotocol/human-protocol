@@ -33,6 +33,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 
 @Injectable()
 export class JobService {
@@ -56,8 +57,8 @@ export class JobService {
     );
 
     if (jobEntity) {
-      this.logger.log('Job already exists', JobService.name);
-      throw new BadRequestException('Job already exists');
+      this.logger.log(ErrorJob.AlreadyExists, JobService.name);
+      throw new BadRequestException(ErrorJob.AlreadyExists);
     }
 
     const signer = this.web3Service.getSigner(webhook.chainId);
@@ -134,7 +135,7 @@ export class JobService {
     solution: string,
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
-      throw new BadRequestException('Invalid address');
+      throw new BadRequestException(ErrorJob.InvalidAddress);
     }
 
     const assignment = await this.assignmentRepository.findOneByEscrowAndWorker(
@@ -142,7 +143,11 @@ export class JobService {
       workerAddress,
     );
     if (!assignment) {
-      throw new BadRequestException('User is not assigned to the job');
+      throw new BadRequestException(ErrorJob.NotAssigned);
+    }
+
+    if (assignment.status !== AssignmentStatus.ACTIVE) {
+      throw new BadRequestException(ErrorAssignment.InvalidStatus);
     }
 
     await this.addSolution(chainId, escrowAddress, workerAddress, solution);
@@ -207,7 +212,7 @@ export class JobService {
         (solution) => solution.workerAddress === workerAddress,
       )
     ) {
-      throw new BadRequestException('User has already submitted a solution');
+      throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
     }
 
     const manifest = await this.getManifest(chainId, escrowAddress);
@@ -215,7 +220,7 @@ export class JobService {
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
-      throw new BadRequestException('This job has already been completed');
+      throw new BadRequestException(ErrorJob.JobCompleted);
     }
 
     const newJobSolutions: ISolution[] = [
@@ -258,7 +263,7 @@ export class JobService {
 
         manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
       } catch {
-        throw new Error('Unable to decrypt manifest');
+        throw new Error(ErrorJob.ManifestDecryptionFailed);
       }
     } else {
       try {
@@ -279,7 +284,7 @@ export class JobService {
 
       await this.webhookRepository.createUnique(webhook);
 
-      throw new NotFoundException('Unable to get manifest');
+      throw new NotFoundException(ErrorJob.ManifestNotFound);
     } else return manifest;
   }
 }
