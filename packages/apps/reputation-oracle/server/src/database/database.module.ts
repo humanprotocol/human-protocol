@@ -18,8 +18,8 @@ import { ServerConfigService } from '../common/config/server-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
 import { CredentialEntity } from '../modules/credentials/credential.entity';
-import { NDAEntity } from 'src/modules/nda/nda.entity';
-import { NDAVersionEntity } from 'src/modules/nda/nda-version.entity';
+import { NDAEntity } from '../modules/nda/nda.entity';
+import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
 
 @Module({
   imports: [
