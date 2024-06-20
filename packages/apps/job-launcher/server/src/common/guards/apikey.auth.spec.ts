@@ -71,7 +71,7 @@ describe('ApiKeyGuard', () => {
         .mockResolvedValue(null);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new ControlledError('Invalid API Key', HttpStatus.UNAUTHORIZED),
+        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
       );
     });
 
@@ -88,7 +88,7 @@ describe('ApiKeyGuard', () => {
       } as ExecutionContext;
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        'Invalid API Key format',
+        'Invalid API Key',
       );
     });
   });
