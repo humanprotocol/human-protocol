@@ -13,6 +13,7 @@ import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { Web3Module } from '../web3/web3.module';
 import { AuthConfigService } from '../../common/config/auth-config.service';
+import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
     TypeOrmModule.forFeature([TokenEntity, UserEntity]),
     SendGridModule,
     Web3Module,
+    HCaptchaModule,
   ],
   providers: [JwtHttpStrategy, AuthService, TokenRepository, UserRepository],
   controllers: [AuthJwtController],
