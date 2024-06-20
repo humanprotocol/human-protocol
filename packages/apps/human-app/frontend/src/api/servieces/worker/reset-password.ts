@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ... */
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,10 @@ export const resetPasswordDtoSchema = z
       .string()
       .min(1, t('validation.required'))
       .max(50, t('validation.max', { count: 50 })),
+    h_captcha_token: z
+      .string()
+      .min(1, t('validation.captcha'))
+      .default('token'),
   })
   .refine(({ password, confirmPassword }) => confirmPassword === password, {
     message: t('validation.passwordMismatch'),

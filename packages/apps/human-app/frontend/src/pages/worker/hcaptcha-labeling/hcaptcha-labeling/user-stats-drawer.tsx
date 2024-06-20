@@ -16,15 +16,17 @@ export interface UserStatsDrawerNavigationProps {
 
 function UserStatsDrawerContent({
   stats,
+  refetch,
 }: {
   stats: HCaptchaUserStatsSuccess;
+  refetch: () => void;
 }) {
   return (
     <>
       <Typography variant="mobileHeaderLarge">
         {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
       </Typography>
-      <UserStatsDetails stats={stats} />
+      <UserStatsDetails refetch={refetch} stats={stats} />
     </>
   );
 }
@@ -34,6 +36,7 @@ export function UserStatsDrawer({ isOpen }: UserStatsDrawerNavigationProps) {
     data: hcaptchaUserStats,
     error: hcaptchaUserStatsError,
     status: hcaptchaUserStatsStatus,
+    refetch: hcaptchaUserStatsRefetch,
   } = useHCaptchaUserStats();
 
   return (
@@ -66,7 +69,12 @@ export function UserStatsDrawer({ isOpen }: UserStatsDrawerNavigationProps) {
           }}
         >
           {hcaptchaUserStatsStatus === 'success' ? (
-            <UserStatsDrawerContent stats={hcaptchaUserStats} />
+            <UserStatsDrawerContent
+              refetch={() => {
+                void hcaptchaUserStatsRefetch();
+              }}
+              stats={hcaptchaUserStats}
+            />
           ) : null}
           {hcaptchaUserStatsStatus === 'error' ? (
             <Alert color="error" severity="error">
