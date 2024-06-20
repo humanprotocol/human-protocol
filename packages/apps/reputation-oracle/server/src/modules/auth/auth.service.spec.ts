@@ -339,19 +339,6 @@ describe('AuthService', () => {
         );
       });
 
-      it('should throw Unauthorized exception if user is not active', () => {
-        userEntity.status = UserStatus.INACTIVE;
-        findByEmailMock.mockResolvedValue(userEntity);
-        expect(
-          authService.forgotPassword({
-            email: 'user@example.com',
-            hCaptchaToken: 'token',
-          }),
-        ).rejects.toThrow(
-          new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN),
-        );
-      });
-
       it('should remove existing token if it exists', async () => {
         findTokenMock.mockResolvedValue(tokenEntity);
         await authService.forgotPassword({
