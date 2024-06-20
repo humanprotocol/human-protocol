@@ -52,6 +52,48 @@ export const gatewayConfigServiceMock = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
+      ENABLE_LABELING: {
+        endpoint: '/labeler/register',
+        method: 'POST',
+        params: { api_key: 'mock-api-key' },
+      },
+      OPERATOR_SIGNIN: {
+        endpoint: '/auth/web3/signin',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        params: {},
+      },
+      REGISTER_ADDRESS: {
+        endpoint: '/user/register-address',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    },
+  }),
+};
+
+export const hCaptchaGatewayConfigServiceMock = {
+  getConfig: jest.fn().mockReturnValue({
+    url: 'https://api.example.com',
+    endpoints: {
+      TOKEN_VERIFY: {
+        method: 'POST',
+        endpoint: '/siteverify',
+        headers: {},
+        params: {},
+      },
+      DAILY_HMT_SPENT: {
+        method: 'GET',
+        endpoint: '/requester/daily_hmt_spend',
+        headers: {},
+        params: { api_key: 'mock-api-key', actual: false },
+      },
+      USER_STATS: {
+        method: 'GET',
+        endpoint: '/support/labeler/',
+        headers: {},
+        params: { api_key: 'mock-api-key' },
+      },
     },
   }),
 };

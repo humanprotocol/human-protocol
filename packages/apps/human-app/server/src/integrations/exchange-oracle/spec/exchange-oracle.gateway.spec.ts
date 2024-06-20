@@ -2,34 +2,35 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { ExchangeOracleGateway } from '../exchange-oracle.gateway';
 import {
-  oracleStatsDetailsFixture,
   statisticsExchangeOracleUrl,
-  userStatsDetailsFixture,
+  generalUserStatsCommandFixture, oracleStatsCommandFixture,
 } from '../../../modules/statistics/spec/statistics.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import nock, { RequestBodyMatcher } from 'nock';
 import { of, throwError } from 'rxjs';
 import {
+  jobAssignmentCommandFixture,
   jobAssignmentDataFixture,
-  jobAssignmentDetailsFixture,
   jobAssignmentOracleUrl,
+  jobsFetchParamsCommandFixture,
   jobsFetchParamsDataFixtureAsString,
-  jobsFetchParamsDetailsFixture,
 } from '../../../modules/job-assignment/spec/job-assignment.fixtures';
-import { ExchangeOracleProfile } from '../exchange-oracle.mapper';
+import { ExchangeOracleProfile } from '../exchange-oracle.mapper.profile';
 import {
-  jobsDiscoveryParamsDetailsFixture,
+  jobsDiscoveryParamsCommandFixture,
   paramsDataFixtureAsString,
 } from '../../../modules/jobs-discovery/spec/jobs-discovery.fixtures';
 import { GoneException, HttpException } from '@nestjs/common';
-import { UserStatisticsDetails } from '../../../modules/statistics/model/user-statistics.model';
 import { HttpMethod } from '../../../common/enums/http-method';
+import { KvStoreGateway } from '../../kv-store/kv-store.gateway';
+import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
 
 describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
   let httpService: HttpService;
-
+  let escrowGateway: EscrowUtilsGateway;
+  const EXCHANGE_ORACLE_ADR = 'mocked:exchange_oracle:address';
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
@@ -38,6 +39,20 @@ describe('ExchangeOracleApiGateway', () => {
         }),
       ],
       providers: [
+        {
+          provide: KvStoreGateway,
+          useValue: {
+            getExchangeOracleUrlByAddress: jest
+              .fn()
+              .mockReturnValue(EXCHANGE_ORACLE_ADR),
+          },
+        },
+        {
+          provide: EscrowUtilsGateway,
+          useValue: {
+            getExchangeOracleAddressByEscrowAddress: jest.fn(),
+          },
+        },
         ExchangeOracleProfile,
         ExchangeOracleGateway,
         {
@@ -48,7 +63,7 @@ describe('ExchangeOracleApiGateway', () => {
         },
       ],
     }).compile();
-
+    escrowGateway = module.get<EscrowUtilsGateway>(EscrowUtilsGateway);
     gateway = module.get<ExchangeOracleGateway>(ExchangeOracleGateway);
     httpService = module.get<HttpService>(HttpService);
   });
@@ -60,71 +75,65 @@ describe('ExchangeOracleApiGateway', () => {
 
   describe('fetchUserStatistics', () => {
     it('should successfully call the requested url for user statistics', async () => {
-      const details = userStatsDetailsFixture;
+      const command = generalUserStatsCommandFixture;
       nock(statisticsExchangeOracleUrl)
         .get('/stats/assignment')
-        .matchHeader('Authorization', `Bearer ${details.token}`)
+        .matchHeader('Authorization', `Bearer ${command.token}`)
         .reply(200);
-      await gateway.fetchUserStatistics(details);
+      await gateway.fetchUserStatistics(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: details.exchangeOracleUrl + '/stats/assignment',
+          url: EXCHANGE_ORACLE_ADR + '/stats/assignment',
           method: HttpMethod.GET,
         }),
       );
     });
     it('should handle errors on fetchUserStatistics', async () => {
-      const details = {
-        exchangeOracleUrl: 'https://example.com',
-        token: 'dummyToken',
-      } as UserStatisticsDetails;
+      const command = generalUserStatsCommandFixture;
       jest
         .spyOn(httpService, 'request')
         .mockReturnValue(
           throwError(() => new HttpException('Service Unavailable', 503)),
         );
 
-      await expect(gateway.fetchUserStatistics(details)).rejects.toThrow(
+      await expect(gateway.fetchUserStatistics(command)).rejects.toThrow(
         HttpException,
       );
     });
   });
   describe('fetchOracleStatistics', () => {
     it('should successfully call the requested url for oracle statistics', async () => {
-      const details = oracleStatsDetailsFixture;
+      const command = oracleStatsCommandFixture;
       nock(statisticsExchangeOracleUrl).get('/stats').reply(200);
-      await gateway.fetchOracleStatistics(details);
+      await gateway.fetchOracleStatistics(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: details.exchangeOracleUrl + '/stats',
+          url: EXCHANGE_ORACLE_ADR + '/stats',
           method: HttpMethod.GET,
         }),
       );
     });
-    it('should handle errors on fetchOracleStatistics', async () => {
-      const details = {
-        exchangeOracleUrl: 'https://example.com',
-        token: 'dummyToken',
-      } as UserStatisticsDetails;
+    it('should handle errors on fetchUserStatistics', async () => {
+      const command = generalUserStatsCommandFixture;
       jest
         .spyOn(httpService, 'request')
         .mockReturnValue(throwError(() => new GoneException()));
 
-      await expect(gateway.fetchUserStatistics(details)).rejects.toThrow(
+      await expect(gateway.fetchUserStatistics(command)).rejects.toThrow(
         GoneException,
       );
     });
   });
   describe('fetchAssignedJobs', () => {
     it('should successfully call get assigned jobs', async () => {
-      const details = jobsFetchParamsDetailsFixture;
+      const command = jobsFetchParamsCommandFixture;
       nock(jobAssignmentOracleUrl)
         .get(`/assignment${jobsFetchParamsDataFixtureAsString}`)
         .reply(200);
-      await gateway.fetchAssignedJobs(details);
+      await gateway.fetchAssignedJobs(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: details.exchangeOracleUrl + '/assignment',
+          url: EXCHANGE_ORACLE_ADR + '/assignment',
           method: HttpMethod.GET,
         }),
       );
@@ -132,17 +141,23 @@ describe('ExchangeOracleApiGateway', () => {
   });
   describe('postNewJobAssignment', () => {
     it('should successfully post new job assignment', async () => {
-      const details = jobAssignmentDetailsFixture;
+      const command = jobAssignmentCommandFixture;
       const data = jobAssignmentDataFixture;
+      jest
+        .spyOn(escrowGateway, 'getExchangeOracleAddressByEscrowAddress')
+        .mockResolvedValue(EXCHANGE_ORACLE_ADR);
       const matcher: RequestBodyMatcher = {
         escrowAddress: data.escrow_address,
         chainId: data.chain_id,
       };
       nock(jobAssignmentOracleUrl).post('/assignment', matcher).reply(200);
-      await gateway.postNewJobAssignment(details);
+      await gateway.postNewJobAssignment(command);
+      expect(
+        escrowGateway.getExchangeOracleAddressByEscrowAddress,
+      ).toHaveBeenCalledWith(command.data.chainId, command.data.escrowAddress);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: details.exchangeOracleUrl + '/assignment',
+          url: EXCHANGE_ORACLE_ADR + '/assignment',
           method: HttpMethod.POST,
         }),
       );
@@ -151,14 +166,14 @@ describe('ExchangeOracleApiGateway', () => {
 
   describe('fetchDiscoveredJobs', () => {
     it('should successfully call get discovered jobs', async () => {
-      const details = jobsDiscoveryParamsDetailsFixture;
+      const command = jobsDiscoveryParamsCommandFixture;
       nock(jobAssignmentOracleUrl)
         .get(`/assignment${paramsDataFixtureAsString}`)
         .reply(200);
-      await gateway.fetchJobs(details);
+      await gateway.fetchJobs(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: details.exchangeOracleUrl + '/job',
+          url: EXCHANGE_ORACLE_ADR + '/job',
           method: HttpMethod.GET,
         }),
       );

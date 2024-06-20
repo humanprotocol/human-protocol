@@ -37,13 +37,6 @@ export class JobAssignmentCommand {
   token: string;
 }
 
-export class JobAssignmentDetails {
-  @AutoMap()
-  data: JobAssignmentParams;
-  @AutoMap()
-  token: string;
-  exchangeOracleUrl: string;
-}
 export class JobAssignmentData {
   @AutoMap()
   escrow_address: string;
@@ -125,13 +118,6 @@ export class JobsFetchParamsCommand {
   @AutoMap()
   token: string;
 }
-export class JobsFetchParamsDetails {
-  exchangeOracleUrl: string;
-  @AutoMap()
-  data: JobsFetchParams;
-  @AutoMap()
-  token: string;
-}
 
 export class JobsFetchParamsData extends PageableData {
   @AutoMap()
@@ -164,4 +150,27 @@ export class JobsFetchResponseItem {
 
 export class JobsFetchResponse {
   data: JobsFetchResponseItem[];
+}
+
+export class ResignJobDto {
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  address: string;
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  assignment_id: string;
+}
+
+export class ResignJobCommand {
+  @AutoMap()
+  oracleAddress: string;
+  @AutoMap()
+  assignmentId: string;
+  token: string;
+}
+export class ResignJobData {
+  @AutoMap()
+  assignment_id: string;
 }

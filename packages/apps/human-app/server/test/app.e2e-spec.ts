@@ -6,7 +6,7 @@ import { generateWorkerSignupRequestBody } from './fixtures/user-worker.fixture'
 import { SignupWorkerData } from '../src/modules/user-worker/model/worker-registration.model';
 import { beforeAll } from '@jest/globals';
 import { generateOperatorSignupRequestBody } from './fixtures/user-operator.fixture';
-import { SignupOperatorData } from '../src/modules/user-operator/model/operator-registration.model';
+import { SignupOperatorData } from '../src/modules/user-operator/model/operator.model';
 import { ConfigService } from '@nestjs/config';
 import {
   TestEnvironmentConfigService,

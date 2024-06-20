@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
+import { AutoMap } from '@automapper/classes';
 
 export class UserStatisticsResponse {
   assignments_amount: number;
@@ -9,15 +10,13 @@ export class UserStatisticsResponse {
   assignments_expired: number;
 }
 export class UserStatisticsCommand {
+  @AutoMap()
   oracleAddress: string;
   token: string;
 }
 export class UserStatisticsDto {
   @ApiProperty({ example: 'string' })
   @IsString()
+  @AutoMap()
   oracle_address: string;
-}
-export class UserStatisticsDetails {
-  exchangeOracleUrl: string;
-  token: string;
 }

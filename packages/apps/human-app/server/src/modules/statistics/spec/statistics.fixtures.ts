@@ -1,11 +1,9 @@
 import {
   UserStatisticsCommand,
-  UserStatisticsDetails,
   UserStatisticsResponse,
 } from '../model/user-statistics.model';
 import {
   OracleStatisticsCommand,
-  OracleStatisticsDetails,
   OracleStatisticsResponse,
 } from '../model/oracle-statistics.model';
 import { AxiosRequestConfig } from 'axios';
@@ -46,24 +44,19 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
   assignments_expired: ASSIGNMENTS_EXPIRED_ORACLE,
 };
 
-export const userStatsCommandFixture: UserStatisticsCommand = {
+export const generalUserStatsCommandFixture: UserStatisticsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
-  token: TOKEN,
-};
-export const userStatsDetailsFixture: UserStatisticsDetails = {
-  exchangeOracleUrl: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
 };
-export const oracleStatsDetailsFixture: OracleStatisticsDetails = {
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
-};
+
 export const requestContextFixture = {
   token: TOKEN,
 };
+
 export const userStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
   url: `${EXCHANGE_ORACLE_URL}/stats/assignment`,

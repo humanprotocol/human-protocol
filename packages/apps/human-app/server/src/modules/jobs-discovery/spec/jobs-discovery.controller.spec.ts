@@ -10,7 +10,7 @@ import {
 } from './jobs-discovery.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { JobsDiscoveryProfile } from '../jobs-discovery.mapper';
+import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
 import { HttpService } from '@nestjs/axios';
 
 describe('JobsDiscoveryController', () => {

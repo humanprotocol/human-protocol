@@ -13,7 +13,7 @@ import {
   JobAssignmentData,
   JobAssignmentParams,
   JobsFetchParams,
-  JobsFetchParamsData,
+  JobsFetchParamsData, ResignJobCommand, ResignJobData,
 } from '../../modules/job-assignment/model/job-assignment.model';
 import {
   JobsDiscoveryParams,
@@ -55,6 +55,15 @@ export class ExchangeOracleProfile extends AutomapperProfile {
           (destination) => destination.fields,
           mapFrom((source) => source.fields),
         ),
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        ResignJobCommand,
+        ResignJobData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

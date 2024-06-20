@@ -1,6 +1,6 @@
 import { UserType } from '../../src/common/enums/user';
 import { ethers } from 'ethers';
-import { SignupOperatorData } from '../../src/modules/user-operator/model/operator-registration.model';
+import { SignupOperatorData } from '../../src/modules/user-operator/model/operator.model';
 export async function generateOperatorSignupRequestBody() {
   const wallet = ethers.Wallet.createRandom();
   const flatSig = await wallet.signMessage('signup');

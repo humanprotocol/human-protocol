@@ -18,10 +18,15 @@ import {
   UserStatisticsResponse,
 } from './model/user-statistics.model';
 import { Authorization } from '../../common/config/params-decorators';
+import { InjectMapper } from '@automapper/nestjs';
+import { Mapper } from '@automapper/core';
 
 @Controller()
 export class StatisticsController {
-  constructor(private readonly service: StatisticsService) {}
+  constructor(
+    private readonly service: StatisticsService,
+    @InjectMapper() private readonly mapper: Mapper,
+  ) {}
   @ApiTags('Statistics')
   @Get('/stats')
   @ApiOperation({ summary: 'General Oracle Statistics' })
@@ -29,9 +34,11 @@ export class StatisticsController {
   public getOracleStatistics(
     @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
-    const command = {
-      oracleAddress: dto.oracle_address,
-    } as OracleStatisticsCommand;
+    const command = this.mapper.map(
+      dto,
+      OracleStatisticsDto,
+      OracleStatisticsCommand,
+    );
     return this.service.getOracleStats(command);
   }
 
@@ -44,10 +51,12 @@ export class StatisticsController {
     @Query() dto: UserStatisticsDto,
     @Authorization() token: string,
   ): Promise<UserStatisticsResponse> {
-    const command: UserStatisticsCommand = {
-      oracleAddress: dto.oracle_address,
-      token: token,
-    } as UserStatisticsCommand;
+    const command = this.mapper.map(
+      dto,
+      UserStatisticsDto,
+      UserStatisticsCommand,
+    );
+    command.token = token;
     return this.service.getUserStats(command);
   }
 }

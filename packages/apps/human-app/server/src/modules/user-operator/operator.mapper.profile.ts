@@ -2,9 +2,11 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
 import {
+  SigninOperatorCommand,
+  SigninOperatorDto,
   SignupOperatorCommand,
   SignupOperatorDto,
-} from './model/operator-registration.model';
+} from './model/operator.model';
 
 @Injectable()
 export class OperatorProfile extends AutomapperProfile {
@@ -15,6 +17,7 @@ export class OperatorProfile extends AutomapperProfile {
   override get profile() {
     return (mapper: Mapper) => {
       createMap(mapper, SignupOperatorDto, SignupOperatorCommand);
+      createMap(mapper, SigninOperatorDto, SigninOperatorCommand);
     };
   }
 }

@@ -86,14 +86,6 @@ export class JobsDiscoveryParamsCommand {
   data: JobsDiscoveryParams;
 }
 
-export class JobsDiscoveryParamsDetails {
-  exchangeOracleUrl: string;
-  @AutoMap()
-  token: string;
-  @AutoMap()
-  data: JobsDiscoveryParams;
-}
-
 export class JobsDiscoveryResponseItem {
   escrow_address: string;
   chain_id: number;

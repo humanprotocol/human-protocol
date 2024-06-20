@@ -17,7 +17,7 @@ import {
   JobAssignmentResponse,
   JobsFetchParamsDto,
   JobsFetchParamsCommand,
-  JobsFetchResponse,
+  JobsFetchResponse, ResignJobDto, ResignJobCommand,
 } from './model/job-assignment.model';
 import { Authorization } from '../../common/config/params-decorators';
 
@@ -65,5 +65,19 @@ export class JobAssignmentController {
     );
     jobsAssignmentParamsCommand.token = token;
     return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
+  }
+  @ApiTags('Job-Assignment')
+  @Post('/resign-job')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Request to resign from assigment',
+  })
+  public async resignAssigment(
+    @Body() dto: ResignJobDto,
+    @Authorization() token: string,
+  ) {
+    const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
+    command.token = token;
+    return this.service.resignJob(command);
   }
 }

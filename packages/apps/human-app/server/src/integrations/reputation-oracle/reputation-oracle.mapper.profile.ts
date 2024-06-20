@@ -10,9 +10,11 @@ import {
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import {
+  SigninOperatorCommand,
+  SigninOperatorData,
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/user-operator/model/operator-registration.model';
+} from '../../modules/user-operator/model/operator.model';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
@@ -21,6 +23,9 @@ import {
   SigninWorkerCommand,
   SigninWorkerData,
 } from '../../modules/user-worker/model/worker-signin.model';
+import {
+  EnableLabelingCommand,
+} from '../../modules/h-captcha/model/enable-labeling.model';
 import {
   PrepareSignatureCommand,
   PrepareSignatureData,
@@ -45,6 +50,10 @@ import {
   EmailVerificationCommand,
   EmailVerificationData,
 } from '../../modules/email-confirmation/model/email-verification.model';
+import {
+  RegisterAddressCommand,
+  RegisterAddressData,
+} from '../../modules/register-address/model/register-address.model';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
@@ -58,10 +67,6 @@ export class ReputationOracleProfile extends AutomapperProfile {
         mapper,
         SignupWorkerCommand,
         SignupWorkerData,
-        forMember(
-          (destination) => destination.h_captcha_token,
-          mapFrom((source) => source.hCaptchaToken),
-        ),
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),
@@ -69,8 +74,8 @@ export class ReputationOracleProfile extends AutomapperProfile {
       );
       createMap(mapper, SignupOperatorCommand, SignupOperatorData);
       createMap(mapper, PrepareSignatureCommand, PrepareSignatureData);
+      createMap(mapper, SigninOperatorCommand, SigninOperatorData);
       createMap(mapper, DisableOperatorParams, DisableOperatorData);
-      createMap(mapper, RestorePasswordCommand, RestorePasswordData);
       createMap(mapper, ForgotPasswordCommand, ForgotPasswordData);
       createMap(
         mapper,
@@ -82,10 +87,24 @@ export class ReputationOracleProfile extends AutomapperProfile {
         mapper,
         SigninWorkerCommand,
         SigninWorkerData,
-        forMember(
-          (destination) => destination.h_captcha_token,
-          mapFrom((source) => source.hCaptchaToken),
-        ),
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        RegisterAddressCommand,
+        RegisterAddressData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        RestorePasswordCommand,
+        RestorePasswordData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

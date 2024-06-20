@@ -1,10 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS = 'Content-Type, Accept';
+const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
 @Injectable()
 export class EnvironmentConfigService {
   constructor(private configService: ConfigService) {}
@@ -18,7 +21,14 @@ export class EnvironmentConfigService {
     return this.configService.getOrThrow<string>('REPUTATION_ORACLE_URL');
   }
   get reputationOracleAddress(): string {
-    return this.configService.getOrThrow<string>('REPUTATION_ORACLE_ADDRESS');
+    return this.configService
+      .getOrThrow<string>('REPUTATION_ORACLE_ADDRESS')
+      .toLowerCase();
+  }
+  get axiosRequestLoggingEnabled(): boolean {
+    return (
+      this.configService.get('IS_AXIOS_REQUEST_LOGGING_ENABLED') === 'true'
+    );
   }
   get cachePort(): number {
     return this.configService.getOrThrow<number>('REDIS_PORT');
@@ -32,11 +42,25 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_ORACLE_STATS,
     );
   }
-
+  get dailyHmtSpentKey(): string {
+    return this.configService.getOrThrow('DAILY_HMT_SPENT_KEY');
+  }
   get cacheTtlUserStats(): number {
     return this.configService.get<number>(
       'CACHE_TTL_USER_STATS',
       DEFAULT_CACHE_TTL_USER_STATS,
+    );
+  }
+  get cacheTtlDailyHmtSpent(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_DAILY_HMT_SPENT',
+      DEFAULT_CACHE_TTL_DAILY_HMT_SPENT,
+    );
+  }
+  get cacheTtlHCaptchaUserStats(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_HCAPTCHA_USER_STATS',
+      DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS,
     );
   }
 
@@ -63,6 +87,25 @@ export class EnvironmentConfigService {
       'CORS_ALLOWED_HEADERS',
       DEFAULT_CORS_ALLOWED_HEADERS,
     );
+  }
+  get cacheTtlExchangeOracleUrl(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_EXCHANGE_ORACLE_URL',
+      DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL,
+    );
+  }
+  get hcaptchaLabelingStatsApiUrl(): string {
+    return this.configService.getOrThrow<string>(
+      'HCAPTCHA_LABELING_STATS_API_URL',
+    );
+  }
+  get hcaptchaLabelingVerifyApiUrl(): string {
+    return this.configService.getOrThrow<string>(
+      'HCAPTCHA_LABELING_VERIFY_API_URL',
+    );
+  }
+  get hcaptchaLabelingApiKey(): string {
+    return this.configService.getOrThrow<string>('HCAPTCHA_LABELING_API_KEY');
   }
   get chainIdsEnabled(): string[] {
     const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');

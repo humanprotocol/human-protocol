@@ -12,13 +12,13 @@ import {
 } from '@automapper/core';
 import {
   JobAssignmentCommand,
-  JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobsFetchParams,
   JobsFetchParamsCommand,
-  JobsFetchParamsDetails,
   JobsFetchParamsDto,
+  ResignJobCommand,
+  ResignJobDto,
 } from './model/job-assignment.model';
 
 @Injectable()
@@ -84,8 +84,15 @@ export class JobAssignmentProfile extends AutomapperProfile {
           destination: new CamelCaseNamingConvention(),
         }),
       );
-      createMap(mapper, JobAssignmentCommand, JobAssignmentDetails);
-      createMap(mapper, JobsFetchParamsCommand, JobsFetchParamsDetails);
+      createMap(
+        mapper,
+        ResignJobDto,
+        ResignJobCommand,
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
+      );
     };
   }
 }

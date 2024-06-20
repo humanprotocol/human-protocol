@@ -13,15 +13,17 @@ jest.mock('@human-protocol/sdk', () => ({
     getReputationNetworkOperators: jest.fn(),
   },
 }));
-
 describe('OracleDiscoveryService', () => {
   const EXCHANGE_ORACLE = 'Exchange Oracle';
+  const EXPECTED_CHAIN_IDS = ['4200'];
+  const REPUTATION_ORACLE_ADDRESS = 'the_oracle';
+  const TTL = '300';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
   let configService: EnvironmentConfigService;
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       imports: [
         CommonConfigModule,
         ConfigModule.forRoot({
@@ -30,6 +32,14 @@ describe('OracleDiscoveryService', () => {
         }),
       ],
       providers: [
+        {
+          provide: EnvironmentConfigService,
+          useValue: {
+            chainIdsEnabled: EXPECTED_CHAIN_IDS,
+            reputationOracleAddress: REPUTATION_ORACLE_ADDRESS,
+            cacheTtlOracleDiscovery: TTL,
+          },
+        },
         OracleDiscoveryService,
         {
           provide: CACHE_MANAGER,
@@ -38,23 +48,18 @@ describe('OracleDiscoveryService', () => {
             set: jest.fn(),
           },
         },
-        {
-          provide: EnvironmentConfigService,
-          useValue: {
-            reputationOracleAddress: 'mockedaddress',
-            cacheTtlOracleDiscovery: 86400,
-            chainIdsEnabled: ['80001'],
-          },
-        },
       ],
     }).compile();
-    configService = moduleRef.get<EnvironmentConfigService>(
+    configService = module.get<EnvironmentConfigService>(
       EnvironmentConfigService,
     );
-    oracleDiscoveryService = moduleRef.get<OracleDiscoveryService>(
+    oracleDiscoveryService = module.get<OracleDiscoveryService>(
       OracleDiscoveryService,
     );
-    cacheManager = moduleRef.get<Cache>(CACHE_MANAGER);
+    cacheManager = module.get<Cache>(CACHE_MANAGER);
+  });
+  afterEach(() => {
+    jest.resetAllMocks();
   });
   it('should be defined', () => {
     expect(oracleDiscoveryService).toBeDefined();
@@ -78,7 +83,6 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
-    const chainId = 80001;
 
     jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
     jest
@@ -88,16 +92,18 @@ describe('OracleDiscoveryService', () => {
     const result = await oracleDiscoveryService.processOracleDiscovery();
 
     expect(result).toEqual(mockData);
-    expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
-    expect(cacheManager.set).toHaveBeenCalledWith(
-      chainId.toString(),
-      mockData,
-      configService.cacheTtlOracleDiscovery,
-    );
-    expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
-      chainId,
-      'mockedaddress',
-      EXCHANGE_ORACLE,
-    );
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      expect(cacheManager.get).toHaveBeenCalledWith(chainId);
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        chainId,
+        mockData,
+        TTL,
+      );
+      expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
+        Number(chainId),
+        REPUTATION_ORACLE_ADDRESS,
+        EXCHANGE_ORACLE,
+      );
+    });
   });
 });
