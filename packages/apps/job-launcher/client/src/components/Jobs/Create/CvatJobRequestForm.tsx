@@ -229,20 +229,46 @@ export const CvatJobRequestForm = () => {
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
                   <Autocomplete
-                    clearIcon={false}
-                    options={[]}
-                    freeSolo
                     multiple
-                    renderTags={(value, props) =>
+                    freeSolo
+                    options={[]}
+                    value={values.labels}
+                    onChange={(event, newValues) => {
+                      const updatedLabels = (newValues as string[]).map(
+                        (label: string) =>
+                          label.startsWith('Add: ')
+                            ? label.replace('Add: ', '')
+                            : label,
+                      );
+                      setFieldValue('labels', updatedLabels);
+                    }}
+                    filterOptions={(options: any, params) => {
+                      const filtered = options;
+                      const { inputValue } = params;
+                      if (inputValue !== '' && !options.includes(inputValue)) {
+                        filtered.push('Add: ' + inputValue);
+                      }
+                      return filtered;
+                    }}
+                    selectOnFocus
+                    onBlur={handleBlur}
+                    handleHomeEndKeys
+                    renderTags={(value, getTagProps) =>
                       value.map((option, index) => (
-                        <Chip label={option} {...props({ index })} />
+                        <Chip label={option} {...getTagProps({ index })} />
                       ))
                     }
                     renderInput={(params) => (
-                      <TextField label="Labels" {...params} />
+                      <Box display="flex" alignItems="center" width="100%">
+                        <TextField
+                          {...params}
+                          label="Labels"
+                          variant="outlined"
+                          onBlur={handleBlur}
+                          fullWidth
+                        />
+                      </Box>
                     )}
-                    onChange={(e, value) => setFieldValue('labels', value)}
-                    onBlur={handleBlur}
                   />
                   {errors.labels && (
                     <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
@@ -255,20 +281,49 @@ export const CvatJobRequestForm = () => {
                 <Grid item xs={12} sm={12}>
                   <FormControl fullWidth>
                     <Autocomplete
-                      clearIcon={false}
-                      options={[]}
-                      freeSolo
                       multiple
-                      renderTags={(value, props) =>
+                      freeSolo
+                      options={[]}
+                      value={values.nodes}
+                      onChange={(event, newValues) => {
+                        const updatedNodes = (newValues as string[]).map(
+                          (node: string) =>
+                            node.startsWith('Add: ')
+                              ? node.replace('Add: ', '')
+                              : node,
+                        );
+                        setFieldValue('nodes', updatedNodes);
+                      }}
+                      filterOptions={(options: any, params) => {
+                        const filtered = options;
+                        const { inputValue } = params;
+                        if (
+                          inputValue !== '' &&
+                          !options.includes(inputValue)
+                        ) {
+                          filtered.push('Add: ' + inputValue);
+                        }
+                        return filtered;
+                      }}
+                      selectOnFocus
+                      onBlur={handleBlur}
+                      handleHomeEndKeys
+                      renderTags={(value, getTagProps) =>
                         value.map((option, index) => (
-                          <Chip label={option} {...props({ index })} />
+                          <Chip label={option} {...getTagProps({ index })} />
                         ))
                       }
                       renderInput={(params) => (
-                        <TextField label="Nodes" {...params} />
+                        <Box display="flex" alignItems="center" width="100%">
+                          <TextField
+                            {...params}
+                            label="Nodes"
+                            variant="outlined"
+                            onBlur={handleBlur}
+                            fullWidth
+                          />
+                        </Box>
                       )}
-                      onChange={(e, value) => setFieldValue('nodes', value)}
-                      onBlur={handleBlur}
                     />
                     {errors.nodes && (
                       <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
