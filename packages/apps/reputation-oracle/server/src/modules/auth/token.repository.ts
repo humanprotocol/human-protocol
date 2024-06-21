@@ -18,7 +18,7 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
         uuid,
         type,
       },
-      relations: ['user'],
+      relations: ['user', 'user.kyc'],
     });
   }
 
