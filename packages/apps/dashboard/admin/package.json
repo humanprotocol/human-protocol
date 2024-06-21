@@ -24,7 +24,7 @@
     "pg": "8.12.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-router-dom": "6.23.1",
+    "react-router-dom": "5.3.4",
     "styled-components": "6.1.11",
     "tar": "^7.4.0",
     "viem": "^2.14.2"
