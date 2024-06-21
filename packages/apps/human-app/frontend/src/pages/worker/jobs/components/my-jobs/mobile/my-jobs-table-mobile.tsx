@@ -22,7 +22,7 @@ import type { MyJob } from '@/api/servieces/worker/my-jobs-data';
 import { useInfiniteGetMyJobsData } from '@/api/servieces/worker/my-jobs-data';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
-import { parseJobStatusChipColor } from './parse-job-status-chip-color';
+import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
