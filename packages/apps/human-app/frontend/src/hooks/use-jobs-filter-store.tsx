@@ -4,7 +4,12 @@ import { create } from 'zustand';
 export interface JobsFilterStoreProps {
   filterParams: {
     sort?: 'ASC' | 'DESC';
-    sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'created_at';
+    sort_field?:
+      | 'chain_id'
+      | 'job_type'
+      | 'reward_amount'
+      | 'created_at'
+      | 'escrow_address';
     network?: 'MATIC' | 'POLYGON';
     // TODO add allowed job types
     job_type?: string;
