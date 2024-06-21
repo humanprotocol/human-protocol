@@ -91,11 +91,12 @@ export function DrawerNavigation({
 
               const { link, label, disabled } = item;
               return (
-                <ListItem disablePadding disabled={disabled} key={link}>
+                <ListItem disablePadding key={link}>
                   <ListItemButton
+                    disabled={disabled}
                     onClick={() => {
+                      if (disabled) return;
                       if (link) {
-                        if (disabled) return;
                         navigate(link);
                       }
                     }}

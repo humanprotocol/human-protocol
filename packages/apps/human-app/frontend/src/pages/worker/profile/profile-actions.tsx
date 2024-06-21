@@ -7,46 +7,39 @@ import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 import { useKycSessionIdMutation } from '@/api/servieces/worker/get-kyc-session-id';
-import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { Button } from '@/components/ui/button';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { routerPaths } from '@/router/router-paths';
 import { startSynapsKyc } from '@/pages/worker/profile/start-synaps-kyc';
 import { RegisterAddressAction } from '@/pages/worker/profile/register-address-action';
 import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 import { useResendEmailVerificationWorkerMutation } from '@/api/servieces/worker/resend-email-verification';
 import { WalletConnectDone } from '@/pages/worker/profile/wallet-connect-done';
+import { useKycErrorNotifications } from '@/hooks/use-kyc-notification';
 
 export function ProfileActions() {
   const navigation = useNavigate();
   const { mutate: resendEmailVerificationMutation } =
     useResendEmailVerificationWorkerMutation();
-  const { setTopNotification } = useProtectedLayoutNotification();
+  const onError = useKycErrorNotifications();
   const {
     data: kycSessionIdData,
     mutate: kycSessionIdMutation,
-    error: kycSessionIdMutationError,
     isPending: kycSessionIdIsPending,
+    status: kycSessionIdIsStatus,
   } = useKycSessionIdMutation({
-    onError: () => {
-      setTopNotification({
-        type: 'warning',
-        content: defaultErrorMessage(kycSessionIdMutationError),
-      });
-    },
+    onError,
   });
 
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   const { isConnected: isWalletConnected } = useWalletConnect();
-  const emailVerified =
-    Boolean(kycSessionIdData?.session_id) ||
-    kycSessionIdData?.error !== 'emailNotVerified';
+  const emailVerified = kycSessionIdData?.error !== 'emailNotVerified';
+
   const kycApproved =
     user.kyc_status === 'APPROVED' || kycSessionIdData?.error === 'kycApproved';
 
   useEffect(() => {
-    if (user.kyc_status !== 'APPROVED') {
+    if (user.kyc_status !== 'APPROVED' && kycSessionIdIsStatus === 'idle') {
       kycSessionIdMutation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...

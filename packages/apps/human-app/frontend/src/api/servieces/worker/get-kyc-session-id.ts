@@ -8,6 +8,7 @@ import { apiPaths } from '@/api/api-paths';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import type { ResponseError } from '@/shared/types/global.type';
 
 const kycSessionIdSchema = z.object({
   session_id: z.string(),
@@ -20,17 +21,10 @@ type KycSessionIdMutationResult =
   | (KycSessionIdSuccessSchema & { error?: never })
   | { session_id?: never; error: KycError };
 
-// POST "kyc/start" responses:
-// 200 - response contains only "session-id", under verification, response contains many properties - KYC was approved
-// 401 - unauthenticated also means that email not verified
-// 400 - bad request also means that KYC already approved
-
-// normally if app receives 401 status code it tries to obtain
-// access token with refresh token, kycSessionIdMutation has to
-// implement its own flow to handle that case because 401 that
-// can be revived for "kyc/start" doesn't mean that JWT token expired
-
-export function useKycSessionIdMutation(callbacks: { onError?: () => void }) {
+export function useKycSessionIdMutation(callbacks: {
+  onError?: (error: ResponseError) => void;
+  onSuccess?: () => void;
+}) {
   const queryClient = useQueryClient();
   const { user, updateUserData } = useAuthenticatedUser();
 
@@ -79,13 +73,15 @@ export function useKycSessionIdMutation(callbacks: { onError?: () => void }) {
         });
         return response;
       } catch (error) {
+        // 401 - unauthenticated also means that email not verified
+        // 400 - bad request also means that KYC already approved
+
+        // normally if app receives 401 status code it tries to obtain
+        // access token with refresh token, kycSessionIdMutation has to
+        // implement its own flow to handle that case because 401 that
+        // can be revived for "kyc/start" doesn't mean that JWT token expired
         if (error instanceof FetchError) {
           if (error.status === 401) {
-            if (user.email) {
-              browserAuthProvider.signOut(() => {
-                window.location.reload();
-              });
-            }
             return { error: 'emailNotVerified' };
           }
           if (error.status === 400) {
@@ -98,9 +94,13 @@ export function useKycSessionIdMutation(callbacks: { onError?: () => void }) {
       }
     },
 
-    onError: () => {
+    onError: (error) => {
       void queryClient.invalidateQueries();
-      if (callbacks.onError) callbacks.onError();
+      if (callbacks.onError) callbacks.onError(error);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries();
+      if (callbacks.onSuccess) callbacks.onSuccess();
     },
     mutationKey: ['kycSessionId', user.email],
   });

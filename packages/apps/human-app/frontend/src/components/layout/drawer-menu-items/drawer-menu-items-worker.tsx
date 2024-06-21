@@ -7,10 +7,10 @@ import type {
 } from '@/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
-import { useAuth } from '@/auth/use-auth';
 
-export const WorkerDrawerTopMenuItems = (): TopMenuItem[] => {
-  const { user } = useAuth();
+export const workerDrawerTopMenuItems = (
+  disableLabeling: boolean
+): TopMenuItem[] => {
   return [
     <Grid
       key={crypto.randomUUID()}
@@ -29,7 +29,7 @@ export const WorkerDrawerTopMenuItems = (): TopMenuItem[] => {
     {
       label: t('components.DrawerNavigation.captchaLabelling'),
       link: routerPaths.worker.enableLabeler,
-      disabled: Boolean(!user?.address),
+      disabled: disableLabeling,
     },
     {
       label: t('components.DrawerNavigation.jobsDiscovery'),
@@ -38,7 +38,6 @@ export const WorkerDrawerTopMenuItems = (): TopMenuItem[] => {
   ];
 };
 
-// eslint-disable-next-line react-refresh/only-export-components -- ...
 export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
   {
     label: t('components.DrawerNavigation.profile'),
