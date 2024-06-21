@@ -258,7 +258,8 @@
         "jobType": {
           "fortune": "Fortune"
         }
-      }
+      },
+      "next": "Next"
     },
     "hcaptchaLabeling": {
       "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",

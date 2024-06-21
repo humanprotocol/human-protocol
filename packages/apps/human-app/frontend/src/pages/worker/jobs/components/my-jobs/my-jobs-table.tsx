@@ -28,7 +28,7 @@ import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/my-j
 import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/servieces/worker/reject-task';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { RejectButton } from '@/components/ui/reject-button';
+import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 
 const getColumnsDefinition = (
