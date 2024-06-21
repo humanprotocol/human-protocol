@@ -37,7 +37,14 @@ describe('Modal header', () => {
 
   it('is breadcrumb visible', () => {
     const { getByTestId } = renderWithWrapper(
-      <ModalHeader {...breadcrumbProps} />
+      <ModalHeader
+        {...breadcrumbProps}
+        closeButton={{
+          isVisible: false,
+          // eslint-disable-next-line @typescript-eslint/no-empty-function -- ...
+          onClick: () => {},
+        }}
+      />
     );
     const breadcrumbButton = getByTestId('breadcrumb-button');
     expect(breadcrumbButton).toBeVisible();
@@ -65,7 +72,11 @@ describe('Modal header', () => {
   //TODO change this test breadcrumb function later
   it('breadcrumb clicked', () => {
     const { getByTestId } = renderWithWrapper(
-      <ModalHeader {...breadcrumbProps} />
+      <ModalHeader
+        {...breadcrumbProps}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- ...,
+        closeButton={{ isVisible: true, onClick: () => {} }}
+      />
     );
     const breadCrumbButton = getByTestId('breadcrumb-button');
     fireEvent.click(breadCrumbButton);

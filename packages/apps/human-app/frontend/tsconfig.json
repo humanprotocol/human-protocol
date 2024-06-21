@@ -2,6 +2,7 @@
   "extends": "../../../../tsconfig.json",
   "compilerOptions": {
     "useDefineForClassFields": true,
+    "module": "Preserve",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "types": [
       "vite-plugin-svgr/client",

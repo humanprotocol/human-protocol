@@ -10,7 +10,7 @@ interface SearchFormProps {
   placeholder: string;
   columnId: string;
   fullWidth?: boolean;
-  updater: (fieldValue: string) => void;
+  updater?: (fieldValue: string) => void;
 }
 
 export function SearchForm({
@@ -40,7 +40,9 @@ export function SearchForm({
         label={label}
         name={name}
         onChange={(e) => {
-          updater(e.target.value);
+          if (updater) {
+            updater(e.target.value);
+          }
         }}
         placeholder={placeholder}
         sx={{
