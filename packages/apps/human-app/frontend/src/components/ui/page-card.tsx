@@ -267,7 +267,9 @@ export function PageCardError({
             {t('components.pageCardError.reload')}
           </Button>
           <Button
-            onClick={navigate.bind(null, routerPaths.homePage)}
+            onClick={() => {
+              navigate(routerPaths.homePage);
+            }}
             variant="outlined"
           >
             {t('components.pageCardError.goHome')}

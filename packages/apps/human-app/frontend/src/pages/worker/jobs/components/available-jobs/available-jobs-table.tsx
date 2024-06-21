@@ -23,8 +23,9 @@ import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
 import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
-import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/available-jobs-reward-amount-sort';
+import { JOB_TYPES } from '@/shared/consts';
 import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-network-filter';
+import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/available-jobs-reward-amount-sort';
 import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-job-type-filter';
 
 export type AvailableJobsTableData = AvailableJob & {
@@ -115,8 +116,7 @@ const getColumns = (callbacks: {
               headerText={t('worker.jobs.jobType')}
               iconType="filter"
               popoverContent={
-                // TODO add available job types
-                <AvailableJobsJobTypeFilter jobTypes={['FORTUNE', 'TEST']} />
+                <AvailableJobsJobTypeFilter jobTypes={JOB_TYPES} />
               }
             />
           );
