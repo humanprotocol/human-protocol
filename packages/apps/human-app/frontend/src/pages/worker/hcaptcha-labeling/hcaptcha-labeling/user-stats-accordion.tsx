@@ -18,6 +18,7 @@ export function UserStatsAccordion() {
     isPending: isHcaptchaUserStatsPending,
     isError: isHcaptchaUserStatsError,
     error: hcaptchaUserStatsError,
+    refetch: refetchUserStats,
   } = useHCaptchaUserStats();
   const { setTopNotification } = useProtectedLayoutNotification();
 
@@ -45,7 +46,12 @@ export function UserStatsAccordion() {
         </AccordionSummary>
         {hcaptchaUserStats ? (
           <AccordionDetails sx={{ ...accordionWidth }}>
-            <UserStatsDetails stats={hcaptchaUserStats} />
+            <UserStatsDetails
+              refetch={() => {
+                void refetchUserStats();
+              }}
+              stats={hcaptchaUserStats}
+            />
           </AccordionDetails>
         ) : null}
       </Accordion>
