@@ -93,13 +93,12 @@ export function Table() {
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
-    renderTopToolbar: ({ table: t }) => (
+    renderTopToolbar: () => (
       <SearchForm
         columnId="address"
         label="Example address search"
         name="Example address search"
         placeholder="Example address search"
-        updater={t.setColumnFilters}
       />
     ),
   });
