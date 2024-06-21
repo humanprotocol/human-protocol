@@ -19,8 +19,8 @@ export function MyJobsJobTypeFilter({ jobTypes }: { jobTypes: string[] }) {
         name: capitalize(jobType),
         option: jobType.toLowerCase(),
       }))}
-      includeFooterAndHeader={false}
       isChecked={(option) => option === filterParams.job_type?.toLowerCase()}
+      isMobile={false}
       setFiltering={(jobType) => {
         setFilterParams({
           ...filterParams,

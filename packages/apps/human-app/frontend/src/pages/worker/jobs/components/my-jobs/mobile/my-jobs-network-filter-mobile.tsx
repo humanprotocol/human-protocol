@@ -21,8 +21,8 @@ export function MyJobsNetworkFilter() {
         });
       }}
       filteringOptions={allNetworks}
-      includeFooterAndHeader={false}
       isChecked={(option) => option === filterParams.chain_id}
+      isMobile={false}
       setFiltering={(chainId) => {
         setFilterParams({
           ...filterParams,

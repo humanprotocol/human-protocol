@@ -16,7 +16,7 @@ interface FilteringProps<T> {
   isChecked: (option: T) => boolean;
   setFiltering: (option: T) => void;
   clear: () => void;
-  includeFooterAndHeader?: boolean;
+  isMobile?: boolean;
 }
 
 export function Filtering<T>({
@@ -24,11 +24,11 @@ export function Filtering<T>({
   isChecked,
   setFiltering,
   clear,
-  includeFooterAndHeader = true,
+  isMobile = true,
 }: FilteringProps<T>) {
   return (
     <List sx={{ padding: 0 }}>
-      {includeFooterAndHeader ? (
+      {isMobile ? (
         <Typography
           color={colorPalette.text.secondary}
           sx={{ padding: '0.5rem' }}
@@ -65,7 +65,7 @@ export function Filtering<T>({
           </ListItem>
         );
       })}
-      {includeFooterAndHeader ? (
+      {isMobile ? (
         <>
           <Divider component="li" variant="fullWidth" />
           <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>

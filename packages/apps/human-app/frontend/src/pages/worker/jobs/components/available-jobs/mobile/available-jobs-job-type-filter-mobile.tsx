@@ -23,8 +23,8 @@ export function AvailableJobsJobTypeFilterMobile({
         name: capitalize(jobType),
         option: jobType.toUpperCase(),
       }))}
-      includeFooterAndHeader={false}
       isChecked={(option) => option === filterParams.job_type?.toUpperCase()}
+      isMobile={false}
       setFiltering={(jobType) => {
         setFilterParams({
           ...filterParams,

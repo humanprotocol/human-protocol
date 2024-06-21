@@ -19,8 +19,8 @@ export function AvailableJobsStatusFilterMobile() {
         name: capitalize(status),
         option: status,
       }))}
-      includeFooterAndHeader={false}
       isChecked={(status) => status === filterParams.status}
+      isMobile={false}
       setFiltering={(status) => {
         setFilterParams({
           ...filterParams,
