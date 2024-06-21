@@ -170,6 +170,10 @@ export function AvailableJobsTable() {
     pageSize: 5,
   });
 
+  const [sortingState, setSortingState] = useState<
+    { id: string; desc: boolean }[]
+  >([]);
+
   useEffect(() => {
     setFilterParams({
       ...filterParams,
@@ -178,6 +182,22 @@ export function AvailableJobsTable() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
   }, [paginationState]);
+  useEffect(() => {
+    if (sortingState.length) {
+      setFilterParams({
+        ...filterParams,
+        sort_field: sortingState[0].id as 'escrow_address',
+        sort: sortingState[0].desc ? 'DESC' : 'ASC',
+      });
+      return;
+    }
+    setFilterParams({
+      ...filterParams,
+      sort_field: undefined,
+      sort: undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
+  }, [sortingState]);
 
   const table = useMaterialReactTable({
     columns: getColumns({
@@ -191,17 +211,18 @@ export function AvailableJobsTable() {
       showAlertBanner: tableStatus === 'error',
       showProgressBars: tableStatus === 'pending' || isAssignJobMutationPending,
       pagination: paginationState,
+      sorting: sortingState,
     },
     enablePagination: true,
     manualPagination: true,
-    onPaginationChange: (updater) => {
-      setPaginationState(updater);
-    },
+    onPaginationChange: setPaginationState,
     pageCount: tableData?.total_pages,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: true,
+    manualSorting: true,
+    onSortingChange: setSortingState,
     renderTopToolbar: () => (
       <SearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
