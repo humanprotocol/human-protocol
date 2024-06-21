@@ -226,6 +226,7 @@ export function PageCardError({
   errorMessage,
   children,
   withLayoutBackground,
+  cardMaxWidth = '100%',
 }:
   | {
       errorMessage: string;
@@ -242,6 +243,10 @@ export function PageCardError({
   const navigate = useNavigate();
   const { setGrayBackground } = useBackgroundColorStore();
 
+  const sx = cardMaxWidth
+    ? { ...commonStyles, maxWidth: cardMaxWidth }
+    : commonStyles;
+
   useEffect(() => {
     if (withLayoutBackground) {
       setGrayBackground();
@@ -250,7 +255,7 @@ export function PageCardError({
   }, []);
 
   return (
-    <Grid container sx={commonStyles}>
+    <Grid container sx={sx}>
       {children ? (
         children
       ) : (

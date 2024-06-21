@@ -11,6 +11,7 @@ import { useWeb3Provider } from '@/hooks/use-web3-provider';
 import { env } from '@/shared/env';
 import type { ResponseError } from '@/shared/types/global.type';
 import { chains } from '@/smart-contracts/chains';
+import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
 
 const projectId = env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -102,17 +103,32 @@ export function WalletConnectProvider({
               chainId,
               web3ProviderMutation,
               openModal,
-              signMessage: (message: string) =>
-                web3ProviderMutation.data.signer.signMessage(message),
+              signMessage: async (message: string) => {
+                try {
+                  const signature =
+                    await web3ProviderMutation.data.signer.signMessage(message);
+                  return signature;
+                } catch (error) {
+                  throw new JsonRpcError(error);
+                }
+              },
               initializing,
             }
           : {
               isConnected: false,
               web3ProviderMutation,
               openModal,
-              signMessage: (message: string) => {
+              signMessage: async (message: string) => {
                 if (web3ProviderMutation.data) {
-                  return web3ProviderMutation.data.signer.signMessage(message);
+                  try {
+                    const signature =
+                      await web3ProviderMutation.data.signer.signMessage(
+                        message
+                      );
+                    return signature;
+                  } catch (error) {
+                    throw new JsonRpcError(error);
+                  }
                 }
                 return Promise.resolve(undefined);
               },

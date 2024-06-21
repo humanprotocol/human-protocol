@@ -18,7 +18,6 @@ import {
 } from '@/api/servieces/operator/get-stacked-amount';
 import { useAddStakeMutationState } from '@/api/servieces/operator/add-stake';
 import { useHMTokenDecimals } from '@/api/servieces/operator/human-token-decimals';
-import { jsonRpcErrorHandler } from '@/shared/helpers/json-rpc-error-handler';
 
 export function AddStakeOperatorPage() {
   const [displayForm, setDisplayForm] = useState(false);
@@ -40,10 +39,7 @@ export function AddStakeOperatorPage() {
       case Boolean(addStakeMutationState?.error):
         return (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(
-              addStakeMutationState?.error,
-              jsonRpcErrorHandler
-            )}
+            {defaultErrorMessage(addStakeMutationState?.error)}
           </Alert>
         );
       case addStakeMutationState?.status === 'success':
@@ -65,10 +61,7 @@ export function AddStakeOperatorPage() {
   if (isGetStakedAmountError || decimalsDataError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(
-          getStackedAmountError,
-          jsonRpcErrorHandler
-        )}
+        errorMessage={defaultErrorMessage(getStackedAmountError)}
       />
     );
   }

@@ -12,14 +12,16 @@ import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 import { RequireWeb3Auth } from '@/auth-web3/require-web3-auth';
 import { DrawerNavigation } from '@/components/layout/protected/drawer-navigation';
 import {
-  workerDrawerBottomMenuItems,
   workerDrawerTopMenuItems,
+  workerDrawerBottomMenuItems,
 } from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import { UserStatsDrawer } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-drawer';
+import { useAuth } from '@/auth/use-auth';
 
 export function Router() {
+  const { user } = useAuth();
   return (
     <Routes>
       <Route element={<LayoutUnprotected />}>
@@ -54,7 +56,7 @@ export function Router() {
                       window.location.reload();
                     });
                   }}
-                  topMenuItems={workerDrawerTopMenuItems}
+                  topMenuItems={workerDrawerTopMenuItems(!user?.address)}
                 />
               )}
               renderHCaptchaStatisticsDrawer={(isOpen) => (

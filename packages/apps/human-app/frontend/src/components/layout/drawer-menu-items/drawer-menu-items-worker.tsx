@@ -8,30 +8,35 @@ import type {
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 
-export const workerDrawerTopMenuItems: TopMenuItem[] = [
-  <Grid
-    key={crypto.randomUUID()}
-    sx={{
-      display: 'inline-flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: '0.8rem',
-    }}
-  >
-    <WorkIcon />
-    <Typography variant="body6">
-      {t('components.DrawerNavigation.jobs')}
-    </Typography>
-  </Grid>,
-  {
-    label: t('components.DrawerNavigation.captchaLabelling'),
-    link: routerPaths.worker.enableLabeler,
-  },
-  {
-    label: t('components.DrawerNavigation.jobsDiscovery'),
-    link: routerPaths.worker.jobsDiscovery,
-  },
-];
+export const workerDrawerTopMenuItems = (
+  disableLabeling: boolean
+): TopMenuItem[] => {
+  return [
+    <Grid
+      key={crypto.randomUUID()}
+      sx={{
+        display: 'inline-flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '0.8rem',
+      }}
+    >
+      <WorkIcon />
+      <Typography variant="body6">
+        {t('components.DrawerNavigation.jobs')}
+      </Typography>
+    </Grid>,
+    {
+      label: t('components.DrawerNavigation.captchaLabelling'),
+      link: routerPaths.worker.enableLabeler,
+      disabled: disableLabeling,
+    },
+    {
+      label: t('components.DrawerNavigation.jobsDiscovery'),
+      link: routerPaths.worker.jobsDiscovery,
+    },
+  ];
+};
 
 export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
   {

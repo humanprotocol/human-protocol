@@ -1,6 +1,6 @@
 import type { ZodError } from 'zod';
-import type { JsonRpcError } from 'ethers';
 import type { FetchError } from '@/api/fetcher';
+import type { JsonRpcError } from '@/smart-contracts/json-rpc-error';
 
 export interface Children {
   children?: React.ReactNode;
