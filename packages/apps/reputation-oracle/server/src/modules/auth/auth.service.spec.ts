@@ -24,7 +24,7 @@ import {
 } from '../../../test/constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
@@ -730,7 +730,7 @@ describe('AuthService', () => {
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
-            type: UserType.WORKER,
+            type: Role.WORKER,
             signature,
           });
 
@@ -754,7 +754,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
+              type: Role.WORKER,
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
@@ -773,7 +773,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
+              type: Role.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(
