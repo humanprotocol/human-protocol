@@ -1,34 +1,25 @@
 import Search from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { MRT_RowData, MRT_TableInstance } from 'material-react-table';
 import { Input } from '@/components/data-entry/input';
 import { colorPalette } from '@/styles/color-palette';
 
-interface ColumnValue {
-  id: string;
-  value: string;
-}
-
-interface SearchFormProps<T extends MRT_RowData> {
-  updater:
-    | MRT_TableInstance<T>['setColumnFilters']
-    | ((searchParams: ColumnValue[]) => void);
+interface SearchFormProps {
   label: string;
   name: string;
   placeholder: string;
   columnId: string;
   fullWidth?: boolean;
+  updater: (fieldValue: string) => void;
 }
 
-export function SearchForm<T extends MRT_RowData>({
-  updater,
+export function SearchForm({
   label,
   name,
   placeholder,
-  columnId,
+  updater,
   fullWidth = false,
-}: SearchFormProps<T>) {
+}: SearchFormProps) {
   const methods = useForm<{ searchValue: string }>({
     defaultValues: {
       searchValue: '',
@@ -49,7 +40,7 @@ export function SearchForm<T extends MRT_RowData>({
         label={label}
         name={name}
         onChange={(e) => {
-          updater([{ id: columnId, value: e.target.value }]);
+          updater(e.target.value);
         }}
         placeholder={placeholder}
         sx={{

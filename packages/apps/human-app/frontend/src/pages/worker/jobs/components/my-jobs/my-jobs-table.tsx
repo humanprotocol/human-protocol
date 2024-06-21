@@ -1,31 +1,40 @@
-/* eslint-disable camelcase -- ... */
-import type { MRT_ColumnDef } from 'material-react-table';
+/* eslint-disable camelcase -- ...*/
+import { t } from 'i18next';
+import { useEffect, useMemo, useState } from 'react';
+import Grid from '@mui/material/Grid';
+import { Link } from 'react-router-dom';
 import {
   MaterialReactTable,
   useMaterialReactTable,
+  type MRT_ColumnDef,
 } from 'material-react-table';
-import { t } from 'i18next';
-import { useEffect, useState } from 'react';
-import Grid from '@mui/material/Grid';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
-import type { MyJob } from '@/api/servieces/worker/my-jobs-data';
+import {
+  useGetMyJobsData,
+  type MyJob,
+} from '@/api/servieces/worker/my-jobs-data';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { Chip } from '@/components/ui/chip';
 import { formatDate } from '@/shared/helpers/format-date';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
-import { MyJobsButton } from '@/pages/worker/jobs/components/my-jobs/my-jobs-button';
 import { MyJobsJobTypeFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-job-type-filter';
 import { MyJobsRewardAmountSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-reward-amount-sort';
 import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-status-filter';
 import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/my-jobs-expires-at-sort';
-import { useMyJobsTableState } from '@/hooks/use-my-jobs-table-state';
 import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/my-jobs-network-filter';
+import { TableButton } from '@/components/ui/table-button';
+import { useRejectTaskMutation } from '@/api/servieces/worker/reject-task';
+import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
+import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { parseJobStatusChipColor } from './parse-job-status-chip-color';
 
-const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
+const getColumnsDefinition = (
+  jobTypes: string[],
+  resignJob: (assignment_id: number) => void
+): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
     header: t('worker.jobs.escrowAddress'),
@@ -155,10 +164,25 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
     size: 100,
     enableSorting: true,
     Cell: (props) => {
-      const { status } = props.row.original;
+      const { url, assignment_id, status } = props.row.original;
+      const buttonDisabled = status !== 'ACTIVE';
       return (
-        <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <MyJobsButton status={status} />
+        <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+          <TableButton
+            component={Link}
+            disabled={buttonDisabled}
+            target="_blank"
+            to={url}
+          >
+            {t('worker.jobs.solve')}
+          </TableButton>
+          <RejectButton
+            disabled={buttonDisabled}
+            onClick={() => {
+              if (buttonDisabled) return;
+              resignJob(assignment_id);
+            }}
+          />
         </Grid>
       );
     },
@@ -166,15 +190,32 @@ const getColumnsDefinition = (jobTypes: string[]): MRT_ColumnDef<MyJob>[] => [
 ];
 
 export function MyJobsTable() {
-  const { setFilterParams, filterParams, availableJobTypes } =
-    useMyJobsFilterStore();
-  const { myJobsTableState, myJobsTableQueryData } = useMyJobsTableState();
+  const {
+    setFilterParams,
+    filterParams,
+    availableJobTypes,
+    setSearchEscrowAddress,
+  } = useMyJobsFilterStore();
+  const { data: tableData, status: tableStatus } = useGetMyJobsData();
+  const memoizedTableDataResults = useMemo(
+    () => tableData?.results || [],
+    [tableData?.results]
+  );
 
+  const { mutate: rejectTaskMutation } = useRejectTaskMutation();
+  const {
+    filterParams: { oracle_address },
+  } = useJobsFilterStore();
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
     pageSize: 5,
   });
 
+  const rejectTask = (address: string) => {
+    return (assignment_id: number) => {
+      rejectTaskMutation({ address, assignment_id });
+    };
+  };
   useEffect(() => {
     setFilterParams({
       ...filterParams,
@@ -185,26 +226,36 @@ export function MyJobsTable() {
   }, [paginationState]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(availableJobTypes),
-    data: myJobsTableQueryData,
+    columns: getColumnsDefinition(
+      availableJobTypes,
+      rejectTask(oracle_address || '')
+    ),
+    data: memoizedTableDataResults,
     state: {
-      isLoading: myJobsTableState?.status === 'pending',
-      showAlertBanner: Boolean(myJobsTableState?.status === 'error'),
-      showProgressBars: myJobsTableState?.fetchStatus === 'fetching',
+      isLoading: tableStatus === 'pending',
+      showAlertBanner: tableStatus === 'error',
+      showProgressBars: tableStatus === 'pending',
       pagination: paginationState,
     },
+    enablePagination: true,
     manualPagination: true,
-    onPaginationChange: setPaginationState,
+    onPaginationChange: (updater) => {
+      setPaginationState(updater);
+    },
+    pageCount: tableData?.total_pages,
+    rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
-    renderTopToolbar: ({ table: tab }) => (
+    renderTopToolbar: () => (
       <SearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
         name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
-        updater={tab.setColumnFilters}
+        updater={(address) => {
+          setSearchEscrowAddress(address);
+        }}
       />
     ),
   });

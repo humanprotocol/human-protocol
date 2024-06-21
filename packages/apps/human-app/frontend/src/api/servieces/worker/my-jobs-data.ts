@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- api response*/
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
@@ -29,7 +29,7 @@ const myJobSchema = z.object({
   reward_token: z.string(),
   created_at: z.string(),
   expires_at: z.string(),
-  url: z.string(),
+  url: z.string().optional(),
 });
 
 const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
@@ -62,5 +62,20 @@ export function useGetMyJobsData() {
   return useQuery({
     queryKey: ['myJobs', filterParams],
     queryFn: () => getMyJobsTableData(filterParams),
+  });
+}
+
+export function useInfiniteGetMyJobsData() {
+  const { filterParams } = useMyJobsFilterStore();
+
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: ['myJobsInfinite', filterParams],
+    queryFn: () => getMyJobsTableData(filterParams),
+    getNextPageParam: (pageParams) => {
+      return pageParams.total_pages === pageParams.page
+        ? undefined
+        : pageParams.page;
+    },
   });
 }

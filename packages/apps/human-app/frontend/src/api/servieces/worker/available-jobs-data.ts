@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- api response*/
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
@@ -47,5 +47,20 @@ export function useGetAvailableJobsData() {
   return useQuery({
     queryKey: ['availableJobs', filterParams],
     queryFn: () => getAvailableJobsTableData(filterParams),
+  });
+}
+
+export function useInfiniteGetAvailableJobsData() {
+  const { filterParams } = useJobsFilterStore();
+
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: ['availableJobsInfinite', filterParams],
+    queryFn: () => getAvailableJobsTableData(filterParams),
+    getNextPageParam: (pageParams) => {
+      return pageParams.total_pages === pageParams.page
+        ? undefined
+        : pageParams.page;
+    },
   });
 }
