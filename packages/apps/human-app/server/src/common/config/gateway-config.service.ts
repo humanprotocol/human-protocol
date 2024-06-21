@@ -92,6 +92,11 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.TOKEN_REFRESH]: {
+              endpoint: '/auth/refresh',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },
         [ExternalApiName.HCAPTCHA_LABELING_STATS]: {

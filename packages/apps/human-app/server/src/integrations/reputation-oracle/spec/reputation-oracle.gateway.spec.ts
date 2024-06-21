@@ -70,6 +70,10 @@ import {
   registerAddressDataFixture,
   registerAddressResponseFixture,
 } from '../../../modules/register-address/spec/register-address.fixtures';
+import {
+  TokenRefreshCommand,
+  TokenRefreshData,
+} from '../../../modules/token-refresh/model/token-refresh.model';
 
 const httpServiceMock = {
   request: jest.fn(),
@@ -738,6 +742,64 @@ describe('ReputationOracleGateway', () => {
         registerAddressCommandFixture,
       );
       expect(httpService.request).toHaveBeenCalledWith(expectedOptions);
+    });
+  });
+
+  describe('sendRefeshToken', () => {
+    it('should successfully call the reputation oracle endpoint', async () => {
+      const command: TokenRefreshCommand = {
+        refreshToken: 'token',
+      };
+      const data: TokenRefreshData = {
+        refresh_token: command.refreshToken,
+      };
+      nock('https://example.com')
+        .post('/auth/refresh', {
+          ...data,
+        })
+        .reply(201, '');
+
+      httpServiceMock.request.mockReturnValue(of({}));
+
+      await expect(service.sendRefreshToken(command)).resolves.not.toThrow();
+      expect(httpService.request).toHaveBeenCalled();
+    });
+
+    it('should handle http error response correctly', async () => {
+      jest
+        .spyOn(httpService, 'request')
+        .mockReturnValue(
+          throwError(
+            () =>
+              new HttpException(
+                { message: 'Bad request' },
+                HttpStatus.BAD_REQUEST,
+              ),
+          ),
+        );
+
+      const command: TokenRefreshCommand = {
+        refreshToken: 'token',
+      };
+      await expect(service.sendRefreshToken(command)).rejects.toThrow(
+        new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('should handle network or unknown errors correctly', async () => {
+      jest
+        .spyOn(httpService, 'request')
+        .mockReturnValue(throwError(() => new Error('Internal Server Error')));
+
+      const command: TokenRefreshCommand = {
+        refreshToken: 'token',
+      };
+      await expect(service.sendRefreshToken(command)).rejects.toThrow(
+        new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
     });
   });
 

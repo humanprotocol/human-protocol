@@ -68,6 +68,11 @@ export const gatewayConfigServiceMock = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
+      TOKEN_REFRESH: {
+        endpoint: '/auth/refresh',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      },
     },
   }),
 };

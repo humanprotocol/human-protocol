@@ -65,6 +65,11 @@ import {
   RegisterAddressData,
   RegisterAddressResponse,
 } from '../../modules/register-address/model/register-address.model';
+import {
+  TokenRefreshCommand,
+  TokenRefreshData,
+  TokenRefreshResponse,
+} from '../../modules/token-refresh/model/token-refresh.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -284,5 +289,18 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<RegisterAddressResponse>(
       options,
     );
+  }
+
+  async sendRefreshToken(command: TokenRefreshCommand) {
+    const data = this.mapper.map(
+      command,
+      TokenRefreshCommand,
+      TokenRefreshData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.TOKEN_REFRESH,
+      data,
+    );
+    return this.handleRequestToReputationOracle<TokenRefreshResponse>(options);
   }
 }

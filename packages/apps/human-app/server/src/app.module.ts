@@ -36,6 +36,8 @@ import { ChainId } from '@human-protocol/sdk';
 import { RegisterAddressController } from './modules/register-address/register-address.controller';
 import { RegisterAddressModule } from './modules/register-address/register-address.module';
 import { InterceptorModule } from './common/interceptors/interceptor.module';
+import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
+import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
 
 @Module({
   imports: [
@@ -93,6 +95,7 @@ import { InterceptorModule } from './common/interceptors/interceptor.module';
     EscrowUtilsModule,
     RegisterAddressModule,
     InterceptorModule,
+    TokenRefreshModule,
   ],
   controllers: [
     AppController,
@@ -104,6 +107,7 @@ import { InterceptorModule } from './common/interceptors/interceptor.module';
     StatisticsController,
     HCaptchaController,
     RegisterAddressController,
+    TokenRefreshController,
   ],
   exports: [HttpModule],
 })

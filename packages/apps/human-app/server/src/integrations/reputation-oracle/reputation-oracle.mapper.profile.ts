@@ -23,9 +23,7 @@ import {
   SigninWorkerCommand,
   SigninWorkerData,
 } from '../../modules/user-worker/model/worker-signin.model';
-import {
-  EnableLabelingCommand,
-} from '../../modules/h-captcha/model/enable-labeling.model';
+import { EnableLabelingCommand } from '../../modules/h-captcha/model/enable-labeling.model';
 import {
   PrepareSignatureCommand,
   PrepareSignatureData,
@@ -54,6 +52,10 @@ import {
   RegisterAddressCommand,
   RegisterAddressData,
 } from '../../modules/register-address/model/register-address.model';
+import {
+  TokenRefreshCommand,
+  TokenRefreshData,
+} from '../../modules/token-refresh/model/token-refresh.model';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
@@ -105,6 +107,15 @@ export class ReputationOracleProfile extends AutomapperProfile {
         mapper,
         RestorePasswordCommand,
         RestorePasswordData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        TokenRefreshCommand,
+        TokenRefreshData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),
