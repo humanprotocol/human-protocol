@@ -2,15 +2,13 @@ import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-not
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { ResponseError } from '@/shared/types/global.type';
 
-export function useKycNotifications() {
+export function useKycErrorNotifications() {
   const { setTopNotification } = useProtectedLayoutNotification();
 
-  return {
-    onError: (error: ResponseError) => {
-      setTopNotification({
-        type: 'warning',
-        content: defaultErrorMessage(error),
-      });
-    },
+  return (error: ResponseError) => {
+    setTopNotification({
+      type: 'warning',
+      content: defaultErrorMessage(error),
+    });
   };
 }
