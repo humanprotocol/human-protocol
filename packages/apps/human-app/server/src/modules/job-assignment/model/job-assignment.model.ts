@@ -160,17 +160,17 @@ export class ResignJobDto {
   @AutoMap()
   @IsString()
   @ApiProperty()
-  assignment_id: string;
+  assignment_id: number;
 }
 
 export class ResignJobCommand {
   @AutoMap()
   oracleAddress: string;
   @AutoMap()
-  assignmentId: string;
+  assignmentId: number;
   token: string;
 }
 export class ResignJobData {
   @AutoMap()
-  assignment_id: string;
+  assignment_id: number;
 }
