@@ -8,15 +8,16 @@ import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Modal } from '@/components/ui/modal/modal';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/available-jobs-table';
-import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/my-jobs-table-mobile';
+import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-table-mobile';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { routerPaths } from '@/router/router-paths';
-import { AvailableJobsTableMobile } from './components/available-jobs/available-jobs-table-mobile';
-import { DrawerMobile } from './components/drawer-mobile';
+import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-table';
+import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-drawer-mobile';
+import { AvailableJobsDrawerMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-drawer-mobile';
+import { AvailableJobsTableMobile } from './components/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
-import { MyJobsTable } from './components/my-jobs/my-jobs-table';
+import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
 
 function generateTabA11yProps(index: number) {
   return {
@@ -37,7 +38,9 @@ export function JobsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
-  const [selectedTab, setSelectedTab] = useState('availableJobs');
+  const [selectedTab, setSelectedTab] = useState<'availableJobs' | 'myJobs'>(
+    'availableJobs'
+  );
   const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
     useState(false);
 
@@ -65,10 +68,15 @@ export function JobsPage() {
         isOpen={isMobileFilterDrawerOpen}
         sx={{ position: 'absolute', zIndex: '1400' }}
       >
-        <DrawerMobile
-          selectedTab={selectedTab}
-          setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
-        />
+        {selectedTab === 'availableJobs' ? (
+          <AvailableJobsDrawerMobile
+            setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
+          />
+        ) : (
+          <MyJobsDrawerMobile
+            setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
+          />
+        )}
       </Modal>
       <Grid alignItems="center" container justifyContent="center">
         <Grid item xs={12}>

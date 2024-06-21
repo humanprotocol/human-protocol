@@ -24,9 +24,9 @@ import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { JOB_TYPES } from '@/shared/consts';
-import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-network-filter';
-import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/available-jobs-reward-amount-sort';
-import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/available-jobs-job-type-filter';
+import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-network-filter';
+import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-reward-amount-sort';
+import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-job-type-filter';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {

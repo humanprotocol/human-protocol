@@ -2,53 +2,27 @@
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
-import {
-  Checkbox,
-  Divider,
-  IconButton,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
-import type { JobsFilterStoreProps } from '@/hooks/use-jobs-filter-store';
-import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { JOB_TYPES } from '@/shared/consts';
+import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 
 interface DrawerMobileProps {
-  selectedTab: string;
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
-export function DrawerMobile({
-  selectedTab,
+export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
   const { t } = useTranslation();
-  const { setFilterParams, filterParams } = useJobsFilterStore();
-
-  const handleCheckboxClick = (
-    paramName: keyof JobsFilterStoreProps['filterParams'],
-    paramValue: string
-  ) => {
-    if (filterParams[paramName] === paramValue) {
-      setFilterParams({
-        ...filterParams,
-        [paramName]: undefined,
-      });
-    } else {
-      setFilterParams({
-        ...filterParams,
-        [paramName]: paramValue,
-      });
-    }
-  };
+  const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
   return (
     <Box sx={{ display: 'flex', position: 'relative' }}>
@@ -122,7 +96,7 @@ export function DrawerMobile({
           }}
           variant="text"
         >
-          <SortArrow />{' '}
+          <SortArrow />
           <Typography
             onClick={() => {
               setFilterParams({
@@ -154,13 +128,73 @@ export function DrawerMobile({
             }}
           >
             <SortArrow />
-          </Box>{' '}
+          </Box>
           <Typography
             onClick={() => {
               setFilterParams({
                 ...filterParams,
                 sort: 'ASC',
                 sort_field: 'reward_amount',
+              });
+            }}
+            sx={{
+              marginLeft: '10px',
+            }}
+            variant="subtitle1"
+          >
+            From lowest
+          </Typography>
+        </Button>
+        <Typography color={colorPalette.text.secondary} variant="body2">
+          {t('worker.jobs.expiresAt')}
+        </Typography>
+        <Button
+          size="small"
+          sx={{
+            marginLeft: '16px',
+            maxWidth: 'fit-content',
+          }}
+          variant="text"
+        >
+          <SortArrow />
+          <Typography
+            onClick={() => {
+              setFilterParams({
+                ...filterParams,
+                sort: 'DESC',
+                sort_field: 'expires_at',
+              });
+            }}
+            sx={{
+              marginLeft: '10px',
+            }}
+            variant="subtitle1"
+          >
+            {t('worker.jobs.sortDirection.fromHighest')}
+          </Typography>
+        </Button>
+        <Button
+          size="small"
+          sx={{
+            marginLeft: '16px',
+            maxWidth: 'fit-content',
+            marginBottom: '16px',
+          }}
+          variant="text"
+        >
+          <Box
+            sx={{
+              transform: 'rotate(180deg)',
+            }}
+          >
+            <SortArrow />
+          </Box>
+          <Typography
+            onClick={() => {
+              setFilterParams({
+                ...filterParams,
+                sort: 'ASC',
+                sort_field: 'expires_at',
               });
             }}
             sx={{
@@ -216,58 +250,7 @@ export function DrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.status')}
         </Typography>
-        <>
-          <AvailableJobsStatusFilterMobile />
-          {selectedTab === 'myJobs' && (
-            <>
-              <Stack
-                alignItems="center"
-                flexDirection="row"
-                key={crypto.randomUUID()}
-              >
-                <Checkbox
-                  checked={filterParams.status === 'VALIDATION'}
-                  onClick={() => {
-                    handleCheckboxClick('status', 'VALIDATION');
-                  }}
-                />
-                <Typography>
-                  {t('worker.jobs.mobileFilterDrawer.jobsStatus.validation')}
-                </Typography>
-              </Stack>
-              <Stack
-                alignItems="center"
-                flexDirection="row"
-                key={crypto.randomUUID()}
-              >
-                <Checkbox
-                  checked={filterParams.status === 'EXPIRED'}
-                  onClick={() => {
-                    handleCheckboxClick('status', 'EXPIRED');
-                  }}
-                />
-                <Typography>
-                  {t('worker.jobs.mobileFilterDrawer.jobsStatus.expired')}
-                </Typography>
-              </Stack>
-              <Stack
-                alignItems="center"
-                flexDirection="row"
-                key={crypto.randomUUID()}
-              >
-                <Checkbox
-                  checked={filterParams.status === 'REJECTED'}
-                  onClick={() => {
-                    handleCheckboxClick('status', 'REJECTED');
-                  }}
-                />
-                <Typography>
-                  {t('worker.jobs.mobileFilterDrawer.jobsStatus.rejected')}
-                </Typography>
-              </Stack>
-            </>
-          )}
-        </>
+        <AvailableJobsStatusFilterMobile />
       </Drawer>
     </Box>
   );

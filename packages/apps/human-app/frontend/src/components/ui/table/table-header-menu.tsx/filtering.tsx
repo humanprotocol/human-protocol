@@ -16,6 +16,7 @@ interface FilteringProps<T> {
   isChecked: (option: T) => boolean;
   setFiltering: (option: T) => void;
   clear: () => void;
+  isMobile?: boolean;
 }
 
 export function Filtering<T>({
@@ -23,16 +24,19 @@ export function Filtering<T>({
   isChecked,
   setFiltering,
   clear,
+  isMobile = true,
 }: FilteringProps<T>) {
   return (
     <List sx={{ padding: 0 }}>
-      <Typography
-        color={colorPalette.text.secondary}
-        sx={{ padding: '0.5rem' }}
-        variant="body2"
-      >
-        {t('components.table.filter')}
-      </Typography>
+      {isMobile ? (
+        <Typography
+          color={colorPalette.text.secondary}
+          sx={{ padding: '0.5rem' }}
+          variant="body2"
+        >
+          {t('components.table.filter')}
+        </Typography>
+      ) : null}
       {filteringOptions.map(({ option, name }) => {
         return (
           <ListItem component="span" key={name} sx={{ padding: '0 0.5rem' }}>
@@ -40,6 +44,10 @@ export function Filtering<T>({
               checked={isChecked(option)}
               name={name}
               onClick={() => {
+                if (isChecked(option)) {
+                  clear();
+                  return;
+                }
                 setFiltering(option);
               }}
               sx={{ paddingLeft: 0, ':hover': { background: 'none' } }}
@@ -57,18 +65,22 @@ export function Filtering<T>({
           </ListItem>
         );
       })}
-      <Divider component="li" variant="fullWidth" />
-      <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>
-        <Typography
-          color={colorPalette.primary.main}
-          onClick={() => {
-            clear();
-          }}
-          variant="buttonMedium"
-        >
-          {t('components.table.clearBtn')}
-        </Typography>
-      </ListItem>
+      {isMobile ? (
+        <>
+          <Divider component="li" variant="fullWidth" />
+          <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>
+            <Typography
+              color={colorPalette.primary.main}
+              onClick={() => {
+                clear();
+              }}
+              variant="buttonMedium"
+            >
+              {t('components.table.clearBtn')}
+            </Typography>
+          </ListItem>
+        </>
+      ) : null}
     </List>
   );
 }
