@@ -14,7 +14,8 @@ import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
-import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
+import { useGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-data';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -31,8 +32,12 @@ export function AvailableJobsTableMobile({
     onError: onJobAssignmentError,
   });
 
-  const { availableJobsTableState, availableJobsTableQueryData } =
-    useAvailableJobsTableState();
+  const {
+    data: tableData,
+    status: tableStatus,
+    isError: isTableError,
+    error: tableError,
+  } = useGetAvailableJobsData();
 
   const { t } = useTranslation();
 
@@ -63,20 +68,18 @@ export function AvailableJobsTableMobile({
         <FiltersButtonIcon />
       </Button>
       <Stack flexDirection="column">
-        {availableJobsTableState?.status === 'error' ? (
+        {isTableError ? (
           <Alert color="error" severity="error">
-            {t('worker.jobs.errorFetchingData')}
+            {defaultErrorMessage(tableError)}
           </Alert>
         ) : null}
-        {availableJobsTableState?.status === 'pending' &&
-        !availableJobsTableState.error ? (
+        {tableStatus === 'pending' ? (
           <Stack alignItems="center" justifyContent="center">
             <Loader size={90} />
           </Stack>
         ) : null}
-        {availableJobsTableState?.status === 'success' &&
-        !availableJobsTableState.error
-          ? availableJobsTableQueryData.map((d) => (
+        {tableStatus === 'success'
+          ? tableData.results.map((d) => (
               <Paper
                 key={crypto.randomUUID()}
                 sx={{

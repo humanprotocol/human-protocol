@@ -29,7 +29,7 @@ const myJobSchema = z.object({
   reward_token: z.string(),
   created_at: z.string(),
   expires_at: z.string(),
-  url: z.string(),
+  url: z.string().optional(),
 });
 
 const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);

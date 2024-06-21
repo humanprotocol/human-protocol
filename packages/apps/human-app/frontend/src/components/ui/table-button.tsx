@@ -13,6 +13,9 @@ export function TableButton(props: CustomButtonProps) {
         color: colorPalette.white,
         paddingTop: '0.4rem',
         paddingBottom: '0.4rem',
+        whiteSpace: 'nowrap',
+        textWrap: 'nowrap',
+        ...props.sx,
       }}
       type="button"
       variant="contained"

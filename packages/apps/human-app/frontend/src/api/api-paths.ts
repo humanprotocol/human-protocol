@@ -40,6 +40,9 @@ export const apiPaths = {
     assignJob: {
       path: '/assignment/job',
     },
+    resignJob: {
+      path: '/assignment/resign-job',
+    },
     registerAddress: {
       path: '/user/register-address',
     },

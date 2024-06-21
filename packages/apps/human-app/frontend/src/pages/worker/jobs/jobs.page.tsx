@@ -8,9 +8,7 @@ import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Modal } from '@/components/ui/modal/modal';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-data';
 import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/available-jobs-table';
-import { useGetMyJobsData } from '@/api/servieces/worker/my-jobs-data';
 import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/my-jobs-table-mobile';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
@@ -35,8 +33,6 @@ export function JobsPage() {
     filterParams: { address },
   } = useMyJobsFilterStore();
 
-  useGetAvailableJobsData();
-  useGetMyJobsData();
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);

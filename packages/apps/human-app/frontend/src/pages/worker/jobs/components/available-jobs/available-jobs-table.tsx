@@ -5,11 +5,14 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 import { t } from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Grid, Typography } from '@mui/material';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
+import {
+  useGetAvailableJobsData,
+  type AvailableJob,
+} from '@/api/servieces/worker/available-jobs-data';
 import type { AssignJobBody } from '@/api/servieces/worker/assign-job';
 import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
@@ -17,7 +20,6 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
-import { useAvailableJobsTableState } from '@/hooks/use-available-jobs-table-state';
 import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
@@ -147,18 +149,21 @@ const getColumns = (callbacks: {
 };
 
 export function AvailableJobsTable() {
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+  const { setFilterParams, filterParams, setSearchEscrowAddress } =
+    useJobsFilterStore();
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
+  const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
+  const memoizedTableDataResults = useMemo(
+    () => tableData?.results || [],
+    [tableData?.results]
+  );
 
   const { mutate: assignJobMutation, isPending: isAssignJobMutationPending } =
     useAssignJobMutation({
       onSuccess: onJobAssignmentSuccess,
       onError: onJobAssignmentError,
     });
-
-  const { availableJobsTableState, availableJobsTableQueryData } =
-    useAvailableJobsTableState();
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -180,27 +185,32 @@ export function AvailableJobsTable() {
         assignJobMutation(data);
       },
     }),
-    data: availableJobsTableQueryData,
+    data: memoizedTableDataResults,
     state: {
-      isLoading: availableJobsTableState?.status === 'pending',
-      showAlertBanner: Boolean(availableJobsTableState?.status === 'error'),
-      showProgressBars:
-        availableJobsTableState?.fetchStatus === 'fetching' ||
-        isAssignJobMutationPending,
+      isLoading: tableStatus === 'pending',
+      showAlertBanner: tableStatus === 'error',
+      showProgressBars: tableStatus === 'pending' || isAssignJobMutationPending,
       pagination: paginationState,
     },
+    enablePagination: true,
     manualPagination: true,
-    onPaginationChange: setPaginationState,
+    onPaginationChange: (updater) => {
+      setPaginationState(updater);
+    },
+    pageCount: tableData?.total_pages,
+    rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: true,
-    renderTopToolbar: ({ table: tab }) => (
+    renderTopToolbar: () => (
       <SearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
         name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
-        updater={tab.setColumnFilters}
+        updater={(address) => {
+          setSearchEscrowAddress(address);
+        }}
       />
     ),
   });
