@@ -1,11 +1,6 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 
-interface SearchUpdaterProps {
-  id: string;
-  value: string;
-}
-
 export interface JobsFilterStoreProps {
   filterParams: {
     sort?: 'ASC' | 'DESC';
@@ -31,7 +26,7 @@ export interface JobsFilterStoreProps {
     partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => void;
   resetFilterParams: () => void;
-  setSearchEscrowAddress: (searchParams: SearchUpdaterProps[]) => void;
+  setSearchEscrowAddress: (escrow_address: string) => void;
   setOracleAddress: (oracleAddress: string) => void;
 }
 
@@ -57,17 +52,14 @@ export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
   resetFilterParams: () => {
     set({ filterParams: initialFiltersState });
   },
-  setSearchEscrowAddress: (searchParams: SearchUpdaterProps[]) => {
-    const escrowAddress = searchParams[0]?.value;
-    if (escrowAddress) {
-      set((state) => ({
-        ...state,
-        filterParams: {
-          ...state.filterParams,
-          escrow_address: escrowAddress,
-        },
-      }));
-    }
+  setSearchEscrowAddress: (escrow_address: string) => {
+    set((state) => ({
+      ...state,
+      filterParams: {
+        ...state.filterParams,
+        escrow_address,
+      },
+    }));
   },
   setOracleAddress: (oracleAddress: string) => {
     set((state) => ({
