@@ -50,7 +50,7 @@ export class RenameAndModifyUserRoleEnum1718970966064
       `CREATE TYPE "hmt"."users_type_enum_old" AS ENUM('OPERATOR', 'WORKER', 'HUMAN_APP', 'ADMIN')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "hmt"."users" ALTER COLUMN "type" TYPE "hmt"."users_type_enum_old" USING "type"::"text"::"hmt"."users_type_enum_old"`,
+      `ALTER TABLE "hmt"."users" ALTER COLUMN "role" TYPE "hmt"."users_type_enum_old" USING "role"::"text"::"hmt"."users_type_enum_old"`,
     );
     await queryRunner.query(`DROP TYPE "hmt"."users_role_enum"`);
     await queryRunner.query(
