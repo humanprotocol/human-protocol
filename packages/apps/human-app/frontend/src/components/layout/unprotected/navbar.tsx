@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Box, Drawer, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
+import { env } from '@/shared/env';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -51,10 +52,20 @@ export function Navbar({ withNavigation }: NavbarProps) {
           >
             {isMainPage ? (
               <>
-                <Button size="large" variant="text">
+                <Button
+                  component={Link}
+                  size="large"
+                  to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
+                  variant="text"
+                >
                   {t('components.navbar.humanProtocol')}
                 </Button>
-                <Button size="large" variant="text">
+                <Button
+                  component={Link}
+                  size="large"
+                  to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
+                  variant="text"
+                >
                   {t('components.navbar.howItWorks')}
                 </Button>
               </>
