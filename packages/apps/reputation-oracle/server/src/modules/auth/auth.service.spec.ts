@@ -30,7 +30,7 @@ import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient, Role } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -719,7 +719,7 @@ describe('AuthService', () => {
 
         it('should create a new web3 user and return the token', async () => {
           (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest.fn().mockResolvedValue(Role.JobLauncher),
+            get: jest.fn().mockResolvedValue('Job Launcher'),
             set: jest.fn(),
           }));
 
