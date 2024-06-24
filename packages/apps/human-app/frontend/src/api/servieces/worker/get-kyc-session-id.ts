@@ -41,8 +41,7 @@ export function useKycSessionIdMutation(callbacks: {
       const tokenExpired = (tokenPayload.exp || 0) < new Date().getTime();
 
       const tokenOrSignInResponseData = tokenExpired
-        ? accessToken
-        : await apiClient(apiPaths.worker.obtainAccessToken.path, {
+        ? await apiClient(apiPaths.worker.obtainAccessToken.path, {
             successSchema: signInSuccessResponseSchema,
             options: {
               method: 'POST',
@@ -50,7 +49,8 @@ export function useKycSessionIdMutation(callbacks: {
                 refresh_token: browserAuthProvider.getRefreshToken(),
               }),
             },
-          });
+          })
+        : accessToken;
 
       if (typeof tokenOrSignInResponseData !== 'string') {
         browserAuthProvider.signIn(

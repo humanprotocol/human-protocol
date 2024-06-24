@@ -164,10 +164,10 @@ export function createFetcher(defaultFetcherConfig?: {
         return;
       }
 
-      appendHeader(fetcherOptionsWithDefaults, {
+      const newHeaders = appendHeader(fetcherOptionsWithDefaults, {
         Authorization: `Bearer ${refetchAccessTokenSuccess.access_token}`,
       });
-      response = await fetch(fetcherUrl, fetcherOptionsWithDefaults);
+      response = await fetch(fetcherUrl, newHeaders);
 
       if (!response.ok) {
         browserAuthProvider.signOut(() => {
