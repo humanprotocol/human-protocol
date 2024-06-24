@@ -1241,7 +1241,8 @@ export class JobService {
     }
 
     if (jobEntity.requestType === JobRequestType.FORTUNE) {
-      const result = await this.storageService.download(finalResultUrl);
+      const data = await this.storageService.download(finalResultUrl);
+      const result = typeof data === 'string' ? JSON.parse(data) : data;
 
       if (!result) {
         throw new ControlledError(
