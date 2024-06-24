@@ -54,6 +54,7 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @UseGuards(JwtAuthGuard)
+  @AllowedRoles([Role.Worker, Role.HumanApp])
   @ApiBearerAuth()
   @Get()
   getJobs(

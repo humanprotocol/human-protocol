@@ -3,4 +3,5 @@ export enum Role {
   Recording = 'recording',
   Reputation = 'reputation',
   Worker = 'worker',
+  HumanApp = 'human_app',
 }
