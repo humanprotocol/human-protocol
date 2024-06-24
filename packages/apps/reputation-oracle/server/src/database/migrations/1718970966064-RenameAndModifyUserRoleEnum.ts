@@ -47,14 +47,14 @@ export class RenameAndModifyUserRoleEnum1718970966064
       `DROP INDEX "hmt"."IDX_271231e19f913b8a0cf028e9e7"`,
     );
     await queryRunner.query(
-      `CREATE TYPE "hmt"."users_role_enum_old" AS ENUM('OPERATOR', 'WORKER', 'HUMAN_APP', 'ADMIN')`,
+      `CREATE TYPE "hmt"."users_type_enum_old" AS ENUM('OPERATOR', 'WORKER', 'HUMAN_APP', 'ADMIN')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "hmt"."users" ALTER COLUMN "role" TYPE "hmt"."users_role_enum_old" USING "role"::"text"::"hmt"."users_role_enum_old"`,
+      `ALTER TABLE "hmt"."users" ALTER COLUMN "type" TYPE "hmt"."users_type_enum_old" USING "type"::"text"::"hmt"."users_type_enum_old"`,
     );
     await queryRunner.query(`DROP TYPE "hmt"."users_role_enum"`);
     await queryRunner.query(
-      `ALTER TYPE "hmt"."users_role_enum_old" RENAME TO "users_type_enum"`,
+      `ALTER TYPE "hmt"."users_type_enum_old" RENAME TO "users_type_enum"`,
     );
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP`,
