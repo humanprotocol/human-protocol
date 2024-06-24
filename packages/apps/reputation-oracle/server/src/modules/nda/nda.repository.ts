@@ -11,14 +11,6 @@ export class NDARepository extends BaseRepository<NDAEntity> {
     super(NDAEntity, dataSource);
   }
 
-  async getLastNDA(user: UserEntity): Promise<NDAEntity | null> {
-    return this.findOne({
-      where: { user },
-      order: { createdAt: 'DESC' },
-      relations: { ndaVersion: true },
-    });
-  }
-
   async findSignedNDAByUserAndVersion(
     user: UserEntity,
     ndaVersion: NDAVersionEntity,
