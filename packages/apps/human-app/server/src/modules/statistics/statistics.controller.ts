@@ -17,9 +17,10 @@ import {
   UserStatisticsDto,
   UserStatisticsResponse,
 } from './model/user-statistics.model';
-import { Authorization } from '../../common/config/params-decorators';
+import { Authorization, JwtPayload } from '../../common/config/params-decorators';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { JwtUserData } from '../../common/utils/jwt-token.model';
 
 @Controller()
 export class StatisticsController {
@@ -49,6 +50,7 @@ export class StatisticsController {
   @UsePipes(new ValidationPipe())
   public getUserStatistics(
     @Query() dto: UserStatisticsDto,
+    @JwtPayload() payload: JwtUserData,
     @Authorization() token: string,
   ): Promise<UserStatisticsResponse> {
     const command = this.mapper.map(
@@ -57,6 +59,7 @@ export class StatisticsController {
       UserStatisticsCommand,
     );
     command.token = token;
+    command.walletAddress = payload.address;
     return this.service.getUserStats(command);
   }
 }

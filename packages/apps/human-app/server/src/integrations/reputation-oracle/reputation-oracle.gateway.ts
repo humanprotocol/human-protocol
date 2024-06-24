@@ -8,12 +8,9 @@ import {
   SignupWorkerData,
 } from '../../modules/user-worker/model/worker-registration.model';
 import {
-  SigninOperatorCommand,
-  SigninOperatorData,
-  SigninOperatorResponse,
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/user-operator/model/operator.model';
+} from '../../modules/user-operator/model/operator-registration.model';
 import { GatewayConfigService } from '../../common/config/gateway-config.service';
 import {
   GatewayConfig,
@@ -70,6 +67,11 @@ import {
   TokenRefreshData,
   TokenRefreshResponse,
 } from '../../modules/token-refresh/model/token-refresh.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorData,
+  SigninOperatorResponse,
+} from '../../modules/user-operator/model/operator-signin.model';
 
 @Injectable()
 export class ReputationOracleGateway {

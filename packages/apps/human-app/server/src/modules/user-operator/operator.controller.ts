@@ -10,12 +10,14 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  SignupOperatorCommand,
+  SignupOperatorDto,
+} from './model/operator-registration.model';
+import {
   SigninOperatorCommand,
   SigninOperatorDto,
   SigninOperatorResponse,
-  SignupOperatorCommand,
-  SignupOperatorDto,
-} from './model/operator.model';
+} from './model/operator-signin.model';
 
 @Controller()
 export class OperatorController {

@@ -5,12 +5,12 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { OperatorProfile } from '../operator.mapper.profile';
 import {
-  SigninOperatorCommand,
   SignupOperatorCommand,
   SignupOperatorDto,
-} from '../model/operator.model';
+} from '../model/operator-registration.model';
 import { UserType } from '../../../common/enums/user';
 import { operatorServiceMock } from './operator.service.mock';
+import { SigninOperatorCommand } from '../model/operator-signin.model';
 
 describe('OperatorController', () => {
   let controller: OperatorController;

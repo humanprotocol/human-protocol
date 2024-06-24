@@ -28,7 +28,7 @@
       "destination": "/api/app.ts"
     },
     {
-      "source": "/user/prepare-signature",
+      "source": "/web3/prepare-signature",
       "destination": "/api/app.ts"
     },
     {

@@ -50,7 +50,6 @@ describe('HCaptchaService', () => {
         {
           provide: EnvironmentConfigService,
           useValue: {
-            dailyHmtSpentKey: 'daily_hmt_spent',
             cacheTtlDailyHmtSpent: 3600,
             cacheTtlHCaptchaUserStats: 3600,
           },
@@ -194,7 +193,6 @@ describe('HCaptchaService', () => {
       const result = await service.getDailyHmtSpent(command);
       expect(result).toEqual(dailyHmtSpentResponseFixture);
       expect(cacheManager.set).toHaveBeenCalledWith(
-        configService.dailyHmtSpentKey,
         dailyHmtSpentResponseFixture,
         configService.cacheTtlDailyHmtSpent,
       );

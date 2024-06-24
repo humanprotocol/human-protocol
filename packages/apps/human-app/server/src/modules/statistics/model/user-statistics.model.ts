@@ -13,6 +13,7 @@ export class UserStatisticsCommand {
   @AutoMap()
   oracleAddress: string;
   token: string;
+  walletAddress: string;
 }
 export class UserStatisticsDto {
   @ApiProperty({ example: 'string' })

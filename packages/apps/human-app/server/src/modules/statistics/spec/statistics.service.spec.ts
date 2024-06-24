@@ -11,6 +11,7 @@ import {
   OracleStatisticsResponse,
 } from '../model/oracle-statistics.model';
 const EXCHANGE_ORACLE_ADDRESS = '0x8f238b21aa2056';
+const WALLET_ADDRESS = '0x3df51d';
 const TOKEN = 'token1';
 describe('StatisticsService', () => {
   let service: StatisticsService;
@@ -90,12 +91,13 @@ describe('StatisticsService', () => {
   describe('getUserStats', () => {
     it('should return cached data if available', async () => {
       const cachedData = { userData: 'data' };
-      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + TOKEN;
+      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + WALLET_ADDRESS;
       cacheManager.get.mockResolvedValue(cachedData);
 
       const command = {
         oracleAddress: EXCHANGE_ORACLE_ADDRESS,
         token: TOKEN,
+        walletAddress: WALLET_ADDRESS,
       };
       const result = await service.getUserStats(command);
 
@@ -106,13 +108,14 @@ describe('StatisticsService', () => {
 
     it('should fetch, cache, and return new data if not in cache', async () => {
       const newData = { newData: 'data' };
-      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + TOKEN;
+      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + WALLET_ADDRESS;
       cacheManager.get.mockResolvedValue(undefined);
       exchangeGateway.fetchUserStatistics.mockResolvedValue(newData);
 
       const command = {
         oracleAddress: EXCHANGE_ORACLE_ADDRESS,
         token: TOKEN,
+        walletAddress: WALLET_ADDRESS,
       } as UserStatisticsCommand;
       const result = await service.getUserStats(command);
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);

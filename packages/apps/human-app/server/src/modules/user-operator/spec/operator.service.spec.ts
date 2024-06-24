@@ -3,7 +3,7 @@ import { OperatorService } from '../operator.service';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { UserType } from '../../../common/enums/user';
 import { reputationOracleGatewayMock } from '../../../integrations/reputation-oracle/spec/reputation-oracle.gateway.mock';
-import { SigninOperatorCommand } from '../model/operator.model';
+import { SigninOperatorCommand } from '../model/operator-signin.model';
 
 describe('OperatorService', () => {
   let service: OperatorService;

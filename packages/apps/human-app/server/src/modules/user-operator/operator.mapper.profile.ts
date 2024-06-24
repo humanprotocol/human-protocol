@@ -2,11 +2,13 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { createMap, Mapper } from '@automapper/core';
 import {
-  SigninOperatorCommand,
-  SigninOperatorDto,
   SignupOperatorCommand,
   SignupOperatorDto,
-} from './model/operator.model';
+} from './model/operator-registration.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorDto,
+} from './model/operator-signin.model';
 
 @Injectable()
 export class OperatorProfile extends AutomapperProfile {

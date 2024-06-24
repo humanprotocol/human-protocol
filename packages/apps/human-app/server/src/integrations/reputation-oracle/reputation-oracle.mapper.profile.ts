@@ -3,18 +3,14 @@ import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
-  forMember,
-  mapFrom,
   Mapper,
   namingConventions,
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import {
-  SigninOperatorCommand,
-  SigninOperatorData,
   SignupOperatorCommand,
   SignupOperatorData,
-} from '../../modules/user-operator/model/operator.model';
+} from '../../modules/user-operator/model/operator-registration.model';
 import {
   SignupWorkerCommand,
   SignupWorkerData,
@@ -23,7 +19,6 @@ import {
   SigninWorkerCommand,
   SigninWorkerData,
 } from '../../modules/user-worker/model/worker-signin.model';
-import { EnableLabelingCommand } from '../../modules/h-captcha/model/enable-labeling.model';
 import {
   PrepareSignatureCommand,
   PrepareSignatureData,
@@ -56,6 +51,10 @@ import {
   TokenRefreshCommand,
   TokenRefreshData,
 } from '../../modules/token-refresh/model/token-refresh.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorData,
+} from '../../modules/user-operator/model/operator-signin.model';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {

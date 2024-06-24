@@ -9,7 +9,7 @@ import {
   namingConventions,
   SnakeCaseNamingConvention,
 } from '@automapper/core';
-import { JwtUserData } from '../../common/interfaces/jwt-token.model';
+import { JwtUserData } from '../../common/utils/jwt-token.model';
 import { EnableLabelingCommand } from './model/enable-labeling.model';
 import { DailyHmtSpentCommand } from './model/daily-hmt-spent.model';
 import { UserStatsCommand } from './model/user-stats.model';

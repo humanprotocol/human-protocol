@@ -42,9 +42,6 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_ORACLE_STATS,
     );
   }
-  get dailyHmtSpentKey(): string {
-    return this.configService.getOrThrow('DAILY_HMT_SPENT_KEY');
-  }
   get cacheTtlUserStats(): number {
     return this.configService.get<number>(
       'CACHE_TTL_USER_STATS',
