@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
+  IsEnum,
   IsEthereumAddress,
   IsString,
   Matches,
@@ -10,6 +11,7 @@ import {
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
+import { UserType } from '../../common/enums/user';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -102,6 +104,12 @@ export class Web3SignUpDto {
   @ApiProperty()
   @IsString()
   public signature: string;
+
+  @ApiProperty({
+    enum: UserType,
+  })
+  @IsEnum(UserType)
+  public type: UserType;
 
   @ApiProperty()
   @IsString()

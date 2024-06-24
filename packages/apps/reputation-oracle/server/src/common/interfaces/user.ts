@@ -5,5 +5,5 @@ export interface IUser extends IBase {
   password: string;
   email: string;
   status: UserStatus;
-  role: UserType;
+  type: UserType;
 }

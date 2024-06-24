@@ -154,7 +154,6 @@ export class AuthService {
       email: userEntity.email,
       userId: userEntity.id,
       address: userEntity.evmAddress,
-      role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       reputation_network: this.web3Service.getOperatorAddress(),
     };
