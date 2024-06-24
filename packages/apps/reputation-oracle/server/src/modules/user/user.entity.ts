@@ -19,7 +19,7 @@ export class UserEntity extends BaseEntity implements IUser {
   public email: string;
 
   @Column({ type: 'enum', enum: UserType })
-  public type: UserType;
+  public role: UserType;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
   public evmAddress: string;

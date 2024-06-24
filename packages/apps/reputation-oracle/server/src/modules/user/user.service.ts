@@ -52,7 +52,7 @@ export class UserService {
     const newUser = new UserEntity();
     newUser.email = dto.email;
     newUser.password = bcrypt.hashSync(dto.password, this.HASH_ROUNDS);
-    newUser.type = UserType.WORKER;
+    newUser.role = UserType.WORKER;
     newUser.status = UserStatus.PENDING;
     await this.userRepository.createUnique(newUser);
     return newUser;
@@ -90,7 +90,7 @@ export class UserService {
     const newUser = new UserEntity();
     newUser.evmAddress = address;
     newUser.nonce = generateNonce();
-    newUser.type = UserType.OPERATOR;
+    newUser.role = UserType.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
 
     await this.userRepository.createUnique(newUser);
@@ -125,7 +125,7 @@ export class UserService {
   }
 
   public async registerLabeler(user: UserEntity): Promise<string> {
-    if (user.type !== UserType.WORKER) {
+    if (user.role !== UserType.WORKER) {
       throw new BadRequestException(ErrorUser.InvalidType);
     }
 
