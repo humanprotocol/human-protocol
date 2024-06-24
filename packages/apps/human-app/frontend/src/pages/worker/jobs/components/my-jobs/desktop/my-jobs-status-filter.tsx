@@ -14,6 +14,7 @@ export function MyJobsStatusFilter() {
         setFilterParams({
           ...filterParams,
           status: undefined,
+          page: 0,
         });
       }}
       filteringOptions={jobStatuses.map((status) => ({
@@ -25,6 +26,7 @@ export function MyJobsStatusFilter() {
         setFilterParams({
           ...filterParams,
           status,
+          page: 0,
         });
       }}
     />

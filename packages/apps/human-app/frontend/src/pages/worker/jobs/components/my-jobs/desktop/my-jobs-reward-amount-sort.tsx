@@ -11,6 +11,7 @@ export function MyJobsRewardAmountSort() {
       ...filterParams,
       sort_field: 'reward_amount',
       sort: 'ASC',
+      page: 0,
     });
   };
 
@@ -19,6 +20,7 @@ export function MyJobsRewardAmountSort() {
       ...filterParams,
       sort_field: 'reward_amount',
       sort: 'DESC',
+      page: 0,
     });
   };
 
@@ -29,16 +31,17 @@ export function MyJobsRewardAmountSort() {
           ...filterParams,
           sort_field: undefined,
           sort: undefined,
+          page: 0,
         });
       }}
       sortingOptions={[
         {
           label: t('worker.jobs.sortDirection.fromHighest'),
-          sortCallback: sortAscRewardAmount,
+          sortCallback: sortDescRewardAmount,
         },
         {
           label: t('worker.jobs.sortDirection.fromLowest'),
-          sortCallback: sortDescRewardAmount,
+          sortCallback: sortAscRewardAmount,
         },
       ]}
     />

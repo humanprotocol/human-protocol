@@ -25,6 +25,7 @@ export function AvailableJobsNetworkFilter() {
         setFilterParams({
           ...filterParams,
           chain_id: chainId,
+          page: 0,
         });
       }}
     />
