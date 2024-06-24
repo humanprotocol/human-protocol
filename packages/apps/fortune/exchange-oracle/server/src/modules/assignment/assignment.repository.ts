@@ -39,27 +39,14 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     });
   }
 
-  public async findOneByIdAndWorker(
+  public async findOneById(
     assignmentId: number,
-    workerAddress: string,
   ): Promise<AssignmentEntity | null> {
     return this.findOne({
       where: {
         id: assignmentId,
-        workerAddress,
       },
-    });
-  }
-
-  public async findOneByEscrowAndWorker(
-    escrowAddress: string,
-    workerAddress: string,
-  ): Promise<AssignmentEntity | null> {
-    return this.findOne({
-      where: {
-        job: { escrowAddress },
-        workerAddress,
-      },
+      relations: ['job'],
     });
   }
 

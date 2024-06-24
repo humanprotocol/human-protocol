@@ -15,9 +15,7 @@ import { AssignmentRepository } from '../assignment/assignment.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([JobEntity]),
-    TypeOrmModule.forFeature([WebhookEntity]),
-    TypeOrmModule.forFeature([AssignmentEntity]),
+    TypeOrmModule.forFeature([JobEntity, WebhookEntity, AssignmentEntity]),
     ConfigModule,
     HttpModule,
     Web3Module,
