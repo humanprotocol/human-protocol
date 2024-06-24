@@ -11,7 +11,13 @@ import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operato
 import { Chips } from '@/components/ui/chips';
 import { Chip } from '@/components/ui/chip';
 
-export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
+export function ExistingKeys({
+  openEditMode,
+  existingKeysInitialState,
+}: {
+  openEditMode: () => void;
+  existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
+}) {
   const { getValues } = useFormContext<GetEthKVStoreValuesSuccessResponse>();
   const publicKey = getValues(EthKVStoreKeys.PublicKey);
   const webhookUrl = getValues(EthKVStoreKeys.WebhookUrl);
@@ -24,42 +30,61 @@ export function ExistingKeys({ openEditMode }: { openEditMode: () => void }) {
       <Typography variant="body4">
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
-      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2">
-          {t('operator.addKeysPage.existingKeys.fee')}
-        </Typography>
-        <Typography variant="body1">
-          <OptionalText text={fee?.toString()} />
-        </Typography>
-      </Grid>
-      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2" width="100%">
-          {t('operator.addKeysPage.existingKeys.publicKey')}
-        </Typography>
-        <Typography variant="body1" width="100%">
-          <OptionalText text={publicKey} />
-        </Typography>
-      </Grid>
-      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2" width="100%">
-          {t('operator.addKeysPage.existingKeys.webhookUrl')}
-        </Typography>
-        <Typography variant="body1" width="100%">
-          <OptionalText text={webhookUrl} />
-        </Typography>
-      </Grid>
-      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2" width="100%">
-          {t('operator.addKeysPage.existingKeys.role')}
-        </Typography>
-        <div>{role ? <Chip label={role} /> : <EmptyPlaceholder />}</div>
-      </Grid>
-      <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-        <Typography variant="subtitle2" width="100%">
-          {t('operator.addKeysPage.existingKeys.jobType')}
-        </Typography>
-        <div>{jobTypes ? <Chips data={jobTypes} /> : <EmptyPlaceholder />}</div>
-      </Grid>
+
+      {existingKeysInitialState.fee ? (
+        <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+          <Typography variant="subtitle2">
+            {t('operator.addKeysPage.existingKeys.fee')}
+          </Typography>
+          <Typography variant="body1">
+            <OptionalText
+              text={fee?.toString() + t('inputMasks.percentSuffix')}
+            />
+          </Typography>
+        </Grid>
+      ) : null}
+      {existingKeysInitialState.public_key ? (
+        <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+          <Typography variant="subtitle2" width="100%">
+            {t('operator.addKeysPage.existingKeys.publicKey')}
+          </Typography>
+          <Typography variant="body1" width="100%">
+            <OptionalText text={publicKey} />
+          </Typography>
+        </Grid>
+      ) : null}
+
+      {existingKeysInitialState.webhook_url ? (
+        <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+          <Typography variant="subtitle2" width="100%">
+            {t('operator.addKeysPage.existingKeys.webhookUrl')}
+          </Typography>
+          <Typography variant="body1" width="100%">
+            <OptionalText text={webhookUrl} />
+          </Typography>
+        </Grid>
+      ) : null}
+
+      {existingKeysInitialState.role ? (
+        <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+          <Typography variant="subtitle2" width="100%">
+            {t('operator.addKeysPage.existingKeys.role')}
+          </Typography>
+          <div>{role ? <Chip label={role} /> : <EmptyPlaceholder />}</div>
+        </Grid>
+      ) : null}
+
+      {existingKeysInitialState.job_types?.length ? (
+        <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+          <Typography variant="subtitle2" width="100%">
+            {t('operator.addKeysPage.existingKeys.jobType')}
+          </Typography>
+          <div>
+            {jobTypes ? <Chips data={jobTypes} /> : <EmptyPlaceholder />}
+          </div>
+        </Grid>
+      ) : null}
+
       <div>
         <Button
           fullWidth={false}

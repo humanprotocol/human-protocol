@@ -1,9 +1,5 @@
 import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { useFormState } from 'react-hook-form';
-import type { CustomButtonProps } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { Input } from '@/components/data-entry/input';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
 import { Select } from '@/components/data-entry/select';
@@ -13,47 +9,43 @@ import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operato
 
 const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
-export function EditExistingKeysForm({
+export function EditPendingKeysForm({
   existingKeysInitialState,
-  formButtonProps,
 }: {
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
-  formButtonProps: CustomButtonProps;
 }) {
-  const { errors } = useFormState();
-  const noChangesError = errors.form?.message as string;
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '1rem' }}>
       <Typography variant="body4">
-        {t('operator.addKeysPage.existingKeys.title')}
+        {t('operator.addKeysPage.pendingKeys.title')}
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
-        {existingKeysInitialState.fee ? (
+        {!existingKeysInitialState.fee ? (
           <Input
             fullWidth
-            label={t('operator.addKeysPage.existingKeys.fee')}
+            label={t('operator.addKeysPage.pendingKeys.fee')}
             mask="PercentsInputMask"
             name={EthKVStoreKeys.Fee}
           />
         ) : null}
-        {existingKeysInitialState.public_key ? (
+        {!existingKeysInitialState.public_key ? (
           <Input
             fullWidth
-            label={t('operator.addKeysPage.existingKeys.publicKey')}
+            label={t('operator.addKeysPage.pendingKeys.publicKey')}
             name={EthKVStoreKeys.PublicKey}
           />
         ) : null}
-        {existingKeysInitialState.webhook_url ? (
+        {!existingKeysInitialState.webhook_url ? (
           <Input
             fullWidth
-            label={t('operator.addKeysPage.existingKeys.webhookUrl')}
+            label={t('operator.addKeysPage.pendingKeys.webhookUrl')}
             name={EthKVStoreKeys.WebhookUrl}
           />
         ) : null}
-        {existingKeysInitialState.webhook_url ? (
+        {!existingKeysInitialState.webhook_url ? (
           <Select
             isChipRenderValue
-            label={t('operator.addKeysPage.existingKeys.role')}
+            label={t('operator.addKeysPage.pendingKeys.role')}
             name={EthKVStoreKeys.Role}
             options={OPTIONS.map((role, i) => ({
               name: role,
@@ -62,31 +54,13 @@ export function EditExistingKeysForm({
             }))}
           />
         ) : null}
-        {existingKeysInitialState.job_types ? (
+        {!existingKeysInitialState.job_types ? (
           <MultiSelect
-            label={t('operator.addKeysPage.existingKeys.jobType')}
+            label={t('operator.addKeysPage.pendingKeys.jobType')}
             name={EthKVStoreKeys.JobTypes}
             options={JOB_TYPES}
           />
         ) : null}
-        {noChangesError ? (
-          <div>
-            <Typography
-              color={colorPalette.error.main}
-              component="div"
-              variant="helperText"
-            >
-              {noChangesError}
-            </Typography>
-          </div>
-        ) : null}
-        <div>
-          <Button {...formButtonProps}>
-            <Typography color={colorPalette.white} variant="buttonMedium">
-              {t('operator.addKeysPage.editKeysForm.btn')}
-            </Typography>
-          </Button>
-        </div>
       </Grid>
     </Grid>
   );
