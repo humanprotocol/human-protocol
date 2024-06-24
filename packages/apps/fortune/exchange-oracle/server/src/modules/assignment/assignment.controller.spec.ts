@@ -78,7 +78,9 @@ describe('assignmentController', () => {
         chainId: 80001,
         escrowAddress: escrowAddress,
       };
-      jest.spyOn(assignmentService, 'createAssignment').mockResolvedValue();
+      jest
+        .spyOn(assignmentService, 'createAssignment')
+        .mockResolvedValue({} as any);
       await assignmentController.createAssignment(
         {
           user: { address: userAddress },

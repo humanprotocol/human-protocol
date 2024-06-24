@@ -1,13 +1,11 @@
 name: Subgraph deployment
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - packages/sdk/typescript/subgraph/**
-      - .github/workflows/cd-subgraph.yaml
   workflow_dispatch:
+    inputs:
+      label:
+        description: 'New version label'
+        required: true
 
 jobs:
   subgraph:
@@ -16,56 +14,42 @@ jobs:
     strategy:
       matrix:
         network:
-          - name: matic
-            graph: polygon-v2
-          - name: goerli
-            graph: goerli-v2
-          - name: moonbeam
-            graph: moonbeam-v2
-          - name: bsc
-            graph: bsc-v2
-          - name: chapel
-            graph: bsctest-v2
-          - name: mumbai
-            graph: mumbai-v2
-          - name: mbase
-            graph: moonbase-alpha-v2
-          - name: mainnet
-            graph: mainnet-v2
-          - name: fuji
-            graph: fuji-v2
+          - name: amoy
           - name: avalanche
-            graph: avalanche-v2
-          - name: celo
-            graph: celo
+          - name: bsc-testnet
+          - name: bsc
           - name: celo-alfajores
-            graph: celo-alfajores
-          - name : xlayer-testnet
-            graph: xlayer-testnet
+          - name: celo
+          - name: ethereum
+          - name: fuji
+          - name: moonbase-alpha
+          - name: moonbeam
+          - name: polygon
+          - name: sepolia
+          - name: xlayer-testnet
           - name: xlayer
-            graph: xlayer
       fail-fast: true
       max-parallel: 3
     steps:
       - uses: actions/checkout@v4
-      - run: yarn --ignore-scripts
+      - run: npm install --global yarn && yarn --ignore-scripts
         name: Install dependencies
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
       - run: yarn global add @graphprotocol/graph-cli
         name: Install Graph CLI
-      - run: graph auth --product hosted-service ${API_KEY}
+      - run: graph auth --studio ${API_KEY}
         name: Authenticate Graph CLI
         env:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
-      - run: yarn generate
-        name: Generate Subgraph
+      - run: yarn generate && yarn build
+        name: Generate and build Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
-          NETWORK: ${{ matrix.network.graph }}
-      - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
+          NETWORK: ${{ matrix.network.name }}
+      - run: graph deploy --studio ${NETWORK} -l ${{ github.event.inputs.label }}
         name: Deploy Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
-          NETWORK: ${{ matrix.network.graph }}
+          NETWORK: ${{ matrix.network.name }}

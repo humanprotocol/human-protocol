@@ -15,7 +15,7 @@ export default new DataSource({
   port: Number(process.env.POSTGRES_PORT),
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DATABASE,
+  database: process.env.POSTGRES_DATABASE || 'exchange-oracle',
   entities: ['dist/src/**/*.entity{.ts,.js}'],
   synchronize: false,
   migrations: ['dist/src/database/migrations/*{.ts,.js}'],

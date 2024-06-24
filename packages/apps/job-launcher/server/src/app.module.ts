@@ -67,7 +67,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
-        '../../../../../',
+        '../../../../../../',
         'node_modules/swagger-ui-dist',
       ),
     }),

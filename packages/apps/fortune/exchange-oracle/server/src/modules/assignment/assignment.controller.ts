@@ -17,6 +17,7 @@ import {
 import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { AssignmentService } from './assignment.service';
 import {
+  AssignJobResponseDto,
   AssignmentDto,
   CreateAssignmentDto,
   GetAssignmentsDto,
@@ -53,11 +54,22 @@ export class AssignmentController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @Post()
-  createAssignment(
+  async createAssignment(
     @Request() req: RequestWithUser,
     @Body() body: CreateAssignmentDto,
-  ): Promise<void> {
-    return this.assignmentService.createAssignment(body, req.user);
+  ): Promise<AssignJobResponseDto> {
+    const assignment = await this.assignmentService.createAssignment(
+      body,
+      req.user,
+    );
+
+    const response: AssignJobResponseDto = {
+      assignmentId: assignment.id,
+      escrowAddress: body.escrowAddress,
+      chainId: body.chainId,
+      workerAddress: assignment.workerAddress,
+    };
+    return response;
   }
 
   @ApiOperation({

@@ -3,11 +3,10 @@ import { AppController } from './app.controller';
 import { JobModule } from './modules/job/job.module';
 import { ConfigModule } from '@nestjs/config';
 import { envValidator } from './common/config';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { DatabaseModule } from './database/database.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
-import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
 import { StatsModule } from './modules/stats/stats.module';
@@ -19,10 +18,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
