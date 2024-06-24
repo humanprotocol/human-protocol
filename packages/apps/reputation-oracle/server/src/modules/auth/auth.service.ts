@@ -149,9 +149,8 @@ export class AuthService {
     const payload: any = {
       email: userEntity.email,
       userId: userEntity.id,
-      role: 'human_app',
-      // address: userEntity.evmAddress,
-      // kyc_status: userEntity.kyc?.status,
+      address: userEntity.evmAddress,
+      kyc_status: userEntity.kyc?.status,
       reputation_network: this.web3Service.getOperatorAddress(),
     };
 
