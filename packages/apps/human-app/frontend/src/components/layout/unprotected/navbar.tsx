@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Box, Drawer, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useLocation } from 'react-router-dom';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
+import { routerPaths } from '@/router/router-paths';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -15,6 +17,8 @@ export function Navbar({ withNavigation }: NavbarProps) {
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const isMainPage = location.pathname === routerPaths.homePage;
   return (
     <Box
       position="static"
@@ -42,15 +46,19 @@ export function Navbar({ withNavigation }: NavbarProps) {
         >
           <Box
             sx={{
-              display: { xs: 'none', md: 'flex' },
+              display: { xs: 'none', md: 'flex', height: '2rem' },
             }}
           >
-            <Button size="large" variant="text">
-              {t('components.navbar.humanProtocol')}
-            </Button>
-            <Button size="large" variant="text">
-              {t('components.navbar.howItWorks')}
-            </Button>
+            {isMainPage ? (
+              <>
+                <Button size="large" variant="text">
+                  {t('components.navbar.humanProtocol')}
+                </Button>
+                <Button size="large" variant="text">
+                  {t('components.navbar.howItWorks')}
+                </Button>
+              </>
+            ) : null}
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
