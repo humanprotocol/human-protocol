@@ -7,7 +7,6 @@ import { NDAVersionRepository } from './nda-version.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorNda } from '../../common/constants/errors';
 import { NdaVersionDto } from './nda.dto';
-import { NDAVersionEntity } from './nda-version.entity';
 
 @Injectable()
 export class NDAService {

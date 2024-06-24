@@ -15,6 +15,7 @@ export class NDARepository extends BaseRepository<NDAEntity> {
     return this.findOne({
       where: { user },
       order: { createdAt: 'DESC' },
+      relations: { ndaVersion: true },
     });
   }
 
