@@ -3,7 +3,8 @@ import { HttpService } from '@nestjs/axios';
 import { ExchangeOracleGateway } from '../exchange-oracle.gateway';
 import {
   statisticsExchangeOracleUrl,
-  generalUserStatsCommandFixture, oracleStatsCommandFixture,
+  generalUserStatsCommandFixture,
+  oracleStatsCommandFixture,
 } from '../../../modules/statistics/spec/statistics.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -13,6 +14,7 @@ import {
   jobAssignmentCommandFixture,
   jobAssignmentDataFixture,
   jobAssignmentOracleUrl,
+  jobResignAssignedCommandFixture,
   jobsFetchParamsCommandFixture,
   jobsFetchParamsDataFixtureAsString,
 } from '../../../modules/job-assignment/spec/job-assignment.fixtures';
@@ -25,6 +27,8 @@ import { GoneException, HttpException } from '@nestjs/common';
 import { HttpMethod } from '../../../common/enums/http-method';
 import { KvStoreGateway } from '../../kv-store/kv-store.gateway';
 import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
+import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
+import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 
 describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
@@ -127,6 +131,17 @@ describe('ExchangeOracleApiGateway', () => {
   describe('fetchAssignedJobs', () => {
     it('should successfully call get assigned jobs', async () => {
       const command = jobsFetchParamsCommandFixture;
+      const expectedMappedData = {
+        page_size: command.data.pageSize,
+        sort_field: command.data.sortField,
+        assignment_id: command.data.assignmentId,
+        chain_id: command.data.chainId,
+        escrow_address: command.data.escrowAddress,
+        job_type: command.data.jobType,
+        page: command.data.page,
+        sort: command.data.sort,
+        status: command.data.status,
+      };
       nock(jobAssignmentOracleUrl)
         .get(`/assignment${jobsFetchParamsDataFixtureAsString}`)
         .reply(200);
@@ -135,6 +150,11 @@ describe('ExchangeOracleApiGateway', () => {
         expect.objectContaining({
           url: EXCHANGE_ORACLE_ADR + '/assignment',
           method: HttpMethod.GET,
+          params: expectedMappedData,
+          headers: {
+            Authorization: command.token,
+            Accept: 'application/json',
+          },
         }),
       );
     });
@@ -164,9 +184,42 @@ describe('ExchangeOracleApiGateway', () => {
     });
   });
 
+  describe('resignAssignedJob', () => {
+    it('should successfully resign assigned job', async () => {
+      const command = jobResignAssignedCommandFixture;
+      const expectedMappedData: ResignJobData = {
+        assignment_id: command.assignmentId,
+      };
+      nock(jobAssignmentOracleUrl).post('/assignment/resign').reply(200);
+      await gateway.resignAssignedJob(command);
+      expect(httpService.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: EXCHANGE_ORACLE_ADR + '/assignment/resign',
+          method: HttpMethod.POST,
+          data: expectedMappedData,
+          headers: {
+            Authorization: command.token,
+            Accept: 'application/json',
+          },
+        }),
+      );
+    });
+  });
+
   describe('fetchDiscoveredJobs', () => {
     it('should successfully call get discovered jobs', async () => {
       const command = jobsDiscoveryParamsCommandFixture;
+      const expectedMappedData: JobsDiscoveryParamsData = {
+        escrow_address: command.data.escrowAddress,
+        chain_id: command.data.chainId,
+        sort_field: command.data.sortField,
+        job_type: command.data.jobType,
+        fields: command.data.fields,
+        status: command.data.status,
+        page: command.data.page,
+        sort: command.data.sort,
+        page_size: command.data.pageSize,
+      };
       nock(jobAssignmentOracleUrl)
         .get(`/assignment${paramsDataFixtureAsString}`)
         .reply(200);
@@ -175,6 +228,11 @@ describe('ExchangeOracleApiGateway', () => {
         expect.objectContaining({
           url: EXCHANGE_ORACLE_ADR + '/job',
           method: HttpMethod.GET,
+          params: expectedMappedData,
+          headers: {
+            Authorization: command.token,
+            Accept: 'application/json',
+          },
         }),
       );
     });

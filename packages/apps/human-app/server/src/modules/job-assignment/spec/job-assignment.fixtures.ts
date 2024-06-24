@@ -10,6 +10,7 @@ import {
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
+  ResignJobCommand,
 } from '../model/job-assignment.model';
 import {
   AssignmentSortField,
@@ -48,6 +49,11 @@ const jobAssignmentParams: JobAssignmentParams = {
 };
 export const jobAssignmentCommandFixture: JobAssignmentCommand = {
   data: jobAssignmentParams,
+  token: TOKEN,
+};
+export const jobResignAssignedCommandFixture: ResignJobCommand = {
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
+  assignmentId: JOB_ASSIGNMENT_ID,
   token: TOKEN,
 };
 export const jobAssignmentDataFixture: JobAssignmentData = {
