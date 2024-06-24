@@ -14246,10 +14246,10 @@ hardhat-contract-sizer@^2.6.1:
     cli-table3 "^0.6.0"
     strip-ansi "^6.0.0"
 
-hardhat-dependency-compiler@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/hardhat-dependency-compiler/-/hardhat-dependency-compiler-1.1.4.tgz#1e405d749ad55c4f3b0f8c908333a34d89f0f15c"
-  integrity sha512-bEsNwSU2owIcKTRJS1vz/VTI1mILfSYiI/4Zcwee99XC41uQIcDDSvJOdIveeMyO7E50JLg2lZet7oIxTC9Gyg==
+hardhat-dependency-compiler@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/hardhat-dependency-compiler/-/hardhat-dependency-compiler-1.2.1.tgz#31a00e388029591b648f49ade74f56bfab11243b"
+  integrity sha512-xG5iwbspTtxOEiP5UsPngEYQ1Hg+fjTjliapIjdTQmwGkCPofrsDhQDV2O/dopcYzcR68nTx2X8xTewYHgA2rQ==
 
 hardhat-deploy@^0.11.43:
   version "0.11.45"
