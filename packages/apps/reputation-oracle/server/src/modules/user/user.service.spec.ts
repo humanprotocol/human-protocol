@@ -114,7 +114,7 @@ describe('UserService', () => {
       const createdUser: Partial<UserEntity> = {
         email: dto.email,
         password: expect.any(String),
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         status: UserStatus.PENDING,
       };
 
@@ -122,7 +122,7 @@ describe('UserService', () => {
       expect(userRepository.createUnique).toHaveBeenCalledWith({
         email: dto.email,
         password: expect.any(String),
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         status: UserStatus.PENDING,
       });
       expect(result).toMatchObject(createdUser);
@@ -184,7 +184,7 @@ describe('UserService', () => {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         kyc: {
           country: 'FR',
           status: KycStatus.APPROVED,
@@ -215,7 +215,7 @@ describe('UserService', () => {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
-        type: UserType.OPERATOR, // Invalid type
+        role: UserType.OPERATOR, // Invalid type
         kyc: {
           country: 'FR',
           status: KycStatus.APPROVED,
@@ -233,7 +233,7 @@ describe('UserService', () => {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         kyc: {
           country: 'FR',
           status: KycStatus.PENDING_VERIFICATION,
@@ -255,7 +255,7 @@ describe('UserService', () => {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         kyc: {
           country: 'FR',
           status: KycStatus.APPROVED,
@@ -279,7 +279,7 @@ describe('UserService', () => {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         kyc: {
           country: 'FR',
           status: KycStatus.APPROVED,
@@ -304,7 +304,7 @@ describe('UserService', () => {
         id: 1,
         email: MOCK_EMAIL,
         evmAddress: MOCK_ADDRESS,
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         kyc: {
           country: 'FR',
           status: KycStatus.APPROVED,
@@ -329,7 +329,7 @@ describe('UserService', () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: MOCK_EMAIL,
-        type: UserType.WORKER,
+        role: UserType.WORKER,
         kyc: {
           country: 'FR',
           status: KycStatus.APPROVED,

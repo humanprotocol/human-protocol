@@ -730,7 +730,6 @@ describe('AuthService', () => {
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
-            type: UserType.WORKER,
             signature,
           });
 
@@ -754,7 +753,6 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
@@ -773,7 +771,6 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(
