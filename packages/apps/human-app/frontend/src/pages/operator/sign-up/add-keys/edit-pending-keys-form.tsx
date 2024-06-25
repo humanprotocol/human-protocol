@@ -1,9 +1,5 @@
 import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { useFormState } from 'react-hook-form';
-import type { CustomButtonProps } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { Input } from '@/components/data-entry/input';
 import type { EthKVStoreKeyValues } from '@/smart-contracts/EthKVStore/config';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
@@ -58,44 +54,21 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
   ),
 };
 
-export function EditExistingKeysForm({
+export function EditPendingKeysForm({
   existingKeysInitialState,
-  formButtonProps,
 }: {
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
-  formButtonProps: CustomButtonProps;
 }) {
-  const { errors } = useFormState();
-  const noChangesError = errors.form?.message as string;
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '1rem' }}>
       <Typography variant="body4">
-        {t('operator.addKeysPage.existingKeys.title')}
+        {t('operator.addKeysPage.pendingKeys.title')}
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
         {Object.keys(existingKeysInitialState).map((key) => {
           const formInputsConfigKey = key as EthKVStoreKeyValues;
-          return <>{key ? formInputsConfig[formInputsConfigKey] : null}</>;
+          return <>{key ? null : formInputsConfig[formInputsConfigKey]}</>;
         })}
-
-        {noChangesError ? (
-          <div>
-            <Typography
-              color={colorPalette.error.main}
-              component="div"
-              variant="helperText"
-            >
-              {noChangesError}
-            </Typography>
-          </div>
-        ) : null}
-        <div>
-          <Button {...formButtonProps}>
-            <Typography color={colorPalette.white} variant="buttonMedium">
-              {t('operator.addKeysPage.editKeysForm.btn')}
-            </Typography>
-          </Button>
-        </div>
       </Grid>
     </Grid>
   );

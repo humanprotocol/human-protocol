@@ -1,13 +1,13 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { PageCard } from '@/components/ui/page-card';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Button } from '@/components/ui/button';
-import { routerPaths } from '@/router/router-paths';
 import { useModalStore } from '@/components/ui/modal/modal.store';
+import { routerPaths } from '@/router/router-paths';
 
 export function ConnectWalletOperatorPage() {
   const { t } = useTranslation();
@@ -40,6 +40,10 @@ export function ConnectWalletOperatorPage() {
     }
   };
 
+  if (isConnected) {
+    return <Navigate replace to={routerPaths.operator.setUpOperator} />;
+  }
+
   return (
     <PageCard
       alert={getAlert()}
@@ -58,15 +62,6 @@ export function ConnectWalletOperatorPage() {
         >
           {t('components.wallet.connectBtn.connect')}
         </Button>
-        {isConnected ? (
-          <Button
-            component={Link}
-            to={routerPaths.operator.addStake}
-            variant="contained"
-          >
-            {t('operator.connectWallet.setupOperator')}
-          </Button>
-        ) : null}
       </Grid>
     </PageCard>
   );

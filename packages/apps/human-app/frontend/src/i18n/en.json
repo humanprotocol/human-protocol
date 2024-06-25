@@ -344,11 +344,14 @@
     "addKeysPage": {
       "title": "Setup Operator",
       "btn": " Add New Keys to KVStore",
+      "skipBtn": "Skip",
       "pendingKeys": {
         "title": "Pending Keys",
+        "fee": "Fee",
+        "publicKey": "Public Key",
+        "webhookUrl": "Webhook URL",
         "role": "Role",
-        "annotationUrl": "Annotation URL",
-        "url": "URL"
+        "jobType": "Job type"
       },
       "existingKeys": {
         "title": "Existing keys",
@@ -361,7 +364,8 @@
         "editBtn": "Edit"
       },
       "editKeysForm": {
-        "btn": "Save"
+        "btn": "Save",
+        "error": "No changes"
       }
     },
     "editExistingKeysSuccess": {

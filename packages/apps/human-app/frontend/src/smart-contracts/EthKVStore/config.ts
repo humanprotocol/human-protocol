@@ -21,15 +21,12 @@ export const EthKVStoreKeys = {
   JobTypes: 'job_types',
 } as const;
 
-export type SetBulkKeys = [
-  typeof EthKVStoreKeys.PublicKey,
-  typeof EthKVStoreKeys.WebhookUrl,
-  typeof EthKVStoreKeys.Role,
-  typeof EthKVStoreKeys.JobTypes,
-  typeof EthKVStoreKeys.Fee,
-];
+export type EthKVStoreKeyValues =
+  (typeof EthKVStoreKeys)[keyof typeof EthKVStoreKeys];
 
-export type SetBulkValues = [string, string, Role, string, string];
+export type SetBulkKeys = string[];
+
+export type SetBulkValues = string[];
 export interface SetOperatorPayload {
   keys: SetBulkKeys;
   values: SetBulkValues;

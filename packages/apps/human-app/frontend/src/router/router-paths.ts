@@ -19,6 +19,7 @@ export const routerPaths = {
   operator: {
     signIn: '/operator/sign-in',
     connectWallet: '/operator/connect-wallet',
+    setUpOperator: '/operator/set-up',
     addStake: '/operator/add-stake',
     addKeys: '/operator/add-keys',
     editExistingKeysSuccess: '/operator/edit-existing-keys-success',

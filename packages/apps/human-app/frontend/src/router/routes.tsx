@@ -25,6 +25,7 @@ import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.page';
 import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/hcaptcha-labeling.page';
 import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
+import { SetUpOperatorPage } from '@/pages/operator/sign-up/set-up-operator';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -169,5 +170,9 @@ export const walletConnectRoutes: RouteProps[] = [
   {
     path: routerPaths.operator.editExistingKeysSuccess,
     element: <EditExistingKeysSuccessPage />,
+  },
+  {
+    path: routerPaths.operator.setUpOperator,
+    element: <SetUpOperatorPage />,
   },
 ];

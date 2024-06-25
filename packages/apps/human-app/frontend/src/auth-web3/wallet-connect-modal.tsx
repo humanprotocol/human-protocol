@@ -2,13 +2,24 @@ import { t } from 'i18next';
 import { Grid, Typography } from '@mui/material';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import { env } from '@/shared/env';
+import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 export function WalletConnectModal() {
   const { closeModal } = useModalStore();
+  const { isConnected } = useWalletConnect();
+
+  useEffect(() => {
+    if (isConnected) {
+      closeModal();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
+  }, [isConnected]);
+
   return (
     <Grid
       container
