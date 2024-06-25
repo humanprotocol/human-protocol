@@ -34,11 +34,11 @@ export function AvailableJobsRewardAmountSort() {
       sortingOptions={[
         {
           label: t('worker.jobs.sortDirection.fromHighest'),
-          sortCallback: sortAscRewardAmount,
+          sortCallback: sortDescRewardAmount,
         },
         {
           label: t('worker.jobs.sortDirection.fromLowest'),
-          sortCallback: sortDescRewardAmount,
+          sortCallback: sortAscRewardAmount,
         },
       ]}
     />
