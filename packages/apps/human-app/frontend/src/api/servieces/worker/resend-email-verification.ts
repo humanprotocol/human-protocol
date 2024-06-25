@@ -8,7 +8,6 @@ import {
 import last from 'lodash/last';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export const resendEmailVerificationDtoSchema = z.object({
@@ -35,7 +34,6 @@ const resendEmailVerificationKey = 'resendEmailVerification';
 
 export function useResendEmailVerificationWorkerMutation() {
   const queryClient = useQueryClient();
-  const { user } = useAuthenticatedUser();
 
   return useMutation({
     mutationFn: resendEmailVerificationMutationFn,
@@ -45,15 +43,13 @@ export function useResendEmailVerificationWorkerMutation() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
-    mutationKey: [resendEmailVerificationKey, user.email],
+    mutationKey: [resendEmailVerificationKey],
   });
 }
 
 export function useResendEmailVerificationWorkerMutationState() {
-  const { user } = useAuthenticatedUser();
-
   const state = useMutationState({
-    filters: { mutationKey: [resendEmailVerificationKey, user.email] },
+    filters: { mutationKey: [resendEmailVerificationKey] },
     select: (mutation) => mutation.state,
   });
 
