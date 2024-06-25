@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
 import { env } from '@/shared/env';
-import { ChatIcon } from '../ui/icons';
+import { Chat } from '@/pages/homepage/components/chat';
 
 interface FooterProps {
   isProtected?: boolean;
@@ -100,7 +100,7 @@ export function Footer({ isProtected }: FooterProps) {
         }}
         xs={isMobile ? 12 : 1}
       >
-        <ChatIcon />
+        <Chat />
       </Grid>
     </Grid>
   );
