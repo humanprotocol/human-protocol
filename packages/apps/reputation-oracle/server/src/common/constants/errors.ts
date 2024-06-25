@@ -135,3 +135,12 @@ export enum ErrorWeb3 {
 export enum ErrorOperator {
   OperatorNotActive = 'Operator not active',
 }
+
+/**
+ * Represents error messages related to qualification.
+ */
+export enum ErrorQualification {
+  InvalidExpiresAt = 'ExpiresAt must be a future date',
+  FailedFetchQualifications = 'Failed to fetch qualifications',
+  NotFound = 'Qualification not found',
+}
