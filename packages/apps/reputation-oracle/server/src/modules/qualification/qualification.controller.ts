@@ -55,18 +55,6 @@ export class QualificationController {
     return this.qualificationService.getQualifications();
   }
 
-  @Delete('/:reference')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Delete a qualification' })
-  @ApiResponse({
-    status: 200,
-    description: 'Qualification deleted successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Qualification not found' })
-  delete(@Param('reference') reference: string) {
-    return this.qualificationService.delete(reference);
-  }
-
   @Post('/assign')
   @HttpCode(201)
   @ApiOperation({ summary: 'Assign a qualification to users' })
@@ -91,5 +79,17 @@ export class QualificationController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   unassign(@Body() unassignQualificationDto: UnassignQualificationDto) {
     return this.qualificationService.unassign(unassignQualificationDto);
+  }
+
+  @Delete('/:reference')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Delete a qualification' })
+  @ApiResponse({
+    status: 200,
+    description: 'Qualification deleted successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Qualification not found' })
+  delete(@Param('reference') reference: string) {
+    return this.qualificationService.delete(reference);
   }
 }

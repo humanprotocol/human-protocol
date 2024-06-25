@@ -8,7 +8,7 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
   private readonly logger = new Logger(QualificationRepository.name);
 
   constructor(private dataSource: DataSource) {
-    super(QualificationRepository, dataSource);
+    super(QualificationEntity, dataSource);
   }
 
   async findByReference(
@@ -21,12 +21,11 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
   async getQualifications(): Promise<QualificationEntity[]> {
     const currentDate = new Date();
 
-    const queryBuilder = this.createQueryBuilder('qualification').where(
-      'qualification.expiresAt > :currentDate',
+    const queryBuilder = this.createQueryBuilder('qualifications').where(
+      'qualifications.expiresAt > :currentDate',
       { currentDate },
     );
 
-    const qualifications = await queryBuilder.getMany();
-    return qualifications;
+    return queryBuilder.getMany();
   }
 }

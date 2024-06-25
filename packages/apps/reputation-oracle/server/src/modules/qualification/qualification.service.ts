@@ -12,14 +12,13 @@ import { ControlledError } from 'src/common/errors/controlled';
 import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { UserType } from 'src/common/enums/user';
+import { UserStatus, UserType } from 'src/common/enums/user';
 
 @Injectable()
 export class QualificationService {
   private readonly logger = new Logger(QualificationService.name);
 
   constructor(
-    @InjectRepository(QualificationEntity)
     private readonly qualificationRepository: QualificationRepository,
     private readonly userRepository: UserRepository,
   ) {}
@@ -70,6 +69,7 @@ export class QualificationService {
     try {
       const qualificationEntities =
         await this.qualificationRepository.getQualifications();
+      console.log(qualificationEntities);
       return qualificationEntities.map((qualificationEntity) => {
         return {
           reference: qualificationEntity.reference,
@@ -124,6 +124,9 @@ export class QualificationService {
       where: { reference },
       relations: ['users'],
     });
+
+    console.log(qualification);
+
     if (!qualification) {
       this.logger.log(`Qualification with reference "${reference}" not found`);
       throw new ControlledError(
@@ -146,7 +149,7 @@ export class QualificationService {
     emails?: string[],
   ): Promise<UserEntity[]> {
     if (
-      (!addresses || addresses.length === 0) &&
+      (!addresses || addresses.length === 0) ===
       (!emails || emails.length === 0)
     ) {
       throw new ControlledError(
@@ -162,12 +165,17 @@ export class QualificationService {
         where: addresses.map((address) => ({
           evmAddress: address,
           type: UserType.WORKER,
+          status: UserStatus.ACTIVE,
         })),
       });
       users.push(...addressUsers);
     } else if (emails && emails.length > 0) {
       const emailUsers = await this.userRepository.find({
-        where: emails.map((email) => ({ email })),
+        where: emails.map((email) => ({
+          email,
+          type: UserType.WORKER,
+          status: UserStatus.ACTIVE,
+        })),
       });
       users.push(...emailUsers);
     }
