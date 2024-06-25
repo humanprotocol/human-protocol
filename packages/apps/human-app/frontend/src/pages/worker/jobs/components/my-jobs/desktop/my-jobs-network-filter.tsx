@@ -17,7 +17,6 @@ export function MyJobsNetworkFilter() {
         setFilterParams({
           ...filterParams,
           chain_id: undefined,
-          page: 0,
         });
       }}
       filteringOptions={allNetworks}
@@ -26,7 +25,6 @@ export function MyJobsNetworkFilter() {
         setFilterParams({
           ...filterParams,
           chain_id: chainId,
-          page: 0,
         });
       }}
     />

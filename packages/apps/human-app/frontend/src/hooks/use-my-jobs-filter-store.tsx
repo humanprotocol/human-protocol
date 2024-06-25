@@ -50,6 +50,7 @@ export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
       filterParams: {
         ...state.filterParams,
         ...partialParams,
+        page: 0,
       },
     }));
   },

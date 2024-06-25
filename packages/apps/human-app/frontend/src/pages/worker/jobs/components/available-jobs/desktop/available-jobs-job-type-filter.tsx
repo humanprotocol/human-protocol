@@ -16,7 +16,6 @@ export function AvailableJobsJobTypeFilter({
         setFilterParams({
           ...filterParams,
           job_type: undefined,
-          page: 0,
         });
       }}
       filteringOptions={jobTypes.map((jobType) => ({
@@ -28,7 +27,6 @@ export function AvailableJobsJobTypeFilter({
         setFilterParams({
           ...filterParams,
           job_type: jobType,
-          page: 0,
         });
       }}
     />
