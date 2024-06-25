@@ -28,7 +28,6 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
 
     // Try to authenticate with JWT
     const canActivate = (await super.canActivate(context)) as boolean;
-    console.log(canActivate);
     if (!canActivate) {
       throw new UnauthorizedException('JWT authentication failed');
     }
@@ -36,11 +35,9 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     // Roles verification
     let roles = this.reflector.get<Role[]>('roles', context.getHandler());
     if (!roles) roles = [Role.Worker];
-    console.log(roles);
 
     const request = context.switchToHttp().getRequest();
     const user = request.user as JwtUser;
-    console.log(user);
     if (!user) {
       throw new UnauthorizedException('User not found in request');
     }

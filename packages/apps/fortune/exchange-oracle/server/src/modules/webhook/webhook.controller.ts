@@ -6,7 +6,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Role } from '../../common/enums/role';
+import { AuthSignatureRole } from '../../common/enums/role';
 import { SignatureAuthGuard } from '../../common/guards';
 import { WebhookService } from './webhook.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
@@ -20,7 +20,11 @@ export class WebhookController {
 
   @Post()
   @UseGuards(SignatureAuthGuard)
-  @AllowedRoles([Role.Recording, Role.Reputation, Role.JobLauncher])
+  @AllowedRoles([
+    AuthSignatureRole.Recording,
+    AuthSignatureRole.Reputation,
+    AuthSignatureRole.JobLauncher,
+  ])
   @ApiOperation({
     summary: 'Handle Webhook Events',
     description:

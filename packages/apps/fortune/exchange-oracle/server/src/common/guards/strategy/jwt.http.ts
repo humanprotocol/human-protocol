@@ -7,7 +7,7 @@ import * as jwt from 'jsonwebtoken';
 import { Web3Service } from '../../../modules/web3/web3.service';
 import { JwtUser } from '../../../common/types/jwt';
 import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
-import { Role } from 'src/common/enums/role';
+import { Role } from '../../../common/enums/role';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
