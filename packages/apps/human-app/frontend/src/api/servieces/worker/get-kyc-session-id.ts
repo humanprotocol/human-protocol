@@ -9,6 +9,7 @@ import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import type { ResponseError } from '@/shared/types/global.type';
+import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
 
 const kycSessionIdSchema = z.object({
   session_id: z.string(),
@@ -26,8 +27,8 @@ export function useKycSessionIdMutation(callbacks: {
   onSuccess?: () => void;
 }) {
   const queryClient = useQueryClient();
-  const { user, updateUserData } = useAuthenticatedUser();
-
+  const { user } = useAuthenticatedUser();
+  const { mutateAsync: getAccessTokenMutation } = useGetAccessTokenMutation();
   return useMutation({
     mutationFn: async (): Promise<KycSessionIdMutationResult> => {
       const accessToken = browserAuthProvider.getAccessToken();
@@ -85,7 +86,7 @@ export function useKycSessionIdMutation(callbacks: {
             return { error: 'emailNotVerified' };
           }
           if (error.status === 400) {
-            updateUserData({ kyc_status: 'APPROVED' });
+            await getAccessTokenMutation();
             return { error: 'kycApproved' };
           }
         }

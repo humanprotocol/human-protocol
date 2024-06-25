@@ -21,7 +21,12 @@ import { Web3AuthProvider } from '@/auth-web3/web3-auth-context';
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    mutations: { retry: 0 },
+    queries: { retry: 0 },
+  },
+});
 
 const themes = createTheme(theme);
 
