@@ -255,7 +255,7 @@ export function PageCardError({
   }, []);
 
   return (
-    <Grid container sx={sx}>
+    <Grid container sx={{ ...sx, gap: '2rem' }}>
       {children ? (
         children
       ) : (
