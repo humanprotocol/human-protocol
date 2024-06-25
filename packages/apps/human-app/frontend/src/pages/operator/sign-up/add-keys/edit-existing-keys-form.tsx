@@ -73,9 +73,9 @@ export function EditExistingKeysForm({
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
-        {Object.keys(existingKeysInitialState).map((key) => {
+        {Object.entries(existingKeysInitialState).map(([key, value]) => {
           const formInputsConfigKey = key as EthKVStoreKeyValues;
-          return <>{key ? formInputsConfig[formInputsConfigKey] : null}</>;
+          return <>{value ? formInputsConfig[formInputsConfigKey] : null}</>;
         })}
 
         {noChangesError ? (

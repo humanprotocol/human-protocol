@@ -65,9 +65,9 @@ export function EditPendingKeysForm({
         {t('operator.addKeysPage.pendingKeys.title')}
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
-        {Object.keys(existingKeysInitialState).map((key) => {
+        {Object.entries(existingKeysInitialState).map(([key, value]) => {
           const formInputsConfigKey = key as EthKVStoreKeyValues;
-          return <>{key ? null : formInputsConfig[formInputsConfigKey]}</>;
+          return <>{!value ? formInputsConfig[formInputsConfigKey] : null}</>;
         })}
       </Grid>
     </Grid>
