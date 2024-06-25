@@ -11,6 +11,7 @@ import { colorPalette } from '@/styles/color-palette';
 export function ResetPasswordWorkerSuccessPage() {
   return (
     <PageCard
+      hiddenCancelButton
       title={
         <Grid
           container

@@ -8,7 +8,7 @@ import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-ob
 const OracleSuccessSchema = z.object({
   address: z.string(),
   role: z.string(),
-  url: z.string(),
+  url: z.string().optional().nullable(),
   jobTypes: z.array(z.string()),
 });
 

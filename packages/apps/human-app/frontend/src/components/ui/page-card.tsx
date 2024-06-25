@@ -1,5 +1,5 @@
 import type { SxProps, Theme } from '@mui/material';
-import { Box, Grid, Typography, styled } from '@mui/material';
+import { Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -32,7 +32,6 @@ const commonStyles: SxProps<Theme> = {
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-  gap: '2rem',
   borderRadius: '20px',
   minHeight: '70vh',
   maxWidth: '1200px',
@@ -100,8 +99,10 @@ export function PageCard({
           </Button>
         </Grid>
       )}
-      <Box
+      <Grid
+        container
         sx={{
+          flexDirection: 'column',
           flexGrow: 1,
           maxWidth: childrenMaxWidth,
           width: '100%',
@@ -192,7 +193,7 @@ export function PageCard({
             {children}
           </Grid>
         </Grid>
-      </Box>
+      </Grid>
     </Grid>
   );
 }
