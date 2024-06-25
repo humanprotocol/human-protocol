@@ -7,6 +7,7 @@ import { UserModule } from '../user/user.module';
 import { QualificationService } from './qualification.service';
 import { QualificationEntity } from './qualification.entity';
 import { QualificationRepository } from './qualification.repository';
+import { UserRepository } from '../user/user.repository';
 
 @Module({
   imports: [
@@ -15,7 +16,12 @@ import { QualificationRepository } from './qualification.repository';
     Web3Module,
     UserModule,
   ],
-  providers: [Logger, QualificationService, QualificationRepository],
+  providers: [
+    Logger,
+    QualificationService,
+    QualificationRepository,
+    UserRepository,
+  ],
   exports: [QualificationService],
 })
 export class QualificationModule {}

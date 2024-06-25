@@ -3,6 +3,7 @@ import {
   IsOptional,
   IsDateString,
   IsEthereumAddress,
+  IsEmail,
 } from 'class-validator';
 
 export class CreateQualificationDto {
@@ -25,11 +26,11 @@ export class AssignQualificationDto {
   public reference: string;
 
   @IsOptional()
-  @IsEthereumAddress()
+  @IsEthereumAddress({ each: true })
   public workerAddresses?: string[];
 
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { each: true })
   public workerEmails?: string[];
 }
 
@@ -38,10 +39,10 @@ export class UnassignQualificationDto {
   public reference: string;
 
   @IsOptional()
-  @IsEthereumAddress()
+  @IsEthereumAddress({ each: true })
   public workerAddresses?: string[];
 
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { each: true })
   public workerEmails?: string[];
 }
