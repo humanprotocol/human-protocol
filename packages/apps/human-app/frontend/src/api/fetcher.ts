@@ -12,16 +12,15 @@ const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,
   newHeaders: Record<string, string>
 ) => {
-  const mergedHeaders = {
-    ...Object.fromEntries(
-      new Headers(fetcherOptionsWithDefaults?.headers).entries()
-    ),
-    ...newHeaders,
-  };
+  const headers = new Headers(fetcherOptionsWithDefaults?.headers);
+
+  for (const [key, value] of Object.entries(newHeaders)) {
+    headers.set(key, value);
+  }
 
   return {
     ...fetcherOptionsWithDefaults,
-    headers: new Headers(mergedHeaders),
+    headers,
   };
 };
 

@@ -12,13 +12,15 @@ import {
 } from '@/api/servieces/worker/send-reset-link';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useAuth } from '@/auth/use-auth';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const methods = useForm<SendResetLinkDto>({
     defaultValues: {
-      email: '',
+      email: user?.email || '',
     },
     resolver: zodResolver(sendResetLinkDtoSchema),
   });

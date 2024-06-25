@@ -8,7 +8,6 @@ import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-not
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import type { UserData } from '@/auth/auth-context';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
-import { ProfileEmailNotification } from '@/pages/worker/profile/profile-email-notifications';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 const getNotificationMessage = (
@@ -70,7 +69,8 @@ export function WorkerProfilePage() {
       >
         <ProfileData />
         <ProfileActions />
-        <ProfileEmailNotification />
+        {/* TODO add email notifications toggling */}
+        {/* <ProfileEmailNotification /> */}
       </Grid>
     </Paper>
   );

@@ -25,7 +25,6 @@ import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.page';
 import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/hcaptcha-labeling.page';
 import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
-import { RequireAuth } from '@/auth/require-auth';
 import { SetUpOperatorPage } from '@/pages/operator/sign-up/set-up-operator';
 
 export const unprotectedRoutes: RouteProps[] = [
@@ -55,11 +54,7 @@ export const unprotectedRoutes: RouteProps[] = [
   },
   {
     path: routerPaths.worker.sendEmailVerification,
-    element: (
-      <RequireAuth>
-        <SendEmailVerificationWorkerPage />
-      </RequireAuth>
-    ),
+    element: <SendEmailVerificationWorkerPage />,
   },
   {
     path: routerPaths.worker.sendResetLink,

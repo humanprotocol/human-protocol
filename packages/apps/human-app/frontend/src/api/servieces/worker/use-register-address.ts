@@ -14,6 +14,7 @@ import {
   prepareSignature,
 } from '@/api/servieces/common/prepare-signature';
 import type { ResponseError } from '@/shared/types/global.type';
+import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
 
 async function registerAddressInKVStore({
   signed_address,
@@ -65,7 +66,9 @@ export function useRegisterAddress(callbacks?: {
     | ((error: ResponseError) => Promise<void>);
 }) {
   const queryClient = useQueryClient();
-  const { user, updateUserData } = useAuthenticatedUser();
+  const { user } = useAuthenticatedUser();
+  const { mutateAsync: getAccessTokenMutation } = useGetAccessTokenMutation();
+
   const { web3ProviderMutation, chainId, address, signMessage } =
     useConnectedWallet();
   return useMutation({
@@ -82,7 +85,7 @@ export function useRegisterAddress(callbacks?: {
       }
 
       const signedAddress = await getSignedAddress(address, signature);
-      updateUserData({ address });
+      await getAccessTokenMutation();
 
       await registerAddressInKVStore({
         signed_address: signedAddress.signed_address,
