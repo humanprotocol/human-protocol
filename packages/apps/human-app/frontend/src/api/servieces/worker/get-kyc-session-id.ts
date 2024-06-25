@@ -37,9 +37,9 @@ export function useKycSessionIdMutation(callbacks: {
         browserAuthProvider.signOut();
         throw new Error();
       }
-
       const tokenPayload = jwtDecode(accessToken);
-      const tokenExpired = (tokenPayload.exp || 0) < new Date().getTime();
+      const tokenExpired =
+        (tokenPayload.exp || 0) < new Date().getTime() / 1000;
 
       const tokenOrSignInResponseData = tokenExpired
         ? await apiClient(apiPaths.worker.obtainAccessToken.path, {
@@ -67,8 +67,7 @@ export function useKycSessionIdMutation(callbacks: {
             method: 'POST',
             headers: new Headers({
               'Content-Type': 'application/json',
-              // eslint-disable-next-line @typescript-eslint/no-base-to-string -- ...
-              Authorization: `Bearer ${tokenOrSignInResponseData.toString()}`,
+              Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
             }),
           },
         });
