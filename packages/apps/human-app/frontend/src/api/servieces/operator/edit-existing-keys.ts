@@ -18,6 +18,7 @@ import {
 import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import { isArray } from '@/shared/helpers/is-array';
 
 export const editEthKVStoreValuesMutationSchema = z.object({
   [EthKVStoreKeys.PublicKey]: z.string().min(1).optional(),
@@ -35,28 +36,30 @@ export const getEditEthKVStoreValuesMutationSchema = (
   initialData: GetEthKVStoreValuesSuccessResponse
 ) => {
   return editEthKVStoreValuesMutationSchema.transform((newData, ctx) => {
-    // add only values that has changed, if no values that has changed throws error
     const result: EditEthKVStoreValuesMutationData = {};
     Object.values(EthKVStoreKeys).forEach((key) => {
-      if (key === 'job_types') {
-        if (
-          newData[key]?.sort().toString() !==
-          initialData[key]?.sort().toString()
-        ) {
-          Object.assign(result, { [key]: newData[key] });
-        }
+      const newFiledData = newData[key];
+      const initialFiledData = initialData[key];
+
+      if (
+        isArray(newFiledData) &&
+        isArray(initialFiledData) &&
+        newFiledData.sort().toString() !== initialFiledData.sort().toString()
+      ) {
+        Object.assign(result, { [key]: newFiledData.toString() });
         return;
       }
 
-      if (key === 'fee') {
-        if (newData[key]?.toString() !== initialData[key]?.toString()) {
-          Object.assign(result, { [key]: newData[key] });
-        }
+      if (
+        typeof newFiledData === 'number' &&
+        newFiledData.toString() !== initialFiledData?.toString()
+      ) {
+        Object.assign(result, { [key]: newFiledData });
         return;
       }
 
-      if (newData[key] !== initialData[key]) {
-        Object.assign(result, { [key]: newData[key] });
+      if (newFiledData !== initialFiledData) {
+        Object.assign(result, { [key]: newFiledData });
       }
     });
 
