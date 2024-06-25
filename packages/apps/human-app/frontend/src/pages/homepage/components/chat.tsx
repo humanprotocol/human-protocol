@@ -36,5 +36,10 @@ export function Chat() {
     };
   }, [ref]);
 
-  return <div ref={ref} style={{ position: 'relative' }} />;
+  return (
+    <div
+      ref={ref}
+      style={{ width: '60px', height: '60px', position: 'relative' }}
+    />
+  );
 }
