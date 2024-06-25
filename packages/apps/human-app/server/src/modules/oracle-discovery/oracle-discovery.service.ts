@@ -1,5 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OracleDiscoveryResponse } from './model/oracle-discovery.model';
+import {
+  OracleDiscoveryCommand,
+  OracleDiscoveryResponse,
+} from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
@@ -14,7 +17,9 @@ export class OracleDiscoveryService {
     private configService: EnvironmentConfigService,
   ) {}
 
-  async processOracleDiscovery(): Promise<OracleDiscoveryResponse[]> {
+  async processOracleDiscovery(
+    command: OracleDiscoveryCommand,
+  ): Promise<OracleDiscoveryResponse[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
 
@@ -37,6 +42,13 @@ export class OracleDiscoveryService {
           } catch (error) {
             this.logger.error(`Error processing chainId ${chainId}:`, error);
           }
+        }
+        if (command.selectedJobTypes) {
+          return data?.filter((oracle) =>
+            oracle.jobTypes?.some((job) =>
+              command.selectedJobTypes?.includes(job),
+            ),
+          );
         }
         return data;
       }),

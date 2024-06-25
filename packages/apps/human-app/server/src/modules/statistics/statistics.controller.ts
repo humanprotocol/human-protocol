@@ -17,7 +17,10 @@ import {
   UserStatisticsDto,
   UserStatisticsResponse,
 } from './model/user-statistics.model';
-import { Authorization, JwtPayload } from '../../common/config/params-decorators';
+import {
+  Authorization,
+  JwtPayload,
+} from '../../common/config/params-decorators';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { JwtUserData } from '../../common/utils/jwt-token.model';
