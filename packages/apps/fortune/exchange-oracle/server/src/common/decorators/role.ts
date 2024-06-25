@@ -1,4 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Role } from '../enums/role';
+import { AuthSignatureRole, Role } from '../enums/role';
 
-export const AllowedRoles = (roles: Role[]) => SetMetadata('roles', roles);
+export const AllowedRoles = (roles: AuthSignatureRole[] | Role[]) =>
+  SetMetadata('roles', roles);
