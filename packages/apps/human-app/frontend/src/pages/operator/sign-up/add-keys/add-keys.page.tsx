@@ -1,6 +1,7 @@
 import { Grid } from '@mui/material';
 import type { UseFormReturn } from 'react-hook-form';
 import { t } from 'i18next';
+import { Link } from 'react-router-dom';
 import {
   PageCard,
   PageCardError,
@@ -15,6 +16,8 @@ import { useGetKeys } from '@/api/servieces/operator/get-keys';
 import { jsonRpcErrorHandler } from '@/shared/helpers/json-rpc-error-handler';
 import { ExistingKeysForm } from '@/pages/operator/sign-up/add-keys/existing-keys-form';
 import { PendingKeysForm } from '@/pages/operator/sign-up/add-keys/pending-keys-form';
+import { Button } from '@/components/ui/button';
+import { routerPaths } from '@/router/router-paths';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -80,8 +83,16 @@ export function Form({
         }}
       >
         {areSomeExistingKeys ? <ExistingKeysForm keysData={keysData} /> : null}
-
         {areSomePendingKeys ? <PendingKeysForm keysData={keysData} /> : null}
+        {areSomeExistingKeys && !areSomePendingKeys ? (
+          <Button
+            component={Link}
+            to={routerPaths.operator.editExistingKeysSuccess}
+            variant="contained"
+          >
+            {t('operator.addKeysPage.skipBtn')}
+          </Button>
+        ) : null}
       </div>
     </Grid>
   );

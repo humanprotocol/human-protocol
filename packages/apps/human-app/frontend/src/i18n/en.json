@@ -344,6 +344,7 @@
     "addKeysPage": {
       "title": "Setup Operator",
       "btn": " Add New Keys to KVStore",
+      "skipBtn": "Skip",
       "pendingKeys": {
         "title": "Pending Keys",
         "fee": "Fee",
