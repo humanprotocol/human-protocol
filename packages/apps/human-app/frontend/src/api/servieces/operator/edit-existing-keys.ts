@@ -37,45 +37,28 @@ export const getEditEthKVStoreValuesMutationSchema = (
   return editEthKVStoreValuesMutationSchema.transform((newData, ctx) => {
     // add only values that has changed, if no values that has changed throws error
     const result: EditEthKVStoreValuesMutationData = {};
+    Object.values(EthKVStoreKeys).forEach((key) => {
+      if (key === 'job_types') {
+        if (
+          newData[key]?.sort().toString() !==
+          initialData[key]?.sort().toString()
+        ) {
+          Object.assign(result, { [key]: newData[key] });
+        }
+        return;
+      }
 
-    const fee = newData[EthKVStoreKeys.Fee];
-    const publicKey = newData[EthKVStoreKeys.PublicKey];
-    const role = newData[EthKVStoreKeys.Role];
-    const webhookUrl = newData[EthKVStoreKeys.WebhookUrl];
-    const jobTypes = newData[EthKVStoreKeys.JobTypes];
+      if (key === 'fee') {
+        if (newData[key]?.toString() !== initialData[key]?.toString()) {
+          Object.assign(result, { [key]: newData[key] });
+        }
+        return;
+      }
 
-    if (
-      fee !== undefined &&
-      initialData.fee !== undefined &&
-      fee !== Number(initialData.fee)
-    ) {
-      result[EthKVStoreKeys.Fee] = fee;
-    }
-
-    if (
-      initialData.public_key !== undefined &&
-      publicKey !== initialData.public_key
-    ) {
-      result[EthKVStoreKeys.PublicKey] = publicKey;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison -- ...
-    if (initialData.role !== undefined && role !== initialData.role) {
-      result[EthKVStoreKeys.Role] = role;
-    }
-
-    if (
-      initialData.webhook_url !== undefined &&
-      webhookUrl !== initialData.webhook_url
-    ) {
-      result[EthKVStoreKeys.WebhookUrl] = webhookUrl;
-    }
-    if (
-      jobTypes !== undefined &&
-      jobTypes.sort().toString() !== initialData.job_types?.sort().toString()
-    ) {
-      result[EthKVStoreKeys.JobTypes] = jobTypes;
-    }
+      if (newData[key] !== initialData[key]) {
+        Object.assign(result, { [key]: newData[key] });
+      }
+    });
 
     if (!Object.values(result).length) {
       ctx.addIssue({
