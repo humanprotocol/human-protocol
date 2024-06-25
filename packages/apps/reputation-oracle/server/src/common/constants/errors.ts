@@ -145,4 +145,5 @@ export enum ErrorQualification {
   NotFound = 'Qualification not found',
   NoWorkersFound = 'No workers found for the provided addresses or emails',
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
+  NotCreated = 'Qualification has not been created',
 }
