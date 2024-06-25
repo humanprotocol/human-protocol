@@ -88,7 +88,7 @@ export function ProfileActions() {
         <ProfileAction
           done={
             Boolean(kycApproved && user.address) ||
-            Boolean(kycApproved && !user.address && isWalletConnected)
+            (kycApproved && isWalletConnected)
           }
           doneLabel={<WalletConnectDone />}
           toDoComponent={
