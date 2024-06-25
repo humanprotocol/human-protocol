@@ -6,6 +6,8 @@ export const env = z
     VITE_PRIVACY_POLICY_URL: z.string(),
     VITE_TERMS_OF_SERVICE_URL: z.string(),
     VITE_HUMAN_PROTOCOL_URL: z.string(),
+    VITE_NAVBAR__LINK__PROTOCOL_URL: z.string(),
+    VITE_NAVBAR__LINK__HOW_IT_WORK_URL: z.string(),
     VITE_HUMAN_PROTOCOL_HELP_URL: z.string(),
     VITE_H_CAPTCHA_SITE_KEY: z.string(),
     VITE_HMT_DAILY_SPENT_LIMIT: z
