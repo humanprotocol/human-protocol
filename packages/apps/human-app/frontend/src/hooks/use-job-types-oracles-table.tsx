@@ -1,17 +1,18 @@
+/* eslint-disable camelcase -- ... */
 import { create } from 'zustand';
 
 export interface JobsTypesOraclesFilterStore {
-  selectedJobType: string[];
+  selected_job_types: string[];
   selectJobType: (jobType: string[]) => void;
 }
 
 export const useJobsTypesOraclesFilter = create<JobsTypesOraclesFilterStore>(
   (set) => ({
-    selectedJobType: [],
-    selectJobType: (jobType: string[]) => {
+    selected_job_types: [],
+    selectJobType: (jobTypes: string[]) => {
       set((state) => ({
         ...state,
-        selectedJobType: jobType,
+        selected_job_types: jobTypes.map((jobType) => jobType.toLowerCase()),
       }));
     },
   })

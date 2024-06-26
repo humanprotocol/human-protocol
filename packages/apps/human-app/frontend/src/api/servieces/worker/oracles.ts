@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ..*/
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
@@ -18,13 +19,12 @@ export type OracleSuccessResponse = z.infer<typeof OracleSuccessSchema>;
 export type OraclesSuccessResponse = OracleSuccessResponse[];
 
 export async function getOracles({
-  selectedJobType,
+  selected_job_types,
 }: {
-  selectedJobType: string[];
+  selected_job_types: string[];
 }) {
   return apiClient(
-    // TODO verify if this is a proper DTO
-    `${apiPaths.worker.oracles.path}?${stringifyUrlQueryObject({ selectedJobType: selectedJobType.join(',') })}`,
+    `${apiPaths.worker.oracles.path}?${stringifyUrlQueryObject({ selected_job_types: selected_job_types.join(',') })}`,
     {
       successSchema: OraclesSuccessSchema,
       options: { method: 'GET' },
@@ -33,9 +33,9 @@ export async function getOracles({
 }
 
 export function useGetOracles() {
-  const { selectedJobType } = useJobsTypesOraclesFilter();
+  const { selected_job_types } = useJobsTypesOraclesFilter();
   return useQuery({
-    queryFn: () => getOracles({ selectedJobType }),
-    queryKey: ['oracles', selectedJobType],
+    queryFn: () => getOracles({ selected_job_types }),
+    queryKey: ['oracles', selected_job_types],
   });
 }
