@@ -1,26 +1,30 @@
 import axios from 'axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { EnvironmentConfigService } from '../config/environment-config.service';
-
+// This interceptor injection is guarded via IS_AXIOS_REQUEST_LOGGING_ENABLED environment variable.
 @Injectable()
 export class AxiosRequestInterceptor {
   private readonly logger = new Logger(AxiosRequestInterceptor.name);
 
-  constructor(private configService: EnvironmentConfigService) {
+  constructor() {
     this.initializeRequestInterceptor();
   }
 
   private initializeRequestInterceptor() {
-    if (!this.configService.axiosRequestLoggingEnabled) return;
     axios.interceptors.request.use(
       (config) => {
         const { url, method, params, data, headers } = config;
-        this.logger.log('NEW REQUEST:');
-        this.logger.log(`Request URL: ${url}`);
-        this.logger.log(`Method: ${method}`);
-        this.logger.log(`Params: ${JSON.stringify(params ?? {})}`);
-        this.logger.log(`Body: ${JSON.stringify(data ?? {})}`);
-        this.logger.log(`Headers: ${JSON.stringify(headers ?? {})}`);
+        const message = JSON.stringify(
+          {
+            request_url: url,
+            method: method,
+            params: params ?? {},
+            body: data ?? {},
+            headers: headers ?? {},
+          },
+          null,
+          2,
+        );
+        this.logger.debug(`Outgoing request:\n${message}`);
         return config;
       },
       (error) => {

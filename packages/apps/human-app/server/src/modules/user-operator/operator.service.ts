@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import {
-  SigninOperatorCommand,
   SignupOperatorCommand,
-} from './model/operator.model';
+} from './model/operator-registration.model';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
+import { SigninOperatorCommand } from './model/operator-signin.model';
 
 @Injectable()
 export class OperatorService {

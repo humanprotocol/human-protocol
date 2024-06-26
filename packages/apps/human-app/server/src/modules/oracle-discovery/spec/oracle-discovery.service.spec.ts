@@ -3,10 +3,15 @@ import { Cache } from 'cache-manager';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
-import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
+import { OracleDiscoveryCommand, OracleDiscoveryResponse } from '../model/oracle-discovery.model';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
+import {
+  emptyCommandFixture, filledCommandFixture,
+  generateOracleDiscoveryResponseBody,
+  notSetCommandFixture,
+} from './oracle-discovery.fixture';
 
 jest.mock('@human-protocol/sdk', () => ({
   OperatorUtils: {
@@ -72,7 +77,8 @@ describe('OracleDiscoveryService', () => {
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValue(mockData);
 
-    const result = await oracleDiscoveryService.processOracleDiscovery();
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
 
     expect(result).toEqual(mockData);
     expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
@@ -89,21 +95,32 @@ describe('OracleDiscoveryService', () => {
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockResolvedValue(mockData);
 
-    const result = await oracleDiscoveryService.processOracleDiscovery();
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
 
     expect(result).toEqual(mockData);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId);
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        chainId,
-        mockData,
-        TTL,
-      );
+      expect(cacheManager.set).toHaveBeenCalledWith(chainId, mockData, TTL);
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
         Number(chainId),
         REPUTATION_ORACLE_ADDRESS,
         EXCHANGE_ORACLE,
       );
     });
+  });
+  it('should filter responses if selectedJobTypes not empty', async () => {
+    const mockData: OracleDiscoveryResponse[] =
+      generateOracleDiscoveryResponseBody();
+
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest
+      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+      .mockResolvedValue(mockData);
+
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
+
+    expect(result).toEqual([mockData[1]]);
   });
 });

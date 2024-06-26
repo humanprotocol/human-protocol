@@ -1,7 +1,3 @@
-import {
-  HCaptchaLabelingStatsEndpoints,
-  ReputationOracleEndpoints,
-} from '../enums/reputation-oracle-endpoints';
 import { ExternalApiName } from '../enums/external-api-name';
 
 export interface GatewayEndpointConfig {
