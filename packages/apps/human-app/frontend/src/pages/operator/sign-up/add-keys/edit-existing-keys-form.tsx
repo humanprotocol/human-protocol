@@ -11,6 +11,10 @@ import { Select } from '@/components/data-entry/select';
 import { MultiSelect } from '@/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import {
+  order,
+  sortFormKeys,
+} from '@/pages/operator/sign-up/add-keys/sort-form';
 
 const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
@@ -57,7 +61,6 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
     />
   ),
 };
-
 export function EditExistingKeysForm({
   existingKeysInitialState,
   formButtonProps,
@@ -67,15 +70,27 @@ export function EditExistingKeysForm({
 }) {
   const { errors } = useFormState();
   const noChangesError = errors.form?.message as string;
+
+  const sortedKeys = sortFormKeys(
+    Object.keys(existingKeysInitialState) as EthKVStoreKeyValues[],
+    order
+  );
+
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '1rem' }}>
       <Typography variant="body4">
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
-        {Object.entries(existingKeysInitialState).map(([key, value]) => {
+        {sortedKeys.map((key) => {
           const formInputsConfigKey = key as EthKVStoreKeyValues;
-          return <>{value ? formInputsConfig[formInputsConfigKey] : null}</>;
+          return (
+            <>
+              {existingKeysInitialState[formInputsConfigKey]
+                ? formInputsConfig[formInputsConfigKey]
+                : null}
+            </>
+          );
         })}
 
         {noChangesError ? (

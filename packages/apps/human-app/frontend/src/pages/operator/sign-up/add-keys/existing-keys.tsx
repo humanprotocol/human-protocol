@@ -12,6 +12,10 @@ import { EmptyPlaceholder } from '@/components/ui/empty-placeholder';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
 import { Chips } from '@/components/ui/chips';
 import { Chip } from '@/components/ui/chip';
+import {
+  order,
+  sortFormKeys,
+} from '@/pages/operator/sign-up/add-keys/sort-form';
 
 const existingKeysConfig: Record<
   EthKVStoreKeyValues,
@@ -75,14 +79,19 @@ export function ExistingKeys({
   const { getValues } = useFormContext<GetEthKVStoreValuesSuccessResponse>();
   const formValues = getValues();
 
+  const sortedKeys = sortFormKeys(
+    Object.keys(existingKeysInitialState) as EthKVStoreKeyValues[],
+    order
+  );
+
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
       <Typography variant="body4">
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
-      {Object.entries(existingKeysInitialState).map(([key, value]) => {
+      {sortedKeys.map((key) => {
         const existingKeysConfigKey = key as EthKVStoreKeyValues;
-        return key && value
+        return existingKeysInitialState[existingKeysConfigKey]
           ? existingKeysConfig[existingKeysConfigKey](formValues)
           : null;
       })}
