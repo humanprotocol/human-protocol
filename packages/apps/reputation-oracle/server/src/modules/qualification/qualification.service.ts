@@ -12,7 +12,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 
 @Injectable()
 export class QualificationService {
@@ -162,7 +162,7 @@ export class QualificationService {
       const addressUsers = await this.userRepository.find({
         where: addresses.map((address) => ({
           evmAddress: address,
-          type: UserType.WORKER,
+          type: Role.WORKER,
           status: UserStatus.ACTIVE,
         })),
       });
@@ -171,7 +171,7 @@ export class QualificationService {
       const emailUsers = await this.userRepository.find({
         where: emails.map((email) => ({
           email,
-          type: UserType.WORKER,
+          type: Role.WORKER,
           status: UserStatus.ACTIVE,
         })),
       });
