@@ -85,7 +85,7 @@ export function useRegisterAddress(callbacks?: {
       }
 
       const signedAddress = await getSignedAddress(address, signature);
-      await getAccessTokenMutation();
+      await getAccessTokenMutation('web2');
 
       await registerAddressInKVStore({
         signed_address: signedAddress.signed_address,

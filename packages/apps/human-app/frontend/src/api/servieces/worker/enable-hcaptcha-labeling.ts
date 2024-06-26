@@ -27,7 +27,7 @@ export function useEnableHCaptchaLabelingMutation() {
         authenticated: true,
         options: { method: 'POST' },
       });
-      await getAccessTokenMutation();
+      await getAccessTokenMutation('web2');
       return result;
     },
     onSuccess: async () => {

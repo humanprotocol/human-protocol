@@ -85,7 +85,7 @@ export function useKycSessionIdMutation(callbacks: {
             return { error: 'emailNotVerified' };
           }
           if (error.status === 400) {
-            await getAccessTokenMutation();
+            await getAccessTokenMutation('web2');
             return { error: 'kycApproved' };
           }
         }

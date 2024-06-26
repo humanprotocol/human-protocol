@@ -4,13 +4,16 @@ import { apiPaths } from '@/api/api-paths';
 import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
 import { useAuth } from '@/auth/use-auth';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import type { AuthType } from '@/shared/types/browser-auth-provider';
+import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 
 export function useGetAccessTokenMutation() {
   const queryClient = useQueryClient();
-  const { signIn } = useAuth();
+  const { signIn: signInWeb2 } = useAuth();
+  const { signIn: signInWeb3 } = useWeb3Auth();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (authType: AuthType) => {
       try {
         const refetchAccessTokenSuccess = await apiClient(
           apiPaths.worker.obtainAccessToken.path,
@@ -26,7 +29,11 @@ export function useGetAccessTokenMutation() {
           }
         );
 
-        signIn(refetchAccessTokenSuccess);
+        if (authType === 'web2') {
+          signInWeb2(refetchAccessTokenSuccess);
+        } else {
+          signInWeb3(refetchAccessTokenSuccess);
+        }
       } catch (error) {
         browserAuthProvider.signOut(() => {
           window.location.reload();
