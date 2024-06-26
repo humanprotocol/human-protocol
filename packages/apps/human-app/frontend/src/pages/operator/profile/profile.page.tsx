@@ -10,26 +10,7 @@ import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { ProfileDisableButton } from '@/pages/operator/profile/profile-disable-button';
 import { ProfileListItem } from '@/components/ui/profile-list-item';
-
-const mockedData = {
-  profile: {
-    role: 'Job Launcher',
-    active: true,
-    fee: '10%',
-    url: 'https://mywebhookurl.com',
-    webhookUrl: 'https://mywebhookurl.com',
-    jobTypes: ['Image Labelling', 'BBox'],
-  },
-  statistics: {
-    escrowsProcessed: 1000,
-    escrowsActive: 350,
-    escrowsCancelled: 50,
-    workersAmount: 500,
-    assignmentsCompleted: 10000,
-    assignmentsRejected: 300,
-    assignmentsExpired: 100,
-  },
-};
+import { useGetOperatorStats } from '@/api/servieces/operator/get-stats';
 
 export function OperatorProfilePage() {
   const { setGrayBackground } = useBackgroundColorStore();
@@ -43,16 +24,34 @@ export function OperatorProfilePage() {
     isPending: isKeysDataPending,
   } = useGetKeys();
 
+  const {
+    data: statsData,
+    error: statsError,
+    isError: isStatsError,
+    isPending: isStatsPending,
+    refetch: refetchStats,
+  } = useGetOperatorStats();
+
   useEffect(() => {
     setGrayBackground();
   }, [setGrayBackground]);
 
-  if (isKeysDataPending) {
+  useEffect(() => {
+    if (keysData?.url) {
+      void refetchStats();
+    }
+  }, [keysData?.url, refetchStats]);
+
+  if (isKeysDataPending || isStatsPending) {
     return <PageCardLoader />;
   }
 
-  if (isKeysError) {
-    return <PageCardError errorMessage={defaultErrorMessage(keysError)} />;
+  if (isKeysError || isStatsError) {
+    return (
+      <PageCardError
+        errorMessage={defaultErrorMessage(keysError || statsError)}
+      />
+    );
   }
 
   return (
@@ -153,33 +152,33 @@ export function OperatorProfilePage() {
             <List>
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsProcessed')}
-                paragraph={mockedData.statistics.escrowsProcessed.toString()}
+                paragraph="-"
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsActive')}
-                paragraph={mockedData.statistics.escrowsActive.toString()}
+                paragraph="-"
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsCancelled')}
-                paragraph={mockedData.statistics.escrowsCancelled.toString()}
+                paragraph="-"
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.workersAmount')}
-                paragraph={mockedData.statistics.workersAmount.toString()}
+                paragraph={statsData.workers_total.toString()}
               />
             </List>
             <List>
               <ProfileListItem
                 header={t('operator.profile.statistics.assignmentsCompleted')}
-                paragraph={mockedData.statistics.assignmentsCompleted.toString()}
+                paragraph={statsData.assignments_completed.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.assignmentsRejected')}
-                paragraph={mockedData.statistics.assignmentsRejected.toString()}
+                paragraph={statsData.assignments_rejected.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.assignmentsExpired')}
-                paragraph={mockedData.statistics.assignmentsExpired.toString()}
+                paragraph={statsData.assignments_expired.toString()}
               />
             </List>
           </Stack>

@@ -49,12 +49,14 @@ export type FetcherOptionsWithValidation<SuccessInput, SuccessOutput> =
     successSchema: ZodType<SuccessOutput, ZodTypeDef, SuccessInput>;
     skipValidation?: false | undefined;
     authenticated?: boolean;
+    baseUrl?: string;
   }>;
 
 export type FetcherOptionsWithoutValidation = Readonly<{
   options?: RequestInit;
   skipValidation: true;
   authenticated?: boolean;
+  baseUrl?: string;
 }>;
 
 export type FetcherOptions<SuccessInput, SuccessOutput> =
@@ -101,7 +103,9 @@ export function createFetcher(defaultFetcherConfig?: {
     }
 
     const baseUrl = (() => {
-      const currentUrl = defaultFetcherConfig?.baseUrl;
+      const currentUrl = fetcherOptions.baseUrl
+        ? () => fetcherOptions.baseUrl
+        : defaultFetcherConfig?.baseUrl;
       if (currentUrl instanceof Function) return currentUrl();
       return currentUrl;
     })();
