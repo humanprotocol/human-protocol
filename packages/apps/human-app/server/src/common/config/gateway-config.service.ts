@@ -3,10 +3,7 @@ import { ExternalApiName } from '../enums/external-api-name';
 import { GatewayConfig, Gateways } from '../interfaces/endpoint.interface';
 import { EnvironmentConfigService } from './environment-config.service';
 import { HttpMethod } from '../enums/http-method';
-<<<<<<< HEAD
-=======
 import { ReputationOracleEndpoints } from '../enums/reputation-oracle-endpoints';
->>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
 
 @Injectable()
 export class GatewayConfigService {
@@ -35,8 +32,6 @@ export class GatewayConfigService {
               endpoint: '/auth/signin',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
-<<<<<<< HEAD
-=======
             },
             [ReputationOracleEndpoints.EMAIL_VERIFICATION]: {
               endpoint: '/auth/email-verification',
@@ -72,7 +67,6 @@ export class GatewayConfigService {
               endpoint: '/kyc/start',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
->>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
             },
           },
         },

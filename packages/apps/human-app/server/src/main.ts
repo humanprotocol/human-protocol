@@ -12,29 +12,14 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
   const envConfigService = new EnvironmentConfigService(configService);
-<<<<<<< HEAD
-  app.enableCors({
-    origin: ['http://localhost', 'http://localhost:5173'], // TODO: do rework
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept',
-  });
-=======
   if (envConfigService.isCorsEnabled) {
     app.enableCors({
       origin: envConfigService.corsEnabledOrigin,
       allowedHeaders: envConfigService.corsAllowedHeaders,
     });
   }
->>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
   const config = new DocumentBuilder()
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-      'access-token',
-    )
+    .addBearerAuth()
     .setTitle('Human APP API')
     .setDescription('Swagger Human APP API')
     .setVersion('1.0')

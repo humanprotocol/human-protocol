@@ -22,8 +22,6 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
-<<<<<<< HEAD
-=======
 import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
 import { PasswordResetModule } from './modules/password-reset/password-reset.module';
 import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
@@ -32,7 +30,6 @@ import { PrepareSignatureModule } from './modules/prepare-signature/prepare-sign
 import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
 import Joi from 'joi';
 import { ChainId } from '@human-protocol/sdk';
->>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
 
 @Module({
   imports: [
@@ -77,15 +74,12 @@ import { ChainId } from '@human-protocol/sdk';
     OracleDiscoveryModule,
     StatisticsModule,
     KvStoreModule,
-<<<<<<< HEAD
-=======
     EmailConfirmationModule,
     PasswordResetModule,
     DisableOperatorModule,
     KycProcedureModule,
     PrepareSignatureModule,
     EscrowUtilsModule,
->>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
   ],
   controllers: [
     AppController,
