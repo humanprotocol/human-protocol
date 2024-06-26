@@ -33,7 +33,8 @@ export const prepareSignature = (body: PrepareSignatureBody) => {
 export function usePrepareSignature(body: PrepareSignatureBody) {
   return useQuery({
     queryFn: () => prepareSignature(body),
-    queryKey: [body],
     refetchInterval: 0,
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps -- ...
+    queryKey: ['prepareSignature'],
   });
 }
