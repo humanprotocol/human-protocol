@@ -5,6 +5,7 @@ import { EventType } from '../../common/enums/webhook';
 import { WebhookController } from './webhook.controller';
 import { WebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 
 jest.mock('../../common/utils/signature');
 
@@ -20,6 +21,10 @@ describe('webhookController', () => {
       controllers: [WebhookController],
       providers: [
         { provide: WebhookService, useValue: createMock<WebhookService>() },
+        {
+          provide: AssignmentRepository,
+          useValue: createMock<AssignmentRepository>(),
+        },
       ],
     }).compile();
 
