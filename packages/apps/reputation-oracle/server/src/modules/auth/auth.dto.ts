@@ -11,7 +11,7 @@ import {
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
-import { UserType } from '../../common/enums/user';
+import { Role } from '../../common/enums/user';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -114,10 +114,10 @@ export class Web3SignUpDto {
   public signature: string;
 
   @ApiProperty({
-    enum: UserType,
+    enum: Role,
   })
-  @IsEnum(UserType)
-  public type: UserType;
+  @IsEnum(Role)
+  public type: Role;
 
   @ApiProperty()
   @IsString()

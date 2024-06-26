@@ -24,13 +24,13 @@ import {
 } from '../../../test/constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient, Role } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -749,7 +749,7 @@ describe('AuthService', () => {
 
         it('should create a new web3 user and return the token', async () => {
           (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest.fn().mockResolvedValue(Role.JobLauncher),
+            get: jest.fn().mockResolvedValue('Job Launcher'),
             set: jest.fn(),
           }));
 
@@ -760,7 +760,7 @@ describe('AuthService', () => {
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
-            type: UserType.WORKER,
+            type: Role.WORKER,
             signature,
           });
 
@@ -784,7 +784,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
+              type: Role.WORKER,
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
@@ -803,7 +803,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
+              type: Role.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(
