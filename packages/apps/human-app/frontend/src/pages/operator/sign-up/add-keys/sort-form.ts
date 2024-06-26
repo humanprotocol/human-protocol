@@ -10,6 +10,7 @@ export const sortFormKeys = (
 export const order: EthKVStoreKeyValues[] = [
   EthKVStoreKeys.Fee,
   EthKVStoreKeys.PublicKey,
+  EthKVStoreKeys.Url,
   EthKVStoreKeys.WebhookUrl,
   EthKVStoreKeys.Role,
   EthKVStoreKeys.JobTypes,

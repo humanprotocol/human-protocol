@@ -15,6 +15,7 @@ export enum JobTypes {
 
 export const EthKVStoreKeys = {
   PublicKey: 'public_key',
+  Url: 'url',
   WebhookUrl: 'webhook_url',
   Role: 'role',
   Fee: 'fee',

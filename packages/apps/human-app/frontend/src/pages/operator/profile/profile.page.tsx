@@ -110,6 +110,12 @@ export function OperatorProfilePage() {
                 }
               />
               <ProfileListItem
+                header={t('operator.profile.about.url')}
+                paragraph={
+                  keysData.url || t('operator.addKeysPage.existingKeys.url')
+                }
+              />
+              <ProfileListItem
                 header={t('operator.profile.about.webhookUrl')}
                 paragraph={
                   keysData.webhook_url ||
