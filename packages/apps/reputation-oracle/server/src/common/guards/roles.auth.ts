@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserType } from '../enums/user';
+import { Role } from '../enums/user';
 import { ROLES_KEY } from '../decorators';
 import { ControlledError } from '../errors/controlled';
 
@@ -14,17 +14,17 @@ export class RolesAuthGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<UserType[]>(
-      ROLES_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!requiredRoles) {
       return true;
     }
 
     const { user } = context.switchToHttp().getRequest();
-    const isAllowed = requiredRoles.some((role) => user.type === role);
+    const isAllowed = requiredRoles.some((role) => user.role === role);
 
     if (isAllowed) {
       return true;

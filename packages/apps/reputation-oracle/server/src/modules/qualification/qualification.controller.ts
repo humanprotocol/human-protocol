@@ -24,7 +24,7 @@ import {
 import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
 import { Roles } from 'src/common/decorators';
-import { UserType } from 'src/common/enums/user';
+import { Role } from 'src/common/enums/user';
 
 @ApiTags('Qualification')
 @Controller('qualification')
@@ -34,7 +34,7 @@ export class QualificationController {
   constructor(private readonly qualificationService: QualificationService) {}
 
   @Post()
-  @Roles(UserType.OPERATOR)
+  @Roles(Role.ADMIN)
   @HttpCode(201)
   @ApiOperation({ summary: 'Create a new qualification' })
   @ApiBody({ type: CreateQualificationDto })
@@ -50,7 +50,7 @@ export class QualificationController {
   }
 
   @Get()
-  @Roles(UserType.WORKER, UserType.OPERATOR)
+  @Roles(Role.OPERATOR, Role.WORKER, Role.HUMAN_APP, Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Get list of qualifications' })
   @ApiResponse({ status: 200, description: 'List of qualifications' })
@@ -59,7 +59,7 @@ export class QualificationController {
   }
 
   @Post('/assign')
-  @Roles(UserType.OPERATOR)
+  @Roles(Role.ADMIN)
   @HttpCode(201)
   @ApiOperation({ summary: 'Assign a qualification to users' })
   @ApiBody({ type: AssignQualificationDto })
@@ -74,7 +74,7 @@ export class QualificationController {
   }
 
   @Delete('/unassign')
-  @Roles(UserType.OPERATOR)
+  @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Unassign a qualification from users' })
   @ApiBody({ type: UnassignQualificationDto })
@@ -89,7 +89,7 @@ export class QualificationController {
   }
 
   @Delete('/:reference')
-  @Roles(UserType.OPERATOR)
+  @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Delete a qualification' })
   @ApiResponse({
