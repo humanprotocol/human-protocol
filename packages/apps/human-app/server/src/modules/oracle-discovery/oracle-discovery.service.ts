@@ -81,6 +81,10 @@ export class OracleDiscoveryService {
     oracleJobTypes: string[],
     requiredJobTypes: string[],
   ) {
-    return oracleJobTypes.some((job) => requiredJobTypes.includes(job));
+    return oracleJobTypes.some((job) =>
+      requiredJobTypes
+        .map((requiredJob) => requiredJob.toLowerCase())
+        .includes(job.toLowerCase()),
+    );
   }
 }

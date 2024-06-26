@@ -121,6 +121,6 @@ describe('OracleDiscoveryService', () => {
     const result =
       await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
 
-    expect(result).toEqual([mockData[1]]);
+    expect(result).toEqual([mockData[1], mockData[2]]);
   });
 });

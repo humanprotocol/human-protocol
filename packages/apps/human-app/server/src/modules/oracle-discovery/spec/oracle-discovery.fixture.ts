@@ -14,7 +14,12 @@ export function generateOracleDiscoveryResponseBody() {
     role: 'role2',
     jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],
   };
-  return [response1, response2];
+  const response3: OracleDiscoveryResponse = {
+    address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
+    role: 'role3',
+    jobTypes: ['Job-Type-2'],
+  }
+  return [response1, response2, response3];
 }
 
 export const filledCommandFixture = {
