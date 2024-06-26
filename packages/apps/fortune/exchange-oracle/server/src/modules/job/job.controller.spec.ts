@@ -2,8 +2,11 @@ import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { RequestWithUser } from 'src/common/types/jwt';
 import { JobController } from './job.controller';
-import { SolveJobDto } from './job.dto';
+import { GetJobsDto, SolveJobDto, JobDto } from './job.dto';
 import { JobService } from './job.service';
+import { JobSortField, JobStatus, JobType } from '../../common/enums/job';
+import { PageDto } from '../../common/pagination/pagination.dto';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 
 jest.mock('../../common/utils/signature');
 
@@ -11,15 +14,17 @@ describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
 
-  const chainId = 1;
-  const escrowAddress = '0x1234567890123456789012345678901234567890';
-  const workerAddress = '0x1234567890123456789012345678901234567891';
-
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [],
       controllers: [JobController],
-      providers: [{ provide: JobService, useValue: createMock<JobService>() }],
+      providers: [
+        { provide: JobService, useValue: createMock<JobService>() },
+        {
+          provide: AssignmentRepository,
+          useValue: createMock<AssignmentRepository>(),
+        },
+      ],
     }).compile();
 
     jobController = moduleRef.get<JobController>(JobController);
@@ -28,53 +33,52 @@ describe('JobController', () => {
 
   describe('getJobs', () => {
     it('should call jobService.getJobList', async () => {
-      const solution = 'job-solution';
-      const solveJobDto: SolveJobDto = {
-        chainId,
-        escrowAddress,
-        solution,
+      const getJobsDto: GetJobsDto = {
+        sortField: JobSortField.CREATED_AT,
+        chainId: 1,
+        jobType: JobType.FORTUNE,
+        fields: [],
+        escrowAddress: '0x1234567890123456789012345678901234567890',
+        status: JobStatus.ACTIVE,
+        page: 1,
+        pageSize: 10,
+        skip: 0,
       };
 
-      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
+      const req = {
+        user: { reputationNetwork: 'network' },
+      } as RequestWithUser;
 
-      await jobController.solveJob(
-        {
-          user: { address: workerAddress },
-        } as RequestWithUser,
-        solveJobDto,
-      );
+      const pageDto: PageDto<JobDto> = {
+        results: [],
+        totalResults: 0,
+        totalPages: 0,
+        pageSize: 10,
+        page: 1,
+      };
 
-      expect(jobService.solveJob).toHaveBeenCalledWith(
-        solveJobDto.chainId,
-        solveJobDto.escrowAddress,
-        workerAddress,
-        solveJobDto.solution,
+      jest.spyOn(jobService, 'getJobList').mockResolvedValue(pageDto);
+
+      await jobController.getJobs(req, getJobsDto);
+
+      expect(jobService.getJobList).toHaveBeenCalledWith(
+        getJobsDto,
+        req.user.reputationNetwork,
       );
     });
   });
 
   describe('solveJob', () => {
     it('should call jobService.solveJob', async () => {
-      const solution = 'job-solution';
       const solveJobDto: SolveJobDto = {
-        chainId,
-        escrowAddress,
-        solution,
+        assignmentId: 1,
+        solution: 'job-solution',
       };
 
-      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
-
-      await jobController.solveJob(
-        {
-          user: { address: workerAddress },
-        } as RequestWithUser,
-        solveJobDto,
-      );
+      await jobController.solveJob('signature', solveJobDto);
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
-        solveJobDto.chainId,
-        solveJobDto.escrowAddress,
-        workerAddress,
+        solveJobDto.assignmentId,
         solveJobDto.solution,
       );
     });

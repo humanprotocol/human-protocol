@@ -44,11 +44,19 @@ export class HCaptchaService {
         ),
       );
 
-      if (response && response.data && response.status === 200) {
+      if (
+        response &&
+        response.data.success === true &&
+        response.status === 200
+      ) {
         return response.data;
+      } else if (response && response.data.success === false) {
+        this.logger.error(
+          `Error occurred during token verification: ${response.data['error-codes']}`,
+        );
       }
     } catch (error) {
-      this.logger.error('Error occurred during token verification:', error);
+      this.logger.error(`Error occurred during token verification: ${error}`);
     }
 
     return false;
@@ -62,6 +70,10 @@ export class HCaptchaService {
   async registerLabeler(data: hCaptchaRegisterLabeler): Promise<boolean> {
     try {
       const { ip, email, language, country, address } = data;
+
+      if (!country) {
+        this.logger.error(`Country is not set for the user`);
+      }
 
       const queryParams: any = {
         api_key: this.hcaptchaConfigService.apiKey,

@@ -30,7 +30,7 @@ export class AssignmentService {
   public async createAssignment(
     data: CreateAssignmentDto,
     jwtUser: JwtUser,
-  ): Promise<void> {
+  ): Promise<AssignmentEntity> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       data.chainId,
       data.escrowAddress,
@@ -87,7 +87,7 @@ export class AssignmentService {
     newAssignmentEntity.rewardAmount =
       manifest.fundAmount / manifest.submissionsRequired;
     newAssignmentEntity.expiresAt = expirationDate;
-    await this.assignmentRepository.createUnique(newAssignmentEntity);
+    return this.assignmentRepository.createUnique(newAssignmentEntity);
   }
 
   public async getAssignmentList(
@@ -132,13 +132,14 @@ export class AssignmentService {
   }
 
   async resign(assignmentId: number, workerAddress: string): Promise<void> {
-    const assignment = await this.assignmentRepository.findOneByIdAndWorker(
-      assignmentId,
-      workerAddress,
-    );
+    const assignment =
+      await this.assignmentRepository.findOneById(assignmentId);
 
     if (!assignment) {
       throw new BadRequestException(ErrorAssignment.NotFound);
+    }
+    if (assignment.workerAddress !== workerAddress) {
+      throw new BadRequestException(ErrorAssignment.InvalidAssignment);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {

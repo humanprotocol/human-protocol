@@ -330,25 +330,21 @@ describe('AuthService', () => {
       it('should throw NotFound exception if user is not found', () => {
         findByEmailMock.mockResolvedValue(null);
         expect(
-          authService.forgotPassword({ email: 'user@example.com' }),
+          authService.forgotPassword({
+            email: 'user@example.com',
+            hCaptchaToken: 'token',
+          }),
         ).rejects.toThrow(
           new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
         );
       });
 
-      it('should throw Unauthorized exception if user is not active', () => {
-        userEntity.status = UserStatus.INACTIVE;
-        findByEmailMock.mockResolvedValue(userEntity);
-        expect(
-          authService.forgotPassword({ email: 'user@example.com' }),
-        ).rejects.toThrow(
-          new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN),
-        );
-      });
-
       it('should remove existing token if it exists', async () => {
         findTokenMock.mockResolvedValue(tokenEntity);
-        await authService.forgotPassword({ email: 'user@example.com' });
+        await authService.forgotPassword({
+          email: 'user@example.com',
+          hCaptchaToken: 'token',
+        });
 
         expect(tokenRepository.deleteOne).toHaveBeenCalled();
       });
@@ -357,7 +353,32 @@ describe('AuthService', () => {
         sendGridService.sendEmail = jest.fn();
         const email = 'user@example.com';
 
-        await authService.forgotPassword({ email });
+        await authService.forgotPassword({ email, hCaptchaToken: 'token' });
+
+        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+          expect.objectContaining({
+            personalizations: [
+              {
+                dynamicTemplateData: {
+                  service_name: SERVICE_NAME,
+                  url: expect.stringContaining(
+                    'http://localhost:3001/reset-password?token=',
+                  ),
+                },
+                to: email,
+              },
+            ],
+            templateId: SENDGRID_TEMPLATES.resetPassword,
+          }),
+        );
+      });
+
+      it('should create a new token and send email if user is not active', async () => {
+        sendGridService.sendEmail = jest.fn();
+        userEntity.status = UserStatus.PENDING;
+        const email = 'user@example.com';
+
+        await authService.forgotPassword({ email, hCaptchaToken: 'token' });
 
         expect(sendGridService.sendEmail).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -530,7 +551,10 @@ describe('AuthService', () => {
       it('should throw an error if user is not found', () => {
         findByEmailMock.mockResolvedValue(null);
         expect(
-          authService.resendEmailVerification({ email: 'user@example.com' }),
+          authService.resendEmailVerification({
+            email: 'user@example.com',
+            hCaptchaToken: 'token',
+          }),
         ).rejects.toThrow(
           new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
         );
@@ -540,7 +564,10 @@ describe('AuthService', () => {
         userEntity.status = UserStatus.ACTIVE;
         findByEmailMock.mockResolvedValue(userEntity);
         expect(
-          authService.resendEmailVerification({ email: 'user@example.com' }),
+          authService.resendEmailVerification({
+            email: 'user@example.com',
+            hCaptchaToken: 'token',
+          }),
         ).rejects.toThrow(
           new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
         );
@@ -552,7 +579,10 @@ describe('AuthService', () => {
         sendGridService.sendEmail = jest.fn();
         const email = 'user@example.com';
 
-        await authService.resendEmailVerification({ email });
+        await authService.resendEmailVerification({
+          email,
+          hCaptchaToken: 'token',
+        });
 
         expect(createTokenMock).toHaveBeenCalled();
         expect(sendGridService.sendEmail).toHaveBeenCalledWith(

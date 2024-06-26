@@ -163,9 +163,9 @@ export const Table = ({
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={data?.totalResults}
+        count={data?.totalResults || data?.results.length}
         rowsPerPage={rowsPerPage}
-        page={data?.page}
+        page={data?.page || page}
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
       />
