@@ -23,8 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
-import { Roles } from 'src/common/decorators';
-import { Role } from 'src/common/enums/user';
+import { Roles } from '../../common/decorators';
+import { Role } from '../../common/enums/user';
 
 @ApiTags('Qualification')
 @Controller('qualification')

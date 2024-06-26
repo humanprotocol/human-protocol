@@ -7,7 +7,6 @@ import {
   UnassignQualificationDto,
   QualificationDto,
 } from './qualification.dto';
-import { HttpStatus } from '@nestjs/common';
 
 describe('QualificationController', () => {
   let qualificationController: QualificationController;
