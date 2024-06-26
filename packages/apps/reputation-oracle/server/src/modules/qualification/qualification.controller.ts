@@ -50,6 +50,7 @@ export class QualificationController {
   }
 
   @Get()
+  @Roles(UserType.WORKER, UserType.OPERATOR)
   @HttpCode(200)
   @ApiOperation({ summary: 'Get list of qualifications' })
   @ApiResponse({ status: 200, description: 'List of qualifications' })
@@ -58,6 +59,7 @@ export class QualificationController {
   }
 
   @Post('/assign')
+  @Roles(UserType.OPERATOR)
   @HttpCode(201)
   @ApiOperation({ summary: 'Assign a qualification to users' })
   @ApiBody({ type: AssignQualificationDto })
@@ -72,6 +74,7 @@ export class QualificationController {
   }
 
   @Delete('/unassign')
+  @Roles(UserType.OPERATOR)
   @HttpCode(200)
   @ApiOperation({ summary: 'Unassign a qualification from users' })
   @ApiBody({ type: UnassignQualificationDto })
@@ -86,6 +89,7 @@ export class QualificationController {
   }
 
   @Delete('/:reference')
+  @Roles(UserType.OPERATOR)
   @HttpCode(200)
   @ApiOperation({ summary: 'Delete a qualification' })
   @ApiResponse({
