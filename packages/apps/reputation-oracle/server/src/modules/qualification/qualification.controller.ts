@@ -21,17 +21,20 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards';
+import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
+import { Roles } from 'src/common/decorators';
+import { UserType } from 'src/common/enums/user';
 
 @ApiTags('Qualification')
 @Controller('qualification')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesAuthGuard)
 export class QualificationController {
   constructor(private readonly qualificationService: QualificationService) {}
 
   @Post()
+  @Roles(UserType.OPERATOR)
   @HttpCode(201)
   @ApiOperation({ summary: 'Create a new qualification' })
   @ApiBody({ type: CreateQualificationDto })
