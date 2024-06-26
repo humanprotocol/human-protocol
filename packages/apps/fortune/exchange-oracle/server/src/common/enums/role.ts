@@ -1,11 +1,11 @@
 export enum AuthSignatureRole {
-  JobLauncher = 'job_launcher',
-  Recording = 'recording',
-  Reputation = 'reputation',
-  Worker = 'worker',
+  JobLauncher = 'JOB_LAUNCHER',
+  Recording = 'RECORDING',
+  Reputation = 'REPUTATION',
+  Worker = 'WORKER',
 }
 
 export enum Role {
-  Worker = 'worker',
-  HumanApp = 'human_app',
+  Worker = 'WORKER',
+  HumanApp = 'HUMAN_APP',
 }
