@@ -7,6 +7,7 @@ import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 
 export const getEthKVStoreValuesSuccessSchema = z.object({
   [EthKVStoreKeys.PublicKey]: z.string().optional(),
+  [EthKVStoreKeys.Url]: z.string().optional(),
   [EthKVStoreKeys.WebhookUrl]: z.string().optional(),
   [EthKVStoreKeys.Role]: z.string().optional(),
   [EthKVStoreKeys.Fee]: z.string().optional(),

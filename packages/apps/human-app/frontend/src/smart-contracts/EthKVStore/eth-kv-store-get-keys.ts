@@ -17,6 +17,7 @@ export async function ethKVStoreGetKeys({
     );
     const keys = (await Promise.all([
       ethKVStoreContract.get(accountAddress, EthKVStoreKeys.PublicKey),
+      ethKVStoreContract.get(accountAddress, EthKVStoreKeys.Url),
       ethKVStoreContract.get(accountAddress, EthKVStoreKeys.WebhookUrl),
       ethKVStoreContract.get(accountAddress, EthKVStoreKeys.Role),
       ethKVStoreContract.get(accountAddress, EthKVStoreKeys.JobTypes),
@@ -25,10 +26,11 @@ export async function ethKVStoreGetKeys({
 
     return {
       [EthKVStoreKeys.PublicKey]: keys[0],
-      [EthKVStoreKeys.WebhookUrl]: keys[1],
-      [EthKVStoreKeys.Role]: keys[2],
-      [EthKVStoreKeys.JobTypes]: keys[3],
-      [EthKVStoreKeys.Fee]: keys[4],
+      [EthKVStoreKeys.Url]: keys[1],
+      [EthKVStoreKeys.WebhookUrl]: keys[2],
+      [EthKVStoreKeys.Role]: keys[3],
+      [EthKVStoreKeys.JobTypes]: keys[4],
+      [EthKVStoreKeys.Fee]: keys[5],
     };
   } catch (error) {
     throw new JsonRpcError(error);

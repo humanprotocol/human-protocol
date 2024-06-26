@@ -34,6 +34,13 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
       name={EthKVStoreKeys.PublicKey}
     />
   ),
+  [EthKVStoreKeys.Url]: (
+    <Input
+      fullWidth
+      label={t('operator.addKeysPage.existingKeys.url')}
+      name={EthKVStoreKeys.Url}
+    />
+  ),
   [EthKVStoreKeys.WebhookUrl]: (
     <Input
       fullWidth

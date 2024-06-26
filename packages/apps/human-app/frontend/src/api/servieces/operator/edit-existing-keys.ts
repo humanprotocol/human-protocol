@@ -22,6 +22,7 @@ import { isArray } from '@/shared/helpers/is-array';
 
 export const editEthKVStoreValuesMutationSchema = z.object({
   [EthKVStoreKeys.PublicKey]: z.string().min(1).optional(),
+  [EthKVStoreKeys.Url]: z.string().url().optional(),
   [EthKVStoreKeys.WebhookUrl]: z.string().url().optional(),
   [EthKVStoreKeys.Role]: z.nativeEnum(Role).optional(),
   [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobTypes)).optional(),

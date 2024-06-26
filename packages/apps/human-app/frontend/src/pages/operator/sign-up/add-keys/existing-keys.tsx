@@ -41,6 +41,16 @@ const existingKeysConfig: Record<
       </Typography>
     </Grid>
   ),
+  [EthKVStoreKeys.Url]: ({ url }) => (
+    <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+      <Typography variant="subtitle2" width="100%">
+        {t('operator.addKeysPage.existingKeys.url')}
+      </Typography>
+      <Typography variant="body1" width="100%">
+        <OptionalText text={url} />
+      </Typography>
+    </Grid>
+  ),
   [EthKVStoreKeys.WebhookUrl]: ({ webhook_url }) => (
     <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
       <Typography variant="subtitle2" width="100%">

@@ -357,6 +357,7 @@
         "title": "Existing keys",
         "fee": "Fee",
         "publicKey": "Public Key",
+        "url": "Url",
         "webhookUrl": "Webhook URL",
         "role": "Role",
         "jobType": "Job type",
