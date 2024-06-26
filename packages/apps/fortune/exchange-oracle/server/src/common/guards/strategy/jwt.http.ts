@@ -7,6 +7,7 @@ import * as jwt from 'jsonwebtoken';
 import { Web3Service } from '../../../modules/web3/web3.service';
 import { JwtUser } from '../../../common/types/jwt';
 import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
+import { Role } from '../../../common/enums/role';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -45,19 +46,34 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   public async validate(
     @Req() request: any,
     payload: {
+      role: string;
       email: string;
       address: string;
       kyc_status: string;
       reputation_network: string;
     },
   ): Promise<JwtUser> {
-    if (!payload.kyc_status || !payload.email || !payload.address) {
+    if (!payload.email || !payload.role) {
       throw new UnauthorizedException('Invalid token');
     }
-    if (payload.kyc_status !== KYC_APPROVED) {
-      throw new UnauthorizedException('Invalid KYC status');
+
+    if (!Object.values(Role).includes(payload.role as Role)) {
+      throw new UnauthorizedException('Invalid role');
     }
+
+    const role: Role = payload.role as Role;
+
+    if (role !== Role.HumanApp) {
+      if (!payload.kyc_status || !payload.address) {
+        throw new UnauthorizedException('Invalid token');
+      }
+      if (payload.kyc_status !== KYC_APPROVED) {
+        throw new UnauthorizedException('Invalid KYC status');
+      }
+    }
+
     return {
+      role: role,
       address: payload.address,
       email: payload.email,
       kycStatus: payload.kyc_status,
