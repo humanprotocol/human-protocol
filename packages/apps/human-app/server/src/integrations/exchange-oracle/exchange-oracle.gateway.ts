@@ -89,6 +89,7 @@ export class ExchangeOracleGateway {
       params: reducedParams,
       headers: {
         Authorization: details.token,
+        Accept: 'application/json',
       },
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);

@@ -1,8 +1,6 @@
-import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsString, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsValidEthereumAddress } from '../../common/validators';
 import {
   JobFieldName,
   JobSortField,
@@ -19,21 +17,13 @@ export class ManifestDto {
 }
 
 export class SolveJobDto {
-  @ApiProperty({ name: 'escrow_address' })
-  @IsString()
-  @IsValidEthereumAddress()
-  public escrowAddress: string;
-
-  @ApiProperty({
-    enum: ChainId,
-    name: 'chain_id',
-  })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
   @ApiProperty()
   @IsString()
   public solution: string;
+
+  @ApiProperty({ name: 'assignment_id' })
+  @IsNumber()
+  public assignmentId: number;
 }
 
 export class GetJobsDto extends PageOptionsDto {
@@ -109,4 +99,15 @@ export class JobDto {
     this.jobType = jobType;
     this.status = status;
   }
+}
+
+export class SolveJobResponseDto {
+  @ApiProperty({ name: 'assignment_id' })
+  assignmentId: number;
+
+  @ApiProperty({ name: 'solution' })
+  solution: string;
+
+  @ApiProperty({ name: 'message' })
+  message: string;
 }

@@ -5,6 +5,8 @@ export const SERVICE_NAME = 'Job Launcher';
 export const NS = 'hmt';
 export const COINGECKO_API_URL =
   'https://api.coingecko.com/api/v3/simple/price';
+export const COINMARKETCAP_API_URL =
+  'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 export const DEFAULT_MAX_RETRY_COUNT = 3;
 export const TX_CONFIRMATION_TRESHOLD = 1;
 
@@ -15,7 +17,8 @@ export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];
 export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_AMOY,
-  ChainId.GOERLI,
+  ChainId.SEPOLIA,
+  ChainId.XLAYER_TESTNET,
 ];
 export const MAINNET_CHAIN_IDS = [
   ChainId.BSC_MAINNET,
@@ -41,6 +44,9 @@ export const CANCEL_JOB_STATUSES = [
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,
+  JobStatus.SET_UP,
+  JobStatus.CREATED,
+  JobStatus.PARTIAL,
 ];
 
 export const SENDGRID_TEMPLATES = {
@@ -65,5 +71,6 @@ export const HCAPTCHA_ORACLE_STAKE = 0.05;
 export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';
 
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+export const LOGOUT_PATH = '/auth/logout';
 
 export const E2E_TEST_ENV = 'test-e2e';

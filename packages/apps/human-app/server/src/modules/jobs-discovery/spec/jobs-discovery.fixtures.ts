@@ -7,19 +7,23 @@ import {
   JobsDiscoveryResponseItem,
 } from '../model/jobs-discovery.model';
 import {
-  JobFields,
-  SortField,
+  JobDiscoveryFieldName,
+  JobDiscoverySortField,
+  JobStatus,
   SortOrder,
-} from '../../../common/enums/jobs-discovery';
+} from '../../../common/enums/global-common';
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
 const PAGE_SIZE = 10;
 const PAGE = 1;
 const SORT = SortOrder.ASC;
-const SORT_FIELD = SortField.CREATED_AT;
-const JOB_TYPE = 'type';
-const FIELDS = [JobFields.JOB_TITLE, JobFields.REWARD_AMOUNT];
+const SORT_FIELD = JobDiscoverySortField.CREATED_AT;
+const JOB_TYPE = 'FORTUNE';
+const FIELDS = [
+  JobDiscoveryFieldName.CreatedAt,
+  JobDiscoveryFieldName.JobDescription,
+];
 const TOKEN = 'test-token';
 const JOB_DESCRIPTION = 'Description of the test job';
 const REWARD_AMOUNT = '100';
@@ -27,10 +31,11 @@ const REWARD_TOKEN = 'ETH';
 const CREATED_AT = '2024-03-01T12:00:00Z';
 const JOB_TITLE = 'test job';
 const EXCHANGE_ORACLE_ADDRESS = '0x3dfa342';
+const STATUS = JobStatus.ACTIVE;
 export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL;
 export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracle_address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
   page_size: PAGE_SIZE,
@@ -39,6 +44,7 @@ export const dtoFixture: JobsDiscoveryParamsDto = {
   sort_field: SORT_FIELD,
   job_type: JOB_TYPE,
   fields: FIELDS,
+  status: STATUS,
 };
 
 const dataFixture: JobsDiscoveryParams = {
@@ -50,6 +56,7 @@ const dataFixture: JobsDiscoveryParams = {
   sortField: SORT_FIELD,
   jobType: JOB_TYPE,
   fields: FIELDS,
+  status: STATUS,
 };
 const paramsDataFixture: JobsDiscoveryParamsData = {
   escrow_address: ESCROW_ADDRESS,
@@ -60,11 +67,12 @@ const paramsDataFixture: JobsDiscoveryParamsData = {
   sort_field: SORT_FIELD,
   job_type: JOB_TYPE,
   fields: FIELDS,
+  status: STATUS,
 };
 export const paramsDataFixtureAsString = `?escrow_address=${paramsDataFixture.escrow_address}&chain_id=${paramsDataFixture.chain_id}&page_size=${paramsDataFixture.page_size}&page=${paramsDataFixture.page}&sort=${paramsDataFixture.sort}&sort_field=${paramsDataFixture.sort_field}&job_type=${paramsDataFixture.job_type}&fields=${paramsDataFixture.fields.join(',')}`;
 export const jobsDiscoveryParamsCommandFixture: JobsDiscoveryParamsCommand = {
   data: dataFixture,
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 export const jobsDiscoveryParamsDetailsFixture: JobsDiscoveryParamsDetails = {

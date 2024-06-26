@@ -9,7 +9,7 @@ Retrieve the contract interface of a given contract.
 * **Returns:**
   The contract interface containing the contract abi.
 
-### human_protocol_sdk.utils.get_data_from_subgraph(url, query, params=None)
+### human_protocol_sdk.utils.get_data_from_subgraph(network, query, params=None)
 
 ### human_protocol_sdk.utils.get_erc20_interface()
 

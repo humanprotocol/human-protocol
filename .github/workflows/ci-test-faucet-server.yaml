@@ -19,5 +19,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
+      - run: cp .env.example .env
+        name: Create .env file
+        working-directory: packages/apps/faucet-server
       - run: yarn faucet-server:test
         name: Run faucet-server test

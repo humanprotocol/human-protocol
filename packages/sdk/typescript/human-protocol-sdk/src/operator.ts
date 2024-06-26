@@ -2,9 +2,10 @@
 import gqlFetch from 'graphql-request';
 import {
   ILeader,
+  ILeaderSubgraph,
   ILeadersFilter,
   IOperator,
-  IReputationNetwork,
+  IReputationNetworkSubgraph,
   IReward,
 } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
@@ -20,7 +21,7 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
 } from './error';
-import { throwError } from './utils';
+import { getSubgraphUrl, throwError } from './utils';
 import { ChainId } from './enums';
 import { NETWORKS } from './constants';
 
@@ -55,12 +56,23 @@ export class OperatorUtils {
 
     try {
       const { leader } = await gqlFetch<{
-        leader: ILeader;
-      }>(networkData.subgraphUrl, GET_LEADER_QUERY, {
+        leader: ILeaderSubgraph;
+      }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
         address: address.toLowerCase(),
       });
 
-      return leader;
+      let jobTypes: string[] = [];
+
+      if (typeof leader.jobTypes === 'string') {
+        jobTypes = leader.jobTypes.split(',');
+      } else if (Array.isArray(leader.jobTypes)) {
+        jobTypes = leader.jobTypes;
+      }
+
+      return {
+        ...leader,
+        jobTypes,
+      };
     } catch (e) {
       return throwError(e);
     }
@@ -78,28 +90,48 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils } from '@human-protocol/sdk';
    *
-   * const leaders = await OperatorUtils.getLeaders();
+   * const filter: ILeadersFilter = {
+   *  chainId: ChainId.POLYGON
+   * };
+   * const leaders = await OperatorUtils.getLeaders(filter);
    * ```
    */
-  public static async getLeaders(
-    filter: ILeadersFilter = { networks: [ChainId.POLYGON_AMOY] }
-  ): Promise<ILeader[]> {
+  public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
     try {
       let leaders_data: ILeader[] = [];
-      for (const chainId of filter.networks) {
-        const networkData = NETWORKS[chainId];
 
-        if (!networkData) {
-          throw ErrorUnsupportedChainID;
-        }
-        const { leaders } = await gqlFetch<{
-          leaders: ILeader[];
-        }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
-          role: filter.role,
-        });
-        leaders_data = leaders_data.concat(leaders);
+      const networkData = NETWORKS[filter.chainId];
+
+      if (!networkData) {
+        throw ErrorUnsupportedChainID;
       }
 
+      const { leaders } = await gqlFetch<{
+        leaders: ILeaderSubgraph[];
+      }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
+        role: filter?.role,
+      });
+
+      if (!leaders) {
+        return [];
+      }
+
+      leaders_data = leaders_data.concat(
+        leaders.map((leader) => {
+          let jobTypes: string[] = [];
+
+          if (typeof leader.jobTypes === 'string') {
+            jobTypes = leader.jobTypes.split(',');
+          } else if (Array.isArray(leader.jobTypes)) {
+            jobTypes = leader.jobTypes;
+          }
+
+          return {
+            ...leader,
+            jobTypes,
+          };
+        })
+      );
       return leaders_data;
     } catch (e) {
       return throwError(e);
@@ -132,13 +164,26 @@ export class OperatorUtils {
     }
     try {
       const { reputationNetwork } = await gqlFetch<{
-        reputationNetwork: IReputationNetwork;
-      }>(networkData.subgraphUrl, GET_REPUTATION_NETWORK_QUERY(role), {
+        reputationNetwork: IReputationNetworkSubgraph;
+      }>(getSubgraphUrl(networkData), GET_REPUTATION_NETWORK_QUERY(role), {
         address: address.toLowerCase(),
         role: role,
       });
 
-      return reputationNetwork.operators;
+      return reputationNetwork.operators.map((operator) => {
+        let jobTypes: string[] = [];
+
+        if (typeof operator.jobTypes === 'string') {
+          jobTypes = operator.jobTypes.split(',');
+        } else if (Array.isArray(operator.jobTypes)) {
+          jobTypes = operator.jobTypes;
+        }
+
+        return {
+          ...operator,
+          jobTypes,
+        };
+      });
     } catch (e) {
       return throwError(e);
     }
@@ -175,7 +220,7 @@ export class OperatorUtils {
     try {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
-      }>(networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
+      }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
         slasherAddress: slasherAddress.toLowerCase(),
       });
 

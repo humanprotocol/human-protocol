@@ -1,4 +1,4 @@
-import { ChainId, NetworkData } from '@human-protocol/sdk';
+import { NetworkData } from '@human-protocol/sdk';
 import { Button, Grid, Paper, Typography } from '@mui/material';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,7 +16,7 @@ export const Success: FC<SuccessProps> = ({ txHash, network }) => {
         direction="column"
         sx={{
           padding: { xs: 2, sm: 2, md: 10, lg: 10 },
-          minwidth: 600,
+          minWidth: 600,
         }}
         justifyContent="center"
       >
@@ -53,9 +53,7 @@ export const Success: FC<SuccessProps> = ({ txHash, network }) => {
             align="center"
             width={'100%'}
           >
-            {network?.chainId === ChainId.SKALE
-              ? 'Congratulations, sFUEL sent to your account'
-              : 'Congratulations, 10 testnet HMT was sent to your account'}
+            Congratulations, 10 testnet HMT was sent to your account
           </Typography>
         </Grid>
 

@@ -3,9 +3,15 @@ import { Injectable } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { SortDirection } from '../../common/enums/collection';
 import { DataSource, In, LessThanOrEqual } from 'typeorm';
-import { JobStatus, JobStatusFilter } from '../../common/enums/job';
+import {
+  JobSortField,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
 import { JobEntity } from './job.entity';
 import { BaseRepository } from '../../database/base.repository';
+import { ListResult } from './job.interface';
+import { GetJobsDto } from './job.dto';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {
@@ -40,7 +46,22 @@ export class JobRepository extends BaseRepository<JobEntity> {
     });
   }
 
-  public async findByStatus(status: JobStatus): Promise<JobEntity[]> {
+  public async findManyByChainIdsAndEscrowAddresses(
+    chainId: ChainId[],
+    escrowAddress: string[],
+  ): Promise<JobEntity[]> {
+    return this.find({
+      where: {
+        chainId: In(chainId),
+        escrowAddress: In(escrowAddress),
+      },
+    });
+  }
+
+  public async findByStatus(
+    status: JobStatus,
+    take?: number,
+  ): Promise<JobEntity[]> {
     return this.find({
       where: {
         status: status,
@@ -51,42 +72,58 @@ export class JobRepository extends BaseRepository<JobEntity> {
         createdAt: SortDirection.DESC,
         waitUntil: SortDirection.ASC,
       },
+      ...(take && { take }),
     });
   }
 
-  public async findByStatusFilter(
-    chainIds: ChainId[],
+  public async fetchFiltered(
+    data: GetJobsDto,
     userId: number,
-    status: JobStatusFilter,
-    skip: number,
-    limit: number,
-  ): Promise<JobEntity[]> {
-    const statusFilter =
-      status === JobStatusFilter.PENDING
-        ? In([
-            JobStatus.PENDING,
-            JobStatus.PAID,
-            JobStatus.CREATED,
-            JobStatus.SET_UP,
-          ])
-        : In([status]);
+  ): Promise<ListResult> {
+    let statusFilter: JobStatus[];
 
-    return this.find({
-      where: { userId, status: statusFilter, chainId: In(chainIds) },
-      skip,
-      take: limit,
-    });
-  }
+    switch (data.status) {
+      case JobStatusFilter.PENDING:
+        statusFilter = [
+          JobStatus.PENDING,
+          JobStatus.PAID,
+          JobStatus.CREATED,
+          JobStatus.SET_UP,
+        ];
+        break;
+      case JobStatusFilter.CANCELED:
+        statusFilter = [JobStatus.TO_CANCEL, JobStatus.CANCELED];
+        break;
+      default:
+        statusFilter = [data.status as any];
+        break;
+    }
 
-  public async findByEscrowAddresses(
-    userId: number,
-    escrowAddresses: string[],
-  ): Promise<JobEntity[]> {
-    return this.find({
-      where: {
-        userId,
-        escrowAddress: In(escrowAddresses),
-      },
-    });
+    const queryBuilder = this.createQueryBuilder('job');
+
+    if (data.sortField == JobSortField.CHAIN_ID)
+      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+    else if (data.sortField == JobSortField.CREATED_AT)
+      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+
+    queryBuilder.where('job.userId = :userId', { userId });
+    if (data.status !== undefined) {
+      queryBuilder.andWhere('job.status IN (:...statusFilter)', {
+        statusFilter,
+      });
+    }
+
+    if (data.chainId !== undefined) {
+      queryBuilder.andWhere('job.chain_id IN (:...chainIds)', {
+        chainIds: data.chainId,
+      });
+    }
+
+    queryBuilder.offset(data.skip).limit(data.pageSize);
+
+    const itemCount = await queryBuilder.getCount();
+    const entities = await queryBuilder.getMany();
+
+    return { entities, itemCount };
   }
 }

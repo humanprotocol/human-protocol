@@ -1,20 +1,26 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
-  SortField,
-  SortOrder,
-  StatusEnum,
-} from '../../../common/enums/job-assignment';
+  PageableData,
+  PageableDto,
+  PageableParams,
+} from '../../../common/utils/pageable.model';
+import {
+  AssignmentSortField,
+  AssignmentStatus,
+} from '../../../common/enums/global-common';
+import { Type } from 'class-transformer';
 
 export class JobAssignmentDto {
   @AutoMap()
-  @ApiProperty({ example: 'string' })
-  address: string;
-  @AutoMap()
-  @ApiProperty({ example: 'string' })
+  @IsString()
+  @ApiProperty()
   escrow_address: string;
   @AutoMap()
-  @ApiProperty({ example: 0 })
+  @IsNumber()
+  @Type(() => Number)
+  @ApiPropertyOptional({ default: 80002 })
   chain_id: number;
 }
 
@@ -29,8 +35,6 @@ export class JobAssignmentCommand {
   data: JobAssignmentParams;
   @AutoMap()
   token: string;
-  @AutoMap()
-  address: string;
 }
 
 export class JobAssignmentDetails {
@@ -61,46 +65,45 @@ export class JobAssignmentResponse {
   expires_at: string;
 }
 
-export class JobsFetchParamsDto {
+export class JobsFetchParamsDto extends PageableDto {
   @AutoMap()
-  @ApiProperty({ example: 'string' })
+  @ApiProperty()
   address: string;
   @AutoMap()
-  @ApiProperty({ example: 'string', required: false })
-  assignment_id: string;
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  @ApiPropertyOptional()
+  assignment_id: number;
+  @IsOptional()
   @AutoMap()
-  @ApiProperty({ example: 'string', required: false })
+  @IsString()
+  @ApiPropertyOptional()
   escrow_address: string;
   @AutoMap()
-  @ApiProperty({ example: 0, required: false })
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  @ApiPropertyOptional({ default: 80002 })
   chain_id: number;
   @AutoMap()
-  @ApiProperty({ example: 'job type', required: false })
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional()
   job_type: string;
   @AutoMap()
-  @ApiProperty({ example: 'ACTIVE', required: false })
-  status: StatusEnum;
+  @IsOptional()
+  @IsEnum(AssignmentStatus)
+  @ApiPropertyOptional({ enum: AssignmentStatus })
+  status: AssignmentStatus;
   @AutoMap()
-  @ApiProperty({ example: 5, default: 5, maximum: 10, required: false })
-  page_size: number;
-  @AutoMap()
-  @ApiProperty({ example: 0, default: 0, required: false })
-  page: number;
-  @AutoMap()
-  @ApiProperty({ example: 'ASC', default: 'ASC', required: false })
-  sort: SortOrder;
-  @AutoMap()
-  @ApiProperty({
-    example: 'created_at',
-    default: 'created_at',
-    required: false,
-  })
-  sort_field: SortField;
+  @IsOptional()
+  @IsEnum(AssignmentSortField, { each: true })
+  @ApiPropertyOptional({ enum: AssignmentSortField, isArray: true })
+  sort_field: AssignmentSortField;
 }
 
-export class JobsFetchParams {
-  @AutoMap()
-  assignmentId: string;
+export class JobsFetchParams extends PageableParams {
   @AutoMap()
   escrowAddress: string;
   @AutoMap()
@@ -108,15 +111,11 @@ export class JobsFetchParams {
   @AutoMap()
   jobType: string;
   @AutoMap()
-  status: StatusEnum;
+  status: AssignmentStatus;
   @AutoMap()
-  pageSize: number;
+  sortField: AssignmentSortField;
   @AutoMap()
-  page: number;
-  @AutoMap()
-  sort: SortOrder;
-  @AutoMap()
-  sortField: SortField;
+  assignmentId: number;
 }
 export class JobsFetchParamsCommand {
   @AutoMap()
@@ -134,25 +133,19 @@ export class JobsFetchParamsDetails {
   token: string;
 }
 
-export class JobsFetchParamsData {
-  @AutoMap()
-  assignment_id: string;
+export class JobsFetchParamsData extends PageableData {
   @AutoMap()
   escrow_address: string;
+  @AutoMap()
+  assignment_id: number;
   @AutoMap()
   chain_id: number;
   @AutoMap()
   job_type: string;
   @AutoMap()
-  status: StatusEnum;
+  status: AssignmentStatus;
   @AutoMap()
-  page_size: number;
-  @AutoMap()
-  page: number;
-  @AutoMap()
-  sort: SortOrder;
-  @AutoMap()
-  sort_field: SortField;
+  sort_field: AssignmentSortField;
 }
 
 export class JobsFetchResponseItem {

@@ -5,7 +5,6 @@ import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
-  JobSortField,
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
@@ -27,8 +26,8 @@ export class CreateAssignmentDto {
 export class GetAssignmentsDto extends PageOptionsDto {
   @ApiPropertyOptional({
     name: 'sort_field',
-    enum: JobSortField,
-    default: JobSortField.CREATED_AT,
+    enum: AssignmentSortField,
+    default: AssignmentSortField.CREATED_AT,
   })
   @IsOptional()
   @IsEnum(AssignmentSortField)
@@ -38,22 +37,27 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  chainId: number;
+  chainId?: number;
 
   @ApiPropertyOptional({ name: 'job_type', enum: JobType })
   @IsEnum(JobType)
   @IsOptional()
-  jobType: JobType;
+  jobType?: JobType;
 
   @ApiPropertyOptional({ name: 'escrow_address' })
   @IsOptional()
   @IsString()
-  escrowAddress: string;
+  escrowAddress?: string;
 
   @ApiPropertyOptional({ enum: AssignmentStatus })
   @IsEnum(AssignmentStatus)
   @IsOptional()
-  status: AssignmentStatus;
+  status?: AssignmentStatus;
+
+  @ApiPropertyOptional({ name: 'assignment_id' })
+  @IsOptional()
+  @IsString()
+  assignmentId?: string;
 }
 
 export class AssignmentDto {
@@ -111,4 +115,24 @@ export class AssignmentDto {
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
   }
+}
+
+export class ResignDto {
+  @ApiProperty({ name: 'assignment_id' })
+  @IsNumber()
+  public assignmentId: number;
+}
+
+export class AssignJobResponseDto {
+  @ApiProperty({ name: 'assignment_id' })
+  assignmentId: number;
+
+  @ApiProperty({ name: 'escrow_address' })
+  escrowAddress: string;
+
+  @ApiProperty({ name: 'chain_id' })
+  chainId: ChainId;
+
+  @ApiProperty({ name: 'worker_address' })
+  workerAddress: string;
 }

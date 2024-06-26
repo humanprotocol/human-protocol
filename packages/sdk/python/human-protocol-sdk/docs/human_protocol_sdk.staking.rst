@@ -13,4 +13,3 @@ Submodules
    :maxdepth: 4
 
    human_protocol_sdk.staking.staking_client
-   human_protocol_sdk.staking.staking_utils

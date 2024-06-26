@@ -6,7 +6,6 @@ import { WorkerModule } from './modules/user-worker/worker.module';
 import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { envValidator } from './common/config/environment-config.service';
 import { OperatorModule } from './modules/user-operator/operator.module';
 import { OperatorController } from './modules/user-operator/operator.controller';
 import { WorkerController } from './modules/user-worker/worker.controller';
@@ -23,13 +22,45 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { StatisticsController } from './modules/statistics/statistics.controller';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
+<<<<<<< HEAD
+=======
+import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
+import { PasswordResetModule } from './modules/password-reset/password-reset.module';
+import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
+import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
+import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
+import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
+import Joi from 'joi';
+import { ChainId } from '@human-protocol/sdk';
+>>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
-      validationSchema: envValidator,
+      validationSchema: Joi.object({
+        HOST: Joi.string().required(),
+        PORT: Joi.number().required(),
+        REPUTATION_ORACLE_URL: Joi.string().required(),
+        REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
+        REDIS_PORT: Joi.number().required(),
+        REDIS_HOST: Joi.string().required(),
+        RPC_URL: Joi.string().required(),
+        CHAIN_IDS_ENABLED: Joi.string()
+          .custom((value) => {
+            const chainIds = value.split(',');
+            for (const id of chainIds) {
+              if (!Object.values(ChainId).includes(Number(id.trim()))) {
+                throw new Error(
+                  `Invalid chain ID: Chain ID ${id} is not included in the HUMAN SDK.`,
+                );
+              }
+            }
+            return value;
+          })
+          .required(),
+      }),
     }),
     AutomapperModule.forRoot({
       strategyInitializer: classes(),
@@ -46,6 +77,15 @@ import { KvStoreModule } from './integrations/kv-store/kv-store.module';
     OracleDiscoveryModule,
     StatisticsModule,
     KvStoreModule,
+<<<<<<< HEAD
+=======
+    EmailConfirmationModule,
+    PasswordResetModule,
+    DisableOperatorModule,
+    KycProcedureModule,
+    PrepareSignatureModule,
+    EscrowUtilsModule,
+>>>>>>> 583e66435c12c7261845de7abbcee9e54ac4551c
   ],
   controllers: [
     AppController,

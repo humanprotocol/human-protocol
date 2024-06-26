@@ -29,7 +29,6 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
-  EthereumError,
   InvalidEthereumAddressError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
@@ -2156,7 +2155,7 @@ describe('EscrowUtils', () => {
     test('should throw an error if chainId is invalid', async () => {
       await expect(
         EscrowUtils.getEscrows({ networks: [123] } as any)
-      ).rejects.toThrow(new EthereumError(ErrorUnsupportedChainID.message));
+      ).rejects.toThrow(ErrorUnsupportedChainID);
     });
     test('should throw an error if launcher is an invalid address', async () => {
       const launcher = FAKE_ADDRESS;
@@ -2228,7 +2227,7 @@ describe('EscrowUtils', () => {
       const result = await EscrowUtils.getEscrows(filter);
       expect(result).toEqual(escrows);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://subgraph.satsuma-prod.com/8d51f9873a51/team--2543/humanprotocol-amoy/api',
+        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_ESCROWS_QUERY(filter),
         filter
       );
@@ -2385,6 +2384,273 @@ describe('EscrowUtils', () => {
         GET_ESCROW_BY_ADDRESS_QUERY(),
         { escrowAddress: escrow.address }
       );
+    });
+  });
+
+  describe('getStatusEvents', () => {
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
+    test('should throw an error if networks array is empty', async () => {
+      await expect(EscrowUtils.getStatusEvents([])).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
+    });
+
+    test('should throw an error if chainId is invalid', async () => {
+      await expect(EscrowUtils.getStatusEvents([123 as any])).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
+    });
+
+    test('should throw an error if launcher address is invalid', async () => {
+      await expect(
+        EscrowUtils.getStatusEvents(
+          [ChainId.POLYGON_AMOY],
+          undefined,
+          undefined,
+          undefined,
+          'invalid_address'
+        )
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should successfully getStatusEvents with default statuses', async () => {
+      const pendingEvents = [
+        {
+          escrowAddress: '0x1',
+          timestamp: '1234567890',
+          status: 'Pending',
+          chainId: ChainId.LOCALHOST,
+        },
+        {
+          escrowAddress: '0x2',
+          timestamp: '1234567891',
+          status: 'Pending',
+          chainId: ChainId.LOCALHOST,
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
+
+      const result = await EscrowUtils.getStatusEvents([ChainId.LOCALHOST]);
+      expect(result).toEqual(pendingEvents);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getStatusEvents with specified dates', async () => {
+      const fromDate = new Date('2023-01-01');
+      const toDate = new Date('2023-12-31');
+
+      const pendingEvents = [
+        {
+          escrowAddress: '0x1',
+          timestamp: '1234567890',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+        {
+          escrowAddress: '0x2',
+          timestamp: '1234567891',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
+
+      const result = await EscrowUtils.getStatusEvents(
+        [ChainId.POLYGON_AMOY],
+        undefined,
+        fromDate,
+        toDate
+      );
+
+      expect(result).toEqual(pendingEvents);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getStatusEvents with all parameters', async () => {
+      const fromDate = new Date('2023-01-01');
+      const toDate = new Date('2023-12-31');
+
+      const partialEvents = [
+        {
+          escrowAddress: '0x1',
+          timestamp: '1234567890',
+          status: 'Partial',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+        {
+          escrowAddress: '0x2',
+          timestamp: '1234567891',
+          status: 'Partial',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValueOnce({ escrowStatusEvents: partialEvents });
+
+      const result = await EscrowUtils.getStatusEvents(
+        [ChainId.POLYGON_AMOY],
+        [EscrowStatus.Partial],
+        fromDate,
+        toDate
+      );
+
+      expect(result).toEqual(partialEvents);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getStatusEvents with default statuses and specified dates', async () => {
+      const fromDate = new Date('2023-01-01');
+      const toDate = new Date('2023-12-31');
+
+      const pendingEvents = [
+        {
+          escrowAddress: '0x1',
+          timestamp: '1234567890',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+        {
+          escrowAddress: '0x2',
+          timestamp: '1234567891',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
+
+      const result = await EscrowUtils.getStatusEvents(
+        [ChainId.POLYGON_AMOY],
+        undefined,
+        fromDate,
+        toDate
+      );
+
+      expect(result).toEqual(pendingEvents);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getStatusEvents with default statuses for multiple networks and specified dates', async () => {
+      const fromDate = new Date('2023-01-01');
+      const toDate = new Date('2023-12-31');
+
+      const pendingEventsNetwork1 = [
+        {
+          escrowAddress: '0x1',
+          timestamp: '1234567890',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+        {
+          escrowAddress: '0x2',
+          timestamp: '1234567891',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+      ];
+
+      const pendingEventsNetwork2 = [
+        {
+          escrowAddress: '0x3',
+          timestamp: '1234567892',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_MUMBAI,
+        },
+        {
+          escrowAddress: '0x4',
+          timestamp: '1234567893',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_MUMBAI,
+        },
+      ];
+
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default');
+      gqlFetchSpy.mockResolvedValueOnce({
+        escrowStatusEvents: pendingEventsNetwork1,
+      });
+      gqlFetchSpy.mockResolvedValueOnce({
+        escrowStatusEvents: pendingEventsNetwork2,
+      });
+
+      const result = await EscrowUtils.getStatusEvents(
+        [ChainId.POLYGON_AMOY, ChainId.POLYGON_MUMBAI],
+        [EscrowStatus.Pending],
+        fromDate,
+        toDate
+      );
+
+      expect(result).toEqual([
+        ...pendingEventsNetwork1,
+        ...pendingEventsNetwork2,
+      ]);
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    test('should successfully getStatusEvents with specified statuses and dates for multiple networks', async () => {
+      const fromDate = new Date('2023-01-01');
+      const toDate = new Date('2023-12-31');
+
+      const pendingEvents = [
+        {
+          escrowAddress: '0x1',
+          timestamp: '1234567890',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+        {
+          escrowAddress: '0x2',
+          timestamp: '1234567891',
+          status: 'Pending',
+          chainId: ChainId.POLYGON_AMOY,
+        },
+      ];
+
+      const partialEvents = [
+        {
+          escrowAddress: '0x3',
+          timestamp: '1234567892',
+          status: 'Partial',
+          chainId: ChainId.POLYGON_MUMBAI,
+        },
+        {
+          escrowAddress: '0x4',
+          timestamp: '1234567893',
+          status: 'Partial',
+          chainId: ChainId.POLYGON_MUMBAI,
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValueOnce({
+          escrowStatusEvents: pendingEvents,
+        })
+        .mockResolvedValueOnce({
+          escrowStatusEvents: partialEvents,
+        });
+
+      const result = await EscrowUtils.getStatusEvents(
+        [ChainId.POLYGON_AMOY, ChainId.POLYGON_MUMBAI],
+        [EscrowStatus.Pending, EscrowStatus.Partial],
+        fromDate,
+        toDate
+      );
+
+      expect(result).toEqual([...pendingEvents, ...partialEvents]);
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

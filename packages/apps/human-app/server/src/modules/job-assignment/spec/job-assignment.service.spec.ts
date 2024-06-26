@@ -12,11 +12,13 @@ import {
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { JobAssignmentProfile } from '../job-assignment.mapper';
+import { EscrowUtilsGateway } from '../../../integrations/escrow/escrow-utils-gateway.service';
 
 describe('JobAssignmentService', () => {
   let service: JobAssignmentService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
   let kvStoreGatewayMock: Partial<KvStoreGateway>;
+  let escrowUtilsGatewayMock: Partial<EscrowUtilsGateway>;
   beforeEach(async () => {
     exchangeOracleGatewayMock = {
       postNewJobAssignment: jest.fn(),
@@ -24,6 +26,9 @@ describe('JobAssignmentService', () => {
     };
     kvStoreGatewayMock = {
       getExchangeOracleUrlByAddress: jest.fn(),
+    };
+    escrowUtilsGatewayMock = {
+      getExchangeOracleAddressByEscrowAddress: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -37,6 +42,7 @@ describe('JobAssignmentService', () => {
         JobAssignmentProfile,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
         { provide: KvStoreGateway, useValue: kvStoreGatewayMock },
+        { provide: EscrowUtilsGateway, useValue: escrowUtilsGatewayMock },
       ],
     }).compile();
 
@@ -49,9 +55,12 @@ describe('JobAssignmentService', () => {
 
   describe('processJobAssignment', () => {
     it('should process job assignment correctly', async () => {
+      const escrowUtilExchangeOracleAddress = '0x';
       const command = jobAssignmentCommandFixture;
       const details = jobAssignmentDetailsFixture;
-
+      (
+        escrowUtilsGatewayMock.getExchangeOracleAddressByEscrowAddress as jest.Mock
+      ).mockResolvedValue(escrowUtilExchangeOracleAddress);
       (
         kvStoreGatewayMock.getExchangeOracleUrlByAddress as jest.Mock
       ).mockResolvedValue(jobAssignmentOracleUrl);
@@ -64,8 +73,11 @@ describe('JobAssignmentService', () => {
       const result = await service.processJobAssignment(command);
 
       expect(
+        escrowUtilsGatewayMock.getExchangeOracleAddressByEscrowAddress,
+      ).toHaveBeenCalledWith(command.data.chainId, command.data.escrowAddress);
+      expect(
         kvStoreGatewayMock.getExchangeOracleUrlByAddress,
-      ).toHaveBeenCalledWith(command.address);
+      ).toHaveBeenCalledWith(escrowUtilExchangeOracleAddress);
       expect(
         exchangeOracleGatewayMock.postNewJobAssignment,
       ).toHaveBeenCalledWith(details);

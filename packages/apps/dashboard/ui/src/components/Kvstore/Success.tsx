@@ -5,10 +5,9 @@ import { saveAs } from 'file-saver';
 import JSzip from 'jszip';
 import { Dispatch, useState, useEffect, FC } from 'react';
 import {
-  useWaitForTransaction,
-  useContractWrite,
-  usePrepareContractWrite,
-  useNetwork,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useAccount,
 } from 'wagmi';
 
 import { Alert } from '../Alert';
@@ -60,7 +59,7 @@ export type SuccessProps = {
 };
 
 export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const [copy, setCopy] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [cid, setCid] = useState<string>('');
@@ -70,34 +69,48 @@ export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
       saveToNFTStorage(keys.publicKey, setCid, setError);
     }
   }, [keys.publicKey]);
-  const { config } = usePrepareContractWrite({
-    address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
-    abi: KVStore,
-    functionName: 'set',
-    args: ['public_key', cid],
+
+  const { data: hash, writeContract } = useWriteContract();
+
+  const {
+    isLoading: loadingTransaction,
+    isSuccess: isTransactionSuccess,
+    error: errorTransaction,
+  } = useWaitForTransactionReceipt({
+    hash,
   });
 
-  const { write, isLoading, data } = useContractWrite({
-    ...config,
-    onError(error) {
-      setError(error.message);
-      setSuccess(false);
-    },
-  });
-  const { isLoading: loadingTransaction } = useWaitForTransaction({
-    hash: data?.hash,
-    onSuccess(data) {
+  useEffect(() => {
+    if (errorTransaction) {
+      setError(errorTransaction.message);
+    }
+  }, [errorTransaction]);
+
+  useEffect(() => {
+    if (isTransactionSuccess) {
       setSuccess(true);
       setStep(2);
       setPage(3);
-    },
-    onError() {
-      setError('Error transaction');
-      setSuccess(false);
-    },
-  });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTransactionSuccess]);
+
   function empowerHuman() {
-    write?.();
+    writeContract(
+      {
+        address: NETWORKS[chain?.id as ChainId]
+          ?.kvstoreAddress as `0x${string}`,
+        abi: KVStore,
+        functionName: 'set',
+        args: ['public_key', cid],
+      },
+      {
+        onError: (error) => {
+          setError(error.message);
+          setSuccess(false);
+        },
+      }
+    );
   }
 
   return (
@@ -205,9 +218,7 @@ export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
           }}
         >
           <Button
-            disabled={
-              cid.length === 0 || !write || isLoading || loadingTransaction
-            }
+            disabled={cid.length === 0 || loadingTransaction}
             variant="outlined"
             sx={{ mr: 2 }}
             onClick={() => {
@@ -224,9 +235,7 @@ export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
           </Button>
           {what === 'generated' && (
             <Button
-              disabled={
-                cid.length === 0 || !write || isLoading || loadingTransaction
-              }
+              disabled={cid.length === 0 || loadingTransaction}
               variant="outlined"
               sx={{ mr: 2 }}
               onClick={() =>
@@ -237,9 +246,7 @@ export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
             </Button>
           )}
           <Button
-            disabled={
-              cid.length === 0 || !write || isLoading || loadingTransaction
-            }
+            disabled={cid.length === 0 || loadingTransaction}
             onClick={() => empowerHuman()}
             variant="contained"
           >

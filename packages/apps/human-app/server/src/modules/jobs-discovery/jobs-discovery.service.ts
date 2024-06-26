@@ -20,7 +20,7 @@ export class JobsDiscoveryService {
     command: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
     const exchangeOracleUrl =
-      await this.kvStoreGateway.getExchangeOracleUrlByAddress(command.address);
+      await this.kvStoreGateway.getExchangeOracleUrlByAddress(command.oracleAddress);
     const details = this.mapper.map(
       command,
       JobsDiscoveryParamsCommand,

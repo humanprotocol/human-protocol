@@ -10,6 +10,8 @@ import { SendgridConfigService } from './sendgrid-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { ReputationConfigService } from './reputation-config.service';
 import { SynapsConfigService } from './synaps-config.service';
+import { NetworkConfigService } from './network-config.service';
+import { HCaptchaConfigService } from './hcaptcha-config.service';
 
 @Global()
 @Module({
@@ -24,6 +26,8 @@ import { SynapsConfigService } from './synaps-config.service';
     SendgridConfigService,
     SynapsConfigService,
     PGPConfigService,
+    NetworkConfigService,
+    HCaptchaConfigService,
   ],
   exports: [
     ConfigService,
@@ -36,6 +40,8 @@ import { SynapsConfigService } from './synaps-config.service';
     SendgridConfigService,
     SynapsConfigService,
     PGPConfigService,
+    NetworkConfigService,
+    HCaptchaConfigService,
   ],
 })
 export class EnvConfigModule {}

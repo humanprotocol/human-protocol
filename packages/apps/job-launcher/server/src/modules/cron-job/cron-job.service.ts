@@ -1,25 +1,29 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
+import { ErrorCronJob, ErrorEscrow } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { JobService } from '../job/job.service';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 import { WebhookService } from '../webhook/webhook.service';
-import { StorageService } from '../storage/storage.service';
 import {
   EventType,
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { FortuneManifestDto } from '../job/job.dto';
 import { PaymentService } from '../payment/payment.service';
 import { ethers } from 'ethers';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
+import { ControlledError } from '../../common/errors/controlled';
+import { Cron } from '@nestjs/schedule';
+import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { Web3Service } from '../web3/web3.service';
+import { JobEntity } from '../job/job.entity';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class CronJobService {
@@ -30,9 +34,10 @@ export class CronJobService {
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
     private readonly webhookService: WebhookService,
-    private readonly storageService: StorageService,
+    private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
     private readonly webhookRepository: WebhookRepository,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
@@ -63,14 +68,14 @@ export class CronJobService {
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.Completed);
+      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
     }
 
     cronJobEntity.completedAt = new Date();
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -89,8 +94,15 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (err) {
-          this.logger.error(`Error creating escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotCreated} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error creating escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -101,6 +113,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('1-59/2 * * * *')
   public async setupEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.SetupEscrow,
@@ -122,8 +135,15 @@ export class CronJobService {
         try {
           await this.jobService.setupEscrow(jobEntity);
         } catch (err) {
-          this.logger.error(`Error setting up escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotSetup} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error setting up escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -134,6 +154,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async fundEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.FundEscrow,
@@ -155,8 +176,15 @@ export class CronJobService {
         try {
           await this.jobService.fundEscrow(jobEntity);
         } catch (err) {
-          this.logger.error(`Error funding escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotFunded} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error funding escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -167,6 +195,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('*/2 * * * *')
   public async cancelCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CancelEscrow,
@@ -204,10 +233,6 @@ export class CronJobService {
           jobEntity.status = JobStatus.CANCELED;
           await this.jobRepository.updateOne(jobEntity);
 
-          const manifest = await this.storageService.download(
-            jobEntity.manifestUrl,
-          );
-
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
@@ -223,8 +248,15 @@ export class CronJobService {
             await this.webhookRepository.createUnique(webhookEntity);
           }
         } catch (err) {
-          this.logger.error(`Error canceling escrow: ${err.message}`);
-          await this.jobService.handleProcessJobFailure(jobEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorEscrow.NotCanceled} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error canceling escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
         }
       }
     } catch (e) {
@@ -235,6 +267,7 @@ export class CronJobService {
     return true;
   }
 
+  @Cron('*/5 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
@@ -272,6 +305,102 @@ export class CronJobService {
     }
 
     this.logger.log('Pending webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('30 */2 * * * *')
+  /**
+   * Process a job that syncs job statuses.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async syncJobStuses(): Promise<void> {
+    const lastCronJob = await this.cronJobRepository.findOneByType(
+      CronJobType.SyncJobStatuses,
+    );
+
+    if (lastCronJob && !lastCronJob.completedAt) {
+      return;
+    }
+
+    this.logger.log('Update jobs START');
+    const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
+
+    try {
+      const events = await EscrowUtils.getStatusEvents(
+        this.networkConfigService.networks.map((network) => network.chainId),
+        [EscrowStatus.Partial, EscrowStatus.Complete],
+        lastCronJob?.lastSubgraphTime || undefined,
+        undefined,
+        this.web3Service.getOperatorAddress(),
+      );
+
+      if (events.length === 0) {
+        this.logger.log('No events to process');
+        await this.completeCronJob(cronJob);
+        return;
+      }
+
+      const escrowAddresses = events.map((event) =>
+        ethers.getAddress(event.escrowAddress),
+      );
+      const chainIds = events.map((event) => event.chainId);
+
+      const jobs =
+        await this.jobRepository.findManyByChainIdsAndEscrowAddresses(
+          chainIds,
+          escrowAddresses,
+        );
+
+      const jobMap = new Map<string, JobEntity>();
+      for (const job of jobs) {
+        jobMap.set(`${job.chainId}-${job.escrowAddress}`, job);
+      }
+
+      const jobsToUpdate: JobEntity[] = [];
+      let latestEventTimestamp = 0;
+
+      for (const event of events) {
+        const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
+        const job = jobMap.get(key);
+
+        if (!job || job.status === JobStatus.TO_CANCEL) continue;
+
+        let newStatus: JobStatus | null = null;
+        if (
+          event.status === EscrowStatus[EscrowStatus.Partial] &&
+          job.status !== JobStatus.PARTIAL
+        ) {
+          newStatus = JobStatus.PARTIAL;
+        } else if (
+          event.status === EscrowStatus[EscrowStatus.Complete] &&
+          job.status !== JobStatus.COMPLETED
+        ) {
+          newStatus = JobStatus.COMPLETED;
+        }
+
+        if (newStatus && newStatus !== job.status) {
+          job.status = newStatus;
+          jobsToUpdate.push(job);
+        }
+        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
+        if (eventTimestamp > latestEventTimestamp) {
+          latestEventTimestamp = eventTimestamp;
+        }
+      }
+
+      if (jobsToUpdate.length > 0) {
+        await this.jobRepository.updateMany(jobsToUpdate);
+      }
+
+      if (latestEventTimestamp > 0) {
+        cronJob.lastSubgraphTime = new Date(latestEventTimestamp + 1000); // Add one sec to avoid getting the last processed event
+        await this.cronJobRepository.save(cronJob);
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
 }

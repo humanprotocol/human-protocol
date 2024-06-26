@@ -36,7 +36,11 @@ Enum for chain IDs.
 
 #### RINKEBY *= 4*
 
-#### SKALE *= 1273227453*
+#### SEPOLIA *= 11155111*
+
+#### XLAYER *= 196*
+
+#### XLAYER_TESTNET *= 195*
 
 ### *class* human_protocol_sdk.constants.KVStoreKeys(value)
 

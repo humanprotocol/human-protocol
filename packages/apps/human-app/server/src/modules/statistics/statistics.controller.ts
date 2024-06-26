@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Headers,
   Query,
   UsePipes,
   ValidationPipe,
@@ -18,6 +17,7 @@ import {
   UserStatisticsDto,
   UserStatisticsResponse,
 } from './model/user-statistics.model';
+import { Authorization } from '../../common/config/params-decorators';
 
 @Controller()
 export class StatisticsController {
@@ -30,7 +30,7 @@ export class StatisticsController {
     @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
     const command = {
-      address: dto.address,
+      oracleAddress: dto.oracle_address,
     } as OracleStatisticsCommand;
     return this.service.getOracleStats(command);
   }
@@ -38,14 +38,14 @@ export class StatisticsController {
   @ApiTags('Statistics')
   @Get('stats/assignment')
   @ApiOperation({ summary: 'Statistics for requesting user' })
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth()
   @UsePipes(new ValidationPipe())
   public getUserStatistics(
     @Query() dto: UserStatisticsDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<UserStatisticsResponse> {
     const command: UserStatisticsCommand = {
-      address: dto.address,
+      oracleAddress: dto.oracle_address,
       token: token,
     } as UserStatisticsCommand;
     return this.service.getUserStats(command);

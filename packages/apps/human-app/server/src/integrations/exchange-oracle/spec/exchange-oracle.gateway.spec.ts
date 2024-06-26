@@ -3,7 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { ExchangeOracleGateway } from '../exchange-oracle.gateway';
 import {
   oracleStatsDetailsFixture,
-  statisticsExchangeOracleAddress, statisticsExchangeOracleUrl,
+  statisticsExchangeOracleUrl,
   userStatsDetailsFixture,
 } from '../../../modules/statistics/spec/statistics.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';

@@ -51,6 +51,19 @@ class Project(Base):
         passive_deletes=True,
     )
 
+    escrow_creation: Mapped["EscrowCreation"] = relationship(
+        back_populates="projects",
+        passive_deletes=True,
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowCreation.escrow_address, "
+            "Project.chain_id == EscrowCreation.chain_id"
+            ")"
+        ),
+        foreign_keys=[escrow_address, chain_id],
+    )
+
     def __repr__(self):
         return f"Project. id={self.id}"
 
@@ -80,6 +93,35 @@ class Task(Base):
 
     def __repr__(self):
         return f"Task. id={self.id}"
+
+
+class EscrowCreation(Base):
+    __tablename__ = "escrow_creations"
+    id = Column(String, primary_key=True, index=True)
+
+    escrow_address = Column(String(42), index=True, nullable=False)
+    chain_id = Column(Integer, Enum(Networks), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    finished_at = Column(DateTime(timezone=True), nullable=True, server_default=None)
+    # TODO: maybe add expiration
+
+    total_jobs = Column(Integer, nullable=False)
+
+    projects: Mapped[List["Project"]] = relationship(
+        back_populates="escrow_creation",
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowCreation.escrow_address, "
+            "Project.chain_id == EscrowCreation.chain_id"
+            ")"
+        ),
+        foreign_keys=[Project.escrow_address, Project.chain_id],
+    )
+
+    def __repr__(self):
+        return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"
 
 
 class DataUpload(Base):

@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Post,
   Query,
   UsePipes,
@@ -20,24 +19,25 @@ import {
   JobsFetchParamsCommand,
   JobsFetchResponse,
 } from './model/job-assignment.model';
+import { Authorization } from '../../common/config/params-decorators';
 
-@Controller()
+@Controller('/assignment')
 export class JobAssignmentController {
   constructor(
-    private readonly jobAssignmentService: JobAssignmentService,
+    private readonly service: JobAssignmentService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
   @ApiTags('Job-Assignment')
-  @Post('/assignment/job')
+  @Post('/job')
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth()
   @UsePipes(new ValidationPipe())
   public async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<JobAssignmentResponse> {
     const jobAssignmentCommand = this.mapper.map(
       jobAssignmentDto,
@@ -45,18 +45,18 @@ export class JobAssignmentController {
       JobAssignmentCommand,
     );
     jobAssignmentCommand.token = token;
-    return this.jobAssignmentService.processJobAssignment(jobAssignmentCommand);
+    return this.service.processJobAssignment(jobAssignmentCommand);
   }
 
   @ApiTags('Job-Assignment')
-  @Get('/assignment/job')
-  @ApiBearerAuth('access-token')
+  @Get('/job')
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Request to get a jobs assigned to a logged user',
   })
   public async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
-    @Headers('authorization') token: string,
+    @Authorization() token: string,
   ): Promise<JobsFetchResponse> {
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,
@@ -64,8 +64,6 @@ export class JobAssignmentController {
       JobsFetchParamsCommand,
     );
     jobsAssignmentParamsCommand.token = token;
-    return this.jobAssignmentService.processGetAssignedJobs(
-      jobsAssignmentParamsCommand,
-    );
+    return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
   }
 }

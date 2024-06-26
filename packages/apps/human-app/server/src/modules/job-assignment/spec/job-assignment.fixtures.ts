@@ -1,43 +1,45 @@
 import {
   JobAssignmentCommand,
-  JobAssignmentData, JobAssignmentDetails,
+  JobAssignmentData,
+  JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
   JobsFetchParamsCommand,
-  JobsFetchParamsData, JobsFetchParamsDetails,
+  JobsFetchParamsData,
+  JobsFetchParamsDetails,
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
 } from '../model/job-assignment.model';
 import {
-  SortField,
+  AssignmentSortField,
+  AssignmentStatus,
   SortOrder,
-  StatusEnum,
-} from '../../../common/enums/job-assignment';
+} from '../../../common/enums/global-common';
 const EXCHANGE_ORACLE_URL = 'https://www.example.com/api';
 const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
-const JOB_TYPE = 'test_type';
-const STATUS = StatusEnum.ACTIVE;
+const JOB_TYPE = 'FORTUNE';
+const STATUS = AssignmentStatus.ACTIVE;
 const PAGE_SIZE = 5;
 const PAGE = 0;
 const SORT = SortOrder.ASC;
-const SORT_FIELD = SortField.CREATED_AT;
+const SORT_FIELD = AssignmentSortField.CREATED_AT;
 const ASSIGNMENT_ID = 'test_id';
 const REWARD_AMOUNT = 'test_amount';
 const REWARD_TOKEN = 'test';
 const CREATED_AT = 'test_date_1';
 const UPDATED_AT = 'test_date_2';
 const EXPIRES_AT = 'test_date_3';
+const JOB_ASSIGNMENT_ID = 1;
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
 };
@@ -49,7 +51,6 @@ const jobAssignmentParams: JobAssignmentParams = {
 export const jobAssignmentCommandFixture: JobAssignmentCommand = {
   data: jobAssignmentParams,
   token: TOKEN,
-  address: EXCHANGE_ORACLE_ADDRESS,
 };
 export const jobAssignmentDetailsFixture: JobAssignmentDetails = {
   data: jobAssignmentParams,
@@ -75,10 +76,10 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
   expires_at: EXPIRES_AT,
 };
 
-export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = { // @TODO: something is not yes: change with actual FetchParams in exchnge oracle
+export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
   address: EXCHANGE_ORACLE_ADDRESS,
-  assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,
+  assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: STATUS,
@@ -89,8 +90,8 @@ export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = { // @TODO: somethi
 };
 
 const jobsFetchParams: JobsFetchParams = {
-  assignmentId: ASSIGNMENT_ID,
   escrowAddress: ESCROW_ADDRESS,
+  assignmentId: JOB_ASSIGNMENT_ID,
   chainId: CHAIN_ID,
   jobType: JOB_TYPE,
   status: STATUS,
@@ -111,8 +112,8 @@ export const jobsFetchParamsDetailsFixture: JobsFetchParamsDetails = {
 };
 
 export const jobsFetchParamsDataFixture: JobsFetchParamsData = {
-  assignment_id: ASSIGNMENT_ID,
   escrow_address: ESCROW_ADDRESS,
+  assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: STATUS,

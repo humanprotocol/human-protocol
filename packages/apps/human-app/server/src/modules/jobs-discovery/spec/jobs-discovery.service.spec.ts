@@ -58,7 +58,7 @@ describe('JobsDiscoveryService', () => {
       const result = await service.processJobsDiscovery(command);
       expect(
         kvStoreGatewayMock.getExchangeOracleUrlByAddress,
-      ).toHaveBeenCalledWith(command.address);
+      ).toHaveBeenCalledWith(command.oracleAddress);
       expect(exchangeOracleGatewayMock.fetchJobs).toHaveBeenCalledWith(details);
       expect(result).toEqual(responseFixture);
     });

@@ -1,4 +1,5 @@
 import {
+  KVStore,
   KVStoreSetEvent,
   Leader,
   LeaderURL,
@@ -9,6 +10,7 @@ import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { isValidEthAddress } from './utils/ethAdrress';
 import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { createTransaction } from './utils/transaction';
 
 export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
   const entityId = `${leader.address.toHex()}-${key}`;
@@ -38,7 +40,24 @@ export function createOrLoadReputationNetwork(
   return reputationNetwork;
 }
 
+export function createOrUpdateKVStore(event: DataSaved): void {
+  const kvstoreId = `${event.params.sender.toHex()}-${event.params.key.toString()}`;
+  let kvstore = KVStore.load(kvstoreId);
+
+  if (!kvstore) {
+    kvstore = new KVStore(kvstoreId);
+    kvstore.address = event.params.sender;
+    kvstore.key = event.params.key;
+  }
+  kvstore.block = event.block.number;
+  kvstore.timestamp = event.block.timestamp;
+  kvstore.value = event.params.value;
+
+  kvstore.save();
+}
+
 export function handleDataSaved(event: DataSaved): void {
+  createTransaction(event, 'set');
   // Create KVStoreSetEvent entity
   const eventEntity = new KVStoreSetEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -48,6 +67,9 @@ export function handleDataSaved(event: DataSaved): void {
   eventEntity.key = event.params.key;
   eventEntity.value = event.params.value;
   eventEntity.save();
+
+  // Update KVStore entity
+  createOrUpdateKVStore(event);
 
   // Update leader attribute, if necessary
   const leader = createOrLoadLeader(event.params.sender);

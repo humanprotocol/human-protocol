@@ -10,7 +10,7 @@ import { EventType } from '../../common/enums/webhook';
 import { ChainId } from '@human-protocol/sdk';
 import { WebhookDataDto } from './webhook.dto';
 import { createMock } from '@golevelup/ts-jest';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import {
   MOCK_ADDRESS,
   MOCK_MAX_RETRY_COUNT,
@@ -18,6 +18,7 @@ import {
 } from '../../../test/constants';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk');
 
@@ -97,12 +98,17 @@ describe('WebhookController', () => {
       jest
         .spyOn(jobService, 'escrowFailedWebhook')
         .mockImplementation(async () => {
-          throw new BadRequestException('Invalid manifest URL');
+          throw new ControlledError(
+            'Invalid manifest URL',
+            HttpStatus.BAD_REQUEST,
+          );
         });
 
       await expect(
         webhookController.processWebhook(mockSignature, invalidDto),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new ControlledError('Invalid manifest URL', HttpStatus.BAD_REQUEST),
+      );
 
       expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(invalidDto);
     });

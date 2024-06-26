@@ -53,7 +53,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsNotNone(project)
         self.assertEqual(project.id, p_id)
         self.assertEqual(project.cvat_id, cvat_id)
-        self.assertEqual(project.status, ProjectStatuses.annotation.value)
+        self.assertEqual(project.status, ProjectStatuses.creation.value)
         self.assertEqual(project.job_type, job_type)
         self.assertEqual(project.escrow_address, escrow_address)
         self.assertEqual(project.chain_id, chain_id)
@@ -213,6 +213,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         project = cvat_service.get_project_by_id(self.session, p_id)
@@ -262,6 +263,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         project = cvat_service.get_project_by_escrow_address(self.session, escrow_address)
@@ -294,6 +296,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         cvat_id = 2
@@ -309,6 +312,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         cvat_id = 3
@@ -324,6 +328,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address,
             chain_id,
             bucket_url,
+            status=ProjectStatuses.annotation,
         )
 
         projects = cvat_service.get_projects_by_status(self.session, ProjectStatuses.annotation)
@@ -736,12 +741,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 2)
 
-        cvat_service.finish_uploads(self.session, [data_uploads[0]])
+        cvat_service.finish_data_uploads(self.session, [data_uploads[0]])
 
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 1)
 
-        cvat_service.finish_uploads(self.session, [data_uploads[0]])
+        cvat_service.finish_data_uploads(self.session, [data_uploads[0]])
 
         data_uploads = self.session.query(DataUpload).all()
         self.assertEqual(len(data_uploads), 0)

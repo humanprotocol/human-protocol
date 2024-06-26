@@ -133,5 +133,99 @@ describe('EscrowFactory', () => {
       'amountJobsLaunched',
       '2'
     );
+
+    // EscrowStatusEvent
+    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
+      data1.block.timestamp
+    }`;
+
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'timestamp',
+      data1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'escrowAddress',
+      escrow1AddressString
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'sender',
+      launcherAddressString
+    );
+    assert.fieldEquals('EscrowStatusEvent', id1, 'status', 'Launched');
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'launcher',
+      launcherAddressString
+    );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'method',
+      'createEscrow'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'from',
+      data1.transaction.from.toHex()
+    );
+
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'method',
+      'createEscrow'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'from',
+      data2.transaction.from.toHex()
+    );
   });
 });

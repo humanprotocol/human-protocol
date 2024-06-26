@@ -46,6 +46,8 @@ const reputationOracleAddress = Address.fromString(
 const recordingOracleAddressString =
   '0x70997970c51812dc3a010c7d01b50e0d17dc79c0';
 const recordingOracleAddress = Address.fromString(recordingOracleAddressString);
+const launcherAddressString = '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65';
+const launcherAddress = Address.fromString(launcherAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
@@ -85,7 +87,7 @@ describe('Escrow', () => {
     escrow.address = escrowAddress;
     escrow.token = Address.zero();
     escrow.factoryAddress = Address.zero();
-    escrow.launcher = Address.zero();
+    escrow.launcher = launcherAddress;
     escrow.count = ZERO_BI;
     escrow.balance = BigInt.fromI32(100);
     escrow.totalFundedAmount = BigInt.fromI32(100);
@@ -134,36 +136,43 @@ describe('Escrow', () => {
     assert.fieldEquals('SetupEvent', id, 'escrowAddress', escrowAddressString);
     assert.fieldEquals('SetupEvent', id, 'sender', operatorAddressString);
 
-    // PendingStatusEvent
+    // EscrowStatusEvent
     assert.fieldEquals(
-      'PendingStatusEvent',
+      'EscrowStatusEvent',
       id,
       'block',
       newPending1.block.number.toString()
     );
     assert.fieldEquals(
-      'PendingStatusEvent',
+      'EscrowStatusEvent',
       id,
       'timestamp',
       newPending1.block.timestamp.toString()
     );
     assert.fieldEquals(
-      'PendingStatusEvent',
+      'EscrowStatusEvent',
       id,
       'txHash',
       newPending1.transaction.hash.toHex()
     );
     assert.fieldEquals(
-      'PendingStatusEvent',
+      'EscrowStatusEvent',
       id,
       'escrowAddress',
       escrowAddressString
     );
     assert.fieldEquals(
-      'PendingStatusEvent',
+      'EscrowStatusEvent',
       id,
       'sender',
       operatorAddressString
+    );
+    assert.fieldEquals('EscrowStatusEvent', id, 'status', 'Pending');
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'launcher',
+      launcherAddressString
     );
 
     // Escrow
@@ -181,6 +190,36 @@ describe('Escrow', () => {
       escrowAddress.toHex(),
       'recordingOracle',
       recordingOracleAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'txHash',
+      newPending1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'method',
+      'setup'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'block',
+      newPending1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'from',
+      newPending1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
     );
   });
 
@@ -220,6 +259,36 @@ describe('Escrow', () => {
     );
     assert.fieldEquals('StoreResultsEvent', id, 'sender', workerAddressString);
     assert.fieldEquals('StoreResultsEvent', id, 'intermediateResultsUrl', URL);
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'txHash',
+      newIS.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'method',
+      'storeResults'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'block',
+      newIS.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'from',
+      newIS.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newIS.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
   });
 
   test('Should properly handle BulkTransfer events with partially paid status', () => {
@@ -270,36 +339,43 @@ describe('Escrow', () => {
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
-    // PartialStatusEvent
+    // EscrowStatusEvent
     assert.fieldEquals(
-      'PartialStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'block',
       bulk1.block.number.toString()
     );
     assert.fieldEquals(
-      'PartialStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'timestamp',
       bulk1.block.timestamp.toString()
     );
     assert.fieldEquals(
-      'PartialStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'txHash',
       bulk1.transaction.hash.toHex()
     );
     assert.fieldEquals(
-      'PartialStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'escrowAddress',
       escrowAddressString
     );
     assert.fieldEquals(
-      'PartialStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'sender',
       operatorAddressString
+    );
+    assert.fieldEquals('EscrowStatusEvent', id1, 'status', 'Partial');
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'launcher',
+      launcherAddressString
     );
 
     // Escrow
@@ -308,6 +384,36 @@ describe('Escrow', () => {
       escrowAddress.toHex(),
       'status',
       'Partially Paid'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'from',
+      bulk1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
     );
   });
 
@@ -359,35 +465,77 @@ describe('Escrow', () => {
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
-    // PaidStatusEvent
+    // EscrowStatusEvent
     assert.fieldEquals(
-      'PaidStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'block',
       bulk1.block.number.toString()
     );
     assert.fieldEquals(
-      'PaidStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'timestamp',
       bulk1.block.timestamp.toString()
     );
     assert.fieldEquals(
-      'PaidStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'txHash',
       bulk1.transaction.hash.toHex()
     );
     assert.fieldEquals(
-      'PaidStatusEvent',
+      'EscrowStatusEvent',
       id1,
       'escrowAddress',
       escrowAddressString
     );
-    assert.fieldEquals('PaidStatusEvent', id1, 'sender', operatorAddressString);
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'sender',
+      operatorAddressString
+    );
+    assert.fieldEquals('EscrowStatusEvent', id1, 'status', 'Paid');
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id1,
+      'launcher',
+      launcherAddressString
+    );
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Paid');
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'from',
+      bulk1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
   });
 
   describe('Statistics', () => {

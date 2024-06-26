@@ -15,6 +15,9 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ServerConfigService } from '../common/config/server-config.service';
+import { SiteKeyEntity } from '../modules/user/site-key.entity';
+import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
+import { CredentialEntity } from '../modules/credentials/credential.entity';
 
 @Module({
   imports: [
@@ -42,10 +45,13 @@ import { ServerConfigService } from '../common/config/server-config.service';
           entities: [
             WebhookIncomingEntity,
             ReputationEntity,
+            CredentialEntity,
+            CredentialValidationEntity,
             TokenEntity,
             UserEntity,
             KycEntity,
             CronJobEntity,
+            SiteKeyEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
@@ -61,6 +67,7 @@ import { ServerConfigService } from '../common/config/server-config.service';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
+          url: databaseConfigService.url,
           host: databaseConfigService.host,
           port: databaseConfigService.port,
           username: databaseConfigService.user,

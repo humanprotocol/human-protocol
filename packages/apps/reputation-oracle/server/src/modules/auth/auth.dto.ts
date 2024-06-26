@@ -18,6 +18,10 @@ export class ForgotPasswordDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class SignInDto {
@@ -56,6 +60,10 @@ export class ResendEmailVerificationDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class RestorePasswordDto extends ValidatePasswordDto {
