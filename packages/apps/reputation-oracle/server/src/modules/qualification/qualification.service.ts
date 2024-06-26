@@ -1,5 +1,4 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateQualificationDto,
   AssignQualificationDto,
@@ -162,7 +161,7 @@ export class QualificationService {
       const addressUsers = await this.userRepository.find({
         where: addresses.map((address) => ({
           evmAddress: address,
-          type: Role.WORKER,
+          role: Role.WORKER,
           status: UserStatus.ACTIVE,
         })),
       });
@@ -171,7 +170,7 @@ export class QualificationService {
       const emailUsers = await this.userRepository.find({
         where: emails.map((email) => ({
           email,
-          type: Role.WORKER,
+          role: Role.WORKER,
           status: UserStatus.ACTIVE,
         })),
       });
