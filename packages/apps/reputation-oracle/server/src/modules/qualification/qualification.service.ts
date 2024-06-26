@@ -7,12 +7,12 @@ import {
   QualificationDto,
 } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
-import { ErrorQualification } from 'src/common/constants/errors';
-import { ControlledError } from 'src/common/errors/controlled';
+import { ErrorQualification } from '../../common/constants/errors';
+import { ControlledError } from '../../common/errors/controlled';
 import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { UserStatus, UserType } from 'src/common/enums/user';
+import { UserStatus, UserType } from '../../common/enums/user';
 
 @Injectable()
 export class QualificationService {
@@ -69,7 +69,7 @@ export class QualificationService {
     try {
       const qualificationEntities =
         await this.qualificationRepository.getQualifications();
-      console.log(qualificationEntities);
+
       return qualificationEntities.map((qualificationEntity) => {
         return {
           reference: qualificationEntity.reference,
@@ -125,8 +125,6 @@ export class QualificationService {
       relations: ['users'],
     });
 
-    console.log(qualification);
-
     if (!qualification) {
       this.logger.log(`Qualification with reference "${reference}" not found`);
       throw new ControlledError(
@@ -144,7 +142,7 @@ export class QualificationService {
     await this.qualificationRepository.save(qualification);
   }
 
-  private async getWorkers(
+  public async getWorkers(
     addresses?: string[],
     emails?: string[],
   ): Promise<UserEntity[]> {

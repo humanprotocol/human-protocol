@@ -21,7 +21,7 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards';
+import { JwtAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
 
 @ApiTags('Qualification')
@@ -50,8 +50,7 @@ export class QualificationController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Get list of qualifications' })
   @ApiResponse({ status: 200, description: 'List of qualifications' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  findAll() {
+  getQualifications() {
     return this.qualificationService.getQualifications();
   }
 
@@ -64,6 +63,7 @@ export class QualificationController {
     description: 'Qualification assigned successfully',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   assign(@Body() assignQualificationDto: AssignQualificationDto) {
     return this.qualificationService.assign(assignQualificationDto);
   }
@@ -77,6 +77,7 @@ export class QualificationController {
     description: 'Qualification unassigned successfully',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   unassign(@Body() unassignQualificationDto: UnassignQualificationDto) {
     return this.qualificationService.unassign(unassignQualificationDto);
   }
