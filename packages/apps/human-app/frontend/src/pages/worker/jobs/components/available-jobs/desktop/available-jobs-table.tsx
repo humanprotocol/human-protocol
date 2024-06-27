@@ -149,7 +149,8 @@ const getColumns = (callbacks: {
 };
 
 export function AvailableJobsTable() {
-  const { setSearchEscrowAddress, setPageParams } = useJobsFilterStore();
+  const { setSearchEscrowAddress, setPageParams, filterParams } =
+    useJobsFilterStore();
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
@@ -170,8 +171,17 @@ export function AvailableJobsTable() {
   });
 
   useEffect(() => {
+    if (!(paginationState.pageSize === 5 || paginationState.pageSize === 10))
+      return;
     setPageParams(paginationState.pageIndex, paginationState.pageSize);
   }, [paginationState, setPageParams]);
+
+  useEffect(() => {
+    setPaginationState({
+      pageIndex: filterParams.page,
+      pageSize: filterParams.page_size,
+    });
+  }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
     columns: getColumns({

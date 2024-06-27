@@ -33,7 +33,7 @@ export interface JobsFilterStoreProps {
   resetFilterParams: () => void;
   setSearchEscrowAddress: (escrow_address: string) => void;
   setOracleAddress: (oracleAddress: string) => void;
-  setPageParams: (pageIndex: number, pageSize: number) => void;
+  setPageParams: (pageIndex: number, pageSize: 5 | 10) => void;
 }
 
 const initialFiltersState = {

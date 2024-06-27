@@ -32,7 +32,7 @@ export interface MyJobsFilterStoreProps {
   setSearchEscrowAddress: (escrow_address: string) => void;
   setOracleAddress: (oracleAddress: string) => void;
   setAvailableJobTypes: (jobTypes: string[]) => void;
-  setPageParams: (pageIndex: number, pageSize: number) => void;
+  setPageParams: (pageIndex: number, pageSize: 5 | 10) => void;
 }
 
 const initialFiltersState = {

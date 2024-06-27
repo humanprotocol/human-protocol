@@ -190,7 +190,8 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
-  const { setSearchEscrowAddress, setPageParams } = useMyJobsFilterStore();
+  const { setSearchEscrowAddress, setPageParams, filterParams } =
+    useMyJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
     () => tableData?.results || [],
@@ -212,8 +213,17 @@ export function MyJobsTable() {
     };
   };
   useEffect(() => {
+    if (!(paginationState.pageSize === 5 || paginationState.pageSize === 10))
+      return;
     setPageParams(paginationState.pageIndex, paginationState.pageSize);
   }, [paginationState, setPageParams]);
+
+  useEffect(() => {
+    setPaginationState({
+      pageIndex: filterParams.page,
+      pageSize: filterParams.page_size,
+    });
+  }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
     columns: getColumnsDefinition(rejectTask(oracle_address || '')),
