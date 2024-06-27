@@ -12,11 +12,7 @@ import { classes } from '@automapper/classes';
 import { ReputationOracleProfile } from '../reputation-oracle.mapper.profile';
 import { gatewayConfigServiceMock } from '../../../common/config/spec/gateway-config-service.mock';
 import { SignupWorkerCommand } from '../../../modules/user-worker/model/worker-registration.model';
-import {
-  SigninOperatorCommand,
-  SigninOperatorData,
-  SignupOperatorCommand,
-} from '../../../modules/user-operator/model/operator.model';
+import { SignupOperatorCommand } from '../../../modules/user-operator/model/operator-registration.model';
 import { SigninWorkerCommand } from '../../../modules/user-worker/model/worker-signin.model';
 import {
   EmailVerificationCommand,
@@ -74,6 +70,10 @@ import {
   TokenRefreshCommand,
   TokenRefreshData,
 } from '../../../modules/token-refresh/model/token-refresh.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorData,
+} from '../../../modules/user-operator/model/operator-signin.model';
 
 const httpServiceMock = {
   request: jest.fn(),

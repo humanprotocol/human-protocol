@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { jwtDecode } from 'jwt-decode';
-import { JwtUserData } from '../interfaces/jwt-token.model';
+import { JwtUserData } from '../utils/jwt-token.model';
 
 export const Authorization = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {

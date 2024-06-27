@@ -7,6 +7,7 @@ import {
   OracleStatisticsResponse,
 } from '../model/oracle-statistics.model';
 import { AxiosRequestConfig } from 'axios';
+import { jwtUserDataFixture } from '../../h-captcha/spec/h-captcha.fixtures';
 
 const ASSIGNMENTS_AMOUNT = 2137;
 const SUBMISSIONS_SENT = 1969;
@@ -47,6 +48,7 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
 export const generalUserStatsCommandFixture: UserStatisticsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
+  walletAddress: jwtUserDataFixture.address,
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {

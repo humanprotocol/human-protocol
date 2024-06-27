@@ -78,9 +78,6 @@ export class GatewayConfigService {
             [ReputationOracleEndpoints.ENABLE_LABELING]: {
               endpoint: '/user/register-labeler',
               method: HttpMethod.POST,
-              params: {
-                api_key: this.envConfig.hcaptchaLabelingApiKey,
-              },
             },
             [ReputationOracleEndpoints.OPERATOR_SIGNIN]: {
               endpoint: '/auth/web3/signin',

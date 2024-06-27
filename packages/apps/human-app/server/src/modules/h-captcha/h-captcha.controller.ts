@@ -23,7 +23,7 @@ import {
   Authorization,
   JwtPayload,
 } from '../../common/config/params-decorators';
-import { JwtUserData } from '../../common/interfaces/jwt-token.model';
+import { JwtUserData } from '../../common/utils/jwt-token.model';
 import {
   EnableLabelingCommand,
   EnableLabelingResponse,

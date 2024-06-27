@@ -1,4 +1,4 @@
-import { JwtUserData } from '../../../common/interfaces/jwt-token.model';
+import { JwtUserData } from '../../../common/utils/jwt-token.model';
 import {
   VerifyTokenApiResponse,
   VerifyTokenCommand,

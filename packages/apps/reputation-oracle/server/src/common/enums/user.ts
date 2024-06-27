@@ -4,11 +4,11 @@ export enum UserStatus {
   PENDING = 'PENDING',
 }
 
-export enum UserType {
+export enum Role {
   OPERATOR = 'OPERATOR',
-  EXCHANGE_ORACLE = 'EXCHANGE_ORACLE',
-  RECORDING_ORACLE = 'RECORDING_ORACLE',
   WORKER = 'WORKER',
+  HUMAN_APP = 'HUMAN_APP',
+  ADMIN = 'ADMIN',
 }
 
 export enum KycStatus {

@@ -5,8 +5,6 @@ import {
 } from '../../common/interfaces/endpoint.interface';
 import { HttpService } from '@nestjs/axios';
 import { GatewayConfigService } from '../../common/config/gateway-config.service';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
 import { ExternalApiName } from '../../common/enums/external-api-name';
 import { HCaptchaLabelingStatsEndpoints } from '../../common/enums/reputation-oracle-endpoints';
 import { RequestDataType } from '../reputation-oracle/reputation-oracle.interface';

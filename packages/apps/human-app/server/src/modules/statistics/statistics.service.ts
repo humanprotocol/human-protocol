@@ -22,16 +22,16 @@ export class StatisticsService {
   async getOracleStats(
     command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
-    const url = command.oracleAddress;
+    const address = command.oracleAddress;
     const cachedStatistics: OracleStatisticsResponse | undefined =
-      await this.cacheManager.get(url);
+      await this.cacheManager.get(address);
     if (cachedStatistics) {
       return cachedStatistics;
     }
     const response: OracleStatisticsResponse =
       await this.exchangeOracleGateway.fetchOracleStatistics(command);
     await this.cacheManager.set(
-      url,
+      address,
       response,
       this.configService.cacheTtlOracleStats,
     );
@@ -40,7 +40,7 @@ export class StatisticsService {
   async getUserStats(
     command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
-    const userCacheKey = command.oracleAddress + command.token;
+    const userCacheKey = command.oracleAddress + command.walletAddress;
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
     if (cachedStatistics) {
