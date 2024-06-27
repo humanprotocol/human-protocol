@@ -12,6 +12,7 @@ import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { UserStatus, Role } from '../../common/enums/user';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class QualificationService {
@@ -20,6 +21,7 @@ export class QualificationService {
   constructor(
     private readonly qualificationRepository: QualificationRepository,
     private readonly userRepository: UserRepository,
+    private readonly serverConfigService: ServerConfigService,
   ) {}
 
   public async createQualification(
@@ -32,8 +34,12 @@ export class QualificationService {
 
     if (createQualificationDto.expiresAt) {
       const providedExpiresAt = new Date(createQualificationDto.expiresAt);
+      const now = new Date();
+      const minimumValidUntil = new Date(
+        now.getTime() + this.serverConfigService.qualificationMinValidity,
+      );
 
-      if (providedExpiresAt <= new Date()) {
+      if (providedExpiresAt <= minimumValidUntil) {
         this.logger.log(
           ErrorQualification.InvalidExpiresAt,
           QualificationService.name,

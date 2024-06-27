@@ -25,4 +25,7 @@ export class ServerConfigService {
   get cronSecret(): string {
     return this.configService.get<string>('CRON_SECRET', '');
   }
+  get qualificationMinValidity(): number {
+    return +this.configService.get<number>('QUALIFICATION_MIN_VALIDITY', 3600);
+  }
 }

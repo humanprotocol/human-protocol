@@ -13,6 +13,8 @@ import {
 } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { UserEntity } from '../user/user.entity';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { ConfigService } from '@nestjs/config';
 
 describe.only('QualificationService', () => {
   let qualificationService: QualificationService;
@@ -28,6 +30,8 @@ describe.only('QualificationService', () => {
           useValue: createMock<QualificationRepository>(),
         },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        ConfigService,
+        ServerConfigService,
       ],
     }).compile();
 
