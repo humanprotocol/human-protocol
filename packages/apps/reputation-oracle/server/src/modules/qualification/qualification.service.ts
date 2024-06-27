@@ -36,7 +36,8 @@ export class QualificationService {
       const providedExpiresAt = new Date(createQualificationDto.expiresAt);
       const now = new Date();
       const minimumValidUntil = new Date(
-        now.getTime() + this.serverConfigService.qualificationMinValidity,
+        now.getTime() +
+          this.serverConfigService.qualificationMinValidity * 1000,
       );
 
       if (providedExpiresAt <= minimumValidUntil) {

@@ -20,20 +20,27 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
+  ApiHeader,
 } from '@nestjs/swagger';
-import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
+import {
+  JwtAuthGuard,
+  RolesAuthGuard,
+  SignatureAuthGuard,
+} from '../../common/guards';
 import { QualificationService } from './qualification.service';
 import { Roles } from '../../common/decorators';
 import { Role } from '../../common/enums/user';
+import { AuthSignatureRole } from 'src/common/enums/role';
+import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
 
 @ApiTags('Qualification')
 @Controller('qualification')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesAuthGuard)
 export class QualificationController {
   constructor(private readonly qualificationService: QualificationService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
   @HttpCode(201)
   @ApiOperation({ summary: 'Create a new qualification' })
@@ -49,8 +56,13 @@ export class QualificationController {
     );
   }
 
+  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.JobLauncher]))
   @Get()
-  @Roles(Role.OPERATOR, Role.WORKER, Role.HUMAN_APP, Role.ADMIN)
+  @ApiHeader({
+    name: HEADER_SIGNATURE_KEY,
+    description: 'Signature for webhook authentication.',
+    required: true,
+  })
   @HttpCode(200)
   @ApiOperation({ summary: 'Get list of qualifications' })
   @ApiResponse({ status: 200, description: 'List of qualifications' })
@@ -59,6 +71,7 @@ export class QualificationController {
   }
 
   @Post('/assign')
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
   @HttpCode(201)
   @ApiOperation({ summary: 'Assign a qualification to users' })
@@ -74,6 +87,7 @@ export class QualificationController {
   }
 
   @Delete('/unassign')
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Unassign a qualification from users' })
@@ -89,6 +103,7 @@ export class QualificationController {
   }
 
   @Delete('/:reference')
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Delete a qualification' })
