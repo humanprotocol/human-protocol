@@ -30,11 +30,13 @@ export class JobsDiscoveryParamsDto extends PageableDto {
   @ApiPropertyOptional()
   chain_id?: number;
   @AutoMap()
+  @IsOptional()
   @IsEnum(JobDiscoverySortField)
   @ApiPropertyOptional({ enum: JobDiscoverySortField })
   sort_field?: JobDiscoverySortField;
   @AutoMap()
   @IsString()
+  @IsOptional()
   @ApiPropertyOptional()
   job_type?: string;
   @AutoMap()
