@@ -22,7 +22,7 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
     const currentDate = new Date();
 
     const queryBuilder = this.createQueryBuilder('qualifications').where(
-      'qualifications.expiresAt > :currentDate',
+      '(qualifications.expiresAt IS NULL OR qualifications.expiresAt > :currentDate)',
       { currentDate },
     );
 
