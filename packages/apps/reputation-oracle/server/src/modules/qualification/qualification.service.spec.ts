@@ -84,13 +84,15 @@ describe.only('QualificationService', () => {
         expiresAt: new Date('2000-01-01'),
       };
 
+      const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
+        '%minValidity%',
+        '1',
+      );
+
       await expect(
         qualificationService.createQualification(createQualificationDto),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.InvalidExpiresAt,
-          HttpStatus.BAD_REQUEST,
-        ),
+        new ControlledError(errorMessage, HttpStatus.BAD_REQUEST),
       );
     });
 

@@ -30,8 +30,8 @@ import {
 import { QualificationService } from './qualification.service';
 import { Roles } from '../../common/decorators';
 import { Role } from '../../common/enums/user';
-import { AuthSignatureRole } from 'src/common/enums/role';
-import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
+import { AuthSignatureRole } from '../../common/enums/role';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiTags('Qualification')
 @Controller('qualification')

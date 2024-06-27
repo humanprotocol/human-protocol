@@ -41,14 +41,15 @@ export class QualificationService {
       );
 
       if (providedExpiresAt <= minimumValidUntil) {
-        this.logger.log(
-          ErrorQualification.InvalidExpiresAt,
-          QualificationService.name,
+        const minValidityHours =
+          this.serverConfigService.qualificationMinValidity / 3600;
+        const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
+          '%minValidity%',
+          minValidityHours.toString(),
         );
-        throw new ControlledError(
-          ErrorQualification.InvalidExpiresAt,
-          HttpStatus.BAD_REQUEST,
-        );
+
+        this.logger.log(errorMessage, QualificationService.name);
+        throw new ControlledError(errorMessage, HttpStatus.BAD_REQUEST);
       } else {
         newQualification.expiresAt = providedExpiresAt;
       }

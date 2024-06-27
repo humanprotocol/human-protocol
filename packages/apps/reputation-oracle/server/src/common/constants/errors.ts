@@ -140,7 +140,7 @@ export enum ErrorOperator {
  * Represents error messages related to qualification.
  */
 export enum ErrorQualification {
-  InvalidExpiresAt = 'ExpiresAt must be a future date',
+  InvalidExpiresAt = 'Qualification should be valid for at least %minValidity% hours',
   FailedFetchQualifications = 'Failed to fetch qualifications',
   NotFound = 'Qualification not found',
   NoWorkersFound = 'No workers found for the provided addresses or emails',
