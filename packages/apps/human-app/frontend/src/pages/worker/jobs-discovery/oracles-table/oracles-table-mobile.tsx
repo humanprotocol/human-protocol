@@ -60,7 +60,7 @@ export function OraclesTableMobile({
             />
             <ProfileListItem
               header={t('worker.oraclesTable.annotationTool')}
-              paragraph={d.url}
+              paragraph={d.url || ''}
             />
             <Typography
               component="div"

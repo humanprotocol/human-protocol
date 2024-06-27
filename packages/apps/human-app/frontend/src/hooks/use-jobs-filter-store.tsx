@@ -1,5 +1,6 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
+import type { PageSize } from '@/shared/types/entity.type';
 
 export interface JobsFilterStoreProps {
   filterParams: {
@@ -22,7 +23,7 @@ export interface JobsFilterStoreProps {
       | 'REJECTED';
     escrow_address?: string;
     page: number;
-    page_size: number;
+    page_size: PageSize;
     fields: string[];
     oracle_address?: string;
     chain_id?: number;
@@ -33,13 +34,17 @@ export interface JobsFilterStoreProps {
   resetFilterParams: () => void;
   setSearchEscrowAddress: (escrow_address: string) => void;
   setOracleAddress: (oracleAddress: string) => void;
+  setPageParams: (pageIndex: number, pageSize: PageSize) => void;
 }
 
 const initialFiltersState = {
   page: 0,
   page_size: 5,
   fields: ['reward_amount', 'job_description', 'reward_token'],
-};
+} satisfies Pick<
+  JobsFilterStoreProps['filterParams'],
+  'page_size' | 'page' | 'fields'
+>;
 
 export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
   filterParams: initialFiltersState,
@@ -52,6 +57,16 @@ export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
         ...state.filterParams,
         ...partialParams,
         page: 0,
+      },
+    }));
+  },
+  setPageParams: (pageIndex: number, pageSize: PageSize) => {
+    set((state) => ({
+      ...state,
+      filterParams: {
+        ...state.filterParams,
+        page: pageIndex,
+        page_size: pageSize,
       },
     }));
   },

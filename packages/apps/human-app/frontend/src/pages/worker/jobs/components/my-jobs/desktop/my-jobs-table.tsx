@@ -29,10 +29,10 @@ import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/servieces/worker/reject-task';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
+import { JOB_TYPES } from '@/shared/consts';
 import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
 
 const getColumnsDefinition = (
-  jobTypes: string[],
   resignJob: (assignment_id: number) => void
 ): MRT_ColumnDef<MyJob>[] => [
   {
@@ -104,7 +104,7 @@ const getColumnsDefinition = (
             {...props}
             headerText={t('worker.jobs.jobType')}
             iconType="filter"
-            popoverContent={<MyJobsJobTypeFilter jobTypes={jobTypes} />}
+            popoverContent={<MyJobsJobTypeFilter jobTypes={JOB_TYPES} />}
           />
         );
       },
@@ -190,12 +190,8 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
-  const {
-    setFilterParams,
-    filterParams,
-    availableJobTypes,
-    setSearchEscrowAddress,
-  } = useMyJobsFilterStore();
+  const { setSearchEscrowAddress, setPageParams, filterParams } =
+    useMyJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
     () => tableData?.results || [],
@@ -217,19 +213,20 @@ export function MyJobsTable() {
     };
   };
   useEffect(() => {
-    setFilterParams({
-      ...filterParams,
-      page: paginationState.pageIndex,
-      page_size: paginationState.pageSize,
+    if (!(paginationState.pageSize === 5 || paginationState.pageSize === 10))
+      return;
+    setPageParams(paginationState.pageIndex, paginationState.pageSize);
+  }, [paginationState, setPageParams]);
+
+  useEffect(() => {
+    setPaginationState({
+      pageIndex: filterParams.page,
+      pageSize: filterParams.page_size,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loop
-  }, [paginationState]);
+  }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(
-      availableJobTypes,
-      rejectTask(oracle_address || '')
-    ),
+    columns: getColumnsDefinition(rejectTask(oracle_address || '')),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
@@ -242,7 +239,10 @@ export function MyJobsTable() {
     onPaginationChange: (updater) => {
       setPaginationState(updater);
     },
-    pageCount: tableData?.total_pages,
+    muiPaginationProps: {
+      rowsPerPageOptions: [5, 10],
+    },
+    pageCount: tableData?.total_pages || -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
