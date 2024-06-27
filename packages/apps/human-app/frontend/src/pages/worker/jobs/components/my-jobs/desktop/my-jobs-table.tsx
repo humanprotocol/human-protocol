@@ -234,7 +234,7 @@ export function MyJobsTable() {
       showProgressBars: tableStatus === 'pending',
       pagination: paginationState,
     },
-    enablePagination: true,
+    enablePagination: Boolean(tableData?.total_pages),
     manualPagination: true,
     onPaginationChange: (updater) => {
       setPaginationState(updater);

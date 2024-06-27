@@ -23,13 +23,14 @@ export async function getOracles({
 }: {
   selected_job_types: string[];
 }) {
-  return apiClient(
-    `${apiPaths.worker.oracles.path}?${stringifyUrlQueryObject({ selected_job_types: selected_job_types.join(',') })}`,
-    {
-      successSchema: OraclesSuccessSchema,
-      options: { method: 'GET' },
-    }
-  );
+  const queryParams = selected_job_types.length
+    ? `?${stringifyUrlQueryObject({ selected_job_types })}`
+    : '';
+
+  return apiClient(`${apiPaths.worker.oracles.path}${queryParams}`, {
+    successSchema: OraclesSuccessSchema,
+    options: { method: 'GET' },
+  });
 }
 
 export function useGetOracles() {

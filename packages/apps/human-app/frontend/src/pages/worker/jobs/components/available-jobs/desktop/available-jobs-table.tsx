@@ -196,7 +196,7 @@ export function AvailableJobsTable() {
       showProgressBars: tableStatus === 'pending' || isAssignJobMutationPending,
       pagination: paginationState,
     },
-    enablePagination: true,
+    enablePagination: Boolean(tableData?.total_pages),
     manualPagination: true,
     onPaginationChange: setPaginationState,
     muiPaginationProps: {
