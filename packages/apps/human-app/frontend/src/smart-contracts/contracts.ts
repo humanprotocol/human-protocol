@@ -15,7 +15,7 @@ export type Mainnet = 'Polygon';
 export const TestnetContracts: Record<Testnet, ContractsAddresses> = {
   Amoy: {
     Staking: env.VITE_TESTNET_AMOY_STAKING_CONTRACT,
-    HMToken: env.VITE_TESTNET_AMOY_HMTOKEN_STAKING_CONTRACT,
+    HMToken: env.VITE_TESTNET_AMOY_HMTOKEN_CONTRACT,
     EthKVStore: env.VITE_TESTNET_AMOY_ETH_KV_STORE_CONTRACT,
   },
 };

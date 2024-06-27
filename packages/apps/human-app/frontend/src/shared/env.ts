@@ -20,7 +20,6 @@ export const env = z
       .pipe(z.number()),
     VITE_H_CAPTCHA_EXCHANGE_URL: z.string(),
     VITE_H_CAPTCHA_LABELING_BASE_URL: z.string(),
-    VITE_SYNAPS_KEY: z.string(),
     VITE_WALLET_CONNECT_PROJECT_ID: z.string(),
     VITE_DAPP_META_NAME: z.string(),
     VITE_DAPP_META_DESCRIPTION: z.string(),
@@ -30,7 +29,7 @@ export const env = z
       return iconsArray;
     }),
     VITE_TESTNET_AMOY_STAKING_CONTRACT: z.string(),
-    VITE_TESTNET_AMOY_HMTOKEN_STAKING_CONTRACT: z.string(),
+    VITE_TESTNET_AMOY_HMTOKEN_CONTRACT: z.string(),
     VITE_TESTNET_AMOY_ETH_KV_STORE_CONTRACT: z.string(),
     VITE_MAINNET_POLYGON_STAKING_CONTRACT: z.string(),
     VITE_MAINNET_POLYGON_HMTOKEN_CONTRACT: z.string(),
