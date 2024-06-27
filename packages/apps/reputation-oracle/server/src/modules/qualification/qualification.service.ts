@@ -78,7 +78,7 @@ export class QualificationService {
         };
       });
     } catch (error) {
-      this.logger.log(`Failed to fetch credentials: ${error.message}`);
+      this.logger.log(`Failed to fetch qualifications: ${error.message}`);
       return [];
     }
   }
