@@ -4,35 +4,61 @@ export function Chat() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new MutationObserver((mutationsList) => {
+    let chatElement: HTMLElement | undefined;
+    const root = document.getElementById('root') as Element | undefined;
+    if (!root) return;
+
+    const positionChatElement = () => {
+      if (chatElement && ref.current) {
+        const refRect = ref.current.getBoundingClientRect();
+        const rootRect = root.getBoundingClientRect();
+
+        chatElement.style.position = 'absolute';
+        chatElement.style.top = `${refRect.top - rootRect.top}px`;
+        chatElement.style.left = `${refRect.left - rootRect.left}px`;
+        chatElement.style.width = `${refRect.width}px`;
+        chatElement.style.height = `${refRect.height}px`;
+      }
+    };
+
+    const mutationObserver = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList') {
-          const chatElement = document.querySelector('[data-id="zsalesiq"]') as
+          chatElement = document.querySelector('[data-id="zsalesiq"]') as
             | HTMLElement
             | undefined;
-          if (
-            chatElement &&
-            ref.current &&
-            !ref.current.contains(chatElement)
-          ) {
-            chatElement.style.position = 'absolute';
-            chatElement.style.top = '0';
-            chatElement.style.bottom = '0';
-            chatElement.style.right = '0';
-            chatElement.style.left = '0';
-            ref.current.appendChild(chatElement);
+          if (chatElement && ref.current) {
+            positionChatElement();
           }
         }
       }
     });
 
-    observer.observe(document.body, {
+    mutationObserver.observe(document.body, {
       childList: true,
       subtree: true,
     });
 
+    const resizeObserverElement = document.createElement('div');
+    resizeObserverElement.style.position = 'absolute';
+    resizeObserverElement.style.width = '100%';
+    resizeObserverElement.style.height = '100%';
+    resizeObserverElement.style.top = '0';
+    resizeObserverElement.style.left = '0';
+    resizeObserverElement.style.opacity = '0';
+    resizeObserverElement.style.pointerEvents = 'none';
+    document.body.appendChild(resizeObserverElement);
+
+    const resizeObserver = new ResizeObserver(positionChatElement);
+
+    resizeObserver.observe(resizeObserverElement);
+
     return () => {
-      observer.disconnect();
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      if (resizeObserverElement.parentNode) {
+        resizeObserverElement.parentNode.removeChild(resizeObserverElement);
+      }
     };
   }, [ref]);
 

@@ -91,12 +91,13 @@ export function Footer({ isProtected }: FooterProps) {
         </Typography>
       </Grid>
       <Grid
-        alignItems="center"
         item
-        justifyContent="flex-end"
         sx={{
           position: isMobile ? 'absolute' : 'relative',
           right: isMobile ? '32px' : 0,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
         }}
         xs={isMobile ? 12 : 1}
       >
