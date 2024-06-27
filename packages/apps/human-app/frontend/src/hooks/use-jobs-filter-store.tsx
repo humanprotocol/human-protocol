@@ -33,6 +33,7 @@ export interface JobsFilterStoreProps {
   resetFilterParams: () => void;
   setSearchEscrowAddress: (escrow_address: string) => void;
   setOracleAddress: (oracleAddress: string) => void;
+  setPageParams: (pageIndex: number, pageSize: number) => void;
 }
 
 const initialFiltersState = {
@@ -52,6 +53,16 @@ export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
         ...state.filterParams,
         ...partialParams,
         page: 0,
+      },
+    }));
+  },
+  setPageParams: (pageIndex: number, pageSize: number) => {
+    set((state) => ({
+      ...state,
+      filterParams: {
+        ...state.filterParams,
+        page: pageIndex,
+        page_size: pageSize,
       },
     }));
   },

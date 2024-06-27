@@ -2,6 +2,7 @@
 import capitalize from 'lodash/capitalize';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
+import { stringToUpperSnakeCase } from '@/shared/helpers/string-to-upper-snake-case';
 
 export function AvailableJobsJobTypeFilterMobile({
   jobTypes,
@@ -23,12 +24,14 @@ export function AvailableJobsJobTypeFilterMobile({
         name: capitalize(jobType),
         option: jobType.toUpperCase(),
       }))}
-      isChecked={(option) => option === filterParams.job_type?.toUpperCase()}
+      isChecked={(option) =>
+        stringToUpperSnakeCase(option) === filterParams.job_type
+      }
       isMobile={false}
       setFiltering={(jobType) => {
         setFilterParams({
           ...filterParams,
-          job_type: jobType,
+          job_type: stringToUpperSnakeCase(jobType),
           page: 0,
         });
       }}
