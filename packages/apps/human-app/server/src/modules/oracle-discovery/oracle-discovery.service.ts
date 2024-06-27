@@ -22,7 +22,6 @@ export class OracleDiscoveryService {
   ): Promise<OracleDiscoveryResponse[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
-
     const filteredOracles = await Promise.all(
       chainIds.map(async (chainId) => {
         return this.findOraclesByChainId(chainId, address).then((oracles) =>
