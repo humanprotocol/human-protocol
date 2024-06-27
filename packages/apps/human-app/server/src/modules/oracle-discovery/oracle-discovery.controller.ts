@@ -26,7 +26,7 @@ export class OracleDiscoveryController {
   @ApiOperation({ summary: 'Oracles discovery' })
   @UsePipes(new ValidationPipe())
   public getOracles(
-    @Query() dto?: OracleDiscoveryDto,
+    @Query() dto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryResponse[]> {
     const command = this.mapper.map(
       dto,
