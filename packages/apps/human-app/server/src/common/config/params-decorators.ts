@@ -1,5 +1,4 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Transform } from 'class-transformer';
 import { jwtDecode } from 'jwt-decode';
 import { JwtUserData } from '../utils/jwt-token.model';
 
@@ -23,12 +22,3 @@ export const JwtPayload = createParamDecorator(
     }
   },
 );
-
-export function TransformToArray() {
-  return Transform(({ value }) => {
-    if (!value) {
-      return undefined;
-    }
-    return Array.isArray(value) ? value : [value];
-  });
-}

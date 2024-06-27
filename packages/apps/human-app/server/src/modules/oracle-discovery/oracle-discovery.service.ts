@@ -22,6 +22,7 @@ export class OracleDiscoveryService {
   ): Promise<OracleDiscoveryResponse[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
+
     const filteredOracles = await Promise.all(
       chainIds.map(async (chainId) => {
         return this.findOraclesByChainId(chainId, address).then((oracles) =>
@@ -68,22 +69,18 @@ export class OracleDiscoveryService {
       !foundOracles ||
       foundOracles.length === 0
     ) {
-      console.log('DUPA1');
       return foundOracles;
     }
-    const filteredOracles = foundOracles.filter((oracle) =>
+    return foundOracles.filter((oracle) =>
       oracle.jobTypes && oracle.jobTypes.length > 0
         ? this.areJobTypeSetsIntersect(oracle.jobTypes, selectedJobTypes)
         : false,
     );
-    return filteredOracles;
   }
   private areJobTypeSetsIntersect(
     oracleJobTypes: string[],
     requiredJobTypes: string[],
   ) {
-    console.log(requiredJobTypes);
-    console.log(oracleJobTypes);
     return oracleJobTypes.some((job) =>
       requiredJobTypes
         .map((requiredJob) => requiredJob.toLowerCase())
