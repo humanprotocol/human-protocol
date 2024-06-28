@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { SignatureType } from '../../common/enums/web3';
 
@@ -23,14 +23,14 @@ export class UserCreateDto extends ValidatePasswordDto {
 }
 
 export class UserDto extends UserCreateDto {
-  public type: UserType;
+  public type: Role;
   public status: UserStatus;
 }
 
 export class Web3UserDto {
   public evmAddress: string;
   public nonce: string;
-  public type: UserType;
+  public type: Role;
   public status: UserStatus;
 }
 

@@ -335,5 +335,13 @@ export class InvalidEthereumAddressError extends Error {
  */
 export const ErrorInvalidHash = new Error('Invalid hash');
 
+/**
+ * @constant {Error} - The Status is not supported
+ */
+export const ErrorUnsupportedStatus = new Error('Unsupported status for query');
+
+/**
+ * @constant {Error} - The SUBGRAPH_API_KEY is not being provided
+ */
 export const WarnSubgraphApiKeyNotProvided =
   '"SUBGRAPH_API_KEY" is not being provided. It might cause issues with the subgraph.';

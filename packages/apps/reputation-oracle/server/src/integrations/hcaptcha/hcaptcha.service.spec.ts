@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { HCaptchaService } from './hcaptcha.service';
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';

@@ -12,7 +12,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ethers } from 'ethers';
 import { TOKEN } from '../../common/constant';
 import {
   AssignmentStatus,
@@ -128,36 +127,30 @@ export class JobService {
     return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
   }
 
-  public async solveJob(
-    chainId: number,
-    escrowAddress: string,
-    workerAddress: string,
-    solution: string,
-  ): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw new BadRequestException(ErrorJob.InvalidAddress);
-    }
-
-    const assignment = await this.assignmentRepository.findOneByEscrowAndWorker(
-      escrowAddress,
-      workerAddress,
-    );
+  public async solveJob(assignmentId: number, solution: string): Promise<void> {
+    const assignment =
+      await this.assignmentRepository.findOneById(assignmentId);
     if (!assignment) {
-      throw new BadRequestException(ErrorJob.NotAssigned);
+      throw new BadRequestException(ErrorAssignment.NotFound);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {
       throw new BadRequestException(ErrorAssignment.InvalidStatus);
     }
 
-    await this.addSolution(chainId, escrowAddress, workerAddress, solution);
+    await this.addSolution(
+      assignment.job.chainId,
+      assignment.job.escrowAddress,
+      assignment.workerAddress,
+      solution,
+    );
 
     assignment.status = AssignmentStatus.VALIDATION;
     await this.assignmentRepository.updateOne(assignment);
 
     const webhook = new WebhookEntity();
-    webhook.escrowAddress = escrowAddress;
-    webhook.chainId = chainId;
+    webhook.escrowAddress = assignment.job.escrowAddress;
+    webhook.chainId = assignment.job.chainId;
     webhook.eventType = EventType.SUBMISSION_IN_REVIEW;
 
     await this.webhookRepository.createUnique(webhook);

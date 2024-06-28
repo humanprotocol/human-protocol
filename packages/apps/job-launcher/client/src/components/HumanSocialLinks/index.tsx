@@ -4,7 +4,7 @@ import { FC } from 'react';
 import { DiscordIcon } from '../Icons/DiscordIcon';
 import { GithubIcon } from '../Icons/GithubIcon';
 import { LinkedinIcon } from '../Icons/LinkedinIcon';
-import { TwitterIcon } from '../Icons/TwitterIcon';
+import { XIcon } from '../Icons/XIcon';
 
 export const HumanSocialLinks: FC<StackProps> = (props) => (
   <Stack {...props}>
@@ -15,7 +15,7 @@ export const HumanSocialLinks: FC<StackProps> = (props) => (
       <DiscordIcon />
     </IconButton>
     <IconButton href="http://hmt.ai/twitter" target="_blank">
-      <TwitterIcon />
+      <XIcon />
     </IconButton>
     <IconButton href="http://hmt.ai/linkedin" target="_blank">
       <LinkedinIcon />

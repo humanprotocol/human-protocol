@@ -110,3 +110,50 @@ Get an array of escrow addresses based on the specified filter parameters.
       )
   )
   ```
+
+#### *static* get_status_events(networks, statuses=None, date_from=None, date_to=None, launcher=None)
+
+Retrieve status events for specified networks and statuses within a date range.
+
+* **Parameters:**
+  * **(****List****[****ChainId****]****)** (*networks*) – List of network chain IDs to query.
+  * **(****Optional****[****List****[****Status****]****]****)** (*statuses*) – List of statuses to filter by.
+  * **(****Optional****[****datetime****]****)** (*date_to*) – Start date for the query range.
+  * **(****Optional****[****datetime****]****)** – End date for the query range.
+  * **(****Optional****[****str****]****)** (*launcher*) – Address of the launcher to filter by.
+* **Return List[StatusEvent]:**
+  List of status events matching the query parameters.
+* **Raises:**
+  [**EscrowClientError**](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an unsupported chain ID or invalid launcher address is provided.
+* **Example:**
+  ```python
+  from datetime import datetime
+  from human_protocol_sdk.constants import ChainId, Status
+  from human_protocol_sdk.escrow import EscrowUtils
+
+  print(
+      EscrowUtils.get_status_events(
+          networks=[ChainId.POLYGON_AMOY, ChainId.ETHEREUM],
+          statuses=[Status.Pending, Status.Paid],
+          date_from=datetime(2023, 1, 1),
+          date_to=datetime(2023, 12, 31),
+          launcher="0x1234567890abcdef1234567890abcdef12345678"
+      )
+  )
+  ```
+* **Return type:**
+  `List`[[`StatusEvent`](#human_protocol_sdk.escrow.escrow_utils.StatusEvent)]
+
+### *class* human_protocol_sdk.escrow.escrow_utils.StatusEvent(timestamp, status, chain_id, escrow_address)
+
+Bases: `object`
+
+Initializes a StatusEvent instance.
+
+* **Parameters:**
+  * **timestamp** (`int`) – The timestamp of the event.
+  * **status** (`str`) – The status of the escrow.
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – The chain identifier where the event occurred.
+  * **escrow_address** (`str`) – The address of the escrow.
+
+#### \_\_init_\_(timestamp, status, chain_id, escrow_address)

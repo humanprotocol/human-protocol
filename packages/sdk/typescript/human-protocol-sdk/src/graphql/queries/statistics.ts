@@ -47,6 +47,8 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
     dailyPayoutAmount
     dailyHMTTransferCount
     dailyHMTTransferAmount
+    dailyUniqueSenders
+    dailyUniqueReceivers
   }
 `;
 

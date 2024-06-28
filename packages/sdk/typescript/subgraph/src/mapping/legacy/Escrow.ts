@@ -9,9 +9,7 @@ import {
 import {
   BulkPayoutEvent,
   Escrow,
-  PaidStatusEvent,
-  PartialStatusEvent,
-  PendingStatusEvent,
+  EscrowStatusEvent,
   SetupEvent,
   StoreResultsEvent,
 } from '../../../generated/schema';
@@ -41,14 +39,14 @@ export function handlePending(event: Pending): void {
   setupEventEntity.sender = event.transaction.from;
   setupEventEntity.save();
 
-  // Create PendingStatusEvent entity
-  const statusEventEntity = new PendingStatusEvent(toEventId(event));
+  // Create EscrowStatusEvent entity
+  const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;
   statusEventEntity.timestamp = event.block.timestamp;
   statusEventEntity.txHash = event.transaction.hash;
   statusEventEntity.escrowAddress = event.address;
   statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.save();
+  statusEventEntity.status = 'Pending';
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
@@ -99,7 +97,9 @@ export function handlePending(event: Pending): void {
     }
 
     escrowEntity.save();
+    statusEventEntity.launcher = escrowEntity.launcher;
   }
+  statusEventEntity.save();
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
@@ -171,17 +171,18 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     const escrowStatus = escrowContract.try_status();
 
     if (!escrowStatus.reverted) {
+      // Create EscrowStatusEvent entity
+      const statusEventEntity = new EscrowStatusEvent(toEventId(event));
+      statusEventEntity.block = event.block.number;
+      statusEventEntity.timestamp = event.block.timestamp;
+      statusEventEntity.txHash = event.transaction.hash;
+      statusEventEntity.escrowAddress = event.address;
+      statusEventEntity.sender = event.transaction.from;
+      statusEventEntity.launcher = escrowEntity.launcher;
       if (escrowStatus.value == EscrowStatuses.Partial) {
         // Partially Paid Status
         escrowEntity.status = 'Partially Paid';
-
-        const statusEventEntity = new PartialStatusEvent(toEventId(event));
-        statusEventEntity.block = event.block.number;
-        statusEventEntity.timestamp = event.block.timestamp;
-        statusEventEntity.txHash = event.transaction.hash;
-        statusEventEntity.escrowAddress = event.address;
-        statusEventEntity.sender = event.transaction.from;
-        statusEventEntity.save();
+        statusEventEntity.status = 'Partial';
 
         statsEntity.partialStatusEventCount =
           statsEntity.partialStatusEventCount.plus(ONE_BI);
@@ -194,14 +195,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       } else if (escrowStatus.value == EscrowStatuses.Paid) {
         // Paid Status
         escrowEntity.status = 'Paid';
-
-        const statusEventEntity = new PaidStatusEvent(toEventId(event));
-        statusEventEntity.block = event.block.number;
-        statusEventEntity.timestamp = event.block.timestamp;
-        statusEventEntity.txHash = event.transaction.hash;
-        statusEventEntity.escrowAddress = event.address;
-        statusEventEntity.sender = event.transaction.from;
-        statusEventEntity.save();
+        statusEventEntity.status = 'Paid';
 
         statsEntity.paidStatusEventCount =
           statsEntity.paidStatusEventCount.plus(ONE_BI);
@@ -212,6 +206,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
         eventDayData.dailyTotalEventCount =
           eventDayData.dailyTotalEventCount.plus(ONE_BI);
       }
+      statusEventEntity.save();
     }
 
     const finalResultsUrl = escrowContract.try_finalResultsUrl();

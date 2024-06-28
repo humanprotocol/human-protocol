@@ -3,11 +3,15 @@ import { Public } from '../../common/decorators';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { Web3Service } from './web3.service';
 import { ChainId } from '@human-protocol/sdk';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @ApiTags('Web3')
 @Controller('/web3')
 export class Web3Controller {
-  constructor(private readonly web3Service: Web3Service) {}
+  constructor(
+    private readonly web3Service: Web3Service,
+    private readonly networkConfigService: NetworkConfigService,
+  ) {}
 
   @ApiOperation({
     summary: 'Get valid network chains',
@@ -29,7 +33,7 @@ export class Web3Controller {
   @Public()
   @Get('/networks')
   getValidChains(): ChainId[] {
-    return this.web3Service.getValidChains();
+    return this.networkConfigService.networks.map((network) => network.chainId);
   }
 
   @ApiOperation({

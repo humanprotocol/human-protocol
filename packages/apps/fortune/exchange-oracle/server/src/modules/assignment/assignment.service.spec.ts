@@ -78,7 +78,7 @@ describe('AssignmentService', () => {
             createUnique: jest.fn(),
             findOneByJobIdAndWorker: jest.fn(),
             countByJobId: jest.fn(),
-            findOneByIdAndWorker: jest.fn(),
+            findOneById: jest.fn(),
             updateOne: jest.fn(),
           },
         },
@@ -399,7 +399,7 @@ describe('AssignmentService', () => {
       } as AssignmentEntity;
 
       jest
-        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .spyOn(assignmentRepository, 'findOneById')
         .mockResolvedValue(mockAssignment);
 
       await expect(
@@ -415,9 +415,7 @@ describe('AssignmentService', () => {
       const assignmentId = 1;
       const workerAddress = MOCK_ADDRESS;
 
-      jest
-        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
-        .mockResolvedValue(null);
+      jest.spyOn(assignmentRepository, 'findOneById').mockResolvedValue(null);
 
       await expect(
         assignmentService.resign(assignmentId, workerAddress),
@@ -434,7 +432,7 @@ describe('AssignmentService', () => {
       } as AssignmentEntity;
 
       jest
-        .spyOn(assignmentRepository, 'findOneByIdAndWorker')
+        .spyOn(assignmentRepository, 'findOneById')
         .mockResolvedValue(mockAssignment);
 
       await expect(

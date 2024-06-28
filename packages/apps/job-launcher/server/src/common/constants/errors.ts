@@ -17,6 +17,7 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+  DatasetValidationFailed = 'Dataset validation failed',
   ManifestHashNotExist = 'Manifest hash does not exist',
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
@@ -39,7 +40,10 @@ export enum ErrorWebhook {
 export enum ErrorEscrow {
   NotFound = 'Escrow not found',
   NotCreated = 'Escrow has not been created',
+  NotSetup = 'Escrow has not been setup',
   NotLaunched = 'Escrow has not been launched',
+  NotFunded = 'Escrow has not been funded',
+  NotCanceled = 'Escrow has not been canceled',
   InvalidStatusCancellation = 'Escrow has an invalid status for cancellation',
   InvalidBalanceCancellation = 'Escrow has an invalid balance for cancellation',
 }
