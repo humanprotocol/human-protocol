@@ -1,7 +1,7 @@
 import PageWrapper from '@components/PageWrapper';
 import Search from '@components/Search';
 import ShadowIcon from '@components/ShadowIcon';
-
+import { HMTPrice } from './HMTPrice';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
@@ -21,7 +21,7 @@ import cup from '@assets/cup.png';
 import Leaderboard from '@components/Home/Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
 
-const Home: React.FC = () => {
+const Home: React.FC = () => {	
 	return (
 		<PageWrapper violetHeader>
 			<div className="home-page-header">
@@ -39,12 +39,7 @@ const Home: React.FC = () => {
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
-						<div>
-							<Typography variant="h6" component="p">
-								HMT Price
-							</Typography>
-							<div className="count">$0.0455</div>
-						</div>
+						<HMTPrice />
 					</div>
 					<Divider
 						sx={{
