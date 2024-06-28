@@ -16,6 +16,7 @@ import { TOKEN } from '../../common/constant';
 import {
   AssignmentStatus,
   JobFieldName,
+  JobSortField,
   JobStatus,
   JobType,
 } from '../../common/enums/job';
@@ -33,6 +34,7 @@ import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
+import { SortDirection } from '../../common/enums/collection';
 
 @Injectable()
 export class JobService {
@@ -95,35 +97,53 @@ export class JobService {
           entity.status,
         );
 
-        if (data.fields) {
-          if (data.fields.includes(JobFieldName.CreatedAt)) {
-            job.createdAt = entity.createdAt.toISOString();
+        if (data.fields?.includes(JobFieldName.CreatedAt)) {
+          job.createdAt = entity.createdAt.toISOString();
+        }
+        if (data.fields?.includes(JobFieldName.UpdatedAt)) {
+          job.updatedAt = entity.updatedAt.toISOString();
+        }
+        if (
+          data.fields?.includes(JobFieldName.JobDescription) ||
+          data.fields?.includes(JobFieldName.RewardAmount) ||
+          data.fields?.includes(JobFieldName.RewardToken) ||
+          data.sortField === JobSortField.REWARD_AMOUNT
+        ) {
+          const manifest = await this.getManifest(
+            entity.chainId,
+            entity.escrowAddress,
+          );
+          if (data.fields?.includes(JobFieldName.JobDescription)) {
+            job.jobDescription = manifest.requesterDescription;
           }
           if (
-            data.fields.includes(JobFieldName.JobDescription) ||
-            data.fields.includes(JobFieldName.RewardAmount) ||
-            data.fields.includes(JobFieldName.RewardToken)
+            data.fields?.includes(JobFieldName.RewardAmount) ||
+            data.sortField === JobSortField.REWARD_AMOUNT
           ) {
-            const manifest = await this.getManifest(
-              entity.chainId,
-              entity.escrowAddress,
-            );
-            if (data.fields.includes(JobFieldName.JobDescription)) {
-              job.jobDescription = manifest.requesterDescription;
-            }
-            if (data.fields.includes(JobFieldName.RewardAmount)) {
-              job.rewardAmount =
-                manifest.fundAmount / manifest.submissionsRequired;
-            }
-            if (data.fields.includes(JobFieldName.RewardToken)) {
-              job.rewardToken = TOKEN;
-            }
+            job.rewardAmount =
+              manifest.fundAmount / manifest.submissionsRequired;
+          }
+          if (data.fields?.includes(JobFieldName.RewardToken)) {
+            job.rewardToken = TOKEN;
           }
         }
 
         return job;
       }),
     );
+
+    if (data.sortField === JobSortField.REWARD_AMOUNT) {
+      jobs.sort((a, b) => {
+        const rewardA = a.rewardAmount ?? 0;
+        const rewardB = b.rewardAmount ?? 0;
+        if (data.sort === SortDirection.DESC) {
+          return rewardB - rewardA;
+        } else {
+          return rewardA - rewardB;
+        }
+      });
+    }
+
     return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
   }
 
