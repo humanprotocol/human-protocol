@@ -56,13 +56,7 @@ export class QualificationController {
     );
   }
 
-  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.JobLauncher]))
   @Get()
-  @ApiHeader({
-    name: HEADER_SIGNATURE_KEY,
-    description: 'Signature for webhook authentication.',
-    required: true,
-  })
   @HttpCode(200)
   @ApiOperation({ summary: 'Get list of qualifications' })
   @ApiResponse({ status: 200, description: 'List of qualifications' })
