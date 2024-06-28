@@ -135,3 +135,10 @@ export enum ErrorWeb3 {
 export enum ErrorOperator {
   OperatorNotActive = 'Operator not active',
 }
+
+/**
+ * Represents error messages related to NDA.
+ */
+export enum ErrorNda {
+  NotFound = 'NDA version not found',
+}

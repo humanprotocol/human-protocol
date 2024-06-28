@@ -33,6 +33,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { NDAService } from '../nda/nda.service';
 
 @Injectable()
 export class AuthService {
@@ -50,6 +51,7 @@ export class AuthService {
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
     private readonly hCaptchaService: HCaptchaService,
+    private readonly ndaService: NDAService,
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
@@ -152,6 +154,7 @@ export class AuthService {
       address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
+      nda: await this.ndaService.isLatestSigned(userEntity),
       reputation_network: this.web3Service.getOperatorAddress(),
     };
 

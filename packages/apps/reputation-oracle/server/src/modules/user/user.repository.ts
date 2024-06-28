@@ -12,21 +12,21 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async findById(id: number): Promise<UserEntity | null> {
     return this.findOne({
       where: { id },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKey: true, ndas: true },
     });
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { email },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKey: true, ndas: true },
     });
   }
 
   async findByAddress(address: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { evmAddress: address },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKey: true, ndas: true },
     });
   }
 
