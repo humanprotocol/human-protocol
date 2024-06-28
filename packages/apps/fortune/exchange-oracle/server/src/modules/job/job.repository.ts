@@ -41,7 +41,8 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     if (
       data.sortField == JobSortField.CHAIN_ID ||
-      data.sortField == JobSortField.CREATED_AT
+      data.sortField == JobSortField.CREATED_AT ||
+      data.sortField == JobSortField.UPDATED_AT
     )
       queryBuilder.orderBy(data.sortField!, data.sort);
 
@@ -57,6 +58,18 @@ export class JobRepository extends BaseRepository<JobEntity> {
     }
     if (data.status !== undefined) {
       queryBuilder.andWhere('job.status = :status', { status: data.status });
+    }
+
+    if (data.createdAfter) {
+      queryBuilder.andWhere('job.createdAt >= :createdAfter', {
+        createdAfter: data.createdAfter,
+      });
+    }
+
+    if (data.updatedAfter) {
+      queryBuilder.andWhere('job.updatedAt >= :updatedAfter', {
+        updatedAfter: data.updatedAfter,
+      });
     }
 
     queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
