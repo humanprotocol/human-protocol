@@ -1,4 +1,21 @@
-# Human Protocol Core Smart Contracts
+<p align="center">
+  <a href="https://www.humanprotocol.org/" target="blank"><img src="https://s2.coinmarketcap.com/static/img/coins/64x64/10347.png" width="100" alt="Human Protocol" /></a>
+</p>
+
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
+
+<h1 align="center">Human Protocol Core</h1>
+<p align="center">This is the repo of the human protocol smart contracts.</p>
+
+<p align="center">
+  <a href="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml">
+    <img src="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml/badge.svg?branch=main" alt="Core Check">
+  </a>
+  <a href="https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml">
+    <img src="https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml/badge.svg?branch=main" alt="Core deployment">
+  </a>
+</p>
 
 ## Contracts
 
@@ -202,3 +219,11 @@ yarn upgrade:proxy --network [NETWORK_NAME]
 ```bash
 npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
+
+## Documentation
+
+For detailed information about core, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/smart-contracts).
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.
