@@ -48,7 +48,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     payload: {
       role: string;
       email: string;
-      address: string;
+      wallet_address: string;
       kyc_status: string;
       reputation_network: string;
     },
@@ -64,7 +64,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     const role: Role = payload.role as Role;
 
     if (role !== Role.HumanApp) {
-      if (!payload.kyc_status || !payload.address) {
+      if (!payload.kyc_status || !payload.wallet_address) {
         throw new UnauthorizedException('Invalid token');
       }
       if (payload.kyc_status !== KYC_APPROVED) {
@@ -74,7 +74,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
 
     return {
       role: role,
-      address: payload.address,
+      address: payload.wallet_address,
       email: payload.email,
       kycStatus: payload.kyc_status,
       reputationNetwork: payload.reputation_network,
