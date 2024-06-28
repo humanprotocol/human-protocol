@@ -1,17 +1,16 @@
 import {
   JobAssignmentCommand,
   JobAssignmentData,
-  JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
   JobsFetchParamsCommand,
   JobsFetchParamsData,
-  JobsFetchParamsDetails,
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
+  ResignJobCommand,
 } from '../model/job-assignment.model';
 import {
   AssignmentSortField,
@@ -52,10 +51,10 @@ export const jobAssignmentCommandFixture: JobAssignmentCommand = {
   data: jobAssignmentParams,
   token: TOKEN,
 };
-export const jobAssignmentDetailsFixture: JobAssignmentDetails = {
-  data: jobAssignmentParams,
+export const jobResignAssignedCommandFixture: ResignJobCommand = {
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
+  assignmentId: JOB_ASSIGNMENT_ID,
   token: TOKEN,
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
 };
 export const jobAssignmentDataFixture: JobAssignmentData = {
   escrow_address: ESCROW_ADDRESS,
@@ -103,11 +102,6 @@ const jobsFetchParams: JobsFetchParams = {
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
   data: jobsFetchParams,
   address: EXCHANGE_ORACLE_ADDRESS,
-  token: TOKEN,
-};
-export const jobsFetchParamsDetailsFixture: JobsFetchParamsDetails = {
-  data: jobsFetchParams,
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
   token: TOKEN,
 };
 

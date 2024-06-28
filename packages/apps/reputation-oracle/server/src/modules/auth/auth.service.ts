@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -31,6 +31,8 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 
 @Injectable()
 export class AuthService {
@@ -42,26 +44,24 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
+    private readonly hCaptchaConfigService: HCaptchaConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
+    private readonly hCaptchaService: HCaptchaService,
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    // if (
-    //   !(
-    //     await verifyToken(
-    //       this.authConfigService.hCaptchaExchangeURL,
-    //       this.authConfigService.hCaptchaSiteKey,
-    //       this.authConfigService.hCaptchaSecret,
-    //       data.hCaptchaToken,
-    //       ip,
-    //     )
-    //   ).success
-    // ) {
-    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
-    // }
+    if (
+      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+        .success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -78,19 +78,22 @@ export class AuthService {
   }
 
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    // if (
-    //   !(
-    //     await verifyToken(
-    //       this.authConfigService.hCaptchaSiteKey,
-    //       this.authConfigService.hCaptchaExchangeURL,
-    //       this.authConfigService.hCaptchaSecret,
-    //       data.hCaptchaToken,
-    //       ip,
-    //     )
-    //   ).success
-    // ) {
-    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED)
-    // }
+    if (
+      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+        .success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    const storedUser = await this.userRepository.findByEmail(data.email);
+    if (storedUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedEmail,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const userEntity = await this.userService.create(data);
 
     const tokenEntity = new TokenEntity();
@@ -143,18 +146,22 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
-    const accessToken = await this.jwtService.signAsync(
-      {
-        email: userEntity.email,
-        userId: userEntity.id,
-        address: userEntity.evmAddress,
-        kyc_status: userEntity.kyc?.status,
-        reputation_network: this.web3Service.getOperatorAddress(),
-      },
-      {
-        expiresIn: this.authConfigService.accessTokenExpiresIn,
-      },
-    );
+    const payload: any = {
+      email: userEntity.email,
+      userId: userEntity.id,
+      address: userEntity.evmAddress,
+      role: userEntity.role,
+      kyc_status: userEntity.kyc?.status,
+      reputation_network: this.web3Service.getOperatorAddress(),
+    };
+
+    if (userEntity.siteKey) {
+      payload.site_key = userEntity.siteKey.siteKey;
+    }
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: this.authConfigService.accessTokenExpiresIn,
+    });
 
     if (refreshTokenEntity) {
       await this.tokenRepository.deleteOne(refreshTokenEntity);
@@ -174,14 +181,20 @@ export class AuthService {
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
+    if (
+      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+        .success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
-    }
-
-    if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -221,19 +234,15 @@ export class AuthService {
     data: RestorePasswordDto,
     ip?: string,
   ): Promise<void> {
-    // if (
-    //   !(
-    //     await verifyToken(
-    //       this.authConfigService.hCaptchaExchangeURL,
-    //       this.authConfigService.hCaptchaSiteKey,
-    //       this.authConfigService.hCaptchaSecret,
-    //       data.hCaptchaToken,
-    //       ip,
-    //     )
-    //   ).success
-    // ) {
-    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED)
-    // }
+    if (
+      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+        .success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
@@ -285,6 +294,16 @@ export class AuthService {
   public async resendEmailVerification(
     data: ResendEmailVerificationDto,
   ): Promise<void> {
+    if (
+      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+        .success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {

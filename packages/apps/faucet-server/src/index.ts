@@ -14,10 +14,11 @@ import { lastSendType } from './interfaces/lastSendType';
 import {
   checkFaucetBalance,
   getFaucetBalance,
+  getHmtBalance,
   getWeb3,
   sendFunds,
 } from './services/web3';
-import { sendSlackMessage } from './services/slack';
+import { sendSlackNotification } from './services/slack';
 
 // init express
 const app = express();
@@ -68,11 +69,7 @@ app.get('/stats', async (_request: Request, response: Response) => {
   const web3 = getWeb3(network.rpcUrl);
   response.send({
     account: web3.eth.defaultAccount,
-    balance: await getFaucetBalance(
-      web3,
-      network.hmtAddress,
-      network?.faucetAddress
-    ),
+    balance: await getFaucetBalance(web3, network.hmtAddress),
     dailyLimit: process.env.DAILY_LIMIT,
   });
 });
@@ -141,25 +138,35 @@ app.post('/faucet', async (request: Request, response: Response) => {
 
   const web3 = getWeb3(network.rpcUrl);
 
+  // Check min HMT balance
   if (
-    !(await checkFaucetBalance(
-      web3,
-      network.hmtAddress,
-      network?.faucetAddress
-    ))
+    (await getHmtBalance(web3, network.hmtAddress)) <
+    BigInt(process.env.FAUCET_MIN_BALANCE)
   ) {
-    sendSlackMessage(network.title);
+    const message = `Low faucet balance detection in network ${network.title} with token address ${network.hmtAddress} and wallet address ${web3.eth.defaultAccount}`;
+    sendSlackNotification(message);
+  }
+
+  // Check min native balance
+  if (
+    (await web3.eth.getBalance(web3.eth.defaultAccount)) <
+    BigInt(process.env.NATIVE_MIN_BALANCE)
+  ) {
+    const message = `Low native balance detection in network ${network.title} with wallet address ${web3.eth.defaultAccount}`;
+    sendSlackNotification(message);
+  }
+
+  if (!(await checkFaucetBalance(web3, network.hmtAddress))) {
+    const message = `Faucet out of balance on ${network.title}`;
+    sendSlackNotification(message);
+
     return response.status(200).json({
       status: false,
       message: 'Faucet out of balance.',
     });
   }
-  const txHash = await sendFunds(
-    web3,
-    network.hmtAddress,
-    toAddress,
-    network?.faucetAddress
-  );
+
+  const txHash = await sendFunds(web3, network.hmtAddress, toAddress);
 
   if (txHash) {
     lastSend.push({

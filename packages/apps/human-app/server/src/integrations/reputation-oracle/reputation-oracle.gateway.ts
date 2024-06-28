@@ -17,8 +17,9 @@ import {
   GatewayEndpointConfig,
 } from '../../common/interfaces/endpoint.interface';
 import { ExternalApiName } from '../../common/enums/external-api-name';
+import { ReputationOracleEndpoints } from '../../common/enums/reputation-oracle-endpoints';
 import { AxiosRequestConfig } from 'axios';
-import { EmptyData, RequestDataType } from './reputation-oracle.interface';
+import { RequestDataType } from './reputation-oracle.interface';
 import {
   SigninWorkerCommand,
   SigninWorkerData,
@@ -52,7 +53,25 @@ import {
   DisableOperatorParams,
 } from '../../modules/disable-operator/model/disable-operator.model';
 import { KycProcedureStartResponse } from '../../modules/kyc-procedure/model/kyc-start.model';
-import { ReputationOracleEndpoints } from '../../common/enums/reputation-oracle-endpoints';
+import {
+  EnableLabelingCommand,
+  EnableLabelingResponse,
+} from '../../modules/h-captcha/model/enable-labeling.model';
+import {
+  RegisterAddressCommand,
+  RegisterAddressData,
+  RegisterAddressResponse,
+} from '../../modules/register-address/model/register-address.model';
+import {
+  TokenRefreshCommand,
+  TokenRefreshData,
+  TokenRefreshResponse,
+} from '../../modules/token-refresh/model/token-refresh.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorData,
+  SigninOperatorResponse,
+} from '../../modules/user-operator/model/operator-signin.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -70,7 +89,7 @@ export class ReputationOracleGateway {
     endpointName: ReputationOracleEndpoints,
     data?: RequestDataType,
     token?: string,
-  ) {
+  ): AxiosRequestConfig {
     const endpointConfig: GatewayEndpointConfig =
       this.reputationOracleConfig.endpoints[endpointName];
     const authHeader = token ? { Authorization: token } : {};
@@ -85,7 +104,7 @@ export class ReputationOracleGateway {
         ...endpointConfig.params,
       },
       data: data,
-    };
+    } as AxiosRequestConfig;
   }
 
   private async handleRequestToReputationOracle<T>(
@@ -109,36 +128,50 @@ export class ReputationOracleGateway {
   }
 
   async sendOperatorSignup(command: SignupOperatorCommand): Promise<void> {
-    const signupOperatorData = this.mapper.map(
+    const data = this.mapper.map(
       command,
       SignupOperatorCommand,
       SignupOperatorData,
     );
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.OPERATOR_SIGNUP,
-      signupOperatorData,
+      data,
     );
     return this.handleRequestToReputationOracle<void>(options);
   }
+  async sendOperatorSignin(
+    command: SigninOperatorCommand,
+  ): Promise<SigninOperatorResponse> {
+    const data = this.mapper.map(
+      command,
+      SigninOperatorCommand,
+      SigninOperatorData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.OPERATOR_SIGNIN,
+      data,
+    );
+    return this.handleRequestToReputationOracle<SigninOperatorResponse>(
+      options,
+    );
+  }
 
-  async sendWorkerSignin(signinWorkerCommand: SigninWorkerCommand) {
-    const signinWorkerData = this.mapper.map(
-      signinWorkerCommand,
+  async sendWorkerSignin(command: SigninWorkerCommand) {
+    const data = this.mapper.map(
+      command,
       SigninWorkerCommand,
       SigninWorkerData,
     );
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.WORKER_SIGNIN,
-      signinWorkerData,
+      data,
     );
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
   }
 
-  async sendEmailVerification(
-    emailVerificationCommand: EmailVerificationCommand,
-  ) {
+  async sendEmailVerification(command: EmailVerificationCommand) {
     const emailVerificationData = this.mapper.map(
-      emailVerificationCommand,
+      command,
       EmailVerificationCommand,
       EmailVerificationData,
     );
@@ -179,14 +212,14 @@ export class ReputationOracleGateway {
   }
 
   async sendRestorePassword(restorePasswordCommand: RestorePasswordCommand) {
-    const restorePasswordData = this.mapper.map(
+    const data = this.mapper.map(
       restorePasswordCommand,
       RestorePasswordCommand,
       RestorePasswordData,
     );
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.RESTORE_PASSWORD,
-      restorePasswordData,
+      data,
     );
     return this.handleRequestToReputationOracle<void>(options);
   }
@@ -223,11 +256,53 @@ export class ReputationOracleGateway {
   async sendKycProcedureStart(token: string) {
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.KYC_PROCEDURE_START,
-      EmptyData,
+      undefined,
       token,
     );
     return this.handleRequestToReputationOracle<KycProcedureStartResponse>(
       options,
     );
+  }
+
+  async approveUserAsLabeler(command: EnableLabelingCommand) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.ENABLE_LABELING,
+      undefined,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<EnableLabelingResponse>(
+      options,
+    );
+  }
+
+  sendBlockchainAddressRegistration(
+    command: RegisterAddressCommand,
+  ): Promise<RegisterAddressResponse> {
+    const data = this.mapper.map(
+      command,
+      RegisterAddressCommand,
+      RegisterAddressData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.REGISTER_ADDRESS,
+      data,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<RegisterAddressResponse>(
+      options,
+    );
+  }
+
+  async sendRefreshToken(command: TokenRefreshCommand) {
+    const data = this.mapper.map(
+      command,
+      TokenRefreshCommand,
+      TokenRefreshData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.TOKEN_REFRESH,
+      data,
+    );
+    return this.handleRequestToReputationOracle<TokenRefreshResponse>(options);
   }
 }

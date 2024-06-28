@@ -41,10 +41,12 @@ import {
   EscrowData,
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
+  GET_STATUS_UPDATES_QUERY,
+  StatusEvent,
 } from './graphql';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowCancel, EscrowStatus, NetworkData } from './types';
-import { isValidUrl, throwError } from './utils';
+import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 
 /**
  * ## Introduction
@@ -1441,7 +1443,7 @@ export class EscrowUtils {
    *   AVALANCHE_TESTNET = 43113,
    *   CELO = 42220,
    *   CELO_ALFAJORES = 44787,
-   *   SKALE = 1273227453,
+   *    = 1273227453,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1524,42 +1526,38 @@ export class EscrowUtils {
       throw ErrorInvalidAddress;
     }
 
-    try {
-      const escrowAddresses: EscrowData[] = [];
-      for (const chainId of filter.networks) {
-        const networkData = NETWORKS[chainId];
+    const escrowAddresses: EscrowData[] = [];
+    for (const chainId of filter.networks) {
+      const networkData = NETWORKS[chainId];
 
-        if (!networkData) {
-          throw ErrorUnsupportedChainID;
-        }
-
-        const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
-          networkData.subgraphUrl,
-          GET_ESCROWS_QUERY(filter),
-          {
-            ...filter,
-            launcher: filter.launcher?.toLowerCase(),
-            reputationOracle: filter.reputationOracle?.toLowerCase(),
-            recordingOracle: filter.recordingOracle?.toLowerCase(),
-            exchangeOracle: filter.exchangeOracle?.toLowerCase(),
-            status:
-              filter.status !== undefined
-                ? Object.entries(EscrowStatus).find(
-                    ([, value]) => value === filter.status
-                  )?.[0]
-                : undefined,
-            from: filter.from ? +filter.from.getTime() / 1000 : undefined,
-            to: filter.to ? +filter.to.getTime() / 1000 : undefined,
-          }
-        );
-        escrows.map((escrow) => (escrow.chainId = networkData.chainId));
-        escrowAddresses.push(...escrows);
+      if (!networkData) {
+        throw ErrorUnsupportedChainID;
       }
-      escrowAddresses.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
-      return escrowAddresses;
-    } catch (e: any) {
-      return throwError(e);
+
+      const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
+        getSubgraphUrl(networkData),
+        GET_ESCROWS_QUERY(filter),
+        {
+          ...filter,
+          launcher: filter.launcher?.toLowerCase(),
+          reputationOracle: filter.reputationOracle?.toLowerCase(),
+          recordingOracle: filter.recordingOracle?.toLowerCase(),
+          exchangeOracle: filter.exchangeOracle?.toLowerCase(),
+          status:
+            filter.status !== undefined
+              ? Object.entries(EscrowStatus).find(
+                  ([, value]) => value === filter.status
+                )?.[0]
+              : undefined,
+          from: filter.from ? +filter.from.getTime() / 1000 : undefined,
+          to: filter.to ? +filter.to.getTime() / 1000 : undefined,
+        }
+      );
+      escrows.map((escrow) => (escrow.chainId = networkData.chainId));
+      escrowAddresses.push(...escrows);
     }
+    escrowAddresses.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+    return escrowAddresses;
   }
 
   /**
@@ -1586,7 +1584,6 @@ export class EscrowUtils {
    *   AVALANCHE_TESTNET = 43113,
    *   CELO = 42220,
    *   CELO_ALFAJORES = 44787,
-   *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1645,16 +1642,143 @@ export class EscrowUtils {
       throw ErrorInvalidAddress;
     }
 
-    try {
-      const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
-        networkData.subgraphUrl,
-        GET_ESCROW_BY_ADDRESS_QUERY(),
-        { escrowAddress: escrowAddress.toLowerCase() }
+    const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
+      getSubgraphUrl(networkData),
+      GET_ESCROW_BY_ADDRESS_QUERY(),
+      { escrowAddress: escrowAddress.toLowerCase() }
+    );
+
+    return escrow || null;
+  }
+
+  /**
+   * This function returns the status events for a given set of networks within an optional date range.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *   ALL = -1,
+   *   MAINNET = 1,
+   *   RINKEBY = 4,
+   *   GOERLI = 5,
+   *   SEPOLIA = 11155111,
+   *   BSC_MAINNET = 56,
+   *   BSC_TESTNET = 97,
+   *   POLYGON = 137,
+   *   POLYGON_MUMBAI = 80001,
+   *   POLYGON_AMOY = 80002,
+   *   MOONBEAM = 1284,
+   *   MOONBASE_ALPHA = 1287,
+   *   AVALANCHE = 43114,
+   *   AVALANCHE_TESTNET = 43113,
+   *   CELO = 42220,
+   *   CELO_ALFAJORES = 44787,
+   *   LOCALHOST = 1338,
+   *   XLAYER_TESTNET = 195,
+   *   XLAYER = 196,
+   * }
+   * ```
+   *
+   * ```ts
+   * type Status = {
+   *   escrowAddress: string;
+   *   timestamp: string;
+   *   status: string;
+   *   chainId: ChainId;
+   * };
+   * ```
+   *
+   * @param {ChainId[]} networks - List of network IDs to query for status events.
+   * @param {EscrowStatus[]} [statuses] - Optional array of statuses to query for. If not provided, queries for all statuses.
+   * @param {Date} [from] - Optional start date to filter events.
+   * @param {Date} [to] - Optional end date to filter events.
+   * @param {string} [launcher] - Optional launcher address to filter events. Must be a valid Ethereum address.
+   * @returns {Promise<StatusEvent[]>} - Array of status events with their corresponding statuses.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
+   *
+   * (async () => {
+   *   const fromDate = new Date('2023-01-01');
+   *   const toDate = new Date('2023-12-31');
+   *   const statusEvents = await EscrowUtils.getStatusEvents(
+   *     [ChainId.POLYGON, ChainId.MAINNET],
+   *     [EscrowStatus.Pending, EscrowStatus.Complete],
+   *     fromDate,
+   *     toDate
+   *   );
+   *   console.log(statusEvents);
+   * })();
+   * ```
+   */
+
+  public static async getStatusEvents(
+    networks: ChainId[],
+    statuses?: EscrowStatus[],
+    from?: Date,
+    to?: Date,
+    launcher?: string
+  ): Promise<StatusEvent[]> {
+    if (!networks?.length) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    if (launcher && !ethers.isAddress(launcher)) {
+      throw ErrorInvalidAddress;
+    }
+
+    const escrowAddresses: StatusEvent[] = [];
+
+    // If statuses are not provided, use all statuses except Launched
+    const effectiveStatuses = statuses ?? [
+      EscrowStatus.Launched,
+      EscrowStatus.Pending,
+      EscrowStatus.Partial,
+      EscrowStatus.Paid,
+      EscrowStatus.Complete,
+      EscrowStatus.Cancelled,
+    ];
+
+    for (const chainId of networks) {
+      const networkData = NETWORKS[chainId];
+      if (!networkData) {
+        throw ErrorUnsupportedChainID;
+      }
+
+      const statusNames = effectiveStatuses.map(
+        (status) => EscrowStatus[status]
       );
 
-      return escrow || null;
-    } catch (e: any) {
-      return throwError(e);
+      const data = await gqlFetch<any>(
+        getSubgraphUrl(networkData),
+        GET_STATUS_UPDATES_QUERY(from, to, launcher),
+        {
+          status: statusNames,
+          from: from ? Math.floor(from.getTime() / 1000) : undefined,
+          to: to ? Math.floor(to.getTime() / 1000) : undefined,
+          launcher: launcher || undefined,
+        }
+      );
+
+      if (!data || !data['escrowStatusEvents']) {
+        continue;
+      }
+      const statusEvents = data['escrowStatusEvents'] as StatusEvent[];
+
+      const eventsWithChainId = statusEvents.map((event) => ({
+        ...event,
+        chainId,
+      }));
+      escrowAddresses.push(...eventsWithChainId);
     }
+
+    escrowAddresses.sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
+
+    return escrowAddresses;
   }
 }

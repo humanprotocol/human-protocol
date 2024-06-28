@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "typedoc": "^0.25.1",
-    "typedoc-plugin-markdown": "^3.16.0"
+    "typedoc-plugin-markdown": "^4.0.3"
   },
   "typedocOptions": {
     "entryPoints": [
@@ -64,7 +64,8 @@
       "./src/operator.ts",
       "./src/staking.ts",
       "./src/storage.ts",
-      "./src/statistics.ts"
+      "./src/statistics.ts",
+      "./src/transaction.ts"
     ]
   }
 }

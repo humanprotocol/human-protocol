@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { expect, it } from '@jest/globals';
-import { DisableOperatorProfile } from '../disable-operator.mapper';
+import { DisableOperatorProfile } from '../disable-operator.mapper.profile';
 import {
   disableOperatorCommandFixture,
   disableOperatorDtoFixture,

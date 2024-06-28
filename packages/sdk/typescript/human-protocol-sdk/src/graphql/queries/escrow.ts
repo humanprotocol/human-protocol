@@ -82,3 +82,34 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
     ${ESCROW_FRAGMENT}
   `;
 };
+
+export const GET_STATUS_UPDATES_QUERY = (
+  from?: Date,
+  to?: Date,
+  launcher?: string
+) => {
+  const WHERE_CLAUSE = `
+    where: {
+      status_in: $status
+      ${from ? `timestamp_gte: $from` : ''}
+      ${to ? `timestamp_lte: $to` : ''}
+      ${launcher ? `launcher: $launcher` : ''}
+    }
+  `;
+  return gql`
+    query getStatus(
+      $status: [String!]!
+      $from: Int
+      $to: Int
+      $launcher: String
+    ) {
+      escrowStatusEvents(
+        ${WHERE_CLAUSE}
+      ) {
+        escrowAddress,
+        timestamp,
+        status,
+      }
+    }
+  `;
+};

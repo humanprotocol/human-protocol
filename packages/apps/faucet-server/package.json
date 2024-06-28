@@ -14,14 +14,13 @@
   "license": "ISC",
   "dependencies": {
     "@human-protocol/sdk": "*",
-    "@skaleproject/pow-ethers": "^0.3.3",
     "axios": "^1.3.4",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "express-rate-limit": "^7.1.3",
+    "express-rate-limit": "^7.3.0",
     "node-cache": "^5.1.2",
-    "web3": "^4.3.0"
+    "web3": "^4.9.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

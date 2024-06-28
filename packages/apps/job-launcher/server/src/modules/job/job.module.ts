@@ -35,6 +35,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
     RoutingProtocolService,
     WebhookRepository,
   ],
-  exports: [JobService],
+  exports: [JobService, RoutingProtocolService],
 })
 export class JobModule {}

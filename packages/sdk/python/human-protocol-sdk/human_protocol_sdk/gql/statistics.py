@@ -46,6 +46,8 @@ fragment EventDayDataFields on EventDayData {
     dailyPayoutAmount
     dailyHMTTransferCount
     dailyHMTTransferAmount
+    dailyUniqueSenders
+    dailyUniqueReceivers
 }
 """
 

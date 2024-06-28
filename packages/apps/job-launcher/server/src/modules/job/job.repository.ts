@@ -46,6 +46,18 @@ export class JobRepository extends BaseRepository<JobEntity> {
     });
   }
 
+  public async findManyByChainIdsAndEscrowAddresses(
+    chainId: ChainId[],
+    escrowAddress: string[],
+  ): Promise<JobEntity[]> {
+    return this.find({
+      where: {
+        chainId: In(chainId),
+        escrowAddress: In(escrowAddress),
+      },
+    });
+  }
+
   public async findByStatus(
     status: JobStatus,
     take?: number,
@@ -113,17 +125,5 @@ export class JobRepository extends BaseRepository<JobEntity> {
     const entities = await queryBuilder.getMany();
 
     return { entities, itemCount };
-  }
-
-  public async findByEscrowAddresses(
-    userId: number,
-    escrowAddresses: string[],
-  ): Promise<JobEntity[]> {
-    return this.find({
-      where: {
-        userId,
-        escrowAddress: In(escrowAddresses),
-      },
-    });
   }
 }

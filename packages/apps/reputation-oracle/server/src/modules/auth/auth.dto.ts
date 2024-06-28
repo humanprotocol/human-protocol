@@ -11,13 +11,17 @@ import {
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
-import { UserType } from '../../common/enums/user';
+import { Role } from '../../common/enums/user';
 
 export class ForgotPasswordDto {
   @ApiProperty()
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class SignInDto {
@@ -56,6 +60,10 @@ export class ResendEmailVerificationDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class RestorePasswordDto extends ValidatePasswordDto {
@@ -106,10 +114,10 @@ export class Web3SignUpDto {
   public signature: string;
 
   @ApiProperty({
-    enum: UserType,
+    enum: Role,
   })
-  @IsEnum(UserType)
-  public type: UserType;
+  @IsEnum(Role)
+  public type: Role;
 
   @ApiProperty()
   @IsString()

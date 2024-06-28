@@ -49,13 +49,13 @@ export class PasswordResetController {
   })
   @UsePipes(new ValidationPipe())
   public async restorePassword(
-    @Body() restorePasswordDto: RestorePasswordDto,
+    @Body() dto: RestorePasswordDto,
   ): Promise<void> {
-    const restorePasswordCommand = this.mapper.map(
-      restorePasswordDto,
+    const command = this.mapper.map(
+      dto,
       RestorePasswordDto,
       RestorePasswordCommand,
     );
-    return await this.service.processRestorePassword(restorePasswordCommand);
+    return await this.service.processRestorePassword(command);
   }
 }

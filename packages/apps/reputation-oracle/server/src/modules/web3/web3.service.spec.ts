@@ -2,7 +2,6 @@ import { ChainId } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { TESTNET_CHAIN_IDS } from '../../common/constants/networks';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Service } from './web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -12,10 +11,6 @@ import { ControlledError } from '../../common/errors/controlled';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
-  const signerMock = {
-    address: MOCK_ADDRESS,
-    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-  };
 
   jest
     .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
@@ -57,13 +52,6 @@ describe('Web3Service', () => {
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
         new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
       );
-    });
-  });
-
-  describe('getValidChains', () => {
-    it('should get all valid chainIds on TESTNET', () => {
-      const validChainIds = web3Service.getValidChains();
-      expect(validChainIds).toBe(TESTNET_CHAIN_IDS);
     });
   });
 

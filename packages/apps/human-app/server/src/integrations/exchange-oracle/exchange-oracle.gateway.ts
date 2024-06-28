@@ -2,128 +2,162 @@ import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
-  UserStatisticsDetails,
+  UserStatisticsCommand,
   UserStatisticsResponse,
 } from '../../modules/statistics/model/user-statistics.model';
 import { HttpService } from '@nestjs/axios';
 import {
-  OracleStatisticsDetails,
+  OracleStatisticsCommand,
   OracleStatisticsResponse,
 } from '../../modules/statistics/model/oracle-statistics.model';
 import {
+  JobAssignmentCommand,
   JobAssignmentData,
-  JobAssignmentDetails,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
+  JobsFetchParamsCommand,
   JobsFetchParamsData,
-  JobsFetchParamsDetails,
   JobsFetchResponse,
+  ResignJobCommand,
+  ResignJobData,
 } from '../../modules/job-assignment/model/job-assignment.model';
 import {
   JobsDiscoveryParams,
+  JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
-  JobsDiscoveryParamsDetails,
   JobsDiscoveryResponse,
 } from '../../modules/jobs-discovery/model/jobs-discovery.model';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { instanceToPlain } from 'class-transformer';
 import { HttpMethod } from '../../common/enums/http-method';
+import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
+import { KvStoreGateway } from '../kv-store/kv-store.gateway';
+import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
 
 @Injectable()
 export class ExchangeOracleGateway {
   constructor(
     private httpService: HttpService,
+    private kvStoreGateway: KvStoreGateway,
+    private readonly escrowUtilsGateway: EscrowUtilsGateway,
     @InjectMapper() private mapper: Mapper,
   ) {}
 
-  private cleanParams(obj: any): any {
-    return Object.entries(obj)
-      .filter(([_, v]) => v != null)
-      .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {});
-  }
-  private toCleanObjParams(params: any): any {
-    const plainParams = instanceToPlain(params);
-    return this.cleanParams(plainParams);
-  }
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
     const response = await lastValueFrom(this.httpService.request(options));
     return response.data;
   }
+
   async fetchUserStatistics(
-    details: UserStatisticsDetails,
+    command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${details.exchangeOracleUrl}/stats/assignment`,
+      url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
+        command.oracleAddress,
+      )}/stats/assignment`,
       headers: {
-        Authorization: details.token,
+        Authorization: command.token,
       },
     };
     return this.callExternalHttpUtilRequest<UserStatisticsResponse>(options);
   }
+
   async fetchOracleStatistics(
-    details: OracleStatisticsDetails,
+    command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${details.exchangeOracleUrl}/stats`,
+      url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
+        command.oracleAddress,
+      )}/stats`,
     };
     return this.callExternalHttpUtilRequest<OracleStatisticsResponse>(options);
   }
+
   async fetchAssignedJobs(
-    details: JobsFetchParamsDetails,
+    command: JobsFetchParamsCommand,
   ): Promise<JobsFetchResponse> {
     const jobFetchParamsData = this.mapper.map(
-      details.data,
+      command.data,
       JobsFetchParams,
       JobsFetchParamsData,
     );
-    const reducedParams = this.toCleanObjParams(jobFetchParamsData);
+    const reducedParams = toCleanObjParams(jobFetchParamsData);
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${details.exchangeOracleUrl}/assignment`,
+      url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
+        command.address,
+      )}/assignment`,
       params: reducedParams,
       headers: {
-        Authorization: details.token,
+        Authorization: command.token,
         Accept: 'application/json',
       },
     };
     return this.callExternalHttpUtilRequest<JobsFetchResponse>(options);
   }
+
   async postNewJobAssignment(
-    details: JobAssignmentDetails,
+    command: JobAssignmentCommand,
   ): Promise<JobAssignmentResponse> {
+    const exchangeOracleAddress =
+      await this.escrowUtilsGateway.getExchangeOracleAddressByEscrowAddress(
+        command.data.chainId,
+        command.data.escrowAddress,
+      );
+    const url = await this.kvStoreGateway.getExchangeOracleUrlByAddress(
+      exchangeOracleAddress,
+    );
     const options: AxiosRequestConfig = {
       method: HttpMethod.POST,
-      url: `${details.exchangeOracleUrl}/assignment`,
+      url: `${url}/assignment`,
       data: this.mapper.map(
-        details.data,
+        command.data,
         JobAssignmentParams,
         JobAssignmentData,
       ),
       headers: {
-        Authorization: details.token,
+        Authorization: command.token,
       },
     };
     return this.callExternalHttpUtilRequest<JobAssignmentResponse>(options);
   }
-  async fetchJobs(details: JobsDiscoveryParamsDetails) {
+
+  async resignAssignedJob(command: ResignJobCommand) {
+    const data = this.mapper.map(command, ResignJobCommand, ResignJobData);
+    const options: AxiosRequestConfig = {
+      method: HttpMethod.POST,
+      url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
+        command.oracleAddress,
+      )}/assignment/resign`,
+      data: data,
+      headers: {
+        Authorization: command.token,
+        Accept: 'application/json',
+      },
+    };
+    return this.callExternalHttpUtilRequest(options);
+  }
+
+  async fetchJobs(command: JobsDiscoveryParamsCommand) {
     const jobsDiscoveryParamsData = this.mapper.map(
-      details.data,
+      command.data,
       JobsDiscoveryParams,
       JobsDiscoveryParamsData,
     );
-    const reducedParams = this.toCleanObjParams(jobsDiscoveryParamsData);
+    const reducedParams = toCleanObjParams(jobsDiscoveryParamsData);
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
-      url: `${details.exchangeOracleUrl}/job`,
+      url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
+        command.oracleAddress,
+      )}/job`,
       params: reducedParams,
       headers: {
-        Authorization: details.token,
+        Authorization: command.token,
         Accept: 'application/json',
       },
     };

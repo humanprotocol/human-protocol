@@ -14,6 +14,7 @@ import { Web3Service } from '../web3/web3.service';
 import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { ControlledError } from '../../common/errors/controlled';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -82,6 +83,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
+  @Cron('*/2 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
@@ -129,6 +131,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  @Cron('1-59/2 * * * *')
   /**
    * Process a paid webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.

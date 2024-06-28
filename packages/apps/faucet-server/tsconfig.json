@@ -17,6 +17,7 @@
     "outDir": "build",
     "lib": ["es2020"],
     "useUnknownInCatchVariables": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "allowJs": true
   }
 }

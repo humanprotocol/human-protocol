@@ -15,6 +15,20 @@ type Worker @entity {
   payoutCount: BigInt!
 }
 
+type UniqueSender @entity {
+  id: ID!
+  address: Bytes!
+  transferCount: BigInt!
+  timestamp: BigInt!
+}
+
+type UniqueReceiver @entity {
+  id: ID!
+  address: Bytes!
+  receiveCount: BigInt!
+  timestamp: BigInt!
+}
+
 type Leader @entity {
   id: ID!
   address: Bytes!
@@ -183,54 +197,16 @@ type BulkPayoutEvent @entity {
   bulkCount: BigInt!
 }
 
-type PendingStatusEvent @entity {
+type EscrowStatusEvent @entity {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
 
   escrowAddress: Bytes! # address
+  launcher: Bytes # address
   sender: Bytes! # address
-}
-
-type CancelledStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type PartialStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type PaidStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type CompletedStatusEvent @entity {
-  id: ID!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
+  status: String!
 }
 
 # KVStore
@@ -241,6 +217,15 @@ type KVStoreSetEvent @entity {
   txHash: Bytes!
 
   leaderAddress: Bytes! # address
+  key: String!
+  value: String!
+}
+
+type KVStore @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  address: Bytes!
   key: String!
   value: String!
 }
@@ -372,9 +357,22 @@ type EventDayData @entity {
   dailyPayoutAmount: BigInt!
   dailyHMTTransferCount: BigInt!
   dailyHMTTransferAmount: BigInt!
+  dailyUniqueSenders: BigInt!
+  dailyUniqueReceivers: BigInt!
 }
 
 type LeaderStatistics @entity {
   id: ID!
   leaders: BigInt!
+}
+
+type Transaction @entity {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  from: Bytes!
+  to: Bytes
+  value: BigInt
+  method: String!
 }

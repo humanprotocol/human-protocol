@@ -12,7 +12,7 @@
     "types": ["node", "jest"],
     "useUnknownInCatchVariables": false,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true
   },
   "include": ["./src"]
 }

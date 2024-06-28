@@ -95,7 +95,6 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
-import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { StorageService } from '../storage/storage.service';
 import stringify from 'json-stable-stringify';
 import {
@@ -121,30 +120,40 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { CronJobType } from '../../common/enums/cron-job';
+import { CronJobRepository } from '../cron-job/cron-job.repository';
+import { ModuleRef } from '@nestjs/core';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
-
+  private cronJobRepository: CronJobRepository;
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
-    public readonly jobRepository: JobRepository,
-    public readonly webhookRepository: WebhookRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly paymentRepository: PaymentRepository,
-    public readonly serverConfigService: ServerConfigService,
-    public readonly authConfigService: AuthConfigService,
-    public readonly web3ConfigService: Web3ConfigService,
-    public readonly cvatConfigService: CvatConfigService,
-    public readonly pgpConfigService: PGPConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly authConfigService: AuthConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly cvatConfigService: CvatConfigService,
+    private readonly pgpConfigService: PGPConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
     private readonly rateService: RateService,
+    private moduleRef: ModuleRef,
     @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
+
+  onModuleInit() {
+    this.cronJobRepository = this.moduleRef.get(CronJobRepository, {
+      strict: false,
+    });
+  }
 
   public async createCvatManifest(
     dto: JobCvatDto,
@@ -158,7 +167,7 @@ export class JobService {
     const jobBounty = await this.calculateJobBounty({
       requestType,
       fundAmount: tokenFundAmount,
-      urls: urls,
+      urls,
       nodesTotal: dto.labels[0]?.nodes?.length,
     });
 
@@ -534,7 +543,6 @@ export class JobService {
         groundTruth: StorageDataDto,
       ): GenerateUrls => {
         const requestType = JobRequestType.IMAGE_BOXES;
-
         return {
           dataUrl: generateBucketUrl(data.dataset, requestType),
           gtUrl: generateBucketUrl(groundTruth, requestType),
@@ -1029,7 +1037,17 @@ export class JobService {
     await this.requestToCancelJob(jobEntity);
   }
 
-  public async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
+  /// This is a duplicate from CronJobService.isCronJobRunning to avoid circular dependency
+  private async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
+    const lastCronJob = await this.cronJobRepository.findOneByType(cronJobType);
+
+    if (!lastCronJob || lastCronJob.completedAt) {
+      return false;
+    }
+    return true;
+  }
+
+  private async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
       throw new ControlledError(
         ErrorJob.InvalidStatusCancellation,
@@ -1037,19 +1055,46 @@ export class JobService {
       );
     }
 
-    if (
-      jobEntity.status === JobStatus.PENDING ||
-      jobEntity.status === JobStatus.PAID
-    ) {
+    let status = JobStatus.CANCELED;
+    switch (jobEntity.status) {
+      case JobStatus.PENDING:
+        break;
+      case JobStatus.PAID:
+        if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
+          status = JobStatus.FAILED;
+        }
+        break;
+      case JobStatus.CREATED:
+        if (await this.isCronJobRunning(CronJobType.SetupEscrow)) {
+          status = JobStatus.FAILED;
+        }
+        break;
+      case JobStatus.SET_UP:
+        if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
+          status = JobStatus.FAILED;
+        }
+        break;
+      default:
+        status = JobStatus.TO_CANCEL;
+        break;
+    }
+
+    if (status === JobStatus.FAILED) {
+      throw new ControlledError(
+        ErrorJob.CancelWhileProcessing,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    if (status === JobStatus.CANCELED) {
       await this.paymentService.createRefundPayment({
         refundAmount: jobEntity.fundAmount,
         userId: jobEntity.userId,
         jobId: jobEntity.id,
       });
-      jobEntity.status = JobStatus.CANCELED;
-    } else {
-      jobEntity.status = JobStatus.TO_CANCEL;
     }
+    jobEntity.status = status;
+
     jobEntity.retriesCount = 0;
     await this.jobRepository.updateOne(jobEntity);
   }
@@ -1068,7 +1113,7 @@ export class JobService {
       const kvstore = await KVStoreClient.build(signer);
       const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
       const oracleAddresses = getOracleAddresses();
-      for (const address in Object.values(oracleAddresses)) {
+      for (const address of Object.values(oracleAddresses)) {
         const publicKey = await kvstore.getPublicKey(address);
         if (publicKey) publicKeys.push(publicKey);
       }
@@ -1196,7 +1241,8 @@ export class JobService {
     }
 
     if (jobEntity.requestType === JobRequestType.FORTUNE) {
-      const result = await this.storageService.download(finalResultUrl);
+      const data = await this.storageService.download(finalResultUrl);
+      const result = typeof data === 'string' ? JSON.parse(data) : data;
 
       if (!result) {
         throw new ControlledError(
@@ -1231,10 +1277,14 @@ export class JobService {
     return finalResultUrl;
   }
 
-  public handleProcessJobFailure = async (jobEntity: JobEntity) => {
+  public handleProcessJobFailure = async (
+    jobEntity: JobEntity,
+    failedReason: string,
+  ) => {
     if (jobEntity.retriesCount < this.serverConfigService.maxRetryCount) {
       jobEntity.retriesCount += 1;
     } else {
+      jobEntity.failedReason = failedReason;
       jobEntity.status = JobStatus.FAILED;
     }
     await this.jobRepository.updateOne(jobEntity);
@@ -1331,7 +1381,7 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<JobDetailsDto> {
-    let jobEntity = await this.jobRepository.findOneByIdAndUserId(
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
       jobId,
       userId,
     );
@@ -1350,7 +1400,6 @@ export class JobService {
 
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
-      jobEntity = await this.updateJobStatus(jobEntity, escrow);
     }
 
     let manifestData = await this.storageService.download(manifestUrl);
@@ -1428,6 +1477,7 @@ export class JobService {
           balance: 0,
           paidOut: 0,
           status: jobEntity.status,
+          failedReason: jobEntity.failedReason,
         },
         manifest: manifestDetails,
         staking: {
@@ -1446,6 +1496,7 @@ export class JobService {
         balance: Number(ethers.formatEther(escrow?.balance || 0)),
         paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
         status: jobEntity.status,
+        failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
       staking: {
@@ -1514,28 +1565,6 @@ export class JobService {
     const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
 
     return BigInt(feeValue ? feeValue : 1);
-  }
-
-  private async updateJobStatus(
-    job: JobEntity,
-    escrow: EscrowData,
-  ): Promise<JobEntity> {
-    let updatedJob = job;
-    if (
-      escrow.status === EscrowStatus[EscrowStatus.Complete] &&
-      job.status !== JobStatus.COMPLETED
-    ) {
-      job.status = JobStatus.COMPLETED;
-      updatedJob = await this.jobRepository.updateOne(job);
-    }
-    if (
-      escrow.status === EscrowStatus[EscrowStatus.Partial] &&
-      job.status !== JobStatus.PARTIAL
-    ) {
-      job.status = JobStatus.PARTIAL;
-      updatedJob = await this.jobRepository.updateOne(job);
-    }
-    return updatedJob;
   }
 
   public async completeJob(dto: WebhookDataDto): Promise<void> {

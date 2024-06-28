@@ -2,7 +2,6 @@ import {
   JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
-  JobsDiscoveryParamsDetails,
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponseItem,
 } from '../model/jobs-discovery.model';
@@ -73,11 +72,6 @@ export const paramsDataFixtureAsString = `?escrow_address=${paramsDataFixture.es
 export const jobsDiscoveryParamsCommandFixture: JobsDiscoveryParamsCommand = {
   data: dataFixture,
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
-  token: TOKEN,
-};
-export const jobsDiscoveryParamsDetailsFixture: JobsDiscoveryParamsDetails = {
-  data: dataFixture,
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
   token: TOKEN,
 };
 export const responseItemFixture: JobsDiscoveryResponseItem = {

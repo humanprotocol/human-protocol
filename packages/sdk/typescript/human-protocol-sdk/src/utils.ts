@@ -9,7 +9,10 @@ import {
   NumericFault,
   ReplacementUnderpriced,
   TransactionReplaced,
+  WarnSubgraphApiKeyNotProvided,
 } from './error';
+import { NetworkData } from './types';
+import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
 
 /**
  * **Handle and throw the error.*
@@ -48,4 +51,26 @@ export const isValidUrl = (url: string) => {
   } catch (err) {
     return false;
   }
+};
+
+/**
+ * **Get the subgraph URL.*
+ *
+ * @param {NetworkData} networkData
+ * @param {string} apiKey
+ * @returns
+ */
+export const getSubgraphUrl = (networkData: NetworkData) => {
+  let subgraphUrl = networkData.subgraphUrl;
+  if (process.env.SUBGRAPH_API_KEY) {
+    subgraphUrl = networkData.subgraphUrlApiKey.replace(
+      SUBGRAPH_API_KEY_PLACEHOLDER,
+      process.env.SUBGRAPH_API_KEY
+    );
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(WarnSubgraphApiKeyNotProvided);
+  }
+
+  return subgraphUrl;
 };

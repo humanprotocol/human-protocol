@@ -316,6 +316,13 @@ export class CommonDetails {
   @ApiProperty({ description: 'Status of the job' })
   @IsEnum(JobStatus)
   public status: JobStatus;
+
+  @ApiProperty({
+    description: 'Reason for job failure',
+    name: 'failed_reason',
+  })
+  @IsString()
+  public failedReason: string | null;
 }
 
 export class JobDetailsDto {

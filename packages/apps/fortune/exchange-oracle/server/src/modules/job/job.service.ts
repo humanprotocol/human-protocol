@@ -12,7 +12,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ethers } from 'ethers';
 import { TOKEN } from '../../common/constant';
 import {
   AssignmentStatus,
@@ -33,6 +32,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 
 @Injectable()
 export class JobService {
@@ -56,8 +56,8 @@ export class JobService {
     );
 
     if (jobEntity) {
-      this.logger.log('Job already exists', JobService.name);
-      throw new BadRequestException('Job already exists');
+      this.logger.log(ErrorJob.AlreadyExists, JobService.name);
+      throw new BadRequestException(ErrorJob.AlreadyExists);
     }
 
     const signer = this.web3Service.getSigner(webhook.chainId);
@@ -127,32 +127,30 @@ export class JobService {
     return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
   }
 
-  public async solveJob(
-    chainId: number,
-    escrowAddress: string,
-    workerAddress: string,
-    solution: string,
-  ): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw new BadRequestException('Invalid address');
-    }
-
-    const assignment = await this.assignmentRepository.findOneByEscrowAndWorker(
-      escrowAddress,
-      workerAddress,
-    );
+  public async solveJob(assignmentId: number, solution: string): Promise<void> {
+    const assignment =
+      await this.assignmentRepository.findOneById(assignmentId);
     if (!assignment) {
-      throw new BadRequestException('User is not assigned to the job');
+      throw new BadRequestException(ErrorAssignment.NotFound);
     }
 
-    await this.addSolution(chainId, escrowAddress, workerAddress, solution);
+    if (assignment.status !== AssignmentStatus.ACTIVE) {
+      throw new BadRequestException(ErrorAssignment.InvalidStatus);
+    }
+
+    await this.addSolution(
+      assignment.job.chainId,
+      assignment.job.escrowAddress,
+      assignment.workerAddress,
+      solution,
+    );
 
     assignment.status = AssignmentStatus.VALIDATION;
     await this.assignmentRepository.updateOne(assignment);
 
     const webhook = new WebhookEntity();
-    webhook.escrowAddress = escrowAddress;
-    webhook.chainId = chainId;
+    webhook.escrowAddress = assignment.job.escrowAddress;
+    webhook.chainId = assignment.job.chainId;
     webhook.eventType = EventType.SUBMISSION_IN_REVIEW;
 
     await this.webhookRepository.createUnique(webhook);
@@ -207,7 +205,7 @@ export class JobService {
         (solution) => solution.workerAddress === workerAddress,
       )
     ) {
-      throw new BadRequestException('User has already submitted a solution');
+      throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
     }
 
     const manifest = await this.getManifest(chainId, escrowAddress);
@@ -215,7 +213,7 @@ export class JobService {
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
-      throw new BadRequestException('This job has already been completed');
+      throw new BadRequestException(ErrorJob.JobCompleted);
     }
 
     const newJobSolutions: ISolution[] = [
@@ -258,7 +256,7 @@ export class JobService {
 
         manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
       } catch {
-        throw new Error('Unable to decrypt manifest');
+        throw new Error(ErrorJob.ManifestDecryptionFailed);
       }
     } else {
       try {
@@ -279,7 +277,7 @@ export class JobService {
 
       await this.webhookRepository.createUnique(webhook);
 
-      throw new NotFoundException('Unable to get manifest');
+      throw new NotFoundException(ErrorJob.ManifestNotFound);
     } else return manifest;
   }
 }

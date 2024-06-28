@@ -11,7 +11,7 @@ import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
 import { WebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
-import { Role } from '../../common/enums/role';
+import { AuthSignatureRole } from '../../common/enums/role';
 
 @Public()
 @ApiTags('Webhook')
@@ -19,7 +19,7 @@ import { Role } from '../../common/enums/role';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
-  @UseGuards(new SignatureAuthGuard([Role.Recording]))
+  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.Recording]))
   @Post('/')
   @ApiOperation({
     summary: 'Create Incoming Webhook',

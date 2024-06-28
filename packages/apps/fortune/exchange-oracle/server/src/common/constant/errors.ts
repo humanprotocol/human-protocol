@@ -22,3 +22,38 @@ export enum ErrorCronJob {
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
 }
+
+/**
+ * Represents error messages associated with assignments.
+ */
+export enum ErrorAssignment {
+  NotFound = 'Assignment not found',
+  InvalidStatus = 'Invalid assignment status',
+  InvalidAssignment = 'Invalid assignment',
+  InvalidUser = 'Assignment does not belong to the user',
+  AlreadyExists = 'Assignment already exists',
+  FullyAssigned = 'Fully assigned job',
+  ExpiredEscrow = 'Expired escrow',
+  JobNotFound = 'Job not found',
+  ReputationNetworkMismatch = 'Requested job is not in your reputation network',
+}
+
+/**
+ * Represents error messages associated with jobs.
+ */
+export enum ErrorJob {
+  AlreadyExists = 'Job already exists',
+  InvalidAddress = 'Invalid address',
+  NotAssigned = 'User is not assigned to the job',
+  SolutionAlreadySubmitted = 'User has already submitted a solution',
+  JobCompleted = 'This job has already been completed',
+  ManifestDecryptionFailed = 'Unable to decrypt manifest',
+  ManifestNotFound = 'Unable to get manifest',
+}
+
+/**
+ * Represents error messages associated with signatures.
+ */
+export enum ErrorSignature {
+  MissingRoles = 'Missing signature roles configuration',
+}

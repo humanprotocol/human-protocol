@@ -3,7 +3,11 @@ import { Test } from '@nestjs/testing';
 import { AssignmentController } from './assignment.controller';
 import { AssignmentService } from './assignment.service';
 import { RequestWithUser } from '../../common/types/jwt';
-import { GetAssignmentsDto, CreateAssignmentDto } from './assignment.dto';
+import {
+  GetAssignmentsDto,
+  CreateAssignmentDto,
+  ResignDto,
+} from './assignment.dto';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { MOCK_EXCHANGE_ORACLE } from '../../../test/constants';
 
@@ -74,7 +78,9 @@ describe('assignmentController', () => {
         chainId: 80001,
         escrowAddress: escrowAddress,
       };
-      jest.spyOn(assignmentService, 'createAssignment').mockResolvedValue();
+      jest
+        .spyOn(assignmentService, 'createAssignment')
+        .mockResolvedValue({} as any);
       await assignmentController.createAssignment(
         {
           user: { address: userAddress },
@@ -84,6 +90,27 @@ describe('assignmentController', () => {
       expect(assignmentService.createAssignment).toHaveBeenCalledWith(body, {
         address: userAddress,
       });
+    });
+  });
+
+  describe('resignJob', () => {
+    it('should call jobService.resignJob', async () => {
+      const assignmentId = 123;
+      const resignJobDto: ResignDto = {
+        assignmentId,
+      };
+
+      jest.spyOn(assignmentService, 'resign').mockResolvedValue();
+
+      await assignmentController.resign(
+        { user: { address: userAddress } } as RequestWithUser,
+        resignJobDto,
+      );
+
+      expect(assignmentService.resign).toHaveBeenCalledWith(
+        resignJobDto.assignmentId,
+        userAddress,
+      );
     });
   });
 });

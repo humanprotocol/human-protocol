@@ -7,9 +7,8 @@ import {
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { ChainId } from '@human-protocol/sdk';
 import { SignatureType } from '../../common/enums/web3';
 
 export class UserCreateDto extends ValidatePasswordDto {
@@ -24,14 +23,14 @@ export class UserCreateDto extends ValidatePasswordDto {
 }
 
 export class UserDto extends UserCreateDto {
-  public type: UserType;
+  public type: Role;
   public status: UserStatus;
 }
 
 export class Web3UserDto {
   public evmAddress: string;
   public nonce: string;
-  public type: UserType;
+  public type: Role;
   public status: UserStatus;
 }
 
@@ -50,14 +49,20 @@ export class UserUpdateDto {
   public status?: UserStatus;
 }
 
-export class RegisterAddressRequestDto {
-  @ApiProperty({ name: 'chain_id' })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
+export class RegisterLabelerResponseDto {
+  @ApiProperty({ name: 'site_key' })
+  @IsString()
+  public siteKey: string;
+}
 
+export class RegisterAddressRequestDto {
   @ApiProperty()
   @IsString()
   public address: string;
+
+  @ApiProperty()
+  @IsString()
+  public signature: string;
 }
 
 export class RegisterAddressResponseDto {

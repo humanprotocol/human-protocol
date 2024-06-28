@@ -3,7 +3,7 @@ import { PasswordResetService } from '../password-reset.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { PasswordResetProfile } from '../password-reset.mapper';
+import { PasswordResetProfile } from '../password-reset.mapper.profile';
 import { serviceMock } from './password-reset.service.mock';
 import { expect, it } from '@jest/globals';
 import {

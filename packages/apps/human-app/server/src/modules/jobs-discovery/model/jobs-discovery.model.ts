@@ -30,11 +30,13 @@ export class JobsDiscoveryParamsDto extends PageableDto {
   @ApiPropertyOptional()
   chain_id?: number;
   @AutoMap()
+  @IsOptional()
   @IsEnum(JobDiscoverySortField)
   @ApiPropertyOptional({ enum: JobDiscoverySortField })
   sort_field?: JobDiscoverySortField;
   @AutoMap()
   @IsString()
+  @IsOptional()
   @ApiPropertyOptional()
   job_type?: string;
   @AutoMap()
@@ -80,14 +82,6 @@ export class JobsDiscoveryParamsData extends PageableData {
 export class JobsDiscoveryParamsCommand {
   @AutoMap()
   oracleAddress: string;
-  @AutoMap()
-  token: string;
-  @AutoMap()
-  data: JobsDiscoveryParams;
-}
-
-export class JobsDiscoveryParamsDetails {
-  exchangeOracleUrl: string;
   @AutoMap()
   token: string;
   @AutoMap()
