@@ -133,12 +133,15 @@ export class JobRepository extends BaseRepository<JobEntity> {
   }
 
   async getAverageCompletionTime(): Promise<number> {
-    const queryBuilder = this.createQueryBuilder()
-      .select('AVG(completion_time_seconds)', 'average_completion_time_seconds')
-      .from('hmt.completed_jobs_duration', 'cjd');
+    const queryBuilder = this.createQueryBuilder('job')
+      .select(
+        'AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60)',
+        'average_completion_time_minutes',
+      )
+      .where('job.status = :status', { status: JobStatus.COMPLETED });
 
     const result = await queryBuilder.getRawOne();
-    return parseFloat(result.average_completion_time_seconds);
+    return parseFloat(result.average_completion_time_minutes);
   }
 
   async getFundAmountStats(): Promise<FundAmountStatisticsDto> {
