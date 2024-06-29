@@ -35,7 +35,10 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
-import { PasswordValidationPipe } from '../../common/pipes';
+import {
+  LowerCaseAddressPipe,
+  PasswordValidationPipe,
+} from '../../common/pipes';
 import { TokenType } from './token.entity';
 
 @ApiTags('Auth')
@@ -130,7 +133,9 @@ export class AuthJwtController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async web3SignUp(@Body() data: Web3SignUpDto): Promise<AuthDto> {
+  public async web3SignUp(
+    @Body(new LowerCaseAddressPipe()) data: Web3SignUpDto,
+  ): Promise<AuthDto> {
     return this.authService.web3Signup(data);
   }
 
@@ -151,7 +156,9 @@ export class AuthJwtController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async web3SignIn(@Body() data: Web3SignInDto): Promise<AuthDto> {
+  public async web3SignIn(
+    @Body(new LowerCaseAddressPipe()) data: Web3SignInDto,
+  ): Promise<AuthDto> {
     return this.authService.web3Signin(data);
   }
   @Public()

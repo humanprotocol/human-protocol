@@ -26,6 +26,7 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
+import { LowerCaseAddressPipe } from 'src/common/pipes';
 
 @ApiTags('User')
 @Controller('/user')
@@ -141,7 +142,7 @@ export class UserController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   public async prepareSignature(
-    @Body() data: PrepareSignatureDto,
+    @Body(new LowerCaseAddressPipe()) data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
     return await this.userService.prepareSignatureBody(data.type, data.address);
   }
