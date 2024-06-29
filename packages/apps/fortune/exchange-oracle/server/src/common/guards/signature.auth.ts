@@ -12,6 +12,7 @@ import { AuthSignatureRole } from '../enums/role';
 import { Reflector } from '@nestjs/core';
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { ErrorAssignment, ErrorSignature } from '../constant/errors';
+import { toLowerCase } from '../utils';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -27,7 +28,11 @@ export class SignatureAuthGuard implements CanActivate {
     );
     if (!roles) throw new NotImplementedException(ErrorSignature.MissingRoles);
     const request = context.switchToHttp().getRequest();
-    const data = request.body;
+    const { escrow_address, ...restBody } = request.body;
+    const data = {
+      ...restBody,
+      escrow_address: toLowerCase(escrow_address),
+    };
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
 

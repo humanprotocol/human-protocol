@@ -13,6 +13,7 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
+import { toLowerCase } from '@/common/utils';
 
 describe('WebhookService', () => {
   let webhookService: WebhookService, jobService: JobService;
@@ -73,7 +74,7 @@ describe('WebhookService', () => {
     it('should handle an incoming escrow completed webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
-        escrowAddress,
+        escrowAddress: toLowerCase(escrowAddress),
         eventType: EventType.ESCROW_COMPLETED,
       };
 
@@ -83,7 +84,7 @@ describe('WebhookService', () => {
     it('should handle an incoming solution in review webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
-        escrowAddress,
+        escrowAddress: toLowerCase(escrowAddress),
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
@@ -102,7 +103,7 @@ describe('WebhookService', () => {
     it('should return an error when the event type is invalid', async () => {
       const webhook: WebhookDto = {
         chainId,
-        escrowAddress,
+        escrowAddress: toLowerCase(escrowAddress),
         eventType: EventType.TASK_COMPLETED,
       };
 

@@ -6,6 +6,7 @@ import { signMessage } from './signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { CaseConverter } from './case-converter';
 import { WebhookDto } from '../../modules/webhook/webhook.dto';
+import { toLowerCase } from '.';
 
 export async function sendWebhook(
   httpService: HttpService,
@@ -14,7 +15,11 @@ export async function sendWebhook(
   webhookBody: WebhookDto,
   privateKey: string,
 ): Promise<boolean> {
-  const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
+  const data = {
+    ...webhookBody,
+    escrowAddress: toLowerCase(webhookBody.escrowAddress)
+  }
+  const snake_case_body = CaseConverter.transformToSnakeCase(data);
   const signedBody = await signMessage(snake_case_body, privateKey);
   const { status } = await firstValueFrom(
     await httpService.post(webhookUrl, snake_case_body, {

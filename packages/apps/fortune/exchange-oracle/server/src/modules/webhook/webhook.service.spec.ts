@@ -27,6 +27,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
+import { toLowerCase } from '../../common/utils';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -214,7 +215,7 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_RECORDING_ORACLE_WEBHOOK_URL,
         {
-          escrow_address: webhookEntity.escrowAddress,
+          escrow_address: toLowerCase(webhookEntity.escrowAddress),
           chain_id: webhookEntity.chainId,
           event_type: webhookEntity.eventType,
           event_data: { solutions_url: expect.any(String) },
