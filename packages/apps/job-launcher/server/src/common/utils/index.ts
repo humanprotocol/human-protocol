@@ -115,3 +115,10 @@ export function isPGPMessage(str: string): boolean {
     /-----BEGIN PGP MESSAGE-----\n\n[\s\S]+?\n-----END PGP MESSAGE-----/;
   return pattern.test(str);
 }
+
+export function toLowerCase(input: string | undefined): string {
+  if (input === undefined) {
+    return '';
+  }
+  return input.toLowerCase();
+}
