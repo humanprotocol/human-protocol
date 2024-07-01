@@ -33,7 +33,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { JobRequestType } from 'src/common/enums';
+import { JobRequestType } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
@@ -416,7 +416,7 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    throw new Error();
+
     const userEntity = await this.userService.createWeb3User(data.address);
 
     await kvstore.set(data.address, OperatorStatus.ACTIVE);

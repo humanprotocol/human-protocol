@@ -42,6 +42,7 @@ import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { JobRequestType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -641,8 +642,8 @@ describe('AuthService', () => {
           } as UserEntity);
 
           const data = {
-            from: MOCK_ADDRESS,
-            to: web3Service.getOperatorAddress(),
+            from: MOCK_ADDRESS.toLowerCase(),
+            to: web3Service.getOperatorAddress().toLowerCase(),
             contents: 'signin',
             nonce: nonce,
           };
@@ -698,8 +699,8 @@ describe('AuthService', () => {
         };
 
         const preSignUpDataMock: SignatureBodyDto = {
-          from: MOCK_ADDRESS,
-          to: MOCK_ADDRESS,
+          from: MOCK_ADDRESS.toLowerCase(),
+          to: MOCK_ADDRESS.toLowerCase(),
           contents: 'signup',
           nonce: undefined,
         };
@@ -749,7 +750,12 @@ describe('AuthService', () => {
 
         it('should create a new web3 user and return the token', async () => {
           (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest.fn().mockResolvedValue('Job Launcher'),
+            get: jest
+              .fn()
+              .mockResolvedValueOnce('Job Launcher')
+              .mockResolvedValueOnce('url')
+              .mockResolvedValueOnce(1)
+              .mockResolvedValueOnce(JobRequestType.FORTUNE),
             set: jest.fn(),
           }));
 
@@ -775,7 +781,7 @@ describe('AuthService', () => {
           });
         });
 
-        it("should throw ConflictException if signature doesn't match", async () => {
+        it("should throw ControlledError if signature doesn't match", async () => {
           const invalidSignature = await signMessage(
             'invalid message',
             MOCK_PRIVATE_KEY,
@@ -794,7 +800,7 @@ describe('AuthService', () => {
             ),
           );
         });
-        it('should throw BadRequestException if role is not in KVStore', async () => {
+        it('should throw ControlledError if role is not in KVStore', async () => {
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
@@ -808,6 +814,73 @@ describe('AuthService', () => {
             }),
           ).rejects.toThrow(
             new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST),
+          );
+        });
+        it('should throw ControlledError if fee is not in KVStore', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest.fn().mockResolvedValueOnce('Job Launcher'),
+          }));
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: Role.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(
+            new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST),
+          );
+        });
+        it('should throw ControlledError if url is not in KVStore', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest
+              .fn()
+              .mockResolvedValueOnce('Job Launcher')
+              .mockResolvedValueOnce('url'),
+          }));
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: Role.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(
+            new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST),
+          );
+        });
+        it('should throw ControlledError if job type is not in KVStore', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest
+              .fn()
+              .mockResolvedValueOnce('Job Launcher')
+              .mockResolvedValueOnce('url')
+              .mockResolvedValueOnce(1),
+          }));
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: Role.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(
+            new ControlledError(
+              ErrorAuth.InvalidJobType,
+              HttpStatus.BAD_REQUEST,
+            ),
           );
         });
       });

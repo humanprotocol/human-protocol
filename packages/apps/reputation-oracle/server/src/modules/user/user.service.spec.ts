@@ -635,8 +635,8 @@ describe('UserService', () => {
 
     it('should prepare web3 pre sign up payload and return typed structured data', async () => {
       const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
+        from: MOCK_ADDRESS.toLowerCase(),
+        to: MOCK_ADDRESS.toLowerCase(),
         contents: 'signup',
         nonce: undefined,
       };
@@ -651,8 +651,8 @@ describe('UserService', () => {
 
     it('should prepare web3 pre register address payload and return typed structured data', async () => {
       const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
+        from: MOCK_ADDRESS.toLowerCase(),
+        to: MOCK_ADDRESS.toLowerCase(),
         contents: 'register-address',
         nonce: undefined,
       };
