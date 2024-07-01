@@ -33,7 +33,7 @@
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.4.3",
     "react-test-renderer": "^18.2.0",
-    "recharts": "2.9.0",
+    "recharts": "2.12.7",
     "serve": "^14.1.1",
     "swr": "^2.2.4",
     "viem": "2.x",
