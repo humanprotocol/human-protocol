@@ -148,6 +148,7 @@ export class AuthService {
 
     const payload: any = {
       email: userEntity.email,
+      status: userEntity.status,
       userId: userEntity.id,
       address: userEntity.evmAddress,
       role: userEntity.role,

@@ -287,6 +287,7 @@ describe('AuthService', () => {
       expect(jwtSignMock).toHaveBeenLastCalledWith(
         {
           email: userEntity.email,
+          status: userEntity.status,
           userId: userEntity.id,
           address: userEntity.evmAddress,
           kyc_status: userEntity.kyc?.status,
