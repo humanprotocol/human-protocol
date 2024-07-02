@@ -67,3 +67,8 @@ export class KycUpdateDto {
   @IsOptional()
   public message?: string;
 }
+
+export class KycSignedAddressDto {
+  key: string;
+  value: string;
+}
