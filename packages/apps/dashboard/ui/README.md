@@ -1,50 +1,62 @@
-# HUMAN Escrow Factory Dashboard
+<p align="center">
+  <a href="https://www.humanprotocol.org/" target="blank"><img src="https://s2.coinmarketcap.com/static/img/coins/64x64/10347.png" width="100" alt="Human Protocol" /></a>
+</p>
 
-This is a readonly dashboard of the [Escrow Factory](https://github.com/humanprotocol/hmt-escrow/blob/master/contracts/EscrowFactory.sol) contract
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-Escrow Factory is used for grouping Escrows in the blockchain. Everything is happening inside Polygon Mainnet. Other networks will be added later
+<h1 align="center">HUMAN Dashboard</h1>
+  <p align="center">HUMAN Dashboard is a comprehensive interface that provides users with detailed insights of the HUMAN Protocol ecosystem. This dashboard is designed to facilitate the tracking of HMT token transactions, escrows, payouts, staking and to provide up-to-date information about available oracles and their reputations</p>
 
-## Available Scripts
+<p align="center">
+  <a href="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-dashboard-ui.yaml">
+    <img src="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-dashboard-ui.yaml/badge.svg?branch=main" alt="Dashboard Check">
+  </a>
+</p>
 
-In the project directory, you can run:
+## ✨ Demo
 
-### `yarn start`
+First, let's install the dependencies, `yarn` is used as a package manager:
 
-Runs the app in the development mode.\
-Open [http://localhost:3002](http://localhost:3002) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `yarn run build`
-
-Before building you need to set environment variable in `.env`:
-
-```
-VITE_APP_NFT_STORAGE_API=
-VITE_APP_FAUCET_SERVER_URL=
-VITE_APP_WALLETCONNECT_PROJECT_ID=
+```bash
+$ yarn install
 ```
 
-Builds the app for production to the `dist` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The application needs access to environment variables in order to work correctly, for this, create one of the `.env.<NODE_ENV>` files, depending on the state of your environment:
 
-The build is minified and the filenames include the hashes.
+```bash
+$ export NODE_ENV=development
+```
 
-### `yarn test/ run lint`
+Use the `.env.example` file as an example to create a configuration file with certain environment variables:
+
+```bash
+$ cp .env.example .env.development
+```
+
+## 🚀 Usage
+
+### Running the app
+
+```bash
+$ yarn run start
+```
+
+### Testing the app
+
+```bash
+# unit tests
+$ yarn run test
+```
 
 # Branching
-[GitFlow convention](https://www.gitkraken.com/learn/git/git-flow) is to be followed (and feature PRs should target `develop` branch rather than `master`)
 
-# Deployment
-
-[Internal CI CD documentation](https://www.notion.so/human-protocol/Escrow-Dashboard-47d26b3be14f4ad395e2fcd4a168d77f)
+[GitFlow convention](https://www.gitkraken.com/learn/git/git-flow) is to be followed (and feature PRs should target `develop` branch rather than `main`)
 
 ## Deployment Endpoints
 
-`develop` branch → staging: http://ec2-18-219-139-195.us-east-2.compute.amazonaws.com/ 
+`main` branch → production: https://dashboard.humanprotocol.org/
 
-`master` branch → production: https://dashboard.humanprotocol.org/
+## License
 
-# Tests
-Feel free to add your own automated tests following GiHub Actions documentation
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.

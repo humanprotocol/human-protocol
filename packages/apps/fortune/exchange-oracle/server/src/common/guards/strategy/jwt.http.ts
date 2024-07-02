@@ -53,22 +53,35 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       reputation_network: string;
     },
   ): Promise<JwtUser> {
-    if (!payload.email || !payload.role) {
-      throw new UnauthorizedException('Invalid token');
+    if (!payload.email) {
+      throw new UnauthorizedException('Invalid token: missing email');
+    }
+
+    if (!payload.role) {
+      throw new UnauthorizedException('Invalid token: missing role');
     }
 
     if (!Object.values(Role).includes(payload.role as Role)) {
-      throw new UnauthorizedException('Invalid role');
+      throw new UnauthorizedException(
+        `Invalid token: unrecognized role "${payload.role}"`,
+      );
     }
 
     const role: Role = payload.role as Role;
 
     if (role !== Role.HumanApp) {
-      if (!payload.kyc_status || !payload.wallet_address) {
-        throw new UnauthorizedException('Invalid token');
+      if (!payload.kyc_status) {
+        throw new UnauthorizedException('Invalid token: missing KYC status');
       }
+
+      if (!payload.wallet_address) {
+        throw new UnauthorizedException('Invalid token: missing address');
+      }
+
       if (payload.kyc_status !== KYC_APPROVED) {
-        throw new UnauthorizedException('Invalid KYC status');
+        throw new UnauthorizedException(
+          `Invalid token: expected KYC status "${KYC_APPROVED}", but received "${payload.kyc_status}"`,
+        );
       }
     }
 

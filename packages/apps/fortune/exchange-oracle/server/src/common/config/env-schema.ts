@@ -6,7 +6,6 @@ export const envValidator = Joi.object({
   HOST: Joi.string(),
   PORT: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
-  CRON_SECRET: Joi.string().required(),
   // Database
   POSTGRES_HOST: Joi.string(),
   POSTGRES_USER: Joi.string(),
