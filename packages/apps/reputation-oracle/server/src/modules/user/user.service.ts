@@ -288,7 +288,7 @@ export class UserService {
         }
         content = JSON.stringify({
           reference: additionalData.reference,
-          workerJson: additionalData.workerAddress,
+          workerJson: additionalData.workerAddress.toLowerCase(),
         });
         break;
       case SignatureType.REGISTER_ADDRESS:
@@ -299,8 +299,8 @@ export class UserService {
     }
 
     return {
-      from: address,
-      to: this.web3Service.getOperatorAddress(),
+      from: address.toLowerCase(),
+      to: this.web3Service.getOperatorAddress().toLowerCase(),
       contents: content,
       nonce: nonce ?? undefined,
     };

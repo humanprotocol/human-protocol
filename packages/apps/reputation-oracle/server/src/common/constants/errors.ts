@@ -84,6 +84,9 @@ export enum ErrorAuth {
   InvalidRole = 'Invalid role in KVStore',
   PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
   InvalidToken = 'Invalid token',
+  InvalidJobType = 'Invalid operator job type',
+  InvalidUrl = 'Invalid operator URL',
+  InvalidFee = 'Invalid operator fee',
 }
 
 /**
