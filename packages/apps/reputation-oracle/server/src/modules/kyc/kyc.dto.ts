@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { KycStatus } from '../../common/enums/user';
 
 export class KycSessionDto {
@@ -30,40 +30,11 @@ export class KycStatusDto {
     enum: KycStatus,
   })
   @IsEnum(KycStatus)
-  public state: KycStatus;
+  public status: KycStatus;
 }
 
 export class KycUpdateWebhookQueryDto {
   @ApiProperty()
   @IsString()
   public secret: string;
-}
-
-export class KycCreateDto {
-  @ApiProperty()
-  @IsString()
-  public sessionId: string;
-
-  @ApiProperty({
-    enum: KycStatus,
-  })
-  @IsEnum(KycStatus)
-  public status: KycStatus;
-
-  @ApiProperty()
-  @IsNumber()
-  public userId: number;
-}
-
-export class KycUpdateDto {
-  @ApiProperty({
-    enum: KycStatus,
-  })
-  @IsEnum(KycStatus)
-  public status: KycStatus;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  public message?: string;
 }
