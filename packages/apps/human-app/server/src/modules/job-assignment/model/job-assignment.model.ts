@@ -61,7 +61,7 @@ export class JobAssignmentResponse {
 export class JobsFetchParamsDto extends PageableDto {
   @AutoMap()
   @ApiProperty()
-  address: string;
+  oracle_address: string;
   @AutoMap()
   @Type(() => Number)
   @IsOptional()
@@ -112,7 +112,7 @@ export class JobsFetchParams extends PageableParams {
 }
 export class JobsFetchParamsCommand {
   @AutoMap()
-  address: string;
+  oracleAddress: string;
   @AutoMap()
   data: JobsFetchParams;
   @AutoMap()
@@ -156,7 +156,7 @@ export class ResignJobDto {
   @AutoMap()
   @IsString()
   @ApiProperty()
-  address: string;
+  oracle_address: string;
   @AutoMap()
   @IsString()
   @ApiProperty()

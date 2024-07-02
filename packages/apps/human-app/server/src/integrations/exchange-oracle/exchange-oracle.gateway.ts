@@ -90,7 +90,7 @@ export class ExchangeOracleGateway {
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
       url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
-        command.address,
+        command.oracleAddress,
       )}/assignment`,
       params: reducedParams,
       headers: {

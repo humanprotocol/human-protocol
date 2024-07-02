@@ -94,11 +94,11 @@ describe('KvStoreGateway', () => {
         KVStoreKeys.url,
       );
       expect(cacheManager.set).toHaveBeenCalledWith(
-        testAddress,
+        service.cachePrefix + testAddress,
         expectedUrl,
         configService.cacheTtlExchangeOracleUrl,
       );
-      expect(cacheManager.get).toHaveBeenCalledWith(testAddress);
+      expect(cacheManager.get).toHaveBeenCalledWith(service.cachePrefix + testAddress);
       expect(result).toBe(expectedUrl);
     });
     it('should get data from cache, if available', async () => {
@@ -108,7 +108,9 @@ describe('KvStoreGateway', () => {
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
 
       expect(service['kvStoreClient'].get).not.toHaveBeenCalled();
-      expect(cacheManager.get).toHaveBeenCalledWith(testAddress);
+      expect(cacheManager.get).toHaveBeenCalledWith(
+        service.cachePrefix + testAddress,
+      );
       expect(result).toBe(expectedUrl);
     });
   });

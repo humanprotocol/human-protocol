@@ -76,7 +76,7 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
 };
 
 export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracle_address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
@@ -101,7 +101,7 @@ const jobsFetchParams: JobsFetchParams = {
 };
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
   data: jobsFetchParams,
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 
