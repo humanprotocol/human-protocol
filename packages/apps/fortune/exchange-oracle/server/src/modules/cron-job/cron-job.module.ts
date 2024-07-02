@@ -7,7 +7,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobService } from './cron-job.service';
-import { CronJobController } from './cron-job.controller';
 
 @Global()
 @Module({
