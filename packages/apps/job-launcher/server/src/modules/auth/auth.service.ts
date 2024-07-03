@@ -102,7 +102,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -307,7 +307,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
