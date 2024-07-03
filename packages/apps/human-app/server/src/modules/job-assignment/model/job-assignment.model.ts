@@ -91,8 +91,8 @@ export class JobsFetchParamsDto extends PageableDto {
   status: AssignmentStatus;
   @AutoMap()
   @IsOptional()
-  @IsEnum(AssignmentSortField, { each: true })
-  @ApiPropertyOptional({ enum: AssignmentSortField, isArray: true })
+  @IsEnum(AssignmentSortField)
+  @ApiPropertyOptional({ enum: AssignmentSortField })
   sort_field: AssignmentSortField;
 }
 

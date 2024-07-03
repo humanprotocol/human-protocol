@@ -79,11 +79,10 @@ export class EnvironmentConfigService {
       DEFAULT_CORS_ALLOWED_ORIGIN,
     );
   }
-  get corsAllowedHeaders(): string {
-    return this.configService.get<string>(
-      'CORS_ALLOWED_HEADERS',
-      DEFAULT_CORS_ALLOWED_HEADERS,
-    );
+  get corsAllowedHeaders(): string[] {
+    return this.configService
+      .get<string>('CORS_ALLOWED_HEADERS', DEFAULT_CORS_ALLOWED_HEADERS)
+      .split(',');
   }
   get cacheTtlExchangeOracleUrl(): number {
     return this.configService.get<number>(

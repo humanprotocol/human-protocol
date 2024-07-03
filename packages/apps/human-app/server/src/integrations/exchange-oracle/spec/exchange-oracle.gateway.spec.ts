@@ -23,7 +23,7 @@ import {
   jobsDiscoveryParamsCommandFixture,
   paramsDataFixtureAsString,
 } from '../../../modules/jobs-discovery/spec/jobs-discovery.fixtures';
-import { GoneException, HttpException } from '@nestjs/common';
+import { GoneException, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { HttpMethod } from '../../../common/enums/http-method';
 import { KvStoreGateway } from '../../kv-store/kv-store.gateway';
 import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
@@ -124,7 +124,7 @@ describe('ExchangeOracleApiGateway', () => {
         .mockReturnValue(throwError(() => new GoneException()));
 
       await expect(gateway.fetchUserStatistics(command)).rejects.toThrow(
-        GoneException,
+        InternalServerErrorException,
       );
     });
   });

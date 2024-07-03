@@ -17,7 +17,9 @@ import {
   JobAssignmentResponse,
   JobsFetchParamsDto,
   JobsFetchParamsCommand,
-  JobsFetchResponse, ResignJobDto, ResignJobCommand,
+  JobsFetchResponse,
+  ResignJobDto,
+  ResignJobCommand,
 } from './model/job-assignment.model';
 import { Authorization } from '../../common/config/params-decorators';
 

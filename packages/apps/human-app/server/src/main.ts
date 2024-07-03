@@ -15,6 +15,7 @@ async function bootstrap() {
   if (envConfigService.isCorsEnabled) {
     app.enableCors({
       origin: envConfigService.corsEnabledOrigin,
+      methods: ['GET', 'POST', 'OPTIONS'],
       allowedHeaders: envConfigService.corsAllowedHeaders,
     });
   }

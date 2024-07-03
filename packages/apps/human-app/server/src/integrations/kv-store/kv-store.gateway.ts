@@ -42,7 +42,7 @@ export class KvStoreGateway {
         );
       }
     }
-    if (!!fetchedUrl || fetchedUrl === '') {
+    if (!fetchedUrl || fetchedUrl === '') {
       throw new HttpException(
         `Unable to retrieve URL from address: ${address}`,
         400,
