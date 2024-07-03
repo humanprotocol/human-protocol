@@ -71,6 +71,12 @@ export class RegisterAddressResponseDto {
   public signedAddress: string;
 }
 
+export class EnableOperatorDto {
+  @ApiProperty()
+  @IsString()
+  public signature: string;
+}
+
 export class DisableOperatorDto {
   @ApiProperty()
   @IsString()

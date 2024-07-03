@@ -136,5 +136,6 @@ export enum ErrorWeb3 {
  * Represents error messages related to operator.
  */
 export enum ErrorOperator {
+  OperatorAlreadyActive = 'Operator is already active',
   OperatorNotActive = 'Operator not active',
 }

@@ -520,6 +520,114 @@ describe('UserService', () => {
     });
   });
 
+  describe('enableOperator', () => {
+    const signatureBody: SignatureBodyDto = {
+      from: MOCK_ADDRESS,
+      to: MOCK_ADDRESS,
+      contents: 'enable-operator',
+      nonce: undefined,
+    };
+
+    const userEntity: DeepPartial<UserEntity> = {
+      id: 1,
+      evmAddress: MOCK_ADDRESS,
+    };
+
+    beforeEach(() => {
+      jest
+        .spyOn(userService as any, 'prepareSignatureBody')
+        .mockReturnValue(signatureBody);
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should enable an operator', async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
+        set: jest.fn(),
+      };
+
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+      const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
+
+      const result = await userService.enableOperator(
+        userEntity as any,
+        signature,
+      );
+
+      expect(result).toBe(undefined);
+      expect(userService.prepareSignatureBody).toHaveBeenCalledWith(
+        SignatureType.ENABLE_OPERATOR,
+        MOCK_ADDRESS,
+      );
+      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
+
+      expect(kvstoreClientMock.get).toHaveBeenCalledWith(
+        MOCK_ADDRESS,
+        MOCK_ADDRESS,
+      );
+      expect(kvstoreClientMock.set).toHaveBeenCalledWith(
+        MOCK_ADDRESS,
+        OperatorStatus.ACTIVE,
+      );
+    });
+
+    it("should throw ConflictException if signature doesn't match", async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
+        set: jest.fn(),
+      };
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+
+      (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
+        throw new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        );
+      });
+
+      const invalidSignature = await signMessage(
+        'invalid message',
+        MOCK_PRIVATE_KEY,
+      );
+
+      await expect(
+        userService.enableOperator(userEntity as any, invalidSignature),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('should throw BadRequestException if operator already enabled in KVStore', async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
+      };
+
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+      const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
+
+      await expect(
+        userService.enableOperator(userEntity as any, signature),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorOperator.OperatorAlreadyActive,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+  });
+
   describe('disableOperator', () => {
     const signatureBody: SignatureBodyDto = {
       from: MOCK_ADDRESS,
