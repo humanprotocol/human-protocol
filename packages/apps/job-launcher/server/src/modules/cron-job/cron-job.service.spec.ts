@@ -24,6 +24,7 @@ import {
   EscrowStatus,
   EscrowUtils,
   KVStoreClient,
+  NETWORKS,
 } from '@human-protocol/sdk';
 import { JobService } from '../job/job.service';
 import { DeepPartial } from 'typeorm';
@@ -120,6 +121,12 @@ describe('CronJobService', () => {
         CvatConfigService,
         PGPConfigService,
         NetworkConfigService,
+        {
+          provide: NetworkConfigService,
+          useValue: {
+            networks: [NETWORKS[ChainId.LOCALHOST]],
+          },
+        },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: PaymentRepository,
