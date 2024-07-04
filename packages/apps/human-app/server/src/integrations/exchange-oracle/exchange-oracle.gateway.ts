@@ -53,7 +53,7 @@ export class ExchangeOracleGateway {
       console.error(
         `Error, while executing exchange oracle API call with options: ${JSON.stringify(options)}, error details: ${e}`,
       );
-      throw new InternalServerErrorException();
+      throw e;
     }
   }
 

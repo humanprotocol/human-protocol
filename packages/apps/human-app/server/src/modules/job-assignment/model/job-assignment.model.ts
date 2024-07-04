@@ -45,7 +45,7 @@ export class JobAssignmentData {
 }
 
 export class JobAssignmentResponse {
-  assignment_id: string;
+  assignment_id: number;
   escrow_address: string;
   chain_id: number;
   job_type: string;
@@ -135,7 +135,7 @@ export class JobsFetchParamsData extends PageableData {
 }
 
 export class JobsFetchResponseItem {
-  assignment_id: string;
+  assignment_id: number;
   escrow_address: string;
   chain_id: number;
   job_type: string;
@@ -158,7 +158,7 @@ export class ResignJobDto {
   @ApiProperty()
   oracle_address: string;
   @AutoMap()
-  @IsString()
+  @IsNumber()
   @ApiProperty()
   assignment_id: number;
 }
@@ -172,5 +172,7 @@ export class ResignJobCommand {
 }
 export class ResignJobData {
   @AutoMap()
+  @IsNumber()
+  @ApiProperty()
   assignment_id: number;
 }
