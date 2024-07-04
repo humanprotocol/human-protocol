@@ -481,7 +481,7 @@ describe('UserService', () => {
       const address = '0x123';
       const signature = 'valid-signature';
 
-      jest.spyOn(userRepository, 'findByAddress').mockResolvedValue({
+      jest.spyOn(userRepository, 'findOneByAddress').mockResolvedValue({
         id: 2,
         email: '',
         evmAddress: '0x123',
