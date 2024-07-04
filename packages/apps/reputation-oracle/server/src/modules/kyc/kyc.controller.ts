@@ -25,17 +25,11 @@ import {
   KycUpdateWebhookQueryDto,
 } from './kyc.dto';
 import { KycService } from './kyc.service';
-import { Web3Service } from '../web3/web3.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @ApiTags('Kyc')
 @Controller('/kyc')
 export class KycController {
-  constructor(
-    private readonly kycService: KycService,
-    private readonly web3Service: Web3Service,
-    private readonly networkConfigService: NetworkConfigService,
-  ) {}
+  constructor(private readonly kycService: KycService) {}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -94,14 +88,6 @@ export class KycController {
   async getSignedAddress(
     @Req() request: RequestWithUser,
   ): Promise<KycSignedAddressDto> {
-    const address = request.user.evmAddress.toLowerCase();
-    const signature = await this.web3Service
-      .getSigner(this.networkConfigService.networks[0].chainId)
-      .signMessage(address);
-
-    return {
-      key: `KYC-${address}`,
-      value: signature,
-    };
+    return this.kycService.getSignedAddress(request.user);
   }
 }
