@@ -224,6 +224,41 @@ export class UserService {
       .signMessage(data.address);
   }
 
+  public async enableOperator(
+    user: UserEntity,
+    signature: string,
+  ): Promise<void> {
+    const signedData = await this.prepareSignatureBody(
+      SignatureType.ENABLE_OPERATOR,
+      user.evmAddress,
+    );
+
+    verifySignature(signedData, signature, [user.evmAddress]);
+
+    let signer: Wallet;
+    const currentWeb3Env = this.web3ConfigService.env;
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      signer = this.web3Service.getSigner(ChainId.POLYGON);
+    } else if (currentWeb3Env === Web3Env.TESTNET) {
+      signer = this.web3Service.getSigner(ChainId.POLYGON_AMOY);
+    } else {
+      signer = this.web3Service.getSigner(ChainId.LOCALHOST);
+    }
+
+    const kvstore = await KVStoreClient.build(signer);
+
+    const status = await kvstore.get(signer.address, user.evmAddress);
+
+    if (status === OperatorStatus.ACTIVE) {
+      throw new ControlledError(
+        ErrorOperator.OperatorAlreadyActive,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await kvstore.set(user.evmAddress, OperatorStatus.ACTIVE);
+  }
+
   public async disableOperator(
     user: UserEntity,
     signature: string,
@@ -273,6 +308,9 @@ export class UserService {
       case SignatureType.SIGNIN:
         content = 'signin';
         nonce = (await this.userRepository.findOneByEvmAddress(address))?.nonce;
+        break;
+      case SignatureType.ENABLE_OPERATOR:
+        content = 'enable-operator';
         break;
       case SignatureType.DISABLE_OPERATOR:
         content = 'disable-operator';

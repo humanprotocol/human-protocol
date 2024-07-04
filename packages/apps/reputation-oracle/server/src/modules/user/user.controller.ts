@@ -21,6 +21,7 @@ import {
   RegisterAddressResponseDto,
   SignatureBodyDto,
   RegisterLabelerResponseDto,
+  EnableOperatorDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
@@ -99,6 +100,28 @@ export class UserController {
     );
 
     return { signedAddress };
+  }
+
+  @Post('/enable-operator')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Enable an operator',
+    description: 'Endpoint to enable an operator.',
+  })
+  @ApiBody({ type: EnableOperatorDto })
+  @ApiResponse({
+    status: 204,
+    description: 'Operator enabled succesfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public enableOperator(
+    @Body() data: EnableOperatorDto,
+    @Request() req: RequestWithUser,
+  ): Promise<void> {
+    return this.userService.enableOperator(req.user, data.signature);
   }
 
   @Post('/disable-operator')
