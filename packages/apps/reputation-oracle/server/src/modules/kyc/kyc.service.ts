@@ -3,17 +3,19 @@ import { map } from 'rxjs/operators';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
-import { KycSessionDto, KycStatusDto } from './kyc.dto';
+import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycServiceType, KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
-import { ErrorKyc } from '../../common/constants/errors';
+import { ErrorKyc, ErrorUser } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
 import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { KycEntity } from './kyc.entity';
 import { ControlledError } from '../../common/errors/controlled';
 import { countriesA3ToA2 } from '../../common/enums/countries';
+import { Web3Service } from '../web3/web3.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class KycService {
@@ -21,6 +23,8 @@ export class KycService {
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
     private readonly synapsConfigService: SynapsConfigService,
+    private readonly web3Service: Web3Service,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
@@ -168,5 +172,31 @@ export class KycService {
     }
 
     await this.kycRepository.updateOne(kycEntity);
+  }
+
+  public async getSignedAddress(
+    user: UserEntity,
+  ): Promise<KycSignedAddressDto> {
+    if (!user.evmAddress)
+      throw new ControlledError(
+        ErrorUser.NoWalletAddresRegistered,
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (user.kyc?.status !== KycStatus.APPROVED)
+      throw new ControlledError(
+        ErrorUser.KycNotApproved,
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const address = user.evmAddress.toLowerCase();
+    const signature = await this.web3Service
+      .getSigner(this.networkConfigService.networks[0].chainId)
+      .signMessage(address);
+
+    return {
+      key: `KYC-${address}`,
+      value: signature,
+    };
   }
 }
