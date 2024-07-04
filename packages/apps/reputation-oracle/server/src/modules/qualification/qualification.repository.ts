@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
-import { DataSource } from 'typeorm';
+import { DataSource, In, MoreThan } from 'typeorm';
 import { QualificationEntity } from './qualification.entity';
+import { UserEntity } from '../user/user.entity';
+import { UserQualificationEntity } from './user-qualification.entity';
 
 @Injectable()
 export class QualificationRepository extends BaseRepository<QualificationEntity> {
@@ -14,18 +16,43 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
   async findByReference(
     reference: string,
   ): Promise<QualificationEntity | null> {
-    const qualificationEntity = this.findOne({ where: { reference } });
+    const currentDate = new Date();
+
+    const qualificationEntity = this.findOne({
+      where: { reference, expiresAt: MoreThan(currentDate) },
+      relations: ['userQualifications', 'userQualifications.user'],
+    });
     return qualificationEntity;
   }
 
   async getQualifications(): Promise<QualificationEntity[]> {
     const currentDate = new Date();
 
-    const queryBuilder = this.createQueryBuilder('qualifications').where(
-      'qualifications.expiresAt > :currentDate',
-      { currentDate },
-    );
+    return this.findBy({ expiresAt: MoreThan(currentDate) });
+  }
 
-    return queryBuilder.getMany();
+  async saveUserQualifications(
+    userQualifications: UserQualificationEntity[],
+  ): Promise<void> {
+    await this.dataSource
+      .getRepository(UserQualificationEntity)
+      .save(userQualifications);
+  }
+
+  async removeUserQualifications(
+    users: UserEntity[],
+    qualification: QualificationEntity,
+  ): Promise<void> {
+    const userQualifications = await this.dataSource
+      .getRepository(UserQualificationEntity)
+      .find({
+        where: {
+          user: { id: In(users.map((user) => user.id)) },
+          qualification: { id: qualification.id },
+        },
+      });
+    await this.dataSource
+      .getRepository(UserQualificationEntity)
+      .remove(userQualifications);
   }
 }

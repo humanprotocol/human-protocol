@@ -62,7 +62,7 @@ export class UserService {
     email: string,
     password: string,
   ): Promise<UserEntity | null> {
-    const userEntity = await this.userRepository.findByEmail(email);
+    const userEntity = await this.userRepository.findOneByEmail(email);
 
     if (!userEntity || !bcrypt.compareSync(password, userEntity.password)) {
       return null;
@@ -98,7 +98,7 @@ export class UserService {
   }
 
   public async checkEvmAddress(address: string): Promise<void> {
-    const userEntity = await this.userRepository.findOneByEvmAddress(address);
+    const userEntity = await this.userRepository.findOneByAddress(address);
 
     if (userEntity) {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
@@ -110,7 +110,7 @@ export class UserService {
   }
 
   public async getByAddress(address: string): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOneByEvmAddress(address);
+    const userEntity = await this.userRepository.findOneByAddress(address);
 
     if (!userEntity) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NOT_FOUND);
@@ -199,7 +199,7 @@ export class UserService {
       );
     }
 
-    const dbUser = await this.userRepository.findByAddress(data.address);
+    const dbUser = await this.userRepository.findOneByAddress(data.address);
     if (dbUser) {
       throw new ControlledError(
         ErrorUser.DuplicatedAddress,
@@ -270,7 +270,7 @@ export class UserService {
         break;
       case SignatureType.SIGNIN:
         content = 'signin';
-        nonce = (await this.userRepository.findOneByEvmAddress(address))?.nonce;
+        nonce = (await this.userRepository.findOneByAddress(address))?.nonce;
         break;
       case SignatureType.DISABLE_OPERATOR:
         content = 'disable-operator';

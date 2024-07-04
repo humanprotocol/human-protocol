@@ -142,20 +142,20 @@ describe('UserService', () => {
     };
     it('should return the user entity if credentials are valid', async () => {
       jest
-        .spyOn(userRepository, 'findByEmail')
+        .spyOn(userRepository, 'findOneByEmail')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByCredentials(email, password);
 
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
+      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(email);
       expect(result).toBe(userEntity);
     });
 
     it('should return null if credentials are invalid', async () => {
-      jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(null);
       const result = await userService.getByCredentials(email, password);
       expect(result).toBe(null);
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
+      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(email);
     });
   });
 
@@ -168,12 +168,12 @@ describe('UserService', () => {
       };
 
       jest
-        .spyOn(userRepository, 'findOneByEvmAddress')
+        .spyOn(userRepository, 'findOneByAddress')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByAddress(address);
 
-      expect(userRepository.findOneByEvmAddress).toHaveBeenCalledWith(address);
+      expect(userRepository.findOneByAddress).toHaveBeenCalledWith(address);
       expect(result).toBe(userEntity);
     });
   });
@@ -352,7 +352,7 @@ describe('UserService', () => {
 
   describe('registerAddress', () => {
     beforeEach(() => {
-      jest.spyOn(userRepository, 'findByAddress').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOneByAddress').mockResolvedValue(null);
     });
 
     afterEach(() => {
@@ -456,7 +456,7 @@ describe('UserService', () => {
       const signature = 'valid-signature';
 
       jest
-        .spyOn(userRepository, 'findByAddress')
+        .spyOn(userRepository, 'findOneByAddress')
         .mockResolvedValue(userEntity as any);
 
       await expect(

@@ -213,7 +213,7 @@ describe('AuthService', () => {
 
       createUserMock.mockResolvedValue(userEntity);
 
-      jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(null);
     });
 
     afterEach(() => {
@@ -242,14 +242,16 @@ describe('AuthService', () => {
 
     it('should fail if the user already exists', async () => {
       jest
-        .spyOn(userRepository, 'findByEmail')
+        .spyOn(userRepository, 'findOneByEmail')
         .mockResolvedValue(userEntity as any);
 
       await expect(authService.signup(userCreateDto)).rejects.toThrow(
         new ControlledError(ErrorUser.DuplicatedEmail, HttpStatus.BAD_REQUEST),
       );
 
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(userEntity.email);
+      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
+        userEntity.email,
+      );
     });
   });
 
@@ -303,7 +305,7 @@ describe('AuthService', () => {
     });
 
     describe('forgotPassword', () => {
-      let findByEmailMock: any, findTokenMock: any;
+      let findOneByEmailMock: any, findTokenMock: any;
       let userEntity: Partial<UserEntity>, tokenEntity: Partial<TokenEntity>;
 
       beforeEach(() => {
@@ -318,9 +320,9 @@ describe('AuthService', () => {
           user: userEntity as UserEntity,
         };
 
-        findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+        findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
         findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
-        findByEmailMock.mockResolvedValue(userEntity);
+        findOneByEmailMock.mockResolvedValue(userEntity);
       });
 
       afterEach(() => {
@@ -328,7 +330,7 @@ describe('AuthService', () => {
       });
 
       it('should throw NotFound exception if user is not found', () => {
-        findByEmailMock.mockResolvedValue(null);
+        findOneByEmailMock.mockResolvedValue(null);
         expect(
           authService.forgotPassword({
             email: 'user@example.com',
@@ -528,7 +530,7 @@ describe('AuthService', () => {
     });
 
     describe('resendEmailVerification', () => {
-      let findByEmailMock: any,
+      let findOneByEmailMock: any,
         findTokenMock: any,
         createTokenMock: any,
         userEntity: Partial<UserEntity>;
@@ -539,7 +541,7 @@ describe('AuthService', () => {
           email: 'user@example.com',
           status: UserStatus.PENDING,
         };
-        findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+        findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
         findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
         createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
       });
@@ -549,7 +551,7 @@ describe('AuthService', () => {
       });
 
       it('should throw an error if user is not found', () => {
-        findByEmailMock.mockResolvedValue(null);
+        findOneByEmailMock.mockResolvedValue(null);
         expect(
           authService.resendEmailVerification({
             email: 'user@example.com',
@@ -562,7 +564,7 @@ describe('AuthService', () => {
 
       it('should throw an error if user is not pending', () => {
         userEntity.status = UserStatus.ACTIVE;
-        findByEmailMock.mockResolvedValue(userEntity);
+        findOneByEmailMock.mockResolvedValue(userEntity);
         expect(
           authService.resendEmailVerification({
             email: 'user@example.com',
@@ -574,7 +576,7 @@ describe('AuthService', () => {
       });
 
       it('should create token and send email', async () => {
-        findByEmailMock.mockResolvedValue(userEntity);
+        findOneByEmailMock.mockResolvedValue(userEntity);
         findTokenMock.mockResolvedValueOnce(null);
         sendGridService.sendEmail = jest.fn();
         const email = 'user@example.com';
@@ -625,7 +627,7 @@ describe('AuthService', () => {
             refreshToken: MOCK_REFRESH_TOKEN,
           });
           jest
-            .spyOn(userRepository, 'findOneByEvmAddress')
+            .spyOn(userRepository, 'findOneByAddress')
             .mockResolvedValue({ nonce: nonce } as any);
         });
 

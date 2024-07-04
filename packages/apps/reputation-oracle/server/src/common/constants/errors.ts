@@ -141,7 +141,6 @@ export enum ErrorOperator {
  */
 export enum ErrorQualification {
   InvalidExpiresAt = 'ExpiresAt must be a future date',
-  FailedFetchQualifications = 'Failed to fetch qualifications',
   NotFound = 'Qualification not found',
   NoWorkersFound = 'No workers found for the provided addresses or emails',
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',

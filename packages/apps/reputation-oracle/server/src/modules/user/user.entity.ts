@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, ManyToMany, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { UserStatus, Role } from '../../common/enums/user';
@@ -8,7 +8,7 @@ import { BaseEntity } from '../../database/base.entity';
 import { TokenEntity } from '../auth/token.entity';
 import { KycEntity } from '../kyc/kyc.entity';
 import { SiteKeyEntity } from './site-key.entity';
-import { QualificationEntity } from '../qualification/qualification.entity';
+import { UserQualificationEntity } from '../qualification/user-qualification.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -43,6 +43,9 @@ export class UserEntity extends BaseEntity implements IUser {
   @OneToOne(() => SiteKeyEntity, (siteKey) => siteKey.user)
   public siteKey?: SiteKeyEntity;
 
-  @ManyToMany(() => QualificationEntity, (qualification) => qualification.users)
-  public qualifications: QualificationEntity[];
+  @OneToMany(
+    () => UserQualificationEntity,
+    (userQualification) => userQualification.user,
+  )
+  public userQualifications: UserQualificationEntity[];
 }

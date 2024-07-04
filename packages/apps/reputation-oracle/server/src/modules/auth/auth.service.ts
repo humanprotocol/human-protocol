@@ -87,7 +87,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const storedUser = await this.userRepository.findByEmail(data.email);
+    const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new ControlledError(
         ErrorUser.DuplicatedEmail,
@@ -191,7 +191,7 @@ export class AuthService {
       );
     }
 
-    const userEntity = await this.userRepository.findByEmail(data.email);
+    const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
@@ -304,7 +304,7 @@ export class AuthService {
       );
     }
 
-    const userEntity = await this.userRepository.findByEmail(data.email);
+    const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);

@@ -1,9 +1,10 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { UserEntity } from '../user/user.entity';
+import { UserQualificationEntity } from './user-qualification.entity';
 
 @Entity({ schema: NS, name: 'qualifications' })
+@Index(['reference'], { unique: true })
 export class QualificationEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   public reference: string;
@@ -17,7 +18,9 @@ export class QualificationEntity extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   public expiresAt?: Date | null;
 
-  @ManyToMany(() => UserEntity, (user) => user.qualifications)
-  @JoinTable({ name: 'qualification_user' })
-  users: UserEntity[];
+  @OneToMany(
+    () => UserQualificationEntity,
+    (userQualification) => userQualification.qualification,
+  )
+  public userQualifications: UserQualificationEntity[];
 }

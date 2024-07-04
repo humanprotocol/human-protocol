@@ -1,5 +1,4 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateQualificationDto,
   AssignQualificationDto,
@@ -13,6 +12,7 @@ import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { UserStatus, Role } from '../../common/enums/user';
+import { UserQualificationEntity } from './user-qualification.entity';
 
 @Injectable()
 export class QualificationService {
@@ -48,21 +48,13 @@ export class QualificationService {
       }
     }
 
-    try {
-      await this.qualificationRepository.save(newQualification);
-      return {
-        reference: newQualification.reference,
-        title: newQualification.title,
-        description: newQualification.description,
-        expiresAt: newQualification.expiresAt || null,
-      };
-    } catch (e) {
-      this.logger.log(ErrorQualification.NotCreated, QualificationService.name);
-      throw new ControlledError(
-        ErrorQualification.NotCreated,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    await this.qualificationRepository.createUnique(newQualification);
+    return {
+      reference: newQualification.reference,
+      title: newQualification.title,
+      description: newQualification.description,
+      expiresAt: newQualification.expiresAt || null,
+    };
   }
 
   public async getQualifications(): Promise<QualificationDto[]> {
@@ -85,25 +77,26 @@ export class QualificationService {
   }
 
   async delete(reference: string): Promise<void> {
-    const result = await this.qualificationRepository.delete({ reference });
-    if (result.affected === 0) {
-      this.logger.log(`Qualification with reference "${reference}" not found`);
+    const qualificationEntity =
+      await this.qualificationRepository.findByReference(reference);
+
+    if (!qualificationEntity) {
       throw new ControlledError(
         ErrorQualification.NotFound,
         HttpStatus.NOT_FOUND,
       );
     }
+
+    return this.qualificationRepository.deleteOne(qualificationEntity);
   }
 
   public async assign(dto: AssignQualificationDto): Promise<void> {
     const { reference, workerAddresses, workerEmails } = dto;
 
-    const qualification = await this.qualificationRepository.findOne({
-      where: { reference },
-      relations: ['users'],
-    });
+    const qualificationEntity =
+      await this.qualificationRepository.findByReference(reference);
 
-    if (!qualification) {
+    if (!qualificationEntity) {
       this.logger.log(`Qualification with reference "${reference}" not found`);
       throw new ControlledError(
         ErrorQualification.NotFound,
@@ -113,19 +106,32 @@ export class QualificationService {
 
     const users = await this.getWorkers(workerAddresses, workerEmails);
 
-    qualification.users.push(...users);
-    await this.qualificationRepository.save(qualification);
+    const newUserQualifications = users
+      .filter(
+        (user) =>
+          !qualificationEntity.userQualifications.some(
+            (uq) => uq.user.id === user.id,
+          ),
+      )
+      .map((user) => {
+        const userQualification = new UserQualificationEntity();
+        userQualification.user = user;
+        userQualification.qualification = qualificationEntity;
+        return userQualification;
+      });
+
+    await this.qualificationRepository.saveUserQualifications(
+      newUserQualifications,
+    );
   }
 
   public async unassign(dto: UnassignQualificationDto): Promise<void> {
     const { reference, workerAddresses, workerEmails } = dto;
 
-    const qualification = await this.qualificationRepository.findOne({
-      where: { reference },
-      relations: ['users'],
-    });
+    const qualificationEntity =
+      await this.qualificationRepository.findByReference(reference);
 
-    if (!qualification) {
+    if (!qualificationEntity) {
       this.logger.log(`Qualification with reference "${reference}" not found`);
       throw new ControlledError(
         ErrorQualification.NotFound,
@@ -134,12 +140,10 @@ export class QualificationService {
     }
 
     const users = await this.getWorkers(workerAddresses, workerEmails);
-
-    qualification.users = qualification.users.filter(
-      (user) => !users.some((u) => u.id === user.id),
+    await this.qualificationRepository.removeUserQualifications(
+      users,
+      qualificationEntity,
     );
-
-    await this.qualificationRepository.save(qualification);
   }
 
   public async getWorkers(
@@ -159,22 +163,18 @@ export class QualificationService {
     const users: UserEntity[] = [];
 
     if (addresses && addresses.length > 0) {
-      const addressUsers = await this.userRepository.find({
-        where: addresses.map((address) => ({
-          evmAddress: address,
-          type: Role.WORKER,
-          status: UserStatus.ACTIVE,
-        })),
-      });
+      const addressUsers = await this.userRepository.findByAddress(
+        addresses,
+        Role.WORKER,
+        UserStatus.ACTIVE,
+      );
       users.push(...addressUsers);
     } else if (emails && emails.length > 0) {
-      const emailUsers = await this.userRepository.find({
-        where: emails.map((email) => ({
-          email,
-          type: Role.WORKER,
-          status: UserStatus.ACTIVE,
-        })),
-      });
+      const emailUsers = await this.userRepository.findByEmail(
+        emails,
+        Role.WORKER,
+        UserStatus.ACTIVE,
+      );
       users.push(...emailUsers);
     }
 

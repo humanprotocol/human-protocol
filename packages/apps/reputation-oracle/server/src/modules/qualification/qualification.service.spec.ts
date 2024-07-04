@@ -13,6 +13,7 @@ import {
 } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { UserEntity } from '../user/user.entity';
+import { UserQualificationEntity } from './user-qualification.entity';
 
 describe.only('QualificationService', () => {
   let qualificationService: QualificationService;
@@ -98,18 +99,13 @@ describe.only('QualificationService', () => {
         expiresAt: new Date('2025-12-31'),
       };
 
-      qualificationRepository.save = jest
+      qualificationRepository.createUnique = jest
         .fn()
         .mockRejectedValueOnce(new Error());
 
       await expect(
         qualificationService.createQualification(createQualificationDto),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.NotCreated,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(Error);
     });
   });
 
@@ -135,9 +131,17 @@ describe.only('QualificationService', () => {
 
   describe('delete', () => {
     it('should delete a qualification by reference', async () => {
-      qualificationRepository.delete = jest
+      const qualificationEntity = new QualificationEntity();
+      qualificationEntity.reference = 'ref1';
+      qualificationEntity.userQualifications = [];
+
+      qualificationRepository.findByReference = jest
         .fn()
-        .mockResolvedValue({ affected: 1 });
+        .mockResolvedValue(qualificationEntity);
+
+      qualificationRepository.deleteOne = jest
+        .fn()
+        .mockResolvedValue(undefined);
 
       await expect(
         qualificationService.delete('ref1'),
@@ -145,9 +149,9 @@ describe.only('QualificationService', () => {
     });
 
     it('should throw an error if the qualification is not found', async () => {
-      qualificationRepository.delete = jest
+      qualificationRepository.findByReference = jest
         .fn()
-        .mockResolvedValue({ affected: 0 });
+        .mockResolvedValue(undefined);
 
       await expect(qualificationService.delete('ref1')).rejects.toThrow(
         new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
@@ -156,6 +160,10 @@ describe.only('QualificationService', () => {
   });
 
   describe('assign', () => {
+    beforeEach(() => {
+      qualificationRepository.saveUserQualifications = jest.fn();
+    });
+
     it('should assign users to a qualification', async () => {
       const assignQualificationDto: AssignQualificationDto = {
         reference: 'ref1',
@@ -165,9 +173,9 @@ describe.only('QualificationService', () => {
 
       const qualificationEntity = new QualificationEntity();
       qualificationEntity.reference = 'ref1';
-      qualificationEntity.users = [];
+      qualificationEntity.userQualifications = [];
 
-      qualificationRepository.findOne = jest
+      qualificationRepository.findByReference = jest
         .fn()
         .mockResolvedValue(qualificationEntity);
       qualificationService.getWorkers = jest
@@ -176,11 +184,15 @@ describe.only('QualificationService', () => {
 
       await qualificationService.assign(assignQualificationDto);
 
-      expect(qualificationEntity.users.length).toBe(1);
+      expect(
+        qualificationRepository.saveUserQualifications,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if the qualification is not found', async () => {
-      qualificationRepository.findOne = jest.fn().mockResolvedValue(null);
+      qualificationRepository.findByReference = jest
+        .fn()
+        .mockResolvedValue(null);
 
       await expect(
         qualificationService.assign({
@@ -195,6 +207,10 @@ describe.only('QualificationService', () => {
   });
 
   describe('unassign', () => {
+    beforeEach(() => {
+      qualificationRepository.saveUserQualifications = jest.fn();
+    });
+
     it('should unassign users from a qualification', async () => {
       const unassignQualificationDto: UnassignQualificationDto = {
         reference: 'ref1',
@@ -204,9 +220,11 @@ describe.only('QualificationService', () => {
 
       const qualificationEntity = new QualificationEntity();
       qualificationEntity.reference = 'ref1';
-      qualificationEntity.users = [{ id: 1 } as UserEntity];
+      qualificationEntity.userQualifications = [
+        { id: 1 } as UserQualificationEntity,
+      ];
 
-      qualificationRepository.findOne = jest
+      qualificationRepository.findByReference = jest
         .fn()
         .mockResolvedValue(qualificationEntity);
       qualificationService.getWorkers = jest
@@ -215,11 +233,15 @@ describe.only('QualificationService', () => {
 
       await qualificationService.unassign(unassignQualificationDto);
 
-      expect(qualificationEntity.users.length).toBe(0);
+      expect(
+        qualificationRepository.saveUserQualifications,
+      ).toHaveBeenCalledTimes(0);
     });
 
     it('should throw an error if the qualification is not found', async () => {
-      qualificationRepository.findOne = jest.fn().mockResolvedValue(null);
+      qualificationRepository.findByReference = jest
+        .fn()
+        .mockResolvedValue(null);
 
       await expect(
         qualificationService.unassign({
@@ -247,7 +269,7 @@ describe.only('QualificationService', () => {
       const addresses = ['address1'];
       const users = [{ id: 1 } as UserEntity];
 
-      userRepository.find = jest.fn().mockResolvedValue(users);
+      userRepository.findByAddress = jest.fn().mockResolvedValue(users);
 
       const result = await qualificationService.getWorkers(addresses, []);
 
@@ -258,7 +280,7 @@ describe.only('QualificationService', () => {
       const emails = ['email1@example.com'];
       const users = [{ id: 1 } as UserEntity];
 
-      userRepository.find = jest.fn().mockResolvedValue(users);
+      userRepository.findByEmail = jest.fn().mockResolvedValue(users);
 
       const result = await qualificationService.getWorkers([], emails);
 

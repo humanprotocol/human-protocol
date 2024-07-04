@@ -19,6 +19,7 @@ import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
 import { CredentialEntity } from '../modules/credentials/credential.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
+import { UserQualificationEntity } from 'src/modules/qualification/user-qualification.entity';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { QualificationEntity } from '../modules/qualification/qualification.enti
             CronJobEntity,
             SiteKeyEntity,
             QualificationEntity,
+            UserQualificationEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
