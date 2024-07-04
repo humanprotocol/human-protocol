@@ -5,7 +5,7 @@ import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
 import { KycSessionDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
-import { KycStatus } from '../../common/enums/user';
+import { KycServiceType, KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
 import { ErrorKyc } from '../../common/constants/errors';
 import { SynapsConfigService } from '../../common/config/synaps-config.service';
@@ -106,7 +106,7 @@ export class KycService {
     if (secret !== this.synapsConfigService.webhookSecret) {
       throw new ControlledError(
         ErrorKyc.InvalidWebhookSecret,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -121,11 +121,11 @@ export class KycService {
 
     if (
       !sessionData?.session?.status ||
-      sessionData.session.status !== data.state
+      sessionData.session.status !== data.status
     ) {
       throw new ControlledError(
         ErrorKyc.InvalidSynapsAPIResponse,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -136,7 +136,7 @@ export class KycService {
       throw new ControlledError(ErrorKyc.NotFound, HttpStatus.BAD_REQUEST);
     }
 
-    if (data.state === KycStatus.APPROVED) {
+    if (data.status === KycStatus.APPROVED) {
       const sessionInfo = await firstValueFrom(
         this.httpService
           .get(
@@ -154,16 +154,18 @@ export class KycService {
         sessionInfo.document.country.trim() !== ''
       ) {
         kycEntity.country = countriesA3ToA2[sessionInfo.document.country];
-      } else {
-        throw new ControlledError(
-          ErrorKyc.CountryNotSet,
-          HttpStatus.BAD_REQUEST,
-        );
       }
     }
 
-    kycEntity.status = data.state;
-    kycEntity.message = data.reason;
+    if (data.service == KycServiceType.ID_DOCUMENT) {
+      if (data.status === KycStatus.APPROVED && !kycEntity.country) {
+        kycEntity.status = KycStatus.ERROR;
+        kycEntity.message = `${data.status} - ${ErrorKyc.CountryNotSet}`;
+      } else {
+        kycEntity.status = data.status;
+        kycEntity.message = data.reason;
+      }
+    }
 
     await this.kycRepository.updateOne(kycEntity);
   }
