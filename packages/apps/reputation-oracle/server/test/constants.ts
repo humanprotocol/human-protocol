@@ -1,4 +1,4 @@
-import { ImageLabelBinaryJobResults } from 'src/common/dto/result';
+import { ImageLabelBinaryJobResults } from '../src/common/dto/result';
 import { JobRequestType } from '../src/common/enums';
 import { IFortuneManifest } from '../src/common/interfaces/manifest';
 

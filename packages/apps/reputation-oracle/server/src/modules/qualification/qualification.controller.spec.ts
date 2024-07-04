@@ -108,7 +108,6 @@ describe('QualificationController', () => {
         workerAddresses: ['0x123'],
         workerEmails: ['test@example.com'],
       };
-      const result = { success: true };
 
       jest.spyOn(qualificationService, 'unassign').mockResolvedValue();
 

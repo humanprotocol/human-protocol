@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { QualificationService } from './qualification.service';
 import { QualificationRepository } from './qualification.repository';
 import { UserRepository } from '../user/user.repository';

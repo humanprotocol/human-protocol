@@ -20,18 +20,11 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
-  ApiHeader,
 } from '@nestjs/swagger';
-import {
-  JwtAuthGuard,
-  RolesAuthGuard,
-  SignatureAuthGuard,
-} from '../../common/guards';
+import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
 import { Roles } from '../../common/decorators';
 import { Role } from '../../common/enums/user';
-import { AuthSignatureRole } from '../../common/enums/role';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiTags('Qualification')
 @Controller('qualification')
