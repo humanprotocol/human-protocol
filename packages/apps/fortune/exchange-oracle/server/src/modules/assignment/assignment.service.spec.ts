@@ -294,7 +294,7 @@ describe('AssignmentService', () => {
 
       expect(result.totalResults).toEqual(1);
       expect(result.results[0]).toEqual({
-        assignmentId: 1,
+        assignmentId: '1',
         chainId: 1,
         escrowAddress: escrowAddress,
         jobType: JobType.FORTUNE,

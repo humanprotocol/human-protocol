@@ -8,7 +8,7 @@ on:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/app/fortune/**'
+      - 'packages/apps/fortune/**'
   workflow_dispatch:
 
 jobs:
