@@ -38,3 +38,8 @@ export class KycUpdateWebhookQueryDto {
   @IsString()
   public secret: string;
 }
+
+export class KycSignedAddressDto {
+  key: string;
+  value: string;
+}

@@ -185,9 +185,11 @@ export class UserService {
     user: UserEntity,
     data: RegisterAddressRequestDto,
   ): Promise<string> {
-    if (user.evmAddress && user.evmAddress !== data.address) {
+    data.address = data.address.toLowerCase();
+
+    if (user.evmAddress) {
       throw new ControlledError(
-        ErrorUser.IncorrectAddress,
+        ErrorUser.AlreadyAssigned,
         HttpStatus.BAD_REQUEST,
       );
     }
