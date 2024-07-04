@@ -110,7 +110,7 @@ export class AssignmentService {
     const assignments = await Promise.all(
       entities.map(async (entity) => {
         const assignment = new AssignmentDto(
-          entity.id,
+          entity.id.toString(),
           entity.job.escrowAddress,
           entity.job.chainId,
           JobType.FORTUNE,
