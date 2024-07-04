@@ -14,6 +14,8 @@ import {
 import { QualificationEntity } from './qualification.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { ConfigService } from '@nestjs/config';
 
 describe.only('QualificationService', () => {
   let qualificationService: QualificationService;
@@ -29,6 +31,8 @@ describe.only('QualificationService', () => {
           useValue: createMock<QualificationRepository>(),
         },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        ConfigService,
+        ServerConfigService,
       ],
     }).compile();
 
@@ -81,13 +85,15 @@ describe.only('QualificationService', () => {
         expiresAt: new Date('2000-01-01'),
       };
 
+      const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
+        '%minValidity%',
+        '1',
+      );
+
       await expect(
         qualificationService.createQualification(createQualificationDto),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.InvalidExpiresAt,
-          HttpStatus.BAD_REQUEST,
-        ),
+        new ControlledError(errorMessage, HttpStatus.BAD_REQUEST),
       );
     });
 

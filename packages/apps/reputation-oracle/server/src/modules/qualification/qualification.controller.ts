@@ -20,18 +20,28 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
+  ApiHeader,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards';
+import {
+  JwtAuthGuard,
+  RolesAuthGuard,
+  SignatureAuthGuard,
+} from '../../common/guards';
 import { QualificationService } from './qualification.service';
+import { Roles } from '../../common/decorators';
+import { Role } from '../../common/enums/user';
+import { AuthSignatureRole } from '../../common/enums/role';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiTags('Qualification')
 @Controller('qualification')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 export class QualificationController {
   constructor(private readonly qualificationService: QualificationService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(201)
   @ApiOperation({ summary: 'Create a new qualification' })
   @ApiBody({ type: CreateQualificationDto })
@@ -55,6 +65,8 @@ export class QualificationController {
   }
 
   @Post('/assign')
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(201)
   @ApiOperation({ summary: 'Assign a qualification to users' })
   @ApiBody({ type: AssignQualificationDto })
@@ -69,6 +81,8 @@ export class QualificationController {
   }
 
   @Delete('/unassign')
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Unassign a qualification from users' })
   @ApiBody({ type: UnassignQualificationDto })
@@ -83,6 +97,8 @@ export class QualificationController {
   }
 
   @Delete('/:reference')
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(200)
   @ApiOperation({ summary: 'Delete a qualification' })
   @ApiResponse({

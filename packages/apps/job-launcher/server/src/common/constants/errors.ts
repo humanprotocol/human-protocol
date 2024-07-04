@@ -17,6 +17,7 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+  DatasetValidationFailed = 'Dataset validation failed',
   ManifestHashNotExist = 'Manifest hash does not exist',
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',

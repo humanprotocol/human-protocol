@@ -13,6 +13,7 @@ import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { UserStatus, Role } from '../../common/enums/user';
 import { UserQualificationEntity } from './user-qualification.entity';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class QualificationService {
@@ -21,6 +22,7 @@ export class QualificationService {
   constructor(
     private readonly qualificationRepository: QualificationRepository,
     private readonly userRepository: UserRepository,
+    private readonly serverConfigService: ServerConfigService,
   ) {}
 
   public async createQualification(
@@ -33,16 +35,22 @@ export class QualificationService {
 
     if (createQualificationDto.expiresAt) {
       const providedExpiresAt = new Date(createQualificationDto.expiresAt);
+      const now = new Date();
+      const minimumValidUntil = new Date(
+        now.getTime() +
+          this.serverConfigService.qualificationMinValidity * 1000,
+      );
 
-      if (providedExpiresAt <= new Date()) {
-        this.logger.log(
-          ErrorQualification.InvalidExpiresAt,
-          QualificationService.name,
+      if (providedExpiresAt <= minimumValidUntil) {
+        const minValidityHours =
+          this.serverConfigService.qualificationMinValidity / 3600;
+        const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
+          '%minValidity%',
+          minValidityHours.toString(),
         );
-        throw new ControlledError(
-          ErrorQualification.InvalidExpiresAt,
-          HttpStatus.BAD_REQUEST,
-        );
+
+        this.logger.log(errorMessage, QualificationService.name);
+        throw new ControlledError(errorMessage, HttpStatus.BAD_REQUEST);
       } else {
         newQualification.expiresAt = providedExpiresAt;
       }
@@ -71,7 +79,7 @@ export class QualificationService {
         };
       });
     } catch (error) {
-      this.logger.log(`Failed to fetch credentials: ${error.message}`);
+      this.logger.log(`Failed to fetch qualifications: ${error.message}`);
       return [];
     }
   }

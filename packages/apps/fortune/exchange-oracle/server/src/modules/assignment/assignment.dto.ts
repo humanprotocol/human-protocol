@@ -62,7 +62,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
 
 export class AssignmentDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;
@@ -95,7 +95,7 @@ export class AssignmentDto {
   expiresAt: string;
 
   constructor(
-    assignmentId: number,
+    assignmentId: string,
     escrowAddress: string,
     chainId: number,
     jobType: string,
@@ -120,12 +120,12 @@ export class AssignmentDto {
 export class ResignDto {
   @ApiProperty({ name: 'assignment_id' })
   @IsNumber()
-  public assignmentId: number;
+  public assignmentId: string;
 }
 
 export class AssignJobResponseDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;

@@ -61,7 +61,7 @@ export enum ErrorUser {
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
-  IncorrectAddress = 'Incorrect address',
+  AlreadyAssigned = 'User already has an address assigned',
   NoWalletAddresRegistered = 'No wallet address registered on your account',
   KycNotApproved = 'KYC not approved',
   UserNotActive = 'User not active',
@@ -84,6 +84,9 @@ export enum ErrorAuth {
   InvalidRole = 'Invalid role in KVStore',
   PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
   InvalidToken = 'Invalid token',
+  InvalidJobType = 'Invalid operator job type',
+  InvalidUrl = 'Invalid operator URL',
+  InvalidFee = 'Invalid operator fee',
 }
 
 /**
@@ -140,7 +143,8 @@ export enum ErrorOperator {
  * Represents error messages related to qualification.
  */
 export enum ErrorQualification {
-  InvalidExpiresAt = 'ExpiresAt must be a future date',
+  InvalidExpiresAt = 'Qualification should be valid for at least %minValidity% hours',
+  FailedFetchQualifications = 'Failed to fetch qualifications',
   NotFound = 'Qualification not found',
   NoWorkersFound = 'No workers found for the provided addresses or emails',
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
