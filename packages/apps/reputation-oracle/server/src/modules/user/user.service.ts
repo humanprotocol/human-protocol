@@ -185,9 +185,11 @@ export class UserService {
     user: UserEntity,
     data: RegisterAddressRequestDto,
   ): Promise<string> {
-    if (user.evmAddress && user.evmAddress !== data.address) {
+    data.address = data.address.toLowerCase();
+
+    if (user.evmAddress) {
       throw new ControlledError(
-        ErrorUser.IncorrectAddress,
+        ErrorUser.AlreadyAssigned,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -288,7 +290,7 @@ export class UserService {
         }
         content = JSON.stringify({
           reference: additionalData.reference,
-          workerJson: additionalData.workerAddress,
+          workerJson: additionalData.workerAddress.toLowerCase(),
         });
         break;
       case SignatureType.REGISTER_ADDRESS:
@@ -299,8 +301,8 @@ export class UserService {
     }
 
     return {
-      from: address,
-      to: this.web3Service.getOperatorAddress(),
+      from: address.toLowerCase(),
+      to: this.web3Service.getOperatorAddress().toLowerCase(),
       contents: content,
       nonce: nonce ?? undefined,
     };

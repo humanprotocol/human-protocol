@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsString,
+  IsNumber,
+  IsDate,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   JobFieldName,
@@ -22,8 +28,8 @@ export class SolveJobDto {
   public solution: string;
 
   @ApiProperty({ name: 'assignment_id' })
-  @IsNumber()
-  public assignmentId: number;
+  @IsString()
+  public assignmentId: string;
 }
 
 export class GetJobsDto extends PageOptionsDto {
@@ -61,6 +67,18 @@ export class GetJobsDto extends PageOptionsDto {
   @IsEnum(JobStatus)
   @IsOptional()
   status: JobStatus;
+
+  @ApiPropertyOptional({ name: 'created_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @ApiPropertyOptional({ name: 'updated_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedAfter?: Date;
 }
 
 export class JobDto {
@@ -88,6 +106,9 @@ export class JobDto {
   @ApiProperty({ name: 'created_at' })
   createdAt?: string;
 
+  @ApiProperty({ name: 'updated_at' })
+  updatedAt?: string;
+
   constructor(
     escrowAddress: string,
     chainId: number,
@@ -103,7 +124,7 @@ export class JobDto {
 
 export class SolveJobResponseDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'solution' })
   solution: string;

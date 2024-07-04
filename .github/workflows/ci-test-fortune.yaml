@@ -1,4 +1,4 @@
-name: Job Launcher Check
+name: Fortune check
 
 on:
   push:
@@ -8,25 +8,25 @@ on:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/job-launcher/**'
+      - 'packages/apps/fortune/**'
   workflow_dispatch:
 
 jobs:
-  job-launcher-client-test:
-    name: Job Launcher Client Test
+  fortune-exchange-oracle-test:
+    name: Fortune Exchange Oracle Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn workspace @human-protocol/job-launcher-client test
-        name: Run Job Launcher Client test
-  job-launcher-server-test:
-    name: Job Launcher Server Test
+      - run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
+        name: Run Exchange Oracle tests
+  fortune-recording-oracle-test:
+    name: Fortune Recording Oracle Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn workspace @human-protocol/job-launcher-server test
-        name: Run Job Launcher Server test
+      - run: yarn workspace @human-protocol/fortune-recording-oracle test
+        name: Run Recording Oracle tests

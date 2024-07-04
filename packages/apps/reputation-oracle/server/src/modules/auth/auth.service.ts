@@ -33,6 +33,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { JobRequestType } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
@@ -148,6 +149,7 @@ export class AuthService {
 
     const payload: any = {
       email: userEntity.email,
+      status: userEntity.status,
       userId: userEntity.id,
       address: userEntity.evmAddress,
       role: userEntity.role,
@@ -376,6 +378,10 @@ export class AuthService {
       kvstore = await KVStoreClient.build(
         this.web3Service.getSigner(ChainId.POLYGON),
       );
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.LOCALHOST),
+      );
     } else {
       kvstore = await KVStoreClient.build(
         this.web3Service.getSigner(ChainId.POLYGON_AMOY),
@@ -388,6 +394,28 @@ export class AuthService {
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await kvstore.get(data.address, KVStoreKeys.fee))) {
+      throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await kvstore.get(data.address, KVStoreKeys.url))) {
+      throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
+    }
+
+    if (
+      !Object.values(JobRequestType).includes(
+        (await kvstore.get(
+          data.address,
+          KVStoreKeys.jobTypes,
+        )) as JobRequestType,
+      )
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidJobType,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const userEntity = await this.userService.createWeb3User(data.address);

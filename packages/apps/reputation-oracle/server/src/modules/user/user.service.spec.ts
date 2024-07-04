@@ -413,7 +413,7 @@ describe('UserService', () => {
           signature,
         }),
       ).rejects.toThrow(
-        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+        new ControlledError(ErrorUser.AlreadyAssigned, HttpStatus.BAD_REQUEST),
       );
     });
 
@@ -421,7 +421,6 @@ describe('UserService', () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: '',
-        evmAddress: '0x123',
         kyc: {
           country: 'FR',
           status: KycStatus.PENDING_VERIFICATION,
@@ -441,7 +440,7 @@ describe('UserService', () => {
       );
     });
 
-    it("should fail if user's email already exists", async () => {
+    it("should fail if user's address already exists", async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: '',
@@ -458,6 +457,35 @@ describe('UserService', () => {
       jest
         .spyOn(userRepository, 'findByAddress')
         .mockResolvedValue(userEntity as any);
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          address,
+          signature,
+        }),
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.AlreadyAssigned, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('should fail if address already registered with another user', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+      };
+
+      const address = '0x123';
+      const signature = 'valid-signature';
+
+      jest.spyOn(userRepository, 'findByAddress').mockResolvedValue({
+        id: 2,
+        email: '',
+        evmAddress: '0x123',
+      } as any);
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
@@ -635,8 +663,8 @@ describe('UserService', () => {
 
     it('should prepare web3 pre sign up payload and return typed structured data', async () => {
       const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
+        from: MOCK_ADDRESS.toLowerCase(),
+        to: MOCK_ADDRESS.toLowerCase(),
         contents: 'signup',
         nonce: undefined,
       };
@@ -651,8 +679,8 @@ describe('UserService', () => {
 
     it('should prepare web3 pre register address payload and return typed structured data', async () => {
       const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
+        from: MOCK_ADDRESS.toLowerCase(),
+        to: MOCK_ADDRESS.toLowerCase(),
         contents: 'register-address',
         nonce: undefined,
       };

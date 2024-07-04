@@ -6,6 +6,6 @@ export enum AuthSignatureRole {
 }
 
 export enum Role {
-  Worker = 'worker',
-  HumanApp = 'human_app',
+  Worker = 'WORKER',
+  HumanApp = 'HUMAN_APP',
 }

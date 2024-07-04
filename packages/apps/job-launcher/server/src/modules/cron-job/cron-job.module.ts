@@ -29,7 +29,6 @@ import { ConfigModule } from '@nestjs/config';
     WebhookRepository,
     JobRepository,
   ],
-  // controllers: [CronJobController], Commented to disable endpoints
   exports: [CronJobService],
 })
 export class CronJobModule {}
