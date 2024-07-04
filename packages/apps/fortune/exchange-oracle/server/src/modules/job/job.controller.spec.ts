@@ -71,14 +71,14 @@ describe('JobController', () => {
   describe('solveJob', () => {
     it('should call jobService.solveJob', async () => {
       const solveJobDto: SolveJobDto = {
-        assignmentId: 1,
+        assignmentId: '1',
         solution: 'job-solution',
       };
 
       await jobController.solveJob('signature', solveJobDto);
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
-        solveJobDto.assignmentId,
+        Number(solveJobDto.assignmentId),
         solveJobDto.solution,
       );
     });

@@ -28,8 +28,8 @@ export class SolveJobDto {
   public solution: string;
 
   @ApiProperty({ name: 'assignment_id' })
-  @IsNumber()
-  public assignmentId: number;
+  @IsString()
+  public assignmentId: string;
 }
 
 export class GetJobsDto extends PageOptionsDto {
@@ -124,7 +124,7 @@ export class JobDto {
 
 export class SolveJobResponseDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'solution' })
   solution: string;
