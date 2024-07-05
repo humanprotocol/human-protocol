@@ -404,14 +404,7 @@ export class AuthService {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      !Object.values(JobRequestType).includes(
-        (await kvstore.get(
-          data.address,
-          KVStoreKeys.jobTypes,
-        )) as JobRequestType,
-      )
-    ) {
+    if (!(await kvstore.get(data.address, KVStoreKeys.jobTypes))) {
       throw new ControlledError(
         ErrorAuth.InvalidJobType,
         HttpStatus.BAD_REQUEST,
