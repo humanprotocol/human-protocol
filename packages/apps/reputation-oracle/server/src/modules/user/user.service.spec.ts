@@ -83,7 +83,9 @@ describe('UserService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
-            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getOperatorAddress: jest
+              .fn()
+              .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
             getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
           },
         },
@@ -394,7 +396,10 @@ describe('UserService', () => {
       );
 
       expect(userRepository.updateOne).toHaveBeenCalledWith(userEntity);
-      expect(result).toBe('signature');
+      expect(result).toEqual({
+        key: `KYC-${MOCK_ADDRESS.toLowerCase()}`,
+        value: 'signature',
+      });
     });
 
     it("should fail if address is different from user's evm address", async () => {
