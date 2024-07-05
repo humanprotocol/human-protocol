@@ -23,6 +23,6 @@ export class ServerConfigService {
     return +this.configService.get<number>('MAX_RETRY_COUNT', 5);
   }
   get qualificationMinValidity(): number {
-    return +this.configService.get<number>('QUALIFICATION_MIN_VALIDITY', 3600);
+    return +this.configService.get<number>('QUALIFICATION_MIN_VALIDITY', 1);
   }
 }

@@ -38,12 +38,12 @@ export class QualificationService {
       const now = new Date();
       const minimumValidUntil = new Date(
         now.getTime() +
-          this.serverConfigService.qualificationMinValidity * 1000,
+          this.serverConfigService.qualificationMinValidity * 60 * 60 * 1000, // Convert hours to milliseconds,
       );
 
       if (providedExpiresAt <= minimumValidUntil) {
         const minValidityHours =
-          this.serverConfigService.qualificationMinValidity / 3600;
+          this.serverConfigService.qualificationMinValidity;
         const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
           '%minValidity%',
           minValidityHours.toString(),
