@@ -71,7 +71,7 @@ export class EnvironmentConfigService {
     return this.configService.getOrThrow<string>('RPC_URL');
   }
   get isCorsEnabled(): boolean {
-    return this.configService.get<boolean>('CORS_ENABLED', false);
+    return this.configService.get<string>('CORS_ENABLED') === 'true';
   }
   get corsEnabledOrigin(): string {
     return this.configService.get<string>(
@@ -106,5 +106,8 @@ export class EnvironmentConfigService {
   get chainIdsEnabled(): string[] {
     const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');
     return chainIds.split(',').map((id) => id.trim());
+  }
+  get isCacheToRestart(): boolean {
+    return this.configService.get('IS_CACHE_TO_RESTART') === 'true';
   }
 }

@@ -21,7 +21,7 @@ import {
 import {
   emailVerificationCommandFixture,
   emailVerificationDataFixture,
-  resendEmailVerificationCommandFixture,
+  resendEmailVerificationCommandFixture, resendEmailVerificationDataFixture,
 } from '../../../modules/email-confirmation/spec/email-verification.fixtures';
 import {
   ResendEmailVerificationCommand,
@@ -358,9 +358,8 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       const command: ResendEmailVerificationCommand =
         resendEmailVerificationCommandFixture;
-      const data: ResendEmailVerificationData = {
-        ...command.data,
-      };
+      const data: ResendEmailVerificationData =
+        resendEmailVerificationDataFixture;
       nock('https://example.com')
         .post('/auth/resend-email-verification', {
           ...data,

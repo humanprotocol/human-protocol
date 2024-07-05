@@ -4,7 +4,7 @@ export class JwtUserData {
   @AutoMap()
   userId: string;
   @AutoMap()
-  address: string;
+  wallet_address: string;
   @AutoMap()
   email: string;
   @AutoMap()

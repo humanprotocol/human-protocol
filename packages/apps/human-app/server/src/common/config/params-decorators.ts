@@ -1,4 +1,9 @@
-import { createParamDecorator, ExecutionContext, HttpException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  createParamDecorator,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { jwtDecode } from 'jwt-decode';
 import { JwtUserData } from '../utils/jwt-token.model';
 
@@ -24,7 +29,7 @@ export const JwtPayload = createParamDecorator(
       return decoded as JwtUserData;
     } catch (error) {
       console.error('Error in decoding token: ', error);
-      return null;
+      throw new BadRequestException();
     }
   },
 );

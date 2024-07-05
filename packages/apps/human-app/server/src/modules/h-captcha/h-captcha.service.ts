@@ -74,15 +74,16 @@ export class HCaptchaService {
   ): Promise<DailyHmtSpentResponse> {
     this.checkIfHcaptchaSitekeyPresent(command.siteKey);
     let dailyHmtSpent = await this.cacheManager.get<DailyHmtSpentResponse>(
-      this.dailyHmtSpentCacheKey
+      this.dailyHmtSpentCacheKey,
     );
     if (!dailyHmtSpent) {
       dailyHmtSpent = await this.hCaptchaLabelingGateway.fetchDailyHmtSpent();
       await this.cacheManager.set(
         this.dailyHmtSpentCacheKey,
         dailyHmtSpent,
-        this.configService.cacheTtlDailyHmtSpent,
-      );
+        {
+          ttl: this.configService.cacheTtlDailyHmtSpent,
+        } as any);
     }
     return dailyHmtSpent;
   }
@@ -97,7 +98,9 @@ export class HCaptchaService {
     await this.cacheManager.set(
       command.email,
       stats,
-      this.configService.cacheTtlHCaptchaUserStats,
+      {
+        ttl: this.configService.cacheTtlHCaptchaUserStats
+      } as any,
     );
     return stats;
   }

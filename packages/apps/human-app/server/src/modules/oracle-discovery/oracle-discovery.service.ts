@@ -56,7 +56,9 @@ export class OracleDiscoveryService {
       await this.cacheManager.set(
         chainId,
         filteredOracles,
-        this.configService.cacheTtlOracleDiscovery,
+        {
+          ttl: this.configService.cacheTtlOracleDiscovery
+        } as any,
       );
       return filteredOracles;
     } catch (error) {

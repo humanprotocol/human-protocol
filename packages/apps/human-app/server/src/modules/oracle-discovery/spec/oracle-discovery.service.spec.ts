@@ -3,12 +3,16 @@ import { Cache } from 'cache-manager';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
-import { OracleDiscoveryCommand, OracleDiscoveryResponse } from '../model/oracle-discovery.model';
+import {
+  OracleDiscoveryCommand,
+  OracleDiscoveryResponse,
+} from '../model/oracle-discovery.model';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import {
-  emptyCommandFixture, filledCommandFixture,
+  emptyCommandFixture,
+  filledCommandFixture,
   generateOracleDiscoveryResponseBody,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
@@ -101,11 +105,9 @@ describe('OracleDiscoveryService', () => {
     expect(result).toEqual([mockData[0]]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId);
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        chainId,
-        [mockData[0]],
-        TTL,
-      );
+      expect(cacheManager.set).toHaveBeenCalledWith(chainId, [mockData[0]], {
+        ttl: TTL,
+      });
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
         Number(chainId),
         REPUTATION_ORACLE_ADDRESS,

@@ -77,11 +77,23 @@ export class ReputationOracleProfile extends AutomapperProfile {
       createMap(mapper, PrepareSignatureCommand, PrepareSignatureData);
       createMap(mapper, SigninOperatorCommand, SigninOperatorData);
       createMap(mapper, DisableOperatorParams, DisableOperatorData);
-      createMap(mapper, ForgotPasswordCommand, ForgotPasswordData);
+      createMap(
+        mapper,
+        ForgotPasswordCommand,
+        ForgotPasswordData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
       createMap(
         mapper,
         ResendEmailVerificationParams,
         ResendEmailVerificationData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
       );
       createMap(mapper, EmailVerificationCommand, EmailVerificationData);
       createMap(

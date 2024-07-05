@@ -86,7 +86,7 @@ describe('StatisticsService', () => {
       expect(cacheManager.set).toHaveBeenCalledWith(
         service.cachePrefix + command.oracleAddress,
         newData,
-        configService.cacheTtlOracleStats,
+        { ttl: configService.cacheTtlOracleStats },
       );
       expect(result).toEqual(newData);
     });
@@ -127,7 +127,7 @@ describe('StatisticsService', () => {
       expect(cacheManager.set).toHaveBeenCalledWith(
         userCacheKey,
         newData,
-        configService.cacheTtlUserStats,
+        { ttl: configService.cacheTtlUserStats },
       );
       expect(result).toEqual(newData);
     });
