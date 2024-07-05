@@ -119,7 +119,7 @@ export class AssignmentDto {
 
 export class ResignDto {
   @ApiProperty({ name: 'assignment_id' })
-  @IsNumber()
+  @IsString()
   public assignmentId: string;
 }
 
