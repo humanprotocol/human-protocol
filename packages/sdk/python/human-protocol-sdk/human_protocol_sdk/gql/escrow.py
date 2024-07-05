@@ -40,6 +40,9 @@ query GetEscrows(
     $status: String
     $from: Int
     $to: Int
+    $orderDirection: String
+    $first: Int
+    $skip: Int
 ) {{
     escrows(
       where: {{
@@ -52,6 +55,10 @@ query GetEscrows(
         {from_clause}
         {to_clause}
       }}
+      orderBy: createdAt
+      orderDirection: $orderDirection
+      first: $first
+      skip: $skip
     ) {{
       ...EscrowFields
     }}
@@ -102,6 +109,9 @@ query getStatus(
     $from: Int
     $to: Int
     $launcher: String
+    $orderDirection: String
+    $first: Int
+    $skip: Int
 ) {{
     escrowStatusEvents(
         where: {{
@@ -110,6 +120,10 @@ query getStatus(
             {to_clause}
             {launcher_clause}
         }}
+        orderBy: timestamp
+        orderDirection: $orderDirection
+        first: $first
+        skip: $skip
     ) {{
         id
         escrowAddress

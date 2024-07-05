@@ -442,7 +442,7 @@ export class KVStoreClient extends BaseEthersClient {
  * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
  *
  * const KVStoreAddresses = new KVStoreUtils.getData({
- *   networks: [ChainId.POLYGON_AMOY]
+ *   network: ChainId.POLYGON_AMOY
  * });
  * ```
  */
