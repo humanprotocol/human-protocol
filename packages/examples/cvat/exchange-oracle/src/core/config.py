@@ -1,10 +1,12 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
 """ Project configuration from env vars """
+import inspect
 import os
 from typing import ClassVar, Optional
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
+from human_protocol_sdk.encryption import Encryption
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
@@ -14,6 +16,12 @@ if dotenv_path and not os.path.exists(dotenv_path):
     raise FileNotFoundError(dotenv_path)
 
 load_dotenv(dotenv_path)
+
+
+class _BaseConfig:
+    @classmethod
+    def validate(cls) -> None:
+        pass
 
 
 class PostgresConfig:
@@ -187,6 +195,28 @@ class HumanAppConfig:
     signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
 
 
+class EncryptionConfig(_BaseConfig):
+    pgp_passphrase = os.environ.get("PGP_PASSPHRASE", "")
+    pgp_private_key = os.environ.get("PGP_PRIVATE_KEY", "")
+    pgp_public_key_url = os.environ.get("PGP_PUBLIC_KEY_URL", "")
+
+    @classmethod
+    def validate(cls) -> None:
+        ex_prefix = "Wrong server configuration."
+
+        if (cls.pgp_public_key_url or cls.pgp_passphrase) and not cls.pgp_private_key:
+            raise Exception(" ".join([ex_prefix, "The PGP_PRIVATE_KEY environment is not set."]))
+
+        if cls.pgp_private_key:
+            try:
+                Encryption(cls.pgp_private_key, passphrase=cls.pgp_passphrase)
+            except Exception as ex:
+                # Possible reasons:
+                # - private key is invalid
+                # - private key is locked but no passphrase is provided
+                raise Exception(" ".join([ex_prefix, str(ex)]))
+
+
 class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
@@ -207,3 +237,11 @@ class Config:
     storage_config = StorageConfig
     features = FeaturesConfig
     core_config = CoreConfig
+    encryption_config = EncryptionConfig
+
+    @classmethod
+    def validate(cls) -> None:
+        for attr_or_method in cls.__dict__:
+            attr_or_method = getattr(cls, attr_or_method)
+            if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _BaseConfig):
+                attr_or_method.validate()

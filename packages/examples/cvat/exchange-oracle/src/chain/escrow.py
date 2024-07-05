@@ -2,6 +2,7 @@ import json
 from typing import List
 
 from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
@@ -43,9 +44,16 @@ def validate_escrow(
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url)
+    manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
 
-    return json.loads(manifest_content.decode("utf-8"))
+    if EncryptionUtils.is_encrypted(manifest_content):
+        encryption = Encryption(
+            Config.encryption_config.pgp_private_key,
+            passphrase=Config.encryption_config.pgp_passphrase,
+        )
+        manifest_content = encryption.decrypt(manifest_content)
+
+    return json.loads(manifest_content)
 
 
 def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
