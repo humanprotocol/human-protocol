@@ -305,4 +305,13 @@ export class ReputationOracleGateway {
     );
     return this.handleRequestToReputationOracle<TokenRefreshResponse>(options);
   }
+
+  sendKycOnChain(token: string) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.KYC_ON_CHAIN,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
 }

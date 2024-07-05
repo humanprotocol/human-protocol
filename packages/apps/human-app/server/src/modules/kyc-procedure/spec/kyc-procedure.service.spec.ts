@@ -27,11 +27,19 @@ describe('KycProcedureService', () => {
   });
 
   it('should call sendKycProcedureStart method of reputationOracleGateway', async () => {
-    const sendKycProcedureStartSpy = jest.spyOn(
+    const kycGatewaySpy = jest.spyOn(
       reputationOracleGateway,
       'sendKycProcedureStart',
     );
     await service.processStartKycProcedure('token');
-    expect(sendKycProcedureStartSpy).toHaveBeenCalled();
+    expect(kycGatewaySpy).toHaveBeenCalledWith('token');
+  });
+  it('should call reputation oracle gateway with jwt token', async () => {
+    const kycGatewaySpy = jest.spyOn(
+      reputationOracleGateway,
+      'sendKycOnChain',
+    );
+    await service.processKycOnChain('token');
+    expect(kycGatewaySpy).toHaveBeenCalledWith('token');
   });
 });

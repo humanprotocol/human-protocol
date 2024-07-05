@@ -625,6 +625,16 @@ describe('ReputationOracleGateway', () => {
       );
     });
   });
+  describe('sendKycOnChain', () => {
+    it('should succesfully call the reputation oracle endpoint', async () => {
+      nock('https://example.com').post('/kyc/on-chain', {}).reply(200, '');
+      httpServiceMock.request.mockReturnValue(of({}));
+      await expect(
+        service.sendKycProcedureStart('token'),
+      ).resolves.not.toThrow();
+      expect(httpService.request).toHaveBeenCalled();
+    });
+  });
 
   describe('sendKycProcedureStart', () => {
     it('should successfully call the reputation oracle endpoint', async () => {

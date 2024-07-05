@@ -13,6 +13,7 @@ export enum ReputationOracleEndpoints {
   ENABLE_LABELING = 'ENABLE_LABELING',
   REGISTER_ADDRESS = 'REGISTER_ADDRESS',
   TOKEN_REFRESH = 'TOKEN_REFRESH',
+  KYC_ON_CHAIN = 'KYC_ON_CHAIN',
 }
 export enum HCaptchaLabelingStatsEndpoints {
   USER_STATS = 'USER_STATS',

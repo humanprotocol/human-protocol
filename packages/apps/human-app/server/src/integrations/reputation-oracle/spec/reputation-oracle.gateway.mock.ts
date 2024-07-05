@@ -12,4 +12,5 @@ export const reputationOracleGatewayMock = {
   sendOperatorSignin: jest.fn(),
   sendBlockchainAddressRegistration: jest.fn(),
   sendRefreshToken: jest.fn(),
+  sendKycOnChain: jest.fn(),
 };
