@@ -75,6 +75,32 @@ export class JobService {
     await this.jobRepository.createUnique(newJobEntity);
   }
 
+  public async cancelJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
+
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      chainId,
+      escrowAddress,
+    );
+
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (jobEntity.status === JobStatus.CANCELED) {
+      throw new BadRequestException(ErrorJob.AlreadyCanceled);
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    await this.jobRepository.updateOne(jobEntity);
+
+    const assignments = await this.assignmentRepository.findByJobId(jobEntity.id);
+    for (const assignment of assignments) {
+      assignment.status = AssignmentStatus.CANCELED;
+      await this.assignmentRepository.updateOne(assignment);
+    }
+  }
+
   public async getJobList(
     data: GetJobsDto,
     reputationNetwork: string,
@@ -301,3 +327,4 @@ export class JobService {
     } else return manifest;
   }
 }
+

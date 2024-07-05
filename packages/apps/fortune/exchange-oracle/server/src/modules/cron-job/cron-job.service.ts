@@ -55,7 +55,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
-  @Cron('*/2 * * * *')
+  @Cron('*/1 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
@@ -96,3 +96,4 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 }
+

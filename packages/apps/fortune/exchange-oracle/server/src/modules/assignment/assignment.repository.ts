@@ -27,6 +27,16 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     });
   }
 
+  public async findByJobId(
+    jobId: number,
+  ): Promise<AssignmentEntity[]> {
+    return this.find({
+      where: {
+        jobId,
+      },
+    });
+  }
+
   public async findOneByJobIdAndWorker(
     jobId: number,
     workerAddress: string,
@@ -180,3 +190,4 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     return { entities, itemCount };
   }
 }
+

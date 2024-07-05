@@ -30,7 +30,7 @@ import { JobService } from './job.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -169,6 +169,58 @@ describe('JobService', () => {
       await expect(jobService.createJob(webhook)).rejects.toThrow(
         'Job already exists',
       );
+    });
+  });
+
+  describe('cancelJob', () => {
+    const chainId = 1;
+    const escrowAddress = '0x1234567890123456789012345678901234567890';
+  
+    const webhook: WebhookDto = {
+      chainId,
+      escrowAddress,
+      eventType: EventType.ESCROW_CANCELED,
+    };
+  
+    it('should cancel a job and update all related assignments', async () => {
+      const jobEntity = new JobEntity();
+      jobEntity.chainId = chainId;
+      jobEntity.escrowAddress = escrowAddress;
+      jobEntity.status = JobStatus.ACTIVE;
+  
+      const assignments: AssignmentEntity[] = [
+        { id: 1, jobId: jobEntity.id, status: AssignmentStatus.ACTIVE } as AssignmentEntity,
+        { id: 2, jobId: jobEntity.id, status: AssignmentStatus.ACTIVE } as AssignmentEntity,
+      ];
+  
+      jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(jobEntity);
+      jest.spyOn(jobRepository, 'updateOne').mockResolvedValue(jobEntity);
+      jest.spyOn(assignmentRepository, 'findByJobId').mockResolvedValue(assignments);
+      jest.spyOn(assignmentRepository, 'updateOne').mockImplementation(async (assignment) => assignment);
+  
+      await jobService.cancelJob(webhook);
+  
+      expect(jobRepository.findOneByChainIdAndEscrowAddress).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(expect.objectContaining({ status: JobStatus.CANCELED }));
+      expect(assignmentRepository.findByJobId).toHaveBeenCalledWith(jobEntity.id);
+      expect(assignmentRepository.updateOne).toHaveBeenCalledTimes(assignments.length);
+    });
+  
+    it('should throw NotFoundException if job does not exist', async () => {
+      jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(null);
+  
+      await expect(jobService.cancelJob(webhook)).rejects.toThrow(new NotFoundException(ErrorJob.NotFound));
+    });
+  
+    it('should throw BadRequestException if job is already canceled', async () => {
+      const jobEntity = new JobEntity();
+      jobEntity.chainId = chainId;
+      jobEntity.escrowAddress = escrowAddress;
+      jobEntity.status = JobStatus.CANCELED;
+  
+      jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(jobEntity);
+  
+      await expect(jobService.cancelJob(webhook)).rejects.toThrow(new BadRequestException(ErrorJob.AlreadyCanceled));
     });
   });
 
@@ -476,3 +528,4 @@ describe('JobService', () => {
     });
   });
 });
+
