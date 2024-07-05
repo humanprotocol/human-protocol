@@ -195,7 +195,7 @@ export class KycService {
       .signMessage(address);
 
     return {
-      key: `KYC-${address}`,
+      key: `KYC-${this.web3Service.getOperatorAddress()}`,
       value: signature,
     };
   }

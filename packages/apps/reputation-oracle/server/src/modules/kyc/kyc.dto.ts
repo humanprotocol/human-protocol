@@ -40,6 +40,11 @@ export class KycUpdateWebhookQueryDto {
 }
 
 export class KycSignedAddressDto {
+  @ApiProperty({ name: 'key' })
+  @IsString()
   key: string;
+
+  @ApiProperty({ name: 'value' })
+  @IsString()
   value: string;
 }
