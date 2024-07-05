@@ -75,7 +75,7 @@ export class QualificationService {
           reference: qualificationEntity.reference,
           title: qualificationEntity.title,
           description: qualificationEntity.description,
-          expiresAt: qualificationEntity.expiresAt || null,
+          expiresAt: qualificationEntity.expiresAt,
         };
       });
     } catch (error) {
