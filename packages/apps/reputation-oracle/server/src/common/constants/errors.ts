@@ -139,3 +139,13 @@ export enum ErrorOperator {
   OperatorAlreadyActive = 'Operator is already active',
   OperatorNotActive = 'Operator not active',
 }
+
+/**
+ * Represents error messages related to qualification.
+ */
+export enum ErrorQualification {
+  InvalidExpiresAt = 'Qualification should be valid for at least %minValidity% hours',
+  NotFound = 'Qualification not found',
+  NoWorkersFound = 'No workers found for the provided addresses or emails',
+  AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
+}

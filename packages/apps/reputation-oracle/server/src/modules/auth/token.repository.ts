@@ -35,10 +35,6 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
     });
   }
 
-  public async deleteOne(token: TokenEntity): Promise<DeleteResult> {
-    return this.delete({ id: token.id });
-  }
-
   public async deleteOneByTypeAndUserId(
     type: TokenType,
     userId: number,
