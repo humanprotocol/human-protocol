@@ -79,10 +79,11 @@ export class JobService {
   public async cancelJob(webhook: WebhookDto): Promise<void> {
     const { chainId, escrowAddress } = webhook;
 
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      chainId,
-      escrowAddress,
-    );
+    const jobEntity =
+      await this.jobRepository.findOneByChainIdAndEscrowAddressWithAssignments(
+        chainId,
+        escrowAddress,
+      );
 
     if (!jobEntity) {
       throw new NotFoundException(ErrorJob.NotFound);

@@ -201,13 +201,13 @@ describe('JobService', () => {
       ];
 
       jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(jobEntity);
 
       await jobService.cancelJob(webhook);
 
       expect(
-        jobRepository.findOneByChainIdAndEscrowAddress,
+        jobRepository.findOneByChainIdAndEscrowAddressWithAssignments,
       ).toHaveBeenCalledWith(chainId, escrowAddress);
       expect(jobRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -222,7 +222,7 @@ describe('JobService', () => {
 
     it('should throw NotFoundException if job does not exist', async () => {
       jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(null);
 
       await expect(jobService.cancelJob(webhook)).rejects.toThrow(
@@ -237,7 +237,7 @@ describe('JobService', () => {
       jobEntity.status = JobStatus.CANCELED;
 
       jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(jobEntity);
 
       await expect(jobService.cancelJob(webhook)).rejects.toThrow(
