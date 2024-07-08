@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
-import { Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
@@ -32,7 +32,13 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 }
 
 export function SignUpWorkerPage() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      signOut();
+    }
+  }, [signOut, user]);
 
   const methods = useForm<SignUpDto>({
     defaultValues: {
@@ -55,10 +61,6 @@ export function SignUpWorkerPage() {
   const handleWorkerSignUp = (data: SignUpDto) => {
     signUpWorkerMutate(omit(data, ['confirmPassword']));
   };
-
-  if (user) {
-    return <Navigate replace to={routerPaths.worker.profile} />;
-  }
 
   return (
     <PageCard

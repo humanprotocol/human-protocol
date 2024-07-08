@@ -3,7 +3,7 @@ import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { t as i18NextT } from 'i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
@@ -29,14 +29,13 @@ function formattedSignInErrorMessage(unknownError: unknown) {
 
 export function SignInWorkerPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     if (user) {
-      navigate(routerPaths.worker.profile, { replace: true });
+      signOut();
     }
-  }, [navigate, user]);
+  }, [signOut, user]);
 
   const methods = useForm<SignInDto>({
     defaultValues: {

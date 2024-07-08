@@ -17,8 +17,13 @@ export function OperatorSignIn() {
     isError: isSignInMutationError,
     error: signInMutationError,
   } = useWeb3SignIn();
-  const { user } = useWeb3Auth();
+  const { user, signOut } = useWeb3Auth();
   const modalWasOpened = useRef(false);
+
+  useEffect(() => {
+    signOut();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
+  }, []);
 
   useEffect(() => {
     if (isConnected && modalWasOpened.current) {
