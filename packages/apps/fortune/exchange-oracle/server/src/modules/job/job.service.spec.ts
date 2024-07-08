@@ -175,50 +175,74 @@ describe('JobService', () => {
   describe('cancelJob', () => {
     const chainId = 1;
     const escrowAddress = '0x1234567890123456789012345678901234567890';
-  
+
     const webhook: WebhookDto = {
       chainId,
       escrowAddress,
       eventType: EventType.ESCROW_CANCELED,
     };
-  
+
     it('should cancel a job and update all related assignments', async () => {
       const jobEntity = new JobEntity();
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
       jobEntity.status = JobStatus.ACTIVE;
       jobEntity.assignments = [
-        { id: 1, jobId: jobEntity.id, status: AssignmentStatus.ACTIVE } as AssignmentEntity,
-        { id: 2, jobId: jobEntity.id, status: AssignmentStatus.ACTIVE } as AssignmentEntity,
+        {
+          id: 1,
+          jobId: jobEntity.id,
+          status: AssignmentStatus.ACTIVE,
+        } as AssignmentEntity,
+        {
+          id: 2,
+          jobId: jobEntity.id,
+          status: AssignmentStatus.ACTIVE,
+        } as AssignmentEntity,
       ];
 
-  
-      jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(jobEntity);
-  
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(jobEntity);
+
       await jobService.cancelJob(webhook);
-  
-      expect(jobRepository.findOneByChainIdAndEscrowAddress).toHaveBeenCalledWith(chainId, escrowAddress);
-      expect(jobRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: JobStatus.CANCELED, assignments: [
-        { id: 1, jobId: jobEntity.id, status: AssignmentStatus.CANCELED },
-        { id: 2, jobId: jobEntity.id, status: AssignmentStatus.CANCELED },
-      ] }));
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddress,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(jobRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: JobStatus.CANCELED,
+          assignments: [
+            { id: 1, jobId: jobEntity.id, status: AssignmentStatus.CANCELED },
+            { id: 2, jobId: jobEntity.id, status: AssignmentStatus.CANCELED },
+          ],
+        }),
+      );
     });
-  
+
     it('should throw NotFoundException if job does not exist', async () => {
-      jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(null);
-  
-      await expect(jobService.cancelJob(webhook)).rejects.toThrow(new NotFoundException(ErrorJob.NotFound));
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(null);
+
+      await expect(jobService.cancelJob(webhook)).rejects.toThrow(
+        new NotFoundException(ErrorJob.NotFound),
+      );
     });
-  
+
     it('should throw BadRequestException if job is already canceled', async () => {
       const jobEntity = new JobEntity();
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
       jobEntity.status = JobStatus.CANCELED;
-  
-      jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(jobEntity);
-  
-      await expect(jobService.cancelJob(webhook)).rejects.toThrow(new BadRequestException(ErrorJob.AlreadyCanceled));
+
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(jobEntity);
+
+      await expect(jobService.cancelJob(webhook)).rejects.toThrow(
+        new BadRequestException(ErrorJob.AlreadyCanceled),
+      );
     });
   });
 
@@ -526,4 +550,3 @@ describe('JobService', () => {
     });
   });
 });
-

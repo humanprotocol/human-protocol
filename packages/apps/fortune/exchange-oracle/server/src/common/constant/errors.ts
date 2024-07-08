@@ -50,7 +50,7 @@ export enum ErrorJob {
   ManifestDecryptionFailed = 'Unable to decrypt manifest',
   ManifestNotFound = 'Unable to get manifest',
   NotFound = 'Job not found',
-  AlreadyCanceled = 'Job already canceled'
+  AlreadyCanceled = 'Job already canceled',
 }
 
 /**
@@ -59,4 +59,3 @@ export enum ErrorJob {
 export enum ErrorSignature {
   MissingRoles = 'Missing signature roles configuration',
 }
-

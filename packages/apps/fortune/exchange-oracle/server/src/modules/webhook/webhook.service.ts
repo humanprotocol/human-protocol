@@ -166,4 +166,3 @@ export class WebhookService {
     return oracleWebhookUrl;
   }
 }
-
