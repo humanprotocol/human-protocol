@@ -21,7 +21,6 @@ export class JobRepository extends BaseRepository<JobEntity> {
       where: {
         id,
       },
-      relations: ['assignments'],
     });
   }
 
