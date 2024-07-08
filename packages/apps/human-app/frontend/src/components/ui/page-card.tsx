@@ -45,7 +45,7 @@ interface FormCardProps {
   alert?: React.JSX.Element;
   childrenMaxWidth?: string;
   backArrowPath?: string | -1;
-  cancelBtnPath?: string | -1;
+  cancelRouterPathOrCallback?: string | -1 | (() => void);
   hiddenCancelButton?: boolean;
   withLayoutBackground?: boolean;
   loader?: boolean;
@@ -57,7 +57,7 @@ export function PageCard({
   alert,
   childrenMaxWidth = '486px',
   backArrowPath,
-  cancelBtnPath = routerPaths.homePage,
+  cancelRouterPathOrCallback = routerPaths.homePage,
   withLayoutBackground = true,
   hiddenCancelButton = false,
 }: FormCardProps) {
@@ -92,7 +92,15 @@ export function PageCard({
             },
           }}
         >
-          <Button onClick={goBack.bind(null, cancelBtnPath)}>
+          <Button
+            onClick={() => {
+              if (cancelRouterPathOrCallback instanceof Function) {
+                cancelRouterPathOrCallback();
+                return;
+              }
+              goBack(cancelRouterPathOrCallback);
+            }}
+          >
             <Typography variant="buttonMedium">
               {t('components.modal.header.closeBtn')}
             </Typography>
@@ -144,7 +152,15 @@ export function PageCard({
               </IconWrapper>
             ) : null}
             {!hiddenCancelButton && (
-              <Button onClick={goBack.bind(null, cancelBtnPath)}>
+              <Button
+                onClick={() => {
+                  if (cancelRouterPathOrCallback instanceof Function) {
+                    cancelRouterPathOrCallback();
+                    return;
+                  }
+                  goBack(cancelRouterPathOrCallback);
+                }}
+              >
                 <Typography variant="buttonMedium">
                   {t('components.modal.header.closeBtn')}
                 </Typography>

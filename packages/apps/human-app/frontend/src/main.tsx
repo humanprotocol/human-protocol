@@ -17,6 +17,7 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/800.css';
 import { WalletConnectProvider } from '@/contexts/wallet-connect';
 import { Web3AuthProvider } from '@/auth-web3/web3-auth-context';
+import { JWTExpirationCheck } from '@/contexts/jwt-expiration-check';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -39,7 +40,9 @@ createRoot(root).render(
           <WalletConnectProvider>
             <Web3AuthProvider>
               <AuthProvider>
-                <Router />
+                <JWTExpirationCheck>
+                  <Router />
+                </JWTExpirationCheck>
               </AuthProvider>
             </Web3AuthProvider>
             <ReactQueryDevtools client={queryClient} initialIsOpen={false} />

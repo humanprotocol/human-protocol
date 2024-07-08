@@ -80,7 +80,10 @@ export function ResetPasswordWorkerPage() {
               label={t('worker.resetPassword.fields.confirm')}
               name="confirmPassword"
             />
-            <FormCaptcha name="h_captcha_token" />
+            <FormCaptcha
+              error={resetPasswordWorkerError}
+              name="h_captcha_token"
+            />
             <Button
               fullWidth
               loading={isResetPasswordWorkerPending}

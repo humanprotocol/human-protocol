@@ -35,7 +35,9 @@
     "errorWithStatusCode": "Error with status code: {{code}}",
     "unknown": "An error occurred, please try again.",
     "unknownNetwork": "Unknown network",
-    "jsonRpcError": "JSON-RPC error"
+    "jsonRpcError": "JSON-RPC error",
+    "unsupportedNetwork": "Network selected in wallet is unsupported.",
+    "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported."
   },
   "components": {
     "multiSelect": {
@@ -138,16 +140,19 @@
     "sendEmailVerification": {
       "title": "Verify Email",
       "btn": "Resend Verification Email",
-      "paragraph1": "We’ve sent an email to <1>{{email}}</1>, please check your inbox and verify your email.",
-      "paragraph2": "The verification link is valid for 24 hours.",
-      "paragraph3": "<1>Cant find our email?</1> If you can’t find the email in your inbox please check the spam folder.",
-      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "paragraph1": "Your email address <1>{{email}}</1> is not verified.",
+      "paragraph2": "<1>Having trouble?</1> Please <2>Contact Support</2>",
       "successResent": "Verification email has been successfully resent."
     },
-    "sendEmailVerificationError": {
-      "title": "Verification failed",
-      "description": "An error occurred during email verification. Click button bellow to resend verification email.",
-      "btn": "Resend Verification Email"
+    "verifyEmail": {
+      "title": "Verify Email",
+      "btn": "Resend Verification Email",
+      "paragraph1": "We've sent an email to <1>{{email}}</1>, please check your inbox and verify your email.",
+      "paragraph2": "The verification link is valid for 24 hours.",
+      "paragraph3": "<1>Can't find our email?</1> If you can't find the email in your inbox please check the spam folder.",
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent.",
+      "authError": "Log in before you resend email verification"
     },
     "emailVerification": {
       "title": "Email Verified",
@@ -166,9 +171,9 @@
     },
     "sendResetLinkSuccess": {
       "title": "Reset password",
-      "paragraph1": "We’ve sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
+      "paragraph1": "We've sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
-      "paragraph3": "<1>Can’t find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
+      "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Resend Reset Password Email",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
@@ -192,18 +197,21 @@
       "password": "Password",
       "resetPassword": "Reset Password",
       "completeKYC": "Complete KYC",
+      "KYCInProgress": "KYC in progress",
       "confirmEmail": "Confirm email",
       "kycCompleted": "KYC Completed",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
       "addKYCInfoOnChain": "Add KYC Info On-chain",
-      "kycInfoOnChainAdded": "KYC Info On-Chain Added ",
+      "wrongWalletAddress": "Selected wallet address doesn't match the address assigned to the account.",
+      "kycInfoOnChainAdded": "KYC Info On-Chain Added",
+      "registerAddress": "Register address",
       "emailNotifications": "Email Notifications",
       "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
         "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
         "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
-        "noKYCOnChain": "Please complete your profile! You still need to add KYC info on-chain."
+        "registerAddress": "Register address"
       }
     },
     "oraclesTable": {
@@ -330,11 +338,12 @@
       "label": "Staked amount",
       "description": "Please add bellow the amount to stake",
       "actionBtn": "Add Stake",
-      "nextBtn": "Next"
+      "nextBtn": "Next",
+      "skipBtn": "Skip"
     },
     "stakeForm": {
       "formBtn": "Add Stake",
-      "backBtn": "Skip",
+      "skipBtn": "Skip",
       "nextBtn": "Next",
       "label": "Stake amount",
       "description": "Please add bellow the amount to stake",

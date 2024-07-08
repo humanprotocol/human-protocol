@@ -7,7 +7,7 @@ interface ChipsProps {
 
 export function Chips({ data }: ChipsProps) {
   return (
-    <Grid container spacing={1} sx={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+    <Grid container sx={{ flexWrap: 'wrap', gap: '0.5rem' }}>
       {data.map((chipLabel) => (
         <Chip key={crypto.randomUUID()} label={chipLabel} />
       ))}

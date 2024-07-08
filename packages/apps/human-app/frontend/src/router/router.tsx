@@ -47,16 +47,19 @@ export function Router() {
           element={
             <LayoutProtected
               pageHeaderProps={pageHeaderProps}
-              renderDrawer={(open) => (
+              renderDrawer={(open, setDrawerOpen) => (
                 <DrawerNavigation
                   bottomMenuItems={workerDrawerBottomMenuItems}
                   open={open}
+                  setDrawerOpen={setDrawerOpen}
                   signOut={() => {
                     browserAuthProvider.signOut(() => {
                       window.location.reload();
                     });
                   }}
-                  topMenuItems={workerDrawerTopMenuItems(!user?.address)}
+                  topMenuItems={workerDrawerTopMenuItems(
+                    Boolean(user?.wallet_address)
+                  )}
                 />
               )}
               renderHCaptchaStatisticsDrawer={(isOpen) => (
@@ -81,10 +84,11 @@ export function Router() {
           element={
             <LayoutProtected
               pageHeaderProps={pageHeaderProps}
-              renderDrawer={(open) => (
+              renderDrawer={(open, setDrawerOpen) => (
                 <DrawerNavigation
                   bottomMenuItems={operatorDrawerBottomMenuItems}
                   open={open}
+                  setDrawerOpen={setDrawerOpen}
                   signOut={() => {
                     browserAuthProvider.signOut(() => {
                       window.location.reload();

@@ -19,7 +19,7 @@ export function EnableLabeler() {
   const { mutate, error, isError, isPending } =
     useEnableHCaptchaLabelingMutation();
 
-  if (!user.address) {
+  if (!user.wallet_address) {
     return <Navigate replace to={routerPaths.worker.profile} />;
   }
 

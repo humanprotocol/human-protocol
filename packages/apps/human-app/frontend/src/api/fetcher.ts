@@ -1,5 +1,5 @@
 import merge from 'lodash/merge';
-import type { ZodType, ZodTypeDef } from 'zod';
+import { ZodError, type ZodType, type ZodTypeDef } from 'zod';
 import type { ResponseError } from '@/shared/types/global.type';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 // eslint-disable-next-line import/no-cycle -- cause by refresh token retry
@@ -203,7 +203,19 @@ export function createFetcher(defaultFetcherConfig?: {
       return data;
     }
 
-    return fetcherOptions.successSchema.parse(data);
+    try {
+      return fetcherOptions.successSchema.parse(data);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        // eslint-disable-next-line no-console -- ...
+        console.error('Invalid response');
+        error.errors.forEach((e) => {
+          // eslint-disable-next-line no-console -- ...
+          console.error(e);
+        });
+      }
+      throw error;
+    }
   }
 
   return fetcher;

@@ -1,6 +1,7 @@
 /* eslint-disable camelcase -- api response*/
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
+import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
@@ -26,7 +27,9 @@ export type AvailableJobsSuccessResponse = z.infer<
   typeof availableJobsSuccessResponseSchema
 >;
 
-type GetJobTableDataDto = JobsFilterStoreProps['filterParams'];
+type GetJobTableDataDto = JobsFilterStoreProps['filterParams'] & {
+  oracle_address: string;
+};
 
 const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
   return apiClient(
@@ -43,22 +46,26 @@ const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
 
 export function useGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
+  const { address: oracle_address } = useParams<{ address: string }>();
+  const dto = { ...filterParams, oracle_address: oracle_address || '' };
 
   return useQuery({
-    queryKey: ['availableJobs', filterParams],
-    queryFn: () => getAvailableJobsTableData(filterParams),
+    queryKey: ['availableJobs', dto],
+    queryFn: () => getAvailableJobsTableData(dto),
   });
 }
 
 export function useInfiniteGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
+  const { address: oracle_address } = useParams<{ address: string }>();
+  const dto = { ...filterParams, oracle_address: oracle_address || '' };
 
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: ['availableJobsInfinite', filterParams],
-    queryFn: () => getAvailableJobsTableData(filterParams),
+    queryKey: ['availableJobsInfinite', dto],
+    queryFn: () => getAvailableJobsTableData(dto),
     getNextPageParam: (pageParams) => {
-      return pageParams.total_pages === pageParams.page
+      return pageParams.total_pages - 1 <= pageParams.page
         ? undefined
         : pageParams.page;
     },

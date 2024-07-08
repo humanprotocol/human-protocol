@@ -37,9 +37,7 @@ export function useGetOnChainRegisteredAddress() {
         chainId,
       });
 
-      return {
-        registeredAddressOnChain,
-      };
+      return registeredAddressOnChain;
     },
     retry: 0,
     refetchInterval: 0,
@@ -47,7 +45,7 @@ export function useGetOnChainRegisteredAddress() {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     queryKey: [
-      user.address,
+      user.wallet_address,
       user.reputation_network,
       chainId,
       address,

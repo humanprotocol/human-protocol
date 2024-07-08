@@ -1,4 +1,4 @@
-import { Contract, ethers } from 'ethers';
+import { Contract } from 'ethers';
 import HMToken from '@/smart-contracts/abi/HMToken.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
@@ -14,12 +14,8 @@ export async function hmTokenApprove({
 } & ContractCallArguments) {
   try {
     const hmTokenContract = new Contract(contractAddress, HMToken.abi, signer);
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- untyped ethers
-    const tx = await hmTokenContract.approve(
-      spender,
-      ethers.parseEther(amount).toString()
-    );
+    const tx = await hmTokenContract.approve(spender, amount);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access  -- untyped ethers
     await tx.wait();
   } catch (error) {

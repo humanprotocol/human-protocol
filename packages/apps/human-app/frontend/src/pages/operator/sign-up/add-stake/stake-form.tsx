@@ -18,10 +18,8 @@ import { Button } from '@/components/ui/button';
 export function StakeForm({
   decimals,
   stakedAmount,
-  closeForm,
 }: {
   decimals: number;
-  closeForm: () => void;
   stakedAmount?: bigint;
 }) {
   const addStakeMutation = useAddStakeMutation();
@@ -41,8 +39,7 @@ export function StakeForm({
     addStakeMutation.mutate(data);
   };
 
-  const isStaked = Number(stakedAmount) < 0;
-
+  const isStaked = stakedAmount ? stakedAmount > BigInt(0) : false;
   return (
     <Grid container sx={{ flexDirection: 'column', gap: '1rem' }}>
       <Typography variant="body1">
@@ -81,20 +78,16 @@ export function StakeForm({
               >
                 {t('operator.stakeForm.formBtn')}
               </Button>
-
-              {isStaked ? (
-                <Button
-                  component={Link}
-                  fullWidth
-                  to={routerPaths.operator.addKeys}
-                >
-                  {t('operator.stakeForm.nextBtn')}
-                </Button>
-              ) : (
-                <Button fullWidth onClick={closeForm} variant="outlined">
-                  {t('operator.stakeForm.backBtn')}
-                </Button>
-              )}
+              <Button
+                component={Link}
+                fullWidth
+                to={routerPaths.operator.addKeys}
+                variant="outlined"
+              >
+                {isStaked
+                  ? t('operator.stakeForm.nextBtn')
+                  : t('operator.stakeForm.skipBtn')}
+              </Button>
             </Grid>
           </Grid>
         </form>

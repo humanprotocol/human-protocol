@@ -11,14 +11,12 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
-import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
-import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { routerPaths } from '@/router/router-paths';
 import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 
 const getColumns = (
-  selectOracle: (oracleAddress: string, jobTypes: string[]) => void
+  selectOracle: (oracleAddress: string) => void
 ): MRT_ColumnDef<OracleSuccessResponse>[] => {
   return [
     {
@@ -53,10 +51,7 @@ const getColumns = (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <TableButton
               onClick={() => {
-                selectOracle(
-                  props.row.original.address,
-                  props.row.original.jobTypes
-                );
+                selectOracle(props.row.original.address);
               }}
             >
               {t('worker.oraclesTable.seeJobs')}
@@ -79,17 +74,10 @@ export function OraclesTable({
     isRefetching: isOraclesDataRefetching,
     isPending: isOraclesDataPending,
   } = oraclesQueryDataResult;
-
-  const { setOracleAddress: setOracleAddressForMyJobs, setAvailableJobTypes } =
-    useMyJobsFilterStore();
-  const { setOracleAddress: setOracleAddressForJobs } = useJobsFilterStore();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const selectOracle = (oracleAddress: string, jobTypes: string[]) => {
-    setOracleAddressForMyJobs(oracleAddress);
-    setOracleAddressForJobs(oracleAddress);
-    setAvailableJobTypes(jobTypes);
-    navigate(routerPaths.worker.jobs);
+  const selectOracle = (oracleAddress: string) => {
+    navigate(`${routerPaths.worker.jobs}/${oracleAddress}`);
   };
 
   const table = useMaterialReactTable({

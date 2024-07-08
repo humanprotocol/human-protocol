@@ -1,15 +1,13 @@
 /* eslint-disable camelcase -- ... */
-import { Grid, List, Paper, Stack } from '@mui/material';
+import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
-import { ProfileListItem } from '@/components/ui/profile-list-item';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Alert } from '@/components/ui/alert';
-import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
@@ -17,6 +15,11 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
 import { useInfiniteGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-data';
 import { Loader } from '@/components/ui/loader';
+import { TableButton } from '@/components/ui/table-button';
+import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
+import { Chip } from '@/components/ui/chip';
+import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
+import { ListItem } from '@/components/ui/list-item';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -42,15 +45,19 @@ export function AvailableJobsTableMobile({
     fetchNextPage,
     hasNextPage,
   } = useInfiniteGetAvailableJobsData();
-  const { filterParams, setFilterParams } = useJobsFilterStore();
+  const { filterParams, setPageParams } = useJobsFilterStore();
   const { t } = useTranslation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
 
   useEffect(() => {
     if (!tableData) return;
     const pagesFromRes = tableData.pages.flatMap((pages) => pages.results);
-    setAllPages((state) => [...state, ...pagesFromRes]);
-  }, [tableData]);
+    if (filterParams.page === 0) {
+      setAllPages(pagesFromRes);
+    } else {
+      setAllPages((state) => [...state, ...pagesFromRes]);
+    }
+  }, [tableData, filterParams.page]);
 
   return (
     <>
@@ -101,24 +108,45 @@ export function AvailableJobsTableMobile({
           >
             <List>
               <Grid container>
-                <Grid item xs={6}>
-                  <ProfileListItem
-                    header={t('worker.jobs.escrowAddress')}
-                    paragraph={shortenEscrowAddress(d.escrow_address)}
-                  />
-                  <ProfileListItem
-                    header={t('worker.jobs.jobType')}
-                    paragraph={d.job_type}
-                  />
+                <Grid item xs={12}>
+                  <ListItem label={t('worker.jobs.jobDescription')}>
+                    <Typography variant="subtitle1">
+                      {d.job_description}
+                    </Typography>
+                  </ListItem>
                 </Grid>
                 <Grid item xs={6}>
-                  <ProfileListItem
-                    header={t('worker.jobs.network')}
-                    paragraph={getNetworkName(d.chain_id)}
-                  />
+                  <ListItem label={t('worker.jobs.escrowAddress')}>
+                    <EvmAddress address={d.escrow_address} />
+                  </ListItem>
+                  <ListItem label={t('worker.jobs.rewardAmount')}>
+                    <Typography
+                      color={colorPalette.secondary.light}
+                      variant="body2"
+                    >
+                      <RewardAmount
+                        color={colorPalette.secondary.light}
+                        reward_amount={d.reward_amount}
+                        reward_token={d.reward_token}
+                      />
+                    </Typography>
+                  </ListItem>
+                </Grid>
+                <Grid item xs={6}>
+                  <ListItem label={t('worker.jobs.network')}>
+                    <Typography
+                      color={colorPalette.secondary.light}
+                      variant="body2"
+                    >
+                      {getNetworkName(d.chain_id)}
+                    </Typography>
+                  </ListItem>
+                  <ListItem label={t('worker.jobs.jobType')}>
+                    <Chip label={d.job_type} />
+                  </ListItem>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
+                  <TableButton
                     color="secondary"
                     fullWidth
                     onClick={() => {
@@ -135,7 +163,7 @@ export function AvailableJobsTableMobile({
                     variant="contained"
                   >
                     {t('worker.jobs.selectJob')}
-                  </Button>
+                  </TableButton>
                 </Grid>
               </Grid>
             </List>
@@ -144,10 +172,7 @@ export function AvailableJobsTableMobile({
         {hasNextPage ? (
           <Button
             onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                page: filterParams.page + 1,
-              });
+              setPageParams(filterParams.page + 1, filterParams.page_size);
               void fetchNextPage();
             }}
             variant="outlined"

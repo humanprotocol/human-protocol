@@ -94,13 +94,12 @@ export function AddStakeOperatorPage() {
           {stakedAmountFormatter(stakedAmount)}
         </Typography>
         {displayForm ? (
-          <StakeForm
-            closeForm={setDisplayForm.bind(null, false)}
-            decimals={decimalsData}
+          <StakeForm decimals={decimalsData} stakedAmount={stakedAmount} />
+        ) : (
+          <Buttons
+            openForm={setDisplayForm.bind(null, true)}
             stakedAmount={stakedAmount}
           />
-        ) : (
-          <Buttons openForm={setDisplayForm.bind(null, true)} />
         )}
       </Grid>
     </PageCard>

@@ -18,6 +18,10 @@ const getNotificationMessage = (
       return t('worker.profile.topNotifications.noKYC');
     case user.kyc_status === 'APPROVED' && !user.isWalletConnected:
       return t('worker.profile.topNotifications.noWalletConnected');
+    case user.kyc_status === 'APPROVED' &&
+      user.isWalletConnected &&
+      !user.wallet_address:
+      return t('worker.profile.topNotifications.registerAddress');
     default:
       return null;
   }
@@ -44,7 +48,7 @@ export function WorkerProfilePage() {
     setNotifications();
     setGrayBackground();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this once
-  }, []);
+  }, [isConnected]);
 
   return (
     <Paper

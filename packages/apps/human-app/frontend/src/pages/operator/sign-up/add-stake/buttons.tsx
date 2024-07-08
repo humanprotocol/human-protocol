@@ -5,7 +5,14 @@ import { Link } from 'react-router-dom';
 import { breakpoints } from '@/styles/theme';
 import { routerPaths } from '@/router/router-paths';
 
-export function Buttons({ openForm }: { openForm: () => void }) {
+export function Buttons({
+  openForm,
+  stakedAmount,
+}: {
+  openForm: () => void;
+  stakedAmount?: bigint;
+}) {
+  const isStaked = stakedAmount ? stakedAmount > BigInt(0) : false;
   return (
     <Grid
       container
@@ -33,7 +40,9 @@ export function Buttons({ openForm }: { openForm: () => void }) {
         to={routerPaths.operator.addKeys}
         variant="outlined"
       >
-        {t('operator.addStake.nextBtn')}
+        {isStaked
+          ? t('operator.addStake.nextBtn')
+          : t('operator.addStake.skipBtn')}
       </Button>
     </Grid>
   );

@@ -6,8 +6,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import type { SignUpDto } from '@/api/servieces/worker/sign-up';
 import {
   signUpDtoSchema,
@@ -34,13 +33,6 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 
 export function SignUpWorkerPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      navigate(routerPaths.worker.profile);
-    }
-  }, [navigate, user]);
 
   const methods = useForm<SignUpDto>({
     defaultValues: {
@@ -61,9 +53,12 @@ export function SignUpWorkerPage() {
   } = useSignUpMutation();
 
   const handleWorkerSignUp = (data: SignUpDto) => {
-    // TODO add hcaptcha token if backend available
     signUpWorkerMutate(omit(data, ['confirmPassword']));
   };
+
+  if (user) {
+    return <Navigate replace to={routerPaths.worker.profile} />;
+  }
 
   return (
     <PageCard
@@ -98,7 +93,7 @@ export function SignUpWorkerPage() {
               label={t('worker.signUpForm.fields.confirmPassword')}
               name="confirmPassword"
             />
-            <FormCaptcha name="h_captcha_token" />
+            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
             <Grid>
               <Typography fontSize="0.75rem" variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
