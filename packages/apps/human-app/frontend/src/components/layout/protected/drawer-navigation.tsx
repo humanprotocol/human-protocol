@@ -18,6 +18,7 @@ const drawerWidth = 240;
 export interface DrawerItem {
   label: string;
   link?: string;
+  href?: string;
   icon?: JSX.Element;
   disabled?: boolean;
   onClick?: () => void;
@@ -97,7 +98,7 @@ export function DrawerNavigation({
                 );
               }
 
-              const { link, label, disabled } = item;
+              const { link, label, disabled, href } = item;
               return (
                 <ListItem disablePadding key={link}>
                   <ListItemButton
@@ -105,7 +106,15 @@ export function DrawerNavigation({
                     onClick={() => {
                       if (disabled) return;
                       if (isMobile) setDrawerOpen(false);
-                      if (link) {
+                      if (href) {
+                        const element = document.createElement('a');
+                        element.href = href;
+                        element.target = '_blank';
+                        document.body.appendChild(element);
+                        element.click();
+                        return;
+                      }
+                      if (link && !href) {
                         navigate(link);
                       }
                     }}
@@ -138,13 +147,21 @@ export function DrawerNavigation({
             })}
           </List>
           <List>
-            {bottomMenuItems?.map(({ label, link, icon }) => (
+            {bottomMenuItems?.map(({ label, link, icon, href }) => (
               <ListItem alignItems="center" disablePadding key={link}>
                 <ListItemButton
                   alignItems="center"
                   onClick={() => {
                     if (isMobile) setDrawerOpen(false);
-                    if (link) {
+                    if (href) {
+                      const element = document.createElement('a');
+                      element.href = href;
+                      element.target = '_blank';
+                      document.body.appendChild(element);
+                      element.click();
+                      return;
+                    }
+                    if (link && !href) {
                       navigate(link);
                     }
                   }}

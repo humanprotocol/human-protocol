@@ -48,7 +48,7 @@ export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
   },
   {
     label: t('components.DrawerNavigation.help'),
-    link: env.VITE_HUMAN_PROTOCOL_HELP_URL,
+    href: env.VITE_HUMAN_PROTOCOL_HELP_URL,
     icon: <HelpIcon />,
   },
 ];
