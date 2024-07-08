@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ... */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { t } from 'i18next';
@@ -13,13 +12,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
-const RegisterAddressSuccessSchema = z.object({
-  signed_address: z.string(),
-});
-
-export type RegisterAddressSuccess = z.infer<
-  typeof RegisterAddressSuccessSchema
->;
+const RegisterAddressSuccessSchema = z.unknown();
 
 export const registerAddress = (address: string, signature: string) => {
   return apiClient(apiPaths.worker.registerAddress.path, {
