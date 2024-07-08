@@ -46,7 +46,7 @@ const EARNINGS_DATA_2 = { date: '2021-01-22', value: 209 } as DateValue;
 const SUCCESSFULLY_ENABLED = 'Enabled labeling for this account successfully';
 export const jwtUserDataFixture: JwtUserData = {
   userId: ID,
-  address: POLYGON_WALLET_ADDR,
+  wallet_address: POLYGON_WALLET_ADDR,
   email: EMAIL,
   kyc_status: 'APPROVED',
   site_key: H_CAPTCHA_SITE_KEY,

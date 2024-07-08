@@ -24,8 +24,15 @@ export class PasswordResetProfile extends AutomapperProfile {
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, ForgotPasswordDto, ForgotPasswordCommand);
-
+      createMap(
+        mapper,
+        ForgotPasswordDto,
+        ForgotPasswordCommand,
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
+      );
       createMap(
         mapper,
         RestorePasswordDto,

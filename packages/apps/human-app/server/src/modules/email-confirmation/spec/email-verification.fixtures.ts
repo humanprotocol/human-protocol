@@ -1,5 +1,5 @@
 import {
-  ResendEmailVerificationCommand,
+  ResendEmailVerificationCommand, ResendEmailVerificationData,
   ResendEmailVerificationDto,
   ResendEmailVerificationParams,
 } from '../model/resend-email-verification.model';
@@ -25,13 +25,19 @@ export const emailVerificationDataFixture: EmailVerificationData = {
 export const emailVerificationToken = TOKEN;
 export const resendEmailVerificationDtoFixture: ResendEmailVerificationDto = {
   email: EMAIL,
+  h_captcha_token: TOKEN,
 };
 export const resendEmailVerificationParamsFixture: ResendEmailVerificationParams =
   {
     email: EMAIL,
+    hCaptchaToken: TOKEN,
   };
 export const resendEmailVerificationCommandFixture: ResendEmailVerificationCommand =
   {
     data: resendEmailVerificationParamsFixture,
     token: TOKEN,
   };
+export const resendEmailVerificationDataFixture: ResendEmailVerificationData = {
+  email: EMAIL,
+  h_captcha_token: TOKEN,
+};

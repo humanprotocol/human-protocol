@@ -94,6 +94,10 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.KYC_ON_CHAIN]: {
+              endpoint: '/kyc/on-chain',
+              method: HttpMethod.GET,
+            },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },
         [ExternalApiName.HCAPTCHA_LABELING_STATS]: {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
@@ -43,12 +43,18 @@ export class ExchangeOracleGateway {
     private readonly escrowUtilsGateway: EscrowUtilsGateway,
     @InjectMapper() private mapper: Mapper,
   ) {}
-
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await lastValueFrom(this.httpService.request(options));
-    return response.data;
+    try {
+      const response = await lastValueFrom(this.httpService.request(options));
+      return response.data;
+    } catch (e) {
+      console.error(
+        `Error, while executing exchange oracle API call with options: ${JSON.stringify(options)}, error details: ${e}`,
+      );
+      throw e;
+    }
   }
 
   async fetchUserStatistics(
@@ -90,7 +96,7 @@ export class ExchangeOracleGateway {
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
       url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
-        command.address,
+        command.oracleAddress,
       )}/assignment`,
       params: reducedParams,
       headers: {
