@@ -3,12 +3,19 @@ import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import CheckCircle from '@mui/icons-material/CheckCircle';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/components/ui/page-card';
 import { colorPalette } from '@/styles/color-palette';
+import { useAuth } from '@/auth/use-auth';
 
 export function ResetPasswordWorkerSuccessPage() {
+  const { signOut } = useAuth();
+
+  useEffect(() => {
+    signOut();
+  }, [signOut]);
   return (
     <PageCard
       hiddenCancelButton
