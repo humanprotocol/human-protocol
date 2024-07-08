@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { chainsWithSCAddresses } from '@/smart-contracts/chains';
 import type { ContractsAddresses } from '@/smart-contracts/contracts';
 
@@ -13,7 +14,7 @@ export const getContractAddress = ({
   )?.addresses[contractName];
 
   if (!contractAddress) {
-    throw new Error(`Cannot find contract address.`);
+    throw new Error(t('errors.unsupportedNetwork'));
   }
   return contractAddress;
 };

@@ -91,7 +91,7 @@ export function SignInWorkerPage() {
               label={t('worker.signInForm.fields.password')}
               name="password"
             />
-            <FormCaptcha name="h_captcha_token" />
+            <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
             <Typography variant="body1">
               <Link
                 style={{ textDecoration: 'none', fontWeight: 600 }}

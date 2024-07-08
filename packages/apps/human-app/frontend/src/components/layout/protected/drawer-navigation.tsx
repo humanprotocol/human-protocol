@@ -8,6 +8,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
+import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
@@ -26,6 +27,7 @@ export type TopMenuItem = DrawerItem | JSX.Element;
 export type BottomMenuItem = DrawerItem;
 interface DrawerNavigationProps {
   open: boolean;
+  setDrawerOpen: Dispatch<SetStateAction<boolean>>;
   topMenuItems?: TopMenuItem[];
   bottomMenuItems?: BottomMenuItem[];
   signOut: () => void;
@@ -33,6 +35,7 @@ interface DrawerNavigationProps {
 
 export function DrawerNavigation({
   open,
+  setDrawerOpen,
   topMenuItems,
   bottomMenuItems,
   signOut,
@@ -76,7 +79,12 @@ export function DrawerNavigation({
             {topMenuItems?.map((item, index) => {
               if (!('label' in item)) {
                 return (
-                  <ListItem key={crypto.randomUUID()}>
+                  <ListItem
+                    key={crypto.randomUUID()}
+                    onClick={() => {
+                      setDrawerOpen(false);
+                    }}
+                  >
                     <Stack
                       direction="row"
                       sx={{
@@ -96,6 +104,7 @@ export function DrawerNavigation({
                     disabled={disabled}
                     onClick={() => {
                       if (disabled) return;
+                      if (isMobile) setDrawerOpen(false);
                       if (link) {
                         navigate(link);
                       }
@@ -134,6 +143,7 @@ export function DrawerNavigation({
                 <ListItemButton
                   alignItems="center"
                   onClick={() => {
+                    if (isMobile) setDrawerOpen(false);
                     if (link) {
                       navigate(link);
                     }
@@ -167,7 +177,10 @@ export function DrawerNavigation({
           </List>
         </Stack>
         <Button
-          onClick={signOut}
+          onClick={() => {
+            if (isMobile) setDrawerOpen(false);
+            signOut();
+          }}
           size="large"
           sx={{
             marginBottom: '44px',

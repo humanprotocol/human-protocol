@@ -25,7 +25,6 @@ export interface JobsFilterStoreProps {
     page: number;
     page_size: PageSize;
     fields: string[];
-    oracle_address?: string;
     chain_id?: number;
   };
   setFilterParams: (

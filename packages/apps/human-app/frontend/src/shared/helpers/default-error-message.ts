@@ -35,7 +35,7 @@ export function defaultErrorMessage(
   }
 
   if (unknownError instanceof Error) {
-    return t('errors.errorWithMessage', { message: unknownError.message });
+    return unknownError.message;
   }
 
   return t('errors.unknown');

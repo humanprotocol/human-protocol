@@ -1,6 +1,5 @@
 import { Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate } from 'react-router-dom';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -10,10 +9,8 @@ import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { HomePageStageType } from '@/pages/homepage/components/home-container';
-import { routerPaths } from '@/router/router-paths';
 import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
-import { useAuth } from '@/auth/use-auth';
-import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
+import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
 
 interface WelcomeProps {
   setStage: (step: HomePageStageType) => void;
@@ -24,16 +21,6 @@ export function Welcome({ setStage }: WelcomeProps) {
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('lg');
-  const { user: worker } = useAuth();
-  const { user: operator } = useWeb3Auth();
-
-  if (worker) {
-    return <Navigate replace to={routerPaths.worker.profile} />;
-  }
-
-  if (operator) {
-    return <Navigate replace to={routerPaths.operator.profile} />;
-  }
 
   return (
     <Grid
@@ -120,18 +107,7 @@ export function Welcome({ setStage }: WelcomeProps) {
             }}
             variant="middle"
           />
-          <Button
-            component={Link}
-            fullWidth
-            size="large"
-            sx={{
-              mb: '1.5625rem',
-            }}
-            to={routerPaths.worker.signIn}
-            variant="contained"
-          >
-            {t('homepage.workerSignIn')}
-          </Button>
+          <WorkerSignIn />
           <OperatorSignIn />
         </Paper>
       </Grid>

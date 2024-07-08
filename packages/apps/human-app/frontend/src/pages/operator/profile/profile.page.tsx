@@ -88,7 +88,7 @@ export function OperatorProfilePage() {
                 header={t('operator.profile.about.status.statusHeader')}
                 paragraph={
                   // TODO check if user is active with JWT payload
-                  user.address
+                  user.wallet_address
                     ? t('operator.profile.about.status.statusActivated')
                     : t('operator.profile.about.status.statusDeactivated')
                 }

@@ -23,7 +23,6 @@ export interface MyJobsFilterStoreProps {
     page: number;
     page_size: PageSize;
     chain_id?: number;
-    address?: string;
   };
   availableJobTypes: string[];
   setFilterParams: (

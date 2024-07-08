@@ -1,3 +1,4 @@
+/* eslint-disable camelcase -- ...*/
 import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +14,7 @@ import {
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { useAuth } from '@/auth/use-auth';
+import { FormCaptcha } from '@/components/h-captcha';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
@@ -21,6 +23,7 @@ export function SendResetLinkWorkerPage() {
   const methods = useForm<SendResetLinkDto>({
     defaultValues: {
       email: user?.email || '',
+      h_captcha_token: '',
     },
     resolver: zodResolver(sendResetLinkDtoSchema),
   });
@@ -62,6 +65,10 @@ export function SendResetLinkWorkerPage() {
               fullWidth
               label={t('worker.sendResetLinkForm.fields.email')}
               name="email"
+            />
+            <FormCaptcha
+              error={sendResetLinkWorkerError}
+              name="h_captcha_token"
             />
             <Button
               fullWidth

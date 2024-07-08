@@ -45,6 +45,9 @@ export const apiPaths = {
     registerAddress: {
       path: '/user/register-address',
     },
+    signedAddress: {
+      path: '/kyc/on-chain',
+    },
     enableHCaptchaLabeling: '/labeling/h-captcha/enable',
     verifyHCaptchaLabeling: '/labeling/h-captcha/verify',
     hCaptchaUserStats: '/labeling/h-captcha/user-stats',

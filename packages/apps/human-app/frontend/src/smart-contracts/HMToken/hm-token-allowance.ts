@@ -3,17 +3,20 @@ import HMToken from '@/smart-contracts/abi/HMToken.json';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
 
-export async function hmTokenDecimals({
+export async function hmTokenAllowance({
+  spender,
+  owner,
   contractAddress,
   signer,
-}: ContractCallArguments) {
+}: { spender: string; owner: string } & ContractCallArguments) {
   try {
     const hmTokenContract = new Contract(contractAddress, HMToken.abi, signer);
-    const decimalsResult = (await hmTokenContract.getFunction(
-      'decimals'
-    )()) as Promise<bigint>;
+    const allowanceResult = (await hmTokenContract.getFunction('allowance')(
+      owner,
+      spender
+    )) as Promise<bigint>;
 
-    return Number(decimalsResult);
+    return allowanceResult;
   } catch (error) {
     throw new JsonRpcError(error);
   }

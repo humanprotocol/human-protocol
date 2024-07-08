@@ -1,4 +1,5 @@
 import { Grid } from '@mui/material';
+import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
@@ -42,7 +43,10 @@ export function Layout({
   renderHCaptchaStatisticsDrawer,
 }: {
   pageHeaderProps: PageHeaderProps;
-  renderDrawer: (open: boolean) => JSX.Element;
+  renderDrawer: (
+    open: boolean,
+    setDrawerOpen: Dispatch<SetStateAction<boolean>>
+  ) => JSX.Element;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
 }) {
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
@@ -103,7 +107,7 @@ export function Layout({
           toggleUserStatsDrawer={toggleUserStatsDrawer}
           userStatsDrawerOpen={hcaptchaDrawerOpen}
         />
-        {renderDrawer(drawerOpen)}
+        {renderDrawer(drawerOpen, setDrawerOpen)}
         {isHCaptchaLabelingPage && renderHCaptchaStatisticsDrawer
           ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
           : null}

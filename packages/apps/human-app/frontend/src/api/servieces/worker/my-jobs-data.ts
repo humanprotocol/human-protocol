@@ -1,6 +1,7 @@
 /* eslint-disable camelcase -- api response*/
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
+import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
@@ -9,7 +10,7 @@ import type { MyJobsFilterStoreProps } from '@/hooks/use-my-jobs-filter-store';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 
 const myJobSchema = z.object({
-  assignment_id: z.number(),
+  assignment_id: z.string(),
   escrow_address: z.string(),
   chain_id: z.number(),
   job_type: z.string(),
@@ -41,7 +42,9 @@ export interface MyJobsWithJobTypes {
   jobs: MyJobsSuccessResponse;
 }
 
-type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'];
+type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'] & {
+  oracle_address: string;
+};
 
 const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
   return apiClient(
@@ -58,22 +61,26 @@ const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
 
 export function useGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
+  const { address } = useParams<{ address: string }>();
+  const dto = { ...filterParams, oracle_address: address || '' };
 
   return useQuery({
-    queryKey: ['myJobs', filterParams],
-    queryFn: () => getMyJobsTableData(filterParams),
+    queryKey: ['myJobs', dto],
+    queryFn: () => getMyJobsTableData(dto),
   });
 }
 
 export function useInfiniteGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
+  const { address } = useParams<{ address: string }>();
+  const dto = { ...filterParams, oracle_address: address || '' };
 
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: ['myJobsInfinite', filterParams],
-    queryFn: () => getMyJobsTableData(filterParams),
+    queryKey: ['myJobsInfinite', dto],
+    queryFn: () => getMyJobsTableData(dto),
     getNextPageParam: (pageParams) => {
-      return pageParams.total_pages === pageParams.page
+      return pageParams.total_pages - 1 <= pageParams.page
         ? undefined
         : pageParams.page;
     },

@@ -25,7 +25,11 @@ export function WalletConnectDone() {
         {t('worker.profile.walletConnected')}
       </Typography>
       <CheckmarkIcon />
-      <CustomTextField disabled fullWidth value={user.address || address} />
+      <CustomTextField
+        disabled
+        fullWidth
+        value={user.wallet_address || address}
+      />
     </Grid>
   );
 }

@@ -13,7 +13,7 @@ import {
   PageCardLoader,
 } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
-import { EmailVerificationErrorPage } from '@/pages/worker/email-verification/email-verification-error.page';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 
 const tokenSchema = z.string().transform((value, ctx) => {
   const token = value.split('=')[1];
@@ -50,9 +50,9 @@ export function EmailVerificationWorker({ token }: { token: string }) {
 
   if (isEmailVerificationWorkerError) {
     return (
-      <PageCardError>
-        <EmailVerificationErrorPage error={emailVerificationWorkerError} />
-      </PageCardError>
+      <PageCardError
+        errorMessage={defaultErrorMessage(emailVerificationWorkerError)}
+      />
     );
   }
 
