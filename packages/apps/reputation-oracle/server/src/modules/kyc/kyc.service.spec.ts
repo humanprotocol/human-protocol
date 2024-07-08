@@ -53,6 +53,9 @@ describe('Kyc Service', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
+            getOperatorAddress: jest
+              .fn()
+              .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
           },
         },
         ConfigService,

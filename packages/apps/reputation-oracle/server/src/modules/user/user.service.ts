@@ -33,6 +33,7 @@ import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { KycSignedAddressDto } from '../kyc/kyc.dto';
 
 @Injectable()
 export class UserService {
@@ -184,7 +185,7 @@ export class UserService {
   public async registerAddress(
     user: UserEntity,
     data: RegisterAddressRequestDto,
-  ): Promise<string> {
+  ): Promise<KycSignedAddressDto> {
     data.address = data.address.toLowerCase();
 
     if (user.evmAddress) {
@@ -219,9 +220,14 @@ export class UserService {
     user.evmAddress = data.address;
     await this.userRepository.updateOne(user);
 
-    return await this.web3Service
+    const signature = await this.web3Service
       .getSigner(this.networkConfigService.networks[0].chainId)
       .signMessage(data.address);
+
+    return {
+      key: `KYC-${this.web3Service.getOperatorAddress()}`,
+      value: signature,
+    };
   }
 
   public async enableOperator(

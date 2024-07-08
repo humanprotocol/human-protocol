@@ -18,7 +18,6 @@ import {
   DisableOperatorDto,
   PrepareSignatureDto,
   RegisterAddressRequestDto,
-  RegisterAddressResponseDto,
   SignatureBodyDto,
   RegisterLabelerResponseDto,
   EnableOperatorDto,
@@ -27,6 +26,7 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
+import { KycSignedAddressDto } from '../kyc/kyc.dto';
 
 @ApiTags('User')
 @Controller('/user')
@@ -76,7 +76,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Blockchain address registered successfully',
-    type: RegisterAddressResponseDto,
+    type: KycSignedAddressDto,
   })
   @ApiResponse({
     status: 400,
@@ -93,13 +93,8 @@ export class UserController {
   public async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
-  ): Promise<RegisterAddressResponseDto> {
-    const signedAddress = await this.userService.registerAddress(
-      request.user,
-      data,
-    );
-
-    return { signedAddress };
+  ): Promise<KycSignedAddressDto> {
+    return this.userService.registerAddress(request.user, data);
   }
 
   @Post('/enable-operator')
