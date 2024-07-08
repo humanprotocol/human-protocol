@@ -187,23 +187,21 @@ describe('JobService', () => {
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
       jobEntity.status = JobStatus.ACTIVE;
-  
-      const assignments: AssignmentEntity[] = [
+      jobEntity.assignments = [
         { id: 1, jobId: jobEntity.id, status: AssignmentStatus.ACTIVE } as AssignmentEntity,
         { id: 2, jobId: jobEntity.id, status: AssignmentStatus.ACTIVE } as AssignmentEntity,
       ];
+
   
       jest.spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress').mockResolvedValue(jobEntity);
-      jest.spyOn(jobRepository, 'updateOne').mockResolvedValue(jobEntity);
-      jest.spyOn(assignmentRepository, 'findByJobId').mockResolvedValue(assignments);
-      jest.spyOn(assignmentRepository, 'updateOne').mockImplementation(async (assignment) => assignment);
   
       await jobService.cancelJob(webhook);
   
       expect(jobRepository.findOneByChainIdAndEscrowAddress).toHaveBeenCalledWith(chainId, escrowAddress);
-      expect(jobRepository.updateOne).toHaveBeenCalledWith(expect.objectContaining({ status: JobStatus.CANCELED }));
-      expect(assignmentRepository.findByJobId).toHaveBeenCalledWith(jobEntity.id);
-      expect(assignmentRepository.updateOne).toHaveBeenCalledTimes(assignments.length);
+      expect(jobRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: JobStatus.CANCELED, assignments: [
+        { id: 1, jobId: jobEntity.id, status: AssignmentStatus.CANCELED },
+        { id: 2, jobId: jobEntity.id, status: AssignmentStatus.CANCELED },
+      ] }));
     });
   
     it('should throw NotFoundException if job does not exist', async () => {

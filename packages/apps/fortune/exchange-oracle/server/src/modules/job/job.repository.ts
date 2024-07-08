@@ -21,6 +21,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
       where: {
         id,
       },
+      relations: ['assignments'],
     });
   }
 
@@ -33,6 +34,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
         chainId,
         escrowAddress,
       },
+      relations: ['assignments'],
     });
   }
 

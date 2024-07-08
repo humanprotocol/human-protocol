@@ -96,4 +96,3 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 }
-
