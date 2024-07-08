@@ -36,6 +36,19 @@ export class JobRepository extends BaseRepository<JobEntity> {
     });
   }
 
+  public async findOneByChainIdAndEscrowAddressWithAssignments(
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<JobEntity | null> {
+    return this.findOne({
+      where: {
+        chainId,
+        escrowAddress,
+      },
+      relations: ['assignments'],
+    });
+  }
+
   public async fetchFiltered(data: JobFilterData): Promise<ListResult> {
     const queryBuilder = this.createQueryBuilder('job');
 
