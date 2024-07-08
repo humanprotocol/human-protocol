@@ -29,8 +29,7 @@ describe('statsService', () => {
     }).compile();
 
     statsService = moduleRef.get<StatsService>(StatsService);
-    jobRepository =
-      moduleRef.get<JobRepository>(JobRepository);
+    jobRepository = moduleRef.get<JobRepository>(JobRepository);
     assignmentRepository =
       moduleRef.get<AssignmentRepository>(AssignmentRepository);
   });

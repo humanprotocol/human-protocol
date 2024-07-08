@@ -103,5 +103,4 @@ export class JobRepository extends BaseRepository<JobEntity> {
       },
     });
   }
-
 }

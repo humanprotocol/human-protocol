@@ -9,14 +9,20 @@ export class StatsService {
   public readonly logger = new Logger(StatsService.name);
   constructor(
     private jobRepository: JobRepository,
-    private assignmentRepository: AssignmentRepository
+    private assignmentRepository: AssignmentRepository,
   ) {}
 
   async getOracleStats(): Promise<OracleStatsDto> {
     return new OracleStatsDto({
-      activeEscrows: await this.jobRepository.countJobsByStatus(JobStatus.ACTIVE),
-      completedEscrows: await this.jobRepository.countJobsByStatus(JobStatus.COMPLETED),
-      canceledEscrows: await this.jobRepository.countJobsByStatus(JobStatus.CANCELED),
+      activeEscrows: await this.jobRepository.countJobsByStatus(
+        JobStatus.ACTIVE,
+      ),
+      completedEscrows: await this.jobRepository.countJobsByStatus(
+        JobStatus.COMPLETED,
+      ),
+      canceledEscrows: await this.jobRepository.countJobsByStatus(
+        JobStatus.CANCELED,
+      ),
       workersTotal: await this.assignmentRepository.countTotalWorkers(),
       assignmentsCompleted:
         await this.assignmentRepository.countCompletedAssignments(),
