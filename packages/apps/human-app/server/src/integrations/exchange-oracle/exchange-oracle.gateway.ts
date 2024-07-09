@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
@@ -48,7 +48,7 @@ export class ExchangeOracleGateway {
   ): Promise<T> {
     try {
       const response = await lastValueFrom(this.httpService.request(options));
-      return response.data;
+      return response.data as T;
     } catch (e) {
       console.error(
         `Error, while executing exchange oracle API call with options: ${JSON.stringify(options)}, error details: ${e}`,
@@ -149,7 +149,9 @@ export class ExchangeOracleGateway {
     return this.callExternalHttpUtilRequest(options);
   }
 
-  async fetchJobs(command: JobsDiscoveryParamsCommand) {
+  async fetchJobs(
+    command: JobsDiscoveryParamsCommand,
+  ): Promise<JobsDiscoveryResponse> {
     const jobsDiscoveryParamsData = this.mapper.map(
       command.data,
       JobsDiscoveryParams,

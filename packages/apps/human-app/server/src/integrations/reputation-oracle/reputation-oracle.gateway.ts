@@ -111,7 +111,7 @@ export class ReputationOracleGateway {
     options: AxiosRequestConfig,
   ): Promise<T> {
     const response = await lastValueFrom(this.httpService.request(options));
-    return response.data;
+    return response.data as T;
   }
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(

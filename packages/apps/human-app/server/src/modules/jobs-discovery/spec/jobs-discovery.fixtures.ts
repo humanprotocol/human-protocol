@@ -3,6 +3,7 @@ import {
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsData,
   JobsDiscoveryParamsDto,
+  JobsDiscoveryResponse,
   JobsDiscoveryResponseItem,
 } from '../model/jobs-discovery.model';
 import {
@@ -11,11 +12,16 @@ import {
   JobStatus,
   SortOrder,
 } from '../../../common/enums/global-common';
+
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
-const ESCROW_ADDRESS = 'test_address';
+const ESCROW_ADDRESS1 = 'test_address1';
+const ESCROW_ADDRESS2 = 'test_address2';
+const ESCROW_ADDRESS3 = 'test_address3';
 const CHAIN_ID = 1;
 const PAGE_SIZE = 10;
 const PAGE = 1;
+const TOTAL = 34;
+const TOTAL_PAGES = 4;
 const SORT = SortOrder.ASC;
 const SORT_FIELD = JobDiscoverySortField.CREATED_AT;
 const JOB_TYPE = 'FORTUNE';
@@ -24,18 +30,12 @@ const FIELDS = [
   JobDiscoveryFieldName.JobDescription,
 ];
 const TOKEN = 'test-token';
-const JOB_DESCRIPTION = 'Description of the test job';
-const REWARD_AMOUNT = '100';
-const REWARD_TOKEN = 'ETH';
-const CREATED_AT = '2024-03-01T12:00:00Z';
-const JOB_TITLE = 'test job';
 const EXCHANGE_ORACLE_ADDRESS = '0x3dfa342';
 const STATUS = JobStatus.ACTIVE;
 export const jobsDiscoveryOracleUrlFixture = EXCHANGE_ORACLE_URL;
 export const jobDiscoveryToken = TOKEN;
 export const dtoFixture: JobsDiscoveryParamsDto = {
   oracle_address: EXCHANGE_ORACLE_ADDRESS,
-  escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
   page_size: PAGE_SIZE,
   page: PAGE,
@@ -47,7 +47,6 @@ export const dtoFixture: JobsDiscoveryParamsDto = {
 };
 
 const dataFixture: JobsDiscoveryParams = {
-  escrowAddress: ESCROW_ADDRESS,
   chainId: CHAIN_ID,
   pageSize: PAGE_SIZE,
   page: PAGE,
@@ -57,8 +56,7 @@ const dataFixture: JobsDiscoveryParams = {
   fields: FIELDS,
   status: STATUS,
 };
-const paramsDataFixture: JobsDiscoveryParamsData = {
-  escrow_address: ESCROW_ADDRESS,
+export const paramsDataFixture: JobsDiscoveryParamsData = {
   chain_id: CHAIN_ID,
   page_size: PAGE_SIZE,
   page: PAGE,
@@ -74,17 +72,33 @@ export const jobsDiscoveryParamsCommandFixture: JobsDiscoveryParamsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
-export const responseItemFixture: JobsDiscoveryResponseItem = {
-  escrow_address: ESCROW_ADDRESS,
+export const responseItemFixture1: JobsDiscoveryResponseItem = {
+  escrow_address: ESCROW_ADDRESS1,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
-  job_title: JOB_TITLE,
-  job_description: JOB_DESCRIPTION,
-  reward_amount: REWARD_AMOUNT,
-  reward_token: REWARD_TOKEN,
-  created_at: CREATED_AT,
+  status: JobStatus.ACTIVE,
 };
-
-export const responseFixture: JobsDiscoveryResponseItem[] = [
-  responseItemFixture,
+export const responseItemFixture2: JobsDiscoveryResponseItem = {
+  escrow_address: ESCROW_ADDRESS2,
+  chain_id: CHAIN_ID,
+  job_type: JOB_TYPE,
+  status: JobStatus.COMPLETED,
+};
+export const responseItemFixture3: JobsDiscoveryResponseItem = {
+  escrow_address: ESCROW_ADDRESS3,
+  chain_id: CHAIN_ID,
+  job_type: JOB_TYPE,
+  status: JobStatus.ACTIVE,
+};
+export const responseItemsFixture: JobsDiscoveryResponseItem[] = [
+  responseItemFixture1,
+  responseItemFixture2,
+  responseItemFixture3,
 ];
+export const responseFixture: JobsDiscoveryResponse = {
+  results: responseItemsFixture,
+  page: PAGE,
+  page_size: PAGE_SIZE,
+  total_pages: TOTAL_PAGES,
+  total_results: TOTAL,
+};
