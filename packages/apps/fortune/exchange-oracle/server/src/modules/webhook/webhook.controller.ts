@@ -19,10 +19,21 @@ export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @Post()
+  @UseGuards(SignatureAuthGuard)
+  @AllowedRoles([
+    AuthSignatureRole.Recording,
+    AuthSignatureRole.Reputation,
+    AuthSignatureRole.JobLauncher,
+  ])
   @ApiOperation({
     summary: 'Handle Webhook Events',
     description:
       'Receives webhook events related to escrow and task operations.',
+  })
+  @ApiHeader({
+    name: HEADER_SIGNATURE_KEY,
+    description: 'Signature header for authenticating the webhook request.',
+    required: true,
   })
   @ApiBody({
     description:
@@ -46,7 +57,7 @@ export class WebhookController {
     description: 'Not Found. Could not find the requested content.',
   })
   public async processWebhook(
-    //@Headers(HEADER_SIGNATURE_KEY) _: string,
+    @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,
   ): Promise<void> {
     return this.webhookService.handleWebhook(body);
