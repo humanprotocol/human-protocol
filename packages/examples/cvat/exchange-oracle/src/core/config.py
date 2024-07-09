@@ -2,11 +2,13 @@
 """ Project configuration from env vars """
 import inspect
 import os
-from typing import ClassVar, Optional
+from typing import ClassVar, Iterable, Optional
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
 from human_protocol_sdk.encryption import Encryption
+from web3 import Web3
+from web3.providers.rpc import HTTPProvider
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
@@ -37,21 +39,36 @@ class PostgresConfig:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
-class PolygonMainnetConfig:
+class _NetworkConfig:
+    chain_id: ClassVar[int]
+    rpc_api: ClassVar[Optional[str]]
+    private_key: ClassVar[Optional[str]]
+    addr: ClassVar[Optional[str]]
+
+    @classmethod
+    def is_configured(cls) -> bool:
+        if all([cls.chain_id, cls.rpc_api, cls.private_key, cls.addr]):
+            w3 = Web3(HTTPProvider(cls.rpc_api))
+            return w3.is_connected()
+
+        return False
+
+
+class PolygonMainnetConfig(_NetworkConfig):
     chain_id = 137
     rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
     private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
 
-class PolygonAmoyConfig:
+class PolygonAmoyConfig(_NetworkConfig):
     chain_id = 80002
     rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
     private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_AMOY_ADDR")
 
 
-class LocalhostConfig:
+class LocalhostConfig(_NetworkConfig):
     chain_id = 1338
     rpc_api = os.environ.get("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
     private_key = os.environ.get(
@@ -245,3 +262,19 @@ class Config:
             attr_or_method = getattr(cls, attr_or_method)
             if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _BaseConfig):
                 attr_or_method.validate()
+
+    @classmethod
+    def get_network_configs(
+        cls, only_configured: Optional[bool] = None
+    ) -> Iterable[_NetworkConfig]:
+        for attr_or_method in cls.__dict__:
+            attr_or_method = getattr(cls, attr_or_method)
+            if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _NetworkConfig):
+                if (
+                    only_configured is None
+                    or (network_is_configured := attr_or_method.is_configured())
+                    and only_configured
+                    or not network_is_configured
+                    and not only_configured
+                ):
+                    yield attr_or_method
