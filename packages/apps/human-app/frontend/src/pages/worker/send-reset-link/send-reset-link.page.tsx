@@ -15,6 +15,7 @@ import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
+import { routerPaths } from '@/router/router-paths';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
@@ -49,6 +50,7 @@ export function SendResetLinkWorkerPage() {
         ) : undefined
       }
       backArrowPath={-1}
+      cancelRouterPathOrCallback={routerPaths.worker.profile}
       title={t('worker.sendResetLinkForm.title')}
     >
       <FormProvider {...methods}>
