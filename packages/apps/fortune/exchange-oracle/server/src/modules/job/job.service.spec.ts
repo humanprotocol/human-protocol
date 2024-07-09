@@ -172,6 +172,80 @@ describe('JobService', () => {
     });
   });
 
+  describe('completeJob', () => {
+    const chainId = 1;
+    const escrowAddress = '0x1234567890123456789012345678901234567890';
+
+    const webhook: WebhookDto = {
+      chainId,
+      escrowAddress,
+      eventType: EventType.ESCROW_COMPLETED,
+    };
+
+    it('should complete a job and update all related assignments', async () => {
+      const jobEntity = new JobEntity();
+      jobEntity.chainId = chainId;
+      jobEntity.escrowAddress = escrowAddress;
+      jobEntity.status = JobStatus.ACTIVE;
+      jobEntity.assignments = [
+        {
+          id: 1,
+          jobId: jobEntity.id,
+          status: AssignmentStatus.ACTIVE,
+        } as AssignmentEntity,
+        {
+          id: 2,
+          jobId: jobEntity.id,
+          status: AssignmentStatus.ACTIVE,
+        } as AssignmentEntity,
+      ];
+
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
+        .mockResolvedValue(jobEntity);
+
+      await jobService.completeJob(webhook);
+
+      expect(
+        jobRepository.findOneByChainIdAndEscrowAddressWithAssignments,
+      ).toHaveBeenCalledWith(chainId, escrowAddress);
+      expect(jobRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: JobStatus.COMPLETED,
+          assignments: [
+            { id: 1, jobId: jobEntity.id, status: AssignmentStatus.COMPLETED },
+            { id: 2, jobId: jobEntity.id, status: AssignmentStatus.COMPLETED },
+          ],
+        }),
+      );
+    });
+
+    it('should throw NotFoundException if job does not exist', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
+        .mockResolvedValue(null);
+
+      await expect(jobService.completeJob(webhook)).rejects.toThrow(
+        new NotFoundException(ErrorJob.NotFound),
+      );
+    });
+
+    it('should throw BadRequestException if job is already completed', async () => {
+      const jobEntity = new JobEntity();
+      jobEntity.chainId = chainId;
+      jobEntity.escrowAddress = escrowAddress;
+      jobEntity.status = JobStatus.COMPLETED;
+
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
+        .mockResolvedValue(jobEntity);
+
+      await expect(jobService.completeJob(webhook)).rejects.toThrow(
+        new BadRequestException(ErrorJob.AlreadyCompleted),
+      );
+    });
+  });
+
   describe('cancelJob', () => {
     const chainId = 1;
     const escrowAddress = '0x1234567890123456789012345678901234567890';
