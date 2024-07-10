@@ -7,6 +7,7 @@ import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CommonConfigModule } from './common/config/config.module';
+import { DetailsModule } from './modules/details/details.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { StatsModule } from './modules/stats/stats.module';
 
@@ -25,6 +26,7 @@ import { StatsModule } from './modules/stats/stats.module';
     }),
     CacheModule.registerAsync(CacheFactoryConfig),
     CommonConfigModule,
+    DetailsModule,
     RedisModule,
     StatsModule,
   ],
