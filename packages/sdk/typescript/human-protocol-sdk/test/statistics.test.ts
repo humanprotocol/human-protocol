@@ -303,8 +303,8 @@ describe('StatisticsClient', () => {
     });
   });
 
-  describe.only('getHMTHolders', () => {
-    test.only('should successfully get HMT holders', async () => {
+  describe('getHMTHolders', () => {
+    test('should successfully get HMT holders', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         holders: [
           {
