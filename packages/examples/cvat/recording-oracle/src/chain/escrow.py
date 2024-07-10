@@ -47,7 +47,8 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
 
     manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
 
-    if EncryptionUtils.is_encrypted(manifest_content):
+    # if EncryptionUtils.is_encrypted(manifest_content):
+    if is_data_encrypted(manifest_content):
         encryption = Encryption(
             Config.encryption_config.pgp_private_key,
             Config.encryption_config.pgp_passphrase,
@@ -70,3 +71,13 @@ def get_reputation_oracle_address(chain_id: int, escrow_address: str) -> str:
 
 def get_exchange_oracle_address(chain_id: int, escrow_address: str) -> str:
     return get_escrow(chain_id, escrow_address).exchange_oracle
+
+
+# FUTURE-TODO: workaround until a new Human Protocol SDK version is released.
+# Check wether data is encrypted without adding new dependencies (like PGPy) to Exchange Oracle.
+# Should be replaced with EncryptionUtils.is_encrypted method.
+def is_data_encrypted(data: str) -> bool:
+    normalized_data = data.strip()
+    return normalized_data.startswith("-----BEGIN PGP MESSAGE-----") and normalized_data.endswith(
+        "-----END PGP MESSAGE-----"
+    )
