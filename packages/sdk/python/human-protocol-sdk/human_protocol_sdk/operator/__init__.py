@@ -9,4 +9,5 @@ from .operator_utils import (
     Operator,
     OperatorUtils,
     RewardData,
+    OperatorUtilsError,
 )
