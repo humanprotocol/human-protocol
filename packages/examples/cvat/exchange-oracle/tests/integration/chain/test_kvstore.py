@@ -5,11 +5,7 @@ from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
 
-from src.chain.kvstore import (
-    get_job_launcher_url,
-    get_recording_oracle_url,
-    set_public_key_to_kvstore,
-)
+from src.chain.kvstore import get_job_launcher_url, get_recording_oracle_url, register_in_kvstore
 from src.core.config import LocalhostConfig
 
 from tests.utils.constants import (
@@ -143,7 +139,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             kvstore_client = KVStoreClient(self.w3)
             self.assertIsNone(kvstore_client.get_public_key(LocalhostConfig.addr))
 
-            set_public_key_to_kvstore()
+            register_in_kvstore()
             self.assertIsNotNone(kvstore_client.get_public_key(LocalhostConfig.addr))
 
             # handle a case when a public key has been updated in a bucket, but URL and hash of a key remain in the KVStore

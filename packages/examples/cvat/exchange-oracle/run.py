@@ -1,12 +1,12 @@
 import uvicorn
 
-from src.chain.kvstore import set_public_key_to_kvstore
+from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
 
 if __name__ == "__main__":
     is_dev = Config.environment == "development"
     Config.validate()
-    set_public_key_to_kvstore()
+    register_in_kvstore()
 
     uvicorn.run(
         app="src:app",

@@ -25,7 +25,7 @@ def get_job_launcher_url(chain_id: int, escrow_address: str) -> str:
     return OperatorUtils.get_leader(ChainId(chain_id), escrow.launcher).webhook_url
 
 
-def set_public_key_to_kvstore() -> None:
+def register_in_kvstore() -> None:
     if Config.encryption_config.pgp_public_key_url:
         for network_config in Config.get_network_configs(only_configured=True):
             w3 = get_web3(network_config.chain_id)
