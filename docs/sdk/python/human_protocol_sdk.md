@@ -83,6 +83,7 @@
       * [`DailyWorkerData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyWorkerData)
       * [`EscrowStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.EscrowStatistics)
       * [`HMTHolder`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTHolder)
+      * [`HMTHoldersParam`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTHoldersParam)
       * [`HMTStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.HMTStatistics)
       * [`PaymentStatistics`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.PaymentStatistics)
       * [`StatisticsClient`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.StatisticsClient)
