@@ -76,6 +76,31 @@ export class JobService {
     await this.jobRepository.createUnique(newJobEntity);
   }
 
+  public async completeJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
+
+    const jobEntity =
+      await this.jobRepository.findOneByChainIdAndEscrowAddressWithAssignments(
+        chainId,
+        escrowAddress,
+      );
+
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (jobEntity.status === JobStatus.COMPLETED) {
+      throw new BadRequestException(ErrorJob.AlreadyCompleted);
+    }
+
+    jobEntity.status = JobStatus.COMPLETED;
+    jobEntity.assignments.forEach((assignment: AssignmentEntity) => {
+      assignment.status = AssignmentStatus.COMPLETED;
+    });
+
+    await this.jobRepository.save(jobEntity);
+  }
+
   public async cancelJob(webhook: WebhookDto): Promise<void> {
     const { chainId, escrowAddress } = webhook;
 
