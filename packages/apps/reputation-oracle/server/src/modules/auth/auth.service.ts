@@ -147,9 +147,30 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
+    let kvstore: KVStoreClient;
+    const currentWeb3Env = this.web3ConfigService.env;
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.POLYGON),
+      );
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.LOCALHOST),
+      );
+    } else {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
+      );
+    }
+
+    const operatorStatus = await kvstore.get(
+      this.web3Service.getOperatorAddress(),
+      userEntity.evmAddress,
+    );
+
     const payload: any = {
       email: userEntity.email,
-      status: userEntity.status,
+      status: operatorStatus ?? userEntity.status,
       userId: userEntity.id,
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
