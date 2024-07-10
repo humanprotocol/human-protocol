@@ -636,7 +636,7 @@ class StatisticsClient:
                 "orderDirection": param.order_direction,
             },
         )
-        print(holders_data)
+
         holders = holders_data["data"]["holders"]
 
         return [

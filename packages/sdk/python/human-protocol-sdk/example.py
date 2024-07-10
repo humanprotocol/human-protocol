@@ -135,6 +135,7 @@ if __name__ == "__main__":
     get_escrows()
     get_leaders()
 
+    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
     get_hmt_holders(statistics_client)
     get_escrow_statistics(statistics_client)
     get_hmt_statistics(statistics_client)
