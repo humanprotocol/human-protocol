@@ -1,10 +1,11 @@
-import { IsOptional } from 'class-validator';
+import { IsArray, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EscrowDto } from './escrow.dto';
+import { EscrowDto, EscrowPaginationDto } from './escrow.dto';
+import { TransactionPaginationDto } from './transaction.dto';
 import { LeaderDto } from './leader.dto';
 import { WalletDto } from './wallet.dto';
 
-export class DetailsDto {
+export class DetailsResponseDto {
   @ApiProperty()
   @ApiPropertyOptional()
   @IsOptional()
@@ -19,4 +20,16 @@ export class DetailsDto {
   @ApiPropertyOptional()
   @IsOptional()
   public leader?: LeaderDto;
+}
+
+export class DetailsPaginationResponseDto {
+  @ApiProperty()
+  public first: number;
+
+  @ApiProperty()
+  public skip: number;
+
+  @ApiProperty()
+  @IsArray()
+  public results: EscrowPaginationDto[] | TransactionPaginationDto[];
 }
