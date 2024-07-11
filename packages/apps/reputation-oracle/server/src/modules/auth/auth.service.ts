@@ -2,7 +2,11 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
-import { OperatorStatus, UserStatus } from '../../common/enums/user';
+import {
+  OperatorStatus,
+  Role as UserRole,
+  UserStatus,
+} from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -33,9 +37,6 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { JobRequestType } from '../../common/enums';
-import { string } from 'joi';
-import { stat } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -165,12 +166,16 @@ export class AuthService {
       );
     }
 
-    let status = await kvstore.get(
-      this.web3Service.getOperatorAddress(),
-      userEntity.evmAddress,
-    );
-
-    status = !status || status === '' ? userEntity.status : status;
+    let status = userEntity.status.toString();
+    if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
+      const operatorStatus = await kvstore.get(
+        this.web3Service.getOperatorAddress(),
+        userEntity.evmAddress,
+      );
+      if (operatorStatus && operatorStatus !== '') {
+        status = operatorStatus;
+      }
+    }
 
     const payload: any = {
       email: userEntity.email,
