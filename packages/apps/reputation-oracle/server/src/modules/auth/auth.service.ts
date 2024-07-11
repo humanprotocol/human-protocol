@@ -34,6 +34,8 @@ import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { JobRequestType } from '../../common/enums';
+import { string } from 'joi';
+import { stat } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -163,14 +165,16 @@ export class AuthService {
       );
     }
 
-    const operatorStatus = await kvstore.get(
+    let status = await kvstore.get(
       this.web3Service.getOperatorAddress(),
       userEntity.evmAddress,
     );
 
+    status = !status || status === '' ? userEntity.status : status;
+
     const payload: any = {
       email: userEntity.email,
-      status: operatorStatus ?? userEntity.status,
+      status,
       userId: userEntity.id,
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
