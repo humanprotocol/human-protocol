@@ -262,6 +262,7 @@ describe('AuthService', () => {
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
+      status: UserStatus.ACTIVE,
     };
 
     beforeEach(() => {
