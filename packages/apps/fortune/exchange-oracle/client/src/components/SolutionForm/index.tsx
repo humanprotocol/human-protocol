@@ -11,7 +11,6 @@ const SolutionForm: React.FC = () => {
   const { data: signer } = useWalletClient();
   const [solution, setSolution] = useState('');
   const { showError, openSnackbar } = useSnackbar();
-  console.log(assignmentId);
 
   const handleSubmit = async () => {
     const message = {
