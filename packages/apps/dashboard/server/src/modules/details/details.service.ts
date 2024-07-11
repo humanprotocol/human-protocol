@@ -68,7 +68,6 @@ export class DetailsService {
         plainToInstance(TransactionPaginationDto, transaction, {
           excludeExtraneousValues: true,
         });
-      transcationPaginationObject.chainId = chainId;
       return transcationPaginationObject;
     });
 

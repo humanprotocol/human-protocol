@@ -90,6 +90,8 @@ export class DetailsController {
       );
 
     const response: DetailsPaginationResponseDto = {
+      address,
+      chainId: query.chainId,
       first: query.first,
       skip: query.skip,
       results: transactions,

@@ -1,13 +1,8 @@
 import { Expose, Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ChainId } from '@human-protocol/sdk';
 
 export class TransactionPaginationDto {
-  @ApiProperty({ example: ChainId.POLYGON_AMOY })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
   @ApiProperty({ example: 12345 })
   @Transform(({ value }) => Number(value))
   @IsNumber()
