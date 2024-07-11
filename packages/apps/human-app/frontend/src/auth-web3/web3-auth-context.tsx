@@ -10,9 +10,10 @@ const web3userDataSchema = z.object({
   wallet_address: z.string(),
   reputation_network: z.string(),
   exp: z.number(),
+  status: z.string().nullable().optional(),
 });
 
-type Web3UserData = z.infer<typeof web3userDataSchema>;
+export type Web3UserData = z.infer<typeof web3userDataSchema>;
 
 type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 export interface Web3AuthenticatedUserContextType {
@@ -20,6 +21,7 @@ export interface Web3AuthenticatedUserContextType {
   status: AuthStatus;
   signOut: () => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
+  updateUserData: (updateUserDataPayload: Partial<Web3UserData>) => void;
 }
 
 interface Web3UnauthenticatedUserContextType {
@@ -38,6 +40,24 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
     user: Web3UserData | null;
     status: AuthStatus;
   }>({ user: null, status: 'loading' });
+  const updateUserData = (updateUserDataPayload: Partial<Web3UserData>) => {
+    setWeb3AuthState((state) => {
+      if (!state.user) {
+        return state;
+      }
+
+      const newUserData = {
+        ...state.user,
+        ...updateUserDataPayload,
+      };
+      browserAuthProvider.setUserData(newUserData);
+
+      return {
+        ...state,
+        user: newUserData,
+      };
+    });
+  };
 
   const handleSignIn = () => {
     try {
@@ -77,12 +97,15 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
       value={
         web3AuthState.user && web3AuthState.status === 'success'
           ? {
-              ...web3AuthState,
+              user: web3AuthState.user,
+              status: web3AuthState.status,
               signOut,
               signIn,
+              updateUserData,
             }
           : {
-              ...web3AuthState,
+              user: null,
+              status: web3AuthState.status,
               signOut,
               signIn,
             }

@@ -11,6 +11,8 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { ProfileDisableButton } from '@/pages/operator/profile/profile-disable-button';
 import { ProfileListItem } from '@/components/ui/profile-list-item';
 import { useGetOperatorStats } from '@/api/servieces/operator/get-stats';
+import { ProfileEnableButton } from '@/pages/operator/profile/profile-enable-button';
+import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
 
 export function OperatorProfilePage() {
   const { setGrayBackground } = useBackgroundColorStore();
@@ -31,6 +33,8 @@ export function OperatorProfilePage() {
     isPending: isStatsPending,
     refetch: refetchStats,
   } = useGetOperatorStats();
+
+  const isOperatorActive = user.status === 'ACTIVE';
 
   useEffect(() => {
     setGrayBackground();
@@ -84,16 +88,54 @@ export function OperatorProfilePage() {
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
-              <ProfileListItem
-                header={t('operator.profile.about.status.statusHeader')}
-                paragraph={
-                  // TODO check if user is active with JWT payload
-                  user.wallet_address
-                    ? t('operator.profile.about.status.statusActivated')
-                    : t('operator.profile.about.status.statusDeactivated')
-                }
-              />
-              <ProfileDisableButton />
+              <Grid
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    overflow: 'hidden',
+                  }}
+                  variant="subtitle2"
+                >
+                  {t('operator.profile.about.status.statusHeader')}
+                </Typography>
+                {isOperatorActive ? (
+                  <Grid
+                    sx={{
+                      display: 'flex',
+
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                    }}
+                  >
+                    {t('operator.profile.about.status.statusActivated')}
+                    <CheckmarkIcon />
+                  </Grid>
+                ) : (
+                  <Grid
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                    }}
+                  >
+                    {t('operator.profile.about.status.statusDeactivated')}
+                    <LockerIcon />
+                  </Grid>
+                )}
+                <div>
+                  {isOperatorActive ? (
+                    <ProfileDisableButton />
+                  ) : (
+                    <ProfileEnableButton />
+                  )}
+                </div>
+              </Grid>
               <ProfileListItem
                 header={t('operator.profile.about.fee')}
                 paragraph={
