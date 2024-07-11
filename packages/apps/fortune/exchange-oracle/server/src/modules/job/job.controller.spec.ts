@@ -1,6 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { RequestWithUser } from 'src/common/types/jwt';
+import { RequestWithUser } from '../../common/types/jwt';
 import { JobController } from './job.controller';
 import { GetJobsDto, SolveJobDto, JobDto } from './job.dto';
 import { JobService } from './job.service';

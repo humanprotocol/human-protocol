@@ -45,7 +45,7 @@
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "decimal.js": "^10.4.3",
-    "joi": "^17.12.2",
+    "joi": "^17.13.3",
     "json-stable-stringify": "^1.1.1",
     "nestjs-minio-client": "^2.2.0",
     "passport": "^0.7.0",
