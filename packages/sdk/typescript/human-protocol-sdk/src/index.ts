@@ -5,6 +5,7 @@ import { EscrowClient, EscrowUtils } from './escrow';
 import { StatisticsClient } from './statistics';
 import { Encryption, EncryptionUtils } from './encryption';
 import { OperatorUtils } from './operator';
+import { TransactionUtils } from './transaction';
 
 export * from './constants';
 export * from './types';
@@ -21,4 +22,5 @@ export {
   Encryption,
   EncryptionUtils,
   OperatorUtils,
+  TransactionUtils,
 };
