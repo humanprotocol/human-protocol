@@ -21,7 +21,7 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
 } from './error';
-import { getSubgraphUrl, throwError } from './utils';
+import { getSubgraphUrl } from './utils';
 import { ChainId } from './enums';
 import { NETWORKS } from './constants';
 
@@ -54,28 +54,28 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    try {
-      const { leader } = await gqlFetch<{
-        leader: ILeaderSubgraph;
-      }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
-        address: address.toLowerCase(),
-      });
+    const { leader } = await gqlFetch<{
+      leader: ILeaderSubgraph;
+    }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
+      address: address.toLowerCase(),
+    });
 
-      let jobTypes: string[] = [];
-
-      if (typeof leader.jobTypes === 'string') {
-        jobTypes = leader.jobTypes.split(',');
-      } else if (Array.isArray(leader.jobTypes)) {
-        jobTypes = leader.jobTypes;
-      }
-
-      return {
-        ...leader,
-        jobTypes,
-      };
-    } catch (e) {
-      return throwError(e);
+    if (!leader) {
+      return (leader as ILeader) || null;
     }
+
+    let jobTypes: string[] = [];
+
+    if (typeof leader.jobTypes === 'string') {
+      jobTypes = leader.jobTypes.split(',');
+    } else if (Array.isArray(leader.jobTypes)) {
+      jobTypes = leader.jobTypes;
+    }
+
+    return {
+      ...leader,
+      jobTypes,
+    };
   }
 
   /**
@@ -97,45 +97,41 @@ export class OperatorUtils {
    * ```
    */
   public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
-    try {
-      let leaders_data: ILeader[] = [];
+    let leaders_data: ILeader[] = [];
 
-      const networkData = NETWORKS[filter.chainId];
+    const networkData = NETWORKS[filter.chainId];
 
-      if (!networkData) {
-        throw ErrorUnsupportedChainID;
-      }
-
-      const { leaders } = await gqlFetch<{
-        leaders: ILeaderSubgraph[];
-      }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
-        role: filter?.role,
-      });
-
-      if (!leaders) {
-        return [];
-      }
-
-      leaders_data = leaders_data.concat(
-        leaders.map((leader) => {
-          let jobTypes: string[] = [];
-
-          if (typeof leader.jobTypes === 'string') {
-            jobTypes = leader.jobTypes.split(',');
-          } else if (Array.isArray(leader.jobTypes)) {
-            jobTypes = leader.jobTypes;
-          }
-
-          return {
-            ...leader,
-            jobTypes,
-          };
-        })
-      );
-      return leaders_data;
-    } catch (e) {
-      return throwError(e);
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
     }
+
+    const { leaders } = await gqlFetch<{
+      leaders: ILeaderSubgraph[];
+    }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
+      role: filter?.role,
+    });
+
+    if (!leaders) {
+      return [];
+    }
+
+    leaders_data = leaders_data.concat(
+      leaders.map((leader) => {
+        let jobTypes: string[] = [];
+
+        if (typeof leader.jobTypes === 'string') {
+          jobTypes = leader.jobTypes.split(',');
+        } else if (Array.isArray(leader.jobTypes)) {
+          jobTypes = leader.jobTypes;
+        }
+
+        return {
+          ...leader,
+          jobTypes,
+        };
+      })
+    );
+    return leaders_data;
   }
 
   /**
@@ -162,31 +158,27 @@ export class OperatorUtils {
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
-    try {
-      const { reputationNetwork } = await gqlFetch<{
-        reputationNetwork: IReputationNetworkSubgraph;
-      }>(getSubgraphUrl(networkData), GET_REPUTATION_NETWORK_QUERY(role), {
-        address: address.toLowerCase(),
-        role: role,
-      });
+    const { reputationNetwork } = await gqlFetch<{
+      reputationNetwork: IReputationNetworkSubgraph;
+    }>(getSubgraphUrl(networkData), GET_REPUTATION_NETWORK_QUERY(role), {
+      address: address.toLowerCase(),
+      role: role,
+    });
 
-      return reputationNetwork.operators.map((operator) => {
-        let jobTypes: string[] = [];
+    return reputationNetwork.operators.map((operator) => {
+      let jobTypes: string[] = [];
 
-        if (typeof operator.jobTypes === 'string') {
-          jobTypes = operator.jobTypes.split(',');
-        } else if (Array.isArray(operator.jobTypes)) {
-          jobTypes = operator.jobTypes;
-        }
+      if (typeof operator.jobTypes === 'string') {
+        jobTypes = operator.jobTypes.split(',');
+      } else if (Array.isArray(operator.jobTypes)) {
+        jobTypes = operator.jobTypes;
+      }
 
-        return {
-          ...operator,
-          jobTypes,
-        };
-      });
-    } catch (e) {
-      return throwError(e);
-    }
+      return {
+        ...operator,
+        jobTypes,
+      };
+    });
   }
 
   /**
@@ -217,21 +209,17 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    try {
-      const { rewardAddedEvents } = await gqlFetch<{
-        rewardAddedEvents: RewardAddedEventData[];
-      }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
-        slasherAddress: slasherAddress.toLowerCase(),
-      });
+    const { rewardAddedEvents } = await gqlFetch<{
+      rewardAddedEvents: RewardAddedEventData[];
+    }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
+      slasherAddress: slasherAddress.toLowerCase(),
+    });
 
-      return rewardAddedEvents.map((reward: any) => {
-        return {
-          escrowAddress: reward.escrow,
-          amount: reward.amount,
-        };
-      });
-    } catch (e) {
-      return throwError(e);
-    }
+    return rewardAddedEvents.map((reward: any) => {
+      return {
+        escrowAddress: reward.escrow,
+        amount: reward.amount,
+      };
+    });
   }
 }
