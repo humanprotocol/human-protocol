@@ -39,16 +39,20 @@ def register_in_kvstore() -> None:
         for network_config in Config.get_network_configs(only_configured=True):
             w3 = get_web3(network_config.chain_id)
             kvstore_client = KVStoreClient(w3)
+            kvstore_public_key_url = None
 
-            is_pub_key_stored = False
             try:
-                is_pub_key_stored = kvstore_client.get_public_key(network_config.addr)
+                kvstore_public_key_url = kvstore_client.get_file_url_and_verify_hash(
+                    network_config.addr, KVStoreKeys.public_key.value
+                )
             except KVStoreClientError as ex:
                 if "Invalid hash" not in str(ex):
                     raise
-                is_pub_key_stored = False
 
-            if not is_pub_key_stored:
+            if (
+                not kvstore_public_key_url
+                or kvstore_public_key_url != Config.encryption_config.pgp_public_key_url
+            ):
                 kvstore_client.set_file_url_and_hash(
                     Config.encryption_config.pgp_public_key_url,
                     key=KVStoreKeys.public_key.value,

@@ -74,7 +74,7 @@ def get_exchange_oracle_address(chain_id: int, escrow_address: str) -> str:
 
 
 # FUTURE-TODO: workaround until a new Human Protocol SDK version is released.
-# Check wether data is encrypted without adding new dependencies (like PGPy) to Exchange Oracle.
+# Check wether data is encrypted without adding new dependencies (like PGPy) to Recording Oracle.
 # Should be replaced with EncryptionUtils.is_encrypted method.
 def is_data_encrypted(data: str) -> bool:
     normalized_data = data.strip()

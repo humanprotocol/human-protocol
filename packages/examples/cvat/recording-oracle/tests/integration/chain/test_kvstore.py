@@ -13,9 +13,6 @@ from src.core.config import LocalhostConfig
 from tests.utils.constants import (
     DEFAULT_GAS_PAYER_PRIV,
     DEFAULT_MANIFEST_URL,
-    PGP_PASSPHRASE,
-    PGP_PRIVATE_KEY1,
-    PGP_PUBLIC_KEY1,
     REPUTATION_ORACLE_ADDRESS,
 )
 from tests.utils.setup_escrow import create_escrow
@@ -100,12 +97,15 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.assertEqual(reputation_url, "")
 
     def test_store_public_key(self):
+        PGP_PUBLIC_KEY_URL_1 = "http://pgp-public-key-url-1"
+        PGP_PUBLIC_KEY_URL_2 = "http://pgp-public-key-url-2"
+
         store = {
             "public_key": None,
             "public_key_hash": None,
         }
 
-        def get_public_key(*args, **kwargs):
+        def get_file_url_and_verify_hash(*args, **kwargs):
             public_key = store["public_key"]
 
             if not public_key:
@@ -118,24 +118,21 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             return public_key
 
-        def set_file_url_and_hash(_, url: str, key: str):
+        def set_file_url_and_hash(url: str, key: str):
             store.update(
                 {
-                    # for testing purposes we store key value directly instead of URL
                     key: url,
                     key + "_hash": hash(url),
                 }
             )
 
         with (
-            patch("src.core.config.Config.encryption_config.pgp_private_key", PGP_PRIVATE_KEY1),
-            patch("src.core.config.Config.encryption_config.pgp_passphrase", PGP_PASSPHRASE),
-            # for testing purposes we store key value directly instead of URL
-            patch("src.core.config.Config.encryption_config.pgp_public_key_url", PGP_PUBLIC_KEY1),
-            patch("human_protocol_sdk.kvstore.KVStoreClient.get_public_key", get_public_key),
             patch(
-                "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash",
-                set_file_url_and_hash,
+                "src.core.config.Config.encryption_config.pgp_public_key_url", PGP_PUBLIC_KEY_URL_1
+            ),
+            patch(
+                "human_protocol_sdk.kvstore.KVStoreClient.get_file_url_and_verify_hash",
+                get_file_url_and_verify_hash,
             ),
             patch("src.core.config.LocalhostConfig.is_configured") as mock_localhost_configured,
             patch("src.chain.kvstore.get_web3") as mock_web3,
@@ -144,14 +141,52 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_web3.return_value = self.w3
 
             kvstore_client = KVStoreClient(self.w3)
-            self.assertIsNone(kvstore_client.get_public_key(LocalhostConfig.addr))
+            self.assertIsNone(kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr))
 
-            register_in_kvstore()
-            self.assertIsNotNone(kvstore_client.get_public_key(LocalhostConfig.addr))
+            # check that public key will be set to KVStore at first time
+            with patch(
+                "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
+            ) as mock_set_file_url_and_hash:
+                mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
+                register_in_kvstore()
+                mock_set_file_url_and_hash.assert_called_once()
+                self.assertEquals(
+                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
+                    PGP_PUBLIC_KEY_URL_1,
+                )
 
-            # handle a case when a public key has been updated in a bucket, but URL and hash of a key remain in the KVStore
-            store["public_key"] = "updated_key"
+            # check that the same public key URL is not written to KVStore a second time
+            with patch(
+                "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
+            ) as mock_set_file_url_and_hash:
+                mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
+                register_in_kvstore()
+                mock_set_file_url_and_hash.assert_not_called()
 
-            with self.assertRaises(KVStoreClientError) as error:
-                kvstore_client.get_public_key(LocalhostConfig.addr)
-            self.assertEqual("Invalid hash", str(error.exception))
+            # check that public key URL and hash will be updated in KVStore if previous hash is outdated/corrupted
+            with patch(
+                "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
+            ) as mock_set_file_url_and_hash:
+                mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
+                store["public_key_hash"] = "corrupted_hash"
+                register_in_kvstore()
+                mock_set_file_url_and_hash.assert_called_once()
+                self.assertNotEquals(store["public_key_hash"], "corrupted_hash")
+
+            # check that a new public key URL will be written to KVStore when an outdated URL is stored there
+            with (
+                patch(
+                    "src.core.config.Config.encryption_config.pgp_public_key_url",
+                    PGP_PUBLIC_KEY_URL_2,
+                ),
+                patch(
+                    "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
+                ) as mock_set_file_url_and_hash,
+            ):
+                mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
+                register_in_kvstore()
+                mock_set_file_url_and_hash.assert_called_once()
+                self.assertEquals(
+                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
+                    PGP_PUBLIC_KEY_URL_2,
+                )
