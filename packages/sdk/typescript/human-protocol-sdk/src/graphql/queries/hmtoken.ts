@@ -7,11 +7,27 @@ const HOLDER_FRAGMENT = gql`
   }
 `;
 
-export const GET_HOLDERS_QUERY = gql`
-  query GetHolders {
-    holders {
-      ...HolderFields
+export const GET_HOLDERS_QUERY = (address?: string) => {
+  const WHERE_CLAUSE = `
+    where: {
+      ${address ? `address: $address,` : ''}
     }
-  }
-  ${HOLDER_FRAGMENT}
-`;
+  `;
+
+  return gql`
+    query GetHolders(
+      $address: String
+      $orderBy: String
+      $orderDirection: String
+    ) {
+      holders(
+        ${WHERE_CLAUSE}
+        orderBy: $orderBy,
+        orderDirection: $orderDirection
+      ) {
+        ...HolderFields
+      }
+    }
+    ${HOLDER_FRAGMENT}
+  `;
+};
