@@ -40,12 +40,13 @@ export class DetailsService {
 
       return leaderDto;
     }
-    const walletDto: WalletDto = {
+    const walletDto: WalletDto = plainToInstance(WalletDto, {
       chainId,
       address,
       // TODO: Balance fetching
       balance: '0.01',
-    };
+    });
+
     return walletDto;
   }
 
