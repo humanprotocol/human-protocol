@@ -138,7 +138,7 @@ export function AvailableJobsTableMobile({
                       color={colorPalette.secondary.light}
                       variant="body2"
                     >
-                      {getNetworkName(d.chain_id)}
+                      {getNetworkName()}
                     </Typography>
                   </ListItem>
                   <ListItem label={t('worker.jobs.jobType')}>

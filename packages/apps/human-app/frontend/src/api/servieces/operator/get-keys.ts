@@ -34,7 +34,6 @@ export function useGetKeys() {
   return useQuery({
     queryFn: async () => {
       const contractAddress = getContractAddress({
-        chainId,
         contractName: 'EthKVStore',
       });
       const result = await ethKVStoreGetKeys({

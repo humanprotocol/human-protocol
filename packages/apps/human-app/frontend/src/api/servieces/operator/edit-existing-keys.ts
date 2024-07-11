@@ -85,7 +85,6 @@ function editExistingKeysMutationFn(
   }
 ) {
   const contractAddress = getContractAddress({
-    chainId: userData.chainId,
     contractName: 'EthKVStore',
   });
 

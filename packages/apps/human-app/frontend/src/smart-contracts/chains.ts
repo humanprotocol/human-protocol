@@ -11,7 +11,7 @@ import {
   type ContractsAddresses,
 } from '@/smart-contracts/contracts';
 
-type ChainWithAddresses = Chain & {
+export type ChainWithAddresses = Chain & {
   addresses: ContractsAddresses;
 };
 

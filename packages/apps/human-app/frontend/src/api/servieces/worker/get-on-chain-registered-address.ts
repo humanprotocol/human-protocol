@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { ethKVStoreGetKycData } from '@/smart-contracts/EthKVStore/eth-kv-store-get-kyc-data';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
-import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
+import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 export interface RegisterAddressPayload {
   address: string;
@@ -20,21 +20,18 @@ export type RegisterAddressSuccess = z.infer<
 
 export function useGetOnChainRegisteredAddress() {
   const { user } = useAuthenticatedUser();
-  const { web3ProviderMutation, address, chainId } = useConnectedWallet();
+  const { address } = useWalletConnect();
 
   return useQuery({
     queryFn: async () => {
       const contractAddress = getContractAddress({
-        chainId,
         contractName: 'EthKVStore',
       });
 
       const registeredAddressOnChain = await ethKVStoreGetKycData({
         contractAddress,
-        accountAddress: address,
+        accountAddress: user.wallet_address || address || '',
         kycKey: `KYC-${user.reputation_network}`,
-        signer: web3ProviderMutation.data?.signer,
-        chainId,
       });
 
       return registeredAddressOnChain;
@@ -44,12 +41,6 @@ export function useGetOnChainRegisteredAddress() {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    queryKey: [
-      user.wallet_address,
-      user.reputation_network,
-      chainId,
-      address,
-      web3ProviderMutation.data?.signer,
-    ],
+    queryKey: [user.wallet_address, user.reputation_network, address],
   });
 }

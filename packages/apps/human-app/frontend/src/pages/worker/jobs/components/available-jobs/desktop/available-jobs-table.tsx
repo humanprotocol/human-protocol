@@ -59,8 +59,8 @@ const getColumns = (callbacks: {
       header: t('worker.jobs.network'),
       size: 100,
       enableSorting: false,
-      Cell: (props) => {
-        return getNetworkName(props.row.original.chain_id);
+      Cell: () => {
+        return getNetworkName();
       },
       muiTableHeadCellProps: () => ({
         component: (props) => {

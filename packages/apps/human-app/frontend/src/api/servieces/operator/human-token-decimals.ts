@@ -12,7 +12,6 @@ export function useHMTokenDecimals() {
   return useQuery({
     queryFn: () => {
       const contractAddress = getContractAddress({
-        chainId,
         contractName: 'HMToken',
       });
       return hmTokenDecimals({

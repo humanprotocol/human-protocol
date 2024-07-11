@@ -12,9 +12,7 @@ import { RegisterAddressBtn } from '@/pages/worker/profile/register-address-btn'
 import { DoneLabel } from '@/pages/worker/profile/done-label';
 import { useRegisterAddressNotifications } from '@/hooks/use-register-address-notifications';
 import { useRegisterAddressMutation } from '@/api/servieces/worker/use-register-address';
-import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
 import { RegisterAddressOnChainButton } from '@/pages/worker/profile/register-address-on-chain-btn';
-import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
 
 export function ProfileActions() {
   const {
@@ -49,7 +47,8 @@ export function ProfileActions() {
             {t('components.wallet.connectBtn.connect')}
           </Button>
         );
-      case user.wallet_address && isWalletConnected:
+      case !user.wallet_address && isWalletConnected:
+      case Boolean(user.wallet_address):
         return (
           <DoneLabel>
             <WalletConnectDone />
@@ -69,14 +68,6 @@ export function ProfileActions() {
           >
             {t('components.wallet.connectBtn.connect')}
           </Button>
-        );
-      case user.wallet_address && !isWalletConnected:
-        return <ConnectWalletBtn fullWidth />;
-      case !user.wallet_address && isWalletConnected:
-        return (
-          <DoneLabel>
-            <WalletConnectDone />
-          </DoneLabel>
         );
       default:
         return null;
@@ -109,10 +100,8 @@ export function ProfileActions() {
         </Grid>
       ) : null}
       <Grid>
-        {isWalletConnected && kycApproved && user.wallet_address ? (
-          <RequireWalletConnect>
-            <RegisterAddressOnChainButton />
-          </RequireWalletConnect>
+        {kycApproved && user.wallet_address ? (
+          <RegisterAddressOnChainButton />
         ) : (
           <Button disabled fullWidth>
             {t('worker.profile.addKYCInfoOnChain')}

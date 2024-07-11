@@ -25,7 +25,6 @@ export function useGetStakedAmount() {
   return useQuery({
     queryFn: async () => {
       const contractAddress = getContractAddress({
-        chainId,
         contractName: 'Staking',
       });
       const stakeAmount = await stakingGetStakedTokens({

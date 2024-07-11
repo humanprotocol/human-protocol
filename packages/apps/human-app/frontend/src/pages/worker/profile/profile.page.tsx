@@ -16,11 +16,7 @@ const getNotificationMessage = (
   switch (true) {
     case user.kyc_status !== 'APPROVED':
       return t('worker.profile.topNotifications.noKYC');
-    case user.kyc_status === 'APPROVED' && !user.isWalletConnected:
-      return t('worker.profile.topNotifications.noWalletConnected');
-    case user.kyc_status === 'APPROVED' &&
-      user.isWalletConnected &&
-      !user.wallet_address:
+    case user.kyc_status === 'APPROVED' && !user.wallet_address:
       return t('worker.profile.topNotifications.registerAddress');
     default:
       return null;

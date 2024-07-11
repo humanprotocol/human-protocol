@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useGetOnChainRegisteredAddress } from '@/api/servieces/worker/get-on-chain-registered-address';
 import { useGetSignedAddress } from '@/api/servieces/worker/get-signed-address';
@@ -7,10 +7,13 @@ import { useRegisterAddressOnChainMutation } from '@/api/servieces/worker/use-re
 import { DoneLabel } from '@/pages/worker/profile/done-label';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 export function RegisterAddressOnChainButton() {
   const { setTopNotification, closeNotification } =
     useProtectedLayoutNotification();
+  const { isConnected: isWalletConnected, openModal } = useWalletConnect();
+  const modalWasOpened = useRef(false);
 
   const {
     data: onChainRegisteredAddress,
@@ -63,6 +66,12 @@ export function RegisterAddressOnChainButton() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
   }, [error, isError]);
 
+  useEffect(() => {
+    if (isWalletConnected && modalWasOpened.current && signedAddress) {
+      registerAddressOnChainMutation(signedAddress);
+    }
+  }, [isWalletConnected, registerAddressOnChainMutation, signedAddress]);
+
   if (isPending) {
     return (
       <Button fullWidth loading>
@@ -87,7 +96,12 @@ export function RegisterAddressOnChainButton() {
     <Button
       fullWidth
       onClick={() => {
-        registerAddressOnChainMutation(signedAddress);
+        if (isWalletConnected) {
+          registerAddressOnChainMutation(signedAddress);
+        } else {
+          modalWasOpened.current = true;
+          void openModal();
+        }
       }}
       variant="contained"
     >

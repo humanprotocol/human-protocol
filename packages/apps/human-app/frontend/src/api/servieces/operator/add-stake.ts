@@ -57,12 +57,10 @@ async function addStakeMutationFn(
   } & Omit<ContractCallArguments, 'contractAddress'>
 ) {
   const stakingContractAddress = getContractAddress({
-    chainId: data.chainId,
     contractName: 'Staking',
   });
 
   const hmTokenContractAddress = getContractAddress({
-    chainId: data.chainId,
     contractName: 'HMToken',
   });
 
@@ -76,7 +74,6 @@ async function addStakeMutationFn(
   });
 
   const amountBigInt = ethers.parseUnits(data.amount, data.decimals);
-
   if (amountBigInt - allowance > 0) {
     await hmTokenApprove({
       spender: stakingContractAddress,
