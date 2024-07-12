@@ -73,7 +73,7 @@ describe('WebhookService', () => {
     it('should handle an incoming escrow completed webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
-        escrowAddress: escrowAddress,
+        escrowAddress,
         eventType: EventType.ESCROW_COMPLETED,
       };
 
@@ -83,7 +83,7 @@ describe('WebhookService', () => {
     it('should handle an incoming solution in review webhook', async () => {
       const webhook: WebhookDto = {
         chainId,
-        escrowAddress: escrowAddress,
+        escrowAddress,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
@@ -102,7 +102,7 @@ describe('WebhookService', () => {
     it('should return an error when the event type is invalid', async () => {
       const webhook: WebhookDto = {
         chainId,
-        escrowAddress: escrowAddress,
+        escrowAddress,
         eventType: EventType.TASK_COMPLETED,
       };
 

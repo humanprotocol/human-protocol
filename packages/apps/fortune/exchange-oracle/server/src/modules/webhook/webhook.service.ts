@@ -80,7 +80,7 @@ export class WebhookService {
 
     // Build the webhook data object based on the oracle type.
     const webhookData: WebhookDto = {
-      escrowAddress: webhook.escrowAddress.toLowerCase(),
+      escrowAddress: webhook.escrowAddress,
       chainId: webhook.chainId,
       eventType: webhook.eventType,
     };
