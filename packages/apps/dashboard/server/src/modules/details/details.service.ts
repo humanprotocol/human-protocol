@@ -6,10 +6,12 @@ import {
   EscrowUtils,
   TransactionUtils,
   OperatorUtils,
+  IEscrowsFilter,
+  Role,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
-import { EscrowDto } from './dto/escrow.dto';
+import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
 
@@ -69,6 +71,48 @@ export class DetailsService {
           excludeExtraneousValues: true,
         });
       return transcationPaginationObject;
+    });
+
+    return result;
+  }
+
+  public async getEscrows(
+    chainId: ChainId,
+    role: string,
+    address: string,
+    first: number,
+    skip: number,
+  ): Promise<EscrowPaginationDto[]> {
+    const filter: IEscrowsFilter = {
+      chainId,
+      first,
+      skip,
+    };
+
+    switch (role) {
+      case Role.JobLauncher:
+        filter.launcher = address;
+        break;
+      case Role.ReputationOracle:
+        filter.reputationOracle = address;
+        break;
+      case Role.RecordingOracle:
+        filter.recordingOracle = address;
+        break;
+      case Role.ExchangeOracle:
+        filter.exchangeOracle = address;
+        break;
+    }
+    const escrows = await EscrowUtils.getEscrows(filter);
+    const result = escrows.map((escrow) => {
+      const escrowPaginationObject: EscrowPaginationDto = plainToInstance(
+        EscrowPaginationDto,
+        escrow,
+        {
+          excludeExtraneousValues: true,
+        },
+      );
+      return escrowPaginationObject;
     });
 
     return result;

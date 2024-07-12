@@ -15,9 +15,12 @@ import {
   DetailsResponseDto,
   DetailsPaginationResponseDto,
 } from './dto/details-response.dto';
-import { DetailsPaginationDto } from './dto/details-pagination.dto';
+import {
+  DetailsTransactionsPaginationDto,
+  DetailsEscrowsPaginationDto,
+} from './dto/details-pagination.dto';
 import { WalletDto } from './dto/wallet.dto';
-import { EscrowDto } from './dto/escrow.dto';
+import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
 
@@ -79,7 +82,7 @@ export class DetailsController {
   })
   public async transactions(
     @Param('address') address: string,
-    @Query() query: DetailsPaginationDto,
+    @Query() query: DetailsTransactionsPaginationDto,
   ): Promise<DetailsPaginationResponseDto> {
     const transactions: TransactionPaginationDto[] =
       await this.detailsService.getTransactions(
@@ -95,6 +98,41 @@ export class DetailsController {
       first: query.first,
       skip: query.skip,
       results: transactions,
+    };
+
+    return response;
+  }
+
+  @Get('/escrows/:address')
+  @ApiQuery({ name: 'chainId', enum: ChainId })
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get escrows by address',
+    description: 'Returns escrows for a given address.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Escrows retrieved successfully',
+    type: DetailsPaginationResponseDto,
+  })
+  public async escrows(
+    @Param('address') address: string,
+    @Query() query: DetailsEscrowsPaginationDto,
+  ): Promise<DetailsPaginationResponseDto> {
+    const escrows: EscrowPaginationDto[] = await this.detailsService.getEscrows(
+      query.chainId,
+      query.role,
+      address,
+      query.first,
+      query.skip,
+    );
+
+    const response: DetailsPaginationResponseDto = {
+      address,
+      chainId: query.chainId,
+      first: query.first,
+      skip: query.skip,
+      results: escrows,
     };
 
     return response;
