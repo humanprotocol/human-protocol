@@ -28,7 +28,6 @@ import { HttpStatus } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
-import { toLowerCase } from '../../common/utils';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -158,7 +157,7 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrow_address: toLowerCase(webhookEntity.escrowAddress!),
+          escrow_address: webhookEntity.escrowAddress!.toLowerCase(),
           chain_id: webhookEntity.chainId,
           event_type: webhookEntity.eventType,
         },
@@ -183,7 +182,7 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrow_address: toLowerCase(webhookEntity.escrowAddress!),
+          escrow_address: webhookEntity.escrowAddress!.toLowerCase(),
           chain_id: webhookEntity.chainId,
           event_type: webhookEntity.eventType,
         },
@@ -209,7 +208,7 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrow_address: toLowerCase(webhookEntity.escrowAddress!),
+          escrow_address: webhookEntity.escrowAddress!.toLowerCase(),
           chain_id: webhookEntity.chainId,
           event_type: webhookEntity.eventType,
         },
@@ -235,7 +234,7 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrow_address: toLowerCase(webhookEntity.escrowAddress!),
+          escrow_address: webhookEntity.escrowAddress!.toLowerCase(),
           chain_id: webhookEntity.chainId,
           event_type: webhookEntity.eventType,
         },

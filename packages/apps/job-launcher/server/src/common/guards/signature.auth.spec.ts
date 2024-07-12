@@ -6,7 +6,6 @@ import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { Role } from '../enums/role';
 import { ControlledError } from '../errors/controlled';
-import { toLowerCase } from '../utils';
 
 jest.mock('../../common/utils/signature');
 
@@ -66,7 +65,7 @@ describe('SignatureAuthGuard', () => {
     it('should return true if signature is verified', async () => {
       mockRequest.headers['header-signature-key'] = 'validSignature';
       mockRequest.body = {
-        escrow_address: toLowerCase(MOCK_ADDRESS),
+        escrow_address: MOCK_ADDRESS.toLowerCase(),
         chain_id: ChainId.LOCALHOST,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
@@ -75,7 +74,7 @@ describe('SignatureAuthGuard', () => {
       expect(result).toBeTruthy();
       expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
-        toLowerCase(MOCK_ADDRESS),
+        MOCK_ADDRESS.toLowerCase(),
       );
     });
 

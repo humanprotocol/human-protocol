@@ -22,7 +22,6 @@ import { CaseConverter } from '../../common/utils/case-converter';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
 import { ControlledError } from '../../common/errors/controlled';
-import { toLowerCase } from '../../common/utils';
 
 @Injectable()
 export class WebhookService {
@@ -57,7 +56,7 @@ export class WebhookService {
 
     // Build the webhook data object based on the oracle type.
     const webhookData = CaseConverter.transformToSnakeCase({
-      escrowAddress: toLowerCase(webhook.escrowAddress),
+      escrowAddress: webhook.escrowAddress.toLowerCase(),
       chainId: webhook.chainId,
       eventType: webhook.eventType,
     } as WebhookDataDto);
