@@ -6,7 +6,6 @@ import { signMessage } from './signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { CaseConverter } from './case-converter';
 import { WebhookDto } from '../../modules/webhook/webhook.dto';
-import { toLowerCase } from '.';
 
 export async function sendWebhook(
   httpService: HttpService,
