@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
-
 dotenv_path = os.getenv("DOTENV_PATH", None)
 if dotenv_path and not os.path.exists(dotenv_path):
     raise FileNotFoundError(dotenv_path)

@@ -1,12 +1,13 @@
 import unittest
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import MagicMock, Mock, patch
 
 from human_protocol_sdk.constants import ChainId
 from sqlalchemy.sql import select
 
 from src.core.types import (
+    AssignmentStatuses,
     ExchangeOracleEventTypes,
     JobStatuses,
     Networks,
@@ -25,6 +26,7 @@ from src.db import SessionLocal
 from src.models.cvat import Assignment, Job, Project, Task, User
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
+from src.utils.time import utcnow
 
 from tests.utils.constants import DEFAULT_MANIFEST_URL, RECORDING_ORACLE_ADDRESS
 
@@ -169,9 +171,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         assignment_id = str(uuid.uuid4())
         assignment = Assignment(
             id=assignment_id,
-            created_at=datetime.utcnow() - timedelta(minutes=10),
-            completed_at=datetime.utcnow() - timedelta(minutes=2),
-            expires_at=datetime.utcnow() + timedelta(minutes=5),
+            created_at=utcnow() - timedelta(minutes=10),
+            completed_at=utcnow() - timedelta(minutes=2),
+            expires_at=utcnow() + timedelta(minutes=5),
             user_wallet_address="sample wallet",
             cvat_job_id=cvat_id,
             status=AssignmentStatuses.completed.value,
