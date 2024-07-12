@@ -208,7 +208,7 @@ class _TaskValidator:
                                 self.manifest.validation.min_quality,
                             ),
                         )
-                        for rejected_job_id, reason in validation_result.rejected_jobs
+                        for rejected_job_id, reason in validation_result.rejected_jobs.items()
                         if not isinstance(reason, TooFewGtError)
                     ]
                 ),
