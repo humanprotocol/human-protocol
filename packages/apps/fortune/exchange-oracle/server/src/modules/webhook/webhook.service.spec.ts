@@ -214,7 +214,9 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_RECORDING_ORACLE_WEBHOOK_URL,
         {
-          escrow_address: webhookEntity.escrowAddress ? webhookEntity.escrowAddress.toLowerCase() : webhookEntity.escrowAddress,
+          escrow_address: webhookEntity.escrowAddress
+            ? webhookEntity.escrowAddress.toLowerCase()
+            : webhookEntity.escrowAddress,
           chain_id: webhookEntity.chainId,
           event_type: webhookEntity.eventType,
           event_data: { solutions_url: expect.any(String) },

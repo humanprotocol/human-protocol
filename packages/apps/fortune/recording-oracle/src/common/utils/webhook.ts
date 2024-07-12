@@ -16,8 +16,8 @@ export async function sendWebhook(
 ): Promise<boolean> {
   const data = {
     ...webhookBody,
-    escrowAddress: webhookBody.escrowAddress.toLowerCase()
-  }
+    escrowAddress: webhookBody.escrowAddress.toLowerCase(),
+  };
   const snake_case_body = CaseConverter.transformToSnakeCase(data);
   const signedBody = await signMessage(snake_case_body, privateKey);
   const { status } = await firstValueFrom(
