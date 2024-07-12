@@ -37,6 +37,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       setup: jest.fn().mockResolvedValue(null),
       fund: jest.fn().mockResolvedValue(null),

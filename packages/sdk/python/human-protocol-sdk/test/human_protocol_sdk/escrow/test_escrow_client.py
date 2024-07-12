@@ -2204,7 +2204,7 @@ class TestEscrowClient(unittest.TestCase):
         date_from = datetime.fromtimestamp(1683811973)
         date_to = datetime.fromtimestamp(1683812007)
         escrow_filter = EscrowFilter(
-            networks=[ChainId.POLYGON_AMOY],
+            chain_id=ChainId.POLYGON_AMOY,
             launcher=launcher,
             reputation_oracle=reputation_oracle,
             recording_oracle=recording_oracle,
@@ -2220,25 +2220,20 @@ class TestEscrowClient(unittest.TestCase):
         self.assertEqual(escrow_filter.date_from, date_from)
         self.assertEqual(escrow_filter.date_to, date_to)
 
-    def test_escrow_filter_empty_chain_id(self):
-        with self.assertRaises(FilterError) as cm:
-            EscrowFilter(networks=[])
-        self.assertEqual("Invalid ChainId", str(cm.exception))
-
     def test_escrow_filter_invalid_chain_id(self):
         with self.assertRaises(ValueError) as cm:
-            EscrowFilter(networks=[ChainId(123)])
+            EscrowFilter(chain_id=ChainId(123))
         self.assertEqual("123 is not a valid ChainId", str(cm.exception))
 
     def test_escrow_filter_invalid_address_launcher(self):
         with self.assertRaises(FilterError) as cm:
-            EscrowFilter(networks=[ChainId.POLYGON_AMOY], launcher="invalid_address")
+            EscrowFilter(chain_id=ChainId.POLYGON_AMOY, launcher="invalid_address")
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_reputation_oracle(self):
         with self.assertRaises(FilterError) as cm:
             EscrowFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 reputation_oracle="invalid_address",
             )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
@@ -2246,7 +2241,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_escrow_filter_invalid_address_recording_oracle(self):
         with self.assertRaises(FilterError) as cm:
             EscrowFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 recording_oracle="invalid_address",
             )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
@@ -2254,7 +2249,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_escrow_filter_invalid_dates(self):
         with self.assertRaises(FilterError) as cm:
             EscrowFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 date_from=datetime.fromtimestamp(1683812007),
                 date_to=datetime.fromtimestamp(1683811973),
             )

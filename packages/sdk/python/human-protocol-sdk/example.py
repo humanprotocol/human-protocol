@@ -4,7 +4,11 @@ import json
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowUtils
 from human_protocol_sdk.filter import EscrowFilter
-from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+from human_protocol_sdk.statistics import (
+    StatisticsClient,
+    StatisticsParam,
+    HMTHoldersParam,
+)
 from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 from human_protocol_sdk.agreement import agreement
 
@@ -53,6 +57,28 @@ def get_hmt_statistics(statistics_client: StatisticsClient):
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
             )
+        )
+    )
+
+
+def get_hmt_holders(statistics_client: StatisticsClient):
+    print(
+        statistics_client.get_hmt_holders(
+            HMTHoldersParam(
+                order_direction="desc",
+            )
+        )
+    )
+    print(
+        statistics_client.get_hmt_holders(
+            HMTHoldersParam(
+                order_direction="asc",
+            )
+        )
+    )
+    print(
+        statistics_client.get_hmt_holders(
+            HMTHoldersParam(address="0xf183b3b34e70dd17859455389a3ab54d49d41e6f")
         )
     )
 
@@ -110,6 +136,7 @@ if __name__ == "__main__":
     get_leaders()
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+    get_hmt_holders(statistics_client)
     get_escrow_statistics(statistics_client)
     get_hmt_statistics(statistics_client)
     get_payment_statistics(statistics_client)

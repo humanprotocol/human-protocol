@@ -25,6 +25,13 @@ class ChainId(Enum):
     LOCALHOST = 1338
 
 
+class OrderDirection(Enum):
+    """Enum for chain IDs."""
+
+    ASC = "asc"
+    DESC = "desc"
+
+
 NETWORKS = {
     ChainId.MAINNET: {
         "title": "Ethereum",

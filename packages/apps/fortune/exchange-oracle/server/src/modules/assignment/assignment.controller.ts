@@ -64,7 +64,7 @@ export class AssignmentController {
     );
 
     const response: AssignJobResponseDto = {
-      assignmentId: assignment.id,
+      assignmentId: assignment.id.toString(),
       escrowAddress: body.escrowAddress,
       chainId: body.chainId,
       workerAddress: assignment.workerAddress,
@@ -135,6 +135,9 @@ export class AssignmentController {
     @Request() req: RequestWithUser,
     @Body() body: ResignDto,
   ): Promise<void> {
-    return this.assignmentService.resign(body.assignmentId, req.user.address);
+    return this.assignmentService.resign(
+      Number(body.assignmentId),
+      req.user.address,
+    );
   }
 }

@@ -176,6 +176,12 @@ export class CronJobService {
                 await escrowClient.getJobLauncherAddress(escrowAddress),
               )
             ).webhookUrl,
+            (
+              await OperatorUtils.getLeader(
+                chainId,
+                await escrowClient.getExchangeOracleAddress(escrowAddress),
+              )
+            ).webhookUrl,
             // Temporarily disable sending webhook to Recording Oracle
             // (
             //   await OperatorUtils.getLeader(

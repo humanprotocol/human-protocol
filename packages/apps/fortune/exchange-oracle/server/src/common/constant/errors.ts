@@ -49,6 +49,9 @@ export enum ErrorJob {
   JobCompleted = 'This job has already been completed',
   ManifestDecryptionFailed = 'Unable to decrypt manifest',
   ManifestNotFound = 'Unable to get manifest',
+  NotFound = 'Job not found',
+  AlreadyCompleted = 'Job already completed',
+  AlreadyCanceled = 'Job already canceled',
 }
 
 /**

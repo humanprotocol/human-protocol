@@ -326,14 +326,29 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
 
     try {
-      const events = await EscrowUtils.getStatusEvents(
-        this.networkConfigService.networks.map((network) => network.chainId),
-        [EscrowStatus.Partial, EscrowStatus.Complete],
-        lastCronJob?.lastSubgraphTime || undefined,
-        undefined,
-        this.web3Service.getOperatorAddress(),
-      );
+      const events = [];
+      const statuses = [EscrowStatus.Partial, EscrowStatus.Complete];
+      const from = lastCronJob?.lastSubgraphTime || undefined;
 
+      for (const network of this.networkConfigService.networks) {
+        let skip = 0;
+        let eventsBatch;
+
+        do {
+          eventsBatch = await EscrowUtils.getStatusEvents(
+            network.chainId,
+            statuses,
+            from,
+            undefined,
+            this.web3Service.getOperatorAddress(),
+            100,
+            skip,
+          );
+
+          events.push(...eventsBatch);
+          skip += 100;
+        } while (eventsBatch.length === 100);
+      }
       if (events.length === 0) {
         this.logger.log('No events to process');
         await this.completeCronJob(cronJob);
@@ -343,7 +358,7 @@ export class CronJobService {
       const escrowAddresses = events.map((event) =>
         ethers.getAddress(event.escrowAddress),
       );
-      const chainIds = events.map((event) => event.chainId);
+      const chainIds = [...new Set(events.map((event) => event.chainId))];
 
       const jobs =
         await this.jobRepository.findManyByChainIdsAndEscrowAddresses(

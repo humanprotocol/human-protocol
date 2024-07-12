@@ -18,15 +18,15 @@ import {
   DisableOperatorDto,
   PrepareSignatureDto,
   RegisterAddressRequestDto,
-  RegisterAddressResponseDto,
   SignatureBodyDto,
   RegisterLabelerResponseDto,
+  EnableOperatorDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
-import { LowerCaseAddressPipe } from 'src/common/pipes';
+import { KycSignedAddressDto } from '../kyc/kyc.dto';
 
 @ApiTags('User')
 @Controller('/user')
@@ -76,7 +76,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Blockchain address registered successfully',
-    type: RegisterAddressResponseDto,
+    type: KycSignedAddressDto,
   })
   @ApiResponse({
     status: 400,
@@ -93,13 +93,30 @@ export class UserController {
   public async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
-  ): Promise<RegisterAddressResponseDto> {
-    const signedAddress = await this.userService.registerAddress(
-      request.user,
-      data,
-    );
+  ): Promise<KycSignedAddressDto> {
+    return this.userService.registerAddress(request.user, data);
+  }
 
-    return { signedAddress };
+  @Post('/enable-operator')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Enable an operator',
+    description: 'Endpoint to enable an operator.',
+  })
+  @ApiBody({ type: EnableOperatorDto })
+  @ApiResponse({
+    status: 204,
+    description: 'Operator enabled succesfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public enableOperator(
+    @Body() data: EnableOperatorDto,
+    @Request() req: RequestWithUser,
+  ): Promise<void> {
+    return this.userService.enableOperator(req.user, data.signature);
   }
 
   @Post('/disable-operator')
