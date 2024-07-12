@@ -74,3 +74,20 @@ export class EscrowDto {
   @Expose()
   public finalResultsUrl?: string;
 }
+
+export class EscrowPaginationDto {
+  @ApiProperty({ example: ChainId.POLYGON_AMOY })
+  @IsEnum(ChainId)
+  @Expose()
+  public chainId: ChainId;
+
+  @ApiProperty({ example: '0xb794f5ea0ba39494ce839613fffba74279579268' })
+  @IsString()
+  @Expose()
+  public address: string;
+
+  @ApiProperty({ example: 'Launched' })
+  @IsString()
+  @Expose()
+  public status: string;
+}

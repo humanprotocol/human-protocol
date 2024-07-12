@@ -1,15 +1,29 @@
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
-import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 
 import { DetailsService } from './details.service';
-import { DetailsDto } from './dto/details-response.dto';
+import {
+  DetailsResponseDto,
+  DetailsPaginationResponseDto,
+} from './dto/details-response.dto';
+import { DetailsPaginationDto } from './dto/details-pagination.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
+import { TransactionPaginationDto } from './dto/transaction.dto';
 
 @ApiTags('Details')
 @Controller('/details')
+@UsePipes(new ValidationPipe({ transform: true }))
 export class DetailsController {
   constructor(private readonly detailsService: DetailsService) {}
 
@@ -23,31 +37,66 @@ export class DetailsController {
   @ApiResponse({
     status: 200,
     description: 'Details retrieved successfully',
-    type: DetailsDto,
+    type: DetailsResponseDto,
   })
   public async details(
     @Param('address') address: string,
     @Query('chainId') chainId: ChainId,
-  ): Promise<DetailsDto> {
+  ): Promise<DetailsResponseDto> {
     const details: WalletDto | EscrowDto | LeaderDto =
       await this.detailsService.getDetails(chainId, address);
     if (details instanceof WalletDto) {
-      const response: DetailsDto = {
+      const response: DetailsResponseDto = {
         wallet: details,
       };
       return response;
     }
     if (details instanceof EscrowDto) {
-      const response: DetailsDto = {
+      const response: DetailsResponseDto = {
         escrow: details,
       };
       return response;
     }
     if (details instanceof LeaderDto) {
-      const response: DetailsDto = {
+      const response: DetailsResponseDto = {
         leader: details,
       };
       return response;
     }
+  }
+
+  @Get('/transactions/:address')
+  @ApiQuery({ name: 'chainId', enum: ChainId })
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get transactions by address',
+    description: 'Returns transactions for a given address.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Transactions retrieved successfully',
+    type: DetailsPaginationResponseDto,
+  })
+  public async transactions(
+    @Param('address') address: string,
+    @Query() query: DetailsPaginationDto,
+  ): Promise<DetailsPaginationResponseDto> {
+    const transactions: TransactionPaginationDto[] =
+      await this.detailsService.getTransactions(
+        query.chainId,
+        address,
+        query.first,
+        query.skip,
+      );
+
+    const response: DetailsPaginationResponseDto = {
+      address,
+      chainId: query.chainId,
+      first: query.first,
+      skip: query.skip,
+      results: transactions,
+    };
+
+    return response;
   }
 }
