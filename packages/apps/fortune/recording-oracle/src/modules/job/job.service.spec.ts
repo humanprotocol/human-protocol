@@ -34,7 +34,6 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { JobService } from './job.service';
-import { toLowerCase } from '../../common/utils';
 
 jest.mock('minio', () => {
   class Client {

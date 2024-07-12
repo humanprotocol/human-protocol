@@ -6,7 +6,6 @@ import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { Role } from '../enums/role';
 import { HEADER_SIGNATURE_KEY } from '../constants';
-import { toLowerCase } from '../utils';
 
 jest.mock('../../common/utils/signature');
 
