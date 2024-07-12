@@ -83,7 +83,9 @@ describe('UserService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
             signMessage: jest.fn(),
             prepareSignatureBody: jest.fn(),
-            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
+            getOperatorAddress: jest
+              .fn()
+              .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
             getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
           },
         },
@@ -142,20 +144,20 @@ describe('UserService', () => {
     };
     it('should return the user entity if credentials are valid', async () => {
       jest
-        .spyOn(userRepository, 'findByEmail')
+        .spyOn(userRepository, 'findOneByEmail')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByCredentials(email, password);
 
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
+      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(email);
       expect(result).toBe(userEntity);
     });
 
     it('should return null if credentials are invalid', async () => {
-      jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(null);
       const result = await userService.getByCredentials(email, password);
       expect(result).toBe(null);
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(email);
+      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(email);
     });
   });
 
@@ -168,12 +170,12 @@ describe('UserService', () => {
       };
 
       jest
-        .spyOn(userRepository, 'findOneByEvmAddress')
+        .spyOn(userRepository, 'findOneByAddress')
         .mockResolvedValue(userEntity as UserEntity);
 
       const result = await userService.getByAddress(address);
 
-      expect(userRepository.findOneByEvmAddress).toHaveBeenCalledWith(address);
+      expect(userRepository.findOneByAddress).toHaveBeenCalledWith(address);
       expect(result).toBe(userEntity);
     });
   });
@@ -352,7 +354,7 @@ describe('UserService', () => {
 
   describe('registerAddress', () => {
     beforeEach(() => {
-      jest.spyOn(userRepository, 'findByAddress').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOneByAddress').mockResolvedValue(null);
     });
 
     afterEach(() => {
@@ -394,7 +396,10 @@ describe('UserService', () => {
       );
 
       expect(userRepository.updateOne).toHaveBeenCalledWith(userEntity);
-      expect(result).toBe('signature');
+      expect(result).toEqual({
+        key: `KYC-${MOCK_ADDRESS.toLowerCase()}`,
+        value: 'signature',
+      });
     });
 
     it("should fail if address is different from user's evm address", async () => {
@@ -413,7 +418,7 @@ describe('UserService', () => {
           signature,
         }),
       ).rejects.toThrow(
-        new ControlledError(ErrorUser.IncorrectAddress, HttpStatus.BAD_REQUEST),
+        new ControlledError(ErrorUser.AlreadyAssigned, HttpStatus.BAD_REQUEST),
       );
     });
 
@@ -421,7 +426,6 @@ describe('UserService', () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: '',
-        evmAddress: '0x123',
         kyc: {
           country: 'FR',
           status: KycStatus.PENDING_VERIFICATION,
@@ -441,7 +445,7 @@ describe('UserService', () => {
       );
     });
 
-    it("should fail if user's email already exists", async () => {
+    it("should fail if user's address already exists", async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: '',
@@ -456,8 +460,37 @@ describe('UserService', () => {
       const signature = 'valid-signature';
 
       jest
-        .spyOn(userRepository, 'findByAddress')
+        .spyOn(userRepository, 'findOneByAddress')
         .mockResolvedValue(userEntity as any);
+
+      await expect(
+        userService.registerAddress(userEntity as UserEntity, {
+          address,
+          signature,
+        }),
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.AlreadyAssigned, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('should fail if address already registered with another user', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: '',
+        kyc: {
+          country: 'FR',
+          status: KycStatus.APPROVED,
+        },
+      };
+
+      const address = '0x123';
+      const signature = 'valid-signature';
+
+      jest.spyOn(userRepository, 'findOneByAddress').mockResolvedValue({
+        id: 2,
+        email: '',
+        evmAddress: '0x123',
+      } as any);
 
       await expect(
         userService.registerAddress(userEntity as UserEntity, {
@@ -515,6 +548,114 @@ describe('UserService', () => {
         new ControlledError(
           ErrorSignature.SignatureNotVerified,
           HttpStatus.CONFLICT,
+        ),
+      );
+    });
+  });
+
+  describe('enableOperator', () => {
+    const signatureBody: SignatureBodyDto = {
+      from: MOCK_ADDRESS,
+      to: MOCK_ADDRESS,
+      contents: 'enable-operator',
+      nonce: undefined,
+    };
+
+    const userEntity: DeepPartial<UserEntity> = {
+      id: 1,
+      evmAddress: MOCK_ADDRESS,
+    };
+
+    beforeEach(() => {
+      jest
+        .spyOn(userService as any, 'prepareSignatureBody')
+        .mockReturnValue(signatureBody);
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should enable an operator', async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
+        set: jest.fn(),
+      };
+
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+      const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
+
+      const result = await userService.enableOperator(
+        userEntity as any,
+        signature,
+      );
+
+      expect(result).toBe(undefined);
+      expect(userService.prepareSignatureBody).toHaveBeenCalledWith(
+        SignatureType.ENABLE_OPERATOR,
+        MOCK_ADDRESS,
+      );
+      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
+
+      expect(kvstoreClientMock.get).toHaveBeenCalledWith(
+        MOCK_ADDRESS,
+        MOCK_ADDRESS,
+      );
+      expect(kvstoreClientMock.set).toHaveBeenCalledWith(
+        MOCK_ADDRESS,
+        OperatorStatus.ACTIVE,
+      );
+    });
+
+    it("should throw ConflictException if signature doesn't match", async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
+        set: jest.fn(),
+      };
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+
+      (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
+        throw new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        );
+      });
+
+      const invalidSignature = await signMessage(
+        'invalid message',
+        MOCK_PRIVATE_KEY,
+      );
+
+      await expect(
+        userService.enableOperator(userEntity as any, invalidSignature),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('should throw BadRequestException if operator already enabled in KVStore', async () => {
+      const kvstoreClientMock = {
+        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
+      };
+
+      (KVStoreClient.build as any).mockImplementationOnce(
+        () => kvstoreClientMock,
+      );
+      const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
+
+      await expect(
+        userService.enableOperator(userEntity as any, signature),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorOperator.OperatorAlreadyActive,
+          HttpStatus.BAD_REQUEST,
         ),
       );
     });
@@ -635,8 +776,8 @@ describe('UserService', () => {
 
     it('should prepare web3 pre sign up payload and return typed structured data', async () => {
       const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
+        from: MOCK_ADDRESS.toLowerCase(),
+        to: MOCK_ADDRESS.toLowerCase(),
         contents: 'signup',
         nonce: undefined,
       };
@@ -651,8 +792,8 @@ describe('UserService', () => {
 
     it('should prepare web3 pre register address payload and return typed structured data', async () => {
       const expectedData: SignatureBodyDto = {
-        from: MOCK_ADDRESS,
-        to: MOCK_ADDRESS,
+        from: MOCK_ADDRESS.toLowerCase(),
+        to: MOCK_ADDRESS.toLowerCase(),
         contents: 'register-address',
         nonce: undefined,
       };

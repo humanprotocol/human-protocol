@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { JobEntity } from './job.entity';
-import { JobSortField } from '../../common/enums/job';
+import { JobSortField, JobStatus } from '../../common/enums/job';
 import { JobFilterData, ListResult } from './job.interface';
 
 @Injectable()
@@ -33,6 +33,19 @@ export class JobRepository extends BaseRepository<JobEntity> {
         chainId,
         escrowAddress,
       },
+    });
+  }
+
+  public async findOneByChainIdAndEscrowAddressWithAssignments(
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<JobEntity | null> {
+    return this.findOne({
+      where: {
+        chainId,
+        escrowAddress,
+      },
+      relations: ['assignments'],
     });
   }
 
@@ -81,5 +94,13 @@ export class JobRepository extends BaseRepository<JobEntity> {
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
     return { entities, itemCount };
+  }
+
+  public async countJobsByStatus(status: JobStatus): Promise<number> {
+    return this.count({
+      where: {
+        status,
+      },
+    });
   }
 }

@@ -19,7 +19,7 @@ class TestEscrowUtils(unittest.TestCase):
         with patch(
             "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
         ) as mock_function:
-            mock_escrow_1 = {
+            mock_escrow = {
                 "id": "0x1234567890123456789012345678901234567891",
                 "address": "0x1234567890123456789012345678901234567891",
                 "amountPaid": "1000000000000000000",
@@ -41,39 +41,15 @@ class TestEscrowUtils(unittest.TestCase):
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
             }
-            mock_escrow_2 = {
-                "id": "0x1234567890123456789012345678901234567892",
-                "address": "0x1234567890123456789012345678901234567892",
-                "amountPaid": "1000000000000000000",
-                "balance": "1000000000000000000",
-                "count": "1",
-                "factoryAddress": "0x1234567890123456789012345678901234567890",
-                "finalResultsUrl": "https://example.com",
-                "intermediateResultsUrl": "https://example.com",
-                "launcher": "0x1234567890123456789012345678901234567892",
-                "manifestHash": "0x1234567890123456789012345678901234567892",
-                "manifestUrl": "https://example.com",
-                "recordingOracle": "0x1234567890123456789012345678901234567892",
-                "recordingOracleFee": "1000000000000000000",
-                "reputationOracle": "0x1234567890123456789012345678901234567892",
-                "reputationOracleFee": "1000000000000000000",
-                "exchangeOracle": "0x1234567890123456789012345678901234567892",
-                "exchangeOracleFee": "1000000000000000000",
-                "status": "Pending",
-                "token": "0x1234567890123456789012345678901234567892",
-                "totalFundedAmount": "1000000000000000000",
-            }
 
             def side_effect(subgraph_url, query, params):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
-                    return {"data": {"escrows": [mock_escrow_1]}}
-                else:
-                    return {"data": {"escrows": [mock_escrow_2]}}
+                    return {"data": {"escrows": [mock_escrow]}}
 
             mock_function.side_effect = side_effect
 
             filter = EscrowFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 launcher="0x1234567890123456789012345678901234567891",
                 job_requester_id="1",
                 status=Status.Pending,
@@ -94,12 +70,15 @@ class TestEscrowUtils(unittest.TestCase):
                     "status": "Pending",
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "desc",
                 },
             )
             self.assertEqual(len(filtered), 1)
-            self.assertEqual(filtered[0].address, mock_escrow_1["address"])
+            self.assertEqual(filtered[0].address, mock_escrow["address"])
 
-            filter = EscrowFilter(networks=[ChainId.POLYGON, ChainId.POLYGON_AMOY])
+            filter = EscrowFilter(chain_id=ChainId.POLYGON_AMOY)
 
             filtered = EscrowUtils.get_escrows(filter)
 
@@ -115,11 +94,13 @@ class TestEscrowUtils(unittest.TestCase):
                     "status": None,
                     "from": None,
                     "to": None,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "desc",
                 },
             )
-            self.assertEqual(len(filtered), 2)
-            self.assertEqual(filtered[0].chain_id, ChainId.POLYGON)
-            self.assertEqual(filtered[1].chain_id, ChainId.POLYGON_AMOY)
+            self.assertEqual(len(filtered), 1)
+            self.assertEqual(filtered[0].chain_id, ChainId.POLYGON_AMOY)
 
     def test_get_escrow(self):
         with patch(
@@ -205,20 +186,15 @@ class TestEscrowUtils(unittest.TestCase):
             EscrowUtils.get_escrow(ChainId.POLYGON_AMOY, "invalid_address")
         self.assertEqual("Invalid escrow address: invalid_address", str(cm.exception))
 
-    def test_get_status_events_no_networks(self):
-        with self.assertRaises(EscrowClientError) as context:
-            EscrowUtils.get_status_events([])
-        self.assertEqual(str(context.exception), "Unsupported Chain ID")
-
     def test_get_status_events_unsupported_chain_id(self):
         with self.assertRaises(EscrowClientError) as context:
-            EscrowUtils.get_status_events([9999])
+            EscrowUtils.get_status_events(9999)
         self.assertEqual(str(context.exception), "Unsupported Chain ID")
 
     def test_get_status_events_invalid_launcher(self):
         with self.assertRaises(EscrowClientError) as context:
             EscrowUtils.get_status_events(
-                [ChainId.POLYGON_AMOY], launcher="invalid_address"
+                ChainId.POLYGON_AMOY, launcher="invalid_address"
             )
         self.assertEqual(str(context.exception), "Invalid Address")
 
@@ -239,7 +215,7 @@ class TestEscrowUtils(unittest.TestCase):
             }
 
             result = EscrowUtils.get_status_events(
-                [ChainId.POLYGON_AMOY], statuses=[Status.Pending]
+                ChainId.POLYGON_AMOY, statuses=[Status.Pending]
             )
 
             self.assertEqual(len(result), 1)
@@ -268,7 +244,7 @@ class TestEscrowUtils(unittest.TestCase):
             date_to = datetime(2021, 12, 31)
 
             result = EscrowUtils.get_status_events(
-                [ChainId.POLYGON_AMOY],
+                ChainId.POLYGON_AMOY,
                 statuses=[Status.Pending],
                 date_from=date_from,
                 date_to=date_to,
@@ -287,54 +263,10 @@ class TestEscrowUtils(unittest.TestCase):
             mock_get_data_from_subgraph.return_value = {"data": {}}
 
             result = EscrowUtils.get_status_events(
-                [ChainId.POLYGON_AMOY], statuses=[Status.Pending]
+                ChainId.POLYGON_AMOY, statuses=[Status.Pending]
             )
 
             self.assertEqual(len(result), 0)
-
-    def test_get_status_events_multiple_networks(self):
-        with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.side_effect = [
-                {
-                    "data": {
-                        "escrowStatusEvents": [
-                            {
-                                "timestamp": 1620000000,
-                                "escrowAddress": "0x123",
-                                "status": "Pending",
-                            }
-                        ]
-                    }
-                },
-                {
-                    "data": {
-                        "escrowStatusEvents": [
-                            {
-                                "timestamp": 1630000000,
-                                "escrowAddress": "0x456",
-                                "status": "Pending",
-                            }
-                        ]
-                    }
-                },
-            ]
-
-            result = EscrowUtils.get_status_events(
-                [ChainId.POLYGON_AMOY, ChainId.POLYGON], statuses=[Status.Pending]
-            )
-
-            self.assertEqual(len(result), 2)
-            self.assertEqual(result[0].timestamp, 1620000000)
-            self.assertEqual(result[0].escrow_address, "0x123")
-            self.assertEqual(result[0].status, "Pending")
-            self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
-
-            self.assertEqual(result[1].timestamp, 1630000000)
-            self.assertEqual(result[1].escrow_address, "0x456")
-            self.assertEqual(result[1].status, "Pending")
-            self.assertEqual(result[1].chain_id, ChainId.POLYGON)
 
     def test_get_status_events_with_launcher(self):
         with patch(
@@ -353,7 +285,7 @@ class TestEscrowUtils(unittest.TestCase):
             }
 
             result = EscrowUtils.get_status_events(
-                [ChainId.POLYGON_AMOY],
+                ChainId.POLYGON_AMOY,
                 statuses=[Status.Pending],
                 launcher="0x1234567890abcdef1234567890abcdef12345678",
             )

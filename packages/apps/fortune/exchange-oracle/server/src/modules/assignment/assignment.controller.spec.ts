@@ -37,7 +37,7 @@ describe('assignmentController', () => {
     assignmentService = moduleRef.get<AssignmentService>(AssignmentService);
   });
 
-  describe('processWebhook', () => {
+  describe('getAssignmentList', () => {
     it('should call assignmentService.getAssignmentList', async () => {
       const query: GetAssignmentsDto = {
         chainId: 80001,
@@ -72,7 +72,9 @@ describe('assignmentController', () => {
         expect.any(String),
       );
     });
+  });
 
+  describe('createAssignment', () => {
     it('should call assignmentService.createAssignment', async () => {
       const body: CreateAssignmentDto = {
         chainId: 80001,
@@ -80,7 +82,7 @@ describe('assignmentController', () => {
       };
       jest
         .spyOn(assignmentService, 'createAssignment')
-        .mockResolvedValue({} as any);
+        .mockResolvedValue({ id: 1 } as any);
       await assignmentController.createAssignment(
         {
           user: { address: userAddress },
@@ -97,7 +99,7 @@ describe('assignmentController', () => {
     it('should call jobService.resignJob', async () => {
       const assignmentId = 123;
       const resignJobDto: ResignDto = {
-        assignmentId,
+        assignmentId: assignmentId.toString(),
       };
 
       jest.spyOn(assignmentService, 'resign').mockResolvedValue();
@@ -108,7 +110,7 @@ describe('assignmentController', () => {
       );
 
       expect(assignmentService.resign).toHaveBeenCalledWith(
-        resignJobDto.assignmentId,
+        assignmentId,
         userAddress,
       );
     });

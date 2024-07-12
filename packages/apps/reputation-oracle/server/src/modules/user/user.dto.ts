@@ -65,10 +65,10 @@ export class RegisterAddressRequestDto {
   public signature: string;
 }
 
-export class RegisterAddressResponseDto {
-  @ApiProperty({ name: 'signed_address' })
+export class EnableOperatorDto {
+  @ApiProperty()
   @IsString()
-  public signedAddress: string;
+  public signature: string;
 }
 
 export class DisableOperatorDto {

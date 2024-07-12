@@ -32,7 +32,7 @@ yarn install @human-protocol/sdk
 import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
 const KVStoreAddresses = new KVStoreUtils.getData({
-  networks: [ChainId.POLYGON_AMOY]
+  network: ChainId.POLYGON_AMOY
 });
 ```
 
@@ -113,4 +113,4 @@ console.log(kvStoreData);
 
 #### Source
 
-[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)
+[kvstore.ts:498](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L498)

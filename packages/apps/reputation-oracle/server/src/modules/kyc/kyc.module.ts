@@ -8,6 +8,7 @@ import { KycRepository } from './kyc.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { KycEntity } from './kyc.entity';
 import { UserModule } from '../user/user.module';
+import { Web3Module } from '../web3/web3.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UserModule } from '../user/user.module';
     TypeOrmModule.forFeature([KycEntity]),
     ConfigModule,
     HttpModule,
+    Web3Module,
   ],
   providers: [KycService, KycRepository],
   controllers: [KycController],

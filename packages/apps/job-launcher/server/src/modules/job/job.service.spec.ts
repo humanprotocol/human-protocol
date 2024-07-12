@@ -136,7 +136,6 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
   EscrowUtils: {
-    getEscrows: jest.fn(),
     getEscrow: jest.fn(),
   },
   StakingClient: {

@@ -32,7 +32,7 @@ yarn install @human-protocol/sdk
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 
 const escrowAddresses = new EscrowUtils.getEscrows({
-  networks: [ChainId.POLYGON_AMOY]
+  network: ChainId.POLYGON_AMOY
 });
 ```
 
@@ -132,7 +132,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Source
 
-[escrow.ts:1631](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1631)
+[escrow.ts:1646](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1646)
 
 ***
 
@@ -146,7 +146,7 @@ This function returns an array of escrows based on the specified filter paramete
 
 ```ts
 interface IEscrowsFilter {
-  networks: ChainId[];
+  chainId: ChainId;
   launcher?: string;
   reputationOracle?: string;
   recordingOracle?: string;
@@ -155,6 +155,9 @@ interface IEscrowsFilter {
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
+  first?: number;
+  skip?: number;
+  orderDirection?: OrderDirection;
 }
 ```
 
@@ -177,6 +180,13 @@ enum ChainId {
   CELO_ALFAJORES = 44787,
    = 1273227453,
   LOCALHOST = 1338,
+}
+```
+
+```ts
+enum OrderDirection {
+  ASC = 'asc',
+  DESC = 'desc',
 }
 ```
 
@@ -239,20 +249,20 @@ const filters: IEscrowsFilter = {
   status: EscrowStatus.Pending,
   from: new Date(2023, 4, 8),
   to: new Date(2023, 5, 8),
-  networks: [ChainId.POLYGON_AMOY]
+  chainId: ChainId.POLYGON_AMOY
 };
 const escrowDatas = await EscrowUtils.getEscrows(filters);
 ```
 
 #### Source
 
-[escrow.ts:1507](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1507)
+[escrow.ts:1517](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1517)
 
 ***
 
 ### getStatusEvents()
 
-> `static` **getStatusEvents**(`networks`, `statuses`?, `from`?, `to`?, `launcher`?): `Promise`\<`StatusEvent`[]\>
+> `static` **getStatusEvents**(`chainId`, `statuses`?, `from`?, `to`?, `launcher`?, `first`?, `skip`?, `orderDirection`?): `Promise`\<`StatusEvent`[]\>
 
 This function returns the status events for a given set of networks within an optional date range.
 
@@ -285,17 +295,23 @@ enum ChainId {
 ```
 
 ```ts
+enum OrderDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+```
+
+```ts
 type Status = {
   escrowAddress: string;
   timestamp: string;
   status: string;
-  chainId: ChainId;
 };
 ```
 
 #### Parameters
 
-• **networks**: `ChainId`[]
+• **chainId**: `ChainId`
 
 List of network IDs to query for status events.
 
@@ -314,6 +330,18 @@ Optional end date to filter events.
 • **launcher?**: `string`
 
 Optional launcher address to filter events. Must be a valid Ethereum address.
+
+• **first?**: `number`
+
+Optional number of transactions per page. Default is 10.
+
+• **skip?**: `number`
+
+Optional number of transactions to skip. Default is 0.
+
+• **orderDirection?**: `OrderDirection`
+
+Optional order of the results. Default is DESC.
 
 #### Returns
 
@@ -341,4 +369,4 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 
 #### Source
 
-[escrow.ts:1720](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1720)
+[escrow.ts:1744](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1744)

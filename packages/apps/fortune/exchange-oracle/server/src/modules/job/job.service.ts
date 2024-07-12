@@ -35,6 +35,7 @@ import { AssignmentRepository } from '../assignment/assignment.repository';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 import { SortDirection } from '../../common/enums/collection';
+import { AssignmentEntity } from '../assignment/assignment.entity';
 
 @Injectable()
 export class JobService {
@@ -73,6 +74,56 @@ export class JobService {
     newJobEntity.status = JobStatus.ACTIVE;
     newJobEntity.reputationNetwork = reputationOracleAddress;
     await this.jobRepository.createUnique(newJobEntity);
+  }
+
+  public async completeJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
+
+    const jobEntity =
+      await this.jobRepository.findOneByChainIdAndEscrowAddressWithAssignments(
+        chainId,
+        escrowAddress,
+      );
+
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (jobEntity.status === JobStatus.COMPLETED) {
+      throw new BadRequestException(ErrorJob.AlreadyCompleted);
+    }
+
+    jobEntity.status = JobStatus.COMPLETED;
+    jobEntity.assignments.forEach((assignment: AssignmentEntity) => {
+      assignment.status = AssignmentStatus.COMPLETED;
+    });
+
+    await this.jobRepository.save(jobEntity);
+  }
+
+  public async cancelJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
+
+    const jobEntity =
+      await this.jobRepository.findOneByChainIdAndEscrowAddressWithAssignments(
+        chainId,
+        escrowAddress,
+      );
+
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (jobEntity.status === JobStatus.CANCELED) {
+      throw new BadRequestException(ErrorJob.AlreadyCanceled);
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    jobEntity.assignments.forEach((assignment: AssignmentEntity) => {
+      assignment.status = AssignmentStatus.CANCELED;
+    });
+
+    await this.jobRepository.save(jobEntity);
   }
 
   public async getJobList(
