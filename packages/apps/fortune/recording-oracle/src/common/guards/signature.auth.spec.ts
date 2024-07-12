@@ -64,7 +64,7 @@ describe('SignatureAuthGuard', () => {
     it('should return true if signature is verified', async () => {
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
       mockRequest.body = {
-        escrow_address: MOCK_ADDRESS.toLowerCase(),
+        escrow_address: MOCK_ADDRESS,
         chain_id: ChainId.LOCALHOST,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
@@ -73,7 +73,7 @@ describe('SignatureAuthGuard', () => {
       expect(result).toBeTruthy();
       expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
-        MOCK_ADDRESS.toLowerCase(),
+        MOCK_ADDRESS,
       );
     });
 
