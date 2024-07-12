@@ -90,7 +90,7 @@ type Escrow @entity {
   createdAt: BigInt!
 }
 
-type Payout @entity {
+type Payout @entity(immutable: true) {
   id: ID!
   escrowAddress: Bytes! # address
   recipient: Bytes! # address
@@ -98,7 +98,7 @@ type Payout @entity {
   createdAt: BigInt!
 }
 
-type DailyWorker @entity {
+type DailyWorker @entity(immutable: true) {
   id: ID!
   timestamp: BigInt!
   address: Bytes! # address
@@ -110,7 +110,7 @@ type DailyWorker @entity {
 ##################################################
 
 # HMToken
-type HMTTransferEvent @entity {
+type HMTTransferEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -121,7 +121,7 @@ type HMTTransferEvent @entity {
   amount: BigInt!
 }
 
-type HMTBulkTransferEvent @entity {
+type HMTBulkTransferEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -131,7 +131,7 @@ type HMTBulkTransferEvent @entity {
   bulkCount: BigInt!
 }
 
-type HMTApprovalEvent @entity {
+type HMTApprovalEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -142,7 +142,7 @@ type HMTApprovalEvent @entity {
   amount: BigInt!
 }
 
-type HMTBulkApprovalEvent @entity {
+type HMTBulkApprovalEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -153,7 +153,7 @@ type HMTBulkApprovalEvent @entity {
 }
 
 # Escrow
-type FundEvent @entity {
+type FundEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -164,7 +164,7 @@ type FundEvent @entity {
   amount: BigInt!
 }
 
-type SetupEvent @entity {
+type SetupEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -174,7 +174,7 @@ type SetupEvent @entity {
   sender: Bytes! # address
 }
 
-type StoreResultsEvent @entity {
+type StoreResultsEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -185,7 +185,7 @@ type StoreResultsEvent @entity {
   intermediateResultsUrl: String! # string
 }
 
-type BulkPayoutEvent @entity {
+type BulkPayoutEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -197,7 +197,7 @@ type BulkPayoutEvent @entity {
   bulkCount: BigInt!
 }
 
-type EscrowStatusEvent @entity {
+type EscrowStatusEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -210,7 +210,7 @@ type EscrowStatusEvent @entity {
 }
 
 # KVStore
-type KVStoreSetEvent @entity {
+type KVStoreSetEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -221,7 +221,7 @@ type KVStoreSetEvent @entity {
   value: String!
 }
 
-type KVStore @entity {
+type KVStore @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -231,7 +231,7 @@ type KVStore @entity {
 }
 
 # Staking
-type StakeDepositedEvent @entity {
+type StakeDepositedEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -241,7 +241,7 @@ type StakeDepositedEvent @entity {
   amount: BigInt!
 }
 
-type StakeLockedEvent @entity {
+type StakeLockedEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -252,7 +252,7 @@ type StakeLockedEvent @entity {
   lockedUntilTimestamp: BigInt!
 }
 
-type StakeWithdrawnEvent @entity {
+type StakeWithdrawnEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -262,7 +262,7 @@ type StakeWithdrawnEvent @entity {
   amount: BigInt!
 }
 
-type StakeSlashedEvent @entity {
+type StakeSlashedEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -274,7 +274,7 @@ type StakeSlashedEvent @entity {
   amount: BigInt!
 }
 
-type StakeAllocatedEvent @entity {
+type StakeAllocatedEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -285,7 +285,7 @@ type StakeAllocatedEvent @entity {
   amount: BigInt!
 }
 
-type AllocationClosedEvent @entity {
+type AllocationClosedEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -297,7 +297,7 @@ type AllocationClosedEvent @entity {
 }
 
 # RewardPool
-type RewardAddedEvent @entity {
+type RewardAddedEvent @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
@@ -366,7 +366,7 @@ type LeaderStatistics @entity {
   leaders: BigInt!
 }
 
-type Transaction @entity {
+type Transaction @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
