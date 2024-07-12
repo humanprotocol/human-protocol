@@ -354,13 +354,14 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
+    const walletAddress = data.address.toLowerCase();
     const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
-      data.address,
+      walletAddress,
     );
 
     const verified = verifySignature(preSignUpData, data.signature, [
-      data.address,
+      walletAddress,
     ]);
 
     if (!verified) {
@@ -384,29 +385,30 @@ export class AuthService {
 
     if (
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await kvstore.get(data.address, KVStoreKeys.role),
+        await kvstore.get(walletAddress, KVStoreKeys.role),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    const userEntity = await this.userService.createWeb3User(data.address);
+    const userEntity = await this.userService.createWeb3User(walletAddress);
 
-    await kvstore.set(data.address, OperatorStatus.ACTIVE);
+    await kvstore.set(walletAddress, OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }
 
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
-    const userEntity = await this.userService.getByAddress(data.address);
+    const walletAddress = data.address.toLowerCase();
+    const userEntity = await this.userService.getByAddress(walletAddress);
 
     const verified = verifySignature(
       await this.userService.prepareSignatureBody(
         SignatureType.SIGNIN,
-        data.address,
+        walletAddress,
       ),
       data.signature,
-      [data.address],
+      [walletAddress],
     );
 
     if (!verified) {
