@@ -159,7 +159,7 @@ export class UserController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   public async prepareSignature(
-    @Body(new LowerCaseAddressPipe()) data: PrepareSignatureDto,
+    @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
     return await this.userService.prepareSignatureBody(data.type, data.address);
   }
