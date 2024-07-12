@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 
+import { AddressValidationPipe } from '../../common/pipes/address-validation.pipe';
 import { DetailsService } from './details.service';
 import {
   DetailsResponseDto,
@@ -43,7 +44,7 @@ export class DetailsController {
     type: DetailsResponseDto,
   })
   public async details(
-    @Param('address') address: string,
+    @Param('address', AddressValidationPipe) address: string,
     @Query('chainId') chainId: ChainId,
   ): Promise<DetailsResponseDto> {
     const details: WalletDto | EscrowDto | LeaderDto =
@@ -81,7 +82,7 @@ export class DetailsController {
     type: DetailsPaginationResponseDto,
   })
   public async transactions(
-    @Param('address') address: string,
+    @Param('address', AddressValidationPipe) address: string,
     @Query() query: DetailsTransactionsPaginationDto,
   ): Promise<DetailsPaginationResponseDto> {
     const transactions: TransactionPaginationDto[] =
@@ -116,7 +117,7 @@ export class DetailsController {
     type: DetailsPaginationResponseDto,
   })
   public async escrows(
-    @Param('address') address: string,
+    @Param('address', AddressValidationPipe) address: string,
     @Query() query: DetailsEscrowsPaginationDto,
   ): Promise<DetailsPaginationResponseDto> {
     const escrows: EscrowPaginationDto[] = await this.detailsService.getEscrows(
