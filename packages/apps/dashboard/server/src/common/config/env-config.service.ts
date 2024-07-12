@@ -43,7 +43,7 @@ export class EnvironmentConfigService {
     );
   }
   get hmtPriceSourceApiKey(): string {
-    return this.configService.get<string>('HMT_PRICE_SOURCE_API_KEY');
+    return this.configService.getOrThrow<string>('HMT_PRICE_SOURCE_API_KEY');
   }
   get hmtPriceFromKey(): string {
     return this.configService.get<string>(
