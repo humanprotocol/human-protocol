@@ -2,6 +2,8 @@ specVersion: 0.0.5
 description: '{{ description }}'
 schema:
   file: ./schema.graphql
+indexerHints:
+  prune: auto
 dataSources:
   - kind: ethereum
     name: EscrowFactory
@@ -129,7 +131,6 @@ dataSources:
         - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
           handler: handleRewardAdded
       file: ./src/mapping/RewardPool.ts
-{{ #LegacyEscrowFactory }}
   - kind: ethereum
     name: LegacyEscrowFactory
     network: '{{ network }}'
@@ -150,7 +151,6 @@ dataSources:
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
-{{ /LegacyEscrowFactory }}
 templates:
   - name: Escrow
     kind: ethereum/contract
@@ -175,8 +175,19 @@ templates:
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending
+          calls:
+            Escrow.reputationOracle: Escrow[event.address].reputationOracle()
+            Escrow.reputationOracleFeePercentage: Escrow[event.address].reputationOracleFeePercentage()
+            LegacyEscrow.reputationOracleStake: LegacyEscrow[event.address].reputationOracleStake()
+            Escrow.recordingOracle: Escrow[event.address].recordingOracle()
+            Escrow.recordingOracleFeePercentage: Escrow[event.address].recordingOracleFeePercentage()
+            LegacyEscrow.recordingOracleStake: LegacyEscrow[event.address].recordingOracleStake()
+            Escrow.exchangeOracle: Escrow[event.address].exchangeOracle()
+            Escrow.exchangeOracleFeePercentage: Escrow[event.address].exchangeOracleFeePercentage()
         - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
           handler: handleBulkTransfer
+          calls:
+            Escrow.finalResultsUrl: Escrow[event.address].finalResultsUrl()
         - event: Cancelled()
           handler: handleCancelled
         - event: Completed()
@@ -202,5 +213,13 @@ templates:
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending
+          calls:
+            Escrow.reputationOracle: Escrow[event.address].reputationOracle()
+            Escrow.reputationOracleStake: Escrow[event.address].reputationOracleStake()
+            Escrow.recordingOracle: Escrow[event.address].recordingOracle()
+            Escrow.recordingOracleStake: Escrow[event.address].recordingOracleStake()
         - event: BulkTransfer(indexed uint256,uint256)
           handler: handleBulkTransfer
+          calls:
+            Escrow.status: Escrow[event.address].status()
+            Escrow.finalResultsUrl: Escrow[event.address].finalResultsUrl()
