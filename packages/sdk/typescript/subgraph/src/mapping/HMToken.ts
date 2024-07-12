@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
 
 import {
   Approval,
@@ -25,8 +25,9 @@ import { ONE_BI, ONE_DAY, ZERO_BI } from './utils/number';
 import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
+import { toBytes } from './utils/string';
 
-export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
+export const HMT_STATISTICS_ENTITY_ID = toBytes('hmt-statistics-id');
 
 function constructStatsEntity(): HMTokenStatistics {
   const entity = new HMTokenStatistics(HMT_STATISTICS_ENTITY_ID);
@@ -42,11 +43,11 @@ function constructStatsEntity(): HMTokenStatistics {
 }
 
 export function createOrLoadUniqueSender(
-  dayStartTimestamp: string,
+  dayStartTimestamp: BigInt,
   timestamp: BigInt,
   address: Address
 ): UniqueSender {
-  const id = `${dayStartTimestamp}-${address.toHex()}`;
+  const id = Bytes.fromI32(dayStartTimestamp.toI32()).concat(address);
   let uniqueSender = UniqueSender.load(id);
 
   if (!uniqueSender) {
@@ -61,11 +62,11 @@ export function createOrLoadUniqueSender(
 }
 
 export function createOrLoadUniqueReceiver(
-  dayStartTimestamp: string,
+  dayStartTimestamp: BigInt,
   timestamp: BigInt,
   address: Address
 ): UniqueReceiver {
-  const id = `${dayStartTimestamp}-${address.toHex()}`;
+  const id = Bytes.fromI32(dayStartTimestamp.toI32()).concat(address);
   let uniqueReceiver = UniqueReceiver.load(id);
 
   if (!uniqueReceiver) {
@@ -89,7 +90,7 @@ function updateHolders(
   )
     return ZERO_BI;
   let count = ZERO_BI;
-  const id = holderAddress.toHex();
+  const id = holderAddress;
   let holder = Holder.load(id);
 
   if (holder == null) {
@@ -143,7 +144,7 @@ export function handleTransfer(event: Transfer): void {
   );
 
   const eventDayData = getEventDayData(event);
-  const escrow = Escrow.load(event.params._to.toHex());
+  const escrow = Escrow.load(event.params._to);
   if (escrow) {
     // Create FundEvent entity
     const fundEventEntity = new FundEvent(toEventId(event));
@@ -199,7 +200,7 @@ export function handleTransfer(event: Transfer): void {
 
   // Update unique sender
   const uniqueSender = createOrLoadUniqueSender(
-    dayStartTimestamp.toString(),
+    new BigInt(dayStartTimestamp),
     event.block.timestamp,
     event.params._from
   );
@@ -214,7 +215,7 @@ export function handleTransfer(event: Transfer): void {
 
   // Update unique receiver
   const uniqueReceiver = createOrLoadUniqueReceiver(
-    dayStartTimestamp.toString(),
+    new BigInt(dayStartTimestamp),
     event.block.timestamp,
     event.params._to
   );
@@ -228,7 +229,7 @@ export function handleTransfer(event: Transfer): void {
   uniqueReceiver.save();
 
   // Track HMT transfer from Escrow for paidAmount, balance, and payout items
-  const fromEscrow = Escrow.load(event.params._from.toHex());
+  const fromEscrow = Escrow.load(event.params._from);
   if (fromEscrow) {
     fromEscrow.amountPaid = fromEscrow.amountPaid.plus(event.params._value);
     fromEscrow.balance = fromEscrow.balance.minus(event.params._value);
@@ -242,7 +243,7 @@ export function handleTransfer(event: Transfer): void {
     worker.payoutCount = worker.payoutCount.plus(ONE_BI);
     worker.save();
 
-    const payoutId = `${event.transaction.hash.toHex()}-${event.params._to.toHex()}`;
+    const payoutId = event.transaction.hash.concat(event.params._to);
     const payment = new Payout(payoutId);
     payment.escrowAddress = event.params._from;
     payment.recipient = event.params._to;
@@ -257,11 +258,14 @@ export function handleTransfer(event: Transfer): void {
     );
 
     const eventDayId = toEventDayId(event);
-    const dailyWorkerId = `${eventDayId}-${event.params._to.toHex()}`;
+    const dailyWorkerId = Bytes.fromI32(eventDayId.toI32()).concat(
+      event.params._to
+    );
+
     let dailyWorker = DailyWorker.load(dailyWorkerId);
     if (!dailyWorker) {
       dailyWorker = new DailyWorker(dailyWorkerId);
-      dailyWorker.timestamp = BigInt.fromString(eventDayId);
+      dailyWorker.timestamp = eventDayId;
       dailyWorker.address = event.params._to;
       dailyWorker.escrowAddress = event.params._from;
       dailyWorker.save();

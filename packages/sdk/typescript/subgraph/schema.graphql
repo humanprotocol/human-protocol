@@ -3,34 +3,34 @@
 ##################################################
 
 type Holder @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes! # address
   balance: BigInt!
 }
 
 type Worker @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   totalAmountReceived: BigInt!
   payoutCount: BigInt!
 }
 
 type UniqueSender @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   transferCount: BigInt!
   timestamp: BigInt!
 }
 
 type UniqueReceiver @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   receiveCount: BigInt!
   timestamp: BigInt!
 }
 
 type Leader @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   amountStaked: BigInt!
   amountAllocated: BigInt!
@@ -53,20 +53,20 @@ type Leader @entity {
 }
 
 type LeaderURL @entity {
-  id: ID!
+  id: Bytes!
   key: String
   url: String
   leader: Leader!
 }
 
 type ReputationNetwork @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
 }
 
 type Escrow @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes! # address
   token: Bytes! # address
   factoryAddress: Bytes! # address
@@ -91,7 +91,7 @@ type Escrow @entity {
 }
 
 type Payout @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   escrowAddress: Bytes! # address
   recipient: Bytes! # address
   amount: BigInt!
@@ -99,7 +99,7 @@ type Payout @entity(immutable: true) {
 }
 
 type DailyWorker @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   timestamp: BigInt!
   address: Bytes! # address
   escrowAddress: Bytes! # address
@@ -111,7 +111,7 @@ type DailyWorker @entity(immutable: true) {
 
 # HMToken
 type HMTTransferEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -122,7 +122,7 @@ type HMTTransferEvent @entity(immutable: true) {
 }
 
 type HMTBulkTransferEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -132,7 +132,7 @@ type HMTBulkTransferEvent @entity(immutable: true) {
 }
 
 type HMTApprovalEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -143,7 +143,7 @@ type HMTApprovalEvent @entity(immutable: true) {
 }
 
 type HMTBulkApprovalEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -154,7 +154,7 @@ type HMTBulkApprovalEvent @entity(immutable: true) {
 
 # Escrow
 type FundEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -165,7 +165,7 @@ type FundEvent @entity(immutable: true) {
 }
 
 type SetupEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -175,7 +175,7 @@ type SetupEvent @entity(immutable: true) {
 }
 
 type StoreResultsEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -186,7 +186,7 @@ type StoreResultsEvent @entity(immutable: true) {
 }
 
 type BulkPayoutEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -198,7 +198,7 @@ type BulkPayoutEvent @entity(immutable: true) {
 }
 
 type EscrowStatusEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -211,7 +211,7 @@ type EscrowStatusEvent @entity(immutable: true) {
 
 # KVStore
 type KVStoreSetEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -222,7 +222,7 @@ type KVStoreSetEvent @entity(immutable: true) {
 }
 
 type KVStore @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   address: Bytes!
@@ -232,7 +232,7 @@ type KVStore @entity(immutable: true) {
 
 # Staking
 type StakeDepositedEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -242,7 +242,7 @@ type StakeDepositedEvent @entity(immutable: true) {
 }
 
 type StakeLockedEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -253,7 +253,7 @@ type StakeLockedEvent @entity(immutable: true) {
 }
 
 type StakeWithdrawnEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -263,7 +263,7 @@ type StakeWithdrawnEvent @entity(immutable: true) {
 }
 
 type StakeSlashedEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -275,7 +275,7 @@ type StakeSlashedEvent @entity(immutable: true) {
 }
 
 type StakeAllocatedEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -286,7 +286,7 @@ type StakeAllocatedEvent @entity(immutable: true) {
 }
 
 type AllocationClosedEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -298,7 +298,7 @@ type AllocationClosedEvent @entity(immutable: true) {
 
 # RewardPool
 type RewardAddedEvent @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -314,7 +314,7 @@ type RewardAddedEvent @entity(immutable: true) {
 ##################################################
 
 type HMTokenStatistics @entity {
-  id: ID!
+  id: Bytes!
   totalTransferEventCount: BigInt!
   totalBulkTransferEventCount: BigInt!
   totalApprovalEventCount: BigInt!
@@ -324,7 +324,7 @@ type HMTokenStatistics @entity {
 }
 
 type EscrowStatistics @entity {
-  id: ID!
+  id: Bytes!
   fundEventCount: BigInt!
   setupEventCount: BigInt!
   storeResultsEventCount: BigInt!
@@ -339,7 +339,7 @@ type EscrowStatistics @entity {
 }
 
 type EventDayData @entity {
-  id: ID!
+  id: Bytes!
   timestamp: Int!
   dailyFundEventCount: BigInt!
   dailySetupEventCount: BigInt!
@@ -362,12 +362,12 @@ type EventDayData @entity {
 }
 
 type LeaderStatistics @entity {
-  id: ID!
+  id: Bytes!
   leaders: BigInt!
 }
 
 type Transaction @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!

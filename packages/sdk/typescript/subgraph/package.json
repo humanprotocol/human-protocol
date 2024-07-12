@@ -10,7 +10,7 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=polygon yarn generate",
-    "test": "graph test ",
+    "test": "graph test",
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",

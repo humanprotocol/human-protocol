@@ -59,7 +59,7 @@ export function handlePending(event: Pending): void {
   );
 
   // Update escrow entity
-  const escrowEntity = Escrow.load(dataSource.address().toHex());
+  const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     escrowEntity.manifestUrl = event.params.manifest;
     escrowEntity.manifestHash = event.params.hash;
@@ -118,7 +118,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   eventDayData.save();
 
   // Update escrow entity
-  const escrowEntity = Escrow.load(dataSource.address().toHex());
+  const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     escrowEntity.intermediateResultsUrl = event.params._url;
     escrowEntity.save();
@@ -152,7 +152,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
   // Update escrow entity
-  const escrowEntity = Escrow.load(dataSource.address().toHex());
+  const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     // Read data on-chain
     const escrowContract = EscrowContract.bind(event.address);
