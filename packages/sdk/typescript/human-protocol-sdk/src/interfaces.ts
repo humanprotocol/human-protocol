@@ -102,6 +102,11 @@ export interface IStatisticsParams {
   limit?: number;
 }
 
+export interface IHMTHoldersParams {
+  address?: string;
+  orderDirection?: 'asc' | 'desc';
+}
+
 export interface IPayoutFilter {
   escrowAddress?: string;
   recipient?: string;

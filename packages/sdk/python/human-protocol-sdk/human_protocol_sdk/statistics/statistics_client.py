@@ -60,6 +60,26 @@ class StatisticsParam:
         self.limit = limit
 
 
+class HMTHoldersParam:
+    """
+    A class used to specify parameters for querying HMT holders.
+    """
+
+    def __init__(
+        self,
+        address: str = None,
+        order_direction: str = "asc",
+    ):
+        """
+        Initializes a HMTHoldersParam instance.
+
+        :param address: Filter by holder's address
+        :param order_direction: Optional. Direction of sorting ('asc' for ascending, 'desc' for descending)
+        """
+        self.address = address
+        self.order_direction = order_direction
+
+
 class DailyEscrowData:
     """
     A class used to specify daily escrow data.
@@ -577,3 +597,52 @@ class StatisticsClient:
                 for event_day_data in event_day_datas
             ],
         )
+
+    def get_hmt_holders(
+        self, param: HMTHoldersParam = HMTHoldersParam()
+    ) -> List[HMTHolder]:
+        """Get HMT holders data with optional filters and ordering.
+
+        :param param: Object containing filter and order parameters
+
+        :return: List of HMT holders
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+                print(statistics_client.get_hmt_holders())
+                print(
+                    statistics_client.get_hmt_holders(
+                        HMTHoldersParam(
+                            address="0x123...",
+                            order_direction="asc",
+                        )
+                    )
+                )
+        """
+        from human_protocol_sdk.gql.hmtoken import get_holders_query
+
+        holders_data = get_data_from_subgraph(
+            self.network,
+            query=get_holders_query(address=param.address),
+            params={
+                "address": param.address,
+                "orderBy": "balance",
+                "orderDirection": param.order_direction,
+            },
+        )
+
+        holders = holders_data["data"]["holders"]
+
+        return [
+            HMTHolder(
+                address=holder.get("address", ""),
+                balance=int(holder.get("balance", 0)),
+            )
+            for holder in holders
+        ]
