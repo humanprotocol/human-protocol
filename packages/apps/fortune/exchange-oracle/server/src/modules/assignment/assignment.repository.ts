@@ -165,6 +165,18 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
       });
     }
 
+    if (data.createdAfter) {
+      queryBuilder.andWhere('assignment.createdAt >= :createdAfter', {
+        createdAfter: data.createdAfter,
+      });
+    }
+
+    if (data.updatedAfter) {
+      queryBuilder.andWhere('assignment.updatedAt >= :updatedAfter', {
+        updatedAfter: data.updatedAfter,
+      });
+    }
+
     queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
       reputationNetwork: data.reputationNetwork,
     });

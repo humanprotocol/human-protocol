@@ -16,6 +16,8 @@ export interface AssignmentFilterData {
   workerAddress: string;
   reputationNetwork: string;
   jobType?: JobType;
+  createdAfter?: Date;
+  updatedAfter?: Date;
 }
 
 export interface ListResult {
