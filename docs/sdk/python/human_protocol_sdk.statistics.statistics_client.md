@@ -8,7 +8,7 @@ This client enables to obtain statistical information from the subgraph.
 from human_protocol_sdk.constants import ChainId
 from human_protocol_sdk.statistics import StatisticsClient
 
-statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 ```
 
 ## Module
@@ -31,13 +31,13 @@ Initializes a DailyEscrowData instance.
   * **escrows_paid** (`int`) – Paid escrows
   * **escrows_cancelled** (`int`) – Cancelled escrows
 
-### *class* human_protocol_sdk.statistics.statistics_client.DailyHMTData(timestamp, total_transaction_amount, total_transaction_count)
+### *class* human_protocol_sdk.statistics.statistics_client.DailyHMTData(timestamp, total_transaction_amount, total_transaction_count, daily_unique_senders, daily_unique_receivers)
 
 Bases: `object`
 
 A class used to specify daily HMT data.
 
-#### \_\_init_\_(timestamp, total_transaction_amount, total_transaction_count)
+#### \_\_init_\_(timestamp, total_transaction_amount, total_transaction_count, daily_unique_senders, daily_unique_receivers)
 
 Initializes a DailyHMTData instance.
 
@@ -45,6 +45,8 @@ Initializes a DailyHMTData instance.
   * **timestamp** (`datetime`) – Timestamp
   * **total_transaction_amount** (`int`) – Total transaction amount
   * **total_transaction_count** (`int`) – Total transaction count
+  * **daily_unique_senders** (`int`) – Total unique senders
+  * **daily_unique_receivers** (`int`) – Total unique receivers
 
 ### *class* human_protocol_sdk.statistics.statistics_client.DailyPaymentData(timestamp, total_amount_paid, total_count, average_amount_per_worker)
 
@@ -104,6 +106,20 @@ Initializes a HMTHolder instance.
   * **address** (`str`) – Holder address
   * **balance** (`int`) – Holder balance
 
+### *class* human_protocol_sdk.statistics.statistics_client.HMTHoldersParam(address=None, order_direction='asc')
+
+Bases: `object`
+
+A class used to specify parameters for querying HMT holders.
+
+#### \_\_init_\_(address=None, order_direction='asc')
+
+Initializes a HMTHoldersParam instance.
+
+* **Parameters:**
+  * **address** (`Optional`[`str`]) – Filter by holder’s address
+  * **order_direction** (`str`) – Optional. Direction of sorting (‘asc’ for ascending, ‘desc’ for descending)
+
 ### *class* human_protocol_sdk.statistics.statistics_client.HMTStatistics(total_transfer_amount, total_transfer_count, total_holders, holders, daily_hmt_data)
 
 Bases: `object`
@@ -134,13 +150,13 @@ Initializes a PaymentStatistics instance.
 * **Parameters:**
   **daily_payments_data** (`List`[[`DailyPaymentData`](#human_protocol_sdk.statistics.statistics_client.DailyPaymentData)]) – Daily payments data
 
-### *class* human_protocol_sdk.statistics.statistics_client.StatisticsClient(chain_id=ChainId.POLYGON_MUMBAI)
+### *class* human_protocol_sdk.statistics.statistics_client.StatisticsClient(chain_id=ChainId.POLYGON_AMOY)
 
 Bases: `object`
 
 A client used to get statistical data.
 
-#### \_\_init_\_(chain_id=ChainId.POLYGON_MUMBAI)
+#### \_\_init_\_(chain_id=ChainId.POLYGON_AMOY)
 
 Initializes a Statistics instance
 
@@ -162,7 +178,7 @@ Get escrow statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_escrow_statistics())
   print(
@@ -170,6 +186,34 @@ Get escrow statistics data for the given date range.
           StatisticsParam(
               date_from=datetime.datetime(2023, 5, 8),
               date_to=datetime.datetime(2023, 6, 8),
+          )
+      )
+  )
+  ```
+
+#### get_hmt_holders(param=<human_protocol_sdk.statistics.statistics_client.HMTHoldersParam object>)
+
+Get HMT holders data with optional filters and ordering.
+
+* **Parameters:**
+  **param** ([`HMTHoldersParam`](#human_protocol_sdk.statistics.statistics_client.HMTHoldersParam)) – Object containing filter and order parameters
+* **Return type:**
+  `List`[[`HMTHolder`](#human_protocol_sdk.statistics.statistics_client.HMTHolder)]
+* **Returns:**
+  List of HMT holders
+* **Example:**
+  ```python
+  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
+
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+  print(statistics_client.get_hmt_holders())
+  print(
+      statistics_client.get_hmt_holders(
+          HMTHoldersParam(
+              address="0x123...",
+              order_direction="asc",
           )
       )
   )
@@ -190,7 +234,7 @@ Get HMT statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_hmt_statistics())
   print(
@@ -218,7 +262,7 @@ Get payment statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_payment_statistics())
   print(
@@ -246,7 +290,7 @@ Get worker statistics data for the given date range.
   from human_protocol_sdk.contants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
-  statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_worker_statistics())
   print(

@@ -44,7 +44,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
             WEBHOOK_MESSAGE["escrow_address"],
         )
         assert webhook.escrow_address == escrow_address
-        assert webhook.chain_id == 80001
+        assert webhook.chain_id == 80002
         assert webhook.event_type == JobLauncherEventTypes.escrow_created.value
         assert webhook.event_data == {}
         assert webhook.direction == "incoming"
@@ -54,7 +54,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
 def test_incoming_webhook_400_missing_field(client: TestClient) -> None:
     data = {
         "escrow_address": escrow_address,
-        "chain_id": 80001,
+        "chain_id": 80002,
     }
 
     response = client.post(
@@ -77,7 +77,7 @@ def test_incoming_webhook_400_missing_field(client: TestClient) -> None:
 def test_incoming_webhook_400_invalid_address(client: TestClient) -> None:
     data = {
         "escrow_address": "bad_address",
-        "chain_id": 80001,
+        "chain_id": 1338,
         "event_type": "escrow_created",
     }
 
@@ -116,7 +116,7 @@ def test_incoming_webhook_400_invalid_chain_id(client: TestClient) -> None:
         "errors": [
             {
                 "field": "chain_id",
-                "message": "value is not a valid enumeration member; permitted: 137, 80001, 1338",
+                "message": "value is not a valid enumeration member; permitted: 137, 80002, 1338",
             }
         ]
     }

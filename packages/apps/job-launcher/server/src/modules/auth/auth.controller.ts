@@ -7,12 +7,11 @@ import {
   UseGuards,
   UseInterceptors,
   Request,
-  UnprocessableEntityException,
   Logger,
   UsePipes,
   Ip,
-  UseFilters,
   HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -39,9 +38,9 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
 import { PasswordValidationPipe } from '../../common/pipes';
-import { AuthExceptionFilter } from '../../common/exceptions/auth.filter';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { ControlledError } from '../../common/errors/controlled';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -60,7 +59,6 @@ import { TokenType } from './token.entity';
   status: 422,
   description: 'Unprocessable entity.',
 })
-@UseFilters(AuthExceptionFilter)
 @Controller('/auth')
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
@@ -82,6 +80,10 @@ export class AuthJwtController {
   @ApiResponse({
     status: 201,
     description: 'User registered successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
   })
   public async signup(
     @Body() data: UserCreateDto,
@@ -155,6 +157,14 @@ export class AuthJwtController {
     status: 204,
     description: 'Password reset email sent successfully',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   public async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
     await this.authService.forgotPassword(data);
   }
@@ -190,6 +200,10 @@ export class AuthJwtController {
     status: 200,
     description: 'Email verification successful',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   public async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
     await this.authService.emailVerification(data);
   }
@@ -206,6 +220,10 @@ export class AuthJwtController {
   @ApiResponse({
     status: 204,
     description: 'Email verification resent successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
   })
   public async resendEmailVerification(
     @Body() data: ResendEmailVerificationDto,
@@ -229,15 +247,16 @@ export class AuthJwtController {
     @Request() req: RequestWithUser,
   ): Promise<ApiKeyDto> {
     try {
-      const apiKey = await this.authService.createOrUpdateAPIKey(req.user.id);
+      const apiKey = await this.authService.createOrUpdateAPIKey(req.user);
       return { apiKey };
     } catch (e) {
       this.logger.log(
         e.message,
         `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
       );
-      throw new UnprocessableEntityException(
+      throw new ControlledError(
         ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

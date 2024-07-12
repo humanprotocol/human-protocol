@@ -11,7 +11,7 @@ Code Example
 
     print(
         OperatorUtils.get_leaders(
-            LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
+            LeaderFilter(networks=[ChainId.POLYGON_AMOY], role="Job Launcher")
         )
     )
 
@@ -27,8 +27,6 @@ from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.utils import get_data_from_subgraph
 from web3 import Web3
-
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 LOG = logging.getLogger("human_protocol_sdk.operator")
 
@@ -46,25 +44,18 @@ class LeaderFilter:
     A class used to filter leaders.
     """
 
-    def __init__(
-        self,
-        networks: List[ChainId],
-        role: Optional[str] = None,
-    ):
+    def __init__(self, chain_id: ChainId, role: Optional[str] = None):
         """
         Initializes a LeaderFilter instance.
 
-        :param networks: Networks to request data
+        :param chain_id: Chain Id to request data
         :param role: Leader role
         """
 
-        if not networks or any(
-            network.value not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise OperatorUtilsError(f"Invalid ChainId")
+        if chain_id not in ChainId:
+            raise OperatorUtilsError("Invalid ChainId")
 
-        self.networks = networks
+        self.chain_id = chain_id
         self.role = role
 
 
@@ -88,6 +79,7 @@ class LeaderData:
         public_key: Optional[str] = None,
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
+        job_types: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -109,6 +101,7 @@ class LeaderData:
         :param public_key: Public key
         :param webhook_url: Webhook url
         :param url: Url
+        :param job_types: Job types
         """
 
         self.chain_id = chain_id
@@ -128,6 +121,7 @@ class LeaderData:
         self.public_key = public_key
         self.webhook_url = webhook_url
         self.url = url
+        self.job_types = job_types
 
 
 class RewardData:
@@ -149,9 +143,7 @@ class RewardData:
 
 class Operator:
     def __init__(
-        self,
-        address: str,
-        role: str,
+        self, address: str, role: str, url: str = "", job_types: List[str] = []
     ):
         """
         Initializes an Operator instance.
@@ -162,6 +154,8 @@ class Operator:
 
         self.address = address
         self.role = role
+        self.url = url
+        self.job_types = job_types
 
 
 class OperatorUtils:
@@ -170,9 +164,7 @@ class OperatorUtils:
     """
 
     @staticmethod
-    def get_leaders(
-        filter: LeaderFilter = LeaderFilter(networks=[ChainId.POLYGON_MUMBAI]),
-    ) -> List[LeaderData]:
+    def get_leaders(filter: LeaderFilter) -> List[LeaderData]:
         """Get leaders data of the protocol
 
         :param filter: Leader filter
@@ -187,7 +179,7 @@ class OperatorUtils:
 
                 print(
                     OperatorUtils.get_leaders(
-                        LeaderFilter(networks=[ChainId.POLYGON_MUMBAI])
+                        LeaderFilter(chain_id=ChainId.POLYGON_AMOY)
                     )
                 )
         """
@@ -195,42 +187,60 @@ class OperatorUtils:
         from human_protocol_sdk.gql.operator import get_leaders_query
 
         leaders = []
-        for chain_id in filter.networks:
-            network = NETWORKS[chain_id]
+        network = NETWORKS[filter.chain_id]
 
-            leaders_data = get_data_from_subgraph(
-                network["subgraph_url"],
-                query=get_leaders_query(filter),
-                params={"role": filter.role},
-            )
-            leaders_raw = leaders_data["data"]["leaders"]
+        if not network.get("subgraph_url"):
+            return []
 
-            leaders.extend(
-                [
-                    LeaderData(
-                        chain_id=chain_id,
-                        id=leader.get("id", ""),
-                        address=leader.get("address", ""),
-                        amount_staked=int(leader.get("amountStaked", 0)),
-                        amount_allocated=int(leader.get("amountAllocated", 0)),
-                        amount_locked=int(leader.get("amountLocked", 0)),
-                        locked_until_timestamp=int(
-                            leader.get("lockedUntilTimestamp", 0)
-                        ),
-                        amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
-                        amount_slashed=int(leader.get("amountSlashed", 0)),
-                        reputation=int(leader.get("reputation", 0)),
-                        reward=int(leader.get("reward", 0)),
-                        amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
-                        role=leader.get("role", None),
-                        fee=int(leader.get("fee")) if leader.get("fee", None) else None,
-                        public_key=leader.get("publicKey", None),
-                        webhook_url=leader.get("webhookUrl", None),
-                        url=leader.get("url", None),
-                    )
-                    for leader in leaders_raw
-                ]
-            )
+        leaders_data = get_data_from_subgraph(
+            network,
+            query=get_leaders_query(filter),
+            params={"role": filter.role},
+        )
+        leaders_raw = leaders_data["data"]["leaders"]
+
+        if not leaders_raw:
+            return []
+
+        job_types = []
+        if isinstance(job_types, str):
+            job_types = job_types.split(",")
+        elif isinstance(job_types, list):
+            job_types = job_types
+
+        leaders.extend(
+            [
+                LeaderData(
+                    chain_id=filter.chain_id,
+                    id=leader.get("id", ""),
+                    address=leader.get("address", ""),
+                    amount_staked=int(leader.get("amountStaked", 0)),
+                    amount_allocated=int(leader.get("amountAllocated", 0)),
+                    amount_locked=int(leader.get("amountLocked", 0)),
+                    locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
+                    amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
+                    amount_slashed=int(leader.get("amountSlashed", 0)),
+                    reputation=int(leader.get("reputation", 0)),
+                    reward=int(leader.get("reward", 0)),
+                    amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                    role=leader.get("role", None),
+                    fee=int(leader.get("fee")) if leader.get("fee", None) else None,
+                    public_key=leader.get("publicKey", None),
+                    webhook_url=leader.get("webhookUrl", None),
+                    url=leader.get("url", None),
+                    job_types=(
+                        leader.get("jobTypes").split(",")
+                        if isinstance(leader.get("jobTypes"), str)
+                        else (
+                            leader.get("jobTypes", [])
+                            if isinstance(leader.get("jobTypes"), list)
+                            else []
+                        )
+                    ),
+                )
+                for leader in leaders_raw
+            ]
+        )
 
         return leaders
 
@@ -253,7 +263,7 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 leader = OperatorUtils.get_leader(
-                    ChainId.POLYGON_MUMBAI,
+                    ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
@@ -269,9 +279,9 @@ class OperatorUtils:
         network = NETWORKS[chain_id]
 
         leader_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_leader_query,
-            params={"address": leader_address},
+            params={"address": leader_address.lower()},
         )
         leader = leader_data["data"]["leader"]
 
@@ -296,6 +306,15 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
+            job_types=(
+                leader.get("jobTypes").split(",")
+                if isinstance(leader.get("jobTypes"), str)
+                else (
+                    leader.get("jobTypes", [])
+                    if isinstance(leader.get("jobTypes"), list)
+                    else []
+                )
+            ),
         )
 
     @staticmethod
@@ -309,6 +328,7 @@ class OperatorUtils:
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
+        :parem job_types: (Optional) Job types of the operator
 
         :return: Returns an array of operator details
 
@@ -319,7 +339,7 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 leader = OperatorUtils.get_reputation_network_operators(
-                    ChainId.POLYGON_MUMBAI,
+                    ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
@@ -335,16 +355,30 @@ class OperatorUtils:
         network = NETWORKS[chain_id]
 
         reputation_network_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_reputation_network_query(role),
-            params={"address": address, "role": role},
+            params={"address": address.lower(), "role": role},
         )
+
+        if not reputation_network_data["data"]["reputationNetwork"]:
+            return []
+
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
 
         return [
             Operator(
                 address=operator.get("address", ""),
                 role=operator.get("role", ""),
+                url=operator.get("url", ""),
+                job_types=(
+                    operator.get("jobTypes").split(",")
+                    if isinstance(operator.get("jobTypes"), str)
+                    else (
+                        operator.get("jobTypes", [])
+                        if isinstance(operator.get("jobTypes"), list)
+                        else []
+                    )
+                ),
             )
             for operator in operators
         ]
@@ -365,7 +399,7 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 rewards_info = OperatorUtils.get_rewards_info(
-                    ChainId.POLYGON_MUMBAI,
+                    ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
         """
@@ -379,10 +413,14 @@ class OperatorUtils:
         network = NETWORKS[chain_id]
 
         reward_added_events_data = get_data_from_subgraph(
-            network["subgraph_url"],
+            network,
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},
         )
+
+        if not reward_added_events_data["data"]["rewardAddedEvents"]:
+            return []
+
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
 
         return [

@@ -24,6 +24,10 @@ import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { JobService } from '../job/job.service';
 import { WebhookDataDto } from './webhook.dto';
+import { HttpStatus } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -66,6 +70,8 @@ describe('WebhookService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,
+        ServerConfigService,
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -114,7 +120,9 @@ describe('WebhookService', () => {
         .mockResolvedValue('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.UrlNotFound);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.UrlNotFound, HttpStatus.NOT_FOUND),
+      );
     });
 
     it('should handle error if any exception is thrown', async () => {
@@ -128,7 +136,9 @@ describe('WebhookService', () => {
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.NotSent);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND),
+      );
     });
 
     it('should successfully process a fortune webhook', async () => {
@@ -137,7 +147,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -162,7 +172,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -188,7 +198,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -214,7 +224,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(await (webhookService as any).sendWebhook(webhookEntity)).toBe(
@@ -339,7 +349,10 @@ describe('WebhookService', () => {
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: escrow_canceled',
+        new ControlledError(
+          'Invalid webhook event type: escrow_canceled',
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });

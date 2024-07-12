@@ -1,11 +1,13 @@
 import {
   Encryption,
   EncryptionUtils,
+  HttpStatus,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_BUCKET_NAME,
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
@@ -23,6 +25,8 @@ import stringify from 'json-stable-stringify';
 import { ErrorBucket } from '../../common/constants/errors';
 import { hashString } from '../../common/utils';
 import { ContentType } from '../../common/enums/storage';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -56,6 +60,8 @@ describe('StorageService', () => {
         switch (key) {
           case 'MOCK_PGP_PRIVATE_KEY':
             return MOCK_PGP_PRIVATE_KEY;
+          case 'S3_BUCKET':
+            return MOCK_BUCKET_NAME;
         }
       }),
     };
@@ -75,6 +81,7 @@ describe('StorageService', () => {
       ],
       providers: [
         StorageService,
+        S3ConfigService,
         {
           provide: Encryption,
           useValue: await Encryption.build(MOCK_PGP_PRIVATE_KEY),
@@ -100,7 +107,7 @@ describe('StorageService', () => {
         hash: expect.any(String),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
-        MOCK_S3_BUCKET,
+        MOCK_BUCKET_NAME,
         expect.any(String),
         expect.any(String),
         {
@@ -117,7 +124,9 @@ describe('StorageService', () => {
 
       await expect(
         storageService.uploadFile(MOCK_MANIFEST, MOCK_FILE_HASH),
-      ).rejects.toThrow(ErrorBucket.NotExist);
+      ).rejects.toThrow(
+        new ControlledError(ErrorBucket.NotExist, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should fail if the file cannot be uploaded', async () => {
@@ -130,7 +139,9 @@ describe('StorageService', () => {
 
       await expect(
         storageService.uploadFile(MOCK_MANIFEST, MOCK_FILE_HASH),
-      ).rejects.toThrow('File not uploaded');
+      ).rejects.toThrow(
+        new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
+      );
     });
   });
 

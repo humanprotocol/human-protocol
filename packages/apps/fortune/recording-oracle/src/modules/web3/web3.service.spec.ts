@@ -1,33 +1,50 @@
-import { ConfigModule, registerAs } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { Web3Service } from './web3.service';
 import { MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants';
-import { networkMap } from '../../common/constants/networks';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { Web3Service } from './web3.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 describe('Web3Service', () => {
+  let mockConfigService: Partial<ConfigService>;
   let web3Service: Web3Service;
+  let networkConfigService: NetworkConfigService;
+
+  jest
+    .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
+    .mockReturnValue(MOCK_WEB3_PRIVATE_KEY);
 
   beforeAll(async () => {
+    mockConfigService = {
+      get: jest.fn((key: string, defaultValue?: any) => {
+        switch (key) {
+          case 'RPC_URL_LOCALHOST':
+            return 'http://localhost:8545/';
+          default:
+            return defaultValue;
+        }
+      }),
+    };
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('web3', () => ({
-            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
-          })),
-        ),
+      providers: [
+        Web3Service,
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
+        Web3ConfigService,
+        NetworkConfigService,
       ],
-      providers: [Web3Service],
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);
+    networkConfigService =
+      moduleRef.get<NetworkConfigService>(NetworkConfigService);
   });
 
   describe('getSigner', () => {
     it('should return the signer for the specified chainId', async () => {
-      for (const networkKey of Object.keys(networkMap)) {
-        // Iterate through the networkMap to test each chainId
-        const network = networkMap[networkKey];
-
+      for (const network of networkConfigService.networks) {
         const signer = web3Service.getSigner(network.chainId);
         expect(signer).toBeDefined();
       }

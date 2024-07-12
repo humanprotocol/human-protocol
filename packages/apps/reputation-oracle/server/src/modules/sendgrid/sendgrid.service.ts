@@ -1,52 +1,50 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
-import { ConfigNames } from '../../common/config';
-import { SENDGRID_API_KEY_REGEX } from '../../common/constants';
+import {
+  SENDGRID_API_KEY_DISABLED,
+  SENDGRID_API_KEY_REGEX,
+} from '../../common/constants';
 import { ErrorSendGrid } from '../../common/constants/errors';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class SendGridService {
   private readonly logger = new Logger(SendGridService.name);
 
-  private readonly defaultFromEmail: string;
-  private readonly defaultFromName: string;
-
   constructor(
     private readonly mailService: MailService,
-    private readonly configService: ConfigService,
+    private readonly sendgridConfigService: SendgridConfigService,
   ) {
-    const apiKey = this.configService.get<string>(
-      ConfigNames.SENDGRID_API_KEY,
-      '',
-    );
-
-    if (!SENDGRID_API_KEY_REGEX.test(apiKey)) {
-      throw new Error(ErrorSendGrid.InvalidApiKey);
+    if (this.sendgridConfigService.apiKey === SENDGRID_API_KEY_DISABLED) {
+      return;
     }
 
-    this.mailService.setApiKey(apiKey);
+    if (!SENDGRID_API_KEY_REGEX.test(this.sendgridConfigService.apiKey)) {
+      throw new ControlledError(
+        ErrorSendGrid.InvalidApiKey,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-    this.defaultFromEmail = this.configService.get<string>(
-      ConfigNames.SENDGRID_FROM_EMAIL,
-      '',
-    );
-    this.defaultFromName = this.configService.get<string>(
-      ConfigNames.SENDGRID_FROM_NAME,
-      '',
-    );
+    this.mailService.setApiKey(this.sendgridConfigService.apiKey);
   }
 
   async sendEmail({
     from = {
-      email: this.defaultFromEmail,
-      name: this.defaultFromName,
+      email: this.sendgridConfigService.fromEmail,
+      name: this.sendgridConfigService.fromName,
     },
     templateId = '',
     personalizations,
     ...emailData
   }: Partial<MailDataRequired>): Promise<void> {
     try {
+      if (this.sendgridConfigService.apiKey === SENDGRID_API_KEY_DISABLED) {
+        this.logger.debug(personalizations);
+        return;
+      }
+
       await this.mailService.send({
         from,
         templateId,
@@ -57,7 +55,10 @@ export class SendGridService {
       return;
     } catch (error) {
       this.logger.error(error, SendGridService.name);
-      throw new BadRequestException(ErrorSendGrid.EmailNotSent);
+      throw new ControlledError(
+        ErrorSendGrid.EmailNotSent,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

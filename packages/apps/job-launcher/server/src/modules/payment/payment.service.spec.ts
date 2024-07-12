@@ -31,8 +31,12 @@ import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
 import { verifySignature } from '../../common/utils/signature';
-import { ConflictException } from '@nestjs/common';
-import { DatabaseError } from '../../database/database.error';
+import { ConflictException, HttpStatus } from '@nestjs/common';
+import { DatabaseError } from '../../common/errors/database';
+import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { RateService } from './rate.service';
 
 jest.mock('@human-protocol/sdk');
 
@@ -68,6 +72,8 @@ describe('PaymentService', () => {
             return '0.0.1';
           case 'STRIPE_APP_INFO_URL':
             return 'https://test-app-url.com';
+          case 'RPC_URL_POLYGON_AMOY':
+            return 'http://0.0.0.0:8545';
           default:
             return defaultValue;
         }
@@ -77,6 +83,7 @@ describe('PaymentService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         PaymentService,
+        StripeConfigService,
         {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
@@ -90,6 +97,8 @@ describe('PaymentService', () => {
         },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        { provide: RateService, useValue: createMock<RateService>() },
+        NetworkConfigService,
       ],
     }).compile();
 
@@ -180,7 +189,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionAlreadyExists,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw a bad request exception if the payment intent creation fails', async () => {
@@ -192,11 +206,16 @@ describe('PaymentService', () => {
 
       const userId = 1;
 
-      createPaymentIntentMock.mockRejectedValue(new Error());
+      createPaymentIntentMock.mockResolvedValue();
 
       await expect(
         paymentService.createFiatPayment(userId, dto),
-      ).rejects.toThrowError();
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.ClientSecretDoesNotExist,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 
@@ -265,7 +284,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.NotSuccess, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should handle payment requiring a payment method', async () => {
@@ -293,7 +314,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.NotSuccess, HttpStatus.BAD_REQUEST),
+      );
     });
 
     it('should handle payment status other than succeeded', async () => {
@@ -334,7 +357,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotFound);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
+      );
     });
   });
 
@@ -373,7 +398,7 @@ describe('PaymentService', () => {
     it('should create a crypto payment successfully', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -388,7 +413,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -424,7 +449,7 @@ describe('PaymentService', () => {
         amount: 10,
         rate: 1.5,
         transaction: MOCK_TRANSACTION_HASH,
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         status: PaymentStatus.SUCCEEDED,
       });
       expect(result).toBe(true);
@@ -433,7 +458,7 @@ describe('PaymentService', () => {
     it('should throw a conflict exception if the token address is unsupported', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -466,13 +491,15 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.UnsupportedToken, HttpStatus.CONFLICT),
+      );
     });
 
     it('should throw a conflict exception if an unsupported token is used', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -487,7 +514,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -505,13 +532,15 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
+      ).rejects.toThrow(
+        new ControlledError(ErrorPayment.UnsupportedToken, HttpStatus.CONFLICT),
+      );
     });
 
     it('should throw a signature error if the signature is wrong', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
       (verifySignature as jest.Mock).mockImplementation(() => {
@@ -530,13 +559,18 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorSignature.SignatureNotVerified);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorSignature.SignatureNotVerified,
+          HttpStatus.CONFLICT,
+        ),
+      );
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -544,7 +578,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.TransactionNotFoundByHash);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionNotFoundByHash,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
 
     it('should throw a not found exception if the transaction data is invalid', async () => {
@@ -566,13 +605,18 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.InvalidTransactionData);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.InvalidTransactionData,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
 
     it('should throw a not found exception if the transaction has insufficient confirmations', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -585,7 +629,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -603,15 +647,18 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(
-        ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+          HttpStatus.NOT_FOUND,
+        ),
       );
     });
 
     it('should throw a bad request exception if the payment with the same transaction hash already exists', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.POLYGON_MUMBAI,
+        chainId: ChainId.POLYGON_AMOY,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -626,7 +673,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            address: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -646,7 +693,12 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.TransactionAlreadyExists,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
@@ -727,7 +779,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createRefundPayment(mockPaymentRefundCreateDto),
-      ).rejects.toThrow(DatabaseError);
+      ).rejects.toThrow(mockError);
     });
 
     it('should throw NotSuccess error on other database errors', async () => {
@@ -737,7 +789,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createRefundPayment(mockPaymentRefundCreateDto),
-      ).rejects.toThrow(DatabaseError);
+      ).rejects.toThrow(new DatabaseError('', ''));
     });
   });
 });

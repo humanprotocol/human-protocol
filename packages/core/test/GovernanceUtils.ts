@@ -8,16 +8,28 @@ import {
   DAOSpokeContract,
   WormholeMock,
 } from '../typechain-types';
-import {
-  IWormholeVM,
-  IWormholeSignature,
-  SignatureComponents,
-} from './GovernanceTypes';
+import { IWormholeVM, IWormholeSignature } from './GovernanceTypes';
 
 let owner: Signer;
 
+export const SECONDS_PER_BLOCK = 12;
+
 export const mineNBlocks = async (n: number) => {
-  await mine(n);
+  await increaseTime(SECONDS_PER_BLOCK * n);
+  await mine(n - 1);
+};
+
+/**
+ * Increases the EVM time by a given number of seconds and mines a new block to apply the time change.
+ * @param {number} seconds - The number of seconds to increase time by.
+ */
+export const increaseTime = async (seconds: number) => {
+  try {
+    await ethers.provider.send('evm_increaseTime', [seconds]);
+    await ethers.provider.send('evm_mine');
+  } catch (error) {
+    throw new Error(`Failed to increase time by ${seconds} seconds`);
+  }
 };
 
 export async function createMockUserWithVotingPower(
@@ -245,11 +257,13 @@ export async function signProposalWithReasonAndParams(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
+  voter: string,
+  nonce: number,
   reason: string,
   params: string,
   signer: Signer
-): Promise<SignatureComponents> {
-  const signature = await signer.signTypedData(
+): Promise<string> {
+  return await signer.signTypedData(
     {
       name: 'MetaHumanGovernor',
       version: '1',
@@ -265,6 +279,14 @@ export async function signProposalWithReasonAndParams(
         {
           name: 'support',
           type: 'uint8',
+        },
+        {
+          name: 'voter',
+          type: 'address',
+        },
+        {
+          name: 'nonce',
+          type: 'uint256',
         },
         {
           name: 'reason',
@@ -279,26 +301,23 @@ export async function signProposalWithReasonAndParams(
     {
       proposalId,
       support,
+      voter,
+      nonce,
       reason,
       params,
     }
   );
-
-  // Extract the signature components
-  const r = signature.slice(0, 66);
-  const s = '0x' + signature.slice(66, 130);
-  const v = parseInt(signature.slice(130, 132), 16);
-
-  return { v, r, s };
 }
 
 export async function signProposal(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
+  voter: string,
+  nonce: number,
   signer: Signer
-): Promise<SignatureComponents> {
-  const signature = await signer.signTypedData(
+): Promise<string> {
+  return await signer.signTypedData(
     {
       name: 'MetaHumanGovernor',
       version: '1',
@@ -315,20 +334,23 @@ export async function signProposal(
           name: 'support',
           type: 'uint8',
         },
+        {
+          name: 'voter',
+          type: 'address',
+        },
+        {
+          name: 'nonce',
+          type: 'uint256',
+        },
       ],
     },
     {
       proposalId,
       support,
+      voter,
+      nonce,
     }
   );
-
-  // Extract the signature components
-  const r = signature.slice(0, 66);
-  const s = '0x' + signature.slice(66, 130);
-  const v = parseInt(signature.slice(130, 132), 16);
-
-  return { v, r, s };
 }
 
 export async function updateVotingDelay(
@@ -378,11 +400,13 @@ export async function updateVotingDelay(
 
   // wait for next block
   await mineNBlocks(2);
+
   //cast vote
   await governor.connect(executer).castVote(proposalId, 1);
 
   // wait for voting block to end
   await mineNBlocks(50410);
+
   await governor.requestCollections(proposalId, { value: 100 });
   await collectVotesFromSpoke(
     daoSpoke,

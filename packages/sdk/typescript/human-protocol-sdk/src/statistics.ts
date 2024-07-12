@@ -15,10 +15,11 @@ import {
   PaymentStatistics,
   WorkerStatistics,
   HMTHolderData,
+  HMTHolder,
 } from './graphql';
-import { IStatisticsParams } from './interfaces';
+import { IHMTHoldersParams, IStatisticsParams } from './interfaces';
 import { NetworkData } from './types';
-import { throwError } from './utils';
+import { getSubgraphUrl, throwError } from './utils';
 
 /**
  * ## Introduction
@@ -54,11 +55,12 @@ import { throwError } from './utils';
  * ```ts
  * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
  *
- * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+ * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
  * ```
  */
 export class StatisticsClient {
   public networkData: NetworkData;
+  public subgraphUrl: string;
 
   /**
    * **StatisticsClient constructor**
@@ -67,6 +69,7 @@ export class StatisticsClient {
    */
   constructor(networkData: NetworkData) {
     this.networkData = networkData;
+    this.subgraphUrl = getSubgraphUrl(networkData);
   }
 
   /**
@@ -109,7 +112,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * const escrowStatistics = await statisticsClient.getEscrowStatistics();
    * const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
@@ -124,11 +127,11 @@ export class StatisticsClient {
     try {
       const { escrowStatistics } = await gqlFetch<{
         escrowStatistics: EscrowStatisticsData;
-      }>(this.networkData.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
+      }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -184,7 +187,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * const workerStatistics = await statisticsClient.getWorkerStatistics();
    * const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
@@ -199,7 +202,7 @@ export class StatisticsClient {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -252,7 +255,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * console.log(
    *   'Payment statistics:',
@@ -288,7 +291,7 @@ export class StatisticsClient {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -355,7 +358,7 @@ export class StatisticsClient {
    * ```ts
    * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
    *
    * const hmtStatistics = await statisticsClient.getHMTStatistics();
    *
@@ -397,15 +400,15 @@ export class StatisticsClient {
     try {
       const { hmtokenStatistics } = await gqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
-      }>(this.networkData.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
+      }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
 
       const { holders } = await gqlFetch<{
         holders: HMTHolderData[];
-      }>(this.networkData.subgraphUrl, GET_HOLDERS_QUERY);
+      }>(this.subgraphUrl, GET_HOLDERS_QUERY());
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -426,8 +429,59 @@ export class StatisticsClient {
             eventDayData.dailyHMTTransferAmount
           ),
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,
+          dailyUniqueSenders: +eventDayData.dailyUniqueSenders,
+          dailyUniqueReceivers: +eventDayData.dailyUniqueReceivers,
         })),
       };
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * This function returns the holders of the HMToken with optional filters and ordering.
+   *
+   * **Input parameters**
+   *
+   * @param {IHMTHoldersParams} params HMT Holders params with filters and ordering
+   * @returns {HMTHolder[]} List of HMToken holders.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   *
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+   *
+   * const hmtHolders = await statisticsClient.getHMTHolders({
+   *   orderDirection: 'asc',
+   * });
+   *
+   * console.log('HMT holders:', hmtHolders.map((h) => ({
+   *   ...h,
+   *   balance: h.balance.toString(),
+   * })));
+   * ```
+   */
+  async getHMTHolders(params: IHMTHoldersParams = {}): Promise<HMTHolder[]> {
+    try {
+      const { address, orderDirection } = params;
+      const query = GET_HOLDERS_QUERY(address);
+
+      const { holders } = await gqlFetch<{ holders: HMTHolderData[] }>(
+        this.subgraphUrl,
+        query,
+        {
+          address,
+          orderBy: 'balance',
+          orderDirection,
+        }
+      );
+
+      return holders.map((holder) => ({
+        address: holder.address,
+        balance: ethers.toBigInt(holder.balance),
+      }));
     } catch (e: any) {
       return throwError(e);
     }

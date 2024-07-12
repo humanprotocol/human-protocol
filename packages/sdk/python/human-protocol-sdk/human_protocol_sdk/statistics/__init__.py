@@ -15,4 +15,5 @@ from .statistics_client import (
     HMTHolder,
     DailyHMTData,
     HMTStatistics,
+    HMTHoldersParam,
 )

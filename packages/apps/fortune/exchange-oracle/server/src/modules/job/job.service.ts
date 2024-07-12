@@ -3,12 +3,8 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  EscrowStatus,
-  EscrowUtils,
-  OperatorUtils,
   StorageClient,
 } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Inject,
@@ -16,117 +12,219 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ISolution } from 'src/common/interfaces/job';
-import { ConfigNames } from '../../common/config';
+import { TOKEN } from '../../common/constant';
 import {
-  ESCROW_FAILED_ENDPOINT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constant';
+  AssignmentStatus,
+  JobFieldName,
+  JobSortField,
+  JobStatus,
+  JobType,
+} from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
-import { signMessage } from '../../common/utils/signature';
+import { ISolution } from '../../common/interfaces/job';
+import { PageDto } from '../../common/pagination/pagination.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { JobDetailsDto, ManifestDto } from './job.dto';
-import { CaseConverter } from '../../common/utils/case-converter';
-import { firstValueFrom } from 'rxjs';
-import { ethers } from 'ethers';
 import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { WebhookRepository } from '../webhook/webhook.repository';
+import { GetJobsDto, JobDto, ManifestDto } from './job.dto';
+import { JobEntity } from './job.entity';
+import { JobRepository } from './job.repository';
+import { AssignmentRepository } from '../assignment/assignment.repository';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
+import { SortDirection } from '../../common/enums/collection';
+import { AssignmentEntity } from '../assignment/assignment.entity';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  private storage: {
-    [key: string]: string[];
-  } = {};
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly pgpConfigService: PGPConfigService,
+    public readonly jobRepository: JobRepository,
+    public readonly assignmentRepository: AssignmentRepository,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     @Inject(StorageService)
     private readonly storageService: StorageService,
-    private readonly httpService: HttpService,
+    public readonly webhookRepository: WebhookRepository,
   ) {}
 
-  public async getDetails(
-    chainId: number,
-    escrowAddress: string,
-  ): Promise<JobDetailsDto> {
-    const manifest = await this.getManifest(chainId, escrowAddress);
-
-    const existingJobSolutions = await this.storageService.downloadJobSolutions(
-      escrowAddress,
-      chainId,
+  public async createJob(webhook: WebhookDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
     );
 
-    if (
-      existingJobSolutions.filter((solution) => !solution.error).length >=
-      manifest.submissionsRequired
-    ) {
-      throw new BadRequestException('This job has already been completed');
+    if (jobEntity) {
+      this.logger.log(ErrorJob.AlreadyExists, JobService.name);
+      throw new BadRequestException(ErrorJob.AlreadyExists);
     }
 
-    return {
-      escrowAddress,
-      chainId,
-      manifest,
-    };
+    const signer = this.web3Service.getSigner(webhook.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const reputationOracleAddress =
+      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+
+    const newJobEntity = new JobEntity();
+    newJobEntity.escrowAddress = webhook.escrowAddress;
+    newJobEntity.chainId = webhook.chainId;
+    newJobEntity.status = JobStatus.ACTIVE;
+    newJobEntity.reputationNetwork = reputationOracleAddress;
+    await this.jobRepository.createUnique(newJobEntity);
   }
 
-  public async getPendingJobs(
-    chainId: number,
-    workerAddress: string,
-  ): Promise<string[]> {
-    const escrows = await EscrowUtils.getEscrows({
-      exchangeOracle: this.web3Service.getSigner(chainId).address,
-      status: EscrowStatus.Pending,
-      networks: [chainId],
+  public async completeJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
+
+    const jobEntity =
+      await this.jobRepository.findOneByChainIdAndEscrowAddressWithAssignments(
+        chainId,
+        escrowAddress,
+      );
+
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (jobEntity.status === JobStatus.COMPLETED) {
+      throw new BadRequestException(ErrorJob.AlreadyCompleted);
+    }
+
+    jobEntity.status = JobStatus.COMPLETED;
+    jobEntity.assignments.forEach((assignment: AssignmentEntity) => {
+      assignment.status = AssignmentStatus.COMPLETED;
     });
 
-    return escrows
-      .filter(
-        (escrow) => !this.storage[escrow.address]?.includes(workerAddress),
-      )
-      .map((escrow) => escrow.address);
+    await this.jobRepository.save(jobEntity);
   }
 
-  public async solveJob(
-    chainId: number,
-    escrowAddress: string,
-    workerAddress: string,
-    solution: string,
-  ): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw new Error('Invalid address');
+  public async cancelJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
+
+    const jobEntity =
+      await this.jobRepository.findOneByChainIdAndEscrowAddressWithAssignments(
+        chainId,
+        escrowAddress,
+      );
+
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const solutionsUrl = await this.addSolution(
-      chainId,
-      escrowAddress,
-      workerAddress,
+    if (jobEntity.status === JobStatus.CANCELED) {
+      throw new BadRequestException(ErrorJob.AlreadyCanceled);
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    jobEntity.assignments.forEach((assignment: AssignmentEntity) => {
+      assignment.status = AssignmentStatus.CANCELED;
+    });
+
+    await this.jobRepository.save(jobEntity);
+  }
+
+  public async getJobList(
+    data: GetJobsDto,
+    reputationNetwork: string,
+  ): Promise<PageDto<JobDto>> {
+    if (data.jobType && data.jobType !== JobType.FORTUNE)
+      return new PageDto(data.page!, data.pageSize!, 0, []);
+
+    const { entities, itemCount } = await this.jobRepository.fetchFiltered({
+      ...data,
+      pageSize: data.pageSize!,
+      skip: data.skip!,
+      reputationNetwork,
+    });
+    const jobs = await Promise.all(
+      entities.map(async (entity) => {
+        const job = new JobDto(
+          entity.escrowAddress,
+          entity.chainId,
+          JobType.FORTUNE,
+          entity.status,
+        );
+
+        if (data.fields?.includes(JobFieldName.CreatedAt)) {
+          job.createdAt = entity.createdAt.toISOString();
+        }
+        if (data.fields?.includes(JobFieldName.UpdatedAt)) {
+          job.updatedAt = entity.updatedAt.toISOString();
+        }
+        if (
+          data.fields?.includes(JobFieldName.JobDescription) ||
+          data.fields?.includes(JobFieldName.RewardAmount) ||
+          data.fields?.includes(JobFieldName.RewardToken) ||
+          data.sortField === JobSortField.REWARD_AMOUNT
+        ) {
+          const manifest = await this.getManifest(
+            entity.chainId,
+            entity.escrowAddress,
+          );
+          if (data.fields?.includes(JobFieldName.JobDescription)) {
+            job.jobDescription = manifest.requesterDescription;
+          }
+          if (
+            data.fields?.includes(JobFieldName.RewardAmount) ||
+            data.sortField === JobSortField.REWARD_AMOUNT
+          ) {
+            job.rewardAmount =
+              manifest.fundAmount / manifest.submissionsRequired;
+          }
+          if (data.fields?.includes(JobFieldName.RewardToken)) {
+            job.rewardToken = TOKEN;
+          }
+        }
+
+        return job;
+      }),
+    );
+
+    if (data.sortField === JobSortField.REWARD_AMOUNT) {
+      jobs.sort((a, b) => {
+        const rewardA = a.rewardAmount ?? 0;
+        const rewardB = b.rewardAmount ?? 0;
+        if (data.sort === SortDirection.DESC) {
+          return rewardB - rewardA;
+        } else {
+          return rewardA - rewardB;
+        }
+      });
+    }
+
+    return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
+  }
+
+  public async solveJob(assignmentId: number, solution: string): Promise<void> {
+    const assignment =
+      await this.assignmentRepository.findOneById(assignmentId);
+    if (!assignment) {
+      throw new BadRequestException(ErrorAssignment.NotFound);
+    }
+
+    if (assignment.status !== AssignmentStatus.ACTIVE) {
+      throw new BadRequestException(ErrorAssignment.InvalidStatus);
+    }
+
+    await this.addSolution(
+      assignment.job.chainId,
+      assignment.job.escrowAddress,
+      assignment.workerAddress,
       solution,
     );
 
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const recordingOracleAddress =
-      await escrowClient.getRecordingOracleAddress(escrowAddress);
+    assignment.status = AssignmentStatus.VALIDATION;
+    await this.assignmentRepository.updateOne(assignment);
 
-    const leader = await OperatorUtils.getLeader(
-      chainId,
-      recordingOracleAddress,
-    );
+    const webhook = new WebhookEntity();
+    webhook.escrowAddress = assignment.job.escrowAddress;
+    webhook.chainId = assignment.job.chainId;
+    webhook.eventType = EventType.SUBMISSION_IN_REVIEW;
 
-    const recordingOracleWebhookUrl = leader?.webhookUrl;
-    if (!recordingOracleWebhookUrl)
-      throw new NotFoundException('Unable to get Recording Oracle webhook URL');
-
-    await this.sendWebhook(recordingOracleWebhookUrl, {
-      escrowAddress: escrowAddress,
-      chainId: chainId,
-      solutionsUrl: solutionsUrl,
-    });
+    await this.webhookRepository.createUnique(webhook);
   }
 
   public async processInvalidJobSolution(
@@ -178,7 +276,7 @@ export class JobService {
         (solution) => solution.workerAddress === workerAddress,
       )
     ) {
-      throw new BadRequestException('User has already submitted a solution');
+      throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
     }
 
     const manifest = await this.getManifest(chainId, escrowAddress);
@@ -186,7 +284,7 @@ export class JobService {
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
-      throw new BadRequestException('This job has already been completed');
+      throw new BadRequestException(ErrorJob.JobCompleted);
     }
 
     const newJobSolutions: ISolution[] = [
@@ -206,20 +304,7 @@ export class JobService {
     return url;
   }
 
-  private async sendWebhook(url: string, body: any): Promise<void> {
-    const snake_case_body = CaseConverter.transformToSnakeCase(body);
-    const signedBody = await signMessage(
-      snake_case_body,
-      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
-    );
-    await firstValueFrom(
-      this.httpService.post(url, snake_case_body, {
-        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      }),
-    );
-  }
-
-  private async getManifest(
+  public async getManifest(
     chainId: number,
     escrowAddress: string,
   ): Promise<ManifestDto> {
@@ -236,13 +321,13 @@ export class JobService {
     ) {
       try {
         const encryption = await Encryption.build(
-          this.configService.get(ConfigNames.PGP_PRIVATE_KEY, ''),
-          this.configService.get(ConfigNames.PGP_PASSPHRASE),
+          this.pgpConfigService.privateKey,
+          this.pgpConfigService.passphrase,
         );
 
         manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
       } catch {
-        throw new Error('Unable to decrypt manifest');
+        throw new Error(ErrorJob.ManifestDecryptionFailed);
       }
     } else {
       try {
@@ -256,31 +341,14 @@ export class JobService {
     }
 
     if (!manifest) {
-      const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      const jobLauncherAddress =
-        await escrowClient.getJobLauncherAddress(escrowAddress);
-      const jobLauncher = await OperatorUtils.getLeader(
-        chainId,
-        jobLauncherAddress,
-      );
-      const jobLauncherWebhookUrl = jobLauncher?.webhookUrl;
+      const webhook = new WebhookEntity();
+      webhook.escrowAddress = escrowAddress;
+      webhook.chainId = chainId;
+      webhook.eventType = EventType.TASK_CREATION_FAILED;
 
-      if (!jobLauncherWebhookUrl) {
-        throw new NotFoundException('Unable to get Job Launcher webhook URL');
-      }
+      await this.webhookRepository.createUnique(webhook);
 
-      const body: WebhookDto = {
-        escrowAddress: escrowAddress,
-        chainId: chainId,
-        eventType: EventType.TASK_CREATION_FAILED,
-        eventData: { assignments: [{ reason: 'Unable to get manifest' }] },
-      };
-      await this.sendWebhook(
-        jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
-        body,
-      );
-      throw new NotFoundException('Unable to get manifest');
+      throw new NotFoundException(ErrorJob.ManifestNotFound);
     } else return manifest;
   }
 }

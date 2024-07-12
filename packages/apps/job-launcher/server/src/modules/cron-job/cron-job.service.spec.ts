@@ -21,7 +21,10 @@ import {
   ChainId,
   Encryption,
   EscrowClient,
+  EscrowStatus,
+  EscrowUtils,
   KVStoreClient,
+  NETWORKS,
 } from '@human-protocol/sdk';
 import { JobService } from '../job/job.service';
 import { DeepPartial } from 'typeorm';
@@ -38,6 +41,18 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { HttpService } from '@nestjs/axios';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ErrorCronJob } from '../../common/constants/errors';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
+import { RateService } from '../payment/rate.service';
+import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
+import { ethers } from 'ethers';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -52,6 +67,9 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
     })),
+  },
+  EscrowUtils: {
+    getStatusEvents: jest.fn(),
   },
 }));
 
@@ -90,11 +108,25 @@ describe('CronJobService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             validateChainId: jest.fn().mockReturnValue(new Error()),
+            getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         JobService,
         WebhookService,
         Encryption,
+        ServerConfigService,
+        AuthConfigService,
+        Web3ConfigService,
+        CvatConfigService,
+        PGPConfigService,
+        NetworkConfigService,
+        {
+          provide: NetworkConfigService,
+          useValue: {
+            networks: [NETWORKS[ChainId.LOCALHOST]],
+          },
+        },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
           provide: PaymentRepository,
@@ -110,6 +142,10 @@ describe('CronJobService', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: RateService,
+          useValue: createMock<RateService>(),
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
@@ -258,7 +294,9 @@ describe('CronJobService', () => {
         .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
-      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow();
+      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow(
+        new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST),
+      );
       expect(updateOneSpy).not.toHaveBeenCalled();
     });
   });
@@ -889,6 +927,119 @@ describe('CronJobService', () => {
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await service.processPendingWebhooks();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(
+        cronJobEntityMock as any,
+      );
+    });
+  });
+  describe('syncJobStuses Cron Job', () => {
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntityMock: Partial<JobEntity>;
+    let escrowEventMock: Partial<StatusEvent>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.SyncJobStatuses,
+        startedAt: new Date(),
+      };
+
+      jobEntityMock = {
+        id: 1,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+      };
+
+      escrowEventMock = {
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: EscrowStatus[EscrowStatus.Partial],
+      };
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
+
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue(jobEntityMock as any);
+
+      (EscrowUtils.getStatusEvents as any).mockResolvedValue([
+        escrowEventMock as any,
+      ]);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if last cron job is still running', async () => {
+      jest.spyOn(repository, 'findOneByType').mockResolvedValueOnce({
+        ...cronJobEntityMock,
+        completedAt: null,
+      } as any);
+
+      const startCronJobMock = jest.spyOn(service, 'startCronJob');
+
+      await service.syncJobStuses();
+
+      expect(startCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity to lock the process', async () => {
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.syncJobStuses();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.SyncJobStatuses,
+      );
+    });
+
+    it('should update job statuses based on escrow events', async () => {
+      jest
+        .spyOn(jobRepository, 'findManyByChainIdsAndEscrowAddresses')
+        .mockResolvedValueOnce([jobEntityMock as any]);
+
+      await service.syncJobStuses();
+
+      expect(EscrowUtils.getStatusEvents).toHaveBeenCalled();
+      expect(
+        jobRepository.findManyByChainIdsAndEscrowAddresses,
+      ).toHaveBeenCalledWith(
+        [escrowEventMock.chainId],
+        [ethers.getAddress(MOCK_ADDRESS)],
+      );
+      expect(jobRepository.updateMany).toHaveBeenCalledWith([
+        {
+          ...jobEntityMock,
+          status: JobStatus.PARTIAL,
+        },
+      ]);
+    });
+
+    it('should handle errors and log them', async () => {
+      const loggerErrorSpy = jest.spyOn((service as any).logger, 'error');
+      jest
+        .spyOn(EscrowUtils, 'getStatusEvents')
+        .mockRejectedValue(new Error('Test error'));
+
+      await service.syncJobStuses();
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.syncJobStuses();
 
       expect(service.completeCronJob).toHaveBeenCalledWith(
         cronJobEntityMock as any,

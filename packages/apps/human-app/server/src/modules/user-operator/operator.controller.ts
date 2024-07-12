@@ -12,12 +12,12 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   SignupOperatorCommand,
   SignupOperatorDto,
-} from './interfaces/operator-registration.interface';
+} from './model/operator-registration.model';
 
 @Controller()
 export class OperatorController {
   constructor(
-    private readonly operatorService: OperatorService,
+    private readonly service: OperatorService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
   @ApiTags('User-Operator')
@@ -32,6 +32,6 @@ export class OperatorController {
       SignupOperatorDto,
       SignupOperatorCommand,
     );
-    return this.operatorService.signupOperator(signupOperatorCommand);
+    return this.service.signupOperator(signupOperatorCommand);
   }
 }

@@ -5,7 +5,7 @@ import { BaseEntity } from '../../database/base.entity';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { ChainId } from '@human-protocol/sdk';
 
-@Entity({ schema: NS, name: 'webhook' })
+@Entity({ schema: NS, name: 'webhooks' })
 export class WebhookEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;

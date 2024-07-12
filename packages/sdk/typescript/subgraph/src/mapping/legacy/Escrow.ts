@@ -9,9 +9,6 @@ import {
 import {
   BulkPayoutEvent,
   Escrow,
-  PaidStatusEvent,
-  PartialStatusEvent,
-  PendingStatusEvent,
   SetupEvent,
   StoreResultsEvent,
 } from '../../../generated/schema';
@@ -19,6 +16,7 @@ import { createOrLoadEscrowStatistics } from '../Escrow';
 import { ONE_BI } from '../utils/number';
 import { toEventId } from '../utils/event';
 import { getEventDayData } from '../utils/dayUpdates';
+import { createTransaction } from '../utils/transaction';
 
 enum EscrowStatuses {
   Launched,
@@ -30,6 +28,7 @@ enum EscrowStatuses {
 }
 
 export function handlePending(event: Pending): void {
+  createTransaction(event, 'setup');
   // Create SetupEvent entity
   const setupEventEntity = new SetupEvent(toEventId(event));
   setupEventEntity.block = event.block.number;
@@ -38,15 +37,6 @@ export function handlePending(event: Pending): void {
   setupEventEntity.escrowAddress = event.address;
   setupEventEntity.sender = event.transaction.from;
   setupEventEntity.save();
-
-  // Create PendingStatusEvent entity
-  const statusEventEntity = new PendingStatusEvent(toEventId(event));
-  statusEventEntity.block = event.block.number;
-  statusEventEntity.timestamp = event.block.timestamp;
-  statusEventEntity.txHash = event.transaction.hash;
-  statusEventEntity.escrowAddress = event.address;
-  statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.save();
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
@@ -101,6 +91,7 @@ export function handlePending(event: Pending): void {
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
+  createTransaction(event, 'storeResults');
   // Create StoreResultsEvent entity
   const eventEntity = new StoreResultsEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -135,6 +126,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
+  createTransaction(event, 'bulkTransfer');
   // Create BulkPayoutEvent entity
   const eventEntity = new BulkPayoutEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -167,17 +159,10 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     const escrowStatus = escrowContract.try_status();
 
     if (!escrowStatus.reverted) {
+      // Create EscrowStatusEvent entity
       if (escrowStatus.value == EscrowStatuses.Partial) {
         // Partially Paid Status
         escrowEntity.status = 'Partially Paid';
-
-        const statusEventEntity = new PartialStatusEvent(toEventId(event));
-        statusEventEntity.block = event.block.number;
-        statusEventEntity.timestamp = event.block.timestamp;
-        statusEventEntity.txHash = event.transaction.hash;
-        statusEventEntity.escrowAddress = event.address;
-        statusEventEntity.sender = event.transaction.from;
-        statusEventEntity.save();
 
         statsEntity.partialStatusEventCount =
           statsEntity.partialStatusEventCount.plus(ONE_BI);
@@ -190,14 +175,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       } else if (escrowStatus.value == EscrowStatuses.Paid) {
         // Paid Status
         escrowEntity.status = 'Paid';
-
-        const statusEventEntity = new PaidStatusEvent(toEventId(event));
-        statusEventEntity.block = event.block.number;
-        statusEventEntity.timestamp = event.block.timestamp;
-        statusEventEntity.txHash = event.transaction.hash;
-        statusEventEntity.escrowAddress = event.address;
-        statusEventEntity.sender = event.transaction.from;
-        statusEventEntity.save();
 
         statsEntity.paidStatusEventCount =
           statsEntity.paidStatusEventCount.plus(ONE_BI);

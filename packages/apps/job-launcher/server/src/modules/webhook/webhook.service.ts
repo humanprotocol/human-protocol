@@ -1,20 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
   KVStoreClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { signMessage } from '../../common/utils/signature';
 import { WebhookRepository } from './webhook.repository';
 import { firstValueFrom } from 'rxjs';
-import {
-  DEFAULT_MAX_RETRY_COUNT,
-  HEADER_SIGNATURE_KEY,
-} from '../../common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookStatus } from '../../common/enums/webhook';
@@ -24,18 +21,17 @@ import { WebhookDataDto } from './webhook.dto';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
-import { BadRequestException } from '@nestjs/common';
+import { ControlledError } from '../../common/errors/controlled';
 @Injectable()
 export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
-
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
-    public readonly configService: ConfigService,
-    public readonly httpService: HttpService,
+    private readonly commonConfigSerice: ServerConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   /**
@@ -54,8 +50,7 @@ export class WebhookService {
 
     // Check if the webhook URL was found.
     if (!webhookUrl) {
-      this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.UrlNotFound);
+      throw new ControlledError(ErrorWebhook.UrlNotFound, HttpStatus.NOT_FOUND);
     }
 
     // Build the webhook data object based on the oracle type.
@@ -69,7 +64,7 @@ export class WebhookService {
     if (webhook.hasSignature) {
       const signedBody = await signMessage(
         webhookData,
-        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+        this.web3ConfigService.privateKey,
       );
 
       config = {
@@ -78,14 +73,13 @@ export class WebhookService {
     }
 
     // Make the HTTP request to the webhook.
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, config),
+    const { status } = await firstValueFrom(
+      this.httpService.post(webhookUrl, webhookData, config),
     );
 
     // Check if the request was successful.
-    if (!data) {
-      this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.NotSent);
+    if (status !== HttpStatus.CREATED && status !== HttpStatus.OK) {
+      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -125,13 +119,7 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   public async handleWebhookError(webhookEntity: WebhookEntity): Promise<void> {
-    if (
-      webhookEntity.retriesCount >=
-      this.configService.get(
-        ConfigNames.MAX_RETRY_COUNT,
-        DEFAULT_MAX_RETRY_COUNT,
-      )
-    ) {
+    if (webhookEntity.retriesCount >= this.commonConfigSerice.maxRetryCount) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {
       webhookEntity.waitUntil = new Date();
@@ -140,23 +128,24 @@ export class WebhookService {
     this.webhookRepository.updateOne(webhookEntity);
   }
 
-  public async handleWebhook(wehbook: WebhookDataDto): Promise<void> {
-    switch (wehbook.eventType) {
+  public async handleWebhook(webhook: WebhookDataDto): Promise<void> {
+    switch (webhook.eventType) {
       case EventType.ESCROW_COMPLETED:
-        await this.jobService.completeJob(wehbook);
+        await this.jobService.completeJob(webhook);
         break;
 
       case EventType.TASK_CREATION_FAILED:
-        await this.jobService.escrowFailedWebhook(wehbook);
+        await this.jobService.escrowFailedWebhook(webhook);
         break;
 
       case EventType.ESCROW_FAILED:
-        await this.jobService.escrowFailedWebhook(wehbook);
+        await this.jobService.escrowFailedWebhook(webhook);
         break;
 
       default:
-        throw new BadRequestException(
-          `Invalid webhook event type: ${wehbook.eventType}`,
+        throw new ControlledError(
+          `Invalid webhook event type: ${webhook.eventType}`,
+          HttpStatus.BAD_REQUEST,
         );
     }
   }

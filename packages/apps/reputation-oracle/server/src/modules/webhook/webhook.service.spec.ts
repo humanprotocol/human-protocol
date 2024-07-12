@@ -19,6 +19,10 @@ import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
+import { HttpStatus } from '@nestjs/common';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -33,7 +37,8 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
-    httpService: HttpService;
+    httpService: HttpService,
+    web3ConfigService: Web3ConfigService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -41,21 +46,6 @@ describe('WebhookService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'HOST':
-            return '127.0.0.1';
-          case 'PORT':
-            return 5000;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,
@@ -69,7 +59,9 @@ describe('WebhookService', () => {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
         },
-        { provide: ConfigService, useValue: mockConfigService },
+        ConfigService,
+        Web3ConfigService,
+        ServerConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
@@ -77,6 +69,11 @@ describe('WebhookService', () => {
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
     httpService = moduleRef.get(HttpService);
+    web3ConfigService = moduleRef.get(Web3ConfigService);
+
+    jest
+      .spyOn(web3ConfigService, 'privateKey', 'get')
+      .mockReturnValue(MOCK_PRIVATE_KEY);
   });
 
   afterEach(() => {
@@ -105,7 +102,7 @@ describe('WebhookService', () => {
 
       await webhookService.createIncomingWebhook(validDto);
 
-      expect(webhookRepository.create).toHaveBeenCalled();
+      expect(webhookRepository.createUnique).toHaveBeenCalled();
       expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
       expect(webhookEntity.retriesCount).toBe(0);
       expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
@@ -120,7 +117,12 @@ describe('WebhookService', () => {
 
       await expect(
         webhookService.createIncomingWebhook(invalidDto),
-      ).rejects.toThrow(ErrorWebhook.InvalidEventType);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorWebhook.InvalidEventType,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     it('should throw NotFoundException if webhook entity not created', async () => {
@@ -130,11 +132,15 @@ describe('WebhookService', () => {
         eventType: EventType.TASK_COMPLETED,
       };
 
-      jest.spyOn(webhookRepository as any, 'create').mockResolvedValue(null);
+      jest
+        .spyOn(webhookRepository as any, 'createUnique')
+        .mockResolvedValue(null);
 
       await expect(
         webhookService.createIncomingWebhook(validDto),
-      ).rejects.toThrow(ErrorWebhook.NotCreated);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotCreated, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
@@ -180,7 +186,7 @@ describe('WebhookService', () => {
     it('should successfully send a webhook', async () => {
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
-          data: true,
+          status: HttpStatus.CREATED,
         });
       });
       expect(
@@ -212,7 +218,9 @@ describe('WebhookService', () => {
       });
       await expect(
         webhookService.sendWebhook(MOCK_WEBHOOK_URL, webhookBody),
-      ).rejects.toThrow(ErrorWebhook.NotSent);
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotSent, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 });

@@ -30,8 +30,9 @@ import {
   CvatJobType,
   GCSRegions,
   StorageProviders,
+  Label,
 } from '../../../types';
-import { CvatJobRequestValidationSchema } from './schema';
+import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
 
 export const CvatJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
@@ -41,6 +42,7 @@ export const CvatJobRequestForm = () => {
 
   const initialValues = {
     labels: [],
+    nodes: [],
     type: CvatJobType.IMAGE_BOXES,
     description: '',
     userGuide: '',
@@ -49,6 +51,10 @@ export const CvatJobRequestForm = () => {
     dataRegion: '',
     dataBucketName: '',
     dataPath: '',
+    bpProvider: StorageProviders.AWS,
+    bpRegion: '',
+    bpBucketName: '',
+    bpPath: '',
     gtProvider: StorageProviders.AWS,
     gtRegion: '',
     gtBucketName: '',
@@ -66,12 +72,17 @@ export const CvatJobRequestForm = () => {
 
   const handleNext = ({
     labels,
+    nodes,
     type,
     description,
     dataProvider,
     dataRegion,
     dataBucketName,
     dataPath,
+    bpProvider,
+    bpRegion,
+    bpBucketName,
+    bpPath,
     gtProvider,
     gtRegion,
     gtBucketName,
@@ -79,17 +90,44 @@ export const CvatJobRequestForm = () => {
     userGuide,
     accuracyTarget,
   }: any) => {
+    let bp = undefined;
+    if (type === CvatJobType.IMAGE_BOXES_FROM_POINTS)
+      bp = {
+        points: {
+          provider: bpProvider,
+          region: bpRegion,
+          bucketName: bpBucketName,
+          path: bpPath,
+        },
+      };
+    else if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES)
+      bp = {
+        boxes: {
+          provider: bpProvider,
+          region: bpRegion,
+          bucketName: bpBucketName,
+          path: bpPath,
+        },
+      };
+    const labelArray: Label[] = labels.map((name: string) => {
+      if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES)
+        return { name: name, nodes: nodes };
+      else return { name: name };
+    });
     updateJobRequest?.({
       ...jobRequest,
       cvatRequest: {
-        labels,
+        labels: labelArray,
         type,
         description,
         data: {
-          provider: dataProvider,
-          region: dataRegion,
-          bucketName: dataBucketName,
-          path: dataPath,
+          dataset: {
+            provider: dataProvider,
+            region: dataRegion,
+            bucketName: dataBucketName,
+            path: dataPath,
+          },
+          ...bp,
         },
         groundTruth: {
           provider: gtProvider,
@@ -104,6 +142,10 @@ export const CvatJobRequestForm = () => {
     goToNextStep?.();
   };
 
+  const [updatedValidationSchema, setUpdatedValidationSchema] = useState(
+    CvatJobRequestValidationSchema,
+  );
+
   const {
     errors,
     touched,
@@ -115,8 +157,10 @@ export const CvatJobRequestForm = () => {
     setFieldValue,
   } = useFormik({
     initialValues,
-    validationSchema: CvatJobRequestValidationSchema,
+    validationSchema: updatedValidationSchema,
     onSubmit: handleNext,
+    validateOnChange: true,
+    validateOnMount: true,
   });
 
   useEffect(() => {
@@ -158,7 +202,14 @@ export const CvatJobRequestForm = () => {
                     id="cvat-job-type-select"
                     label="Type of job"
                     value={values.type}
-                    onChange={(e) => setFieldValue('type', e.target.value)}
+                    onChange={(e) => {
+                      setUpdatedValidationSchema(
+                        CvatJobRequestValidationSchema.concat(
+                          dataValidationSchema(e.target.value as CvatJobType),
+                        ),
+                      );
+                      setFieldValue('type', e.target.value);
+                    }}
                     error={touched.type && Boolean(errors.type)}
                     onBlur={handleBlur}
                   >
@@ -166,26 +217,58 @@ export const CvatJobRequestForm = () => {
                     <MenuItem value={CvatJobType.IMAGE_BOXES}>
                       Bounding Boxes
                     </MenuItem>
+                    <MenuItem value={CvatJobType.IMAGE_BOXES_FROM_POINTS}>
+                      Bounding Boxes from points
+                    </MenuItem>
+                    <MenuItem value={CvatJobType.IMAGE_SKELETONS_FROM_BOXES}>
+                      Skeletons from Bounding Boxes
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
                   <Autocomplete
-                    clearIcon={false}
-                    options={[]}
-                    freeSolo
                     multiple
-                    renderTags={(value, props) =>
+                    freeSolo
+                    options={[]}
+                    value={values.labels}
+                    onChange={(event, newValues) => {
+                      const updatedLabels = (newValues as string[]).map(
+                        (label: string) =>
+                          label.startsWith('Add: ')
+                            ? label.replace('Add: ', '')
+                            : label,
+                      );
+                      setFieldValue('labels', updatedLabels);
+                    }}
+                    filterOptions={(options: any, params) => {
+                      const filtered = options;
+                      const { inputValue } = params;
+                      if (inputValue !== '' && !options.includes(inputValue)) {
+                        filtered.push('Add: ' + inputValue);
+                      }
+                      return filtered;
+                    }}
+                    selectOnFocus
+                    onBlur={handleBlur}
+                    handleHomeEndKeys
+                    renderTags={(value, getTagProps) =>
                       value.map((option, index) => (
-                        <Chip label={option} {...props({ index })} />
+                        <Chip label={option} {...getTagProps({ index })} />
                       ))
                     }
                     renderInput={(params) => (
-                      <TextField label="Labels" {...params} />
+                      <Box display="flex" alignItems="center" width="100%">
+                        <TextField
+                          {...params}
+                          label="Labels"
+                          variant="outlined"
+                          onBlur={handleBlur}
+                          fullWidth
+                        />
+                      </Box>
                     )}
-                    onChange={(e, value) => setFieldValue('labels', value)}
-                    onBlur={handleBlur}
                   />
                   {errors.labels && (
                     <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
@@ -194,6 +277,62 @@ export const CvatJobRequestForm = () => {
                   )}
                 </FormControl>
               </Grid>
+              {values.type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES && (
+                <Grid item xs={12} sm={12}>
+                  <FormControl fullWidth>
+                    <Autocomplete
+                      multiple
+                      freeSolo
+                      options={[]}
+                      value={values.nodes}
+                      onChange={(event, newValues) => {
+                        const updatedNodes = (newValues as string[]).map(
+                          (node: string) =>
+                            node.startsWith('Add: ')
+                              ? node.replace('Add: ', '')
+                              : node,
+                        );
+                        setFieldValue('nodes', updatedNodes);
+                      }}
+                      filterOptions={(options: any, params) => {
+                        const filtered = options;
+                        const { inputValue } = params;
+                        if (
+                          inputValue !== '' &&
+                          !options.includes(inputValue)
+                        ) {
+                          filtered.push('Add: ' + inputValue);
+                        }
+                        return filtered;
+                      }}
+                      selectOnFocus
+                      onBlur={handleBlur}
+                      handleHomeEndKeys
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip label={option} {...getTagProps({ index })} />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <Box display="flex" alignItems="center" width="100%">
+                          <TextField
+                            {...params}
+                            label="Nodes"
+                            variant="outlined"
+                            onBlur={handleBlur}
+                            fullWidth
+                          />
+                        </Box>
+                      )}
+                    />
+                    {errors.nodes && (
+                      <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                        {errors.nodes}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <FormControl fullWidth>
                   <TextField
@@ -319,6 +458,103 @@ export const CvatJobRequestForm = () => {
                   </FormControl>
                 </Grid>
               </Grid>
+              {[
+                CvatJobType.IMAGE_BOXES_FROM_POINTS,
+                CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
+              ].includes(values.type) && (
+                <Grid item container xs={12} spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="body2" fontWeight={700}>
+                      {values.type === CvatJobType.IMAGE_BOXES_FROM_POINTS
+                        ? 'Points'
+                        : 'Boxes'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel id="cvat-bp-storage-provider-select-label">
+                        Storage Provider
+                      </InputLabel>
+                      <Select
+                        labelId="cvat-bp-storage-provider-select-label"
+                        id="cvat-bp-storage-provider-select"
+                        label="Storage Provider"
+                        value={values.bpProvider}
+                        onChange={(e) =>
+                          setFieldValue('bpProvider', e.target.value)
+                        }
+                        error={touched.bpProvider && Boolean(errors.bpProvider)}
+                        onBlur={handleBlur}
+                      >
+                        <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel id="cvat-bp-storage-provider-select-label">
+                        Region
+                      </InputLabel>
+                      <Select
+                        labelId="cvat-bp-storage-provider-select-label"
+                        id="cvat-bp-storage-provider-select"
+                        label="Region"
+                        value={values.bpRegion}
+                        onChange={(e) =>
+                          setFieldValue('bpRegion', e.target.value)
+                        }
+                        error={touched.bpRegion && Boolean(errors.bpRegion)}
+                        onBlur={handleBlur}
+                      >
+                        {Object.values(dataRegions).map((region) => (
+                          <MenuItem key={`bpset-${region}`} value={region}>
+                            {region}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errors.bpRegion && (
+                        <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                          {errors.bpRegion}
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl fullWidth>
+                      <TextField
+                        name="bpBucketName"
+                        label="Bucket Name"
+                        placeholder="Bucket Name"
+                        value={values.bpBucketName}
+                        onBlur={handleBlur}
+                        onChange={(e) =>
+                          setFieldValue('bpBucketName', e.target.value)
+                        }
+                        error={
+                          touched.bpBucketName && Boolean(errors.bpBucketName)
+                        }
+                        helperText={errors.bpBucketName}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6}>
+                    <FormControl fullWidth>
+                      <TextField
+                        name="bpPath"
+                        label="Path"
+                        placeholder="Path"
+                        value={values.bpPath}
+                        onBlur={handleBlur}
+                        onChange={(e) =>
+                          setFieldValue('bpPath', e.target.value)
+                        }
+                        error={touched.bpPath && Boolean(errors.bpPath)}
+                        helperText={errors.bpPath}
+                      />
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              )}
               <Grid item container xs={12} spacing={2}>
                 <Grid item xs={12}>
                   <Typography variant="body2" fontWeight={700}>

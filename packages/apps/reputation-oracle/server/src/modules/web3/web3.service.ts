@@ -1,100 +1,57 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
-import {
-  ConfigNames,
-  MAINNET_CHAIN_IDS,
-  TESTNET_CHAIN_IDS,
-  networks,
-} from '../../common/config';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ErrorWeb3 } from '../../common/constants/errors';
-import { ChainId } from '@human-protocol/sdk';
-import { SignatureBodyDto } from './web3.dto';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
   public readonly logger = new Logger(Web3Service.name);
 
-  constructor(private readonly configService: ConfigService) {
-    const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
-    const validChains = this.getValidChains();
-    const validNetworks = networks.filter((network) =>
-      validChains.includes(network.chainId),
-    );
-    for (const network of validNetworks) {
+  constructor(
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly networkConfigService: NetworkConfigService,
+  ) {
+    const privateKey = this.web3ConfigService.privateKey;
+
+    if (!this.networkConfigService.networks.length) {
+      this.logger.log(ErrorWeb3.NoValidNetworks, Web3Service.name);
+      throw new ControlledError(
+        ErrorWeb3.NoValidNetworks,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    for (const network of this.networkConfigService.networks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
   }
 
   public getSigner(chainId: number): Wallet {
-    this.validateChainId(chainId);
-    return this.signers[chainId];
-  }
-
-  public validateChainId(chainId: number): void {
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
-    const validChainIds = this.getValidChains();
-
-    if (!validChainIds.includes(chainId)) {
-      const errorType =
-        currentWeb3Env === Web3Env.MAINNET
-          ? ErrorWeb3.InvalidMainnetChainId
-          : ErrorWeb3.InvalidTestnetChainId;
-      this.logger.log(errorType, Web3Service.name);
-      throw new BadRequestException(errorType);
+    if (!this.signers[chainId]) {
+      this.logger.log(ErrorWeb3.InvalidChainId, Web3Service.name);
+      throw new ControlledError(
+        ErrorWeb3.InvalidChainId,
+        HttpStatus.BAD_REQUEST,
+      );
     }
-  }
-
-  public getValidChains(): ChainId[] {
-    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
-    const validChainIds =
-      currentWeb3Env === Web3Env.MAINNET
-        ? MAINNET_CHAIN_IDS
-        : TESTNET_CHAIN_IDS;
-
-    return validChainIds;
+    return this.signers[chainId];
   }
 
   public async calculateGasPrice(chainId: number): Promise<bigint> {
     const signer = this.getSigner(chainId);
-    const multiplier = this.configService.get<number>(
-      ConfigNames.GAS_PRICE_MULTIPLIER,
-      1,
-    );
+    const multiplier = this.web3ConfigService.gasPriceMultiplier;
     const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
-    if (!gasPrice) {
-      throw new Error(ErrorWeb3.GasPriceError);
+    if (gasPrice) {
+      return gasPrice * BigInt(multiplier);
     }
-    return gasPrice * BigInt(multiplier);
+    throw new ControlledError(ErrorWeb3.GasPriceError, HttpStatus.CONFLICT);
   }
 
   public getOperatorAddress(): string {
     return Object.values(this.signers)[0].address;
-  }
-
-  public prepareSignatureBody(
-    type: SignatureType,
-    address: string,
-  ): SignatureBodyDto {
-    let content: string;
-    switch (type) {
-      case SignatureType.SIGNUP:
-        content = 'signup';
-        break;
-      case SignatureType.DISABLE_OPERATOR:
-        content = 'disable-operator';
-        break;
-      default:
-        throw new BadRequestException('Type not allowed');
-    }
-
-    return {
-      from: address,
-      to: this.getOperatorAddress(),
-      contents: content,
-    };
   }
 }

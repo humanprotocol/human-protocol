@@ -8,6 +8,9 @@ import {
   MOCK_SENDGRID_FROM_EMAIL,
   MOCK_SENDGRID_FROM_NAME,
 } from '../../../test/constants';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
@@ -36,6 +39,7 @@ describe('SendGridService', () => {
     const app = await Test.createTestingModule({
       providers: [
         SendGridService,
+        SendgridConfigService,
         {
           provide: MailService,
           useValue: mockMailService,
@@ -101,17 +105,14 @@ describe('SendGridService', () => {
           text: 'and easy to do anywhere, even with Node.js',
           html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         }),
-      ).rejects.toThrowError(ErrorSendGrid.EmailNotSent);
+      ).rejects.toThrow(
+        new ControlledError(ErrorSendGrid.EmailNotSent, HttpStatus.BAD_REQUEST),
+      );
     });
   });
 
   describe('constructor', () => {
     it('should initialize SendGridService with valid API key', () => {
-      sendGridService = new SendGridService(
-        mailService,
-        mockConfigService as any,
-      );
-
       expect(mailService.setApiKey).toHaveBeenCalledWith(MOCK_SENDGRID_API_KEY);
       expect(sendGridService['defaultFromEmail']).toEqual(
         MOCK_SENDGRID_FROM_EMAIL,
@@ -122,15 +123,16 @@ describe('SendGridService', () => {
     });
 
     it('should throw an error with invalid API key', async () => {
-      const invalidApiKey = 'invalid-api-key';
-      mockConfigService.get = jest.fn().mockReturnValue(invalidApiKey);
+      mockConfigService.get = jest.fn().mockReturnValue('invalid-api-key');
 
       expect(() => {
         sendGridService = new SendGridService(
           mailService,
           mockConfigService as any,
         );
-      }).toThrowError(ErrorSendGrid.InvalidApiKey);
+      }).toThrow(
+        new ControlledError(ErrorSendGrid.InvalidApiKey, HttpStatus.CONFLICT),
+      );
     });
   });
 });

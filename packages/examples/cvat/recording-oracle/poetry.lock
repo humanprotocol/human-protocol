@@ -1164,13 +1164,13 @@ test = ["eth-hash[pycryptodome]", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)"]
 
 [[package]]
 name = "eth-typing"
-version = "4.0.0"
+version = "4.1.0"
 description = "eth-typing: Common type annotations for ethereum python packages"
 optional = false
-python-versions = ">=3.8, <4"
+python-versions = "<4,>=3.8"
 files = [
-    {file = "eth-typing-4.0.0.tar.gz", hash = "sha256:9af0b6beafbc5c2e18daf19da5f5a68315023172c4e79d149e12ad10a3d3f731"},
-    {file = "eth_typing-4.0.0-py3-none-any.whl", hash = "sha256:7e556bea322b6e8c0a231547b736c258e10ce9eed5ddc254f51031b12af66a16"},
+    {file = "eth-typing-4.1.0.tar.gz", hash = "sha256:ed52b0c6b049240fd810bc87c8857c7ea39370f060f70b9ca3876285269f2938"},
+    {file = "eth_typing-4.1.0-py3-none-any.whl", hash = "sha256:1f1b16bf37bfe0be730731fd24c7398e931a2b45a8feebf82df2e77a611a23be"},
 ]
 
 [package.extras]
@@ -1781,18 +1781,19 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "human-protocol-sdk"
-version = "1.1.19"
+version = "3.0.0"
 description = "A python library to launch escrow contracts to the HUMAN network."
 optional = false
 python-versions = "*"
 files = [
-    {file = "human-protocol-sdk-1.1.19.tar.gz", hash = "sha256:c00fb0bc58607c57a062d78f916af793d436da9c84a05030261e08c930b5268d"},
-    {file = "human_protocol_sdk-1.1.19-py3-none-any.whl", hash = "sha256:725d3ef50d7d23b6a90cadf14e2cfd59bc698beed9bcda239b55141b1ad6e3e1"},
+    {file = "human-protocol-sdk-3.0.0.tar.gz", hash = "sha256:3e5dd6acac30d8121fbdfdf01be7a3f8f3153e2668453b03b25427973d55f02f"},
+    {file = "human_protocol_sdk-3.0.0-py3-none-any.whl", hash = "sha256:f75c38f0dc784d199274799b41b81f00ff4941fdd2049ab5ae3677867def46ef"},
 ]
 
 [package.dependencies]
 aiohttp = "<4.0.0"
 cryptography = "*"
+eth-typing = "4.1.0"
 minio = "*"
 pgpy = "*"
 validators = "0.20.0"

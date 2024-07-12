@@ -29,3 +29,12 @@ def get_default_assignment_timeout(task_type: TaskTypes) -> int:
         timeout_seconds *= skeletons_from_boxes.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
 
     return timeout_seconds
+
+
+def get_default_assignment_size(manifest: TaskManifest) -> int:
+    job_size = manifest.annotation.job_size + manifest.validation.val_size
+
+    if job_size == TaskTypes.image_skeletons_from_boxes:
+        job_size *= skeletons_from_boxes.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
+
+    return job_size

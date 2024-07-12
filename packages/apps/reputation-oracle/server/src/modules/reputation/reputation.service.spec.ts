@@ -22,11 +22,13 @@ import {
   SolutionError,
 } from '../../common/enums';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 import { EscrowClient } from '@human-protocol/sdk';
+import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -52,17 +54,6 @@ describe('ReputationService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case ConfigNames.REPUTATION_LEVEL_LOW:
-            return 300;
-          case ConfigNames.REPUTATION_LEVEL_HIGH:
-            return 700;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -82,6 +73,7 @@ describe('ReputationService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
             validateChainId: jest.fn().mockReturnValue(new Error()),
+            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
@@ -94,10 +86,8 @@ describe('ReputationService', () => {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
+        ConfigService,
+        ReputationConfigService,
       ],
     }).compile();
 
@@ -117,7 +107,12 @@ describe('ReputationService', () => {
 
       await expect(
         reputationService.assessReputationScores(chainId, escrowAddress),
-      ).rejects.toThrow(ErrorManifest.ManifestUrlDoesNotExist);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorManifest.ManifestUrlDoesNotExist,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
 
     describe('fortune', () => {
@@ -141,7 +136,12 @@ describe('ReputationService', () => {
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
-        ).rejects.toThrow(ErrorResults.NoResultsHaveBeenVerified);
+        ).rejects.toThrow(
+          new ControlledError(
+            ErrorResults.NoResultsHaveBeenVerified,
+            HttpStatus.BAD_REQUEST,
+          ),
+        );
       });
 
       it('should assess reputation scores', async () => {
@@ -233,7 +233,12 @@ describe('ReputationService', () => {
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
-        ).rejects.toThrow(ErrorResults.NoAnnotationsMetaFound);
+        ).rejects.toThrow(
+          new ControlledError(
+            ErrorResults.NoAnnotationsMetaFound,
+            HttpStatus.BAD_REQUEST,
+          ),
+        );
       });
 
       it('should assess reputation scores', async () => {
@@ -318,18 +323,43 @@ describe('ReputationService', () => {
 
     it('should create a new reputation entity if not found', async () => {
       jest
-        .spyOn(reputationRepository, 'findOne')
+        .spyOn(reputationRepository, 'findOneByAddress')
         .mockResolvedValueOnce(undefined as any);
-      jest.spyOn(reputationRepository, 'create');
+      jest.spyOn(reputationRepository, 'createUnique');
 
       await reputationService.increaseReputation(chainId, address, type);
 
-      expect(reputationRepository.findOne).toHaveBeenCalledWith({ address });
-      expect(reputationRepository.create).toHaveBeenCalledWith({
+      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
+        address,
+      );
+      expect(reputationRepository.createUnique).toHaveBeenCalledWith({
         chainId,
         address,
         reputationPoints: 1,
         type,
+      });
+    });
+
+    it('should create a new reputation entity with Reputation Oracle type if not found', async () => {
+      jest
+        .spyOn(reputationRepository, 'findOneByAddress')
+        .mockResolvedValueOnce(undefined as any);
+      jest.spyOn(reputationRepository, 'createUnique');
+
+      await reputationService.increaseReputation(
+        chainId,
+        address,
+        ReputationEntityType.REPUTATION_ORACLE,
+      );
+
+      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
+        address,
+      );
+      expect(reputationRepository.createUnique).toHaveBeenCalledWith({
+        chainId,
+        address,
+        reputationPoints: 700,
+        type: ReputationEntityType.REPUTATION_ORACLE,
       });
     });
 
@@ -341,12 +371,14 @@ describe('ReputationService', () => {
       };
 
       jest
-        .spyOn(reputationRepository, 'findOne')
+        .spyOn(reputationRepository, 'findOneByAddress')
         .mockResolvedValueOnce(reputationEntity as ReputationEntity);
 
       await reputationService.increaseReputation(chainId, address, type);
 
-      expect(reputationRepository.findOne).toHaveBeenCalledWith({ address });
+      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
+        address,
+      );
       expect(reputationEntity.reputationPoints).toBe(2);
       expect(reputationEntity.save).toHaveBeenCalled();
     });
@@ -359,14 +391,16 @@ describe('ReputationService', () => {
 
     it('should create a new reputation entity if not found', async () => {
       jest
-        .spyOn(reputationRepository, 'findOne')
+        .spyOn(reputationRepository, 'findOneByAddress')
         .mockResolvedValueOnce(undefined as any);
-      jest.spyOn(reputationRepository, 'create');
+      jest.spyOn(reputationRepository, 'createUnique');
 
       await reputationService.decreaseReputation(chainId, address, type);
 
-      expect(reputationRepository.findOne).toHaveBeenCalledWith({ address });
-      expect(reputationRepository.create).toHaveBeenCalledWith({
+      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
+        address,
+      );
+      expect(reputationRepository.createUnique).toHaveBeenCalledWith({
         chainId,
         address,
         reputationPoints: 0,
@@ -382,14 +416,40 @@ describe('ReputationService', () => {
       };
 
       jest
-        .spyOn(reputationRepository, 'findOne')
+        .spyOn(reputationRepository, 'findOneByAddress')
         .mockResolvedValueOnce(reputationEntity as ReputationEntity);
 
       await reputationService.decreaseReputation(chainId, address, type);
 
-      expect(reputationRepository.findOne).toHaveBeenCalledWith({ address });
+      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
+        address,
+      );
       expect(reputationEntity.reputationPoints).toBe(0);
       expect(reputationEntity.save).toHaveBeenCalled();
+    });
+
+    it('should return if called for Reputation Oracle itself', async () => {
+      const reputationEntity: Partial<ReputationEntity> = {
+        address,
+        reputationPoints: 701,
+        save: jest.fn(),
+      };
+
+      jest
+        .spyOn(reputationRepository, 'findOneByAddress')
+        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
+
+      await reputationService.decreaseReputation(
+        chainId,
+        address,
+        ReputationEntityType.REPUTATION_ORACLE,
+      );
+
+      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
+        address,
+      );
+      expect(reputationEntity.reputationPoints).toBe(701);
+      expect(reputationEntity.save).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -416,7 +476,7 @@ describe('ReputationService', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
 
-    it('should return reputation entity', async () => {
+    it('should return HIGH reputation for Reputation Oracle Address', async () => {
       const reputationEntity: Partial<ReputationEntity> = {
         chainId,
         address,
@@ -424,7 +484,7 @@ describe('ReputationService', () => {
       };
 
       jest
-        .spyOn(reputationRepository, 'findOne')
+        .spyOn(reputationRepository, 'findOneByAddressAndChainId')
         .mockResolvedValueOnce(reputationEntity as ReputationEntity);
 
       const result = await reputationService.getReputation(chainId, address);
@@ -432,13 +492,39 @@ describe('ReputationService', () => {
       const resultReputation = {
         chainId,
         address,
+        reputation: ReputationLevel.HIGH,
+      };
+
+      expect(result).toEqual(resultReputation);
+    });
+
+    it('should return reputation entity', async () => {
+      const NOT_ORACLE_ADDRESS = '0x0000000000000000000000000000000000000000';
+      const reputationEntity: Partial<ReputationEntity> = {
+        chainId,
+        address: NOT_ORACLE_ADDRESS,
+        reputationPoints: 1,
+      };
+
+      jest
+        .spyOn(reputationRepository, 'findOneByAddressAndChainId')
+        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
+
+      const result = await reputationService.getReputation(
+        chainId,
+        NOT_ORACLE_ADDRESS,
+      );
+
+      const resultReputation = {
+        chainId,
+        address: NOT_ORACLE_ADDRESS,
         reputation: ReputationLevel.LOW,
       };
 
-      expect(reputationRepository.findOne).toHaveBeenCalledWith({
-        chainId,
-        address,
-      });
+      expect(
+        reputationRepository.findOneByAddressAndChainId,
+      ).toHaveBeenCalledWith(NOT_ORACLE_ADDRESS, chainId);
+
       expect(result).toEqual(resultReputation);
     });
   });
@@ -455,7 +541,7 @@ describe('ReputationService', () => {
       };
 
       jest
-        .spyOn(reputationRepository, 'find')
+        .spyOn(reputationRepository, 'findByChainId')
         .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
 
       const result = await reputationService.getAllReputations();
@@ -466,7 +552,7 @@ describe('ReputationService', () => {
         reputation: ReputationLevel.LOW,
       };
 
-      expect(reputationRepository.find).toHaveBeenCalled();
+      expect(reputationRepository.findByChainId).toHaveBeenCalled();
       expect(result).toEqual([resultReputation]);
     });
   });

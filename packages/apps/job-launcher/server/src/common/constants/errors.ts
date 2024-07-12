@@ -17,7 +17,11 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+  DatasetValidationFailed = 'Dataset validation failed',
   ManifestHashNotExist = 'Manifest hash does not exist',
+  DataNotExist = 'Data does not exist',
+  ImageConsistency = 'Ground Truth images not found in dataset',
+  CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
 }
 
 /**
@@ -36,7 +40,10 @@ export enum ErrorWebhook {
 export enum ErrorEscrow {
   NotFound = 'Escrow not found',
   NotCreated = 'Escrow has not been created',
+  NotSetup = 'Escrow has not been setup',
   NotLaunched = 'Escrow has not been launched',
+  NotFunded = 'Escrow has not been funded',
+  NotCanceled = 'Escrow has not been canceled',
   InvalidStatusCancellation = 'Escrow has an invalid status for cancellation',
   InvalidBalanceCancellation = 'Escrow has an invalid balance for cancellation',
 }
@@ -50,6 +57,7 @@ export enum ErrorUser {
   BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
   UserNotActive = 'User not active',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
 }
 
 /**
@@ -119,6 +127,7 @@ export enum ErrorBucket {
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
+  NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
 }

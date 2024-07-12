@@ -6,7 +6,7 @@ from src.utils.enums import BetterEnumMeta
 
 class Networks(int, Enum, metaclass=BetterEnumMeta):
     polygon_mainnet = Config.polygon_mainnet.chain_id
-    polygon_mumbai = Config.polygon_mumbai.chain_id
+    polygon_amoy = Config.polygon_amoy.chain_id
     localhost = Config.localhost.chain_id
 
 
@@ -17,6 +17,7 @@ class CvatEventTypes(str, Enum, metaclass=BetterEnumMeta):
 
 
 class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
+    creation = "creation"
     annotation = "annotation"
     completed = "completed"
     validation = "validation"

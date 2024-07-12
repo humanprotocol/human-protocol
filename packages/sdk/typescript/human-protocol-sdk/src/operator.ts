@@ -2,9 +2,10 @@
 import gqlFetch from 'graphql-request';
 import {
   ILeader,
+  ILeaderSubgraph,
   ILeadersFilter,
   IOperator,
-  IReputationNetwork,
+  IReputationNetworkSubgraph,
   IReward,
 } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
@@ -20,7 +21,7 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
 } from './error';
-import { throwError } from './utils';
+import { getSubgraphUrl } from './utils';
 import { ChainId } from './enums';
 import { NETWORKS } from './constants';
 
@@ -37,7 +38,7 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const leader = await OperatorUtils.getLeader(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   public static async getLeader(
@@ -53,17 +54,28 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    try {
-      const { leader } = await gqlFetch<{
-        leader: ILeader;
-      }>(networkData.subgraphUrl, GET_LEADER_QUERY, {
-        address: address.toLowerCase(),
-      });
+    const { leader } = await gqlFetch<{
+      leader: ILeaderSubgraph;
+    }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
+      address: address.toLowerCase(),
+    });
 
-      return leader;
-    } catch (e) {
-      return throwError(e);
+    if (!leader) {
+      return (leader as ILeader) || null;
     }
+
+    let jobTypes: string[] = [];
+
+    if (typeof leader.jobTypes === 'string') {
+      jobTypes = leader.jobTypes.split(',');
+    } else if (Array.isArray(leader.jobTypes)) {
+      jobTypes = leader.jobTypes;
+    }
+
+    return {
+      ...leader,
+      jobTypes,
+    };
   }
 
   /**
@@ -78,32 +90,48 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils } from '@human-protocol/sdk';
    *
-   * const leaders = await OperatorUtils.getLeaders();
+   * const filter: ILeadersFilter = {
+   *  chainId: ChainId.POLYGON
+   * };
+   * const leaders = await OperatorUtils.getLeaders(filter);
    * ```
    */
-  public static async getLeaders(
-    filter: ILeadersFilter = { networks: [ChainId.POLYGON_MUMBAI] }
-  ): Promise<ILeader[]> {
-    try {
-      let leaders_data: ILeader[] = [];
-      for (const chainId of filter.networks) {
-        const networkData = NETWORKS[chainId];
+  public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
+    let leaders_data: ILeader[] = [];
 
-        if (!networkData) {
-          throw ErrorUnsupportedChainID;
-        }
-        const { leaders } = await gqlFetch<{
-          leaders: ILeader[];
-        }>(networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
-          role: filter.role,
-        });
-        leaders_data = leaders_data.concat(leaders);
-      }
+    const networkData = NETWORKS[filter.chainId];
 
-      return leaders_data;
-    } catch (e) {
-      return throwError(e);
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
     }
+
+    const { leaders } = await gqlFetch<{
+      leaders: ILeaderSubgraph[];
+    }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
+      role: filter?.role,
+    });
+
+    if (!leaders) {
+      return [];
+    }
+
+    leaders_data = leaders_data.concat(
+      leaders.map((leader) => {
+        let jobTypes: string[] = [];
+
+        if (typeof leader.jobTypes === 'string') {
+          jobTypes = leader.jobTypes.split(',');
+        } else if (Array.isArray(leader.jobTypes)) {
+          jobTypes = leader.jobTypes;
+        }
+
+        return {
+          ...leader,
+          jobTypes,
+        };
+      })
+    );
+    return leaders_data;
   }
 
   /**
@@ -117,7 +145,7 @@ export class OperatorUtils {
    * ```typescript
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   public static async getReputationNetworkOperators(
@@ -130,18 +158,27 @@ export class OperatorUtils {
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
-    try {
-      const { reputationNetwork } = await gqlFetch<{
-        reputationNetwork: IReputationNetwork;
-      }>(networkData.subgraphUrl, GET_REPUTATION_NETWORK_QUERY(role), {
-        address: address,
-        role: role,
-      });
+    const { reputationNetwork } = await gqlFetch<{
+      reputationNetwork: IReputationNetworkSubgraph;
+    }>(getSubgraphUrl(networkData), GET_REPUTATION_NETWORK_QUERY(role), {
+      address: address.toLowerCase(),
+      role: role,
+    });
 
-      return reputationNetwork.operators;
-    } catch (e) {
-      return throwError(e);
-    }
+    return reputationNetwork.operators.map((operator) => {
+      let jobTypes: string[] = [];
+
+      if (typeof operator.jobTypes === 'string') {
+        jobTypes = operator.jobTypes.split(',');
+      } else if (Array.isArray(operator.jobTypes)) {
+        jobTypes = operator.jobTypes;
+      }
+
+      return {
+        ...operator,
+        jobTypes,
+      };
+    });
   }
 
   /**
@@ -156,7 +193,7 @@ export class OperatorUtils {
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_MUMBAI, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   public static async getRewards(
@@ -172,21 +209,17 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    try {
-      const { rewardAddedEvents } = await gqlFetch<{
-        rewardAddedEvents: RewardAddedEventData[];
-      }>(networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
-        slasherAddress: slasherAddress.toLowerCase(),
-      });
+    const { rewardAddedEvents } = await gqlFetch<{
+      rewardAddedEvents: RewardAddedEventData[];
+    }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
+      slasherAddress: slasherAddress.toLowerCase(),
+    });
 
-      return rewardAddedEvents.map((reward: any) => {
-        return {
-          escrowAddress: reward.escrow,
-          amount: reward.amount,
-        };
-      });
-    } catch (e) {
-      return throwError(e);
-    }
+    return rewardAddedEvents.map((reward: any) => {
+      return {
+        escrowAddress: reward.escrow,
+        amount: reward.amount,
+      };
+    });
   }
 }

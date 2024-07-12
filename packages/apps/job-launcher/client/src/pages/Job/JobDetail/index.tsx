@@ -11,7 +11,6 @@ import { useJobDetails } from '../../../hooks/useJobDetails';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import * as jobService from '../../../services/job';
 import { JobStatus } from '../../../types';
-import { formatAmount } from '../../../utils/bignumber';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -28,6 +27,8 @@ export default function JobDetail() {
   const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
   const [isCancelling, setIsCancelling] = useState(false);
   const { openSnackbar, showError } = useSnackbar();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleCancel = async () => {
     setIsCancelling(true);
@@ -47,10 +48,22 @@ export default function JobDetail() {
     setIsCancelling(false);
   };
 
+  const handleChangePage = (event: any, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: any) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const isCancellable =
     data?.details.status === JobStatus.FAILED ||
     data?.details.status === JobStatus.PAID ||
     data?.details.status === JobStatus.PENDING ||
+    data?.details.status === JobStatus.PARTIAL ||
+    data?.details.status === JobStatus.SET_UP ||
+    data?.details.status === JobStatus.CREATED ||
     data?.details.status === JobStatus.LAUNCHED;
 
   if (isLoading) return <>Loading...</>;
@@ -103,7 +116,7 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Paid Out HMT"
-                  value={`${formatAmount(data.details.paidOut.toString())} HMT`}
+                  value={`${data.details.paidOut.toString()} HMT`}
                 />
                 <CardTextRow label="Amount of Jobs" value="" />
                 <CardTextRow label="Workers assigned" value="" />
@@ -124,13 +137,11 @@ export default function JobDetail() {
                 <CardTextRow label="Staker" value={data.staking.staker} />
                 <CardTextRow
                   label="Staked HMT"
-                  value={`${formatAmount(
-                    data.staking.allocated.toString(),
-                  )} HMT`}
+                  value={`${data.staking.allocated.toString()} HMT`}
                 />
                 <CardTextRow
                   label="Slashed HMT"
-                  value={`${formatAmount(data.staking.slashed.toString())} HMT`}
+                  value={`${data.staking.slashed.toString()} HMT`}
                 />
               </Stack>
             </CardContainer>
@@ -167,9 +178,7 @@ export default function JobDetail() {
                     />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${formatAmount(
-                        data.manifest.fundAmount.toString(),
-                      )} HMT`}
+                      value={`${data.manifest.fundAmount.toString()} HMT`}
                     />
                     <CardTextRow
                       label="Job Requester"
@@ -230,7 +239,11 @@ export default function JobDetail() {
                   },
                   { id: 'error', label: 'Refused reason' },
                 ]}
-                data={data.results}
+                data={data}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
               />
             )}
             {data.manifest.requestType !== 'FORTUNE' && (

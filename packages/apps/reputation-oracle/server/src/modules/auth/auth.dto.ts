@@ -6,17 +6,22 @@ import {
   IsEthereumAddress,
   IsString,
   Matches,
+  IsUUID,
 } from 'class-validator';
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
-import { UserType } from '../../common/enums/user';
+import { Role } from '../../common/enums/user';
 
 export class ForgotPasswordDto {
   @ApiProperty()
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class SignInDto {
@@ -28,6 +33,16 @@ export class SignInDto {
   @ApiProperty()
   @IsString()
   public password: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
+}
+
+export class RefreshDto {
+  @ApiProperty({ name: 'refresh_token' })
+  @IsUUID()
+  public refreshToken: string;
 }
 
 export class ValidatePasswordDto {
@@ -45,12 +60,20 @@ export class ResendEmailVerificationDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class RestorePasswordDto extends ValidatePasswordDto {
   @ApiProperty()
   @IsString()
   public token: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class VerifyEmailDto {
@@ -91,10 +114,10 @@ export class Web3SignUpDto {
   public signature: string;
 
   @ApiProperty({
-    enum: UserType,
+    enum: Role,
   })
-  @IsEnum(UserType)
-  public type: UserType;
+  @IsEnum(Role)
+  public type: Role;
 
   @ApiProperty()
   @IsString()

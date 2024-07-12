@@ -1,3 +1,4 @@
+import { handleQueryFailedError } from '../common/errors/database';
 import {
   DataSource,
   EntityTarget,
@@ -5,8 +6,6 @@ import {
   QueryFailedError,
   Repository,
 } from 'typeorm';
-import { handleQueryFailedError } from './database.error';
-
 export class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
   constructor(target: EntityTarget<T>, dataSource: DataSource) {
     super(target, dataSource.createEntityManager());
@@ -36,5 +35,17 @@ export class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
       }
     }
     return item;
+  }
+
+  async deleteOne(item: T): Promise<void> {
+    try {
+      await this.remove(item);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
   }
 }

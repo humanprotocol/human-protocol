@@ -1,0 +1,32 @@
+name: Fortune check
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths:
+      - 'packages/core/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/apps/fortune/**'
+  workflow_dispatch:
+
+jobs:
+  fortune-exchange-oracle-test:
+    name: Fortune Exchange Oracle Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
+        name: Run Exchange Oracle tests
+  fortune-recording-oracle-test:
+    name: Fortune Recording Oracle Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn workspace @human-protocol/fortune-recording-oracle test
+        name: Run Recording Oracle tests

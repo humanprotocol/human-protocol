@@ -5,13 +5,13 @@ import { JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { AssignmentEntity } from '../assignment/assignment.entity';
 
-@Entity({ schema: NS, name: 'job' })
+@Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
 export class JobEntity extends BaseEntity {
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int' })
   public chainId: number;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar' })
   public escrowAddress: string;
 
   @Column({
@@ -20,6 +20,11 @@ export class JobEntity extends BaseEntity {
   })
   public status: JobStatus;
 
-  @OneToMany(() => AssignmentEntity, (assignment) => assignment.job)
+  @Column({ type: 'varchar' })
+  public reputationNetwork: string;
+
+  @OneToMany(() => AssignmentEntity, (assignment) => assignment.job, {
+    cascade: true,
+  })
   public assignments: AssignmentEntity[];
 }

@@ -81,7 +81,7 @@ def convert_point_arrays_dataset_to_1_point_skeletons(
     """
 
     def _get_skeleton_label(original_label: str) -> str:
-        return original_label + "_sk"
+        return original_label
 
     new_label_cat = dm.LabelCategories.from_iterable(
         [_get_skeleton_label(label) for label in labels]

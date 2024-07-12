@@ -18,6 +18,15 @@ export enum ErrorReputation {
 }
 
 /**
+ * Represents error messages related to credential.
+ */
+export enum ErrorCredential {
+  NotFound = 'Credential not found',
+  NotCreated = 'Credential has not been created',
+  InvalidCredential = 'Invalid credential',
+}
+
+/**
  * Represents error messages related to results.
  */
 export enum ErrorResults {
@@ -52,8 +61,14 @@ export enum ErrorUser {
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
-  IncorrectAddress = 'Incorrect address',
+  AlreadyAssigned = 'User already has an address assigned',
+  NoWalletAddresRegistered = 'No wallet address registered on your account',
   KycNotApproved = 'KYC not approved',
+  UserNotActive = 'User not active',
+  LabelingEnableFailed = 'Failed to enable labeling for this account',
+  InvalidType = 'User has invalid type',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
+  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address',
 }
 
 /**
@@ -63,9 +78,15 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
+  TokenExpired = 'Token has expired',
   UserNotActive = 'User not active',
   InvalidSignature = 'Invalid signature',
   InvalidRole = 'Invalid role in KVStore',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  InvalidToken = 'Invalid token',
+  InvalidJobType = 'Invalid operator job type',
+  InvalidUrl = 'Invalid operator URL',
+  InvalidFee = 'Invalid operator fee',
 }
 
 /**
@@ -90,6 +111,7 @@ export enum ErrorKyc {
   Rejected = 'KYC session rejected',
   InvalidSynapsAPIResponse = 'Invalid Synaps API response',
   InvalidWebhookSecret = 'Invalid webhook secret',
+  CountryNotSet = 'Сountry is not set for the user',
 }
 
 /**
@@ -105,8 +127,8 @@ export enum ErrorCronJob {
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
-  InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
-  InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+  NoValidNetworks = 'No valid networks found',
+  InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
 }
 
@@ -114,5 +136,16 @@ export enum ErrorWeb3 {
  * Represents error messages related to operator.
  */
 export enum ErrorOperator {
+  OperatorAlreadyActive = 'Operator is already active',
   OperatorNotActive = 'Operator not active',
+}
+
+/**
+ * Represents error messages related to qualification.
+ */
+export enum ErrorQualification {
+  InvalidExpiresAt = 'Qualification should be valid for at least %minValidity% hours',
+  NotFound = 'Qualification not found',
+  NoWorkersFound = 'No workers found for the provided addresses or emails',
+  AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
 }

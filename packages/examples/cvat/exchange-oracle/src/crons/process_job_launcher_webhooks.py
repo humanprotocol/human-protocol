@@ -116,10 +116,10 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     accepted_states=[EscrowStatus.Pending, EscrowStatus.Cancelled],
                 )
 
-                project = cvat_db_service.get_project_by_escrow_address(
-                    db_session, webhook.escrow_address, for_update=True
+                projects = cvat_db_service.get_projects_by_escrow_address(
+                    db_session, webhook.escrow_address, for_update=True, limit=None
                 )
-                if not project:
+                if not projects:
                     logger.error(
                         "Received escrow cancel event "
                         f"(escrow_address={webhook.escrow_address}). "
@@ -127,23 +127,28 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     )
                     return
 
-                if project.status in [
-                    ProjectStatuses.canceled,
-                    ProjectStatuses.recorded,
-                ]:
-                    logger.error(
-                        "Received escrow cancel event "
-                        f"(escrow_address={webhook.escrow_address}). "
-                        "The project already finished, ignoring"
-                    )
-                    return
+                for project in projects:
+                    if project.status in [
+                        ProjectStatuses.canceled,
+                        ProjectStatuses.recorded,
+                    ]:
+                        logger.error(
+                            "Received escrow cancel event "
+                            f"(escrow_address={webhook.escrow_address}). "
+                            "The project is already finished, ignoring"
+                        )
+                        continue
 
-                logger.info(
-                    f"Received escrow cancel event (escrow_address={webhook.escrow_address}). "
-                    "Canceling the project"
-                )
-                cvat_db_service.update_project_status(
-                    db_session, project.id, ProjectStatuses.canceled
+                    logger.info(
+                        f"Received escrow cancel event (escrow_address={webhook.escrow_address}). "
+                        "Canceling the project"
+                    )
+                    cvat_db_service.update_project_status(
+                        db_session, project.id, ProjectStatuses.canceled
+                    )
+
+                cvat_db_service.finish_escrow_creations_by_escrow_address(
+                    db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
                 )
 
             except Exception as ex:

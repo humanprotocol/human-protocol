@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
-import { SignupWorkerCommand } from './interfaces/worker-registration.interface';
-import { SigninWorkerCommand } from './interfaces/worker-signin.interface';
+import { SignupWorkerCommand } from './model/worker-registration.model';
+import { SigninWorkerCommand } from './model/worker-signin.model';
 
 @Injectable()
 export class WorkerService {
-  constructor(private reputationOracleService: ReputationOracleGateway) {}
+  constructor(private gateway: ReputationOracleGateway) {}
 
   async signupWorker(signupWorkerCommand: SignupWorkerCommand) {
-    return this.reputationOracleService.sendWorkerSignup(signupWorkerCommand);
+    return this.gateway.sendWorkerSignup(signupWorkerCommand);
   }
   async signinWorker(signinWorkerCommand: SigninWorkerCommand) {
-    return this.reputationOracleService.sendWorkerSignin(signinWorkerCommand);
+    return this.gateway.sendWorkerSignin(signinWorkerCommand);
   }
 }

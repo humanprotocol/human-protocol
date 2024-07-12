@@ -24,6 +24,12 @@ import { ReputationService } from '../reputation/reputation.service';
 import { StorageService } from '../storage/storage.service';
 import { ReputationRepository } from '../reputation/reputation.repository';
 import { HttpService } from '@nestjs/axios';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ControlledError } from '../../common/errors/controlled';
+import { ErrorCronJob } from '../../common/constants/errors';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -31,6 +37,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       setup: jest.fn().mockResolvedValue(null),
       fund: jest.fn().mockResolvedValue(null),
@@ -64,14 +71,6 @@ describe('CronJobService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CronJobService,
@@ -90,7 +89,10 @@ describe('CronJobService', () => {
         WebhookService,
         PayoutService,
         ReputationService,
-        { provide: ConfigService, useValue: mockConfigService },
+        ConfigService,
+        ServerConfigService,
+        Web3ConfigService,
+        ReputationConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
         {
           provide: WebhookRepository,
@@ -246,7 +248,9 @@ describe('CronJobService', () => {
         .spyOn(repository, 'updateOne')
         .mockResolvedValue(cronJobEntity);
 
-      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow();
+      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow(
+        new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST),
+      );
       expect(updateOneSpy).not.toHaveBeenCalled();
     });
   });

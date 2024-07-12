@@ -38,6 +38,7 @@ export type CreateFortuneJobRequest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
+  currency: string;
   fundAmount: number;
 };
 
@@ -45,6 +46,7 @@ export type CreateCvatJobRequest = {
   chainId: number;
   requesterDescription: string;
   fundAmount: number;
+  currency: string;
   data: CvatDataSource;
   labels: string[];
   minQuality: number;
@@ -74,6 +76,8 @@ export enum JobType {
 export enum CvatJobType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
+  IMAGE_BOXES_FROM_POINTS = 'IMAGE_BOXES_FROM_POINTS',
+  IMAGE_SKELETONS_FROM_BOXES = 'IMAGE_SKELETONS_FROM_BOXES',
 }
 
 export enum HCaptchaJobType {
@@ -179,11 +183,23 @@ type CvatDataSource = {
   path: string;
 };
 
+type CvatData = {
+  dataset: CvatDataSource;
+  points?: CvatDataSource;
+  boxes?: CvatDataSource;
+};
+
+export type Label = {
+  name: string;
+  nodes?: string[];
+  joints?: string[];
+};
+
 export type CvatRequest = {
-  labels: string[];
+  labels: Label[];
   type: CvatJobType;
   description: string;
-  data: CvatDataSource;
+  data: CvatData;
   groundTruth: CvatDataSource;
   userGuide: string;
   accuracyTarget: number;
@@ -221,11 +237,14 @@ export type JobRequest = {
 export enum JobStatus {
   LAUNCHED = 'LAUNCHED',
   PENDING = 'PENDING',
+  PARTIAL = 'PARTIAL',
   CANCELED = 'CANCELED',
   FAILED = 'FAILED',
   COMPLETED = 'COMPLETED',
   TO_CANCEL = 'TO_CANCEL',
   PAID = 'PAID',
+  SET_UP = 'SET_UP',
+  CREATED = 'CREATED',
 }
 
 export type JobDetailsResponse = {

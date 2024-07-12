@@ -7,16 +7,17 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { useConnect } from 'wagmi';
 
 import coinbaseSvg from 'src/assets/coinbase.svg';
 import metaMaskSvg from 'src/assets/metamask.svg';
 import walletConnectSvg from 'src/assets/walletconnect.svg';
+import { useNotification } from 'src/providers/NotificationProvider';
 
 const WALLET_ICONS: Record<string, any> = {
   metaMask: metaMaskSvg,
-  coinbaseWallet: coinbaseSvg,
+  coinbaseWalletSDK: coinbaseSvg,
   walletConnect: walletConnectSvg,
 };
 
@@ -26,8 +27,15 @@ type WalletModalProps = {
 };
 
 export const WalletModal: FC<WalletModalProps> = ({ open, onClose }) => {
-  const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect();
+  const { connect, connectors, error: errorConnect } = useConnect();
+  const { showMessage } = useNotification();
+
+  useEffect(() => {
+    if (errorConnect) {
+      showMessage(errorConnect.message, 'error');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorConnect]);
 
   const theme = useTheme();
 
@@ -87,23 +95,23 @@ export const WalletModal: FC<WalletModalProps> = ({ open, onClose }) => {
                     border: `1px solid ${theme.palette.primary.main}`,
                   },
                 }}
-                disabled={!connector.ready}
                 key={connector.id}
-                onClick={() => connect({ connector })}
+                onClick={() => {
+                  connect({ connector });
+
+                  if (connector.id === 'walletConnect') {
+                    onClose();
+                  }
+                }}
               >
-                <img src={WALLET_ICONS[connector.id]} alt={connector.id} />
-                <span>
-                  {connector.name}
-                  {!connector.ready && ' (unsupported)'}
-                  {isLoading &&
-                    connector.id === pendingConnector?.id &&
-                    ' (connecting)'}
-                </span>
+                <img
+                  src={connector.icon || WALLET_ICONS[connector.id]}
+                  alt={connector.id}
+                />
+                <span>{connector.name}</span>
               </Button>
             ))}
           </Box>
-
-          {error && <div>{error.message}</div>}
         </Box>
       </Box>
     </Dialog>

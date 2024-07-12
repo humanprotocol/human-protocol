@@ -1,21 +1,12 @@
-import { HttpService } from '@nestjs/axios';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { of } from 'rxjs';
-import {
-  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-} from '../../../test/constants';
-import { StorageService } from '../storage/storage.service';
-import { Web3Service } from '../web3/web3.service';
+import { RequestWithUser } from '../../common/types/jwt';
 import { JobController } from './job.controller';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { GetJobsDto, SolveJobDto, JobDto } from './job.dto';
 import { JobService } from './job.service';
+import { JobSortField, JobStatus, JobType } from '../../common/enums/job';
+import { PageDto } from '../../common/pagination/pagination.dto';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 
 jest.mock('../../common/utils/signature');
 
@@ -23,56 +14,15 @@ describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
 
-  const chainId = 1;
-  const escrowAddress = '0x1234567890123456789012345678901234567890';
-  const workerAddress = '0x1234567890123456789012345678901234567891';
-
-  const reputationOracleURL = 'https://example.com/reputationoracle';
-  const configServiceMock = {
-    get: jest.fn().mockReturnValue(reputationOracleURL),
-  };
-
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-        ConfigModule.forFeature(
-          registerAs('server', () => ({
-            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
-          })),
-        ),
-      ],
+      imports: [],
       controllers: [JobController],
       providers: [
-        JobService,
+        { provide: JobService, useValue: createMock<JobService>() },
         {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
-        {
-          provide: Web3Service,
-          useValue: {
-            getSigner: jest.fn().mockReturnValue({
-              address: '0x1234567890123456789012345678901234567892',
-              getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-            }),
-          },
-        },
-        StorageService,
-        {
-          provide: HttpService,
-          useValue: {
-            post: jest.fn().mockReturnValue(of({ status: 200, data: {} })),
-          },
+          provide: AssignmentRepository,
+          useValue: createMock<AssignmentRepository>(),
         },
       ],
     }).compile();
@@ -81,68 +31,54 @@ describe('JobController', () => {
     jobService = moduleRef.get<JobService>(JobService);
   });
 
-  describe('getDetails', () => {
-    it('should return job details', async () => {
-      const expectedDetails: JobDetailsDto = {
-        escrowAddress,
-        chainId,
-        manifest: {
-          requesterTitle: 'Example Title',
-          requesterDescription: 'Example Description',
-          submissionsRequired: 5,
-          fundAmount: 100,
-        },
+  describe('getJobs', () => {
+    it('should call jobService.getJobList', async () => {
+      const getJobsDto: GetJobsDto = {
+        sortField: JobSortField.CREATED_AT,
+        chainId: 1,
+        jobType: JobType.FORTUNE,
+        fields: [],
+        escrowAddress: '0x1234567890123456789012345678901234567890',
+        status: JobStatus.ACTIVE,
+        page: 1,
+        pageSize: 10,
+        skip: 0,
       };
 
-      jest.spyOn(jobService, 'getDetails').mockResolvedValue(expectedDetails);
+      const req = {
+        user: { reputationNetwork: 'network' },
+      } as RequestWithUser;
 
-      const result = await jobController.getDetails(chainId, escrowAddress);
+      const pageDto: PageDto<JobDto> = {
+        results: [],
+        totalResults: 0,
+        totalPages: 0,
+        pageSize: 10,
+        page: 1,
+      };
 
-      expect(result).toBe(expectedDetails);
-      expect(jobService.getDetails).toHaveBeenCalledWith(
-        chainId,
-        escrowAddress,
-      );
-    });
-  });
+      jest.spyOn(jobService, 'getJobList').mockResolvedValue(pageDto);
 
-  describe('getPendingJobs', () => {
-    it('should return pending jobs', async () => {
-      const expectedJobs: any[] = [
-        '0x1234567890123456789012345678901234567891',
-        '0x1234567890123456789012345678901234567892',
-      ];
+      await jobController.getJobs(req, getJobsDto);
 
-      jest.spyOn(jobService, 'getPendingJobs').mockResolvedValue(expectedJobs);
-
-      const result = await jobController.getPendingJobs(chainId, workerAddress);
-
-      expect(result).toBe(expectedJobs);
-      expect(jobService.getPendingJobs).toHaveBeenCalledWith(
-        chainId,
-        workerAddress,
+      expect(jobService.getJobList).toHaveBeenCalledWith(
+        getJobsDto,
+        req.user.reputationNetwork,
       );
     });
   });
 
   describe('solveJob', () => {
-    it('should solve a job', async () => {
-      const solution = 'job-solution';
+    it('should call jobService.solveJob', async () => {
       const solveJobDto: SolveJobDto = {
-        chainId,
-        escrowAddress,
-        workerAddress,
-        solution,
+        assignmentId: '1',
+        solution: 'job-solution',
       };
 
-      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
-
-      await jobController.solveJob(solveJobDto);
+      await jobController.solveJob('signature', solveJobDto);
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
-        solveJobDto.chainId,
-        solveJobDto.escrowAddress,
-        solveJobDto.workerAddress,
+        Number(solveJobDto.assignmentId),
         solveJobDto.solution,
       );
     });

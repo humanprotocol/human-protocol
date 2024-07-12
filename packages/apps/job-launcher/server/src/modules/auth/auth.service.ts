@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -19,8 +19,8 @@ import {
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
-import { ConfigNames } from '../../common/config';
-import { ConfigService } from '@nestjs/config';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
@@ -30,75 +30,34 @@ import * as crypto from 'crypto';
 import { verifyToken } from '../../common/utils/hcaptcha';
 import { UserRepository } from '../user/user.repository';
 import { ApiKeyEntity } from './apikey.entity';
-import { AuthError } from './auth.error';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-  private readonly refreshTokenExpiresIn: number;
-  private readonly accessTokenExpiresIn: number;
-  private readonly verifyEmailTokenExpiresIn: number;
-  private readonly forgotPasswordTokenExpiresIn: number;
-  private readonly feURL: string;
-  private readonly iterations: number;
-  private readonly keyLength: number;
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
-    private readonly configService: ConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly authConfigService: AuthConfigService,
     private readonly sendgridService: SendGridService,
     private readonly apiKeyRepository: ApiKeyRepository,
     private readonly userRepository: UserRepository,
-  ) {
-    this.refreshTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.REFRESH_TOKEN_EXPIRES_IN,
-      3600000,
-    );
-
-    this.accessTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
-      300000,
-    );
-
-    this.verifyEmailTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
-      1800000,
-    );
-
-    this.forgotPasswordTokenExpiresIn = this.configService.get<number>(
-      ConfigNames.FORGOT_PASSWORD_TOKEN_EXPIRES_IN,
-      1800000,
-    );
-
-    this.feURL = this.configService.get<string>(
-      ConfigNames.FE_URL,
-      'http://localhost:3005',
-    );
-    this.iterations = this.configService.get<number>(
-      ConfigNames.APIKEY_ITERATIONS,
-      1000,
-    );
-    this.keyLength = this.configService.get<number>(
-      ConfigNames.APIKEY_KEY_LENGTH,
-      64,
-    );
-  }
+  ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
     const userEntity = await this.userService.getByCredentials(
       data.email,
@@ -106,7 +65,10 @@ export class AuthService {
     );
 
     if (!userEntity) {
-      throw new AuthError(ErrorAuth.InvalidEmailOrPassword);
+      throw new ControlledError(
+        ErrorAuth.InvalidEmailOrPassword,
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     return this.auth(userEntity);
@@ -116,16 +78,23 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
+    const storedUser = await this.userRepository.findByEmail(data.email);
+    if (storedUser) {
+      throw new ControlledError(
+        ErrorUser.DuplicatedEmail,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const userEntity = await this.userService.create(data);
 
     const tokenEntity = new TokenEntity();
@@ -133,7 +102,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -144,7 +113,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -161,11 +130,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(ErrorAuth.InvalidToken);
+      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.TokenExpired);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     return this.auth(tokenEntity.user);
@@ -185,7 +154,7 @@ export class AuthService {
         status: userEntity.status,
       },
       {
-        expiresIn: this.accessTokenExpiresIn,
+        expiresIn: this.authConfigService.accessTokenExpiresIn,
       },
     );
 
@@ -198,7 +167,7 @@ export class AuthService {
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.refreshTokenExpiresIn,
+      date.getTime() + this.authConfigService.refreshTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(newRefreshTokenEntity);
@@ -210,11 +179,11 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
-      throw new AuthError(ErrorUser.NotFound);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
     }
 
     if (userEntity.status !== UserStatus.ACTIVE) {
-      throw new AuthError(ErrorUser.UserNotActive);
+      throw new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -231,7 +200,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.forgotPasswordTokenExpiresIn,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -242,7 +211,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/reset-password?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -257,15 +226,15 @@ export class AuthService {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_EXCHANGE_URL)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SITE_KEY)!,
-    //       this.configService.get<string>(ConfigNames.HCAPTCHA_SECRET)!,
+    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
     //       ip,
     //     )
     //   ).success
     // ) {
-    //   throw new UnauthorizedException(ErrorAuth.InvalidCaptchaToken);
+    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
     // }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
@@ -274,11 +243,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(ErrorAuth.InvalidToken);
+      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.TokenExpired);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -304,11 +273,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(ErrorAuth.NotFound);
+      throw new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(ErrorAuth.TokenExpired);
+      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
     }
 
     tokenEntity.user.status = UserStatus.ACTIVE;
@@ -321,7 +290,7 @@ export class AuthService {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
-      throw new AuthError(ErrorUser.NotFound);
+      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -338,7 +307,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -349,7 +318,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
           },
         },
       ],
@@ -357,21 +326,29 @@ export class AuthService {
     });
   }
 
-  async createOrUpdateAPIKey(userId: number): Promise<string> {
+  async createOrUpdateAPIKey(user: UserEntity): Promise<string> {
     const salt = crypto.randomBytes(16).toString('hex');
     const apiKey = crypto.randomBytes(32).toString('hex');
     const hashedAPIKey = await generateHash(
       apiKey,
       salt,
-      this.iterations,
-      this.keyLength,
+      this.authConfigService.apiKeyIterations,
+      this.authConfigService.apiKeyLength,
     );
 
-    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(user.id);
     if (!apiKeyEntity) {
       apiKeyEntity = new ApiKeyEntity();
-      apiKeyEntity.user.id = userId;
+      apiKeyEntity.user = user;
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
       await this.apiKeyRepository.createUnique(apiKeyEntity);
+    } else {
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
+      this.apiKeyRepository.updateOne(apiKeyEntity);
     }
 
     apiKeyEntity.hashedAPIKey = hashedAPIKey;
@@ -386,15 +363,14 @@ export class AuthService {
     const apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
 
     if (!apiKeyEntity) {
-      this.logger.log('API Key Entity not found', AuthService.name);
-      throw new AuthError(ErrorAuth.ApiKeyNotFound);
+      throw new ControlledError(ErrorAuth.ApiKeyNotFound, HttpStatus.FORBIDDEN);
     }
 
     const hash = await generateHash(
       apiKey,
       apiKeyEntity.salt,
-      this.iterations,
-      this.keyLength,
+      this.authConfigService.apiKeyIterations,
+      this.authConfigService.apiKeyLength,
     );
 
     return hash === apiKeyEntity.hashedAPIKey;
@@ -407,14 +383,13 @@ export class AuthService {
     const apiKeyEntity = await this.apiKeyRepository.findAPIKeyById(apiKeyId);
 
     if (!apiKeyEntity) {
-      this.logger.log('API Key Entity not found', AuthService.name);
-      throw new AuthError(ErrorAuth.ApiKeyNotFound);
+      throw new ControlledError(ErrorAuth.ApiKeyNotFound, HttpStatus.FORBIDDEN);
     }
     const hash = await generateHash(
       apiKey,
       apiKeyEntity.salt,
-      this.iterations,
-      this.keyLength,
+      this.authConfigService.apiKeyIterations,
+      this.authConfigService.apiKeyLength,
     );
 
     const isValid = crypto.timingSafeEqual(
