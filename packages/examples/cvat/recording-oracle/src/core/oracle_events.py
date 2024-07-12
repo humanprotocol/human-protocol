@@ -34,7 +34,7 @@ class RecordingOracleEvent_SubmissionRejected(OracleEvent):
         reason: str
 
     # no task_id, escrow is enough for now
-    rejected_tasks: list[RejectedTaskInfo]
+    assignments: list[RejectedTaskInfo]
 
 
 class ExchangeOracleEvent_JobCreationFailed(OracleEvent):

@@ -199,9 +199,8 @@ class _TaskValidator:
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_SubmissionRejected(
-                    # TODO: update field name to "assignments", send all assignments,
-                    # handle rejection reason in Exchange Oracle
-                    rejected_tasks=[
+                    # TODO: send all assignments, handle rejection reason in Exchange Oracle
+                    assignments=[
                         RecordingOracleEvent_SubmissionRejected.RejectedTaskInfo(
                             task_id=job_id_to_assignment_id[rejected_job_id],
                             reason=self._LOW_QUALITY_REASON_MESSAGE_TEMPLATE.format(
