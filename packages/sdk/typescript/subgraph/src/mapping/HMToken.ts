@@ -200,7 +200,7 @@ export function handleTransfer(event: Transfer): void {
 
   // Update unique sender
   const uniqueSender = createOrLoadUniqueSender(
-    new BigInt(dayStartTimestamp),
+    BigInt.fromI32(dayStartTimestamp),
     event.block.timestamp,
     event.params._from
   );
@@ -215,7 +215,7 @@ export function handleTransfer(event: Transfer): void {
 
   // Update unique receiver
   const uniqueReceiver = createOrLoadUniqueReceiver(
-    new BigInt(dayStartTimestamp),
+    BigInt.fromI32(dayStartTimestamp),
     event.block.timestamp,
     event.params._to
   );
