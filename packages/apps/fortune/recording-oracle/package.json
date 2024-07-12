@@ -19,7 +19,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "postgres": "docker compose up -d postgres",
     "docker": "docker compose up -d",
-    "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn recording-oracle:dev\" )"
+    "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn recording-oracle:dev\" )",
+    "setup:local": "ts-node ./test/setup.ts"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",

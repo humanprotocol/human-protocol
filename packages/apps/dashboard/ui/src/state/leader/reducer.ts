@@ -1,4 +1,4 @@
-import { ChainId, EscrowClient, StakingClient } from '@human-protocol/sdk';
+import { ChainId, EscrowUtils, OperatorUtils } from '@human-protocol/sdk';
 import {
   createAction,
   createAsyncThunk,
@@ -10,10 +10,9 @@ import {
   UnknownAsyncThunkPendingAction,
   UnknownAsyncThunkRejectedAction,
 } from '@reduxjs/toolkit/dist/matchers';
-import { providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
 import { LeaderData, LeaderEscrowData } from './types';
-import { RPC_URLS, V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { AppState } from 'src/state';
 import { formatAmount } from 'src/utils';
 
@@ -48,9 +47,9 @@ export const fetchLeadersAsync = createAsyncThunk<
   const leaders = (
     await Promise.all(
       V2_SUPPORTED_CHAIN_IDS.map(async (chainId) => {
-        const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]!);
-        const client = await StakingClient.build(provider);
-        const leaders = await client.getLeaders();
+        const leaders = await OperatorUtils.getLeaders({
+          networks: [chainId],
+        });
 
         return {
           chainId,
@@ -58,11 +57,11 @@ export const fetchLeadersAsync = createAsyncThunk<
             chainId,
             address: leader.address,
             role: leader.role,
-            amountStaked: formatAmount(leader.amountStaked),
-            amountAllocated: formatAmount(leader.amountAllocated),
-            amountLocked: formatAmount(leader.amountLocked),
-            amountSlashed: formatAmount(leader.amountSlashed),
-            amountWithdrawn: formatAmount(leader.amountWithdrawn),
+            amountStaked: Number(leader.amountStaked),
+            amountAllocated: Number(leader.amountAllocated),
+            amountLocked: Number(leader.amountLocked),
+            amountSlashed: Number(leader.amountSlashed),
+            amountWithdrawn: Number(leader.amountWithdrawn),
             lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
             reputation: Number(leader.reputation),
             amountJobsLaunched: Number(leader.amountJobsLaunched),
@@ -83,9 +82,7 @@ export const fetchLeaderAsync = createAsyncThunk<
   { chainId: ChainId; address: string },
   { state: AppState }
 >('leader/fetchLeaderAsync', async ({ chainId, address }) => {
-  const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]!);
-  const client = await StakingClient.build(provider);
-  const leader = await client.getLeader(address);
+  const leader = await OperatorUtils.getLeader(chainId, address);
 
   if (!leader) {
     throw new Error('Error fetching leader detail');
@@ -95,11 +92,11 @@ export const fetchLeaderAsync = createAsyncThunk<
     chainId: chainId,
     address: leader.address,
     role: leader.role,
-    amountStaked: formatAmount(leader.amountStaked),
-    amountAllocated: formatAmount(leader.amountAllocated),
-    amountLocked: formatAmount(leader.amountLocked),
-    amountSlashed: formatAmount(leader.amountSlashed),
-    amountWithdrawn: formatAmount(leader.amountWithdrawn),
+    amountStaked: Number(leader.amountStaked),
+    amountAllocated: Number(leader.amountAllocated),
+    amountLocked: Number(leader.amountLocked),
+    amountSlashed: Number(leader.amountSlashed),
+    amountWithdrawn: Number(leader.amountWithdrawn),
     lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
     reputation: Number(leader.reputation),
     amountJobsLaunched: Number(leader.amountJobsLaunched),
@@ -112,9 +109,10 @@ export const fetchLeaderEscrowsAsync = createAsyncThunk<
   { chainId: ChainId; address: string },
   { state: AppState }
 >('leader/fetchLeaderEscrowsAsync', async ({ chainId, address }) => {
-  const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]!);
-  const client = await EscrowClient.build(provider);
-  const launchedEscrows = await client.getEscrows({ launcher: address });
+  const launchedEscrows = await EscrowUtils.getEscrows({
+    networks: [chainId],
+    launcher: address,
+  });
 
   return launchedEscrows.map((escrow) => ({
     address: escrow.address,

@@ -13,10 +13,12 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { EncryptionModule } from '../encryption/encryption.module';
 import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { WebhookRepository } from '../webhook/webhook.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([JobEntity]),
+    TypeOrmModule.forFeature([JobEntity, WebhookEntity]),
     ConfigModule,
     HttpModule,
     AuthModule,
@@ -26,7 +28,13 @@ import { AuthModule } from '../auth/auth.module';
     StorageModule,
   ],
   controllers: [JobController],
-  providers: [Logger, JobService, JobRepository, RoutingProtocolService],
+  providers: [
+    Logger,
+    JobService,
+    JobRepository,
+    RoutingProtocolService,
+    WebhookRepository,
+  ],
   exports: [JobService],
 })
 export class JobModule {}

@@ -1,5 +1,6 @@
 import io
 import os
+from collections import Counter
 from logging import Logger
 from typing import Dict, Optional
 
@@ -10,7 +11,7 @@ import src.core.annotation_meta as annotation
 import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
 from src.core.config import Config
-from src.core.manifest import TaskManifest
+from src.core.manifest import TaskManifest, parse_manifest
 from src.core.oracle_events import (
     RecordingOracleEvent_JobCompleted,
     RecordingOracleEvent_SubmissionRejected,
@@ -19,10 +20,9 @@ from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
 )
 from src.core.types import OracleWebhookTypes
+from src.core.validation_errors import TooFewGtError
+from src.core.validation_results import ValidationFailure, ValidationResult, ValidationSuccess
 from src.handlers.process_intermediate_results import (
-    ValidationFailure,
-    ValidationResult,
-    ValidationSuccess,
     parse_annotation_metafile,
     process_intermediate_results,
     serialize_validation_meta,
@@ -30,7 +30,7 @@ from src.handlers.process_intermediate_results import (
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.assignments import compute_resulting_annotations_hash, parse_manifest
+from src.utils.assignments import compute_resulting_annotations_hash
 from src.utils.logging import NullLogger, get_function_logger
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
@@ -133,7 +133,7 @@ class _TaskValidator:
 
         if isinstance(validation_result, ValidationSuccess):
             logger.info(
-                f"Validation for escrow_address={escrow_address} successful, "
+                f"Validation for escrow_address={escrow_address}: successful, "
                 f"average annotation quality is {validation_result.average_quality:.2f}"
             )
 
@@ -180,9 +180,13 @@ class _TaskValidator:
                 event=RecordingOracleEvent_JobCompleted(),
             )
         elif isinstance(validation_result, ValidationFailure):
+            error_type_counts = Counter(
+                type(e).__name__ for e in validation_result.rejected_jobs.values()
+            )
             logger.info(
                 f"Validation for escrow_address={escrow_address} failed, "
-                f"rejected {len(validation_result.rejected_jobs)} jobs"
+                f"rejected {len(validation_result.rejected_jobs)} jobs. "
+                f"Problems: {dict(error_type_counts)}"
             )
 
             job_id_to_assignment_id = {
@@ -195,6 +199,8 @@ class _TaskValidator:
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_SubmissionRejected(
+                    # TODO: update field name to "assignments", send all assignments,
+                    # handle rejection reason in Exchange Oracle
                     rejected_tasks=[
                         RecordingOracleEvent_SubmissionRejected.RejectedTaskInfo(
                             task_id=job_id_to_assignment_id[rejected_job_id],
@@ -203,7 +209,8 @@ class _TaskValidator:
                                 self.manifest.validation.min_quality,
                             ),
                         )
-                        for rejected_job_id in validation_result.rejected_jobs
+                        for rejected_job_id, reason in validation_result.rejected_jobs
+                        if not isinstance(reason, TooFewGtError)
                     ]
                 ),
             )

@@ -260,7 +260,7 @@ export const NETWORKS: {
     stakingAddress: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
     rewardPoolAddress: '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853',
     kvstoreAddress: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707',
-    subgraphUrl: '',
+    subgraphUrl: 'http://localhost:8000/subgraphs/name/humanprotocol/localhost',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -269,8 +269,8 @@ export const NETWORKS: {
 export const KVStoreKeys = {
   role: 'role',
   fee: 'fee',
-  publicKey: 'publicKey',
-  webhookUrl: 'webhookUrl',
+  publicKey: 'public_key',
+  webhookUrl: 'webhook_url',
   url: 'url',
 };
 

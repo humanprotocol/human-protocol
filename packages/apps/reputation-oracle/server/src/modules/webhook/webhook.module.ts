@@ -1,22 +1,20 @@
 import { Logger, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { WebhookService } from './webhook.service';
+import { HttpModule } from '@nestjs/axios';
+import { Web3Module } from '../web3/web3.module';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookController } from './webhook.controller';
 import { WebhookRepository } from './webhook.repository';
-import { ReputationModule } from '../reputation/reputation.module';
-import { Web3Module } from '../web3/web3.module';
-import { StorageModule } from '../storage/storage.module';
+import { WebhookService } from './webhook.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([WebhookIncomingEntity]),
     ConfigModule,
-    ReputationModule,
     Web3Module,
-    StorageModule,
+    HttpModule,
   ],
   controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository],

@@ -89,9 +89,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 expected_url,
                 headers={"human-signature": SIGNATURE},
                 json={
-                    "escrowAddress": escrow_address,
-                    "chainId": chain_id,
-                    "eventType": RecordingOracleEventTypes.job_completed.value,
+                    "escrow_address": escrow_address,
+                    "chain_id": chain_id,
+                    "event_type": RecordingOracleEventTypes.job_completed.value,
                 },
             )
             self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)

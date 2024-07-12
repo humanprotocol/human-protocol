@@ -4,13 +4,15 @@
   "singleQuote": true,
   "printWidth": 80,
   "arrowParens": "always",
+  "plugins": ["prettier-plugin-solidity"],
   "overrides": [
     {
       "files": "*.sol",
       "options": {
         "semi": true,
         "printWidth": 80,
-        "explicitTypes": "always"
+        "explicitTypes": "always",
+        "parser": "solidity-parse"
       }
     }
   ]

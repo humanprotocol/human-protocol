@@ -102,7 +102,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                         session=db_session,
                         escrow_address=webhook.escrow_address,
                         chain_id=webhook.chain_id,
-                        type=OracleWebhookTypes.exchange_oracle,
+                        type=OracleWebhookTypes.job_launcher,
                         event=ExchangeOracleEvent_JobCreationFailed(reason=str(ex)),
                     )
 
@@ -187,15 +187,6 @@ def process_outgoing_job_launcher_webhooks():
                         webhook.event_data,
                         timestamp=None,  # TODO: launcher doesn't support it yet
                     )
-
-                    # FIXME: If using against the launcher from
-                    # https://github.com/humanprotocol/human-protocol/pull/889
-                    # Add this:
-                    body["escrowAddress"] = body.pop("escrow_address")
-                    body["chainId"] = body.pop("chain_id")
-                    body["eventType"] = body.pop("event_type")
-                    body["eventData"] = body.pop("event_data")
-                    # ^^^
 
                     _, signature = prepare_signed_message(
                         webhook.escrow_address,

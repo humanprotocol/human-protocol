@@ -1,16 +1,16 @@
+import { ImageLabelBinaryJobResults } from 'src/common/dto/result';
 import { JobRequestType } from '../src/common/enums';
 import { IFortuneManifest } from '../src/common/interfaces/manifest';
-import { ImageLabelBinaryJobResults } from '../src/modules/webhook/webhook.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
 export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 export const MOCK_FILE_URL = 'mockedFileUrl';
+export const MOCK_WEBHOOK_URL = 'mockedWebhookUrl';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_LABEL = 'contains burnt area';
 export const MOCK_LABEL_NEGATIVE = '';
-export const MOCK_JOB_LAUNCHER_FEE = 5;
 export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
 export const MOCK_JOB_LAUNCHER_ADDRESS =
@@ -228,3 +228,7 @@ fIZLubRoCz4FQH4j2i0WiXgAAGBzAQDyOy3WfJOJUAb5V41TFd4ZZEBrSqfh
 Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
 =IMAe
 -----END PGP PUBLIC KEY BLOCK-----`;
+
+export const MOCK_MAX_RETRY_COUNT = 5;
+export const MOCK_BUCKET_FILE =
+  'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';

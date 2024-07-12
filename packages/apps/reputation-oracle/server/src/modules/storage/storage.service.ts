@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StakingClient,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -11,10 +11,10 @@ import * as Minio from 'minio';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
-import { FortuneFinalResult } from '../webhook/webhook.dto';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
+import { FortuneFinalResult } from '../../common/dto/result';
 
 @Injectable()
 export class StorageService {
@@ -51,21 +51,24 @@ export class StorageService {
 
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const stakingClient = await StakingClient.build(signer);
+    const kvstoreClient = await KVStoreClient.build(signer);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const reputationOracle = await stakingClient.getLeader(signer.address);
-    const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
+    const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
+      signer.address,
+    );
+    const jobLauncherPublicKey =
+      await kvstoreClient.getPublicKey(jobLauncherAddress);
 
-    if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
+    if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
       throw new BadRequestException('Missing public key');
     }
 
     return await EncryptionUtils.encrypt(content, [
-      reputationOracle.publicKey,
-      jobLauncher.publicKey,
+      reputationOraclePublicKey,
+      jobLauncherPublicKey,
     ]);
   }
 
@@ -112,8 +115,8 @@ export class StorageService {
         JSON.stringify(solutions),
       );
 
-      const key = `${escrowAddress}-${chainId}.json`;
       const hash = crypto.createHash('sha1').update(content).digest('hex');
+      const key = `${hash}.json`;
       await this.minioClient.putObject(this.s3Config.bucket, key, content, {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',

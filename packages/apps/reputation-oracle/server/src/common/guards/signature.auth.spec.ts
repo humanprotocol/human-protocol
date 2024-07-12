@@ -28,7 +28,7 @@ describe('SignatureAuthGuard', () => {
         {
           provide: SignatureAuthGuard,
           useValue: new SignatureAuthGuard([
-            Role.JobLaucher,
+            Role.JobLauncher,
             Role.Exchange,
             Role.Recording,
           ]),

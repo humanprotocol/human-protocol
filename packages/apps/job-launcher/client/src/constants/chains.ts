@@ -1,16 +1,32 @@
 import { ChainId } from '@human-protocol/sdk';
 
-export const IS_MAINNET = import.meta.env.VITE_APP_NETWORK === 'mainnet';
+export const IS_MAINNET =
+  import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase() === 'mainnet';
 export const IS_TESTNET = !IS_MAINNET;
 
-export const SUPPORTED_CHAIN_IDS = IS_MAINNET
-  ? [ChainId.POLYGON] // ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
-  : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
+export let SUPPORTED_CHAIN_IDS: ChainId[];
+switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
+  case 'mainnet':
+    SUPPORTED_CHAIN_IDS = [ChainId.POLYGON];
+    break;
+  case 'testnet':
+    SUPPORTED_CHAIN_IDS = [
+      ChainId.BSC_TESTNET,
+      ChainId.POLYGON_MUMBAI,
+      ChainId.GOERLI,
+    ];
+    break;
+  case 'localhost':
+  default:
+    SUPPORTED_CHAIN_IDS = [ChainId.LOCALHOST];
+    break;
+}
 
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
   'Polygon Mumbai': ChainId.POLYGON_MUMBAI,
   'Binance Smart Chain': ChainId.BSC_MAINNET,
   'Ethereum Goerli': ChainId.GOERLI,
+  Localhost: ChainId.LOCALHOST,
 };
 
 export const RPC_URLS: {

@@ -149,7 +149,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
         with patch("src.chain.escrow.get_escrow") as mock_escrow:
             mock_escrow_data = Mock()
-            mock_escrow_data.status = Status.Complete.name
+            mock_escrow_data.status = Status.Pending.name
             mock_escrow.return_value = mock_escrow_data
 
             process_incoming_job_launcher_webhooks()
@@ -166,12 +166,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(
                 escrow_address=escrow_address,
                 chain_id=chain_id,
-                type=OracleWebhookTypes.exchange_oracle,
+                type=OracleWebhookTypes.job_launcher,
             )
             .first()
         )
 
         self.assertEqual(new_webhook.status, OracleWebhookStatuses.pending.value)
+        self.assertEqual(new_webhook.event_type, ExchangeOracleEventTypes.task_creation_failed)
         self.assertEqual(new_webhook.attempts, 0)
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_remove_when_error(

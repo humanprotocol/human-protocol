@@ -19,6 +19,7 @@ import { StorageModule } from './modules/storage/storage.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
+import { WebhookModule } from './modules/webhook/webhook.module';
 
 @Module({
   providers: [
@@ -40,7 +41,6 @@ import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
     },
   ],
   imports: [
-    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`
@@ -55,6 +55,7 @@ import { DatabaseExceptionFilter } from './common/exceptions/database.filter';
     PaymentModule,
     Web3Module,
     StorageModule,
+    WebhookModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,

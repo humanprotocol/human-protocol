@@ -8,6 +8,8 @@ import datumaro as dm
 from attrs import frozen
 from datumaro.util import dump_json, parse_json
 
+DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER = 2 * 3  # tile grid size
+
 SkeletonBboxMapping = Dict[int, int]
 
 

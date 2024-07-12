@@ -6,6 +6,7 @@ export const ConfigNames = {
   PORT: 'PORT',
   FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
+  MAX_RETRY_COUNT: 'MAX_RETRY_COUNT',
   HASH_SECRET: 'HASH_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
@@ -17,6 +18,8 @@ export const ConfigNames = {
   POSTGRES_PORT: 'POSTGRES_PORT',
   POSTGRES_SYNC: 'POSTGRES_SYNC',
   POSTGRES_SSL: 'POSTGRES_SSL',
+  POSTGRES_LOGGING: 'POSTGRES_LOGGING',
+  WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   S3_ENDPOINT: 'S3_ENDPOINT',
@@ -35,6 +38,7 @@ export const ConfigNames = {
   PGP_ENCRYPT: 'PGP_ENCRYPT',
   SYNAPS_API_KEY: 'SYNAPS_API_KEY',
   SYNAPS_WEBHOOK_SECRET: 'SYNAPS_WEBHOOK_SECRET',
+  CRON_SECRET: 'CRON_SECRET',
 };
 
 export const envValidator = Joi.object({
@@ -44,6 +48,7 @@ export const envValidator = Joi.object({
   PORT: Joi.string().default(5000),
   FE_URL: Joi.string().default('http://localhost:3001'),
   SESSION_SECRET: Joi.string().default('session_key'),
+  MAX_RETRY_COUNT: Joi.number().default(5),
   // Auth
   HASH_SECRET: Joi.string().default('a328af3fc1dad15342cc3d68936008fa'),
   JWT_SECRET: Joi.string().default('secret'),
@@ -58,7 +63,9 @@ export const envValidator = Joi.object({
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SYNC: Joi.string().default('false'),
   POSTGRES_SSL: Joi.string().default('false'),
+  POSTGRES_LOGGING: Joi.string(),
   // Web3
+  WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number().default(null),
   // S3
@@ -82,4 +89,6 @@ export const envValidator = Joi.object({
   // Synaps Kyc
   SYNAPS_API_KEY: Joi.string().required(),
   SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
+  // Cron Secret
+  CRON_SECRET: Joi.string().required(),
 });

@@ -20,9 +20,6 @@ export class WebhookIncomingEntity extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   public resultsUrl: string;
 
-  @Column({ type: 'boolean', nullable: true })
-  public checkPassed: boolean;
-
   @Column({ type: 'int' })
   public retriesCount: number;
 

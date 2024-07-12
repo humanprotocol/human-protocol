@@ -74,7 +74,7 @@ export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
     address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'set',
-    args: ['publicKey', cid],
+    args: ['public_key', cid],
   });
 
   const { write, isLoading, data } = useContractWrite({

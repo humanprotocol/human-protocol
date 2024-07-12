@@ -37,3 +37,17 @@ export const networkMap: NetworkMapDto = {
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
 };
+
+export const networks = Object.values(networkMap).map((network) => network);
+
+export const TESTNET_CHAIN_IDS = [
+  ChainId.BSC_TESTNET,
+  ChainId.POLYGON_MUMBAI,
+  ChainId.GOERLI,
+];
+
+export const MAINNET_CHAIN_IDS = [
+  ChainId.BSC_MAINNET,
+  ChainId.POLYGON,
+  ChainId.MOONBEAM,
+];

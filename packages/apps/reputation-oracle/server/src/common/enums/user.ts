@@ -20,3 +20,8 @@ export enum KycStatus {
   PENDING_VERIFICATION = 'PENDING_VERIFICATION',
   RESET = 'RESET',
 }
+
+export enum OperatorStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}

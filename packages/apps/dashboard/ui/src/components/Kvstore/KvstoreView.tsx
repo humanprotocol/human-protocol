@@ -18,7 +18,7 @@ export const KvstoreView: FC = () => {
     address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'get',
-    args: [address, 'publicKey'],
+    args: [address, 'public_key'],
   });
 
   useEffect(() => {

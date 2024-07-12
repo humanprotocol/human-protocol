@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   EscrowFactory,
   EscrowFactory__factory,
@@ -10,7 +9,6 @@ import {
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, Overrides, ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -25,12 +23,9 @@ import {
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
 } from './error';
-import { IAllocation, ILeader, ILeadersFilter, IReward } from './interfaces';
+import { IAllocation } from './interfaces';
 import { NetworkData } from './types';
 import { throwError } from './utils';
-import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
-import { RewardAddedEventData } from './graphql';
-import { GET_LEADER_QUERY, GET_LEADERS_QUERY } from './graphql/queries/staking';
 
 /**
  * ## Introduction
@@ -573,80 +568,6 @@ export class StakingClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns all the leader details of the protocol.
-   *
-   * @param {ILeadersFilter} filter Filter for the leaders.
-   * @returns {ILeader[]} Returns an array with all the leader details.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { StakingClient } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const stakingClient = await StakingClient.build(provider);
-   *
-   * const leaders = await stakingClient.getLeaders();
-   * ```
-   */
-  public async getLeader(address: string): Promise<ILeader> {
-    if (!ethers.isAddress(address)) {
-      throw ErrorInvalidStakerAddressProvided;
-    }
-
-    try {
-      const { leader } = await gqlFetch<{
-        leader: ILeader;
-      }>(this.networkData.subgraphUrl, GET_LEADER_QUERY, {
-        address: address.toLowerCase(),
-      });
-
-      return leader;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function returns the leader data for the given address.
-   *
-   * @param {string} address Leader address.
-   * @returns {ILeader} Returns the leader details.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { StakingClient } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const stakingClient = await StakingClient.build(provider);
-   *
-   * const leader = await stakingClient.getLeader('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
-   * ```
-   */
-  public async getLeaders(filter: ILeadersFilter = {}): Promise<ILeader[]> {
-    try {
-      const { leaders } = await gqlFetch<{
-        leaders: ILeader[];
-      }>(this.networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
-        role: filter.role,
-      });
-
-      return leaders;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
    * This function returns information about the allocation of the specified escrow.
    *
    * @param {string} escrowAddress Escrow address from which we want to get allocation information.
@@ -673,50 +594,6 @@ export class StakingClient extends BaseEthersClient {
     try {
       const result = await this.stakingContract.getAllocation(escrowAddress);
       return result;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function returns information about the rewards for a given slasher address.
-   *
-   * @param {string} slasherAddress Slasher address.
-   * @returns {IReward[]} Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { StakingClient } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const stakingClient = await StakingClient.build(provider);
-   *
-   * const rewards = await stakingClient.getRewards('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
-   * ```
-   */
-  public async getRewards(slasherAddress: string): Promise<IReward[]> {
-    if (!ethers.isAddress(slasherAddress)) {
-      throw ErrorInvalidSlasherAddressProvided;
-    }
-
-    try {
-      const { rewardAddedEvents } = await gqlFetch<{
-        rewardAddedEvents: RewardAddedEventData[];
-      }>(this.networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
-        slasherAddress: slasherAddress.toLowerCase(),
-      });
-
-      return rewardAddedEvents.map((reward: any) => {
-        return {
-          escrowAddress: reward.escrow,
-          amount: reward.amount,
-        };
-      });
     } catch (e) {
       return throwError(e);
     }

@@ -1,11 +1,12 @@
 import os
 from copy import deepcopy
 from glob import glob
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
 from datumaro.util import filter_dict, mask_tools
+from datumaro.util.annotation_util import find_group_leader, find_instances, max_bbox
 from defusedxml import ElementTree as ET
 
 
@@ -139,9 +140,10 @@ def remove_duplicated_gt_frames(dataset: dm.Dataset, known_frames: Sequence[str]
     return dataset
 
 
-def shift_ann(
-    ann: dm.Annotation, offset_x: float, offset_y: float, *, img_w: int, img_h: int
-) -> dm.Annotation:
+T = TypeVar("T", bound=dm.Annotation)
+
+
+def shift_ann(ann: T, offset_x: float, offset_y: float, *, img_w: int, img_h: int) -> T:
     "Shift annotation coordinates with clipping to the image size"
 
     if isinstance(ann, dm.Bbox):
@@ -341,3 +343,46 @@ class ProjectLabels(dm.ItemTransform):
 
 def is_point_in_bbox(px: float, py: float, bbox: dm.Bbox) -> bool:
     return (bbox.x <= px <= bbox.x + bbox.w) and (bbox.y <= py <= bbox.y + bbox.h)
+
+
+class InstanceSegmentsToBbox(dm.ItemTransform):
+    """
+    Replaces instance segments (masks, polygons) with a single ("head") bbox.
+    A group of annotations with the same group id is considered an "instance".
+    The largest annotation in the group is considered the group "head".
+    If there is a bbox in a group, it's used as the group "head".
+    The resulting bbox takes properties from that "head" annotation.
+    """
+
+    def transform_item(self, item):
+        annotations = []
+        segments = []
+        for ann in item.annotations:
+            if ann.type in [
+                dm.AnnotationType.polygon,
+                dm.AnnotationType.mask,
+                dm.AnnotationType.bbox,
+            ]:
+                segments.append(ann)
+            else:
+                annotations.append(ann)
+
+        if not segments:
+            return item
+
+        instances = find_instances(segments)
+        for instance_annotations in instances:
+            instance_leader = find_group_leader(instance_annotations)
+            instance_bbox = max_bbox(instance_annotations)
+            instance_bbox_ann = dm.Bbox(
+                *instance_bbox,
+                label=instance_leader.label,
+                z_order=instance_leader.z_order,
+                id=instance_leader.id,
+                attributes=instance_leader.attributes,
+                group=instance_leader.group,
+            )
+
+            annotations.append(instance_bbox_ann)
+
+        return self.wrap_item(item, annotations=annotations)

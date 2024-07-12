@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 import { UserEntity } from './user.entity';
@@ -6,7 +6,6 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { UserBalanceDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { ErrorUser } from '../../common/constants/errors';
 import { PaymentService } from '../payment/payment.service';
 import { Currency } from '../../common/enums/payment';
 
@@ -32,22 +31,14 @@ export class UserService {
   public async getByCredentials(
     email: string,
     password: string,
-  ): Promise<UserEntity> {
+  ): Promise<UserEntity | null> {
     const userEntity = await this.userRepository.findByEmail(email);
 
-    if (!userEntity) {
-      throw new NotFoundException(ErrorUser.InvalidCredentials);
-    }
-
-    if (!bcrypt.compareSync(password, userEntity.password)) {
-      throw new NotFoundException(ErrorUser.InvalidCredentials);
+    if (!userEntity || !bcrypt.compareSync(password, userEntity.password)) {
+      return null;
     }
 
     return userEntity;
-  }
-
-  public async getByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepository.findByEmail(email);
   }
 
   public updatePassword(
