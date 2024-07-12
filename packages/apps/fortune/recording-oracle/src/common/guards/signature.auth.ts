@@ -8,7 +8,6 @@ import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { Role } from '../enums/role';
-import { toLowerCase } from '../utils';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -20,7 +19,7 @@ export class SignatureAuthGuard implements CanActivate {
     const { escrow_address, ...restBody } = request.body;
     const data = {
       ...restBody,
-      escrow_address: toLowerCase(escrow_address),
+      escrow_address: escrow_address.toLowerCase(),
     };
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];

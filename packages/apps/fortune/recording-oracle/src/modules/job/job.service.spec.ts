@@ -137,7 +137,7 @@ describe('JobService', () => {
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
       const jobSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -156,7 +156,7 @@ describe('JobService', () => {
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
       const jobSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -185,7 +185,7 @@ describe('JobService', () => {
         .mockResolvedValue(JSON.stringify(invalidManifest));
 
       const jobSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -216,7 +216,7 @@ describe('JobService', () => {
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
 
       const jobSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -281,7 +281,7 @@ describe('JobService', () => {
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       const newSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -344,7 +344,7 @@ describe('JobService', () => {
       );
 
       const newSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -400,7 +400,7 @@ describe('JobService', () => {
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       const jobSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -463,7 +463,7 @@ describe('JobService', () => {
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       const jobSolution: WebhookDto = {
-        escrowAddress: toLowerCase(MOCK_ADDRESS),
+        escrowAddress: MOCK_ADDRESS.toLowerCase(),
         chainId: ChainId.LOCALHOST,
         eventType: EventType.SUBMISSION_IN_REVIEW,
         eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -555,7 +555,7 @@ describe('JobService', () => {
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
     const jobSolution: WebhookDto = {
-      escrowAddress: toLowerCase(MOCK_ADDRESS),
+      escrowAddress: MOCK_ADDRESS.toLowerCase(),
       chainId: ChainId.LOCALHOST,
       eventType: EventType.SUBMISSION_IN_REVIEW,
       eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -634,7 +634,7 @@ describe('JobService', () => {
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
     const jobSolution: WebhookDto = {
-      escrowAddress: toLowerCase(MOCK_ADDRESS),
+      escrowAddress: MOCK_ADDRESS.toLowerCase(),
       chainId: ChainId.LOCALHOST,
       eventType: EventType.SUBMISSION_IN_REVIEW,
       eventData: { solutionsUrl: MOCK_FILE_URL },
@@ -718,7 +718,7 @@ describe('JobService', () => {
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
     const jobSolution: WebhookDto = {
-      escrowAddress: toLowerCase(MOCK_ADDRESS),
+      escrowAddress: MOCK_ADDRESS.toLowerCase(),
       chainId: ChainId.LOCALHOST,
       eventType: EventType.SUBMISSION_IN_REVIEW,
       eventData: { solutionsUrl: MOCK_FILE_URL },

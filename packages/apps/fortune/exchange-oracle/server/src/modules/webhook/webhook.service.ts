@@ -22,7 +22,6 @@ import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { toLowerCase } from '../../common/utils';
 
 @Injectable()
 export class WebhookService {
@@ -81,7 +80,7 @@ export class WebhookService {
 
     // Build the webhook data object based on the oracle type.
     const webhookData: WebhookDto = {
-      escrowAddress: toLowerCase(webhook.escrowAddress),
+      escrowAddress: webhook.escrowAddress.toLowerCase(),
       chainId: webhook.chainId,
       eventType: webhook.eventType,
     };
