@@ -264,17 +264,9 @@ class Config:
                 attr_or_method.validate()
 
     @classmethod
-    def get_network_configs(
-        cls, only_configured: Optional[bool] = None
-    ) -> Iterable[_NetworkConfig]:
+    def get_network_configs(cls, only_configured: bool = True) -> Iterable[_NetworkConfig]:
         for attr_or_method in cls.__dict__:
             attr_or_method = getattr(cls, attr_or_method)
             if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _NetworkConfig):
-                if (
-                    only_configured is None
-                    or (network_is_configured := attr_or_method.is_configured())
-                    and only_configured
-                    or not network_is_configured
-                    and not only_configured
-                ):
+                if not only_configured or attr_or_method.is_configured():
                     yield attr_or_method
