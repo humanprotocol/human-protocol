@@ -69,9 +69,28 @@ Models are used to define the shape and responsibilities of the data:
 
 ### Additional Information Regarding Project Structure
 
-- **Mappers**: There are two types of mappers. The first type is domain-specific, used in each module
-to distinguish between DTO and Command datatypes. The second type is layer-specific and part of gateway integration. 
-This division of responsibilities is intentional, as gateways serve as the gathering point between many domain purposes. 
-Domain-specific mappers in this context would be overly convoluted and difficult to configure.
-- **Gateway Configuration**: The configuration of the gateways' destination points is located 
-in the `gateway-config.service.ts` file.
+  - **Mappers**: There are two types of mappers. The first type is domain-specific, used in each module
+  to distinguish between DTO and Command datatypes. The second type is layer-specific and part of gateway integration. 
+  This division of responsibilities is intentional, as gateways serve as the gathering point between many domain purposes. 
+  Domain-specific mappers in this context would be overly convoluted and difficult to configure.
+  - **Gateway Configuration**: The configuration of the gateways' destination points is located 
+  in the `gateway-config.service.ts` file.
+  - **Caching**: Cache persistence functionality was introduced in this project for optimization purposes. Redis was chosen
+  as the in-memory storage. The TTL can be checked and changed in the `.env.example` file, all `TTL` values are in seconds:
+    * `REDIS_HOST` - URL of the Redis host
+    * `REDIS_PORT` - port on which Redis is hosted
+    * `CACHE_TTL_ORACLE_DISCOVERY` - time of persisting found oracles
+    * `CACHE_TTL_ORACLE_STATS` - time of persisting statistics of the given oracle
+    * `CACHE_TTL_DAILY_HMT_SPENT` - time of persisting statistics of global daily HMT expenditures
+    * `CACHE_TTL_USER_STATS` - time of persisting statistics of the given user
+    * `CACHE_TTL_HCAPTCHA_USER_STATS` - time of persisting statistics related to h-captcha tasks for given user
+    * `CACHE_TTL_EXCHANGE_ORACLE_URL` - time of persisting exchange oracle URL
+    
+    Caching is used for persisting the exchange oracle URL as well as responses from the following endpoints:
+    * `/h-captcha/daily-hmt-spent`
+    * `/h-captcha/user-stats`
+    * `/oracles`
+    * `/statistics/stats`
+    * `/statistics/stats/assignment`
+    
+    Redis config may be found in: `./packages/apps/human-app/server/src/common/config/cache-factory.config.ts`

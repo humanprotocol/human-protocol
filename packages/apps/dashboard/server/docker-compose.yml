@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: dashboard-cache
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./redis_data:/data

@@ -8,7 +8,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { WorkerProfile } from '../worker.mapper';
+import { WorkerProfile } from '../worker.mapper.profile';
 import { workerServiceMock } from './worker.service.mock';
 import { SigninWorkerDto } from '../model/worker-signin.model';
 
