@@ -658,9 +658,7 @@ describe('AuthService', () => {
             signature,
           });
 
-          expect(userService.getByAddress).toHaveBeenCalledWith(
-            MOCK_ADDRESS.toLowerCase(),
-          );
+          expect(userService.getByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
           expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
 
           expect(authService.auth).toHaveBeenCalledWith(userEntity);
@@ -777,7 +775,7 @@ describe('AuthService', () => {
           });
 
           expect(userService.createWeb3User).toHaveBeenCalledWith(
-            web3PreSignUpDto.address.toLowerCase(),
+            web3PreSignUpDto.address,
           );
 
           expect(authService.auth).toHaveBeenCalledWith(userEntity);

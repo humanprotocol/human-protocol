@@ -386,14 +386,13 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const walletAddress = data.address.toLowerCase();
     const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
-      walletAddress,
+      data.address,
     );
 
     const verified = verifySignature(preSignUpData, data.signature, [
-      walletAddress,
+      data.address,
     ]);
 
     if (!verified) {
@@ -421,45 +420,44 @@ export class AuthService {
 
     if (
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await kvstore.get(walletAddress, KVStoreKeys.role),
+        await kvstore.get(data.address, KVStoreKeys.role),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await kvstore.get(walletAddress, KVStoreKeys.fee))) {
+    if (!(await kvstore.get(data.address, KVStoreKeys.fee))) {
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await kvstore.get(walletAddress, KVStoreKeys.url))) {
+    if (!(await kvstore.get(data.address, KVStoreKeys.url))) {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await kvstore.get(walletAddress, KVStoreKeys.jobTypes))) {
+    if (!(await kvstore.get(data.address, KVStoreKeys.jobTypes))) {
       throw new ControlledError(
         ErrorAuth.InvalidJobType,
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    const userEntity = await this.userService.createWeb3User(walletAddress);
+    const userEntity = await this.userService.createWeb3User(data.address);
 
-    await kvstore.set(walletAddress, OperatorStatus.ACTIVE);
+    await kvstore.set(data.address, OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }
 
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
-    const walletAddress = data.address.toLowerCase();
-    const userEntity = await this.userService.getByAddress(walletAddress);
+    const userEntity = await this.userService.getByAddress(data.address);
 
     const verified = verifySignature(
       await this.userService.prepareSignatureBody(
         SignatureType.SIGNIN,
-        walletAddress,
+        data.address,
       ),
       data.signature,
-      [walletAddress],
+      [data.address],
     );
 
     if (!verified) {

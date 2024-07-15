@@ -89,7 +89,7 @@ export class UserService {
     await this.checkEvmAddress(address);
 
     const newUser = new UserEntity();
-    newUser.evmAddress = address;
+    newUser.evmAddress = address.toLowerCase();
     newUser.nonce = generateNonce();
     newUser.role = Role.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
@@ -217,7 +217,7 @@ export class UserService {
     );
     verifySignature(signedData, data.signature, [data.address]);
 
-    user.evmAddress = data.address;
+    user.evmAddress = data.address.toLowerCase();
     await this.userRepository.updateOne(user);
 
     const signature = await this.web3Service
