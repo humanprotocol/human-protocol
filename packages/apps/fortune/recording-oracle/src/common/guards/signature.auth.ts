@@ -19,7 +19,7 @@ export class SignatureAuthGuard implements CanActivate {
     const { escrow_address, ...restBody } = request.body;
     const data = {
       ...restBody,
-      escrow_address
+      escrow_address,
     };
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
