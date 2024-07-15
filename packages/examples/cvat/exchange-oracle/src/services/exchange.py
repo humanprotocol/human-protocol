@@ -77,3 +77,30 @@ def create_assignment(
         # rollback is automatic within the transaction
 
     return assignment_id
+
+
+class NoAccessError(Exception):
+    pass
+
+
+async def resign_assignment(assignment_id: int, wallet_address: str) -> None:
+    with SessionLocal.begin() as session:
+        assignments = cvat_service.get_assignments_by_id(session, [assignment_id], for_update=True)
+        assignment = get_or_404(next(iter(assignments), None), assignment_id, "assignment")
+
+        # Can only resign from an active assignment in a job
+        # TODO: maybe optimize to a single DB request
+
+        if assignment.is_finished:
+            raise NoAccessError()  # TODO: maybe can be ignored
+
+        if assignment.user_wallet_address != wallet_address:
+            raise NoAccessError()
+
+        last_job_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
+            session, assignment.cvat_job_id, for_update=True
+        )
+        if assignment.id != last_job_assignment.id:
+            raise NoAccessError()
+
+        cvat_service.cancel_assignment(session, assignment_id)

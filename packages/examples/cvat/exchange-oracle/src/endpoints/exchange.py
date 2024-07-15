@@ -341,6 +341,19 @@ async def create_assignment(
     return serialize_assignment(assignment_id)
 
 
+@router.post(
+    "/assignment/resign",
+    description="Allows to reject an assignment",
+)
+async def resign_assignment(
+    assignment_id: int, token: AuthorizationData = AuthorizationParam
+) -> None:
+    try:
+        await oracle_service.resign_assignment(assignment_id, wallet_address=token.wallet_address)
+    except oracle_service.NoAccessError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
+
 @router.get("/stats/assignment", description="Get oracle statistics for the user")
 async def get_user_stats(token: AuthorizationData = AuthorizationParam) -> UserStatsResponse:
     wallet_address = token.wallet_address
