@@ -43,6 +43,6 @@ export function handleLaunched(event: Launched): void {
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsLaunched = leader.amountJobsLaunched.plus(ONE_BI);
+  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
   leader.save();
 }

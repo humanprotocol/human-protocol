@@ -56,7 +56,7 @@ export function createOrLoadLeader(address: Address): Leader {
     leader.amountWithdrawn = ZERO_BI;
     leader.reward = ZERO_BI;
     leader.reputation = ZERO_BI;
-    leader.amountJobsLaunched = ZERO_BI;
+    leader.amountJobsProcessed = ZERO_BI;
   }
 
   return leader;
