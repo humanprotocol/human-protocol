@@ -3,8 +3,6 @@ import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
-  forMember,
-  mapFrom,
   Mapper,
   namingConventions,
   SnakeCaseNamingConvention,
@@ -45,6 +43,18 @@ import {
   EmailVerificationCommand,
   EmailVerificationData,
 } from '../../modules/email-confirmation/model/email-verification.model';
+import {
+  RegisterAddressCommand,
+  RegisterAddressData,
+} from '../../modules/register-address/model/register-address.model';
+import {
+  TokenRefreshCommand,
+  TokenRefreshData,
+} from '../../modules/token-refresh/model/token-refresh.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorData,
+} from '../../modules/user-operator/model/operator-signin.model';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
@@ -58,10 +68,6 @@ export class ReputationOracleProfile extends AutomapperProfile {
         mapper,
         SignupWorkerCommand,
         SignupWorkerData,
-        forMember(
-          (destination) => destination.h_captcha_token,
-          mapFrom((source) => source.hCaptchaToken),
-        ),
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),
@@ -69,23 +75,58 @@ export class ReputationOracleProfile extends AutomapperProfile {
       );
       createMap(mapper, SignupOperatorCommand, SignupOperatorData);
       createMap(mapper, PrepareSignatureCommand, PrepareSignatureData);
+      createMap(mapper, SigninOperatorCommand, SigninOperatorData);
       createMap(mapper, DisableOperatorParams, DisableOperatorData);
-      createMap(mapper, RestorePasswordCommand, RestorePasswordData);
-      createMap(mapper, ForgotPasswordCommand, ForgotPasswordData);
+      createMap(
+        mapper,
+        ForgotPasswordCommand,
+        ForgotPasswordData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
       createMap(
         mapper,
         ResendEmailVerificationParams,
         ResendEmailVerificationData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
       );
       createMap(mapper, EmailVerificationCommand, EmailVerificationData);
       createMap(
         mapper,
         SigninWorkerCommand,
         SigninWorkerData,
-        forMember(
-          (destination) => destination.h_captcha_token,
-          mapFrom((source) => source.hCaptchaToken),
-        ),
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        RegisterAddressCommand,
+        RegisterAddressData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        RestorePasswordCommand,
+        RestorePasswordData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        TokenRefreshCommand,
+        TokenRefreshData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

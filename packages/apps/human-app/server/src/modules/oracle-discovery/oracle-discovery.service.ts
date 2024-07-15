@@ -1,5 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OracleDiscoveryResponse } from './model/oracle-discovery.model';
+import {
+  OracleDiscoveryCommand,
+  OracleDiscoveryResponse,
+} from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
@@ -14,34 +17,85 @@ export class OracleDiscoveryService {
     private configService: EnvironmentConfigService,
   ) {}
 
-  async processOracleDiscovery(): Promise<OracleDiscoveryResponse[]> {
-    const address = this.configService.reputationOracleAddress.toLowerCase();
+  async processOracleDiscovery(
+    command: OracleDiscoveryCommand,
+  ): Promise<OracleDiscoveryResponse[]> {
+    const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
-
-    const allData = await Promise.all(
+    const filteredOracles = await Promise.all(
       chainIds.map(async (chainId) => {
-        let data: OracleDiscoveryResponse[] | undefined =
-          await this.cacheManager.get(chainId);
-        if (!data) {
-          try {
-            data = await OperatorUtils.getReputationNetworkOperators(
-              Number(chainId),
-              address,
-              this.EXCHANGE_ORACLE,
-            );
-            await this.cacheManager.set(
-              chainId,
-              data,
-              this.configService.cacheTtlOracleDiscovery,
-            );
-          } catch (error) {
-            this.logger.error(`Error processing chainId ${chainId}:`, error);
-          }
-        }
-        return data;
+        return await this.findOraclesByChainId(
+          chainId,
+          address,
+          command.selectedJobTypes,
+        );
       }),
     );
-
-    return allData.flat().filter(Boolean) as OracleDiscoveryResponse[];
+    return filteredOracles.flat().filter(Boolean) as OracleDiscoveryResponse[];
+  }
+  private async findOraclesByChainId(
+    chainId: string,
+    address: string,
+    selectedJobTypes: string[] | undefined,
+  ): Promise<OracleDiscoveryResponse[]> {
+    let receivedOracles: OracleDiscoveryResponse[] | undefined =
+      await this.cacheManager.get(chainId);
+    if (receivedOracles) {
+      return receivedOracles;
+    }
+    try {
+      receivedOracles = await OperatorUtils.getReputationNetworkOperators(
+        Number(chainId),
+        address,
+        this.EXCHANGE_ORACLE,
+      );
+      const filteredOracles = this.filterOracles(
+        receivedOracles,
+        selectedJobTypes,
+      );
+      await this.cacheManager.set(
+        chainId,
+        filteredOracles,
+        {
+          ttl: this.configService.cacheTtlOracleDiscovery
+        } as any,
+      );
+      return filteredOracles;
+    } catch (error) {
+      this.logger.error(`Error processing chainId ${chainId}:`, error);
+    }
+    return [];
+  }
+  private filterOracles(
+    foundOracles: OracleDiscoveryResponse[] | undefined,
+    selectedJobTypes: string[] | undefined,
+  ) {
+    if (foundOracles && foundOracles.length > 0) {
+      const filteredOracles = foundOracles.filter((oracle) => {
+        if (!oracle.url || oracle.url === null) {
+          return false;
+        }
+        return true;
+      });
+      if (selectedJobTypes && selectedJobTypes.length > 0) {
+        return filteredOracles.filter((oracle) =>
+          oracle.jobTypes && oracle.jobTypes.length > 0
+            ? this.areJobTypeSetsIntersect(oracle.jobTypes, selectedJobTypes)
+            : false,
+        );
+      }
+      return filteredOracles;
+    }
+    return [];
+  }
+  private areJobTypeSetsIntersect(
+    oracleJobTypes: string[],
+    requiredJobTypes: string[],
+  ) {
+    return oracleJobTypes.some((job) =>
+      requiredJobTypes
+        .map((requiredJob) => requiredJob.toLowerCase())
+        .includes(job.toLowerCase()),
+    );
   }
 }

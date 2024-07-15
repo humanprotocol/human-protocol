@@ -19,7 +19,7 @@ import {
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { JobAssignmentProfile } from '../job-assignment.mapper';
+import { JobAssignmentProfile } from '../job-assignment.mapper.profile';
 import { HttpService } from '@nestjs/axios';
 
 const httpServiceMock = {

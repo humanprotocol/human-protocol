@@ -5,6 +5,10 @@ import {
   SignupOperatorCommand,
   SignupOperatorDto,
 } from './model/operator-registration.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorDto,
+} from './model/operator-signin.model';
 
 @Injectable()
 export class OperatorProfile extends AutomapperProfile {
@@ -15,6 +19,7 @@ export class OperatorProfile extends AutomapperProfile {
   override get profile() {
     return (mapper: Mapper) => {
       createMap(mapper, SignupOperatorDto, SignupOperatorCommand);
+      createMap(mapper, SigninOperatorDto, SigninOperatorCommand);
     };
   }
 }

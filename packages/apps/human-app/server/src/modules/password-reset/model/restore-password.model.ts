@@ -32,5 +32,5 @@ export class RestorePasswordData {
   @AutoMap()
   token: string;
   @AutoMap()
-  h_captcha_token: string;
+  hCaptchaToken: string;
 }

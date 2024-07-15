@@ -63,3 +63,9 @@ export abstract class PageableData {
 
   abstract sort_field?: any;
 }
+export abstract class PageableResponse {
+  page: number;
+  page_size: number;
+  total_pages: number;
+  total_results: number;
+}

@@ -14,6 +14,8 @@ import {
   JobAssignmentParams,
   JobsFetchParams,
   JobsFetchParamsData,
+  ResignJobCommand,
+  ResignJobData,
 } from '../../modules/job-assignment/model/job-assignment.model';
 import {
   JobsDiscoveryParams,
@@ -45,6 +47,15 @@ export class ExchangeOracleProfile extends AutomapperProfile {
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),
         }),
+        // forMember usage cause: https://github.com/nartc/mapper/issues/583
+        forMember(
+          (destination) => destination.page_size,
+          mapFrom((source) => source.pageSize),
+        ),
+        forMember(
+          (destination) => destination.sort_field,
+          mapFrom((source) => source.sortField),
+        ),
       );
       createMap(
         mapper,
@@ -55,6 +66,23 @@ export class ExchangeOracleProfile extends AutomapperProfile {
           (destination) => destination.fields,
           mapFrom((source) => source.fields),
         ),
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+        forMember(
+          (destination) => destination.page_size,
+          mapFrom((source) => source.pageSize),
+        ),
+        forMember(
+          (destination) => destination.sort_field,
+          mapFrom((source) => source.sortField),
+        ),
+      );
+      createMap(
+        mapper,
+        ResignJobCommand,
+        ResignJobData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

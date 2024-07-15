@@ -7,14 +7,13 @@ import {
 } from '@nestjs/common';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   PrepareSignatureCommand,
   PrepareSignatureDto,
   PrepareSignatureResponse,
 } from './model/prepare-signature.model';
 import { PrepareSignatureService } from './prepare-signature.service';
-import { Authorization } from '../../common/config/params-decorators';
 
 @Controller('/prepare-signature')
 export class PrepareSignatureController {

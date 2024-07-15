@@ -8,31 +8,26 @@ import {
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import {
-  ForgotPasswordCommand,
-  ForgotPasswordData,
-  ForgotPasswordDto,
-} from './model/forgot-password.model';
+  OracleStatisticsCommand,
+  OracleStatisticsDto,
+} from './model/oracle-statistics.model';
 import {
-  RestorePasswordCommand,
-  RestorePasswordData,
-  RestorePasswordDto,
-} from './model/restore-password.model';
+  UserStatisticsCommand,
+  UserStatisticsDto,
+} from './model/user-statistics.model';
 
 @Injectable()
-export class PasswordResetProfile extends AutomapperProfile {
+export class StatisticsProfile extends AutomapperProfile {
   constructor(@InjectMapper() mapper: Mapper) {
     super(mapper);
   }
 
   override get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, ForgotPasswordDto, ForgotPasswordCommand);
-      createMap(mapper, ForgotPasswordCommand, ForgotPasswordData);
-
       createMap(
         mapper,
-        RestorePasswordDto,
-        RestorePasswordCommand,
+        OracleStatisticsDto,
+        OracleStatisticsCommand,
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),
@@ -40,11 +35,11 @@ export class PasswordResetProfile extends AutomapperProfile {
       );
       createMap(
         mapper,
-        RestorePasswordCommand,
-        RestorePasswordData,
+        UserStatisticsDto,
+        UserStatisticsCommand,
         namingConventions({
-          source: new CamelCaseNamingConvention(),
-          destination: new SnakeCaseNamingConvention(),
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
         }),
       );
     };

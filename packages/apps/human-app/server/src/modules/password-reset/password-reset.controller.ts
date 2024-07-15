@@ -48,14 +48,12 @@ export class PasswordResetController {
     summary: 'Endpoint to restore the user password after reset',
   })
   @UsePipes(new ValidationPipe())
-  public async restorePassword(
-    @Body() restorePasswordDto: RestorePasswordDto,
-  ): Promise<void> {
-    const restorePasswordCommand = this.mapper.map(
-      restorePasswordDto,
+  public async restorePassword(@Body() dto: RestorePasswordDto): Promise<void> {
+    const command = this.mapper.map(
+      dto,
       RestorePasswordDto,
       RestorePasswordCommand,
     );
-    return await this.service.processRestorePassword(restorePasswordCommand);
+    return await this.service.processRestorePassword(command);
   }
 }
