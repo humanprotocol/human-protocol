@@ -14,11 +14,7 @@ export async function sendWebhook(
   webhookBody: WebhookDto,
   privateKey: string,
 ): Promise<boolean> {
-  const data = {
-    ...webhookBody,
-    escrowAddress: webhookBody.escrowAddress,
-  };
-  const snake_case_body = CaseConverter.transformToSnakeCase(data);
+  const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
   const signedBody = await signMessage(snake_case_body, privateKey);
   const { status } = await firstValueFrom(
     await httpService.post(webhookUrl, snake_case_body, {
