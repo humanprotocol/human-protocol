@@ -25,6 +25,7 @@ class JobResponse(BaseModel):
     reward_amount: Optional[str] = None
     reward_token: Optional[str] = DEFAULT_TOKEN
     created_at: Optional[datetime] = None
+    qualifications: list[str] = Field(default_factory=list)
 
 
 class UserResponse(BaseModel):

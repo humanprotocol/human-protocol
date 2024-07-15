@@ -56,6 +56,7 @@ def serialize_job(
             job_description=manifest.annotation.description if manifest else None,
             reward_amount=str(manifest.job_bounty) if manifest else None,
             created_at=project.created_at,
+            # TODO: add qualifications
         )
 
 
