@@ -105,7 +105,7 @@ def serialize_assignment(
         else:
             api_status = assignment_status_mapping[assignment.status]
 
-        updated_at = None
+        updated_at = assignment.created_at
         if assignment.status == AssignmentStatuses.completed:
             updated_at = assignment.completed_at
         elif assignment.status in [

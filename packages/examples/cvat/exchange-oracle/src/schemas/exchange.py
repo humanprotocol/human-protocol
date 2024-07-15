@@ -60,7 +60,7 @@ class AssignmentResponse(BaseModel):
     reward_amount: Optional[str] = None
     reward_token: Optional[str] = DEFAULT_TOKEN
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
     expires_at: datetime
 
 
