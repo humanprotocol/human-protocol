@@ -9,9 +9,8 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({ fastRefresh: false }),
     nodePolyfills({
-      // Whether to polyfill `node:` protocol imports.
       protocolImports: true,
     }),
   ],
@@ -23,10 +22,10 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
-      include: [/human-protocol-sdk/, /node_modules/],
+      include: [/core/, /human-protocol-sdk/, /node_modules/],
     },
   },
   server: {
-    port: 3005,
+    port: 3006,
   },
 });
