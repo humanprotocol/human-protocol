@@ -1,7 +1,13 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsDate,
+} from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
@@ -58,6 +64,18 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsOptional()
   @IsString()
   assignmentId?: string;
+
+  @ApiPropertyOptional({ name: 'created_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @ApiPropertyOptional({ name: 'updated_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedAfter?: Date;
 }
 
 export class AssignmentDto {

@@ -13,6 +13,11 @@ import {
   SignupOperatorCommand,
   SignupOperatorDto,
 } from './model/operator-registration.model';
+import {
+  SigninOperatorCommand,
+  SigninOperatorDto,
+  SigninOperatorResponse,
+} from './model/operator-signin.model';
 
 @Controller()
 export class OperatorController {
@@ -33,5 +38,20 @@ export class OperatorController {
       SignupOperatorCommand,
     );
     return this.service.signupOperator(signupOperatorCommand);
+  }
+
+  @ApiTags('User-Operator')
+  @Post('/auth/web3/signin')
+  @ApiOperation({ summary: 'Operator signin' })
+  @UsePipes(new ValidationPipe())
+  public signinOperator(
+    @Body() dto: SigninOperatorDto,
+  ): Promise<SigninOperatorResponse> {
+    const command = this.mapper.map(
+      dto,
+      SigninOperatorDto,
+      SigninOperatorCommand,
+    );
+    return this.service.signinOperator(command);
   }
 }

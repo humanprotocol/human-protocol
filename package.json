@@ -41,18 +41,19 @@
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^15.2.7",
     "prettier": "^3.2.5",
-    "ts-jest": "^29.1.1",
+    "ts-jest": "^29.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.3"
   },
   "resolutions": {
-    "ejs": "^3.1.8",
+    "ejs": "^3.1.10",
     "gluegun": "^5.0.0",
     "mocha": "^10.0.0",
     "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
     "qrcode": "^1.5.0",
     "semver": "^7.5.2",
-    "undici": "^6.11.1"
+    "undici": "^6.11.1",
+    "lru-cache": "10.4.3"
   }
 }

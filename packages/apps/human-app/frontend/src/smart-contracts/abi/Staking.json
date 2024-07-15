@@ -1,0 +1,694 @@
+{
+  "abi": [
+    { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+    {
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "previousAdmin",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "newAdmin",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "staker",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokens",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "name": "escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "closedAt",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "AllocationClosed",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "beacon",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "BeaconUpgraded",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "version",
+          "internalType": "uint8",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newOwner",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "lockPeriod",
+          "internalType": "uint32",
+          "type": "uint32"
+        }
+      ],
+      "name": "SetLockPeriod",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "minimumStake",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetMinumumStake",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "rewardPool",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "SetRewardPool",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "staker",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokens",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "name": "escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "createdAt",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeAllocated",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "staker",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokens",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeDeposited",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "staker",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokens",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "until",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeLocked",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "staker",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokens",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "name": "escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "slasher",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "StakeSlashed",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "staker",
+          "internalType": "address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "tokens",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeWithdrawn",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "implementation",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "Upgraded",
+      "anonymous": false,
+      "type": "event"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        {
+          "name": "_escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        },
+        { "name": "_tokens", "internalType": "uint256", "type": "uint256" }
+      ],
+      "name": "allocate",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [
+        {
+          "name": "escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        },
+        { "name": "staker", "internalType": "address", "type": "address" },
+        { "name": "tokens", "internalType": "uint256", "type": "uint256" },
+        { "name": "createdAt", "internalType": "uint256", "type": "uint256" },
+        { "name": "closedAt", "internalType": "uint256", "type": "uint256" }
+      ],
+      "inputs": [{ "name": "", "internalType": "address", "type": "address" }],
+      "name": "allocations",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        {
+          "name": "_escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "closeAllocation",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [
+        {
+          "components": [
+            {
+              "name": "escrowAddress",
+              "internalType": "address",
+              "type": "address"
+            },
+            { "name": "staker", "internalType": "address", "type": "address" },
+            { "name": "tokens", "internalType": "uint256", "type": "uint256" },
+            {
+              "name": "createdAt",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            { "name": "closedAt", "internalType": "uint256", "type": "uint256" }
+          ],
+          "name": "",
+          "internalType": "struct IStaking.Allocation",
+          "type": "tuple"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "_escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "getAllocation",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [
+        {
+          "name": "",
+          "internalType": "enum IStaking.AllocationState",
+          "type": "uint8"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "_escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "getAllocationState",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [
+        { "name": "", "internalType": "address[]", "type": "address[]" },
+        {
+          "components": [
+            {
+              "name": "tokensStaked",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            {
+              "name": "tokensAllocated",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            {
+              "name": "tokensLocked",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            {
+              "name": "tokensLockedUntil",
+              "internalType": "uint256",
+              "type": "uint256"
+            }
+          ],
+          "name": "",
+          "internalType": "struct Stakes.Staker[]",
+          "type": "tuple[]"
+        }
+      ],
+      "inputs": [],
+      "name": "getListOfStakers",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "uint256", "type": "uint256" }],
+      "inputs": [
+        { "name": "_staker", "internalType": "address", "type": "address" }
+      ],
+      "name": "getStakedTokens",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [
+        {
+          "components": [
+            {
+              "name": "tokensStaked",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            {
+              "name": "tokensAllocated",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            {
+              "name": "tokensLocked",
+              "internalType": "uint256",
+              "type": "uint256"
+            },
+            {
+              "name": "tokensLockedUntil",
+              "internalType": "uint256",
+              "type": "uint256"
+            }
+          ],
+          "name": "",
+          "internalType": "struct Stakes.Staker",
+          "type": "tuple"
+        }
+      ],
+      "inputs": [
+        { "name": "_staker", "internalType": "address", "type": "address" }
+      ],
+      "name": "getStaker",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "bool", "type": "bool" }],
+      "inputs": [
+        { "name": "_staker", "internalType": "address", "type": "address" }
+      ],
+      "name": "hasAvailableStake",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "bool", "type": "bool" }],
+      "inputs": [
+        { "name": "_staker", "internalType": "address", "type": "address" }
+      ],
+      "name": "hasStake",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "_token", "internalType": "address", "type": "address" },
+        {
+          "name": "_minimumStake",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        { "name": "_lockPeriod", "internalType": "uint32", "type": "uint32" }
+      ],
+      "name": "initialize",
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "bool", "type": "bool" }],
+      "inputs": [
+        {
+          "name": "_escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "isAllocation",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "uint32", "type": "uint32" }],
+      "inputs": [],
+      "name": "lockPeriod",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "uint256", "type": "uint256" }],
+      "inputs": [],
+      "name": "minimumStake",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "address", "type": "address" }],
+      "inputs": [],
+      "name": "owner",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "bytes32", "type": "bytes32" }],
+      "inputs": [],
+      "name": "proxiableUUID",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [],
+      "name": "renounceOwnership",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "address", "type": "address" }],
+      "inputs": [],
+      "name": "rewardPool",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "_lockPeriod", "internalType": "uint32", "type": "uint32" }
+      ],
+      "name": "setLockPeriod",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        {
+          "name": "_minimumStake",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMinimumStake",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "_rewardPool", "internalType": "address", "type": "address" }
+      ],
+      "name": "setRewardPool",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "_slasher", "internalType": "address", "type": "address" },
+        { "name": "_staker", "internalType": "address", "type": "address" },
+        {
+          "name": "_escrowAddress",
+          "internalType": "address",
+          "type": "address"
+        },
+        { "name": "_tokens", "internalType": "uint256", "type": "uint256" }
+      ],
+      "name": "slash",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "_tokens", "internalType": "uint256", "type": "uint256" }
+      ],
+      "name": "stake",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "address", "type": "address" }],
+      "inputs": [{ "name": "", "internalType": "uint256", "type": "uint256" }],
+      "name": "stakers",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [
+        {
+          "name": "tokensStaked",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "name": "tokensAllocated",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "name": "tokensLocked",
+          "internalType": "uint256",
+          "type": "uint256"
+        },
+        {
+          "name": "tokensLockedUntil",
+          "internalType": "uint256",
+          "type": "uint256"
+        }
+      ],
+      "inputs": [{ "name": "", "internalType": "address", "type": "address" }],
+      "name": "stakes",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [{ "name": "", "internalType": "address", "type": "address" }],
+      "inputs": [],
+      "name": "token",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "newOwner", "internalType": "address", "type": "address" }
+      ],
+      "name": "transferOwnership",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        { "name": "_tokens", "internalType": "uint256", "type": "uint256" }
+      ],
+      "name": "unstake",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        {
+          "name": "newImplementation",
+          "internalType": "address",
+          "type": "address"
+        }
+      ],
+      "name": "upgradeTo",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        {
+          "name": "newImplementation",
+          "internalType": "address",
+          "type": "address"
+        },
+        { "name": "data", "internalType": "bytes", "type": "bytes" }
+      ],
+      "name": "upgradeToAndCall",
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "outputs": [],
+      "inputs": [],
+      "name": "withdraw",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}

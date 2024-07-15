@@ -37,13 +37,6 @@ export class JobAssignmentCommand {
   token: string;
 }
 
-export class JobAssignmentDetails {
-  @AutoMap()
-  data: JobAssignmentParams;
-  @AutoMap()
-  token: string;
-  exchangeOracleUrl: string;
-}
 export class JobAssignmentData {
   @AutoMap()
   escrow_address: string;
@@ -68,13 +61,12 @@ export class JobAssignmentResponse {
 export class JobsFetchParamsDto extends PageableDto {
   @AutoMap()
   @ApiProperty()
-  address: string;
+  oracle_address: string;
   @AutoMap()
-  @Type(() => Number)
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @ApiPropertyOptional()
-  assignment_id: number;
+  assignment_id: string;
   @IsOptional()
   @AutoMap()
   @IsString()
@@ -98,8 +90,8 @@ export class JobsFetchParamsDto extends PageableDto {
   status: AssignmentStatus;
   @AutoMap()
   @IsOptional()
-  @IsEnum(AssignmentSortField, { each: true })
-  @ApiPropertyOptional({ enum: AssignmentSortField, isArray: true })
+  @IsEnum(AssignmentSortField)
+  @ApiPropertyOptional({ enum: AssignmentSortField })
   sort_field: AssignmentSortField;
 }
 
@@ -115,18 +107,11 @@ export class JobsFetchParams extends PageableParams {
   @AutoMap()
   sortField: AssignmentSortField;
   @AutoMap()
-  assignmentId: number;
+  assignmentId: string;
 }
 export class JobsFetchParamsCommand {
   @AutoMap()
-  address: string;
-  @AutoMap()
-  data: JobsFetchParams;
-  @AutoMap()
-  token: string;
-}
-export class JobsFetchParamsDetails {
-  exchangeOracleUrl: string;
+  oracleAddress: string;
   @AutoMap()
   data: JobsFetchParams;
   @AutoMap()
@@ -137,7 +122,7 @@ export class JobsFetchParamsData extends PageableData {
   @AutoMap()
   escrow_address: string;
   @AutoMap()
-  assignment_id: number;
+  assignment_id: string;
   @AutoMap()
   chain_id: number;
   @AutoMap()
@@ -164,4 +149,27 @@ export class JobsFetchResponseItem {
 
 export class JobsFetchResponse {
   data: JobsFetchResponseItem[];
+}
+
+export class ResignJobDto {
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  oracle_address: string;
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  assignment_id: string;
+}
+
+export class ResignJobCommand {
+  @AutoMap()
+  oracleAddress: string;
+  @AutoMap()
+  assignmentId: string;
+  token: string;
+}
+export class ResignJobData {
+  @AutoMap()
+  assignment_id: string;
 }

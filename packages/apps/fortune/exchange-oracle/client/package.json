@@ -1,0 +1,61 @@
+{
+  "name": "@human-protocol/fortune-exchange-oracle-client",
+  "version": "1.0.0",
+  "description": "Job Launcher Client",
+  "scripts": {
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "start": "vite --port 3006",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start:prod": "serve -s dist",
+    "test": "vitest run -u",
+    "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
+    "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
+    "format": "yarn format:prettier && yarn format:lint"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "@human-protocol/sdk": "*",
+    "@mui/material": "^5.16.0",
+    "@tanstack/query-sync-storage-persister": "^5.38.0",
+    "@tanstack/react-query": "^5.49.2",
+    "@tanstack/react-query-persist-client": "^5.35.4",
+    "axios": "^1.7.2",
+    "ethers": "^6.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.24.1",
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "wagmi": "^2.10.10"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-router-dom": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
+}

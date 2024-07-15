@@ -35,8 +35,10 @@ export enum AssignmentSortField {
   CREATED_AT = 'created_at',
   EXPIRES_AT = 'expires_at',
 }
-export enum PrepareSignatureType {
+export enum SignatureType {
   SIGNUP = 'SIGNUP',
-  DISABLE_OPERATOR = 'DISABLE_OPERATOR',
   SIGNIN = 'SIGNIN',
+  DISABLE_OPERATOR = 'DISABLE_OPERATOR',
+  CERTIFICATE_AUTHENTICATION = 'CERTIFICATE_AUTHENTICATION',
+  REGISTER_ADDRESS = 'REGISTER_ADDRESS',
 }
