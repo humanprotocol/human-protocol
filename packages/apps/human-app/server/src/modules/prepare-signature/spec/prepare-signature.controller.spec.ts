@@ -11,7 +11,7 @@ import { serviceMock } from './prepare-signature.service.mock';
 import { PrepareSignatureResponse } from '../model/prepare-signature.model';
 import { PrepareSignatureController } from '../prepare-signature.controller';
 import { PrepareSignatureService } from '../prepare-signature.service';
-import { PrepareSignatureProfile } from '../prepare-signature.mapper';
+import { PrepareSignatureProfile } from '../prepare-signature.mapper.profile';
 
 describe('PrepareSignatureController', () => {
   let controller: PrepareSignatureController;
@@ -51,13 +51,5 @@ describe('PrepareSignatureController', () => {
       expect(response).toEqual(expectedResponse);
       expect(service.processPrepareSignature).toHaveBeenCalledWith(command);
     });
-  });
-
-  it('should return the proper response from prepareSignature method in controller', async () => {
-    const dto = prepareSignatureDtoFixture;
-    const expectedResponse: PrepareSignatureResponse =
-      prepareSignatureResponseFixture;
-    const response = await controller.prepareSignature(dto);
-    expect(response).toEqual(expectedResponse);
   });
 });

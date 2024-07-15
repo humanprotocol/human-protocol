@@ -18,6 +18,8 @@ import { ServerConfigService } from '../common/config/server-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
 import { CredentialEntity } from '../modules/credentials/credential.entity';
+import { QualificationEntity } from '../modules/qualification/qualification.entity';
+import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { CredentialEntity } from '../modules/credentials/credential.entity';
             KycEntity,
             CronJobEntity,
             SiteKeyEntity,
+            QualificationEntity,
+            UserQualificationEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,

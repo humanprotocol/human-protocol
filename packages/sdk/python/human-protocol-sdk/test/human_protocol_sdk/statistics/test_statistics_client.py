@@ -12,6 +12,7 @@ from human_protocol_sdk.gql.statistics import (
 from human_protocol_sdk.statistics import (
     StatisticsClient,
     StatisticsParam,
+    HMTHoldersParam,
 )
 
 
@@ -262,6 +263,47 @@ class TestStatisticsClient(unittest.TestCase):
             )
             self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_senders, 5)
             self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_receivers, 5)
+
+    def test_get_hmt_holders(self):
+        param = HMTHoldersParam(
+            order_direction="asc",
+        )
+
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [
+                {
+                    "data": {
+                        "holders": [
+                            {"address": "0x123", "balance": "1000"},
+                            {"address": "0x456", "balance": "2000"},
+                        ]
+                    }
+                }
+            ]
+
+            holders = self.statistics.get_hmt_holders(param)
+
+            mock_function.assert_any_call(
+                NETWORKS[ChainId.LOCALHOST],
+                query=get_holders_query(
+                    address=param.address,
+                ),
+                params={
+                    "address": param.address,
+                    "orderBy": "balance",
+                    "orderDirection": param.order_direction,
+                },
+            )
+
+            self.assertEqual(len(holders), 2)
+            self.assertEqual(holders[0].address, "0x123")
+            self.assertEqual(holders[0].balance, 1000)
+            self.assertEqual(holders[1].address, "0x456")
+            self.assertEqual(holders[1].balance, 2000)
 
 
 if __name__ == "__main__":

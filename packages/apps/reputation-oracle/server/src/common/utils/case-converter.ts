@@ -22,6 +22,9 @@ export class CaseConverter {
     if (Array.isArray(obj)) {
       return obj.map((item) => CaseConverter.transformToSnakeCase(item));
     } else if (typeof obj === 'object' && obj !== null) {
+      if (obj instanceof Date) {
+        return obj.toISOString(); // Convert Date object to ISO string format
+      }
       return Object.keys(obj).reduce(
         (acc: Record<string, any>, key: string) => {
           const snakeCaseKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();

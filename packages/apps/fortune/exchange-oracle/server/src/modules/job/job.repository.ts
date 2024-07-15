@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { JobEntity } from './job.entity';
-import { JobSortField } from '../../common/enums/job';
+import { JobSortField, JobStatus } from '../../common/enums/job';
 import { JobFilterData, ListResult } from './job.interface';
 
 @Injectable()
@@ -36,12 +36,26 @@ export class JobRepository extends BaseRepository<JobEntity> {
     });
   }
 
+  public async findOneByChainIdAndEscrowAddressWithAssignments(
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<JobEntity | null> {
+    return this.findOne({
+      where: {
+        chainId,
+        escrowAddress,
+      },
+      relations: ['assignments'],
+    });
+  }
+
   public async fetchFiltered(data: JobFilterData): Promise<ListResult> {
     const queryBuilder = this.createQueryBuilder('job');
 
     if (
       data.sortField == JobSortField.CHAIN_ID ||
-      data.sortField == JobSortField.CREATED_AT
+      data.sortField == JobSortField.CREATED_AT ||
+      data.sortField == JobSortField.UPDATED_AT
     )
       queryBuilder.orderBy(data.sortField!, data.sort);
 
@@ -59,6 +73,18 @@ export class JobRepository extends BaseRepository<JobEntity> {
       queryBuilder.andWhere('job.status = :status', { status: data.status });
     }
 
+    if (data.createdAfter) {
+      queryBuilder.andWhere('job.createdAt >= :createdAfter', {
+        createdAfter: data.createdAfter,
+      });
+    }
+
+    if (data.updatedAfter) {
+      queryBuilder.andWhere('job.updatedAt >= :updatedAfter', {
+        updatedAfter: data.updatedAfter,
+      });
+    }
+
     queryBuilder.andWhere('job.reputationNetwork = :reputationNetwork', {
       reputationNetwork: data.reputationNetwork,
     });
@@ -68,5 +94,13 @@ export class JobRepository extends BaseRepository<JobEntity> {
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
     return { entities, itemCount };
+  }
+
+  public async countJobsByStatus(status: JobStatus): Promise<number> {
+    return this.count({
+      where: {
+        status,
+      },
+    });
   }
 }

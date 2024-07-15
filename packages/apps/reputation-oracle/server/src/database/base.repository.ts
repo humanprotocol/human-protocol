@@ -36,4 +36,16 @@ export class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
     }
     return item;
   }
+
+  async deleteOne(item: T): Promise<void> {
+    try {
+      await this.remove(item);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+  }
 }

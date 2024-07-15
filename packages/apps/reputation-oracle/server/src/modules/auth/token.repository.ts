@@ -18,7 +18,7 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
         uuid,
         type,
       },
-      relations: ['user', 'user.kyc'],
+      relations: ['user', 'user.kyc', 'user.siteKey'],
     });
   }
 
@@ -33,10 +33,6 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
       },
       relations: ['user'],
     });
-  }
-
-  public async deleteOne(token: TokenEntity): Promise<DeleteResult> {
-    return this.delete({ id: token.id });
   }
 
   public async deleteOneByTypeAndUserId(

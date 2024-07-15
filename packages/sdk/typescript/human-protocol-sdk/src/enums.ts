@@ -19,3 +19,8 @@ export enum ChainId {
   LOCALHOST = 1338,
   XLAYER = 196,
 }
+
+export enum OrderDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}

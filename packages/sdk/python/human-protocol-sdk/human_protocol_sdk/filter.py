@@ -4,7 +4,7 @@ from datetime import datetime
 
 from typing import List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
 
 from web3 import Web3
 
@@ -24,7 +24,7 @@ class EscrowFilter:
 
     def __init__(
         self,
-        networks: List[ChainId],
+        chain_id: ChainId,
         launcher: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
@@ -33,11 +33,14 @@ class EscrowFilter:
         status: Optional[Status] = None,
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
         Initializes a EscrowFilter instance.
 
-        :param networks: Networks to request data
+        :param chain_id: Network to request data
         :param launcher: Launcher address
         :param reputation_oracle: Reputation oracle address
         :param recording_oracle: Recording oracle address
@@ -46,12 +49,12 @@ class EscrowFilter:
         :param status: Escrow status
         :param date_from: Created from date
         :param date_to: Created to date
+        :param first: Number of items per page
+        :param skip: Page number to retrieve
+        :param order_direction: Order of results, "asc" or "desc"
         """
 
-        if not networks or any(
-            network.value not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
+        if chain_id.value not in set(chain_id.value for chain_id in ChainId):
             raise FilterError(f"Invalid ChainId")
 
         if launcher and not Web3.is_address(launcher):
@@ -71,6 +74,12 @@ class EscrowFilter:
                 f"Invalid dates: {date_from} must be earlier than {date_to}"
             )
 
+        if order_direction.value not in set(
+            order_direction.value for order_direction in OrderDirection
+        ):
+            raise FilterError(f"Invalid order: {order_direction}")
+
+        self.chain_id = chain_id
         self.launcher = launcher
         self.reputation_oracle = reputation_oracle
         self.recording_oracle = recording_oracle
@@ -79,7 +88,9 @@ class EscrowFilter:
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
-        self.networks = networks
+        self.first = min(first, 1000)
+        self.skip = skip
+        self.order_direction = order_direction
 
 
 class PayoutFilter:
@@ -127,24 +138,30 @@ class TransactionFilter:
 
     def __init__(
         self,
-        networks: List[ChainId],
+        chain_id: ChainId,
         from_address: Optional[str] = None,
         to_address: Optional[str] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         start_block: Optional[int] = None,
         end_block: Optional[int] = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
         Initializes a TransactionsFilter instance.
 
-        :param networks: List of chain IDs to filter transactions from
+        :param chain_id: Chain ID to filter transactions from
         :param from_address: Sender address
         :param to_address: Receiver address
         :param start_date: Start date for filtering transactions
         :param end_date: End date for filtering transactions
         :param start_block: Start block number for filtering transactions
         :param end_block: End block number for filtering transactions
+        :param first: Number of items per page
+        :param skip: Page number to retrieve
+        :param order: Order of results, "asc" or "desc"
 
         :raises ValueError: If start_date is after end_date
         """
@@ -169,15 +186,18 @@ class TransactionFilter:
                 f"Invalid block range: start_block must be earlier than end_block"
             )
 
-        if (start_date or end_date) and (start_block or end_block):
-            raise ValueError(
-                "Date and block filters cannot be used together in TransactionsFilter"
-            )
+        if order_direction.value not in set(
+            order_direction.value for order_direction in OrderDirection
+        ):
+            raise ValueError(f"Invalid order: {order_direction}")
 
-        self.networks = networks
+        self.chain_id = chain_id
         self.from_address = from_address
         self.to_address = to_address
         self.start_date = start_date
         self.end_date = end_date
         self.start_block = start_block
         self.end_block = end_block
+        self.first = min(first, 1000)
+        self.skip = skip
+        self.order_direction = order_direction

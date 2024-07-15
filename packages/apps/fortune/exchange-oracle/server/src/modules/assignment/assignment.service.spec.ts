@@ -1,11 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import {
-  MOCK_ADDRESS,
-  MOCK_EXCHANGE_ORACLE,
-  MOCK_PRIVATE_KEY,
-} from '../../../test/constants';
+import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { TOKEN } from '../../common/constant';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { AssignmentRepository } from '../assignment/assignment.repository';
@@ -21,6 +17,7 @@ import { SortDirection } from '../../common/enums/collection';
 import { AssignmentEntity } from './assignment.entity';
 import { ErrorAssignment } from '../../common/constant/errors';
 import { BadRequestException } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),
@@ -82,6 +79,7 @@ describe('AssignmentService', () => {
             updateOne: jest.fn(),
           },
         },
+        ServerConfigService,
       ],
     }).compile();
 
@@ -289,12 +287,11 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(result.totalResults).toEqual(1);
       expect(result.results[0]).toEqual({
-        assignmentId: 1,
+        assignmentId: '1',
         chainId: 1,
         escrowAddress: escrowAddress,
         jobType: JobType.FORTUNE,
@@ -343,7 +340,6 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(result.totalResults).toEqual(0);
@@ -369,7 +365,6 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
