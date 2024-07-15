@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { forwardRef, useState } from 'react';
 import Popover from '@mui/material/Popover';
 import type { TableCellBaseProps } from '@mui/material/TableCell/TableCell';

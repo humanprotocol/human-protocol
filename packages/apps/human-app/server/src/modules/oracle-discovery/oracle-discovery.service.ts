@@ -53,13 +53,9 @@ export class OracleDiscoveryService {
         receivedOracles,
         selectedJobTypes,
       );
-      await this.cacheManager.set(
-        chainId,
-        filteredOracles,
-        {
-          ttl: this.configService.cacheTtlOracleDiscovery
-        } as any,
-      );
+      await this.cacheManager.set(chainId, filteredOracles, {
+        ttl: this.configService.cacheTtlOracleDiscovery,
+      } as any);
       return filteredOracles;
     } catch (error) {
       this.logger.error(`Error processing chainId ${chainId}:`, error);

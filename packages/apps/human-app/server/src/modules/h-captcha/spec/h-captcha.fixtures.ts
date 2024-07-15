@@ -13,7 +13,8 @@ import {
   BalanceStats,
   UserStatsApiResponse,
   UserStatsCommand,
-  UserStatsResponse, DateValue,
+  UserStatsResponse,
+  DateValue,
 } from '../model/user-stats.model';
 import {
   EnableLabelingCommand,

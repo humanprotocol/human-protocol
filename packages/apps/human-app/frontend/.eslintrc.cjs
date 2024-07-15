@@ -32,6 +32,7 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    'eslint-comments/require-description': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     // allow imports from material react table library
     camelcase: ['error', { allow: ['MRT_'] }],

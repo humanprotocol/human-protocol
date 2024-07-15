@@ -21,7 +21,8 @@ import {
 import {
   emailVerificationCommandFixture,
   emailVerificationDataFixture,
-  resendEmailVerificationCommandFixture, resendEmailVerificationDataFixture,
+  resendEmailVerificationCommandFixture,
+  resendEmailVerificationDataFixture,
 } from '../../../modules/email-confirmation/spec/email-verification.fixtures';
 import {
   ResendEmailVerificationCommand,

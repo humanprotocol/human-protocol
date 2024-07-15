@@ -34,10 +34,7 @@ describe('KycProcedureController', () => {
     expect(startKycProcedureSpy).toHaveBeenCalledWith('token');
   });
   it('should call processKycOnChain method of KycProcedureService', async () => {
-    const kycService = jest.spyOn(
-      service,
-      'processKycOnChain',
-    );
+    const kycService = jest.spyOn(service, 'processKycOnChain');
     await controller.onChainKyc('token');
     expect(kycService).toHaveBeenCalledWith('token');
   });
