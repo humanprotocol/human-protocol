@@ -24,7 +24,6 @@ from src.schemas.exchange import (
     JobResponse,
     JobStatuses,
     OracleStatsResponse,
-    UserRequest,
     UserResponse,
     UserStatsResponse,
 )
@@ -140,16 +139,19 @@ async def list_jobs(
 
 @router.put("/register", description="Binds a CVAT user to a HUMAN App user")
 async def register(
-    user: UserRequest,
+    token: AuthorizationData = AuthorizationParam,
     signature: str = Header(description="Calling service signature", alias="Human-Signature"),
 ) -> UserResponse:
     await validate_human_app_signature(signature)
 
-    with SessionLocal.begin() as session:
-        email_db_user = cvat_service.get_user_by_email(session, user.cvat_email, for_update=True)
-        wallet_db_user = cvat_service.get_user_by_id(session, user.wallet_address, for_update=True)
+    user_email = token.email
+    user_wallet_address = token.wallet_address
 
-        if wallet_db_user and not email_db_user and wallet_db_user.cvat_email != user.cvat_email:
+    with SessionLocal.begin() as session:
+        email_db_user = cvat_service.get_user_by_email(session, user_email, for_update=True)
+        wallet_db_user = cvat_service.get_user_by_id(session, user_wallet_address, for_update=True)
+
+        if wallet_db_user and not email_db_user and wallet_db_user.email != user_email:
             # Allow changing email for a wallet, don't allow changing wallet for a email
             # Need to clean up existing membership
             with suppress(cvat_api.exceptions.NotFoundException):
@@ -157,7 +159,7 @@ async def register(
 
         if not email_db_user:
             try:
-                cvat_id = cvat_api.get_user_id(user.cvat_email)
+                cvat_id = cvat_api.get_user_id(user_email)
             except cvat_api.exceptions.ApiException as e:
                 if (
                     e.status == status.HTTP_400_BAD_REQUEST
@@ -182,12 +184,12 @@ async def register(
 
             email_db_user = cvat_service.put_user(
                 session,
-                wallet_address=user.wallet_address,
-                cvat_email=user.cvat_email,
+                wallet_address=user_wallet_address,
+                cvat_email=user_email,
                 cvat_id=cvat_id,
             )
 
-        elif email_db_user.wallet_address != user.wallet_address:
+        elif email_db_user.wallet_address != user_wallet_address:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists"
             )
@@ -195,7 +197,6 @@ async def register(
         return UserResponse(
             wallet_address=email_db_user.wallet_address,
             cvat_email=email_db_user.cvat_email,
-            cvat_id=email_db_user.cvat_id,
         )
 
 

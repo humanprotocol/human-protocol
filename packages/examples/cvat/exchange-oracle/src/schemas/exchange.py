@@ -27,13 +27,9 @@ class JobResponse(BaseModel):
     created_at: Optional[datetime] = None
 
 
-class UserRequest(BaseModel):
+class UserResponse(BaseModel):
     wallet_address: str = Field(min_length=1)
     cvat_email: str = Field(min_length=1)
-
-
-class UserResponse(UserRequest):
-    cvat_id: int
 
 
 class AssignmentRequest(BaseModel):
