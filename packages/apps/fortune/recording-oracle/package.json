@@ -32,7 +32,7 @@
     "body-parser": "^1.20.2",
     "class-validator": "^0.14.1",
     "helmet": "^7.1.0",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",
