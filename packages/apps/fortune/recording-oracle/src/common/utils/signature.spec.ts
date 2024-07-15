@@ -1,5 +1,12 @@
 import { verifySignature, recoverSigner, signMessage } from './signature';
-import { MOCK_ADDRESS, MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_FILE_URL,
+  MOCK_WEB3_PRIVATE_KEY,
+} from '../../../test/constants';
+import { ChainId } from '@human-protocol/sdk';
+import { WebhookDto } from '@/modules/webhook/webhook.dto';
+import { EventType } from '../enums/webhook';
 
 jest.doMock('ethers', () => {
   return {
@@ -49,6 +56,25 @@ describe('Signature utility', () => {
       expect(() => {
         verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
       }).toThrow('Invalid signature');
+    });
+
+    it('should return true for valid WebhookDto signature', async () => {
+      const webhookDto: WebhookDto = {
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: '0x1234567890123456789012345678901234567890',
+        eventType: EventType.ESCROW_COMPLETED,
+        eventData: { solutionsUrl: MOCK_FILE_URL },
+      };
+
+      const messageString = JSON.stringify({
+        ...webhookDto,
+        escrowAddress: webhookDto.escrowAddress.toLowerCase(),
+      });
+      const signature = await signMessage(messageString, MOCK_WEB3_PRIVATE_KEY);
+
+      const result = verifySignature(webhookDto, signature, [MOCK_ADDRESS]);
+
+      expect(result).toBe(true);
     });
   });
 
