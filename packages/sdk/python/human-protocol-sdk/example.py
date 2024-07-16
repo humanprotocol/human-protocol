@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.constants import ChainId, Status, HMTOKEN_OWNER_ADDRESS
 from human_protocol_sdk.escrow import EscrowUtils
 from human_protocol_sdk.filter import EscrowFilter
 from human_protocol_sdk.statistics import (
@@ -78,8 +78,8 @@ def get_hmt_holders(statistics_client: StatisticsClient):
     )
     print(
         statistics_client.get_hmt_holders(
-            HMTHoldersParam(address="0xf183b3b34e70dd17859455389a3ab54d49d41e6f")
-        )
+            HMTHoldersParam(address=HMTOKEN_OWNER_ADDRESS)
+        )[0].balance
     )
 
 

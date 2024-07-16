@@ -367,3 +367,8 @@ class KVStoreKeys(Enum):
     webhook_url = "webhook_url"
     url = "url"
     job_types = "job_types"
+
+
+HMTOKEN_INITIAL_MINTED_SUPPLY = 1000000000 * (10**18)
+
+HMTOKEN_OWNER_ADDRESS = "0xf3d9a0ba9fa14273c515e519dfd0826ff87d5164"

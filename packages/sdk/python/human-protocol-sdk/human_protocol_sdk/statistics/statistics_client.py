@@ -20,8 +20,14 @@ import logging
 
 from typing import List, Optional
 
-from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.constants import (
+    ChainId,
+    NETWORKS,
+    HMTOKEN_INITIAL_MINTED_SUPPLY,
+    HMTOKEN_OWNER_ADDRESS,
+)
 from human_protocol_sdk.gql.hmtoken import get_holders_query
+
 
 from human_protocol_sdk.utils import get_data_from_subgraph
 
@@ -637,12 +643,20 @@ class StatisticsClient:
             },
         )
 
-        holders = holders_data["data"]["holders"]
+        holders = []
+        for holder in holders_data["data"]["holders"]:
+            address = holder.get("address", "")
+            balance = int(holder.get("balance", 0))
 
-        return [
-            HMTHolder(
-                address=holder.get("address", ""),
-                balance=int(holder.get("balance", 0)),
+            # Check if the address is the token creator and adjust the balance
+            if address == HMTOKEN_OWNER_ADDRESS:
+                balance += HMTOKEN_INITIAL_MINTED_SUPPLY
+
+            holders.append(
+                HMTHolder(
+                    address=address,
+                    balance=balance,
+                )
             )
-            for holder in holders
-        ]
+
+        return holders

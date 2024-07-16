@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { StatisticsClient } from '../src/statistics';
-import { NETWORKS } from '../src/constants';
+import { HMTOKEN_OWNER_ADDRESS, NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 
 const getEscrowStatistics = async (statisticsClient: StatisticsClient) => {
@@ -95,6 +95,22 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   });
 };
 
+const getHMTHolders = async (statisticsClient: StatisticsClient) => {
+  console.log(
+    'HMT holder:',
+    await statisticsClient.getHMTHolders({
+      address: HMTOKEN_OWNER_ADDRESS,
+    })
+  );
+
+  console.log(
+    'HMT holders sorted:',
+    await statisticsClient.getHMTHolders({
+      orderDirection: 'desc',
+    })
+  );
+};
+
 (async () => {
   if (!NETWORKS[ChainId.POLYGON]) {
     return;
@@ -106,4 +122,5 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   await getWorkerStatistics(statisticsClient);
   await getPaymentStatistics(statisticsClient);
   await getHMTStatistics(statisticsClient);
+  await getHMTHolders(statisticsClient);
 })();

@@ -1,0 +1,30 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.OrderDirection = exports.ChainId = void 0;
+var ChainId;
+(function (ChainId) {
+    ChainId[ChainId["ALL"] = -1] = "ALL";
+    ChainId[ChainId["MAINNET"] = 1] = "MAINNET";
+    ChainId[ChainId["RINKEBY"] = 4] = "RINKEBY";
+    ChainId[ChainId["GOERLI"] = 5] = "GOERLI";
+    ChainId[ChainId["SEPOLIA"] = 11155111] = "SEPOLIA";
+    ChainId[ChainId["BSC_MAINNET"] = 56] = "BSC_MAINNET";
+    ChainId[ChainId["BSC_TESTNET"] = 97] = "BSC_TESTNET";
+    ChainId[ChainId["POLYGON"] = 137] = "POLYGON";
+    ChainId[ChainId["POLYGON_MUMBAI"] = 80001] = "POLYGON_MUMBAI";
+    ChainId[ChainId["POLYGON_AMOY"] = 80002] = "POLYGON_AMOY";
+    ChainId[ChainId["MOONBEAM"] = 1284] = "MOONBEAM";
+    ChainId[ChainId["MOONBASE_ALPHA"] = 1287] = "MOONBASE_ALPHA";
+    ChainId[ChainId["AVALANCHE_TESTNET"] = 43113] = "AVALANCHE_TESTNET";
+    ChainId[ChainId["AVALANCHE"] = 43114] = "AVALANCHE";
+    ChainId[ChainId["CELO"] = 42220] = "CELO";
+    ChainId[ChainId["CELO_ALFAJORES"] = 44787] = "CELO_ALFAJORES";
+    ChainId[ChainId["XLAYER_TESTNET"] = 195] = "XLAYER_TESTNET";
+    ChainId[ChainId["LOCALHOST"] = 1338] = "LOCALHOST";
+    ChainId[ChainId["XLAYER"] = 196] = "XLAYER";
+})(ChainId || (exports.ChainId = ChainId = {}));
+var OrderDirection;
+(function (OrderDirection) {
+    OrderDirection["ASC"] = "asc";
+    OrderDirection["DESC"] = "desc";
+})(OrderDirection || (exports.OrderDirection = OrderDirection = {}));

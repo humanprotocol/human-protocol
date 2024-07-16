@@ -359,3 +359,8 @@ export const Role = {
 };
 
 export const SUBGRAPH_API_KEY_PLACEHOLDER = '[SUBGRAPH_API_KEY]';
+
+export const HMTOKEN_INITIAL_MINTED_SUPPLY = 1000000000 * 10 ** 18;
+
+export const HMTOKEN_OWNER_ADDRESS =
+  '0xf3d9a0ba9fa14273c515e519dfd0826ff87d5164';

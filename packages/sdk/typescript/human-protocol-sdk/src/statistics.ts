@@ -20,6 +20,10 @@ import {
 import { IHMTHoldersParams, IStatisticsParams } from './interfaces';
 import { NetworkData } from './types';
 import { getSubgraphUrl, throwError } from './utils';
+import {
+  HMTOKEN_INITIAL_MINTED_SUPPLY,
+  HMTOKEN_OWNER_ADDRESS,
+} from './constants';
 
 /**
  * ## Introduction
@@ -478,10 +482,18 @@ export class StatisticsClient {
         }
       );
 
-      return holders.map((holder) => ({
-        address: holder.address,
-        balance: ethers.toBigInt(holder.balance),
-      }));
+      return holders.map((holder) => {
+        let balance = BigInt(holder.balance);
+
+        if (holder.address === HMTOKEN_OWNER_ADDRESS) {
+          balance += BigInt(HMTOKEN_INITIAL_MINTED_SUPPLY);
+        }
+
+        return {
+          address: holder.address,
+          balance,
+        };
+      });
     } catch (e: any) {
       return throwError(e);
     }
