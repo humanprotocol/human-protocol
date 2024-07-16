@@ -16,14 +16,17 @@ const H_CAPTCHA_TOKEN = 'test_captcha_token';
 
 export const forgotPasswordDtoFixture: ForgotPasswordDto = {
   email: EMAIL,
+  h_captcha_token: H_CAPTCHA_TOKEN,
 };
 
 export const forgotPasswordCommandFixture: ForgotPasswordCommand = {
   email: EMAIL,
+  hCaptchaToken: H_CAPTCHA_TOKEN,
 };
 
 export const forgotPasswordDataFixture: ForgotPasswordData = {
   email: EMAIL,
+  h_captcha_token: H_CAPTCHA_TOKEN,
 };
 
 export const restorePasswordDtoFixture: RestorePasswordDto = {
@@ -41,5 +44,5 @@ export const restorePasswordCommandFixture: RestorePasswordCommand = {
 export const restorePasswordDataFixture: RestorePasswordData = {
   password: PASSWORD,
   token: TOKEN,
-  h_captcha_token: H_CAPTCHA_TOKEN,
+  hCaptchaToken: H_CAPTCHA_TOKEN,
 };

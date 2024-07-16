@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { KvStoreGateway } from './kv-store-gateway.service';
+import { KvStoreGateway } from './kv-store.gateway';
 
 @Module({
   providers: [KvStoreGateway],

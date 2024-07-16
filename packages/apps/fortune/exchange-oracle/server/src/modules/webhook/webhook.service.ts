@@ -42,7 +42,7 @@ export class WebhookService {
       case EventType.ESCROW_CREATED:
         await this.jobService.createJob(webhook);
         break;
-      
+
       case EventType.ESCROW_COMPLETED:
         await this.jobService.completeJob(webhook);
         break;

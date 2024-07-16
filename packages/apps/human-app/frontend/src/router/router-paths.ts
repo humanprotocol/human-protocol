@@ -1,0 +1,28 @@
+export const routerPaths = {
+  homePage: '/',
+  playground: '/playground',
+  worker: {
+    signIn: '/worker/sign-in',
+    signUp: '/worker/sign-up',
+    resetPassword: '/reset-password',
+    resetPasswordSuccess: '/worker/reset-password-success',
+    sendResetLink: '/worker/send-reset-link',
+    sendResetLinkSuccess: '/worker/send-reset-link-success',
+    emailVerification: '/verify',
+    verifyEmail: '/worker/verify-email',
+    profile: '/worker/profile',
+    jobsDiscovery: '/worker/jobs-discovery',
+    jobs: '/worker/jobs',
+    HcaptchaLabeling: '/worker/hcaptcha-labeling',
+    enableLabeler: '/worker/enable-labeler',
+  },
+  operator: {
+    signIn: '/operator/sign-in',
+    connectWallet: '/operator/connect-wallet',
+    setUpOperator: '/operator/set-up',
+    addStake: '/operator/add-stake',
+    addKeys: '/operator/add-keys',
+    editExistingKeysSuccess: '/operator/edit-existing-keys-success',
+    profile: '/operator/profile',
+  },
+} as const;

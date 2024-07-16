@@ -94,18 +94,10 @@ export class AssignmentController {
     @Request() req: RequestWithUser,
     @Query() query: GetAssignmentsDto,
   ): any {
-    let protocol = 'http';
-
-    if ((req as any).secure) {
-      protocol = 'https';
-    }
-
-    const serverUrl = `${protocol}://${(req.headers as any).host}`;
     return this.assignmentService.getAssignmentList(
       query,
       req.user.address,
       req.user.reputationNetwork,
-      serverUrl,
     );
   }
 

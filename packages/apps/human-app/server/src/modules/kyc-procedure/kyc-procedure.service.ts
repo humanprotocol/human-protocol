@@ -11,4 +11,8 @@ export class KycProcedureService {
   ): Promise<KycProcedureStartResponse> {
     return this.gateway.sendKycProcedureStart(token);
   }
+
+  processKycOnChain(token: string) {
+    return this.gateway.sendKycOnChain(token);
+  }
 }
