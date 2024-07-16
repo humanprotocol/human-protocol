@@ -108,6 +108,8 @@ export class JobsFetchParams extends PageableParams {
   sortField: AssignmentSortField;
   @AutoMap()
   assignmentId: string;
+  @AutoMap()
+  updatedAfter?: string;
 }
 export class JobsFetchParamsCommand {
   @AutoMap()
@@ -131,6 +133,8 @@ export class JobsFetchParamsData extends PageableData {
   status: AssignmentStatus;
   @AutoMap()
   sort_field: AssignmentSortField;
+  @AutoMap()
+  updated_after?: string;
 }
 
 export class JobsFetchResponseItem {
@@ -143,12 +147,16 @@ export class JobsFetchResponseItem {
   reward_amount: string;
   reward_token: string;
   created_at: string;
-  updated_at: string; //Only for VALIDATION, COMPLETED, EXPIRED, CANCELED and REJECTED status
+  updated_at: string;
   expires_at: string;
 }
 
 export class JobsFetchResponse {
-  data: JobsFetchResponseItem[];
+  results: JobsFetchResponseItem[];
+  page: number;
+  page_size: number;
+  total_pages: number;
+  total_results: number;
 }
 
 export class ResignJobDto {

@@ -133,5 +133,9 @@ export const jobsFetchResponseItemFixture: JobsFetchResponseItem = {
 };
 
 export const jobsFetchResponseFixture: JobsFetchResponse = {
-  data: [jobsFetchResponseItemFixture],
+  page: 0,
+  page_size: 10,
+  total_pages: 1,
+  total_results: 1,
+  results: [jobsFetchResponseItemFixture],
 };

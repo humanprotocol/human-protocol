@@ -23,6 +23,7 @@ import {
 } from './model/job-assignment.model';
 import { Authorization } from '../../common/config/params-decorators';
 
+@ApiTags('Job-Assignment')
 @Controller('/assignment')
 export class JobAssignmentController {
   constructor(
@@ -30,7 +31,6 @@ export class JobAssignmentController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Job-Assignment')
   @Post('/job')
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
@@ -50,7 +50,6 @@ export class JobAssignmentController {
     return this.service.processJobAssignment(jobAssignmentCommand);
   }
 
-  @ApiTags('Job-Assignment')
   @Get('/job')
   @ApiBearerAuth()
   @ApiOperation({
@@ -66,9 +65,10 @@ export class JobAssignmentController {
       JobsFetchParamsCommand,
     );
     jobsAssignmentParamsCommand.token = token;
+
     return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
   }
-  @ApiTags('Job-Assignment')
+
   @Post('/resign-job')
   @ApiBearerAuth()
   @ApiOperation({
