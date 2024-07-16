@@ -1,14 +1,12 @@
 import { ConflictException } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { WebhookDto } from '../../modules/webhook/webhook.dto';
 
 export function verifySignature(
-  message: WebhookDto | string,
+  message: object | string,
   signature: string,
   addresses: string[],
 ): boolean {
-  const messageString = formatMessage(message);
-  const signer = recoverSigner(messageString, signature);
+  const signer = recoverSigner(message, signature);
 
   if (
     !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
@@ -17,17 +15,6 @@ export function verifySignature(
   }
 
   return true;
-}
-
-function formatMessage(message: WebhookDto | string): string {
-  if (typeof message === 'string') {
-    return message;
-  } else {
-    return JSON.stringify({
-      ...message,
-      escrowAddress: message.escrowAddress.toLowerCase(),
-    });
-  }
 }
 
 export async function signMessage(
