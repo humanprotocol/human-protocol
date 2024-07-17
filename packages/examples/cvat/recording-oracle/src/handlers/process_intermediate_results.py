@@ -1090,8 +1090,8 @@ def process_intermediate_results(
 
 
 def parse_annotation_metafile(metafile: io.RawIOBase) -> AnnotationMeta:
-    return AnnotationMeta.parse_raw(metafile.read())
+    return AnnotationMeta.model_validate(metafile.read())
 
 
 def serialize_validation_meta(validation_meta: ValidationMeta) -> bytes:
-    return validation_meta.json().encode()
+    return validation_meta.model_dump_json().encode()

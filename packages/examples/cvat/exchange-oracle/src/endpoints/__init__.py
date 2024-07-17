@@ -25,7 +25,7 @@ def meta_route() -> MetaResponse:
         for network in networks
     ]
 
-    return MetaResponse.parse_obj(
+    return MetaResponse.model_validate(
         dict(
             message="Exchange Oracle API",
             version="0.1.0",

@@ -101,7 +101,7 @@ def parse_event(
         assert False, f"Unknown event sender type '{sender}'"
 
     event_class = get_class_for_event_type(event_type)
-    return event_class.parse_obj(event_data or {})
+    return event_class.model_validate(event_data or {})
 
 
 def validate_event(sender: OracleWebhookTypes, event_type: str, event_data: dict):
