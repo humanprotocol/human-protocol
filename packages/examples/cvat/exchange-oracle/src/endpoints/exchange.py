@@ -1,8 +1,10 @@
 from contextlib import suppress
+from datetime import datetime
 from enum import auto
 from typing import List, Optional, Sequence
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import Field
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
@@ -33,8 +35,13 @@ router = APIRouter()
 
 
 class JobsFilter(Filter):
+    # Simply using Query is not enough to include parameter description in the OpenAPI schema
+    # https://github.com/tiangolo/fastapi/issues/4700
     escrow_address: Optional[str] = None
-    job_type: Optional[TaskTypes] = None
+    chain_id: Optional[int] = None
+    job_type: Optional[TaskTypes] = Field(
+        Query(default=None, json_schema_extra={"enum": list(TaskTypes.__members__.values())})
+    )
 
     class SortingFields(StrEnum, metaclass=BetterEnumMeta):
         created_at = auto()
@@ -43,7 +50,12 @@ class JobsFilter(Filter):
         reward_amount = auto()
 
     sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
-    sort_field: Optional[SortingFields] = Query(default=SortingFields.created_at)
+    sort_field: Optional[SortingFields] = Field(
+        Query(
+            default=SortingFields.created_at,
+            json_schema_extra={"enum": list(SortingFields.__members__.values())},
+        )
+    )
 
     class SelectableFields(StrEnum, metaclass=BetterEnumMeta):
         job_description = auto()
@@ -71,7 +83,11 @@ class JobsFilter(Filter):
 )
 async def list_jobs(
     filter: JobsFilter = FilterDepends(JobsFilter),
-    status: Optional[JobStatuses] = Query(default=None),
+    created_after: Optional[datetime] = Query(default=None),
+    updated_after: Optional[datetime] = Query(default=None),
+    status: Optional[JobStatuses] = Query(
+        default=None, json_schema_extra={"enum": list(JobStatuses.__members__.values())}
+    ),
     token: AuthorizationData = AuthorizationParam,
 ) -> Page[JobResponse]:
     wallet_address = token.wallet_address
@@ -121,6 +137,12 @@ async def list_jobs(
                 )
             case _:
                 raise NotImplementedError(f"Unsupported status {status}")
+
+    if created_after:
+        query = query.filter(created_after < cvat_service.Project.created_at)
+
+    if updated_after:
+        query = query.filter(updated_after < cvat_service.Project.updated_at)
 
     query = filter.filter_(query)
     query = filter.sort_(query)
@@ -195,7 +217,7 @@ async def register(token: AuthorizationData = AuthorizationParam) -> UserRespons
 
 
 class AssignmentFilter(Filter):
-    id: Optional[str] = None
+    id: Optional[str] = Field(Query(default=None, alias="assignment_id"))
 
     class SortingFields(StrEnum, metaclass=BetterEnumMeta):
         chain_id = auto()
@@ -206,7 +228,12 @@ class AssignmentFilter(Filter):
         expires_at = auto()
 
     sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
-    sort_field: Optional[SortingFields] = Query(default=SortingFields.created_at)
+    sort_field: Optional[SortingFields] = Field(
+        Query(
+            default=SortingFields.created_at,
+            json_schema_extra={"enum": list(SortingFields.__members__.values())},
+        )
+    )
 
     class Constants(Filter.Constants):
         model = cvat_service.Assignment
@@ -223,9 +250,16 @@ class AssignmentFilter(Filter):
 )
 async def list_assignments(
     filter: AssignmentFilter = FilterDepends(AssignmentFilter),
+    created_after: Optional[datetime] = Query(default=None),
+    updated_after: Optional[datetime] = Query(default=None),
     escrow_address: Optional[str] = Query(default=None),
-    job_type: Optional[TaskTypes] = Query(default=None),
-    status: Optional[AssignmentStatuses] = Query(default=None),
+    job_type: Optional[TaskTypes] = Query(
+        default=None, json_schema_extra={"enum": list(TaskTypes.__members__.values())}
+    ),
+    status: Optional[AssignmentStatuses] = Query(
+        default=None,
+        json_schema_extra={"enum": list(AssignmentStatuses.__members__.values())},
+    ),
     token: AuthorizationData = AuthorizationParam,
 ) -> Page[AssignmentResponse]:
     query = select(cvat_service.Assignment)
@@ -274,6 +308,15 @@ async def list_assignments(
             )
         else:
             raise NotImplementedError(f"Unsupported status {status}")
+
+    if created_after:
+        query = query.filter(created_after < cvat_service.Assignment.created_at)
+
+    if updated_after:
+        query = query.filter(
+            (updated_after < cvat_service.Assignment.completed_at)
+            | (updated_after < cvat_service.Assignment.created_at)
+        )
 
     query = filter.filter_(query)
     query = filter.sort_(query)

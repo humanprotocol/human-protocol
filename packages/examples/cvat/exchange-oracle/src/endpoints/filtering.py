@@ -7,7 +7,7 @@ import sqlalchemy
 import sqlalchemy.orm
 from fastapi_filter import FilterDepends, with_prefix
 from fastapi_filter.contrib.sqlalchemy import Filter as _Filter
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from pydantic.fields import FieldInfo
 
 from src.utils.enums import BetterEnumMeta
@@ -37,7 +37,15 @@ class Filter(_Filter):
 
     @classmethod
     def _default_sorting_direction_param(cls) -> tuple[Type, FieldInfo]:
-        return (Optional[OrderingDirection], fastapi.Query(default=OrderingDirection.asc))
+        return (
+            Optional[OrderingDirection],
+            Field(
+                fastapi.Query(
+                    default=OrderingDirection.asc,
+                    json_schema_extra={"enum": list(OrderingDirection.__members__.values())},
+                )
+            ),
+        )
 
     @property
     def filtering_fields(self):
