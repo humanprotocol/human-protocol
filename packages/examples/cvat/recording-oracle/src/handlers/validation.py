@@ -200,6 +200,7 @@ class _TaskValidator:
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_SubmissionRejected(
                     # TODO: send all assignments, handle rejection reason in Exchange Oracle
+                    # change validation frames in these jobs once possible
                     assignments=[
                         RecordingOracleEvent_SubmissionRejected.RejectedTaskInfo(
                             task_id=job_id_to_assignment_id[rejected_job_id],
