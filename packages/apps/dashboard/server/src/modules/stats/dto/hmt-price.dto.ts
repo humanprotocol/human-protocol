@@ -1,8 +1,8 @@
-import { IsNumber } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class HmtPriceDto {
   @ApiProperty({ example: 0.123 })
-  @IsNumber()
+  @IsString()
   public hmtPrice: number;
 }
