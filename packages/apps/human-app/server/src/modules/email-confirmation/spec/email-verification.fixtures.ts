@@ -1,10 +1,12 @@
 import {
-  ResendEmailVerificationCommand, ResendEmailVerificationData,
+  ResendEmailVerificationCommand,
+  ResendEmailVerificationData,
   ResendEmailVerificationDto,
   ResendEmailVerificationParams,
 } from '../model/resend-email-verification.model';
 import {
-  EmailVerificationCommand, EmailVerificationData,
+  EmailVerificationCommand,
+  EmailVerificationData,
   EmailVerificationDto,
 } from '../model/email-verification.model';
 

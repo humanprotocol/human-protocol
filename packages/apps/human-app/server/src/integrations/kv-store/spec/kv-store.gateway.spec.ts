@@ -98,7 +98,9 @@ describe('KvStoreGateway', () => {
         expectedUrl,
         { ttl: configService.cacheTtlExchangeOracleUrl },
       );
-      expect(cacheManager.get).toHaveBeenCalledWith(service.cachePrefix + testAddress);
+      expect(cacheManager.get).toHaveBeenCalledWith(
+        service.cachePrefix + testAddress,
+      );
       expect(result).toBe(expectedUrl);
     });
     it('should get data from cache, if available', async () => {

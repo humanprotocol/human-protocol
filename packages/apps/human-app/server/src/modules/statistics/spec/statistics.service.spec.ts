@@ -124,11 +124,9 @@ describe('StatisticsService', () => {
       const result = await service.getUserStats(command);
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
       expect(exchangeGateway.fetchUserStatistics).toHaveBeenCalledWith(command);
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        userCacheKey,
-        newData,
-        { ttl: configService.cacheTtlUserStats },
-      );
+      expect(cacheManager.set).toHaveBeenCalledWith(userCacheKey, newData, {
+        ttl: configService.cacheTtlUserStats,
+      });
       expect(result).toEqual(newData);
     });
   });

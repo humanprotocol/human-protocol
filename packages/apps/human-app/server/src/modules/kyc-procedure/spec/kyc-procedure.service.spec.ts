@@ -35,10 +35,7 @@ describe('KycProcedureService', () => {
     expect(kycGatewaySpy).toHaveBeenCalledWith('token');
   });
   it('should call reputation oracle gateway with jwt token', async () => {
-    const kycGatewaySpy = jest.spyOn(
-      reputationOracleGateway,
-      'sendKycOnChain',
-    );
+    const kycGatewaySpy = jest.spyOn(reputationOracleGateway, 'sendKycOnChain');
     await service.processKycOnChain('token');
     expect(kycGatewaySpy).toHaveBeenCalledWith('token');
   });

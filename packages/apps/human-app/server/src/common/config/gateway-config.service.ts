@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ExternalApiName } from '../enums/external-api-name';
 import {
-  HCaptchaLabelingStatsEndpoints, HCaptchaLabelingVerifyEndpoints,
+  HCaptchaLabelingStatsEndpoints,
+  HCaptchaLabelingVerifyEndpoints,
   ReputationOracleEndpoints,
 } from '../enums/reputation-oracle-endpoints';
 import {

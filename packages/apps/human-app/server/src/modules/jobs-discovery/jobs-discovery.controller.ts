@@ -21,8 +21,7 @@ export class JobsDiscoveryController {
   @Get('/jobs')
   @ApiBearerAuth()
   @ApiOperation({
-    summary:
-      'Retrieve a list of jobs for given Exchange Oracle',
+    summary: 'Retrieve a list of jobs for given Exchange Oracle',
   })
   public async getJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,

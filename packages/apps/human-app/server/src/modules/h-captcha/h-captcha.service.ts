@@ -78,12 +78,9 @@ export class HCaptchaService {
     );
     if (!dailyHmtSpent) {
       dailyHmtSpent = await this.hCaptchaLabelingGateway.fetchDailyHmtSpent();
-      await this.cacheManager.set(
-        this.dailyHmtSpentCacheKey,
-        dailyHmtSpent,
-        {
-          ttl: this.configService.cacheTtlDailyHmtSpent,
-        } as any);
+      await this.cacheManager.set(this.dailyHmtSpentCacheKey, dailyHmtSpent, {
+        ttl: this.configService.cacheTtlDailyHmtSpent,
+      } as any);
     }
     return dailyHmtSpent;
   }
@@ -95,13 +92,9 @@ export class HCaptchaService {
       return stats;
     }
     stats = await this.hCaptchaLabelingGateway.fetchUserStats(command.email);
-    await this.cacheManager.set(
-      command.email,
-      stats,
-      {
-        ttl: this.configService.cacheTtlHCaptchaUserStats
-      } as any,
-    );
+    await this.cacheManager.set(command.email, stats, {
+      ttl: this.configService.cacheTtlHCaptchaUserStats,
+    } as any);
     return stats;
   }
   private checkIfHcaptchaSitekeyPresent(siteKey: string) {

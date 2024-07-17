@@ -2,13 +2,7 @@ import { Alert, Snackbar } from '@mui/material';
 import React, { createContext, useContext, useState } from 'react';
 import { parseErrorMessage } from '../utils/string';
 
-export const SnackbarContext = createContext({
-  openSnackbar: (
-    message: string,
-    severity: 'success' | 'error' | 'warning' | 'info'
-  ) => {},
-  showError: (error: any) => {},
-});
+export const SnackbarContext = createContext({});
 
 const SnackbarProvider = ({ children }: { children: React.ReactElement }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);

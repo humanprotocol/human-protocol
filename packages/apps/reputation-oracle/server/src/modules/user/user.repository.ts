@@ -26,7 +26,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
 
   async findOneByAddress(address: string): Promise<UserEntity | null> {
     return this.findOne({
-      where: { evmAddress: address },
+      where: { evmAddress: address.toLowerCase() },
       relations: { kyc: true, siteKey: true },
     });
   }
@@ -59,7 +59,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
     status?: UserStatus,
   ): Promise<UserEntity[]> {
     const whereConditions = addresses.map((address) => {
-      const condition: any = { evmAddress: address };
+      const condition: any = { evmAddress: address.toLowerCase() };
       if (role) {
         condition.role = role;
       }

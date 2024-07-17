@@ -39,7 +39,7 @@ import { UserQualificationEntity } from '../modules/qualification/user-qualifica
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
-            : (loggerOptions as LoggerOptions) ?? false,
+            : ((loggerOptions as LoggerOptions) ?? false),
         );
         return {
           name: 'default',

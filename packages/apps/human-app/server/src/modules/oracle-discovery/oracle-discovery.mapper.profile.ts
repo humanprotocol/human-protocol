@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import {
   CamelCaseNamingConvention,
-  createMap, forMember, mapFrom,
+  createMap,
+  forMember,
+  mapFrom,
   Mapper,
   namingConventions,
   SnakeCaseNamingConvention,
