@@ -21,7 +21,7 @@ def prepare_outgoing_webhook_body(
     event = parse_event(OracleWebhookTypes.recording_oracle, event_type, event_data)
     body["event_type"] = event_type
 
-    body["event_data"] = event.dict()
+    body["event_data"] = event.model_dump()
     if not body["event_data"]:
         body.pop("event_data")
 

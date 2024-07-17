@@ -173,7 +173,7 @@ class BucketAccessInfo:
 
     @classmethod
     def from_bucket_url(cls, bucket_url: manifest.BucketUrl) -> BucketAccessInfo:
-        return cls._from_dict(bucket_url.dict())
+        return cls._from_dict(bucket_url.model_dump())
 
     @classmethod
     def parse_obj(
