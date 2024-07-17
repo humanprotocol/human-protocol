@@ -58,7 +58,7 @@
       "jobsDiscovery": "Jobs discovery",
       "profile": "Profile",
       "help": "Help",
-      "logout": "Log out"
+      "logout": "Log Out"
     },
     "footer": {
       "privacyPolicy": "Privacy Policy",
@@ -121,7 +121,7 @@
         "emailTaken": "Email is already taken. Please sign in."
       },
       "title": "Sign Up",
-      "submitBtn": "Sign up",
+      "submitBtn": "Sign Up",
       "passwordDetailedValidation": "Password must contain at least:",
       "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>"
     },
@@ -134,8 +134,8 @@
         "invalidCredentials": "Incorrect email or password!"
       },
       "title": "Sign In",
-      "submitBtn": "Sign in",
-      "forgotPassword": "Forgot password?"
+      "submitBtn": "Sign In",
+      "forgotPassword": "Forgot Password?"
     },
     "sendEmailVerification": {
       "title": "Verify Email",
@@ -275,7 +275,7 @@
     },
     "enableHCaptchaLabeling": {
       "description": "To earn HMT, you must enable data-labeling. Rewards will be automatically sent to your wallet according to a predefined schedule.",
-      "enableButton": "Enable labeling"
+      "enableButton": "Enable Labeling"
     },
     "hcaptchaLabelingStats": {
       "hCapchaStatistics": "hCapcha Statistics",

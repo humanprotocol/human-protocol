@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material';
 import type { Dispatch, SetStateAction } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
@@ -49,6 +49,10 @@ export function Layout({
   ) => JSX.Element;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
 }) {
+  const [notificationWith, setNotificationWith] = useState<
+    number | undefined
+  >();
+  const layoutElementRef = useRef<HTMLDivElement>();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
   const [notification, setNotification] =
     useState<TopNotificationPayload | null>(null);
@@ -71,6 +75,25 @@ export function Layout({
       setDrawerOpen(true);
     }
   }, [isMobile]);
+
+  const setNotificationWidth = () => {
+    if (layoutElementRef.current) {
+      setNotificationWith(layoutElementRef.current.clientWidth);
+    }
+  };
+  useEffect(() => {
+    setNotificationWidth();
+    window.addEventListener('resize', () => {
+      setNotificationWidth();
+    });
+    return () => {
+      window.removeEventListener('resize', setNotificationWidth);
+    };
+  }, []);
+
+  useEffect(() => {
+    setNotificationWidth();
+  }, [notification]);
 
   return (
     <ProtectedLayoutContext.Provider
@@ -113,6 +136,7 @@ export function Layout({
           : null}
         <Main isMobile={isMobile} open={drawerOpen}>
           <Grid
+            component="div"
             container
             sx={{
               margin: '1rem 0',
@@ -128,35 +152,65 @@ export function Layout({
             }}
           >
             <Grid
-              item
               sx={{
-                minHeight: '3.2rem',
+                height: '3.2rem',
                 [breakpoints.mobile]: {
-                  minHeight: 'unset',
+                  height: 'unset',
+                  position: 'absolute',
+                  zIndex: 2000,
+                  top: '0',
+                  left: '0',
+                  width: notificationWith ? `${notificationWith}px` : 'unset',
                 },
               }}
             >
-              {notification ? (
-                <TopNotification
-                  onClose={() => {
-                    setNotification(null);
-                  }}
-                  type={notification.type}
-                >
-                  {notification.content}
-                </TopNotification>
-              ) : null}
+              <Grid
+                item
+                sx={{
+                  minHeight: '3.2rem',
+                  position: 'fixed',
+                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  zIndex: '10',
+                  [breakpoints.mobile]: {
+                    minHeight: 'unset',
+                  },
+                }}
+              >
+                {notification ? (
+                  <Grid
+                    sx={{
+                      minHeight: '3.2rem',
+                      position: 'relative',
+                      zIndex: '10',
+                    }}
+                  >
+                    <TopNotification
+                      onClose={() => {
+                        setNotification(null);
+                      }}
+                      type={notification.type}
+                    >
+                      {notification.content}
+                    </TopNotification>
+                  </Grid>
+                ) : null}
+              </Grid>
             </Grid>
 
             <Grid item>
               <PageHeader {...pageHeaderProps} />
             </Grid>
-            <Grid sx={{ height: '100%' }}>
+            <Grid
+              component="div"
+              // @ts-expect-error -- ...
+              ref={layoutElementRef}
+              sx={{ height: '100%' }}
+            >
               <Outlet />
             </Grid>
           </Grid>
         </Main>
-        <Footer isProtected />
+        <Footer displayChatIcon={!isMobile || !drawerOpen} isProtected />
       </Grid>
     </ProtectedLayoutContext.Provider>
   );

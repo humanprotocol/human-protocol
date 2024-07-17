@@ -9,6 +9,7 @@ const envSchema = z.object({
   VITE_NAVBAR__LINK__PROTOCOL_URL: z.string(),
   VITE_NAVBAR__LINK__HOW_IT_WORK_URL: z.string(),
   VITE_HUMAN_PROTOCOL_HELP_URL: z.string(),
+  VITE_WALLET_CONNECT_MODAL_LINK: z.string(),
   VITE_H_CAPTCHA_SITE_KEY: z.string(),
   VITE_HMT_DAILY_SPENT_LIMIT: z
     .string()

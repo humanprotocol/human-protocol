@@ -49,7 +49,6 @@ export function SendResetLinkWorkerPage() {
           </Alert>
         ) : undefined
       }
-      backArrowPath={-1}
       cancelRouterPathOrCallback={routerPaths.worker.profile}
       title={t('worker.sendResetLinkForm.title')}
     >

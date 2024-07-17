@@ -4,6 +4,7 @@ import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import { Typography } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import { colorPalette } from '@/styles/color-palette';
+import { breakpoints } from '@/styles/theme';
 
 export type TopNotificationType = 'success' | 'warning';
 
@@ -33,7 +34,17 @@ export function TopNotification({
     <MuiAlert
       icon={icon}
       {...rest}
-      sx={{ backgroundColor: color, color: colorPalette.white }}
+      sx={{
+        backgroundColor: color,
+        color: colorPalette.white,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        [breakpoints.mobile]: {
+          margin: '1rem',
+        },
+      }}
       variant="standard"
     >
       <Typography color={colorPalette.white} variant="subtitle2">

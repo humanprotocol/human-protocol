@@ -17,7 +17,6 @@ import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';
 import { PageCard } from '@/components/ui/page-card';
 import { env } from '@/shared/env';
-import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
@@ -74,7 +73,6 @@ export function SignUpWorkerPage() {
           </Alert>
         ) : undefined
       }
-      backArrowPath={routerPaths.homePage}
       title={t('worker.signUpForm.title')}
     >
       <FormProvider {...methods}>
@@ -100,8 +98,8 @@ export function SignUpWorkerPage() {
               <Typography fontSize="0.75rem" variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
                   Terms
-                  <Link href={env.VITE_TERMS_OF_SERVICE_URL} />
-                  <Link href={env.VITE_PRIVACY_POLICY_URL} />
+                  <Link href={env.VITE_TERMS_OF_SERVICE_URL} target="_blank" />
+                  <Link href={env.VITE_PRIVACY_POLICY_URL} target="_blank" />
                 </Trans>
               </Typography>
             </Grid>

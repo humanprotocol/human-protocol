@@ -8,6 +8,8 @@ import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
 
+export const paddingX = '44px';
+
 interface NavbarProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -23,6 +25,39 @@ export function Navbar({
 }: NavbarProps) {
   const isMobile = useIsMobile();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
+  const getIcon = () => {
+    switch (true) {
+      case open:
+        return (
+          <CloseIcon
+            onClick={() => {
+              setOpen(false);
+            }}
+          />
+        );
+      case !open && !userStatsDrawerOpen:
+        return (
+          <MenuIcon
+            onClick={() => {
+              setOpen(true);
+            }}
+          />
+        );
+      case userStatsDrawerOpen:
+        return (
+          <CloseIcon
+            onClick={() => {
+              if (toggleUserStatsDrawer) {
+                toggleUserStatsDrawer();
+              }
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Stack
       alignItems="center"
@@ -33,7 +68,7 @@ export function Navbar({
         backgroundColor: colorPalette.white,
         display: { xs: 'flex', md: 'none' },
         width: '100%',
-        px: isMobile ? '44px' : 0,
+        px: isMobile ? paddingX : 0,
         py: isMobile ? '32px' : 0,
         zIndex: '1300',
         position: open ? 'sticky' : 'relative',
@@ -50,20 +85,15 @@ export function Navbar({
       >
         {isHCaptchaLabelingPage && toggleUserStatsDrawer ? (
           <Button
+            disabled={open}
             onClick={toggleUserStatsDrawer}
-            sx={{ padding: '3px' }}
+            sx={{ padding: '6px' }}
             variant={userStatsDrawerOpen ? 'contained' : 'outlined'}
           >
             {t('translation:worker.hcaptchaLabelingStats.statistics')}
           </Button>
         ) : null}
-        <IconButton
-          onClick={() => {
-            setOpen(!open);
-          }}
-        >
-          {open ? <CloseIcon /> : <MenuIcon />}
-        </IconButton>
+        <IconButton>{getIcon()}</IconButton>
       </Grid>
     </Stack>
   );

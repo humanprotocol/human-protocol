@@ -10,6 +10,7 @@ import {
   PasswordCheckLabel,
   type PasswordCheck,
 } from '@/components/data-entry/password/password-check-label';
+import { colorPalette } from '@/styles/color-palette';
 
 type CommonProps = InputProps & { type?: never };
 
@@ -43,7 +44,12 @@ export function Password({
 
   const customError = passwordCheckHeader ? (
     <Grid container gap={1}>
-      <Typography variant="helperText">{passwordCheckHeader}</Typography>
+      <Typography
+        sx={{ color: colorPalette.primary.dark }}
+        variant="helperText"
+      >
+        {passwordCheckHeader}
+      </Typography>
       <Grid columnGap="1rem" container flexWrap="wrap" width="100%">
         {passwordChecks.map((checks) => {
           return (
@@ -64,19 +70,35 @@ export function Password({
       {...rest}
       InputProps={{
         endAdornment: (
-          <InputAdornment position="end">
+          <InputAdornment
+            position="end"
+            sx={{
+              marginLeft: 0,
+            }}
+          >
             <IconButton
               aria-label="toggle password visibility"
               edge="end"
               onClick={handleClickShowPassword}
               onMouseDown={handleMouseDownPassword}
             >
-              {showPassword ? <VisibilityOff /> : <Visibility />}
+              {showPassword ? (
+                <VisibilityOff sx={{ fill: colorPalette.primary.dark }} />
+              ) : (
+                <Visibility sx={{ fill: colorPalette.primary.dark }} />
+              )}
             </IconButton>
           </InputAdornment>
         ),
       }}
       customError={customError}
+      onKeyDown={(e) => {
+        // ignore space
+        if (e.keyCode === 32) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
       type={showPassword ? 'text' : 'password'}
     />
   );

@@ -55,8 +55,14 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
             sx={{
               position: isMobile ? 'relative' : 'absolute',
               marginLeft: isMobile ? '-20px' : -7,
-              marginTop: isMobile ? 0 : 1,
               transform: isMobile ? 'scale(0.6)' : 'none',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: '50%',
+              backgroundColor: colorPalette.paper.main,
             }}
           >
             <BackArrowIcon />

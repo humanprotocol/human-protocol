@@ -56,7 +56,7 @@ export function EnableLabeler() {
             : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
-          padding: '40px',
+          padding: isMobile ? 0 : '40px',
           borderRadius: '20px',
         }}
       >

@@ -12,13 +12,13 @@ export interface PasswordCheck {
 const getColor = (isSubmitted: boolean, isValid: boolean) => {
   if (isSubmitted) {
     if (isValid) {
-      return colorPalette.success.main;
+      return colorPalette.success.dark;
     }
     return colorPalette.error.main;
   }
 
   if (isValid) {
-    return colorPalette.success.main;
+    return colorPalette.success.dark;
   }
 
   return colorPalette.text.primary;
