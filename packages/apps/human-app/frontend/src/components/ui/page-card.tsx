@@ -56,7 +56,7 @@ export function PageCard({
   title,
   alert,
   childrenMaxWidth = '486px',
-  backArrowPath,
+  backArrowPath = -1,
   cancelRouterPathOrCallback = routerPaths.homePage,
   withLayoutBackground = true,
   hiddenCancelButton = false,

@@ -51,11 +51,7 @@ export function AddKeysOperatorPage() {
   }
 
   return (
-    <PageCard
-      alert={errorAlert}
-      backArrowPath={-1}
-      title={t('operator.addKeysPage.title')}
-    >
+    <PageCard alert={errorAlert} title={t('operator.addKeysPage.title')}>
       <Form keysData={keysData} />
     </PageCard>
   );

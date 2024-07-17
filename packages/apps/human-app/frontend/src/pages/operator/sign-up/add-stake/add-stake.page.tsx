@@ -75,11 +75,7 @@ export function AddStakeOperatorPage() {
   }
 
   return (
-    <PageCard
-      alert={getAlert()}
-      backArrowPath={-1}
-      title={t('operator.addStake.title')}
-    >
+    <PageCard alert={getAlert()} title={t('operator.addStake.title')}>
       <Grid
         container
         sx={{ flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}
