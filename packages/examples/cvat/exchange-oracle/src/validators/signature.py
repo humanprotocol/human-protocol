@@ -56,8 +56,3 @@ async def validate_cvat_signature(request: Request, x_signature_256: str):
 
     if not hmac.compare_digest(x_signature_256, signature):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
-
-
-async def validate_human_app_signature(signature: str):
-    if not signature == Config.human_app_config.signature:
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)

@@ -2,7 +2,7 @@ from contextlib import suppress
 from enum import auto
 from typing import List, Optional, Sequence
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 
 import src.cvat.api_calls as cvat_api
@@ -28,7 +28,6 @@ from src.schemas.exchange import (
     UserStatsResponse,
 )
 from src.utils.enums import BetterEnumMeta, StrEnum
-from src.validators.signature import validate_human_app_signature
 
 router = APIRouter()
 
@@ -138,12 +137,7 @@ async def list_jobs(
 
 
 @router.put("/register", description="Binds a CVAT user to a HUMAN App user")
-async def register(
-    token: AuthorizationData = AuthorizationParam,
-    signature: str = Header(description="Calling service signature", alias="Human-Signature"),
-) -> UserResponse:
-    await validate_human_app_signature(signature)
-
+async def register(token: AuthorizationData = AuthorizationParam) -> UserResponse:
     user_email = token.email
     user_wallet_address = token.wallet_address
 

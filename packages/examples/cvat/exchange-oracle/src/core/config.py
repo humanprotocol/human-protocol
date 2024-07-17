@@ -193,7 +193,6 @@ class CoreConfig:
 
 
 class HumanAppConfig:
-    signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
     jwt_key = os.environ.get("HUMAN_APP_JWT_KEY", "sample")
 
 
