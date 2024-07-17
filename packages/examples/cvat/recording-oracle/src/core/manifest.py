@@ -176,6 +176,9 @@ class TaskManifest(BaseModel):
     job_bounty: Decimal = Field(ge=0)
     "Assignment bounty, a decimal value in HMT"
 
+    qualifications: List[str] = Field(default_factory=list)
+    "A list of annotator qualifications required for participation"
+
 
 def parse_manifest(manifest: Any) -> TaskManifest:
     return TaskManifest.model_validate(manifest)
