@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import ConfigDict, BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from src.chain.web3 import validate_address
 from src.core.types import ExchangeOracleEventTypes, Networks
@@ -19,14 +19,16 @@ class OracleWebhook(BaseModel):
     def validate_escrow_(cls, value):
         return validate_address(value)
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
-            "chain_id": 80002,
-            "event_type": ExchangeOracleEventTypes.job_finished.value,
-            "event_data": {},
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
+                "chain_id": 80002,
+                "event_type": ExchangeOracleEventTypes.job_finished.value,
+                "event_data": {},
+            }
         }
-    })
+    )
 
 
 class OracleWebhookResponse(BaseModel):
