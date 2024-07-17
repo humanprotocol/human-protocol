@@ -168,6 +168,8 @@ templates:
       abis:
         - name: Escrow
           file: '{{{ Escrow.abi }}}'
+        - name: LegacyEscrow
+          file: '{{{ LegacyEscrow.abi }}}'
       eventHandlers:
         - event: IntermediateStorage(string,string)
           handler: handleIntermediateStorage
@@ -179,7 +181,6 @@ templates:
           handler: handleCancelled
         - event: Completed()
           handler: handleCompleted
-{{ #LegacyEscrowFactory }}
   - name: LegacyEscrow
     kind: ethereum/contract
     network: '{{ network }}'
@@ -203,4 +204,3 @@ templates:
           handler: handlePending
         - event: BulkTransfer(indexed uint256,uint256)
           handler: handleBulkTransfer
-{{ /LegacyEscrowFactory }}
