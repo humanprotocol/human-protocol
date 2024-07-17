@@ -66,25 +66,25 @@ export function handlePending(event: Pending): void {
     escrowEntity.status = 'Pending';
 
     // Read data on-chain
-    const escrowContract = EscrowContract.bind(event.address);
+    // const escrowContract = EscrowContract.bind(event.address);
 
-    const reputationOracle = escrowContract.try_reputationOracle();
-    if (!reputationOracle.reverted) {
-      escrowEntity.reputationOracle = reputationOracle.value;
-    }
-    const reputationOracleStake = escrowContract.try_reputationOracleStake();
-    if (!reputationOracleStake.reverted) {
-      escrowEntity.reputationOracleFee = reputationOracleStake.value;
-    }
+    // const reputationOracle = escrowContract.try_reputationOracle();
+    // if (!reputationOracle.reverted) {
+    //   escrowEntity.reputationOracle = reputationOracle.value;
+    // }
+    // const reputationOracleStake = escrowContract.try_reputationOracleStake();
+    // if (!reputationOracleStake.reverted) {
+    //   escrowEntity.reputationOracleFee = reputationOracleStake.value;
+    // }
 
-    const recordingOracle = escrowContract.try_recordingOracle();
-    if (!recordingOracle.reverted) {
-      escrowEntity.recordingOracle = recordingOracle.value;
-    }
-    const recordingOracleStake = escrowContract.try_recordingOracleStake();
-    if (!recordingOracleStake.reverted) {
-      escrowEntity.recordingOracleFee = recordingOracleStake.value;
-    }
+    // const recordingOracle = escrowContract.try_recordingOracle();
+    // if (!recordingOracle.reverted) {
+    //   escrowEntity.recordingOracle = recordingOracle.value;
+    // }
+    // const recordingOracleStake = escrowContract.try_recordingOracleStake();
+    // if (!recordingOracleStake.reverted) {
+    //   escrowEntity.recordingOracleFee = recordingOracleStake.value;
+    // }
 
     escrowEntity.save();
   }
@@ -152,6 +152,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
   // Update escrow entity
+  /*
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     // Read data on-chain
@@ -193,6 +194,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     }
     escrowEntity.save();
   }
+  */
 
   // Save statistics, and event day data
   statsEntity.save();

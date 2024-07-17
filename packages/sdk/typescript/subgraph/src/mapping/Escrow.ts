@@ -114,57 +114,57 @@ export function handlePending(event: Pending): void {
     escrowEntity.status = 'Pending';
 
     // Read data on-chain
-    const escrowContract = EscrowContract.bind(event.address);
-    const legacyEscrowContract = LegacyEscrowContract.bind(event.address);
+    // const escrowContract = EscrowContract.bind(event.address);
+    // const legacyEscrowContract = LegacyEscrowContract.bind(event.address);
 
     // Reputation & Recording Oracle Fee Variable is changed over time
     // For old one, it was oracleStake, for new one it is oracleFeePercentage
 
-    const reputationOracle = escrowContract.try_reputationOracle();
-    if (!reputationOracle.reverted) {
-      escrowEntity.reputationOracle = reputationOracle.value;
-    }
-    const reputationOracleFeePercentage =
-      escrowContract.try_reputationOracleFeePercentage();
-    if (!reputationOracleFeePercentage.reverted) {
-      escrowEntity.reputationOracleFee = BigInt.fromI32(
-        reputationOracleFeePercentage.value
-      );
-    }
-    const reputationOracleStake =
-      legacyEscrowContract.try_reputationOracleStake();
-    if (!reputationOracleStake.reverted) {
-      escrowEntity.reputationOracleFee = reputationOracleStake.value;
-    }
+    // const reputationOracle = escrowContract.try_reputationOracle();
+    // if (!reputationOracle.reverted) {
+    //   escrowEntity.reputationOracle = reputationOracle.value;
+    // }
+    // const reputationOracleFeePercentage =
+    //   escrowContract.try_reputationOracleFeePercentage();
+    // if (!reputationOracleFeePercentage.reverted) {
+    //   escrowEntity.reputationOracleFee = BigInt.fromI32(
+    //     reputationOracleFeePercentage.value
+    //   );
+    // }
+    // const reputationOracleStake =
+    //   legacyEscrowContract.try_reputationOracleStake();
+    // if (!reputationOracleStake.reverted) {
+    //   escrowEntity.reputationOracleFee = reputationOracleStake.value;
+    // }
 
-    const recordingOracle = escrowContract.try_recordingOracle();
-    if (!recordingOracle.reverted) {
-      escrowEntity.recordingOracle = recordingOracle.value;
-    }
-    const recordingOracleFeePercentage =
-      escrowContract.try_recordingOracleFeePercentage();
-    if (!recordingOracleFeePercentage.reverted) {
-      escrowEntity.recordingOracleFee = BigInt.fromI32(
-        recordingOracleFeePercentage.value
-      );
-    }
-    const recordingOracleStake =
-      legacyEscrowContract.try_recordingOracleStake();
-    if (!recordingOracleStake.reverted) {
-      escrowEntity.recordingOracleFee = recordingOracleStake.value;
-    }
+    // const recordingOracle = escrowContract.try_recordingOracle();
+    // if (!recordingOracle.reverted) {
+    //   escrowEntity.recordingOracle = recordingOracle.value;
+    // }
+    // const recordingOracleFeePercentage =
+    //   escrowContract.try_recordingOracleFeePercentage();
+    // if (!recordingOracleFeePercentage.reverted) {
+    //   escrowEntity.recordingOracleFee = BigInt.fromI32(
+    //     recordingOracleFeePercentage.value
+    //   );
+    // }
+    // const recordingOracleStake =
+    //   legacyEscrowContract.try_recordingOracleStake();
+    // if (!recordingOracleStake.reverted) {
+    //   escrowEntity.recordingOracleFee = recordingOracleStake.value;
+    // }
 
-    const exchangeOracle = escrowContract.try_exchangeOracle();
-    if (!exchangeOracle.reverted) {
-      escrowEntity.exchangeOracle = exchangeOracle.value;
-    }
-    const exchangeOracleFeePercentage =
-      escrowContract.try_exchangeOracleFeePercentage();
-    if (!exchangeOracleFeePercentage.reverted) {
-      escrowEntity.exchangeOracleFee = BigInt.fromI32(
-        exchangeOracleFeePercentage.value
-      );
-    }
+    // const exchangeOracle = escrowContract.try_exchangeOracle();
+    // if (!exchangeOracle.reverted) {
+    //   escrowEntity.exchangeOracle = exchangeOracle.value;
+    // }
+    // const exchangeOracleFeePercentage =
+    //   escrowContract.try_exchangeOracleFeePercentage();
+    // if (!exchangeOracleFeePercentage.reverted) {
+    //   escrowEntity.exchangeOracleFee = BigInt.fromI32(
+    //     exchangeOracleFeePercentage.value
+    //   );
+    // }
 
     escrowEntity.save();
     statusEventEntity.launcher = escrowEntity.launcher;
@@ -247,11 +247,11 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     escrowEntity.status = event.params._isPartial ? 'Partial' : 'Paid';
 
     // Read data on-chain
-    const escrowContract = EscrowContract.bind(event.address);
-    const finalResultsUrl = escrowContract.try_finalResultsUrl();
-    if (!finalResultsUrl.reverted) {
-      escrowEntity.finalResultsUrl = finalResultsUrl.value;
-    }
+    // const escrowContract = EscrowContract.bind(event.address);
+    // const finalResultsUrl = escrowContract.try_finalResultsUrl();
+    // if (!finalResultsUrl.reverted) {
+    //   escrowEntity.finalResultsUrl = finalResultsUrl.value;
+    // }
 
     escrowEntity.save();
     statusEventEntity.launcher = escrowEntity.launcher;
