@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 
 import {
   Approval,
@@ -27,6 +27,8 @@ import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
+export const TOTAL_SUPPLY = BigInt.fromString('{{ HMToken.totalSupply }}');
+export const CONTRACT_DEPLOYER = '{{ HMToken.contractDeployer }}';
 
 function constructStatsEntity(): HMTokenStatistics {
   const entity = new HMTokenStatistics(HMT_STATISTICS_ENTITY_ID);
@@ -95,7 +97,11 @@ function updateHolders(
   if (holder == null) {
     holder = new Holder(id);
     holder.address = holderAddress;
-    holder.balance = BigInt.fromI32(0);
+    if (holderAddress.toHex() == CONTRACT_DEPLOYER) {
+      holder.balance = TOTAL_SUPPLY;
+    } else {
+      holder.balance = BigInt.fromI32(0);
+    }
   }
   const balanceBeforeTransfer = holder.balance;
   holder.balance = increase
