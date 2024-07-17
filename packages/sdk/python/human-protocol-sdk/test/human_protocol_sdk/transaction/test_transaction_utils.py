@@ -166,7 +166,7 @@ class TestTransactionUtils(unittest.TestCase):
         with patch(
             "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
         ) as mock_function:
-            
+
             mock_function.return_value = {"data": {"transaction": None}}
 
             transaction = TransactionUtils.get_transaction(
