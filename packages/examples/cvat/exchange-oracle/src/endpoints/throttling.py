@@ -1,4 +1,4 @@
-from contextlib import aclosing, asynccontextmanager
+from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
 import redis.asyncio as redis
@@ -14,8 +14,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[Any]:
     redis_connection = redis.from_url(Config.redis_config.connection_url(), encoding="utf8")
     await FastAPILimiter.init(redis_connection)
 
-    async with aclosing(FastAPILimiter):
+    try:
         yield
+    finally:
+        await FastAPILimiter.close()  # supposed to be aclose, but has a different name
 
 
 def add_throttling(app: FastAPI):
