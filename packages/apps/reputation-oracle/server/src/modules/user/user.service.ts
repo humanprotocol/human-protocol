@@ -142,11 +142,11 @@ export class UserService {
     }
 
     if (user.siteKeys && user.siteKeys.length > 0) {
-      const hcaptchaSiteKey = user.siteKeys.find(
+      const existingHcaptchaSiteKey = user.siteKeys?.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
       );
-      if (hcaptchaSiteKey) {
-        return hcaptchaSiteKey.siteKey;
+      if (existingHcaptchaSiteKey) {
+        return existingHcaptchaSiteKey.siteKey;
       }
     }
 

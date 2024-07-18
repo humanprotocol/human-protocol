@@ -188,13 +188,12 @@ export class AuthService {
       reputation_network: this.web3Service.getOperatorAddress(),
     };
 
-    // TODO: Check type
     if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
-      const hcaptchaSiteKey = userEntity.siteKeys.find(
+      const existingHcaptchaSiteKey = userEntity.siteKeys?.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
       );
-      if (hcaptchaSiteKey) {
-        payload.site_key = hcaptchaSiteKey.siteKey;
+      if (existingHcaptchaSiteKey) {
+        payload.site_key = existingHcaptchaSiteKey.siteKey;
       }
     }
 
