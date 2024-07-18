@@ -1,22 +1,30 @@
-import { Entity, Column, OneToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToOne,
+  JoinColumn,
+  Index,
+  ManyToOne,
+  Unique,
+} from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from './user.entity';
-import { OracleType } from '../../common/enums';
+import { SiteKeyType } from '../../common/enums';
 
 @Entity({ schema: NS, name: 'site_keys' })
-@Index(['siteKey', 'type'], { unique: true })
+@Unique(['siteKey', 'type', 'user'])
 export class SiteKeyEntity extends BaseEntity {
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'varchar' })
   public siteKey: string;
 
   @Column({
     type: 'enum',
-    enum: OracleType,
+    enum: SiteKeyType,
   })
-  public type: OracleType;
+  public type: SiteKeyType;
 
+  @ManyToOne(() => UserEntity, (user) => user.siteKeys)
   @JoinColumn()
-  @OneToOne(() => UserEntity, (user) => user.siteKey)
   public user: UserEntity;
 }
