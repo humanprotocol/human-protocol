@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddNewTypeAndRemoveUniqueKeyToSiteKey1721292675362
+export class AddNewTypeAndUpdatedUniqueKeysToSiteKey1721361395971
   implements MigrationInterface
 {
-  name = 'AddNewTypeAndRemoveUniqueKeyToSiteKey1721292675362';
+  name = 'AddNewTypeAndUpdatedUniqueKeysToSiteKey1721361395971';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -19,7 +19,7 @@ export class AddNewTypeAndRemoveUniqueKeyToSiteKey1721292675362
       `ALTER TYPE "hmt"."site_keys_type_enum" RENAME TO "site_keys_type_enum_old"`,
     );
     await queryRunner.query(
-      `CREATE TYPE "hmt"."site_keys_type_enum" AS ENUM('fortune', 'cvat', 'hcaptcha', 'registration')`,
+      `CREATE TYPE "hmt"."site_keys_type_enum" AS ENUM('hcaptcha', 'registration')`,
     );
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" ALTER COLUMN "type" TYPE "hmt"."site_keys_type_enum" USING "type"::"text"::"hmt"."site_keys_type_enum"`,
@@ -27,6 +27,9 @@ export class AddNewTypeAndRemoveUniqueKeyToSiteKey1721292675362
     await queryRunner.query(`DROP TYPE "hmt"."site_keys_type_enum_old"`);
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" DROP CONSTRAINT "site_keys_user_id_key"`,
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_2dcfd04b329a0fd4be7f376512" ON "hmt"."site_keys" ("user_id") WHERE "type" = 'hcaptcha'`,
     );
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" ADD CONSTRAINT "UQ_7100e356f506f79d28eb2ba3e46" UNIQUE ("site_key", "type", "user_id")`,
@@ -37,6 +40,9 @@ export class AddNewTypeAndRemoveUniqueKeyToSiteKey1721292675362
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `DROP INDEX "hmt"."IDX_2dcfd04b329a0fd4be7f376512"`,
+    );
     await queryRunner.query(
       `ALTER TABLE "hmt"."site_keys" DROP CONSTRAINT "FK_266dc68bd3412cb17b5d927b30c"`,
     );

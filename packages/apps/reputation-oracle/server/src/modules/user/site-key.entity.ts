@@ -1,12 +1,4 @@
-import {
-  Entity,
-  Column,
-  OneToOne,
-  JoinColumn,
-  Index,
-  ManyToOne,
-  Unique,
-} from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from './user.entity';
