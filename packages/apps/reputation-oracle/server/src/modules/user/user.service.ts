@@ -126,7 +126,7 @@ export class UserService {
   }
 
   public async registerLabeler(user: UserEntity): Promise<string> {
-    /*if (user.role !== Role.WORKER) {
+    if (user.role !== Role.WORKER) {
       throw new BadRequestException(ErrorUser.InvalidType);
     }
 
@@ -139,22 +139,22 @@ export class UserService {
 
     if (user.kyc?.status !== KycStatus.APPROVED) {
       throw new BadRequestException(ErrorUser.KycNotApproved);
-    }*/
+    }
 
-    /*if (user.siteKeys && user.siteKeys.length > 0) {
+    if (user.siteKeys && user.siteKeys.length > 0) {
       const existingHcaptchaSiteKey = user.siteKeys?.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
       );
       if (existingHcaptchaSiteKey) {
         return existingHcaptchaSiteKey.siteKey;
       }
-    } */
+    }
 
     // Register user as a labeler at hcaptcha foundation
-    /*const registeredLabeler = await this.hcaptchaService.registerLabeler({
+    const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
       language: this.hcaptchaConfigService.defaultLabelerLang,
-      country: 'RUS',//user.kyc.country,
+      country: user.kyc.country,
       address: user.evmAddress,
     });
 
@@ -174,8 +174,8 @@ export class UserService {
         ErrorUser.LabelingEnableFailed,
         HttpStatus.BAD_REQUEST,
       );
-    }*/
-    const siteKey = '321'; //labelerData.sitekeys[0].sitekey;
+    }
+    const siteKey = labelerData.sitekeys[0].sitekey;
 
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = siteKey;
