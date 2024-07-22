@@ -88,6 +88,7 @@ describe('StatisticsService', () => {
         newData,
         { ttl: configService.cacheTtlOracleStats },
       );
+
       expect(result).toEqual(newData);
     });
   });
@@ -106,7 +107,7 @@ describe('StatisticsService', () => {
       const result = await service.getUserStats(command);
 
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
-      expect(result).toEqual(cachedData);
+      expect(result).toEqual({ ...cachedData, disclaimer: expect.any(String) });
       expect(exchangeGateway.fetchUserStatistics).not.toHaveBeenCalled();
     });
 
@@ -127,7 +128,7 @@ describe('StatisticsService', () => {
       expect(cacheManager.set).toHaveBeenCalledWith(userCacheKey, newData, {
         ttl: configService.cacheTtlUserStats,
       });
-      expect(result).toEqual(newData);
+      expect(result).toEqual({ ...newData, disclaimer: expect.any(String) });
     });
   });
 });

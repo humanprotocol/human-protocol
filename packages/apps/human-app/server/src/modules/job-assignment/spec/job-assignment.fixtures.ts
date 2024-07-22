@@ -36,6 +36,7 @@ const EXPIRES_AT = 'test_date_3';
 const JOB_ASSIGNMENT_ID = '1';
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
+export const USER_ADDRESS = 'test_address';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {

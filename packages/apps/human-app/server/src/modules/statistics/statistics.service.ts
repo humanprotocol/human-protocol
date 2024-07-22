@@ -46,13 +46,25 @@ export class StatisticsService {
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
     if (cachedStatistics) {
-      return cachedStatistics;
+      return {
+        ...cachedStatistics,
+        disclaimer:
+          'These stats are cached and not live. Last updated at: ' +
+          cachedStatistics.last_updated,
+      };
     }
     const response =
       await this.exchangeOracleGateway.fetchUserStatistics(command);
+    response.last_updated = new Date().toISOString();
+
     await this.cacheManager.set(userCacheKey, response, {
       ttl: this.configService.cacheTtlUserStats,
     } as any);
-    return response;
+    return {
+      ...response,
+      disclaimer:
+        'These stats are cached and not live. Last updated at: ' +
+        response.last_updated,
+    };
   }
 }

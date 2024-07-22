@@ -5,6 +5,7 @@ import {
   PageableData,
   PageableDto,
   PageableParams,
+  PageableResponse,
 } from '../../../common/utils/pageable.model';
 import {
   AssignmentSortField,
@@ -151,12 +152,8 @@ export class JobsFetchResponseItem {
   expires_at: string;
 }
 
-export class JobsFetchResponse {
+export class JobsFetchResponse extends PageableResponse {
   results: JobsFetchResponseItem[];
-  page: number;
-  page_size: number;
-  total_pages: number;
-  total_results: number;
 }
 
 export class ResignJobDto {

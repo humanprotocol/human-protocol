@@ -3,11 +3,13 @@ import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exc
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   jobsDiscoveryParamsCommandFixture,
-  responseFixture,
+  responseItemsFixture,
 } from './jobs-discovery.fixtures';
+import { CronJobService } from '../../../modules/cron-job/cron-job.service';
 
 describe('JobsDiscoveryService', () => {
   let service: JobsDiscoveryService;
+  let cronJobService: CronJobService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
   beforeEach(async () => {
     exchangeOracleGatewayMock = {
@@ -18,10 +20,17 @@ describe('JobsDiscoveryService', () => {
       providers: [
         JobsDiscoveryService,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
+        {
+          provide: CronJobService,
+          useValue: {
+            getCachedJobs: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<JobsDiscoveryService>(JobsDiscoveryService);
+    cronJobService = module.get<CronJobService>(CronJobService);
   });
   it('should be defined', () => {
     expect(service).toBeDefined();
@@ -30,13 +39,13 @@ describe('JobsDiscoveryService', () => {
     it('should get oracle url and call api for jobs fetch', async () => {
       const command = jobsDiscoveryParamsCommandFixture;
 
-      (exchangeOracleGatewayMock.fetchJobs as jest.Mock).mockResolvedValue(
-        responseFixture,
+      (cronJobService.getCachedJobs as jest.Mock).mockResolvedValue(
+        responseItemsFixture,
       );
 
       const result = await service.processJobsDiscovery(command);
-      expect(exchangeOracleGatewayMock.fetchJobs).toHaveBeenCalledWith(command);
-      expect(result).toEqual(responseFixture);
+      expect(cronJobService.getCachedJobs).toHaveBeenCalledWith();
+      expect(result.results).toEqual(responseItemsFixture);
     });
   });
 });

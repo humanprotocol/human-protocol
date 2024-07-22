@@ -38,6 +38,7 @@ import { RegisterAddressModule } from './modules/register-address/register-addre
 import { InterceptorModule } from './common/interceptors/interceptor.module';
 import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
 import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { TokenRefreshController } from './modules/token-refresh/token-refresh.co
     RegisterAddressModule,
     InterceptorModule,
     TokenRefreshModule,
+    CronJobModule,
   ],
   controllers: [
     AppController,

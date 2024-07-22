@@ -13,7 +13,7 @@ import {
   JobsFetchResponseItem,
   ResignJobCommand,
 } from './model/job-assignment.model';
-import { SortOrder } from '../../common/enums/global-common';
+import { paginateAndSortResults } from '../../common/utils/pagination.utils';
 
 @Injectable()
 export class JobAssignmentService {
@@ -54,16 +54,27 @@ export class JobAssignmentService {
     const evmAddress = this.getEvmAddressFromToken(command.token);
     const cacheKey = `assignedJobs:${evmAddress}`;
 
-    // const cachedData =
-    //   await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
-    // if (cachedData && cachedData.length > 0) {
-    //   return this.paginateAndSortResults(cachedData, command.data);
-    // }
+    const cachedData =
+      await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
+    if (cachedData && cachedData.length > 0) {
+      return paginateAndSortResults(
+        cachedData,
+        command.data.page,
+        command.data.pageSize,
+        command.data.sortField as keyof JobsFetchResponseItem,
+        command.data.sort,
+      );
+    }
 
     const allJobsData = await this.fetchAllAssignedJobs(command);
     await this.cacheManager.set(cacheKey, allJobsData);
-
-    return this.paginateAndSortResults(allJobsData, command.data);
+    return paginateAndSortResults(
+      allJobsData,
+      command.data.page,
+      command.data.pageSize,
+      command.data.sortField as keyof JobsFetchResponseItem,
+      command.data.sort,
+    );
   }
 
   private async updateAssignmentsCache(
@@ -142,36 +153,6 @@ export class JobAssignmentService {
     }
 
     return Array.from(assignmentsMap.values());
-  }
-
-  private paginateAndSortResults(
-    data: JobsFetchResponseItem[],
-    params: JobsFetchParams,
-  ): JobsFetchResponse {
-    // Sorting
-    if (params.sortField) {
-      data = data.sort((a, b) => {
-        if (params.sort === SortOrder.DESC) {
-          return a[params.sortField] < b[params.sortField] ? 1 : -1;
-        } else {
-          return a[params.sortField] > b[params.sortField] ? 1 : -1;
-        }
-      });
-    }
-
-    // Pagination
-    const page = params.page || 0;
-    const pageSize = params.pageSize || 10;
-    const start = page * pageSize;
-    const end = (page + 1) * pageSize;
-
-    return {
-      page,
-      page_size: pageSize,
-      total_pages: Math.ceil(data.length / pageSize),
-      total_results: data.length,
-      results: data.slice(start, end),
-    };
   }
 
   async resignJob(command: ResignJobCommand) {
