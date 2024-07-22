@@ -38,7 +38,7 @@
     "swr": "^2.2.4",
     "viem": "2.x",
     "wagmi": "^2.8.5",
-    "web-vitals": "^3.5.2"
+    "web-vitals": "^4.2.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
