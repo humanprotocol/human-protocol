@@ -162,3 +162,10 @@ export enum ErrorCronJob {
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
 }
+
+/**
+ * Represents error messages associated with a qualification.
+ */
+export enum ErrorQualification {
+  FailedToFetchQualifications = 'Failed to fetch qualifications',
+}
