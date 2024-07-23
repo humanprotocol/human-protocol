@@ -191,6 +191,13 @@ const theme: ThemeOptions = createTheme({
 				},
 			},
 		},
+		MuiOutlinedInput: {
+			styleOverrides: {
+				root: {
+					backgroundColor: colorPalette.white,
+				},
+			},
+		},
 	},
 });
 
