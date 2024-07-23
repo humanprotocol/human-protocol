@@ -28,7 +28,6 @@ export const envValidator = Joi.object({
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number(),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
-  REPUTATION_ORACLE_URI: Joi.string().required(),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),

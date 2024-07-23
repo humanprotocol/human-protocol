@@ -4,7 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
-import { ErrorQualification } from '../../common/constants/errors';
+import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
 @Injectable()
 export class QualificationService {
@@ -17,18 +18,37 @@ export class QualificationService {
 
   public async getQualifications(): Promise<QualificationDto[]> {
     try {
-      const { data } = (await firstValueFrom(
-        this.httpService.get(
-          `${this.web3ConfigService.reputationOracleUri}/qualification`,
+      const kvStoreData = await KVStoreUtils.getKVStoreData(
+        ChainId.POLYGON_AMOY,
+        this.web3ConfigService.reputationOracleAddress,
+      );
+      const reputationOracleUrl = kvStoreData.find(
+        (item) => item.key === 'url',
+      )?.value;
+
+      if (!reputationOracleUrl) {
+        throw new ControlledError(
+          ErrorWeb3.ReputationOracleUrlNotSet,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const { data } = await firstValueFrom(
+        this.httpService.get<QualificationDto[]>(
+          `${reputationOracleUrl}/qualification`,
         ),
-      )) as any;
+      );
 
       return data;
     } catch (error) {
-      throw new ControlledError(
-        ErrorQualification.FailedToFetchQualifications,
-        HttpStatus.BAD_REQUEST,
-      );
+      if (error instanceof ControlledError) {
+        throw error;
+      } else {
+        throw new ControlledError(
+          ErrorQualification.FailedToFetchQualifications,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
   }
 }

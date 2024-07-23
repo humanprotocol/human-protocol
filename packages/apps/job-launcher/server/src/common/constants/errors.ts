@@ -130,6 +130,7 @@ export enum ErrorWeb3 {
   NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
+  ReputationOracleUrlNotSet = 'Reputation oracle URL not set',
 }
 
 /**
