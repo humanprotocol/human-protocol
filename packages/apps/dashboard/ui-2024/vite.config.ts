@@ -21,4 +21,7 @@ export default defineConfig({
 			'@api': path.resolve(__dirname, './src/api'),
 		},
 	},
+	server: {
+		port: 3001,
+	},
 });

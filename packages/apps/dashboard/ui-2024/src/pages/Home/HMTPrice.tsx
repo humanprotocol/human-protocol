@@ -9,7 +9,7 @@ export function HMTPrice() {
 				HMT Price
 			</Typography>
 			<div className="count">
-				{status === 'success' && data['human-protocol'].usd}
+				{status === 'success' && data.hmtPrice}
 				{status === 'pending' && '...'}
 				{status === 'error' && 'No data'}
 			</div>

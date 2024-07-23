@@ -21,7 +21,7 @@ import cup from '@assets/cup.png';
 import Leaderboard from '@components/Home/Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
 
-const Home: React.FC = () => {	
+const Home: React.FC = () => {
 	return (
 		<PageWrapper violetHeader>
 			<div className="home-page-header">
