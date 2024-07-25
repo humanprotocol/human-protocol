@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export interface WalletSearchStore {
 	filterParams: {
 		address: string;
-		chainId?: number;
+		chainId: number;
 	};
 	setAddress: (address: string) => void;
 	setChainId: (chainId: number) => void;
@@ -12,6 +12,7 @@ export interface WalletSearchStore {
 export const useWalletSearch = create<WalletSearchStore>((set) => ({
 	filterParams: {
 		address: '',
+		chainId: 1,
 	},
 	setAddress: (address) => {
 		set((state) => ({
