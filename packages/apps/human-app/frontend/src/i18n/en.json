@@ -1,0 +1,395 @@
+{
+  "humanCurrencySymbol": "HMT",
+  "inputMasks": {
+    "humanCurrencySuffix": " HMT",
+    "percentSuffix": "%",
+    "plusPrefix": "+"
+  },
+  "dashboard": {},
+  "protectedPagesHeaders": {
+    "profile": "Profile",
+    "jobsDiscovery": "Jobs Discovery",
+    "hcaptchaLabeling": "hCaptcha Labeling",
+    "jobs": "Jobs"
+  },
+  "web3ProtectedPagesHeaders": {
+    "profile": "Profile"
+  },
+  "validation": {
+    "required": "Required",
+    "min": "Min {{count}} characters",
+    "max": "Max {{count}} characters",
+    "passwordWeak": "Password should be at least 8 characters long and contain at least one uppercase and one lowercase letter, one number and one special character",
+    "passwordMismatch": "Passwords are not the same",
+    "password8Chars": "8 characters",
+    "passwordUppercase": "1 uppercase (A-Z)",
+    "passwordLowercase": "1 lowercase (a-z)",
+    "passwordNumeric": "1 numeric (0-9)",
+    "passwordSpecialCharacter": "1 special character (@#$%^&+=!*])",
+    "captcha": "Please complete the captcha",
+    "passwordMissing": "Please enter your password.",
+    "invalidEmail": "Please enter a valid email address."
+  },
+  "errors": {
+    "errorWithMessage": "Error with message: {{message}}",
+    "errorWithStatusCode": "Error with status code: {{code}}",
+    "unknown": "An error occurred, please try again.",
+    "unknownNetwork": "Unknown network",
+    "jsonRpcError": "JSON-RPC error",
+    "unsupportedNetwork": "Network selected in wallet is unsupported.",
+    "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported."
+  },
+  "components": {
+    "multiSelect": {
+      "allFields": "All fields",
+      "andMore": "(and {{number}} more)",
+      "clearAll": "Clear all"
+    },
+    "breadcrumb": {
+      "back": "Back"
+    },
+    "navbar": {
+      "humanProtocol": "HUMAN Protocol",
+      "howItWorks": "How It Works"
+    },
+    "DrawerNavigation": {
+      "jobs": "Jobs",
+      "captchaLabelling": "hCaptcha labelling",
+      "jobsDiscovery": "Jobs discovery",
+      "profile": "Profile",
+      "help": "Help",
+      "logout": "Log Out"
+    },
+    "footer": {
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "humanProtocol": "HUMAN Protocol",
+      "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
+    },
+    "table": {
+      "clearBtn": "Clear",
+      "sort": "Sort",
+      "filter": "Filter"
+    },
+    "modal": {
+      "header": {
+        "closeBtn": "Cancel"
+      }
+    },
+    "wallet": {
+      "connectBtn": {
+        "disconnect": "Disconnect Wallet",
+        "connect": "Connect Wallet"
+      }
+    },
+    "pageCardError": {
+      "reload": "Reload",
+      "goHome": "Back to home page"
+    }
+  },
+  "homepage": {
+    "humanApp": "HUMAN App",
+    "completeJobs": "Complete jobs, earn HMT.",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "workerSignIn": "Worker Sign In",
+    "operatorSignIn": "Operator Sign In",
+    "welcome": "Welcome",
+    "howWillUse": "How will you use HUMAN App?",
+    "selectOption": "Please select an option below.",
+    "iWantToEarn": "I want to earn HMT",
+    "completeTask": "Complete simple tasks and get paid.",
+    "workAnywhere": "Work anywhere, any time.",
+    "signUpToComplete": "Sign Up to Complete Tasks",
+    "joinAsOperator": "I want to join as an operator",
+    "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
+    "becomePartner": "Become a HUMAN App partner.",
+    "signAsOperator": "Sign Up as an Operator",
+    "termsAndConditions": "Terms & conditions",
+    "cancel": "Cancel"
+  },
+  "worker": {
+    "signUpForm": {
+      "fields": {
+        "createPassword": "Create Password",
+        "password": "Create Password",
+        "confirmPassword": "Confirm Password",
+        "email": "your@email.com"
+      },
+      "errors": {
+        "emailTaken": "Email is already taken. Please sign in."
+      },
+      "title": "Sign Up",
+      "submitBtn": "Sign Up",
+      "passwordDetailedValidation": "Password must contain at least:",
+      "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>"
+    },
+    "signInForm": {
+      "fields": {
+        "password": "Password",
+        "email": "your@email.com"
+      },
+      "errors": {
+        "invalidCredentials": "Incorrect email or password!"
+      },
+      "title": "Sign In",
+      "submitBtn": "Sign In",
+      "forgotPassword": "Forgot Password?"
+    },
+    "sendEmailVerification": {
+      "title": "Verify Email",
+      "btn": "Resend Verification Email",
+      "paragraph1": "Your email address <1>{{email}}</1> is not verified.",
+      "paragraph2": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent."
+    },
+    "verifyEmail": {
+      "title": "Verify Email",
+      "btn": "Resend Verification Email",
+      "paragraph1": "We've sent an email to <1>{{email}}</1>, please check your inbox and verify your email.",
+      "paragraph2": "The verification link is valid for 24 hours.",
+      "paragraph3": "<1>Can't find our email?</1> If you can't find the email in your inbox please check the spam folder.",
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent.",
+      "authError": "Log in before you resend email verification"
+    },
+    "emailVerification": {
+      "title": "Email Verified",
+      "description": "You are ready to go. Your email has been successfully verified!",
+      "btn": "Sign In"
+    },
+    "sendResetLinkForm": {
+      "fields": {
+        "email": "your@email.com"
+      },
+      "title": "Reset Password",
+      "description": "Please enter your email address. We will send you an email to reset your password.",
+      "submitBtn": "Send Email",
+      "invalidEmailError": "Please enter a valid email address.",
+      "noEmailError": "Please enter your email address."
+    },
+    "sendResetLinkSuccess": {
+      "title": "Reset password",
+      "paragraph1": "We've sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
+      "paragraph2": "The verification link is valid for 24 hours.",
+      "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
+      "btn": "Resend Reset Password Email",
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+    },
+    "resetPassword": {
+      "fields": {
+        "createNewPassword": "Create New Password",
+        "confirm": "Confirm New Password"
+      },
+      "title": "Reset password",
+      "description": "Please enter your new password below.",
+      "btn": "Reset password"
+    },
+    "resetPasswordSuccess": {
+      "title": "Password Changed",
+      "description": "Your password has been changed successfully.",
+      "btn": "Sign In"
+    },
+    "profile": {
+      "profileHeader": "Profile",
+      "email": "Email",
+      "password": "Password",
+      "resetPassword": "Reset Password",
+      "completeKYC": "Complete KYC",
+      "KYCInProgress": "KYC in progress",
+      "confirmEmail": "Confirm email",
+      "kycCompleted": "KYC Completed",
+      "connectWallet": "Connect Wallet",
+      "walletConnected": "Wallet Connected ",
+      "addKYCInfoOnChain": "Add KYC Info On-chain",
+      "wrongWalletAddress": "Selected wallet address doesn't match the address assigned to the account.",
+      "kycInfoOnChainAdded": "KYC Info On-Chain Added",
+      "registerAddress": "Register address",
+      "emailNotifications": "Email Notifications",
+      "notificationsConsent": "I would like to be notified about News and Offers",
+      "topNotifications": {
+        "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
+        "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
+        "registerAddress": "Register address"
+      }
+    },
+    "oraclesTable": {
+      "annotationTool": "Annotation tool",
+      "oracleAddress": "Oracle address",
+      "jobTypes": "Job types",
+      "seeJobs": "See jobs",
+      "allJobs": "All jobs"
+    },
+    "jobs": {
+      "successFullyAssignedJob": "Successfully assigned a job!",
+      "errorFetchingData": "There was an error while fetching data, please try again",
+      "availableJobs": "Available Jobs",
+      "myJobs": "My Jobs",
+      "jobsDiscovery": "Jobs Discovery",
+      "jobDescription": "Job description",
+      "escrowAddress": "Escrow address",
+      "network": "Network",
+      "rewardAmount": "Reward amount",
+      "jobType": "Job type",
+      "expiresAt": "Expires at",
+      "status": "Status",
+      "selectJob": "Select job",
+      "searchEscrowAddress": "Search escrow address",
+      "resign": "Resign",
+      "solve": "Solve",
+      "filter": "Filter",
+      "escrowAddressColumnId": "escrowAddress",
+      "Ethereum": "Ethereum",
+      "Polygon": "Polygon",
+      "sortDirection": {
+        "fromHighest": "From highest",
+        "fromLowest": "From lowest",
+        "furthestToNow": "Furthest to now",
+        "closestToNow": "Closest to now"
+      },
+      "mobileFilterDrawer": {
+        "sortBy": "Sort by",
+        "filters": "Filters",
+        "jobsStatus": {
+          "active": "Active",
+          "validation": "Validation",
+          "completed": "Completed",
+          "expired": "Expired",
+          "canceled": "Canceled",
+          "rejected": "Rejected"
+        },
+        "network": {
+          "matic": "Matic",
+          "polygon": "Polygon"
+        },
+        "jobType": {
+          "fortune": "Fortune"
+        }
+      },
+      "next": "Next"
+    },
+    "hcaptchaLabeling": {
+      "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "noJobs": "No jobs available at the moment. Please come back in:"
+    },
+    "enableHCaptchaLabeling": {
+      "description": "To earn HMT, you must enable data-labeling. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "enableButton": "Enable Labeling"
+    },
+    "hcaptchaLabelingStats": {
+      "hCapchaStatistics": "hCapcha Statistics",
+      "statistics": "Statistics",
+      "allTime": "All Time",
+      "jobsServed": "Jobs served",
+      "jobsComplete": "Jobs complete",
+      "hmtEarned": "HMT earned",
+      "lastHour": "Last hour",
+      "earnedLastHour": "HMT earned in last hour",
+      "statisticsNotLive": "Statistics are not live. Please refresh to view live statistics.",
+      "solvedSuccess": "HCaptcha solved!"
+    }
+  },
+  "operator": {
+    "profile": {
+      "profileHeader": "Profile",
+      "about": {
+        "header": "About",
+        "role": "Role",
+        "status": {
+          "statusHeader": "Status",
+          "statusActivated": "Active",
+          "statusDeactivated": "Deactivated",
+          "statusActivateButton": "Activate",
+          "statusDeactivateButton": "Deactivate"
+        },
+        "fee": "Fee",
+        "url": "URL",
+        "webhookUrl": "Webhook URL",
+        "jobTypes": "Job Types",
+        "publicKey": "Public Key"
+      },
+      "activateBtn" : "Activate",
+      "disable": {
+        "disableBtn": "Deactivate",
+        "cannotDisable": "Cannot deactivate operator"
+      },
+      "statistics": {
+        "header": "Statistics",
+        "escrowsProcessed": "Escrows processed",
+        "escrowsActive": "Escrows active",
+        "escrowsCancelled": "Escrows cancelled",
+        "workersAmount": "Workers amount",
+        "assignmentsCompleted": "Assignments completed",
+        "assignmentsRejected": "Assignments rejected",
+        "assignmentsExpired": "Assignments expired"
+      }
+    },
+    "connectWallet": {
+      "title": "Setup Operator",
+      "description": "Please use the button bellow to connect your wallet and sign up as an operator.",
+      "connect": "Connect Wallet",
+      "disconnect": "Disconnect",
+      "successAlert": "Wallet successfully connected",
+      "setupOperator": "Setup Operator"
+    },
+    "addStake": {
+      "title": "Setup Operator",
+      "formHeader": "Stake",
+      "label": "Staked amount",
+      "description": "Please add bellow the amount to stake",
+      "actionBtn": "Add Stake",
+      "nextBtn": "Next",
+      "skipBtn": "Skip"
+    },
+    "stakeForm": {
+      "formBtn": "Add Stake",
+      "skipBtn": "Skip",
+      "nextBtn": "Next",
+      "label": "Stake amount",
+      "description": "Please add bellow the amount to stake",
+      "successAlert": "You have successfully staked {{amount}} HMT",
+      "invalidDecimals": "Incorrect decimal expansion. HMT token has {{decimals}} decimals"
+    },
+    "addKeysPage": {
+      "title": "Setup Operator",
+      "btn": " Add New Keys to KVStore",
+      "skipBtn": "Skip",
+      "pendingKeys": {
+        "title": "Pending Keys",
+        "fee": "Fee",
+        "publicKey": "Public Key",
+        "webhookUrl": "Webhook URL",
+        "role": "Role",
+        "jobType": "Job type"
+      },
+      "existingKeys": {
+        "title": "Existing keys",
+        "fee": "Fee",
+        "publicKey": "Public Key",
+        "url": "Url",
+        "webhookUrl": "Webhook URL",
+        "role": "Role",
+        "jobType": "Job type",
+        "noValue": "no value",
+        "editBtn": "Edit"
+      },
+      "editKeysForm": {
+        "btn": "Save",
+        "error": "No changes"
+      }
+    },
+    "editExistingKeysSuccess": {
+      "title": "Setup Operator",
+      "paragraph1": "Congratulations 🎉!",
+      "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
+      "btn": "Finish"
+    }
+  },
+  "walletConnectModal": {
+    "header": "Connect Wallet",
+    "paragraph": "The HUMAN App runs on Polygon. Please make sure you enter your Polygon wallet address. <1>Learn more.</1>",
+    "connectBtn": "Connect Wallet",
+    "cancelBtn": "Cancel"
+  }
+}

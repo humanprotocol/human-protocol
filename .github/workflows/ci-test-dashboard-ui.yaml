@@ -20,5 +20,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn dashboard-ui:test
+      - run: yarn workspace @human-protocol/dashboard-ui test
         name: Run dashboard-ui test

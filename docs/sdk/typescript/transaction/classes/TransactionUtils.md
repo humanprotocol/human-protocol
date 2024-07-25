@@ -50,7 +50,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 #### Source
 
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 ***
 
@@ -66,13 +66,16 @@ This function returns all transaction details based on the provided filter.
 
 ```ts
 interface ITransactionsFilter {
-  networks: ChainId[]; // List of chain IDs to query.
+  chainId: ChainId; // List of chain IDs to query.
   fromAddress?: string; // (Optional) The address from which transactions are sent.
   toAddress?: string; // (Optional) The address to which transactions are sent.
   startDate?: Date; // (Optional) The start date to filter transactions (inclusive).
   endDate?: Date; // (Optional) The end date to filter transactions (inclusive).
   startBlock?: number; // (Optional) The start block number to filter transactions (inclusive).
   endBlock?: number; // (Optional) The end block number to filter transactions (inclusive).
+  first?: number; // (Optional) Number of transactions per page. Default is 10.
+  skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+  orderDirection?: OrderDirection; // (Optional) Order of the results. Default is DESC.
 }
 ```
 
@@ -103,16 +106,19 @@ Returns an array with all the transaction details.
 **Code example**
 
 ```ts
-import { TransactionUtils, ChainId } from '@human-protocol/sdk';
+import { TransactionUtils, ChainId, OrderDirection } from '@human-protocol/sdk';
 
 const filter: ITransactionsFilter = {
-  networks: [ChainId.POLYGON],
+  chainId: ChainId.POLYGON,
   startDate: new Date('2022-01-01'),
-  endDate: new Date('2022-12-31')
+  endDate: new Date('2022-12-31'),
+  first: 10,
+  skip: 0,
+  orderDirection: OrderDirection.DESC,
 };
 const transactions = await TransactionUtils.getTransactions(filter);
 ```
 
 #### Source
 
-[transaction.ts:103](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L103)
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)

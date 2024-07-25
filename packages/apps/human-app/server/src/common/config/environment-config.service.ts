@@ -6,7 +6,8 @@ const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
 const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
-const DEFAULT_CORS_ALLOWED_HEADERS = 'Content-Type, Accept';
+const DEFAULT_CORS_ALLOWED_HEADERS =
+  'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
 @Injectable()
 export class EnvironmentConfigService {
@@ -71,7 +72,7 @@ export class EnvironmentConfigService {
     return this.configService.getOrThrow<string>('RPC_URL');
   }
   get isCorsEnabled(): boolean {
-    return this.configService.get<boolean>('CORS_ENABLED', false);
+    return this.configService.get<string>('CORS_ENABLED') === 'true';
   }
   get corsEnabledOrigin(): string {
     return this.configService.get<string>(
@@ -79,11 +80,10 @@ export class EnvironmentConfigService {
       DEFAULT_CORS_ALLOWED_ORIGIN,
     );
   }
-  get corsAllowedHeaders(): string {
-    return this.configService.get<string>(
-      'CORS_ALLOWED_HEADERS',
-      DEFAULT_CORS_ALLOWED_HEADERS,
-    );
+  get corsAllowedHeaders(): string[] {
+    return this.configService
+      .get<string>('CORS_ALLOWED_HEADERS', DEFAULT_CORS_ALLOWED_HEADERS)
+      .split(',');
   }
   get cacheTtlExchangeOracleUrl(): number {
     return this.configService.get<number>(
@@ -107,5 +107,8 @@ export class EnvironmentConfigService {
   get chainIdsEnabled(): string[] {
     const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');
     return chainIds.split(',').map((id) => id.trim());
+  }
+  get isCacheToRestart(): boolean {
+    return this.configService.get('IS_CACHE_TO_RESTART') === 'true';
   }
 }

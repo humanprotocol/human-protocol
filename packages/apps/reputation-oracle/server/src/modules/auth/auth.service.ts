@@ -2,7 +2,11 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
-import { OperatorStatus, UserStatus } from '../../common/enums/user';
+import {
+  OperatorStatus,
+  Role as UserRole,
+  UserStatus,
+} from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -33,6 +37,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { SiteKeyType } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
@@ -87,7 +92,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const storedUser = await this.userRepository.findByEmail(data.email);
+    const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new ControlledError(
         ErrorUser.DuplicatedEmail,
@@ -101,7 +106,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -146,17 +151,50 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
+    let kvstore: KVStoreClient;
+    const currentWeb3Env = this.web3ConfigService.env;
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.POLYGON),
+      );
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.LOCALHOST),
+      );
+    } else {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
+      );
+    }
+
+    let status = userEntity.status.toString();
+    if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
+      const operatorStatus = await kvstore.get(
+        this.web3Service.getOperatorAddress(),
+        userEntity.evmAddress,
+      );
+      if (operatorStatus && operatorStatus !== '') {
+        status = operatorStatus;
+      }
+    }
+
     const payload: any = {
       email: userEntity.email,
+      status,
       userId: userEntity.id,
-      address: userEntity.evmAddress,
+      wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       reputation_network: this.web3Service.getOperatorAddress(),
     };
 
-    if (userEntity.siteKey) {
-      payload.site_key = userEntity.siteKey.siteKey;
+    if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
+      const existingHcaptchaSiteKey = userEntity.siteKeys?.find(
+        (key) => key.type === SiteKeyType.HCAPTCHA,
+      );
+      if (existingHcaptchaSiteKey) {
+        payload.site_key = existingHcaptchaSiteKey.siteKey;
+      }
     }
 
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -191,7 +229,7 @@ export class AuthService {
       );
     }
 
-    const userEntity = await this.userRepository.findByEmail(data.email);
+    const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
@@ -304,7 +342,7 @@ export class AuthService {
       );
     }
 
-    const userEntity = await this.userRepository.findByEmail(data.email);
+    const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
@@ -324,7 +362,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -376,6 +414,10 @@ export class AuthService {
       kvstore = await KVStoreClient.build(
         this.web3Service.getSigner(ChainId.POLYGON),
       );
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      kvstore = await KVStoreClient.build(
+        this.web3Service.getSigner(ChainId.LOCALHOST),
+      );
     } else {
       kvstore = await KVStoreClient.build(
         this.web3Service.getSigner(ChainId.POLYGON_AMOY),
@@ -388,6 +430,21 @@ export class AuthService {
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await kvstore.get(data.address, KVStoreKeys.fee))) {
+      throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await kvstore.get(data.address, KVStoreKeys.url))) {
+      throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await kvstore.get(data.address, KVStoreKeys.jobTypes))) {
+      throw new ControlledError(
+        ErrorAuth.InvalidJobType,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const userEntity = await this.userService.createWeb3User(data.address);

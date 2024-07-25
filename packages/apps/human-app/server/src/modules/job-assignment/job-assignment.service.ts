@@ -9,9 +9,7 @@ import {
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 @Injectable()
 export class JobAssignmentService {
-  constructor(
-    private readonly exchangeOracleGateway: ExchangeOracleGateway,
-  ) {}
+  constructor(private readonly exchangeOracleGateway: ExchangeOracleGateway) {}
 
   async processJobAssignment(
     command: JobAssignmentCommand,

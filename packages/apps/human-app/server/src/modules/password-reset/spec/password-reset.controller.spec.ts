@@ -51,6 +51,7 @@ describe('PasswordResetController', () => {
       const dto: ForgotPasswordDto = forgotPasswordDtoFixture;
       const expectedCommand: ForgotPasswordCommand = {
         email: dto.email,
+        hCaptchaToken: dto.h_captcha_token,
       };
       await controller.forgotPassword(dto);
       expect(service.processForgotPassword).toHaveBeenCalledWith(

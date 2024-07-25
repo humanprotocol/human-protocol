@@ -6,11 +6,12 @@
     "generated"
   ],
   "scripts": {
-    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-hmt && graph codegen",
+    "generate-hmt": "mustache ./config/$NETWORK.json src/mapping/HMTokenTemplate.ts > src/mapping/HMToken.ts",
     "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=polygon yarn generate",
-    "test": "graph test ",
+    "test": "graph test",
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",
@@ -34,7 +35,7 @@
   "license": "MIT",
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.71.1",
-    "@graphprotocol/graph-ts": "^0.32.0",
+    "@graphprotocol/graph-ts": "^0.35.1",
     "@graphql-eslint/eslint-plugin": "^3.19.1",
     "@human-protocol/core": "*",
     "graphql": "^16.6.0",

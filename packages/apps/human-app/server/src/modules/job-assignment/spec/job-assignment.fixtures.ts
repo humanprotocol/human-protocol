@@ -27,13 +27,13 @@ const PAGE_SIZE = 5;
 const PAGE = 0;
 const SORT = SortOrder.ASC;
 const SORT_FIELD = AssignmentSortField.CREATED_AT;
-const ASSIGNMENT_ID = 'test_id';
+const ASSIGNMENT_ID = '2';
 const REWARD_AMOUNT = 'test_amount';
 const REWARD_TOKEN = 'test';
 const CREATED_AT = 'test_date_1';
 const UPDATED_AT = 'test_date_2';
 const EXPIRES_AT = 'test_date_3';
-const JOB_ASSIGNMENT_ID = 1;
+const JOB_ASSIGNMENT_ID = '1';
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
 export const jobAssignmentToken = TOKEN;
@@ -76,7 +76,7 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
 };
 
 export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracle_address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
@@ -101,7 +101,7 @@ const jobsFetchParams: JobsFetchParams = {
 };
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
   data: jobsFetchParams,
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 

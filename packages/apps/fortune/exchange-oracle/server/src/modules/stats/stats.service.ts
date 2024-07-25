@@ -1,14 +1,28 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { JobRepository } from '../job/job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentStatsDto, OracleStatsDto } from './stats.dto';
+import { JobStatus } from '../../common/enums/job';
 
 @Injectable()
 export class StatsService {
   public readonly logger = new Logger(StatsService.name);
-  constructor(private assignmentRepository: AssignmentRepository) {}
+  constructor(
+    private jobRepository: JobRepository,
+    private assignmentRepository: AssignmentRepository,
+  ) {}
 
   async getOracleStats(): Promise<OracleStatsDto> {
     return new OracleStatsDto({
+      activeEscrows: await this.jobRepository.countJobsByStatus(
+        JobStatus.ACTIVE,
+      ),
+      completedEscrows: await this.jobRepository.countJobsByStatus(
+        JobStatus.COMPLETED,
+      ),
+      canceledEscrows: await this.jobRepository.countJobsByStatus(
+        JobStatus.CANCELED,
+      ),
       workersTotal: await this.assignmentRepository.countTotalWorkers(),
       assignmentsCompleted:
         await this.assignmentRepository.countCompletedAssignments(),

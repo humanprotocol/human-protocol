@@ -57,18 +57,18 @@ export enum ErrorSignature {
  * Represents error messages related to user.
  */
 export enum ErrorUser {
-  NotFound = 'User not found',
-  AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
-  InvalidCredentials = 'Invalid credentials',
-  IncorrectAddress = 'Incorrect address',
-  NoWalletAddresRegistered = 'No wallet address registered on your account',
-  KycNotApproved = 'KYC not approved',
+  NotFound = 'User not found.',
+  AccountCannotBeRegistered = 'Account cannot be registered.',
+  BalanceCouldNotBeRetreived = 'User balance could not be retrieved.',
+  InvalidCredentials = 'Invalid credentials.',
+  AlreadyAssigned = 'User already has an address assigned.',
+  NoWalletAddresRegistered = 'No wallet address registered on your account.',
+  KycNotApproved = 'KYC not approved.',
   UserNotActive = 'User not active',
-  LabelingEnableFailed = 'Failed to enable labeling for this account',
-  InvalidType = 'User has invalid type',
-  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
-  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address',
+  LabelingEnableFailed = 'Failed to enable labeling for this account.',
+  InvalidType = 'User has invalid type.',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
+  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address.',
 }
 
 /**
@@ -82,8 +82,11 @@ export enum ErrorAuth {
   UserNotActive = 'User not active',
   InvalidSignature = 'Invalid signature',
   InvalidRole = 'Invalid role in KVStore',
-  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least 8 characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
   InvalidToken = 'Invalid token',
+  InvalidJobType = 'Invalid operator job type',
+  InvalidUrl = 'Invalid operator URL',
+  InvalidFee = 'Invalid operator fee',
 }
 
 /**
@@ -133,5 +136,16 @@ export enum ErrorWeb3 {
  * Represents error messages related to operator.
  */
 export enum ErrorOperator {
+  OperatorAlreadyActive = 'Operator is already active',
   OperatorNotActive = 'Operator not active',
+}
+
+/**
+ * Represents error messages related to qualification.
+ */
+export enum ErrorQualification {
+  InvalidExpiresAt = 'Qualification should be valid for at least %minValidity% hours',
+  NotFound = 'Qualification not found',
+  NoWorkersFound = 'No workers found for the provided addresses or emails',
+  AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
 }

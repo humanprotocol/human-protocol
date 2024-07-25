@@ -24,11 +24,10 @@ export class OracleDiscoveryService {
     const chainIds = this.configService.chainIdsEnabled;
     const filteredOracles = await Promise.all(
       chainIds.map(async (chainId) => {
-        return this.findOraclesByChainId(chainId, address).then((oracles) =>
-          this.getOraclesWithSelectedJobTypes(
-            oracles,
-            command.selectedJobTypes,
-          ),
+        return await this.findOraclesByChainId(
+          chainId,
+          address,
+          command.selectedJobTypes,
         );
       }),
     );
@@ -37,44 +36,53 @@ export class OracleDiscoveryService {
   private async findOraclesByChainId(
     chainId: string,
     address: string,
-  ): Promise<OracleDiscoveryResponse[] | undefined> {
+    selectedJobTypes: string[] | undefined,
+  ): Promise<OracleDiscoveryResponse[]> {
     let receivedOracles: OracleDiscoveryResponse[] | undefined =
       await this.cacheManager.get(chainId);
-    if (!receivedOracles) {
-      try {
-        receivedOracles = await OperatorUtils.getReputationNetworkOperators(
-          Number(chainId),
-          address,
-          this.EXCHANGE_ORACLE,
-        );
-        await this.cacheManager.set(
-          chainId,
-          receivedOracles,
-          this.configService.cacheTtlOracleDiscovery,
-        );
-      } catch (error) {
-        this.logger.error(`Error processing chainId ${chainId}:`, error);
-      }
+    if (receivedOracles) {
+      return receivedOracles;
     }
-    return receivedOracles;
+    try {
+      receivedOracles = await OperatorUtils.getReputationNetworkOperators(
+        Number(chainId),
+        address,
+        this.EXCHANGE_ORACLE,
+      );
+      const filteredOracles = this.filterOracles(
+        receivedOracles,
+        selectedJobTypes,
+      );
+      await this.cacheManager.set(chainId, filteredOracles, {
+        ttl: this.configService.cacheTtlOracleDiscovery,
+      } as any);
+      return filteredOracles;
+    } catch (error) {
+      this.logger.error(`Error processing chainId ${chainId}:`, error);
+    }
+    return [];
   }
-  private getOraclesWithSelectedJobTypes(
+  private filterOracles(
     foundOracles: OracleDiscoveryResponse[] | undefined,
     selectedJobTypes: string[] | undefined,
   ) {
-    if (
-      !selectedJobTypes ||
-      selectedJobTypes.length === 0 ||
-      !foundOracles ||
-      foundOracles.length === 0
-    ) {
-      return foundOracles;
+    if (foundOracles && foundOracles.length > 0) {
+      const filteredOracles = foundOracles.filter((oracle) => {
+        if (!oracle.url || oracle.url === null) {
+          return false;
+        }
+        return true;
+      });
+      if (selectedJobTypes && selectedJobTypes.length > 0) {
+        return filteredOracles.filter((oracle) =>
+          oracle.jobTypes && oracle.jobTypes.length > 0
+            ? this.areJobTypeSetsIntersect(oracle.jobTypes, selectedJobTypes)
+            : false,
+        );
+      }
+      return filteredOracles;
     }
-    return foundOracles.filter((oracle) =>
-      oracle.jobTypes && oracle.jobTypes.length > 0
-        ? this.areJobTypeSetsIntersect(oracle.jobTypes, selectedJobTypes)
-        : false,
-    );
+    return [];
   }
   private areJobTypeSetsIntersect(
     oracleJobTypes: string[],

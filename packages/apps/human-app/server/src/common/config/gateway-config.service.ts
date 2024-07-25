@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ExternalApiName } from '../enums/external-api-name';
 import {
-  HCaptchaLabelingStatsEndpoints, HCaptchaLabelingVerifyEndpoints,
+  HCaptchaLabelingStatsEndpoints,
+  HCaptchaLabelingVerifyEndpoints,
   ReputationOracleEndpoints,
 } from '../enums/reputation-oracle-endpoints';
 import {
@@ -93,6 +94,10 @@ export class GatewayConfigService {
               endpoint: '/auth/refresh',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.KYC_ON_CHAIN]: {
+              endpoint: '/kyc/on-chain',
+              method: HttpMethod.GET,
             },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },

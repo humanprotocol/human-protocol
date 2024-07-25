@@ -1,6 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { createMap, forMember, Mapper, mapWith } from '@automapper/core';
+import {
+  CamelCaseNamingConvention,
+  createMap,
+  forMember,
+  Mapper,
+  mapWith,
+  namingConventions,
+  SnakeCaseNamingConvention,
+} from '@automapper/core';
 import {
   EmailVerificationCommand,
   EmailVerificationData,
@@ -41,6 +49,10 @@ export class EmailConfirmationProfile extends AutomapperProfile {
         mapper,
         ResendEmailVerificationDto,
         ResendEmailVerificationParams,
+        namingConventions({
+          destination: new CamelCaseNamingConvention(),
+          source: new SnakeCaseNamingConvention(),
+        }),
       );
       createMap(
         mapper,

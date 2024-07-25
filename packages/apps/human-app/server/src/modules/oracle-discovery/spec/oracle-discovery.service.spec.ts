@@ -3,12 +3,16 @@ import { Cache } from 'cache-manager';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { OperatorUtils } from '@human-protocol/sdk';
-import { OracleDiscoveryCommand, OracleDiscoveryResponse } from '../model/oracle-discovery.model';
+import {
+  OracleDiscoveryCommand,
+  OracleDiscoveryResponse,
+} from '../model/oracle-discovery.model';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import {
-  emptyCommandFixture, filledCommandFixture,
+  emptyCommandFixture,
+  filledCommandFixture,
   generateOracleDiscoveryResponseBody,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
@@ -86,7 +90,7 @@ describe('OracleDiscoveryService', () => {
 
   it('should fetch and cache data if not already cached', async () => {
     const mockData: OracleDiscoveryResponse[] = [
-      { address: 'mockAddress1', role: 'validator' },
+      { address: 'mockAddress1', role: 'validator', url: 'url1' },
       { address: 'mockAddress2', role: 'validator' },
     ];
 
@@ -98,10 +102,12 @@ describe('OracleDiscoveryService', () => {
     const result =
       await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
 
-    expect(result).toEqual(mockData);
+    expect(result).toEqual([mockData[0]]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId);
-      expect(cacheManager.set).toHaveBeenCalledWith(chainId, mockData, TTL);
+      expect(cacheManager.set).toHaveBeenCalledWith(chainId, [mockData[0]], {
+        ttl: TTL,
+      });
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
         Number(chainId),
         REPUTATION_ORACLE_ADDRESS,
@@ -109,7 +115,7 @@ describe('OracleDiscoveryService', () => {
       );
     });
   });
-  it('should filter responses if selectedJobTypes not empty', async () => {
+  it('should filter responses if selectedJobTypes not empty, or url not set', async () => {
     const mockData: OracleDiscoveryResponse[] =
       generateOracleDiscoveryResponseBody();
 

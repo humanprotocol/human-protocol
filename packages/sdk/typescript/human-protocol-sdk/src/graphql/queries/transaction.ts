@@ -19,12 +19,12 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
 
   const WHERE_CLAUSE = `
     where: {
-      ${fromAddress ? `from: $fromAddress` : ''}
-      ${toAddress ? `to: $toAddress` : ''}
-      ${startDate ? `timestamp_gte: $startDate` : ''}
-      ${endDate ? `timestamp_lte: $endDate` : ''}
-      ${startBlock ? `block_gte: $startBlock` : ''}
-      ${endBlock ? `block_lte: $endBlock` : ''}
+      ${fromAddress ? `from: $fromAddress,` : ''}
+      ${toAddress ? `to: $toAddress,` : ''}
+      ${startDate ? `timestamp_gte: $startDate,` : ''}
+      ${endDate ? `timestamp_lte: $endDate,` : ''}
+      ${startBlock ? `block_gte: $startBlock,` : ''}
+      ${endBlock ? `block_lte: $endBlock,` : ''}
     }
   `;
 
@@ -36,11 +36,16 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
         $endDate: Int
         $startBlock: Int
         $endBlock: Int
+        $orderDirection: String
+        $first: Int
+        $skip: Int
     ) {
       transactions(
         ${WHERE_CLAUSE}
         orderBy: timestamp,
-        orderDirection: asc,
+        orderDirection: $orderDirection,
+        first: $first,
+        skip: $skip
       ) {
         ...TransactionFields
       }

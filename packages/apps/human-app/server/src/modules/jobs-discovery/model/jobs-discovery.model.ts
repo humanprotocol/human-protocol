@@ -11,6 +11,7 @@ import {
   PageableData,
   PageableDto,
   PageableParams,
+  PageableResponse,
 } from '../../../common/utils/pageable.model';
 
 export class JobsDiscoveryParamsDto extends PageableDto {
@@ -92,13 +93,9 @@ export class JobsDiscoveryResponseItem {
   escrow_address: string;
   chain_id: number;
   job_type: string;
-  job_title: string;
-  job_description: string;
-  reward_amount: string;
-  reward_token: string;
-  created_at: string;
+  status: JobStatus;
 }
 
-export class JobsDiscoveryResponse {
-  data: JobsDiscoveryResponseItem[];
+export class JobsDiscoveryResponse extends PageableResponse {
+  results: JobsDiscoveryResponseItem[];
 }

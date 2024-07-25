@@ -62,7 +62,9 @@ describe('StatisticsService', () => {
       const result: OracleStatisticsResponse =
         await service.getOracleStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(command.oracleAddress);
+      expect(cacheManager.get).toHaveBeenCalledWith(
+        service.cachePrefix + command.oracleAddress,
+      );
       expect(result).toEqual(cachedData);
       expect(exchangeGateway.fetchOracleStatistics).not.toHaveBeenCalled();
     });
@@ -75,14 +77,16 @@ describe('StatisticsService', () => {
       const command = { oracleAddress: EXCHANGE_ORACLE_ADDRESS };
       const result = await service.getOracleStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(command.oracleAddress);
+      expect(cacheManager.get).toHaveBeenCalledWith(
+        service.cachePrefix + command.oracleAddress,
+      );
       expect(exchangeGateway.fetchOracleStatistics).toHaveBeenCalledWith(
         command,
       );
       expect(cacheManager.set).toHaveBeenCalledWith(
-        command.oracleAddress,
+        service.cachePrefix + command.oracleAddress,
         newData,
-        configService.cacheTtlOracleStats,
+        { ttl: configService.cacheTtlOracleStats },
       );
       expect(result).toEqual(newData);
     });
@@ -120,11 +124,9 @@ describe('StatisticsService', () => {
       const result = await service.getUserStats(command);
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
       expect(exchangeGateway.fetchUserStatistics).toHaveBeenCalledWith(command);
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        userCacheKey,
-        newData,
-        configService.cacheTtlUserStats,
-      );
+      expect(cacheManager.set).toHaveBeenCalledWith(userCacheKey, newData, {
+        ttl: configService.cacheTtlUserStats,
+      });
       expect(result).toEqual(newData);
     });
   });

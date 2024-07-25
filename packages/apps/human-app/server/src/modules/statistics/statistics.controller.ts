@@ -62,7 +62,7 @@ export class StatisticsController {
       UserStatisticsCommand,
     );
     command.token = token;
-    command.walletAddress = payload.address;
+    command.walletAddress = payload.wallet_address;
     return this.service.getUserStats(command);
   }
 }

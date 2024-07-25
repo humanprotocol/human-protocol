@@ -22,6 +22,7 @@ import {
   emailVerificationCommandFixture,
   emailVerificationDataFixture,
   resendEmailVerificationCommandFixture,
+  resendEmailVerificationDataFixture,
 } from '../../../modules/email-confirmation/spec/email-verification.fixtures';
 import {
   ResendEmailVerificationCommand,
@@ -358,9 +359,8 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
       const command: ResendEmailVerificationCommand =
         resendEmailVerificationCommandFixture;
-      const data: ResendEmailVerificationData = {
-        ...command.data,
-      };
+      const data: ResendEmailVerificationData =
+        resendEmailVerificationDataFixture;
       nock('https://example.com')
         .post('/auth/resend-email-verification', {
           ...data,
@@ -623,6 +623,16 @@ describe('ReputationOracleGateway', () => {
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );
+    });
+  });
+  describe('sendKycOnChain', () => {
+    it('should succesfully call the reputation oracle endpoint', async () => {
+      nock('https://example.com').post('/kyc/on-chain', {}).reply(200, '');
+      httpServiceMock.request.mockReturnValue(of({}));
+      await expect(
+        service.sendKycProcedureStart('token'),
+      ).resolves.not.toThrow();
+      expect(httpService.request).toHaveBeenCalled();
     });
   });
 

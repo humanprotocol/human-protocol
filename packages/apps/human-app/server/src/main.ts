@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import { GlobalExceptionsFilter } from './common/filter/global-exceptions.filter';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
@@ -15,6 +17,7 @@ async function bootstrap() {
   if (envConfigService.isCorsEnabled) {
     app.enableCors({
       origin: envConfigService.corsEnabledOrigin,
+      methods: ['GET', 'POST', 'OPTIONS'],
       allowedHeaders: envConfigService.corsAllowedHeaders,
     });
   }
@@ -29,7 +32,10 @@ async function bootstrap() {
 
   const host = envConfigService.host;
   const port = envConfigService.port;
-
+  if (envConfigService.isCacheToRestart) {
+    const cacheManager: Cache = app.get<Cache>(CACHE_MANAGER);
+    await cacheManager.reset();
+  }
   app.useGlobalFilters(new GlobalExceptionsFilter());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 

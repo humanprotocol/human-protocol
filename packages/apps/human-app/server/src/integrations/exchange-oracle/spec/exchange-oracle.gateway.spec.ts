@@ -21,7 +21,9 @@ import {
 import { ExchangeOracleProfile } from '../exchange-oracle.mapper.profile';
 import {
   jobsDiscoveryParamsCommandFixture,
+  paramsDataFixture,
   paramsDataFixtureAsString,
+  responseFixture,
 } from '../../../modules/jobs-discovery/spec/jobs-discovery.fixtures';
 import { GoneException, HttpException } from '@nestjs/common';
 import { HttpMethod } from '../../../common/enums/http-method';
@@ -29,6 +31,7 @@ import { KvStoreGateway } from '../../kv-store/kv-store.gateway';
 import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
 import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
 import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
+import { AxiosResponse } from 'axios';
 
 describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
@@ -208,21 +211,20 @@ describe('ExchangeOracleApiGateway', () => {
 
   describe('fetchDiscoveredJobs', () => {
     it('should successfully call get discovered jobs', async () => {
+      jest.spyOn(httpService, 'request').mockReturnValue(
+        of({
+          data: responseFixture,
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: {},
+        } as AxiosResponse),
+      );
       const command = jobsDiscoveryParamsCommandFixture;
-      const expectedMappedData: JobsDiscoveryParamsData = {
-        escrow_address: command.data.escrowAddress,
-        chain_id: command.data.chainId,
-        sort_field: command.data.sortField,
-        job_type: command.data.jobType,
-        fields: command.data.fields,
-        status: command.data.status,
-        page: command.data.page,
-        sort: command.data.sort,
-        page_size: command.data.pageSize,
-      };
+      const expectedMappedData: JobsDiscoveryParamsData = paramsDataFixture;
       nock(jobAssignmentOracleUrl)
         .get(`/assignment${paramsDataFixtureAsString}`)
-        .reply(200);
+        .reply(200, responseFixture);
       await gateway.fetchJobs(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({

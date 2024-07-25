@@ -48,7 +48,7 @@ export const oracleStatsResponseFixture: OracleStatisticsResponse = {
 export const generalUserStatsCommandFixture: UserStatisticsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
-  walletAddress: jwtUserDataFixture.address,
+  walletAddress: jwtUserDataFixture.wallet_address,
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {

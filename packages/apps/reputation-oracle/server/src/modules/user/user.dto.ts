@@ -65,10 +65,10 @@ export class RegisterAddressRequestDto {
   public signature: string;
 }
 
-export class RegisterAddressResponseDto {
-  @ApiProperty({ name: 'signed_address' })
+export class EnableOperatorDto {
+  @ApiProperty()
   @IsString()
-  public signedAddress: string;
+  public signature: string;
 }
 
 export class DisableOperatorDto {
@@ -108,4 +108,14 @@ export class PrepareSignatureDto {
   })
   @IsEnum(SignatureType)
   public type: SignatureType;
+}
+
+export class RegisterOracleDto {
+  @ApiProperty({ description: 'Ethereum address of the oracle' })
+  @IsEthereumAddress()
+  public oracleAddress: string;
+}
+
+export class RegisteredOraclesDto {
+  public oracleAddresses: string[];
 }

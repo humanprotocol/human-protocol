@@ -88,9 +88,9 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
                   nextContinuationToken,
                 )}`
               : ''
-          }${url.pathname ? `&prefix=${url.pathname}` : ''}`;
+          }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`;
         } else {
-          requestOptions += `${url.pathname ? `${url.pathname}` : ''}?list-type=2${
+          requestOptions += `${url.pathname ? `${url.pathname.replace(/^\//, '')}` : ''}?list-type=2${
             nextContinuationToken
               ? `&continuation-token=${encodeURIComponent(
                   nextContinuationToken,
@@ -98,7 +98,6 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
               : ''
           }`;
         }
-
         const response = await axios.get(requestOptions);
 
         if (response.status === HttpStatus.OK && response.data) {

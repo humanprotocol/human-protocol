@@ -14,6 +14,9 @@ import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchan
 
 @Injectable()
 export class StatisticsService {
+  get cachePrefix() {
+    return 'Statistics:';
+  }
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
@@ -23,18 +26,17 @@ export class StatisticsService {
     command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
     const address = command.oracleAddress;
+    const key = this.cachePrefix + address;
     const cachedStatistics: OracleStatisticsResponse | undefined =
-      await this.cacheManager.get(address);
+      await this.cacheManager.get(this.cachePrefix + address);
     if (cachedStatistics) {
       return cachedStatistics;
     }
     const response: OracleStatisticsResponse =
       await this.exchangeOracleGateway.fetchOracleStatistics(command);
-    await this.cacheManager.set(
-      address,
-      response,
-      this.configService.cacheTtlOracleStats,
-    );
+    await this.cacheManager.set(key, response, {
+      ttl: this.configService.cacheTtlOracleStats,
+    } as any);
     return response;
   }
   async getUserStats(
@@ -48,11 +50,9 @@ export class StatisticsService {
     }
     const response =
       await this.exchangeOracleGateway.fetchUserStatistics(command);
-    await this.cacheManager.set(
-      userCacheKey,
-      response,
-      this.configService.cacheTtlUserStats,
-    );
+    await this.cacheManager.set(userCacheKey, response, {
+      ttl: this.configService.cacheTtlUserStats,
+    } as any);
     return response;
   }
 }

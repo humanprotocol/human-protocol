@@ -88,10 +88,6 @@ export class JobAssignmentProfile extends AutomapperProfile {
         mapper,
         ResignJobDto,
         ResignJobCommand,
-        forMember(
-          (destination) => destination.oracleAddress,
-          mapFrom((source) => source.address),
-        ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),

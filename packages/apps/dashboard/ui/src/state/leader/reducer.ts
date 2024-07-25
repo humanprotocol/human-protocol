@@ -110,7 +110,7 @@ export const fetchLeaderEscrowsAsync = createAsyncThunk<
   { state: AppState }
 >('leader/fetchLeaderEscrowsAsync', async ({ chainId, address }) => {
   const launchedEscrows = await EscrowUtils.getEscrows({
-    networks: [chainId],
+    chainId: chainId,
     launcher: address,
   });
 

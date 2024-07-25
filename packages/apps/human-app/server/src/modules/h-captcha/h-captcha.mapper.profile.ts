@@ -51,7 +51,7 @@ export class HCaptchaMapperProfile extends AutomapperProfile {
         ),
         forMember(
           (destination) => destination.secret,
-          mapFrom((source) => source.address),
+          mapFrom((source) => source.wallet_address),
         ),
       );
     };

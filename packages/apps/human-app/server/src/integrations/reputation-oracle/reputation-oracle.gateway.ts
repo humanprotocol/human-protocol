@@ -111,7 +111,7 @@ export class ReputationOracleGateway {
     options: AxiosRequestConfig,
   ): Promise<T> {
     const response = await lastValueFrom(this.httpService.request(options));
-    return response.data;
+    return response.data as T;
   }
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(
@@ -304,5 +304,14 @@ export class ReputationOracleGateway {
       data,
     );
     return this.handleRequestToReputationOracle<TokenRefreshResponse>(options);
+  }
+
+  sendKycOnChain(token: string) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.KYC_ON_CHAIN,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
   }
 }

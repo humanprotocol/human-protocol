@@ -106,6 +106,20 @@ Initializes a HMTHolder instance.
   * **address** (`str`) – Holder address
   * **balance** (`int`) – Holder balance
 
+### *class* human_protocol_sdk.statistics.statistics_client.HMTHoldersParam(address=None, order_direction='asc')
+
+Bases: `object`
+
+A class used to specify parameters for querying HMT holders.
+
+#### \_\_init_\_(address=None, order_direction='asc')
+
+Initializes a HMTHoldersParam instance.
+
+* **Parameters:**
+  * **address** (`Optional`[`str`]) – Filter by holder’s address
+  * **order_direction** (`str`) – Optional. Direction of sorting (‘asc’ for ascending, ‘desc’ for descending)
+
 ### *class* human_protocol_sdk.statistics.statistics_client.HMTStatistics(total_transfer_amount, total_transfer_count, total_holders, holders, daily_hmt_data)
 
 Bases: `object`
@@ -172,6 +186,34 @@ Get escrow statistics data for the given date range.
           StatisticsParam(
               date_from=datetime.datetime(2023, 5, 8),
               date_to=datetime.datetime(2023, 6, 8),
+          )
+      )
+  )
+  ```
+
+#### get_hmt_holders(param=<human_protocol_sdk.statistics.statistics_client.HMTHoldersParam object>)
+
+Get HMT holders data with optional filters and ordering.
+
+* **Parameters:**
+  **param** ([`HMTHoldersParam`](#human_protocol_sdk.statistics.statistics_client.HMTHoldersParam)) – Object containing filter and order parameters
+* **Return type:**
+  `List`[[`HMTHolder`](#human_protocol_sdk.statistics.statistics_client.HMTHolder)]
+* **Returns:**
+  List of HMT holders
+* **Example:**
+  ```python
+  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
+
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+  print(statistics_client.get_hmt_holders())
+  print(
+      statistics_client.get_hmt_holders(
+          HMTHoldersParam(
+              address="0x123...",
+              order_direction="asc",
           )
       )
   )

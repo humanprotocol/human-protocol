@@ -6,9 +6,7 @@ import {
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 @Injectable()
 export class JobsDiscoveryService {
-  constructor(
-    private readonly exchangeOracleGateway: ExchangeOracleGateway,
-  ) {}
+  constructor(private readonly exchangeOracleGateway: ExchangeOracleGateway) {}
 
   async processJobsDiscovery(
     command: JobsDiscoveryParamsCommand,

@@ -99,7 +99,7 @@ export class JobController {
   ): Promise<SolveJobResponseDto> {
     const { assignmentId, solution } = solveJobDto;
 
-    await this.jobService.solveJob(assignmentId, solution);
+    await this.jobService.solveJob(Number(assignmentId), solution);
 
     const response: SolveJobResponseDto = {
       assignmentId,

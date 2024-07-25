@@ -76,8 +76,6 @@ export const envValidator = Joi.object({
   // APIKey
   APIKEY_ITERATIONS: Joi.number(),
   APIKEY_KEY_LENGTH: Joi.number(),
-  // Cron Job Secret
-  CRON_SECRET: Joi.string().required(),
   //COIN API KEYS
   RATE_CACHE_TIME: Joi.number().optional(),
   COINMARKETCAP_API_KEY: Joi.string().optional(),

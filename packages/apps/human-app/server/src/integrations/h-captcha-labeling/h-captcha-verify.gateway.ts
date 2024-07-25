@@ -20,7 +20,7 @@ import {
 import { HCaptchaLabelingVerifyEndpoints } from '../../common/enums/reputation-oracle-endpoints';
 import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 
-Injectable()
+Injectable();
 export class HCaptchaVerifyGateway {
   private readonly gatewayConfig: GatewayConfig;
   constructor(

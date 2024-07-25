@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { UserEntity } from './user.entity';
+import { Role, UserStatus } from '../../common/enums/user';
 
 @Injectable()
 export class UserRepository extends BaseRepository<UserEntity> {
@@ -12,27 +13,65 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async findById(id: number): Promise<UserEntity | null> {
     return this.findOne({
       where: { id },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
-  async findByEmail(email: string): Promise<UserEntity | null> {
+  async findOneByEmail(email: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { email },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
-  async findByAddress(address: string): Promise<UserEntity | null> {
+  async findOneByAddress(address: string): Promise<UserEntity | null> {
     return this.findOne({
-      where: { evmAddress: address },
-      relations: { kyc: true, siteKey: true },
+      where: { evmAddress: address.toLowerCase() },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
-  public async findOneByEvmAddress(
-    evmAddress: string,
-  ): Promise<UserEntity | null> {
-    return this.findOne({ where: { evmAddress } });
+  async findByEmail(
+    emails: string[],
+    role?: Role,
+    status?: UserStatus,
+  ): Promise<UserEntity[]> {
+    const whereConditions = emails.map((email) => {
+      const condition: any = { email };
+      if (role) {
+        condition.role = role;
+      }
+      if (status) {
+        condition.status = status;
+      }
+      return condition;
+    });
+
+    return this.find({
+      where: whereConditions,
+      relations: { kyc: true, siteKeys: true },
+    });
+  }
+
+  async findByAddress(
+    addresses: string[],
+    role?: Role,
+    status?: UserStatus,
+  ): Promise<UserEntity[]> {
+    const whereConditions = addresses.map((address) => {
+      const condition: any = { evmAddress: address.toLowerCase() };
+      if (role) {
+        condition.role = role;
+      }
+      if (status) {
+        condition.status = status;
+      }
+      return condition;
+    });
+
+    return this.find({
+      where: whereConditions,
+      relations: { kyc: true, siteKeys: true },
+    });
   }
 }
