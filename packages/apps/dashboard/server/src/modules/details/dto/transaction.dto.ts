@@ -15,7 +15,7 @@ export class TransactionPaginationDto {
   })
   @IsString()
   @Expose()
-  public hash: string;
+  public txHash: string;
 
   @ApiProperty({ example: '0xad1F7e45D83624A0c628F1B03477c6E129EddB78' })
   @IsString()
