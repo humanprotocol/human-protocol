@@ -4,23 +4,24 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { colorPalette } from '@assets/styles/color-palette';
 import TitleSectionWrapper from '@components/SearchResults';
+import { AddressDetailsEscrowSchema } from '@services/api/use-address-details';
 
-const HARDCODED_ESCROW_ADDRESS = {
-	token: 'HMT',
-	balance: '234645753',
-	factoryAddress: '412143a395e032e76c0dc0f83606031',
-	totalFoundedAmount: '234638547865753',
-	paidAmount: '25687',
-	status: 'Launched',
-	jobLauncher: '0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031',
-	exchangeOracle: 'xxxxxxxxxx',
-	recordingOracle: 'xxxxxxxxxx',
-	reputationOracle: 'xxxxxxxxxx',
-	manifest: 'xxxxxxxxxx',
-	results: 'xxxxxxxxxx',
-};
-
-const EscrowAddress = () => {
+const EscrowAddress = ({
+	data: {
+		token,
+		balance,
+		factoryAddress,
+		totalFundedAmount,
+		amountPaid,
+		status,
+		launcher,
+		exchangeOracle,
+		recordingOracle,
+		reputationOracle,
+	},
+}: {
+	data: AddressDetailsEscrowSchema;
+}) => {
 	return (
 		<Card
 			sx={{
@@ -30,70 +31,58 @@ const EscrowAddress = () => {
 		>
 			<Stack gap={4}>
 				<TitleSectionWrapper title="Token">
-					<Typography>{HARDCODED_ESCROW_ADDRESS.token ?? 'N/A'}</Typography>
+					<Typography>{token}</Typography>
 				</TitleSectionWrapper>
 				<TitleSectionWrapper
 					tooltip={{ description: 'Amount of HMT in Escrow' }}
 					title="Balance"
 				>
-					{HARDCODED_ESCROW_ADDRESS.balance ? (
-						<Typography>
-							{HARDCODED_ESCROW_ADDRESS.balance}
-							<Typography
-								sx={{
-									marginLeft: 0.5,
-								}}
-								color={colorPalette.fog.main}
-								component="span"
-							>
-								{HARDCODED_ESCROW_ADDRESS.token}
-							</Typography>
+					<Typography>
+						{balance}
+						<Typography
+							sx={{
+								marginLeft: 0.5,
+							}}
+							color={colorPalette.fog.main}
+							component="span"
+						>
+							HMT
 						</Typography>
-					) : (
-						<Typography>N/A</Typography>
-					)}
+					</Typography>
 				</TitleSectionWrapper>
 				<TitleSectionWrapper
 					title="Factory Address"
 					tooltip={{ description: 'Address of EscrowFactory contract' }}
 				>
-					<Typography>{HARDCODED_ESCROW_ADDRESS.factoryAddress}</Typography>
+					<Typography>{factoryAddress}</Typography>
 				</TitleSectionWrapper>
 				<TitleSectionWrapper title="Total Funded Amount">
-					{HARDCODED_ESCROW_ADDRESS.totalFoundedAmount ? (
-						<Typography>
-							{HARDCODED_ESCROW_ADDRESS.totalFoundedAmount}
-							<Typography
-								sx={{
-									marginLeft: 0.5,
-								}}
-								color={colorPalette.fog.main}
-								component="span"
-							>
-								HMT
-							</Typography>
+					<Typography>
+						{totalFundedAmount}
+						<Typography
+							sx={{
+								marginLeft: 0.5,
+							}}
+							color={colorPalette.fog.main}
+							component="span"
+						>
+							HMT
 						</Typography>
-					) : (
-						<Typography>N/A</Typography>
-					)}
+					</Typography>
 				</TitleSectionWrapper>
 				<TitleSectionWrapper title="Paid Amount">
-					{HARDCODED_ESCROW_ADDRESS.paidAmount ? (
-						<Typography>
-							{HARDCODED_ESCROW_ADDRESS.paidAmount}
-							<Typography
-								sx={{
-									marginLeft: 0.5,
-								}}
-								color={colorPalette.fog.main}
-								component="span"
-							>
-								HMT
-							</Typography>
+					<Typography>
+						{amountPaid}
+						<Typography
+							sx={{
+								marginLeft: 0.5,
+							}}
+							color={colorPalette.fog.main}
+							component="span"
+						>
+							HMT
 						</Typography>
-					) : (
-						<Typography>N/A</Typography>
-					)}
+					</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper title="Status">
@@ -106,7 +95,7 @@ const EscrowAddress = () => {
 						}}
 					>
 						<Typography color={colorPalette.secondary.main}>
-							{HARDCODED_ESCROW_ADDRESS.status}
+							{status}
 						</Typography>
 					</Box>
 				</TitleSectionWrapper>
@@ -117,9 +106,7 @@ const EscrowAddress = () => {
 						description: 'Address of the Job Launcher that created the escrow',
 					}}
 				>
-					<Typography sx={{ wordBreak: 'break-word' }}>
-						{HARDCODED_ESCROW_ADDRESS.jobLauncher}
-					</Typography>
+					<Typography sx={{ wordBreak: 'break-word' }}>{launcher}</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper
@@ -129,7 +116,7 @@ const EscrowAddress = () => {
 							"The Exchange Oracle is HUMAN Protocol's powerhouse, routing tasks to skilled workers ensuring smooth communication.",
 					}}
 				>
-					<Typography>{HARDCODED_ESCROW_ADDRESS.exchangeOracle}</Typography>
+					<Typography>{exchangeOracle}</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper
@@ -141,7 +128,7 @@ const EscrowAddress = () => {
 							"From quality checks to reputation adjustments, it's the assurance you need for dependable results.",
 					}}
 				>
-					<Typography>{HARDCODED_ESCROW_ADDRESS.recordingOracle}</Typography>
+					<Typography>{recordingOracle}</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper
@@ -152,20 +139,7 @@ const EscrowAddress = () => {
 							"It's the final seal of quality and trust within the ecosystem.",
 					}}
 				>
-					<Typography>{HARDCODED_ESCROW_ADDRESS.reputationOracle}</Typography>
-				</TitleSectionWrapper>
-
-				<TitleSectionWrapper
-					title="Manifest Oracle"
-					tooltip={{
-						description: 'Metadata file containing job information',
-					}}
-				>
-					<Typography>{HARDCODED_ESCROW_ADDRESS.manifest}</Typography>
-				</TitleSectionWrapper>
-
-				<TitleSectionWrapper title="Results">
-					<Typography>{HARDCODED_ESCROW_ADDRESS.results ?? 'N/A'}</Typography>
+					<Typography>{reputationOracle}</Typography>
 				</TitleSectionWrapper>
 			</Stack>
 		</Card>

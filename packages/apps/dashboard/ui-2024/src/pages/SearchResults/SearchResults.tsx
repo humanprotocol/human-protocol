@@ -4,31 +4,47 @@ import ShadowIcon from '@components/ShadowIcon';
 import WalletIcon from '@assets/icons/excluded/wallet.svg';
 import EscrowIcon from '@assets/icons/excluded/escrow.svg';
 import Clipboard from '@components/Clipboard';
-import { useState } from 'react';
-import RoleDetails from '@pages/SearchResults/RoleDetails';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import EscrowAddress from '@pages/SearchResults/EscrowAddress';
 import WalletAddress from '@pages/SearchResults/WalletAddress';
 import NothingFound from '@components/NothingFound';
 import Breadcrumbs from '@components/Breadcrumbs';
 import Search from '@components/Search';
-
-// const TOKEN_ID = '0x67499f129433b82e5a4e412143a395e032e76c0dc0f83606031';
+import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import Loader from '@components/Loader';
+import { getNetwork } from '@utils/config/networks';
+import {
+	AddressDetails,
+	useAddressDetails,
+} from '@services/api/use-address-details';
+import { useNavigate } from 'react-router-dom';
+import { Box } from '@mui/material';
+import { handleErrorMessage } from '@services/handle-error-message';
+import RoleDetails from '@pages/SearchResults/RoleDetails/RoleDetails';
+import { AxiosError } from 'axios';
 
 const renderCurrentResultType = (
-	type: 'roleDetails' | 'escrowAddress' | 'walletAddress' | null,
+	addressDetails: AddressDetails,
 	tokenId: string | undefined
 ) => {
-	const renderType = {
-		roleDetails: {
+	const type = Object.keys(addressDetails)[0] as
+		| keyof AddressDetails
+		| undefined;
+
+	const renderType: Record<
+		keyof AddressDetails,
+		{ title: string; icon: string }
+	> = {
+		leader: {
 			title: 'Role Details',
 			icon: WalletIcon,
 		},
-		escrowAddress: {
+		escrow: {
 			title: 'Escrow Address',
 			icon: EscrowIcon,
 		},
-		walletAddress: {
+		wallet: {
 			title: 'Wallet Address',
 			icon: WalletIcon,
 		},
@@ -46,28 +62,96 @@ const renderCurrentResultType = (
 	);
 };
 
-const SearchResults = () => {
-	const { tokenId } = useParams();
-	const [currentState] = useState<
-		'roleDetails' | 'escrowAddress' | 'walletAddress' | null
-	>('roleDetails');
+const ResultError = ({ error }: { error: unknown }) => {
+	if (error instanceof AxiosError && error.response?.status === 400) {
+		return <NothingFound />;
+	}
+	return <Box>{handleErrorMessage(error)}</Box>;
+};
+
+const Results = () => {
+	const { data, status, error } = useAddressDetails();
+	const { filterParams } = useWalletSearch();
+
+	if (status === 'pending' && !data) {
+		return <Loader height="50vh" />;
+	}
+
+	if (status === 'error') {
+		return <ResultError error={error} />;
+	}
+
 	return (
-		<PageWrapper displaySearchBar className="standard-background">
-			<Breadcrumbs title="Search Results" />
-			<Search className="search-results-bar" />
+		<>
 			<Stack
 				sx={{ marginBottom: 2, marginTop: { xs: 0, md: 4 } }}
 				direction={{ xs: 'column', md: 'row' }}
 				gap={3}
 				alignItems={{ xs: 'stretch', md: 'center' }}
 			>
-				{renderCurrentResultType(currentState, tokenId)}
+				{renderCurrentResultType(data, filterParams.address)}
 			</Stack>
+			{data.leader ? <RoleDetails data={data.leader} /> : null}
+			{data.escrow ? <EscrowAddress data={data.escrow} /> : null}
+			{data.wallet ? <WalletAddress data={data.wallet} /> : null}
+		</>
+	);
+};
 
-			{currentState === 'roleDetails' && <RoleDetails />}
-			{currentState === 'escrowAddress' && <EscrowAddress />}
-			{currentState === 'walletAddress' && <WalletAddress />}
-			{currentState === null && <NothingFound />}
+const SearchResults = () => {
+	const history = useNavigate();
+	const { chainId: urlChainId, address: urlAddress } = useParams();
+	const {
+		setAddress,
+		setChainId,
+		filterParams: { chainId, address },
+	} = useWalletSearch();
+	const [paramsStatus, setParamsStatus] = useState<
+		'loading' | 'error' | 'success'
+	>('loading');
+
+	useEffect(() => {
+		if (paramsStatus === 'success') return;
+		if (urlAddress) {
+			setAddress(urlAddress);
+		} else {
+			setParamsStatus('error');
+			return;
+		}
+		const chainIdFromUrl = Number(urlChainId);
+		if (
+			!Number.isNaN(chainIdFromUrl) &&
+			chainIdFromUrl &&
+			getNetwork(chainIdFromUrl)
+		) {
+			setChainId(chainIdFromUrl);
+		} else {
+			setParamsStatus('error');
+		}
+	}, [
+		address,
+		chainId,
+		paramsStatus,
+		setAddress,
+		setChainId,
+		urlAddress,
+		urlChainId,
+	]);
+
+	useEffect(() => {
+		if (address && chainId && paramsStatus !== 'success') {
+			setParamsStatus('success');
+		}
+		history(`/search/${chainId}/${address}`);
+	}, [address, chainId, history, paramsStatus]);
+
+	return (
+		<PageWrapper displaySearchBar className="standard-background">
+			<Breadcrumbs title="Search Results" />
+			<Search className="search-results-bar" />
+			{paramsStatus === 'loading' && <Loader />}
+			{paramsStatus === 'error' && 'Error'}
+			{paramsStatus === 'success' && <Results />}
 		</PageWrapper>
 	);
 };

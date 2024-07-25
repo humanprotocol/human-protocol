@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
@@ -12,7 +12,7 @@ import {
 	SelectChangeEvent,
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
-import { networks } from '@utils/config/networks';
+import { getNetwork, networks } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 
 const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
@@ -30,9 +30,10 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 	};
 
 	const handleSelectChange = (event: SelectChangeEvent<string>) => {
-		setSelectValue(event.target.value);
-		// TODO add function that get chain if for network
-		setChainId(3);
+		const chainId = Number(event.target.value);
+		setChainId(chainId);
+		const networkName = getNetwork(chainId)?.name || '';
+		setSelectValue(networkName);
 	};
 
 	const handleClearClick = () => {
@@ -49,8 +50,19 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		navigate(`/search/${selectValue}/${inputValue}`);
+		navigate(`/search/${filterParams.chainId}/${filterParams.address}`);
 	};
+
+	useEffect(() => {
+		const networkName = getNetwork(filterParams.chainId || -1)?.name || '';
+		if (networkName) {
+			setSelectValue(networkName);
+		}
+	}, [filterParams.chainId]);
+
+	useEffect(() => {
+		setInputValue(filterParams.address);
+	}, [filterParams.address]);
 
 	return (
 		<form
@@ -136,12 +148,12 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 													Network
 												</span>
 											)
-										: undefined
+										: () => selectValue
 								}
 							>
-								{networks.map(({ networkDisplayName, networkName }) => (
-									<MenuItem key={networkName} value={networkName}>
-										{networkDisplayName}
+								{networks.map((network) => (
+									<MenuItem key={network.name} value={network.id}>
+										{network.name}
 									</MenuItem>
 								))}
 							</MuiSelect>

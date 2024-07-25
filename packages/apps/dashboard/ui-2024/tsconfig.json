@@ -26,7 +26,8 @@
       "@assets/*": ["src/assets/*"],
       "@pages/*": ["src/pages/*"],
       "@api/*": ["src/api/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@services/*": ["src/services/*"]
     }
   },
   "include": ["src"],
