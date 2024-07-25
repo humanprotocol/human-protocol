@@ -17,6 +17,7 @@ import {
   jobResignAssignedCommandFixture,
   jobsFetchParamsCommandFixture,
   jobsFetchParamsDataFixtureAsString,
+  workerRegisterUrl,
 } from '../../../modules/job-assignment/spec/job-assignment.fixtures';
 import { ExchangeOracleProfile } from '../exchange-oracle.mapper.profile';
 import {
@@ -32,6 +33,8 @@ import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
 import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
 import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { AxiosResponse } from 'axios';
+import { RegisterWorkerData } from '../../../modules/user-worker/model/worker-registration.model';
+import { registerWorkerCommandFixture, registerWorkerDataFixture, responseWorkerFixture } from '../../../modules/user-worker/spec/worker.fixtures';
 
 describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
@@ -231,6 +234,37 @@ describe('ExchangeOracleApiGateway', () => {
           url: EXCHANGE_ORACLE_ADR + '/job',
           method: HttpMethod.GET,
           params: expectedMappedData,
+          headers: {
+            Authorization: command.token,
+            Accept: 'application/json',
+          },
+        }),
+      );
+    });
+  });
+
+  describe('registerWorker', () => {
+    it('should successfully call register worker', async () => {
+      jest.spyOn(httpService, 'request').mockReturnValue(
+        of({
+          data: responseWorkerFixture,
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: {},
+        } as AxiosResponse),
+      );
+      const command = registerWorkerCommandFixture;
+      const expectedMappedData: RegisterWorkerData = registerWorkerDataFixture;
+      nock(workerRegisterUrl)
+        .post(`/register`)
+        .reply(200, responseWorkerFixture);
+      await gateway.registerWorker(command);
+      expect(httpService.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: EXCHANGE_ORACLE_ADR + '/register',
+          method: HttpMethod.POST,
+          data: expectedMappedData,
           headers: {
             Authorization: command.token,
             Accept: 'application/json',
