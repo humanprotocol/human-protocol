@@ -38,7 +38,7 @@ class TransactionData:
         self,
         chain_id: ChainId,
         block: int,
-        hash: str,
+        tx_hash: str,
         from_address: str,
         to_address: str,
         timestamp: int,
@@ -47,7 +47,7 @@ class TransactionData:
     ):
         self.chain_id = chain_id
         self.block = block
-        self.hash = hash
+        self.tx_hash = tx_hash
         self.from_address = from_address
         self.to_address = to_address
         self.timestamp = timestamp
@@ -109,7 +109,7 @@ class TransactionUtils:
         return TransactionData(
             chain_id=chain_id,
             block=transaction.get("block", 0),
-            hash=transaction.get("txHash", ""),
+            tx_hash=transaction.get("txHash", ""),
             from_address=transaction.get("from", ""),
             to_address=transaction.get("to", ""),
             timestamp=transaction.get("timestamp", 0),
@@ -181,7 +181,7 @@ class TransactionUtils:
                 TransactionData(
                     chain_id=filter.chain_id,
                     block=transaction.get("block", 0),
-                    hash=transaction.get("txHash", ""),
+                    tx_hash=transaction.get("txHash", ""),
                     from_address=transaction.get("from", ""),
                     to_address=transaction.get("to", ""),
                     timestamp=transaction.get("timestamp", 0),
