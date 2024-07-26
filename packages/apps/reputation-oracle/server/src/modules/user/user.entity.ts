@@ -41,7 +41,7 @@ export class UserEntity extends BaseEntity implements IUser {
   public kyc?: KycEntity;
 
   @OneToMany(() => SiteKeyEntity, (siteKey) => siteKey.user)
-  public siteKeys: SiteKeyEntity[];
+  public siteKeys?: SiteKeyEntity[];
 
   @OneToMany(
     () => UserQualificationEntity,
