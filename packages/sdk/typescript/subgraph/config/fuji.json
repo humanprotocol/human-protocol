@@ -1,0 +1,42 @@
+{
+  "network": "fuji",
+  "description": "Human subgraph on Avalanche testnet (Fuji C-Chain)",
+  "EscrowFactory": {
+    "address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
+    "startBlock": 26449198,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x9406d5c635AD22b0d76c75E52De57A2177919ca3",
+    "startBlock": 14935627,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0x4c0e5f15b38bC8cfD90DDEa183C180cdCcAF7406"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3",
+    "startBlock": 26449192,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x3aD4B091E054f192a822D1406f4535eAd38580e4",
+    "startBlock": 27495191,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
+    "startBlock": 26449207,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrowFactory": {
+    "address": "0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88",
+    "startBlock": 14957503,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/EscrowFactory.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

@@ -98,11 +98,17 @@ export class ReputationService {
     // Decreases or increases the reputation score for the recording oracle based on job completion status.
     const recordingOracleAddress =
       await escrowClient.getRecordingOracleAddress(escrowAddress);
-
     await this.increaseReputation(
       chainId,
       recordingOracleAddress,
       ReputationEntityType.RECORDING_ORACLE,
+    );
+
+    const reputationOracleAddress = this.web3Service.getOperatorAddress();
+    await this.increaseReputation(
+      chainId,
+      reputationOracleAddress,
+      ReputationEntityType.REPUTATION_ORACLE,
     );
   }
 
@@ -251,6 +257,15 @@ export class ReputationService {
       reputationEntity.address = address;
       reputationEntity.reputationPoints = INITIAL_REPUTATION + 1;
       reputationEntity.type = type;
+
+      if (
+        type === ReputationEntityType.REPUTATION_ORACLE &&
+        address === this.web3Service.getOperatorAddress()
+      ) {
+        reputationEntity.reputationPoints =
+          this.reputationConfigService.highLevel;
+      }
+
       this.reputationRepository.createUnique(reputationEntity);
       return;
     }
@@ -287,6 +302,13 @@ export class ReputationService {
       return;
     }
 
+    if (
+      type === ReputationEntityType.REPUTATION_ORACLE &&
+      address === this.web3Service.getOperatorAddress()
+    ) {
+      return;
+    }
+
     if (reputationEntity.reputationPoints === INITIAL_REPUTATION) {
       return;
     }
@@ -308,6 +330,15 @@ export class ReputationService {
     chainId: ChainId,
     address: string,
   ): Promise<ReputationDto> {
+    // https://github.com/humanprotocol/human-protocol/issues/1047
+    if (address === this.web3Service.getOperatorAddress()) {
+      return {
+        chainId,
+        address,
+        reputation: ReputationLevel.HIGH,
+      };
+    }
+
     const reputationEntity =
       await this.reputationRepository.findOneByAddressAndChainId(
         address,

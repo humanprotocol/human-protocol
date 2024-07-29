@@ -38,6 +38,7 @@ export type CreateFortuneJobRequest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
+  currency: string;
   fundAmount: number;
 };
 
@@ -45,6 +46,7 @@ export type CreateCvatJobRequest = {
   chainId: number;
   requesterDescription: string;
   fundAmount: number;
+  currency: string;
   data: CvatDataSource;
   labels: string[];
   minQuality: number;
@@ -241,6 +243,8 @@ export enum JobStatus {
   COMPLETED = 'COMPLETED',
   TO_CANCEL = 'TO_CANCEL',
   PAID = 'PAID',
+  SET_UP = 'SET_UP',
+  CREATED = 'CREATED',
 }
 
 export type JobDetailsResponse = {

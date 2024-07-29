@@ -9,6 +9,7 @@ import {
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
   Query,
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import {
   KycSessionDto,
+  KycSignedAddressDto,
   KycStatusDto,
   KycUpdateWebhookQueryDto,
 } from './kyc.dto';
@@ -68,5 +70,24 @@ export class KycController {
     @Body() data: KycStatusDto,
   ): Promise<void> {
     return this.kycService.updateKycStatus(query.secret, data);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('/on-chain')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get Signed Address',
+    description: 'Endpoint to get a signed address for the KYC process.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'KYC signed address generated successfully',
+    type: KycSignedAddressDto,
+  })
+  async getSignedAddress(
+    @Req() request: RequestWithUser,
+  ): Promise<KycSignedAddressDto> {
+    return this.kycService.getSignedAddress(request.user);
   }
 }

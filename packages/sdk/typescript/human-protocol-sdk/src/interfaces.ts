@@ -1,5 +1,5 @@
 import { EscrowStatus } from './types';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -40,7 +40,7 @@ export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
 }
 
 export interface ILeadersFilter {
-  networks: ChainId[];
+  chainId: ChainId;
   role?: string;
 }
 
@@ -66,7 +66,7 @@ export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {
   jobTypes?: string;
 }
 
-export interface IEscrowsFilter {
+export interface IEscrowsFilter extends IPagination {
   launcher?: string;
   reputationOracle?: string;
   recordingOracle?: string;
@@ -75,7 +75,7 @@ export interface IEscrowsFilter {
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
-  networks: ChainId[];
+  chainId: ChainId;
 }
 
 export interface IEscrowConfig {
@@ -102,9 +102,45 @@ export interface IStatisticsParams {
   limit?: number;
 }
 
+export interface IHMTHoldersParams {
+  address?: string;
+  orderDirection?: 'asc' | 'desc';
+}
+
 export interface IPayoutFilter {
   escrowAddress?: string;
   recipient?: string;
   from?: Date;
   to?: Date;
+}
+
+export interface IKVStore {
+  key: string;
+  value: string;
+}
+
+export interface ITransaction {
+  block: bigint;
+  hash: string;
+  from: string;
+  to: string;
+  timestamp: bigint;
+  value: string;
+  method: string;
+}
+
+export interface ITransactionsFilter extends IPagination {
+  chainId: ChainId;
+  startBlock?: number;
+  endBlock?: number;
+  startDate?: Date;
+  endDate?: Date;
+  fromAddress?: string;
+  toAddress?: string;
+}
+
+export interface IPagination {
+  first?: number;
+  skip?: number;
+  orderDirection?: OrderDirection;
 }

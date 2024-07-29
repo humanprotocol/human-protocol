@@ -21,6 +21,8 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { E2E_TEST_ENV } from './common/constants';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { ScheduleModule } from '@nestjs/schedule';
+import { StatisticModule } from './modules/statistic/statistic.module';
 
 @Module({
   providers: [
@@ -42,6 +44,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     },
   ],
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       ignoreEnvFile: process.env.NODE_ENV === E2E_TEST_ENV,
       ...(process.env.NODE_ENV !== E2E_TEST_ENV && {
@@ -62,10 +65,11 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     Web3Module,
     StorageModule,
     WebhookModule,
+    StatisticModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
-        '../../../../../',
+        '../../../../../../',
         'node_modules/swagger-ui-dist',
       ),
     }),

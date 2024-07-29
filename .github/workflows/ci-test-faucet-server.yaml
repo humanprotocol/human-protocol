@@ -22,5 +22,5 @@ jobs:
       - run: cp .env.example .env
         name: Create .env file
         working-directory: packages/apps/faucet-server
-      - run: yarn faucet-server:test
+      - run: yarn workspace @human-protocol/faucet-server test
         name: Run faucet-server test

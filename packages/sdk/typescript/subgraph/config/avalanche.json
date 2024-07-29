@@ -1,0 +1,42 @@
+{
+  "network": "avalanche",
+  "description": "Human subgraph on Avalanche Mainnet",
+  "EscrowFactory": {
+    "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+    "startBlock": 28745625,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x12365293cb6477d4fc2686e46bb97e3fb64f1550",
+    "startBlock": 20412574,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "0",
+    "contractDeployer": "bridge"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
+    "startBlock": 36012046,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x9Bc7bff35B2Be2413708d48c3B0aEF5c43646728",
+    "startBlock": 38431384,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0x4A5963Dd6792692e9147EdC7659936b96251917a",
+    "startBlock": 36026027,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrowFactory": {
+    "address": "0x9767a578ba7a5FA1563c8229943cB01cd8446BB4",
+    "startBlock": 23168540,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/EscrowFactory.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

@@ -8,6 +8,7 @@ import { StatisticsClient } from '../src/statistics';
 import {
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
+  GET_HOLDERS_QUERY,
 } from '../src/graphql/queries';
 
 vi.mock('axios');
@@ -61,11 +62,11 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_ESCROW_STATISTICS_QUERY
       );
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -124,7 +125,7 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -180,7 +181,7 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -241,6 +242,8 @@ describe('StatisticsClient', () => {
               timestamp: 1,
               dailyHMTTransferCount: '4',
               dailyHMTTransferAmount: '100',
+              dailyUniqueSenders: '100',
+              dailyUniqueReceivers: '100',
             },
           ],
         });
@@ -254,7 +257,7 @@ describe('StatisticsClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -277,6 +280,8 @@ describe('StatisticsClient', () => {
             timestamp: new Date(1000),
             totalTransactionAmount: ethers.toBigInt(100),
             totalTransactionCount: 4,
+            dailyUniqueSenders: 100,
+            dailyUniqueReceivers: 100,
           },
         ],
       });
@@ -293,6 +298,166 @@ describe('StatisticsClient', () => {
           to: new Date(),
         })
       ).rejects.toThrow('Error');
+
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getHMTHolders', () => {
+    test('should successfully get HMT holders', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x123',
+            balance: '10',
+          },
+          {
+            address: '0x456',
+            balance: '20',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders();
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY(),
+        {
+          address: undefined,
+          orderBy: 'balance',
+          orderDirection: undefined,
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+        {
+          address: '0x456',
+          balance: ethers.toBigInt(20),
+        },
+      ]);
+    });
+
+    test('should filter HMT holders by address', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x123',
+            balance: '10',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders({
+        address: '0x123',
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY('0x123'),
+        {
+          address: '0x123',
+          orderBy: 'balance',
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+      ]);
+    });
+
+    test('should order HMT holders by balance ascending', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x123',
+            balance: '10',
+          },
+          {
+            address: '0x456',
+            balance: '20',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders({
+        orderBy: 'balance',
+        orderDirection: 'asc',
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY(),
+        {
+          orderBy: 'balance',
+          orderDirection: 'asc',
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+        {
+          address: '0x456',
+          balance: ethers.toBigInt(20),
+        },
+      ]);
+    });
+
+    test('should order HMT holders by balance descending', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x456',
+            balance: '20',
+          },
+          {
+            address: '0x123',
+            balance: '10',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders({
+        orderDirection: 'desc',
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY(),
+        {
+          orderBy: 'balance',
+          orderDirection: 'desc',
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x456',
+          balance: ethers.toBigInt(20),
+        },
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+      ]);
+    });
+
+    test('should throw error in case gql fetch fails from subgraph', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
+
+      await expect(statisticsClient.getHMTHolders()).rejects.toThrow('Error');
 
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });

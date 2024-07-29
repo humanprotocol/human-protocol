@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { Role } from '../enums/role';
+import { JwtUser } from '../types/jwt';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
@@ -25,12 +27,25 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     }
 
     // Try to authenticate with JWT
-    try {
-      // see https://github.com/nestjs/passport/blob/master/lib/auth.guard.ts
-      return (await super.canActivate(context)) as boolean;
-    } catch (jwtError) {
-      console.error('JWT auth failed:', jwtError);
-      throw new UnauthorizedException(jwtError.message);
+    const canActivate = (await super.canActivate(context)) as boolean;
+    if (!canActivate) {
+      throw new UnauthorizedException('JWT authentication failed');
     }
+
+    // Roles verification
+    let roles = this.reflector.get<Role[]>('roles', context.getHandler());
+    if (!roles) roles = [Role.Worker];
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user as JwtUser;
+    if (!user) {
+      throw new UnauthorizedException('User not found in request');
+    }
+
+    if (!roles.includes(user.role)) {
+      throw new UnauthorizedException('Invalid role');
+    }
+
+    return true;
   }
 }

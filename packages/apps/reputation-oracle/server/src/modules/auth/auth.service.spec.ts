@@ -24,20 +24,25 @@ import {
 } from '../../../test/constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { KVStoreClient, Role } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
+import { SiteKeyRepository } from '../user/site-key.repository';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { JobRequestType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -48,13 +53,17 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
 }));
-jest.mock('../../common/utils/hcaptcha', () => ({
-  verifyToken: jest.fn().mockReturnValue({ success: true }),
-}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
 }));
+
+jest.spyOn(NetworkConfigService.prototype, 'networks', 'get').mockReturnValue([
+  {
+    chainId: ChainId.POLYGON_AMOY,
+    rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
+  },
+]);
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -65,6 +74,7 @@ describe('AuthService', () => {
   let sendGridService: SendGridService;
   let web3Service: Web3Service;
   let authConfigService: AuthConfigService;
+  let hcaptchaService: HCaptchaService;
 
   beforeAll(async () => {
     const signerMock = {
@@ -80,6 +90,8 @@ describe('AuthService', () => {
         ServerConfigService,
         Web3ConfigService,
         ConfigService,
+        HCaptchaService,
+        HCaptchaConfigService,
         {
           provide: JwtService,
           useValue: {
@@ -88,6 +100,10 @@ describe('AuthService', () => {
         },
         { provide: TokenRepository, useValue: createMock<TokenRepository>() },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: SiteKeyRepository,
+          useValue: createMock<SiteKeyRepository>(),
+        },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
         {
@@ -99,6 +115,7 @@ describe('AuthService', () => {
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
+        NetworkConfigService,
       ],
     }).compile();
 
@@ -110,6 +127,9 @@ describe('AuthService', () => {
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
+    hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
+
+    hcaptchaService.verifyToken = jest.fn().mockReturnValue({ success: true });
   });
 
   afterEach(() => {
@@ -193,6 +213,8 @@ describe('AuthService', () => {
       createUserMock = jest.spyOn(userService, 'create');
 
       createUserMock.mockResolvedValue(userEntity);
+
+      jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(null);
     });
 
     afterEach(() => {
@@ -218,6 +240,20 @@ describe('AuthService', () => {
 
       expect(sendGridService.sendEmail).toHaveBeenCalled();
     });
+
+    it('should fail if the user already exists', async () => {
+      jest
+        .spyOn(userRepository, 'findOneByEmail')
+        .mockResolvedValue(userEntity as any);
+
+      await expect(authService.signup(userCreateDto)).rejects.toThrow(
+        new ControlledError(ErrorUser.DuplicatedEmail, HttpStatus.BAD_REQUEST),
+      );
+
+      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
+        userEntity.email,
+      );
+    });
   });
 
   describe('auth', () => {
@@ -226,6 +262,7 @@ describe('AuthService', () => {
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
+      status: UserStatus.ACTIVE,
     };
 
     beforeEach(() => {
@@ -254,6 +291,7 @@ describe('AuthService', () => {
       expect(jwtSignMock).toHaveBeenLastCalledWith(
         {
           email: userEntity.email,
+          status: userEntity.status,
           userId: userEntity.id,
           address: userEntity.evmAddress,
           kyc_status: userEntity.kyc?.status,
@@ -270,7 +308,7 @@ describe('AuthService', () => {
     });
 
     describe('forgotPassword', () => {
-      let findByEmailMock: any, findTokenMock: any;
+      let findOneByEmailMock: any, findTokenMock: any;
       let userEntity: Partial<UserEntity>, tokenEntity: Partial<TokenEntity>;
 
       beforeEach(() => {
@@ -285,9 +323,9 @@ describe('AuthService', () => {
           user: userEntity as UserEntity,
         };
 
-        findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+        findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
         findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
-        findByEmailMock.mockResolvedValue(userEntity);
+        findOneByEmailMock.mockResolvedValue(userEntity);
       });
 
       afterEach(() => {
@@ -295,27 +333,23 @@ describe('AuthService', () => {
       });
 
       it('should throw NotFound exception if user is not found', () => {
-        findByEmailMock.mockResolvedValue(null);
+        findOneByEmailMock.mockResolvedValue(null);
         expect(
-          authService.forgotPassword({ email: 'user@example.com' }),
+          authService.forgotPassword({
+            email: 'user@example.com',
+            hCaptchaToken: 'token',
+          }),
         ).rejects.toThrow(
           new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
         );
       });
 
-      it('should throw Unauthorized exception if user is not active', () => {
-        userEntity.status = UserStatus.INACTIVE;
-        findByEmailMock.mockResolvedValue(userEntity);
-        expect(
-          authService.forgotPassword({ email: 'user@example.com' }),
-        ).rejects.toThrow(
-          new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN),
-        );
-      });
-
       it('should remove existing token if it exists', async () => {
         findTokenMock.mockResolvedValue(tokenEntity);
-        await authService.forgotPassword({ email: 'user@example.com' });
+        await authService.forgotPassword({
+          email: 'user@example.com',
+          hCaptchaToken: 'token',
+        });
 
         expect(tokenRepository.deleteOne).toHaveBeenCalled();
       });
@@ -324,7 +358,32 @@ describe('AuthService', () => {
         sendGridService.sendEmail = jest.fn();
         const email = 'user@example.com';
 
-        await authService.forgotPassword({ email });
+        await authService.forgotPassword({ email, hCaptchaToken: 'token' });
+
+        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+          expect.objectContaining({
+            personalizations: [
+              {
+                dynamicTemplateData: {
+                  service_name: SERVICE_NAME,
+                  url: expect.stringContaining(
+                    'http://localhost:3001/reset-password?token=',
+                  ),
+                },
+                to: email,
+              },
+            ],
+            templateId: SENDGRID_TEMPLATES.resetPassword,
+          }),
+        );
+      });
+
+      it('should create a new token and send email if user is not active', async () => {
+        sendGridService.sendEmail = jest.fn();
+        userEntity.status = UserStatus.PENDING;
+        const email = 'user@example.com';
+
+        await authService.forgotPassword({ email, hCaptchaToken: 'token' });
 
         expect(sendGridService.sendEmail).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -474,7 +533,7 @@ describe('AuthService', () => {
     });
 
     describe('resendEmailVerification', () => {
-      let findByEmailMock: any,
+      let findOneByEmailMock: any,
         findTokenMock: any,
         createTokenMock: any,
         userEntity: Partial<UserEntity>;
@@ -485,7 +544,7 @@ describe('AuthService', () => {
           email: 'user@example.com',
           status: UserStatus.PENDING,
         };
-        findByEmailMock = jest.spyOn(userRepository, 'findByEmail');
+        findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
         findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
         createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
       });
@@ -495,9 +554,12 @@ describe('AuthService', () => {
       });
 
       it('should throw an error if user is not found', () => {
-        findByEmailMock.mockResolvedValue(null);
+        findOneByEmailMock.mockResolvedValue(null);
         expect(
-          authService.resendEmailVerification({ email: 'user@example.com' }),
+          authService.resendEmailVerification({
+            email: 'user@example.com',
+            hCaptchaToken: 'token',
+          }),
         ).rejects.toThrow(
           new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
         );
@@ -505,21 +567,27 @@ describe('AuthService', () => {
 
       it('should throw an error if user is not pending', () => {
         userEntity.status = UserStatus.ACTIVE;
-        findByEmailMock.mockResolvedValue(userEntity);
+        findOneByEmailMock.mockResolvedValue(userEntity);
         expect(
-          authService.resendEmailVerification({ email: 'user@example.com' }),
+          authService.resendEmailVerification({
+            email: 'user@example.com',
+            hCaptchaToken: 'token',
+          }),
         ).rejects.toThrow(
           new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
         );
       });
 
       it('should create token and send email', async () => {
-        findByEmailMock.mockResolvedValue(userEntity);
+        findOneByEmailMock.mockResolvedValue(userEntity);
         findTokenMock.mockResolvedValueOnce(null);
         sendGridService.sendEmail = jest.fn();
         const email = 'user@example.com';
 
-        await authService.resendEmailVerification({ email });
+        await authService.resendEmailVerification({
+          email,
+          hCaptchaToken: 'token',
+        });
 
         expect(createTokenMock).toHaveBeenCalled();
         expect(sendGridService.sendEmail).toHaveBeenCalledWith(
@@ -562,7 +630,7 @@ describe('AuthService', () => {
             refreshToken: MOCK_REFRESH_TOKEN,
           });
           jest
-            .spyOn(userRepository, 'findOneByEvmAddress')
+            .spyOn(userRepository, 'findOneByAddress')
             .mockResolvedValue({ nonce: nonce } as any);
         });
 
@@ -578,8 +646,8 @@ describe('AuthService', () => {
           } as UserEntity);
 
           const data = {
-            from: MOCK_ADDRESS,
-            to: web3Service.getOperatorAddress(),
+            from: MOCK_ADDRESS.toLowerCase(),
+            to: web3Service.getOperatorAddress().toLowerCase(),
             contents: 'signin',
             nonce: nonce,
           };
@@ -635,8 +703,8 @@ describe('AuthService', () => {
         };
 
         const preSignUpDataMock: SignatureBodyDto = {
-          from: MOCK_ADDRESS,
-          to: MOCK_ADDRESS,
+          from: MOCK_ADDRESS.toLowerCase(),
+          to: MOCK_ADDRESS.toLowerCase(),
           contents: 'signup',
           nonce: undefined,
         };
@@ -686,7 +754,12 @@ describe('AuthService', () => {
 
         it('should create a new web3 user and return the token', async () => {
           (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest.fn().mockResolvedValue(Role.JobLauncher),
+            get: jest
+              .fn()
+              .mockResolvedValueOnce('Job Launcher')
+              .mockResolvedValueOnce('url')
+              .mockResolvedValueOnce(1)
+              .mockResolvedValueOnce(JobRequestType.FORTUNE),
             set: jest.fn(),
           }));
 
@@ -697,7 +770,7 @@ describe('AuthService', () => {
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
-            type: UserType.WORKER,
+            type: Role.WORKER,
             signature,
           });
 
@@ -712,7 +785,7 @@ describe('AuthService', () => {
           });
         });
 
-        it("should throw ConflictException if signature doesn't match", async () => {
+        it("should throw ControlledError if signature doesn't match", async () => {
           const invalidSignature = await signMessage(
             'invalid message',
             MOCK_PRIVATE_KEY,
@@ -721,7 +794,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
+              type: Role.WORKER,
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
@@ -731,7 +804,7 @@ describe('AuthService', () => {
             ),
           );
         });
-        it('should throw BadRequestException if role is not in KVStore', async () => {
+        it('should throw ControlledError if role is not in KVStore', async () => {
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
@@ -740,11 +813,78 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: UserType.WORKER,
+              type: Role.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(
             new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST),
+          );
+        });
+        it('should throw ControlledError if fee is not in KVStore', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest.fn().mockResolvedValueOnce('Job Launcher'),
+          }));
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: Role.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(
+            new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST),
+          );
+        });
+        it('should throw ControlledError if url is not in KVStore', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest
+              .fn()
+              .mockResolvedValueOnce('Job Launcher')
+              .mockResolvedValueOnce('url'),
+          }));
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: Role.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(
+            new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST),
+          );
+        });
+        it('should throw ControlledError if job type is not in KVStore', async () => {
+          (KVStoreClient.build as any).mockImplementationOnce(() => ({
+            get: jest
+              .fn()
+              .mockResolvedValueOnce('Job Launcher')
+              .mockResolvedValueOnce('url')
+              .mockResolvedValueOnce(1),
+          }));
+          const signature = await signMessage(
+            preSignUpDataMock,
+            MOCK_PRIVATE_KEY,
+          );
+
+          await expect(
+            authService.web3Signup({
+              ...web3PreSignUpDto,
+              type: Role.WORKER,
+              signature: signature,
+            }),
+          ).rejects.toThrow(
+            new ControlledError(
+              ErrorAuth.InvalidJobType,
+              HttpStatus.BAD_REQUEST,
+            ),
           );
         });
       });

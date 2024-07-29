@@ -9,6 +9,7 @@ export enum JobSortField {
   JOB_TYPE = 'job_type',
   REWARD_AMOUNT = 'reward_amount',
   CREATED_AT = 'created_at',
+  UPDATED_AT = 'updated_at',
 }
 
 export enum JobFieldName {
@@ -16,6 +17,7 @@ export enum JobFieldName {
   RewardAmount = 'reward_amount',
   RewardToken = 'reward_token',
   CreatedAt = 'created_at',
+  UpdatedAt = 'updated_at',
 }
 
 export enum AssignmentStatus {

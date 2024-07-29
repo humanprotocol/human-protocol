@@ -12,7 +12,10 @@ jest.doMock('ethers', () => {
           if (message === 'valid-message' && signature === 'valid-signature') {
             return 'recovered-address';
           } else {
-            throw new Error('Invalid signature');
+            throw new ControlledError(
+              'Invalid signature',
+              HttpStatus.BAD_REQUEST,
+            );
           }
         });
       },

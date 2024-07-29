@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import time
 import re
 from typing import Tuple, Optional
@@ -12,9 +13,17 @@ from web3.types import TxReceipt
 from web3.exceptions import ContractLogicError
 from web3.types import TxParams
 
-from human_protocol_sdk.constants import ARTIFACTS_FOLDER
+from human_protocol_sdk.constants import ARTIFACTS_FOLDER, SUBGRAPH_API_KEY_PLACEHOLDER
 
 logger = logging.getLogger("human_protocol_sdk.utils")
+
+# Try to load environment variables from the .env file if python-dotenv is available
+try:
+    from dotenv import load_dotenv  # type: ignore
+
+    load_dotenv()
+except ImportError:
+    pass
 
 
 def with_retry(fn, retries=3, delay=5, backoff=2):
@@ -182,8 +191,19 @@ def get_kvstore_interface():
     )
 
 
-def get_data_from_subgraph(url: str, query: str, params: dict = None):
-    request = requests.post(url, json={"query": query, "variables": params})
+def get_data_from_subgraph(network: dict, query: str, params: dict = None):
+    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
+    if subgraph_api_key:
+        subgraph_url = network["subgraph_url_api_key"].replace(
+            SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
+        )
+    else:
+        logger.warning(
+            "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
+        )
+        subgraph_url = network["subgraph_url"]
+
+    request = requests.post(subgraph_url, json={"query": query, "variables": params})
     if request.status_code == 200:
         return request.json()
     else:

@@ -3,7 +3,11 @@ import { Test } from '@nestjs/testing';
 import { AssignmentController } from './assignment.controller';
 import { AssignmentService } from './assignment.service';
 import { RequestWithUser } from '../../common/types/jwt';
-import { GetAssignmentsDto, CreateAssignmentDto } from './assignment.dto';
+import {
+  GetAssignmentsDto,
+  CreateAssignmentDto,
+  ResignDto,
+} from './assignment.dto';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { MOCK_EXCHANGE_ORACLE } from '../../../test/constants';
 
@@ -33,7 +37,7 @@ describe('assignmentController', () => {
     assignmentService = moduleRef.get<AssignmentService>(AssignmentService);
   });
 
-  describe('processWebhook', () => {
+  describe('getAssignmentList', () => {
     it('should call assignmentService.getAssignmentList', async () => {
       const query: GetAssignmentsDto = {
         chainId: 80001,
@@ -65,16 +69,19 @@ describe('assignmentController', () => {
         query,
         userAddress,
         reputationNetwork,
-        expect.any(String),
       );
     });
+  });
 
+  describe('createAssignment', () => {
     it('should call assignmentService.createAssignment', async () => {
       const body: CreateAssignmentDto = {
         chainId: 80001,
         escrowAddress: escrowAddress,
       };
-      jest.spyOn(assignmentService, 'createAssignment').mockResolvedValue();
+      jest
+        .spyOn(assignmentService, 'createAssignment')
+        .mockResolvedValue({ id: 1 } as any);
       await assignmentController.createAssignment(
         {
           user: { address: userAddress },
@@ -84,6 +91,27 @@ describe('assignmentController', () => {
       expect(assignmentService.createAssignment).toHaveBeenCalledWith(body, {
         address: userAddress,
       });
+    });
+  });
+
+  describe('resignJob', () => {
+    it('should call jobService.resignJob', async () => {
+      const assignmentId = 123;
+      const resignJobDto: ResignDto = {
+        assignmentId: assignmentId.toString(),
+      };
+
+      jest.spyOn(assignmentService, 'resign').mockResolvedValue();
+
+      await assignmentController.resign(
+        { user: { address: userAddress } } as RequestWithUser,
+        resignJobDto,
+      );
+
+      expect(assignmentService.resign).toHaveBeenCalledWith(
+        assignmentId,
+        userAddress,
+      );
     });
   });
 });

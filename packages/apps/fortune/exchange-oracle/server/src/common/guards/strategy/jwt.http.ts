@@ -7,6 +7,7 @@ import * as jwt from 'jsonwebtoken';
 import { Web3Service } from '../../../modules/web3/web3.service';
 import { JwtUser } from '../../../common/types/jwt';
 import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
+import { Role } from '../../../common/enums/role';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -45,20 +46,48 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   public async validate(
     @Req() request: any,
     payload: {
+      role: string;
       email: string;
-      address: string;
+      wallet_address: string;
       kyc_status: string;
       reputation_network: string;
     },
   ): Promise<JwtUser> {
-    if (!payload.kyc_status || !payload.email || !payload.address) {
-      throw new UnauthorizedException('Invalid token');
+    if (!payload.email) {
+      throw new UnauthorizedException('Invalid token: missing email');
     }
-    if (payload.kyc_status !== KYC_APPROVED) {
-      throw new UnauthorizedException('Invalid KYC status');
+
+    if (!payload.role) {
+      throw new UnauthorizedException('Invalid token: missing role');
     }
+
+    if (!Object.values(Role).includes(payload.role as Role)) {
+      throw new UnauthorizedException(
+        `Invalid token: unrecognized role "${payload.role}"`,
+      );
+    }
+
+    const role: Role = payload.role as Role;
+
+    if (role !== Role.HumanApp) {
+      if (!payload.kyc_status) {
+        throw new UnauthorizedException('Invalid token: missing KYC status');
+      }
+
+      if (!payload.wallet_address) {
+        throw new UnauthorizedException('Invalid token: missing address');
+      }
+
+      if (payload.kyc_status !== KYC_APPROVED) {
+        throw new UnauthorizedException(
+          `Invalid token: expected KYC status "${KYC_APPROVED}", but received "${payload.kyc_status}"`,
+        );
+      }
+    }
+
     return {
-      address: payload.address,
+      role: role,
+      address: payload.wallet_address,
       email: payload.email,
       kycStatus: payload.kyc_status,
       reputationNetwork: payload.reputation_network,

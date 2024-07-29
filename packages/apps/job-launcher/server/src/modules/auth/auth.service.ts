@@ -101,7 +101,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -166,7 +166,7 @@ export class AuthService {
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.refreshTokenExpiresIn,
+      date.getTime() + this.authConfigService.refreshTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(newRefreshTokenEntity);
@@ -309,7 +309,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -328,7 +328,7 @@ export class AuthService {
     });
   }
 
-  async createOrUpdateAPIKey(userId: number): Promise<string> {
+  async createOrUpdateAPIKey(user: UserEntity): Promise<string> {
     const salt = crypto.randomBytes(16).toString('hex');
     const apiKey = crypto.randomBytes(32).toString('hex');
     const hashedAPIKey = await generateHash(
@@ -338,11 +338,19 @@ export class AuthService {
       this.authConfigService.apiKeyLength,
     );
 
-    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+    let apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(user.id);
     if (!apiKeyEntity) {
       apiKeyEntity = new ApiKeyEntity();
-      apiKeyEntity.user.id = userId;
+      apiKeyEntity.user = user;
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
       await this.apiKeyRepository.createUnique(apiKeyEntity);
+    } else {
+      apiKeyEntity.hashedAPIKey = hashedAPIKey;
+      apiKeyEntity.salt = salt;
+
+      this.apiKeyRepository.updateOne(apiKeyEntity);
     }
 
     apiKeyEntity.hashedAPIKey = hashedAPIKey;

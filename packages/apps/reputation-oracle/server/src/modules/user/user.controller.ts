@@ -13,18 +13,23 @@ import {
   Req,
   UseGuards,
   Request,
+  Get,
 } from '@nestjs/common';
 import {
   DisableOperatorDto,
   PrepareSignatureDto,
   RegisterAddressRequestDto,
-  RegisterAddressResponseDto,
   SignatureBodyDto,
+  RegisterLabelerResponseDto,
+  EnableOperatorDto,
+  RegisterOracleDto,
+  RegisteredOraclesDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
+import { KycSignedAddressDto } from '../kyc/kyc.dto';
 
 @ApiTags('User')
 @Controller('/user')
@@ -32,6 +37,38 @@ import { Public } from '../../common/decorators';
 @UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('/register-labeler')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Register Labeler',
+    description: 'Endpoint to register user as a labeler on hcaptcha services.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Labeler registered successfully',
+    type: RegisterLabelerResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public async registerLabeler(
+    @Req() request: RequestWithUser,
+  ): Promise<RegisterLabelerResponseDto> {
+    const siteKey = await this.userService.registerLabeler(request.user);
+
+    return { siteKey };
+  }
+
   @Post('/register-address')
   @HttpCode(200)
   @ApiOperation({
@@ -42,7 +79,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Blockchain address registered successfully',
-    type: RegisterAddressResponseDto,
+    type: KycSignedAddressDto,
   })
   @ApiResponse({
     status: 400,
@@ -59,13 +96,30 @@ export class UserController {
   public async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
-  ): Promise<RegisterAddressResponseDto> {
-    const signedAddress = await this.userService.registerAddress(
-      request.user,
-      data,
-    );
+  ): Promise<KycSignedAddressDto> {
+    return this.userService.registerAddress(request.user, data);
+  }
 
-    return { signedAddress };
+  @Post('/enable-operator')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Enable an operator',
+    description: 'Endpoint to enable an operator.',
+  })
+  @ApiBody({ type: EnableOperatorDto })
+  @ApiResponse({
+    status: 204,
+    description: 'Operator enabled succesfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public enableOperator(
+    @Body() data: EnableOperatorDto,
+    @Request() req: RequestWithUser,
+  ): Promise<void> {
+    return this.userService.enableOperator(req.user, data.signature);
   }
 
   @Post('/disable-operator')
@@ -111,5 +165,58 @@ export class UserController {
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
     return await this.userService.prepareSignatureBody(data.type, data.address);
+  }
+
+  @Post('/registration')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Register Oracle',
+    description: 'Endpoint to save a registration process completed.',
+  })
+  @ApiBody({ type: RegisterOracleDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Oracle registered successfully',
+    type: RegisterOracleDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async registerOracle(
+    @Req() request: RequestWithUser,
+    @Body() data: RegisterOracleDto,
+  ): Promise<RegisterOracleDto> {
+    await this.userService.registerOracle(request.user, data.oracleAddress);
+    return data;
+  }
+
+  @Get('/registration')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get Registered Oracles',
+    description:
+      'Fetch the list of exchange oracles where the user completed a registration process.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of registered oracles retrieved successfully',
+    type: RegisteredOraclesDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async getRegisteredOracles(
+    @Req() request: RequestWithUser,
+  ): Promise<RegisteredOraclesDto> {
+    const oracleAddresses = await this.userService.getRegisteredOracles(
+      request.user,
+    );
+    return { oracleAddresses };
   }
 }

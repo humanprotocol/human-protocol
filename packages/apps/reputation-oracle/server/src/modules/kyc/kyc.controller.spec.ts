@@ -1,9 +1,9 @@
 import { Test } from '@nestjs/testing';
 
-import { KycController } from './kyc.controller';
-import { KycService } from './kyc.service';
-import { KycSessionDto } from './kyc.dto';
 import { KycStatus } from '../../common/enums/user';
+import { KycController } from './kyc.controller';
+import { KycSessionDto } from './kyc.dto';
+import { KycService } from './kyc.service';
 
 describe('KycController', () => {
   let kycController: KycController;
@@ -20,10 +20,11 @@ describe('KycController', () => {
           },
         },
       ],
+      controllers: [KycController],
     }).compile();
 
     kycService = moduleRef.get<KycService>(KycService);
-    kycController = new KycController(kycService);
+    kycController = moduleRef.get<KycController>(KycController);
   });
 
   describe('startKyc', () => {
@@ -61,6 +62,19 @@ describe('KycController', () => {
       expect(kycService.updateKycStatus).toHaveBeenCalledWith('secret', {
         session_id: '123',
         state: KycStatus.APPROVED,
+      });
+    });
+  });
+
+  describe('updateKycStatus', () => {
+    it('should call service', async () => {
+      kycService.getSignedAddress = jest.fn();
+      await kycController.getSignedAddress({
+        user: { evmAddress: '0x123' },
+      } as any);
+
+      expect(kycService.getSignedAddress).toHaveBeenCalledWith({
+        evmAddress: '0x123',
       });
     });
   });

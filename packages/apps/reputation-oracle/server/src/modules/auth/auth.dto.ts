@@ -11,13 +11,17 @@ import {
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
-import { UserType } from '../../common/enums/user';
+import { Role } from '../../common/enums/user';
 
 export class ForgotPasswordDto {
   @ApiProperty()
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class SignInDto {
@@ -44,7 +48,7 @@ export class RefreshDto {
 export class ValidatePasswordDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/, {
     message:
-      'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character.',
+      'Password is not strong enough. Password must be at least 8 characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character.',
   })
   @ApiProperty()
   @IsPassword()
@@ -56,6 +60,10 @@ export class ResendEmailVerificationDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class RestorePasswordDto extends ValidatePasswordDto {
@@ -106,10 +114,10 @@ export class Web3SignUpDto {
   public signature: string;
 
   @ApiProperty({
-    enum: UserType,
+    enum: Role,
   })
-  @IsEnum(UserType)
-  public type: UserType;
+  @IsEnum(Role)
+  public type: Role;
 
   @ApiProperty()
   @IsString()

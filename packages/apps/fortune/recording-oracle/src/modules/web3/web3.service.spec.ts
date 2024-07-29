@@ -20,8 +20,6 @@ describe('Web3Service', () => {
         switch (key) {
           case 'RPC_URL_LOCALHOST':
             return 'http://localhost:8545/';
-          case 'WEB3_ENV':
-            return 'localhost';
           default:
             return defaultValue;
         }

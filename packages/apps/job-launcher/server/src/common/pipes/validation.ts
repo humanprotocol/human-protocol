@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  HttpStatus,
   Injectable,
   PipeTransform,
   ValidationError,
@@ -8,13 +8,24 @@ import {
 } from '@nestjs/common';
 import { ValidatePasswordDto } from '../../modules/auth/auth.dto';
 import { ErrorAuth } from '../constants/errors';
+import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
   constructor(options?: ValidationPipeOptions) {
     super({
-      exceptionFactory: (errors: ValidationError[]): BadRequestException =>
-        new BadRequestException(errors),
+      exceptionFactory: (errors: ValidationError[]): ControlledError => {
+        const errorMessages = errors
+          .map(
+            (error) =>
+              Object.values((error as any).constraints) as unknown as string,
+          )
+          .flat();
+        throw new ControlledError(
+          errorMessages.join(', '),
+          HttpStatus.BAD_REQUEST,
+        );
+      },
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -28,7 +39,10 @@ export class HttpValidationPipe extends ValidationPipe {
 export class PasswordValidationPipe implements PipeTransform {
   transform(value: ValidatePasswordDto) {
     if (!this.isValidPassword(value.password)) {
-      throw new BadRequestException(ErrorAuth.PasswordIsNotStrongEnough);
+      throw new ControlledError(
+        ErrorAuth.PasswordIsNotStrongEnough,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return value;

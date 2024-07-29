@@ -1,4 +1,4 @@
-import { ImageLabelBinaryJobResults } from 'src/common/dto/result';
+import { ImageLabelBinaryJobResults } from '../src/common/dto/result';
 import { JobRequestType } from '../src/common/enums';
 import { IFortuneManifest } from '../src/common/interfaces/manifest';
 
@@ -234,3 +234,5 @@ export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
 
 export const MOCK_HCAPTCHA_TOKEN = 'test-token';
+export const MOCK_HCAPTCHA_PROTECTION_URL = 'https://api.hcaptcha.com';
+export const MOCK_HCAPTCHA_LABELING_URL = 'https://foundation-accounts.hmt.ai';

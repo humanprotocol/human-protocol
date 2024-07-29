@@ -9,7 +9,11 @@ from dotenv import load_dotenv
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
-load_dotenv()
+dotenv_path = os.getenv("DOTENV_PATH", None)
+if dotenv_path and not os.path.exists(dotenv_path):
+    raise FileNotFoundError(dotenv_path)
+
+load_dotenv(dotenv_path)
 
 
 class PostgresConfig:
@@ -68,8 +72,9 @@ class CronConfig:
     track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
     track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 30))
-    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+    track_completed_tasks_chunk_size = os.environ.get("TRACK_COMPLETED_TASKS_CHUNK_SIZE", 20)
     track_creating_tasks_int = int(os.environ.get("TRACK_CREATING_TASKS_INT", 300))
+    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
     track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
@@ -157,6 +162,12 @@ class FeaturesConfig:
 
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
+
+    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", False))
+    "Allow to log request details for each request"
+
+    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
+    "Allow to profile specific requests"
 
 
 class CoreConfig:

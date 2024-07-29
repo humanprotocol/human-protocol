@@ -6,16 +6,28 @@ import { JobStatus } from '../types';
 export const useJobs = ({
   chainId,
   status,
+  page,
+  pageSize,
 }: {
   chainId?: ChainId;
   status?: JobStatus;
+  page?: number;
+  pageSize?: number;
 }) => {
-  return useSWR(`human-protocol-jobs-${chainId}-${status}`, async () => {
-    try {
-      const jobs = await jobService.getJobList({ chainId, status });
-      return jobs;
-    } catch (err) {
-      return [];
-    }
-  });
+  return useSWR(
+    `human-protocol-jobs-${chainId}-${status}-${page}-${pageSize}`,
+    async () => {
+      try {
+        const jobs = await jobService.getJobList({
+          chainId,
+          status,
+          page,
+          pageSize,
+        });
+        return jobs;
+      } catch (err) {
+        return [];
+      }
+    },
+  );
 };

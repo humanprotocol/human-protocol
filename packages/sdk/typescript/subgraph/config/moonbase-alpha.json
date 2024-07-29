@@ -1,0 +1,42 @@
+{
+  "network": "mbase",
+  "description": "Human subgraph on Moonbase Alpha network",
+  "EscrowFactory": {
+    "address": "0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed",
+    "startBlock": 3950929,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3",
+    "startBlock": 3950738,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0xf183b3B34E70Dd17859455389A3aB54D49D41e6f"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0xBFC7009F3371F93F3B54DdC8caCd02914a37495c",
+    "startBlock": 3950927,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0xcC561f4482f4Ff051D2Dcc65c2cE1A0f291bbA46",
+    "startBlock": 5431340,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0xf46B45Df3d956369726d8Bd93Ba33963Ab692920",
+    "startBlock": 3950931,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrowFactory": {
+    "address": "0x24e587b36B5EF0202d665d94f08fc20Bd21D523b",
+    "startBlock": 4941034,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/EscrowFactory.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

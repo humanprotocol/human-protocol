@@ -1,0 +1,42 @@
+{
+  "network": "mainnet",
+  "description": "Human subgraph on Ethereum Mainnet",
+  "EscrowFactory": {
+    "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+    "startBlock": 16924057,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
+    "startBlock": 12184475,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0x3895d913a9A231d2B215F402c528511B569C676D"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "KVStore": {
+    "address": "0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D",
+    "startBlock": 18683644,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "Staking": {
+    "address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
+    "startBlock": 16924055,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "RewardPool": {
+    "address": "0x4A5963Dd6792692e9147EdC7659936b96251917a",
+    "startBlock": 16968283,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "LegacyEscrowFactory": {
+    "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+    "startBlock": 16924057,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/EscrowFactory.json"
+  },
+  "LegacyEscrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+  }
+}

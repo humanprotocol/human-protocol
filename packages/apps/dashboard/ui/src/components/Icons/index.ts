@@ -15,6 +15,5 @@ export { MoonbaseAlphaIcon } from './MoonbaseAlphaIcon';
 export { MoonbeamIcon } from './MoonbeamIcon';
 export { OpenInNewIcon } from './OpenInNewIcon';
 export { PolygonIcon } from './PolygonIcon';
-export { SkaleHumanProtocolIcon } from './SkaleHumanProtocolIcon';
 export { TelegramIcon } from './TelegramIcon';
-export { TwitterIcon } from './TwitterIcon';
+export { XIcon } from './XIcon';

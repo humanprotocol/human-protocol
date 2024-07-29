@@ -2,8 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
 import helmet from 'helmet';
 
 import { INestApplication } from '@nestjs/common';
@@ -22,7 +20,6 @@ async function bootstrap() {
 
   const host = serverConfigService.host;
   const port = serverConfigService.port;
-  const sessionSecret = serverConfigService.sessionSecret;
 
   app.useGlobalFilters(new GlobalExceptionsFilter());
 
@@ -34,18 +31,6 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.use(cookieParser());
-
-  app.use(
-    session({
-      secret: sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: true,
-      },
-    }),
-  );
   app.use(json({ limit: '5mb' }));
   app.use(urlencoded({ limit: '5mb', extended: true }));
 

@@ -72,7 +72,7 @@ describe('SendGridService', () => {
       expect(mock).toHaveBeenCalledWith(
         expect.objectContaining({
           from: expect.objectContaining({
-            email: 'reputation-oracle@hmt.ai',
+            email: 'app@humanprotocol.org',
           }),
         }),
       );

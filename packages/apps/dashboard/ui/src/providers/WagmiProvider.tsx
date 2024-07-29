@@ -5,7 +5,7 @@ import { http, createConfig, WagmiProvider as WWagmiProvider } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 
-import { RPC_URLS, X_LAYER } from '../constants';
+import { RPC_URLS } from '../constants';
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
 
@@ -21,9 +21,8 @@ export const wagmiConfig = createConfig({
     wagmiChains.moonbaseAlpha,
     wagmiChains.avalancheFuji,
     wagmiChains.avalanche,
-    wagmiChains.skaleHumanProtocol,
-    wagmiChains.okc,
-    X_LAYER,
+    wagmiChains.xLayer,
+    wagmiChains.xLayerTestnet,
   ],
   connectors: [
     walletConnect({
@@ -45,8 +44,8 @@ export const wagmiConfig = createConfig({
     [wagmiChains.moonbaseAlpha.id]: http(RPC_URLS[ChainId.MOONBASE_ALPHA]),
     [wagmiChains.avalanche.id]: http(RPC_URLS[ChainId.AVALANCHE]),
     [wagmiChains.avalancheFuji.id]: http(RPC_URLS[ChainId.AVALANCHE_TESTNET]),
-    [wagmiChains.skaleHumanProtocol.id]: http(RPC_URLS[ChainId.SKALE]),
-    [X_LAYER.id]: http(RPC_URLS[ChainId.XLAYER]),
+    [wagmiChains.xLayer.id]: http(RPC_URLS[ChainId.XLAYER]),
+    [wagmiChains.xLayerTestnet.id]: http(RPC_URLS[ChainId.XLAYER_TESTNET]),
   },
 });
 

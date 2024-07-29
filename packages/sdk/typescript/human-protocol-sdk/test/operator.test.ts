@@ -75,6 +75,58 @@ describe('OperatorUtils', () => {
       expect(result).toEqual(mockLeader);
     });
 
+    test('should return staker information when jobTypes is undefined', async () => {
+      mockLeaderSubgraph.jobTypes = undefined;
+      const mockLeader: ILeader = {
+        ...mockLeaderSubgraph,
+        jobTypes: [],
+      };
+
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leader: mockLeaderSubgraph,
+      });
+
+      const result = await OperatorUtils.getLeader(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADER_QUERY,
+        {
+          address: stakerAddress,
+        }
+      );
+      expect(result).toEqual(mockLeader);
+    });
+
+    test('should return staker information when jobTypes is array', async () => {
+      mockLeaderSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
+      const mockLeader: ILeader = {
+        ...mockLeaderSubgraph,
+        jobTypes: ['type1', 'type2', 'type3'],
+      };
+
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leader: mockLeaderSubgraph,
+      });
+
+      const result = await OperatorUtils.getLeader(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADER_QUERY,
+        {
+          address: stakerAddress,
+        }
+      );
+      expect(result).toEqual(mockLeader);
+    });
+
     test('should throw an error for an invalid staker address', async () => {
       await expect(
         OperatorUtils.getLeader(ChainId.LOCALHOST, invalidAddress)
@@ -121,7 +173,55 @@ describe('OperatorUtils', () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
-      const filter = { networks: [ChainId.LOCALHOST], role: 'role' };
+      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+
+      const result = await OperatorUtils.getLeaders(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          role: filter.role,
+        }
+      );
+      expect(result).toEqual([mockLeader, mockLeader]);
+    });
+
+    test('should return an array of stakers when jobTypes is undefined', async () => {
+      mockLeaderSubgraph.jobTypes = undefined;
+      const mockLeader: ILeader = {
+        ...mockLeaderSubgraph,
+        jobTypes: [],
+      };
+
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
+      });
+      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+
+      const result = await OperatorUtils.getLeaders(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          role: filter.role,
+        }
+      );
+      expect(result).toEqual([mockLeader, mockLeader]);
+    });
+
+    test('should return an array of stakers when jobTypes is array', async () => {
+      mockLeaderSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
+      const mockLeader: ILeader = {
+        ...mockLeaderSubgraph,
+        jobTypes: ['type1', 'type2', 'type3'],
+      };
+
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
+      });
+      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
 
       const result = await OperatorUtils.getLeaders(filter);
 
@@ -136,11 +236,13 @@ describe('OperatorUtils', () => {
     });
 
     test('should throw an error if gql fetch fails', async () => {
+      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
         .mockRejectedValueOnce(new Error('Error'));
 
-      await expect(OperatorUtils.getLeaders()).rejects.toThrow();
+      await expect(OperatorUtils.getLeaders(filter)).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
   });
@@ -164,6 +266,60 @@ describe('OperatorUtils', () => {
     };
 
     test('should return reputation network operators', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        reputationNetwork: mockReputationNetwork,
+      });
+
+      const result = await OperatorUtils.getReputationNetworkOperators(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_REPUTATION_NETWORK_QUERY(),
+        {
+          address: stakerAddress,
+          role: undefined,
+        }
+      );
+      expect(result).toEqual([mockOperator]);
+    });
+
+    test('should return reputation network operators when jobTypes is undefined', async () => {
+      mockOperatorSubgraph.jobTypes = undefined;
+      const mockOperator: IOperator = {
+        ...mockOperatorSubgraph,
+        jobTypes: [],
+      };
+
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        reputationNetwork: mockReputationNetwork,
+      });
+
+      const result = await OperatorUtils.getReputationNetworkOperators(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_REPUTATION_NETWORK_QUERY(),
+        {
+          address: stakerAddress,
+          role: undefined,
+        }
+      );
+      expect(result).toEqual([mockOperator]);
+    });
+
+    test('should return reputation network operators when jobTypes is array', async () => {
+      mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
+      const mockOperator: IOperator = {
+        ...mockOperatorSubgraph,
+        jobTypes: ['type1', 'type2', 'type3'],
+      };
+
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         reputationNetwork: mockReputationNetwork,
       });

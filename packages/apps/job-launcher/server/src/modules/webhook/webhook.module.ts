@@ -17,7 +17,6 @@ import { WebhookController } from './webhook.controller';
     JobModule,
     Web3Module,
     HttpModule,
-    JobModule,
   ],
   controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository],

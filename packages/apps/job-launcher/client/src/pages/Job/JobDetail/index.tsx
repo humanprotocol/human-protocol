@@ -27,6 +27,8 @@ export default function JobDetail() {
   const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
   const [isCancelling, setIsCancelling] = useState(false);
   const { openSnackbar, showError } = useSnackbar();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleCancel = async () => {
     setIsCancelling(true);
@@ -46,10 +48,22 @@ export default function JobDetail() {
     setIsCancelling(false);
   };
 
+  const handleChangePage = (event: any, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: any) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const isCancellable =
     data?.details.status === JobStatus.FAILED ||
     data?.details.status === JobStatus.PAID ||
     data?.details.status === JobStatus.PENDING ||
+    data?.details.status === JobStatus.PARTIAL ||
+    data?.details.status === JobStatus.SET_UP ||
+    data?.details.status === JobStatus.CREATED ||
     data?.details.status === JobStatus.LAUNCHED;
 
   if (isLoading) return <>Loading...</>;
@@ -225,7 +239,11 @@ export default function JobDetail() {
                   },
                   { id: 'error', label: 'Refused reason' },
                 ]}
-                data={data.results}
+                data={data}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
               />
             )}
             {data.manifest.requestType !== 'FORTUNE' && (

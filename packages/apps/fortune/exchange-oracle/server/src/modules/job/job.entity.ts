@@ -23,6 +23,8 @@ export class JobEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   public reputationNetwork: string;
 
-  @OneToMany(() => AssignmentEntity, (assignment) => assignment.job)
+  @OneToMany(() => AssignmentEntity, (assignment) => assignment.job, {
+    cascade: true,
+  })
   public assignments: AssignmentEntity[];
 }

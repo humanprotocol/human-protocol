@@ -1,11 +1,16 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsDate,
+} from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
-  JobSortField,
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
@@ -27,8 +32,8 @@ export class CreateAssignmentDto {
 export class GetAssignmentsDto extends PageOptionsDto {
   @ApiPropertyOptional({
     name: 'sort_field',
-    enum: JobSortField,
-    default: JobSortField.CREATED_AT,
+    enum: AssignmentSortField,
+    default: AssignmentSortField.CREATED_AT,
   })
   @IsOptional()
   @IsEnum(AssignmentSortField)
@@ -59,11 +64,23 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsOptional()
   @IsString()
   assignmentId?: string;
+
+  @ApiPropertyOptional({ name: 'created_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @ApiPropertyOptional({ name: 'updated_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedAfter?: Date;
 }
 
 export class AssignmentDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;
@@ -96,7 +113,7 @@ export class AssignmentDto {
   expiresAt: string;
 
   constructor(
-    assignmentId: number,
+    assignmentId: string,
     escrowAddress: string,
     chainId: number,
     jobType: string,
@@ -116,4 +133,24 @@ export class AssignmentDto {
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
   }
+}
+
+export class ResignDto {
+  @ApiProperty({ name: 'assignment_id' })
+  @IsString()
+  public assignmentId: string;
+}
+
+export class AssignJobResponseDto {
+  @ApiProperty({ name: 'assignment_id' })
+  assignmentId: string;
+
+  @ApiProperty({ name: 'escrow_address' })
+  escrowAddress: string;
+
+  @ApiProperty({ name: 'chain_id' })
+  chainId: ChainId;
+
+  @ApiProperty({ name: 'worker_address' })
+  workerAddress: string;
 }

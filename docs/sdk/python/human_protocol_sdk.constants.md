@@ -38,8 +38,6 @@ Enum for chain IDs.
 
 #### SEPOLIA *= 11155111*
 
-#### SKALE *= 1273227453*
-
 #### XLAYER *= 196*
 
 #### XLAYER_TESTNET *= 195*
@@ -61,6 +59,16 @@ Enum for KVStore keys
 #### url *= 'url'*
 
 #### webhook_url *= 'webhook_url'*
+
+### *class* human_protocol_sdk.constants.OrderDirection(value)
+
+Bases: `Enum`
+
+Enum for chain IDs.
+
+#### ASC *= 'asc'*
+
+#### DESC *= 'desc'*
 
 ### *class* human_protocol_sdk.constants.Role(value)
 

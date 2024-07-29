@@ -12,6 +12,7 @@ from human_protocol_sdk.gql.statistics import (
 from human_protocol_sdk.statistics import (
     StatisticsClient,
     StatisticsParam,
+    HMTHoldersParam,
 )
 
 
@@ -62,12 +63,12 @@ class TestStatisticsClient(unittest.TestCase):
             escrow_statistics = self.statistics.get_escrow_statistics(param)
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_escrow_statistics_query,
             )
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -115,7 +116,7 @@ class TestStatisticsClient(unittest.TestCase):
             payment_statistics = self.statistics.get_worker_statistics(param)
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -157,7 +158,7 @@ class TestStatisticsClient(unittest.TestCase):
             payment_statistics = self.statistics.get_payment_statistics(param)
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -215,6 +216,8 @@ class TestStatisticsClient(unittest.TestCase):
                                 "timestamp": 1,
                                 "dailyHMTTransferCount": "4",
                                 "dailyHMTTransferAmount": "100",
+                                "dailyUniqueSenders": "5",
+                                "dailyUniqueReceivers": "5",
                             },
                         ],
                     }
@@ -224,17 +227,17 @@ class TestStatisticsClient(unittest.TestCase):
             hmt_statistics = self.statistics.get_hmt_statistics(param)
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_hmtoken_statistics_query,
             )
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_holders_query,
             )
 
             mock_function.assert_any_call(
-                "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+                NETWORKS[ChainId.LOCALHOST],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -258,6 +261,49 @@ class TestStatisticsClient(unittest.TestCase):
             self.assertEqual(
                 hmt_statistics.daily_hmt_data[0].total_transaction_count, 4
             )
+            self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_senders, 5)
+            self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_receivers, 5)
+
+    def test_get_hmt_holders(self):
+        param = HMTHoldersParam(
+            order_direction="asc",
+        )
+
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [
+                {
+                    "data": {
+                        "holders": [
+                            {"address": "0x123", "balance": "1000"},
+                            {"address": "0x456", "balance": "2000"},
+                        ]
+                    }
+                }
+            ]
+
+            holders = self.statistics.get_hmt_holders(param)
+
+            mock_function.assert_any_call(
+                NETWORKS[ChainId.LOCALHOST],
+                query=get_holders_query(
+                    address=param.address,
+                ),
+                params={
+                    "address": param.address,
+                    "orderBy": "balance",
+                    "orderDirection": param.order_direction,
+                },
+            )
+
+            self.assertEqual(len(holders), 2)
+            self.assertEqual(holders[0].address, "0x123")
+            self.assertEqual(holders[0].balance, 1000)
+            self.assertEqual(holders[1].address, "0x456")
+            self.assertEqual(holders[1].balance, 2000)
 
 
 if __name__ == "__main__":

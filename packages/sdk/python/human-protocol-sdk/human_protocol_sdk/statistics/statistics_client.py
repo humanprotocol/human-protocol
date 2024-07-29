@@ -60,6 +60,26 @@ class StatisticsParam:
         self.limit = limit
 
 
+class HMTHoldersParam:
+    """
+    A class used to specify parameters for querying HMT holders.
+    """
+
+    def __init__(
+        self,
+        address: str = None,
+        order_direction: str = "asc",
+    ):
+        """
+        Initializes a HMTHoldersParam instance.
+
+        :param address: Filter by holder's address
+        :param order_direction: Optional. Direction of sorting ('asc' for ascending, 'desc' for descending)
+        """
+        self.address = address
+        self.order_direction = order_direction
+
+
 class DailyEscrowData:
     """
     A class used to specify daily escrow data.
@@ -229,6 +249,8 @@ class DailyHMTData:
         timestamp: datetime,
         total_transaction_amount: int,
         total_transaction_count: int,
+        daily_unique_senders: int,
+        daily_unique_receivers: int,
     ):
         """
         Initializes a DailyHMTData instance.
@@ -236,11 +258,15 @@ class DailyHMTData:
         :param timestamp: Timestamp
         :param total_transaction_amount: Total transaction amount
         :param total_transaction_count: Total transaction count
+        :param daily_unique_senders: Total unique senders
+        :param daily_unique_receivers: Total unique receivers
         """
 
         self.timestamp = timestamp
         self.total_transaction_amount = total_transaction_amount
         self.total_transaction_count = total_transaction_count
+        self.daily_unique_senders = daily_unique_senders
+        self.daily_unique_receivers = daily_unique_receivers
 
 
 class HMTStatistics:
@@ -327,13 +353,13 @@ class StatisticsClient:
         )
 
         escrow_statistics_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_escrow_statistics_query,
         )
         escrow_statistics = escrow_statistics_data["data"]["escrowStatistics"]
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -399,7 +425,7 @@ class StatisticsClient:
         )
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -453,7 +479,7 @@ class StatisticsClient:
         )
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -514,19 +540,19 @@ class StatisticsClient:
         )
 
         hmtoken_statistics_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_hmtoken_statistics_query,
         )
         hmtoken_statistics = hmtoken_statistics_data["data"]["hmtokenStatistics"]
 
         holders_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_holders_query,
         )
         holders = holders_data["data"]["holders"]
 
         event_day_datas_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
+            self.network,
             query=get_event_day_data_query(param),
             params={
                 "from": int(param.date_from.timestamp()) if param.date_from else None,
@@ -561,7 +587,62 @@ class StatisticsClient:
                     total_transaction_count=int(
                         event_day_data.get("dailyHMTTransferCount", 0)
                     ),
+                    daily_unique_senders=int(
+                        event_day_data.get("dailyUniqueSenders", 0)
+                    ),
+                    daily_unique_receivers=int(
+                        event_day_data.get("dailyUniqueReceivers", 0)
+                    ),
                 )
                 for event_day_data in event_day_datas
             ],
         )
+
+    def get_hmt_holders(
+        self, param: HMTHoldersParam = HMTHoldersParam()
+    ) -> List[HMTHolder]:
+        """Get HMT holders data with optional filters and ordering.
+
+        :param param: Object containing filter and order parameters
+
+        :return: List of HMT holders
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+                print(statistics_client.get_hmt_holders())
+                print(
+                    statistics_client.get_hmt_holders(
+                        HMTHoldersParam(
+                            address="0x123...",
+                            order_direction="asc",
+                        )
+                    )
+                )
+        """
+        from human_protocol_sdk.gql.hmtoken import get_holders_query
+
+        holders_data = get_data_from_subgraph(
+            self.network,
+            query=get_holders_query(address=param.address),
+            params={
+                "address": param.address,
+                "orderBy": "balance",
+                "orderDirection": param.order_direction,
+            },
+        )
+
+        holders = holders_data["data"]["holders"]
+
+        return [
+            HMTHolder(
+                address=holder.get("address", ""),
+                balance=int(holder.get("balance", 0)),
+            )
+            for holder in holders
+        ]

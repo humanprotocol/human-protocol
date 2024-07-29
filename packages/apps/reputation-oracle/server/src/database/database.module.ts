@@ -15,8 +15,11 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ServerConfigService } from '../common/config/server-config.service';
+import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
 import { CredentialEntity } from '../modules/credentials/credential.entity';
+import { QualificationEntity } from '../modules/qualification/qualification.entity';
+import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 
 @Module({
   imports: [
@@ -36,7 +39,7 @@ import { CredentialEntity } from '../modules/credentials/credential.entity';
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
-            : (loggerOptions as LoggerOptions) ?? false,
+            : ((loggerOptions as LoggerOptions) ?? false),
         );
         return {
           name: 'default',
@@ -50,6 +53,9 @@ import { CredentialEntity } from '../modules/credentials/credential.entity';
             UserEntity,
             KycEntity,
             CronJobEntity,
+            SiteKeyEntity,
+            QualificationEntity,
+            UserQualificationEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
@@ -65,6 +71,7 @@ import { CredentialEntity } from '../modules/credentials/credential.entity';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
+          url: databaseConfigService.url,
           host: databaseConfigService.host,
           port: databaseConfigService.port,
           username: databaseConfigService.user,
