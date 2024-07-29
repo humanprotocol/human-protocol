@@ -15,7 +15,7 @@
     "@human-protocol/core": "^3.0.0",
     "@human-protocol/sdk": "^3.0.0",
     "@strapi/plugin-i18n": "4.25.1",
-    "@strapi/plugin-users-permissions": "4.25.1",
+    "@strapi/plugin-users-permissions": "4.25.5",
     "@strapi/strapi": "4.25.1",
     "axios": "^1.5.1",
     "dayjs": "^1.11.10",
