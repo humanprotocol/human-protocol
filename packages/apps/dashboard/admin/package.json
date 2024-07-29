@@ -27,7 +27,7 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
     "tar": "^7.4.0",
-    "viem": "^2.14.2"
+    "viem": "^2.18.4"
   },
   "resolutions": {
     "braces": "^3.0.3",

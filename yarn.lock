@@ -3970,7 +3970,7 @@
   dependencies:
     "@noble/hashes" "1.4.0"
 
-"@noble/curves@1.4.2", "@noble/curves@~1.4.0":
+"@noble/curves@1.4.2", "@noble/curves@^1.4.0", "@noble/curves@~1.4.0":
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.4.2.tgz#40309198c76ed71bc6dbf7ba24e81ceb4d0d1fe9"
   integrity sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==
@@ -25190,10 +25190,10 @@ viem@2.7.14:
     isows "1.0.3"
     ws "8.13.0"
 
-viem@2.x, viem@^2.1.1, viem@^2.14.2:
-  version "2.17.4"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.17.4.tgz#ecdaa35739c547268583610b77b2451b4e4fc9cb"
-  integrity sha512-6gmBB85I7z1qt/+yPPS+i4L2jNPJqCs+SEb+26WnKVYez13svSzjYMsU9OYYlPFpQmpGSy9dV2bKW6VX68FTgg==
+viem@2.x, viem@^2.1.1, viem@^2.18.4:
+  version "2.18.4"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.18.4.tgz#6af97b68141faa68f624b7cded4956065432a078"
+  integrity sha512-JGdN+PgBnZMbm7fc9o0SfHvL0CKyfrlhBUtaz27V+PeHO43Kgc9Zd4WyIbM8Brafq4TvVcnriRFW/FVGOzwEJw==
   dependencies:
     "@adraffy/ens-normalize" "1.10.0"
     "@noble/curves" "1.4.0"
@@ -25202,6 +25202,7 @@ viem@2.x, viem@^2.1.1, viem@^2.14.2:
     "@scure/bip39" "1.3.0"
     abitype "1.0.5"
     isows "1.0.4"
+    webauthn-p256 "0.0.5"
     ws "8.17.1"
 
 vite-node@1.6.0:
@@ -25635,6 +25636,14 @@ web3@^4.9.0:
     web3-types "^1.7.0"
     web3-utils "^4.3.1"
     web3-validator "^2.0.6"
+
+webauthn-p256@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/webauthn-p256/-/webauthn-p256-0.0.5.tgz#0baebd2ba8a414b21cc09c0d40f9dd0be96a06bd"
+  integrity sha512-drMGNWKdaixZNobeORVIqq7k5DsRC9FnG201K2QjeOoQLmtSDaSsVZdkg6n5jUALJKcAG++zBPJXmv6hy0nWFg==
+  dependencies:
+    "@noble/curves" "^1.4.0"
+    "@noble/hashes" "^1.4.0"
 
 webcrypto-core@^1.8.0:
   version "1.8.0"
