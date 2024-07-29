@@ -11,52 +11,10 @@ import HumanAppIcon from '@assets/icons/human-app.svg';
 import JobLauncherIcon from '@assets/icons/job-launcher.svg';
 import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-
-//TEMPORARY INTERFACE AND DATA
-interface Overview {
-	network: string;
-	reputation: 'high' | 'medium' | 'low' | 'comingSoon';
-	jobsLaunched: number;
-}
-
-interface StakeInfo {
-	tokensStaked: number;
-	tokensAllocated: number;
-	tokensLocked: number;
-	jobsLaunched: number | null;
-}
-
-interface RoleDetails {
-	overview: Overview;
-	stakeInfo: StakeInfo;
-	escrows: {
-		escrowId: string;
-	}[];
-}
-//TEMPORARY INTERFACE AND DATA
-const HARDCODED_ROLE_DETAILS: RoleDetails = {
-	overview: {
-		network: 'Polygon Mumbai',
-		reputation: 'medium',
-		jobsLaunched: 1786573,
-	},
-	stakeInfo: {
-		tokensStaked: 257680404,
-		tokensAllocated: 207704,
-		tokensLocked: 40404,
-		jobsLaunched: null,
-	},
-	escrows: [
-		{
-			escrowId:
-				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
-		},
-		{
-			escrowId:
-				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
-		},
-	],
-};
+import { AddressDetailsLeader, Roles } from '@services/api/use-address-details';
+import { getNetwork } from '@utils/config/networks';
+import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
 
 interface RoleInfoProps {
 	title: string;
@@ -85,10 +43,12 @@ const RoleInformation = ({ title, points }: RoleInfoProps) => {
 const RenderRoleDetailsInfo = ({
 	role,
 }: {
-	role: 'exchangeOracle' | 'recordingOracle' | 'reputationOracle';
+	role: AddressDetailsLeader['role'];
 }) => {
-	const roleDetailsInfo = {
-		reputationOracle: {
+	const roleDetailsInfo: Partial<
+		Record<Roles, { title: string; points: string[] }>
+	> = {
+		[Roles.reputationOracle]: {
 			title: 'Reputation Oracle',
 			points: [
 				'The Reputation Oracle is the trust engine of HUMAN Protocol.',
@@ -96,7 +56,7 @@ const RenderRoleDetailsInfo = ({
 				"It's the final seal of quality and trust within the ecosystem.",
 			],
 		},
-		recordingOracle: {
+		[Roles.recordingOracle]: {
 			title: 'Recording Oracle',
 			points: [
 				'The Recording Oracle is where task solutions get the green light.',
@@ -104,7 +64,7 @@ const RenderRoleDetailsInfo = ({
 				"From quality checks to reputation adjustments, it's the assurance you need for dependable results.",
 			],
 		},
-		exchangeOracle: {
+		[Roles.exchangeOracle]: {
 			title: 'Exchange Oracle',
 			points: [
 				"The Exchange Oracle is the HUMAN Protocol's powerhouse, directing tasks to skilled workers and ensuring smooth communication.",
@@ -122,32 +82,34 @@ const RenderRoleDetailsInfo = ({
 	return <RoleInformation points={details.points} title={details.title} />;
 };
 
-const renderReputationTitle = (
-	reputation: 'high' | 'medium' | 'low' | 'comingSoon'
-) => {
-	const reputationAttributes = {
-		high: {
+const renderReputationTitle = (reputation: number) => {
+	const reputationAttributes: Record<
+		string,
+		{ title: string; colors: { title: string; border: string } }
+	> = {
+		'3': {
 			title: 'High',
 			colors: {
 				title: colorPalette.success.main,
 				border: colorPalette.success.light,
 			},
 		},
-		medium: {
+		'2': {
 			title: 'Medium',
 			colors: {
 				title: colorPalette.warning.main,
 				border: colorPalette.warning.light,
 			},
 		},
-		low: {
+
+		'1': {
 			title: 'Low',
 			colors: {
 				title: colorPalette.orange.main,
 				border: colorPalette.orange.light,
 			},
 		},
-		comingSoon: {
+		'0': {
 			title: 'Coming soon',
 			colors: {
 				title: colorPalette.ocean.main,
@@ -156,7 +118,7 @@ const renderReputationTitle = (
 		},
 	};
 
-	const colors = reputationAttributes[reputation].colors;
+	const colors = reputationAttributes[reputation.toString()].colors;
 
 	return (
 		<Box
@@ -168,32 +130,39 @@ const renderReputationTitle = (
 			}}
 		>
 			<Typography color={colors.title}>
-				{reputationAttributes[reputation].title}
+				{reputationAttributes[reputation.toString()].title}
 			</Typography>
 		</Box>
 	);
 };
 
-const renderRoleIcon = (
-	role:
-		| 'reputationOracle'
-		| 'exchangeOracle'
-		| 'humanApp'
-		| 'jobLauncher'
-		| 'recordingOracle'
-) => {
+const renderRoleIcon = (role: AddressDetailsLeader['role']) => {
 	const roleIcons = {
-		reputationOracle: <ReputationOracleIcon />,
-		exchangeOracle: <ExchangeOracleIcon />,
-		humanApp: <HumanAppIcon />,
-		jobLauncher: <JobLauncherIcon />,
-		recordingOracle: <RecordingOracleIcon />,
+		[Roles.reputationOracle]: <ReputationOracleIcon />,
+		[Roles.exchangeOracle]: <ExchangeOracleIcon />,
+		[Roles.humanApp]: <HumanAppIcon />,
+		[Roles.jobLauncher]: <JobLauncherIcon />,
+		[Roles.recordingOracle]: <RecordingOracleIcon />,
 	};
 
 	return roleIcons[role];
 };
 
-const RoleDetails = () => {
+const RoleDetails = ({
+	data: {
+		role,
+		chainId,
+		reputation,
+		amountJobsLaunched,
+		amountStaked,
+		amountAllocated,
+		amountLocked,
+	},
+}: {
+	data: AddressDetailsLeader;
+}) => {
+	const { filterParams } = useWalletSearch();
+
 	return (
 		<>
 			<Card
@@ -246,8 +215,8 @@ const RoleDetails = () => {
 							<Typography fontWeight={600}>Role</Typography>
 						</Stack>
 						<Stack gap={2} direction="column">
-							{renderRoleIcon('exchangeOracle')}
-							<RenderRoleDetailsInfo role="exchangeOracle" />
+							{renderRoleIcon(role)}
+							<RenderRoleDetailsInfo role={role} />
 						</Stack>
 					</Stack>
 					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
@@ -259,7 +228,7 @@ const RoleDetails = () => {
 						>
 							Network
 						</Typography>
-						<Typography>{HARDCODED_ROLE_DETAILS.overview.network}</Typography>
+						<Typography>{getNetwork(chainId)?.name || ''}</Typography>
 					</Stack>
 					<Stack
 						alignItems={{ xs: 'start', md: 'center' }}
@@ -286,7 +255,7 @@ const RoleDetails = () => {
 							</Tooltip>
 							<Typography fontWeight={600}>Reputation Score</Typography>
 						</Stack>
-						{renderReputationTitle(HARDCODED_ROLE_DETAILS.overview.reputation)}
+						{renderReputationTitle(reputation)}
 					</Stack>
 					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
 						<Typography
@@ -297,11 +266,7 @@ const RoleDetails = () => {
 						>
 							Jobs Launched
 						</Typography>
-						<Typography>
-							{HARDCODED_ROLE_DETAILS.overview.jobsLaunched.toLocaleString(
-								'en-US'
-							)}
-						</Typography>
+						<Typography>{amountJobsLaunched}</Typography>
 					</Stack>
 				</Stack>
 			</Card>
@@ -337,24 +302,18 @@ const RoleDetails = () => {
 						>
 							Tokens Staked
 						</Typography>
-						{HARDCODED_ROLE_DETAILS.stakeInfo.tokensStaked ? (
-							<Typography>
-								{HARDCODED_ROLE_DETAILS.stakeInfo.tokensStaked.toLocaleString(
-									'en-US'
-								)}
-								<Typography
-									sx={{
-										marginLeft: 0.5,
-									}}
-									color={colorPalette.fog.main}
-									component="span"
-								>
-									HMT
-								</Typography>
+						<Typography>
+							{amountStaked}
+							<Typography
+								sx={{
+									marginLeft: 0.5,
+								}}
+								color={colorPalette.fog.main}
+								component="span"
+							>
+								HMT
 							</Typography>
-						) : (
-							<Typography>N/A</Typography>
-						)}
+						</Typography>
 					</Stack>
 					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
 						<Typography
@@ -365,24 +324,18 @@ const RoleDetails = () => {
 						>
 							Tokens Allocated
 						</Typography>
-						{HARDCODED_ROLE_DETAILS.stakeInfo.tokensAllocated ? (
-							<Typography>
-								{HARDCODED_ROLE_DETAILS.stakeInfo.tokensAllocated.toLocaleString(
-									'en-US'
-								)}
-								<Typography
-									sx={{
-										marginLeft: 0.5,
-									}}
-									color={colorPalette.fog.main}
-									component="span"
-								>
-									HMT
-								</Typography>
+						<Typography>
+							{amountAllocated}
+							<Typography
+								sx={{
+									marginLeft: 0.5,
+								}}
+								color={colorPalette.fog.main}
+								component="span"
+							>
+								HMT
 							</Typography>
-						) : (
-							<Typography>N/A</Typography>
-						)}
+						</Typography>
 					</Stack>
 					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
 						<Typography
@@ -393,98 +346,25 @@ const RoleDetails = () => {
 						>
 							Tokens Locked
 						</Typography>
-						{HARDCODED_ROLE_DETAILS.stakeInfo.tokensLocked ? (
-							<Typography>
-								{HARDCODED_ROLE_DETAILS.stakeInfo.tokensLocked.toLocaleString(
-									'en-US'
-								)}
-								<Typography
-									sx={{
-										marginLeft: 0.5,
-									}}
-									color={colorPalette.fog.main}
-									component="span"
-								>
-									HMT
-								</Typography>
+						<Typography>
+							{amountLocked}
+							<Typography
+								sx={{
+									marginLeft: 0.5,
+								}}
+								color={colorPalette.fog.main}
+								component="span"
+							>
+								HMT
 							</Typography>
-						) : (
-							<Typography>N/A</Typography>
-						)}
-					</Stack>
-					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
-						<Typography
-							sx={{
-								width: 300,
-							}}
-							fontWeight={600}
-						>
-							Jobs Launched
 						</Typography>
-						{HARDCODED_ROLE_DETAILS.stakeInfo.jobsLaunched ? (
-							<Typography>
-								{HARDCODED_ROLE_DETAILS.stakeInfo.jobsLaunched.toLocaleString(
-									'en-US'
-								)}
-								<Typography
-									sx={{
-										marginLeft: 0.5,
-									}}
-									color={colorPalette.fog.main}
-									component="span"
-								>
-									HMT
-								</Typography>
-							</Typography>
-						) : (
-							<Typography>N/A</Typography>
-						)}
 					</Stack>
 				</Stack>
 			</Card>
 
-			<Card
-				sx={{
-					paddingX: { xs: 2, md: 8 },
-					paddingY: { xs: 4, md: 6 },
-					marginBottom: 4,
-				}}
-			>
-				<Box>
-					<Typography
-						sx={{
-							marginBottom: 3,
-						}}
-						variant="h5"
-					>
-						Escrows
-					</Typography>
-					{HARDCODED_ROLE_DETAILS.escrows.length > 1 ? (
-						<>
-							{HARDCODED_ROLE_DETAILS.escrows.map((elem) => (
-								<Typography
-									variant="h6"
-									component="p"
-									sx={{
-										marginBottom: 3,
-										'&:last-child': { marginBottom: 0 },
-									}}
-								>
-									{elem.escrowId}
-								</Typography>
-							))}
-						</>
-					) : (
-						<Typography
-							variant="h6"
-							component="p"
-							textAlign={{ xs: 'left', md: 'center' }}
-						>
-							No escrows launched yet
-						</Typography>
-					)}
-				</Box>
-			</Card>
+			{filterParams.address && filterParams.chainId ? (
+				<RoleDetailsEscrowsTable role={role} />
+			) : null}
 		</>
 	);
 };

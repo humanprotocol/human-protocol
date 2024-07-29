@@ -6,7 +6,6 @@
   #search-bar{
     width: 100%;
     border-radius: 8px;
-    padding: 16px 85px 16px 17px;
     line-height: 24px;
 
     &:focus, &:focus-visible {
@@ -20,18 +19,12 @@
   }
 
   .search-close{
-    position: absolute;
-    right: 56px;
-    top: 15px;
     cursor: pointer;
   }
 
   .search-button{
-    position: absolute;
-    right: 4px;
     background-color: $secondary;
     border-radius: 8px;
-    top: 4px;
     svg{
       font-size: 32px;
     }
@@ -55,7 +48,6 @@
 
   .search-button{
     padding: 4px;
-    top: 5px;
     background: #1406B214;
     svg{
       font-size: 24px;
@@ -68,15 +60,8 @@
     }
   }
 
-  .search-close{
-    position: absolute;
-    right: 40px;
-    top: 13px;
-    font-size: 16px;
-  }
-
   #search-bar{
-    padding: 8px 68px 8px 16px;
+    padding: 8px 0;
 
   }
   @media (max-width: 1150px) {

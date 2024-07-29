@@ -1,42 +1,20 @@
-export const networks = [
-	{
-		networkDisplayName: 'Ethereum',
-		networkName: 'ethereum',
-	},
-	{
-		networkDisplayName: 'Ethereum Goerli',
-		networkName: 'goerli',
-	},
-	{
-		networkDisplayName: 'Binance Smart Chain',
-		networkName: 'binance',
-	},
-	{
-		networkDisplayName: 'Smart Chain (Testnet)',
-		networkName: 'testnet',
-	},
-	{
-		networkDisplayName: 'Polygon',
-		networkName: 'polygon',
-	},
-	{
-		networkDisplayName: 'Polygon Mumbai',
-		networkName: 'mumbai',
-	},
-	{
-		networkDisplayName: 'Moonbeam',
-		networkName: 'moonbeam',
-	},
-	{
-		networkDisplayName: 'Moonbase Alpha',
-		networkName: 'alpha',
-	},
-	{
-		networkDisplayName: 'Celo',
-		networkName: 'celo',
-	},
-	{
-		networkDisplayName: 'Celo Alfajores',
-		networkName: 'alfajores',
-	},
-] as const;
+import type { Chain } from 'viem/chains';
+import * as chains from 'viem/chains';
+
+const chainIdsList = [
+	1, 4, 5, 11155111, 56, 97, 137, 80001, 80002, 1284, 1287, 43113, 43114, 42220,
+	44787, 195, 1338, 196,
+];
+
+const viemChains = Object.values(chains);
+
+export const getNetwork = (chainId: number): Chain | undefined =>
+	viemChains.find((network) => {
+		if ('id' in network && network.id === chainId) {
+			return network;
+		}
+	});
+
+export const networks = chainIdsList
+	.map((id) => getNetwork(id))
+	.filter((chain): chain is Chain => !!chain);

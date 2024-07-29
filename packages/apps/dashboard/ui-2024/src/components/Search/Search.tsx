@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
@@ -12,7 +12,7 @@ import {
 	SelectChangeEvent,
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
-import { networks } from '@utils/config/networks';
+import { getNetwork, networks } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 
 const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
@@ -30,13 +30,15 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 	};
 
 	const handleSelectChange = (event: SelectChangeEvent<string>) => {
-		setSelectValue(event.target.value);
-		// TODO add function that get chain if for network
-		setChainId(3);
+		const chainId = Number(event.target.value);
+		setChainId(chainId);
+		const networkName = getNetwork(chainId)?.name || '';
+		setSelectValue(networkName);
 	};
 
 	const handleClearClick = () => {
 		setInputValue('');
+		setAddress('');
 	};
 
 	const handleInputBlur = () => {
@@ -49,8 +51,21 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		navigate(`/search/${selectValue}/${inputValue}`);
+		navigate(
+			`/search/${filterParams.chainId || -1}/${filterParams.address || '0x0'}`
+		);
 	};
+
+	useEffect(() => {
+		const networkName = getNetwork(filterParams.chainId || -1)?.name || '';
+		if (networkName) {
+			setSelectValue(networkName);
+		}
+	}, [filterParams.chainId]);
+
+	useEffect(() => {
+		setInputValue(filterParams.address);
+	}, [filterParams.address]);
 
 	return (
 		<form
@@ -77,6 +92,10 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 							border: 'none',
 						},
 					},
+					'& .MuiInputBase-input': {
+						overflow: 'hidden',
+						textOverflow: 'ellipsis',
+					},
 				}}
 				InputProps={{
 					sx: {
@@ -88,6 +107,7 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 							color: `${colorPalette.sky.main}`,
 							opacity: 1,
 						},
+						padding: '0 5px',
 					},
 					startAdornment: (
 						<InputAdornment
@@ -96,9 +116,10 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 								root: {
 									backgroundColor: 'red',
 								},
-								width: '220px',
+								width: displaySearchBar ? '100px' : '220px',
 								height: '100%',
 								backgroundColor: `${colorPalette.white}`,
+								marginLeft: '1rem',
 							}}
 						>
 							<MuiSelect
@@ -106,7 +127,7 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 								displayEmpty
 								sx={{
 									backgroundColor: `${colorPalette.white}`,
-									width: '220px',
+									width: displaySearchBar ? '100px' : '220px',
 									fontSize: '16px',
 									boxShadow: 'none',
 									'.MuiOutlinedInput-notchedOutline': { border: 0 },
@@ -136,29 +157,43 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 													Network
 												</span>
 											)
-										: undefined
+										: () => selectValue
 								}
 							>
-								{networks.map(({ networkDisplayName, networkName }) => (
-									<MenuItem key={networkName} value={networkName}>
-										{networkDisplayName}
+								{networks.map((network) => (
+									<MenuItem key={network.name} value={network.id}>
+										{network.name}
 									</MenuItem>
 								))}
 							</MuiSelect>
 						</InputAdornment>
 					),
 					endAdornment: inputValue && (
-						<InputAdornment position="end">
+						<InputAdornment
+							sx={{
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								gap: '0.7rem',
+							}}
+							position="end"
+						>
 							<IconButton onClick={handleClearClick} edge="end">
 								<CloseIcon color={`${focus ? 'textSecondary' : 'primary'}`} />
+							</IconButton>
+							<IconButton
+								className="search-button"
+								type="submit"
+								aria-label="search"
+							>
+								<SearchIcon
+									color={`${displaySearchBar ? 'textSecondary' : 'white'}`}
+								/>
 							</IconButton>
 						</InputAdornment>
 					),
 				}}
 			/>
-			<IconButton className="search-button" type="submit" aria-label="search">
-				<SearchIcon color={`${displaySearchBar ? 'textSecondary' : 'white'}`} />
-			</IconButton>
 		</form>
 	);
 };
