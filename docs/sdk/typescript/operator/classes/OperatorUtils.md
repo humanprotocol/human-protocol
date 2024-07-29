@@ -46,9 +46,9 @@ import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ***
 
@@ -81,9 +81,9 @@ const filter: ILeadersFilter = {
 const leaders = await OperatorUtils.getLeaders(filter);
 ```
 
-#### Source
+#### Defined in
 
-[operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
+[operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
 
 ***
 
@@ -119,9 +119,9 @@ import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[operator.ts:155](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L155)
+[operator.ts:151](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L151)
 
 ***
 
@@ -153,6 +153,6 @@ import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[operator.ts:207](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L207)
+[operator.ts:199](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L199)

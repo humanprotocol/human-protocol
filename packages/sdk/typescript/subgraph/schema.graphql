@@ -79,11 +79,8 @@ type Escrow @entity {
   manifestUrl: String # string
   manifestHash: String # string
   reputationOracle: Bytes # address
-  reputationOracleFee: BigInt
   recordingOracle: Bytes # address
-  recordingOracleFee: BigInt
   exchangeOracle: Bytes # address
-  exchangeOracleFee: BigInt
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
   jobRequesterId: String # string

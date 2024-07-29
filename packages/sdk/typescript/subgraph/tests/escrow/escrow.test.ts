@@ -106,35 +106,8 @@ describe('Escrow', () => {
 
     createMockedFunction(
       escrowAddress,
-      'reputationOracleStake',
-      'reputationOracleStake():(uint256)'
-    ).returns([ethereum.Value.fromI32(10)]);
-    createMockedFunction(
-      escrowAddress,
-      'reputationOracleFeePercentage',
-      'reputationOracleFeePercentage():(uint8)'
-    ).reverts();
-
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracleStake',
-      'recordingOracleStake():(uint256)'
-    ).returns([ethereum.Value.fromI32(20)]);
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracleFeePercentage',
-      'recordingOracleFeePercentage():(uint8)'
-    ).reverts();
-
-    createMockedFunction(
-      escrowAddress,
       'exchangeOracle',
       'exchangeOracle():(address)'
-    ).reverts();
-    createMockedFunction(
-      escrowAddress,
-      'exchangeOracleFeePercentage',
-      'exchangeOracleFeePercentage():(uint8)'
     ).reverts();
 
     const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
@@ -217,20 +190,8 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'Escrow',
       escrowAddress.toHex(),
-      'reputationOracleFee',
-      '10'
-    );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
       'recordingOracle',
       recordingOracleAddressString
-    );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
-      'recordingOracleFee',
-      '20'
     );
     assert.fieldEquals(
       'Transaction',
@@ -270,34 +231,8 @@ describe('Escrow', () => {
 
     createMockedFunction(
       escrowAddress,
-      'reputationOracleStake',
-      'reputationOracleStake():(uint256)'
-    ).reverts();
-    createMockedFunction(
-      escrowAddress,
-      'reputationOracleFeePercentage',
-      'reputationOracleFeePercentage():(uint8)'
-    ).returns([ethereum.Value.fromI32(10)]);
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracleStake',
-      'recordingOracleStake():(uint256)'
-    ).reverts();
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracleFeePercentage',
-      'recordingOracleFeePercentage():(uint8)'
-    ).returns([ethereum.Value.fromI32(20)]);
-
-    createMockedFunction(
-      escrowAddress,
       'exchangeOracle',
       'exchangeOracle():(address)'
-    ).reverts();
-    createMockedFunction(
-      escrowAddress,
-      'exchangeOracleFeePercentage',
-      'exchangeOracleFeePercentage():(uint8)'
     ).reverts();
 
     const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
@@ -377,24 +312,14 @@ describe('Escrow', () => {
       'reputationOracle',
       reputationOracleAddressString
     );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
-      'reputationOracleFee',
-      '10'
-    );
+
     assert.fieldEquals(
       'Escrow',
       escrowAddress.toHex(),
       'recordingOracle',
       recordingOracleAddressString
     );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
-      'recordingOracleFee',
-      '20'
-    );
+
     assert.fieldEquals(
       'Transaction',
       newPending1.transaction.hash.toHex(),
@@ -433,35 +358,9 @@ describe('Escrow', () => {
 
     createMockedFunction(
       escrowAddress,
-      'reputationOracleStake',
-      'reputationOracleStake():(uint256)'
-    ).reverts();
-    createMockedFunction(
-      escrowAddress,
-      'reputationOracleFeePercentage',
-      'reputationOracleFeePercentage():(uint8)'
-    ).returns([ethereum.Value.fromI32(10)]);
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracleStake',
-      'recordingOracleStake():(uint256)'
-    ).reverts();
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracleFeePercentage',
-      'recordingOracleFeePercentage():(uint8)'
-    ).returns([ethereum.Value.fromI32(20)]);
-
-    createMockedFunction(
-      escrowAddress,
       'exchangeOracle',
       'exchangeOracle():(address)'
     ).returns([ethereum.Value.fromAddress(exchangeOracleAddress)]);
-    createMockedFunction(
-      escrowAddress,
-      'exchangeOracleFeePercentage',
-      'exchangeOracleFeePercentage():(uint8)'
-    ).returns([ethereum.Value.fromI32(30)]);
 
     const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
 
@@ -543,32 +442,14 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'Escrow',
       escrowAddress.toHex(),
-      'reputationOracleFee',
-      '10'
-    );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
       'recordingOracle',
       recordingOracleAddressString
     );
     assert.fieldEquals(
       'Escrow',
       escrowAddress.toHex(),
-      'recordingOracleFee',
-      '20'
-    );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
       'exchangeOracle',
       exchangeOracleAddressString
-    );
-    assert.fieldEquals(
-      'Escrow',
-      escrowAddress.toHex(),
-      'exchangeOracleFee',
-      '30'
     );
     assert.fieldEquals(
       'Transaction',

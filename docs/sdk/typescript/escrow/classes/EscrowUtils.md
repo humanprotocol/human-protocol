@@ -94,11 +94,8 @@ type EscrowData = {
   manifestHash?: string;
   manifestUrl?: string;
   recordingOracle?: string;
-  recordingOracleFee?: string;
   reputationOracle?: string;
-  reputationOracleFee?: string;
   exchangeOracle?: string;
-  exchangeOracleFee?: string;
   status: EscrowStatus;
   token: string;
   totalFundedAmount: string;
@@ -130,9 +127,9 @@ import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1646](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1646)
+[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
 
 ***
 
@@ -216,11 +213,8 @@ type EscrowData = {
   manifestHash?: string;
   manifestUrl?: string;
   recordingOracle?: string;
-  recordingOracleFee?: string;
   reputationOracle?: string;
-  reputationOracleFee?: string;
   exchangeOracle?: string;
-  exchangeOracleFee?: string;
   status: EscrowStatus;
   token: string;
   totalFundedAmount: string;
@@ -254,9 +248,9 @@ const filters: IEscrowsFilter = {
 const escrowDatas = await EscrowUtils.getEscrows(filters);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1517](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1517)
+[escrow.ts:1514](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1514)
 
 ***
 
@@ -367,6 +361,6 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 })();
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1744](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1744)
+[escrow.ts:1738](https://github.com/humanprotocol/human-protocol/blob/bdc9f1fd41a985bc8924e9f4afc9d6aaf52881dc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1738)
