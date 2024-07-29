@@ -73,8 +73,8 @@ export function useAddressDetails() {
 	return useQuery({
 		queryFn: async () => {
 			const { data } = await httpService.get(
-				`${apiPaths.addressDetails.path}/${filterParams.address}`,
-				{ params: { chainId: filterParams.chainId } }
+				`${apiPaths.addressDetails.path}/${filterParams.address || '0x0'}`,
+				{ params: { chainId: filterParams.chainId || -1 } }
 			);
 
 			const {

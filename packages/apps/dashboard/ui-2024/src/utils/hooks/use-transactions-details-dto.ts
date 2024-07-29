@@ -13,7 +13,7 @@ export interface TransactionDetailsDto {
 	setNextPage: () => void;
 	setPrevPage: () => void;
 	setPageSize: (pageSize: number) => void;
-	setLastPageIndex: (lastPageIndex: number) => void;
+	setLastPageIndex: (lastPageIndex: number | undefined) => void;
 }
 
 const INITIAL_PAGE_SIZE = 10;
@@ -84,7 +84,7 @@ export const useTransactionDetailsDto = create<TransactionDetailsDto>(
 				};
 			});
 		},
-		setLastPageIndex(lastPageIndex: number) {
+		setLastPageIndex(lastPageIndex: number | undefined) {
 			set((state) => {
 				return {
 					...state,

@@ -13,7 +13,7 @@ export interface EscrowDetailsDto {
 	setNextPage: () => void;
 	setPrevPage: () => void;
 	setPageSize: (pageSize: number) => void;
-	setLastPageIndex: (lastPageIndex: number) => void;
+	setLastPageIndex: (lastPageIndex: number | undefined) => void;
 }
 
 const INITIAL_PAGE_SIZE = 10;
@@ -83,7 +83,7 @@ export const useEscrowDetailsDto = create<EscrowDetailsDto>((set) => ({
 			};
 		});
 	},
-	setLastPageIndex(lastPageIndex: number) {
+	setLastPageIndex(lastPageIndex: number | undefined) {
 		set((state) => {
 			return {
 				...state,

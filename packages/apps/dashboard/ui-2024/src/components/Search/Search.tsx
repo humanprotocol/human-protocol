@@ -38,6 +38,7 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 
 	const handleClearClick = () => {
 		setInputValue('');
+		setAddress('');
 	};
 
 	const handleInputBlur = () => {
@@ -50,7 +51,9 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		navigate(`/search/${filterParams.chainId}/${filterParams.address}`);
+		navigate(
+			`/search/${filterParams.chainId || -1}/${filterParams.address || '0x0'}`
+		);
 	};
 
 	useEffect(() => {
@@ -89,6 +92,10 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 							border: 'none',
 						},
 					},
+					'& .MuiInputBase-input': {
+						overflow: 'hidden',
+						textOverflow: 'ellipsis',
+					},
 				}}
 				InputProps={{
 					sx: {
@@ -100,6 +107,7 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 							color: `${colorPalette.sky.main}`,
 							opacity: 1,
 						},
+						padding: '0 5px',
 					},
 					startAdornment: (
 						<InputAdornment
@@ -108,9 +116,10 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 								root: {
 									backgroundColor: 'red',
 								},
-								width: '220px',
+								width: displaySearchBar ? '100px' : '220px',
 								height: '100%',
 								backgroundColor: `${colorPalette.white}`,
+								marginLeft: '1rem',
 							}}
 						>
 							<MuiSelect
@@ -118,7 +127,7 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 								displayEmpty
 								sx={{
 									backgroundColor: `${colorPalette.white}`,
-									width: '220px',
+									width: displaySearchBar ? '100px' : '220px',
 									fontSize: '16px',
 									boxShadow: 'none',
 									'.MuiOutlinedInput-notchedOutline': { border: 0 },
@@ -160,17 +169,31 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 						</InputAdornment>
 					),
 					endAdornment: inputValue && (
-						<InputAdornment position="end">
+						<InputAdornment
+							sx={{
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								gap: '0.7rem',
+							}}
+							position="end"
+						>
 							<IconButton onClick={handleClearClick} edge="end">
 								<CloseIcon color={`${focus ? 'textSecondary' : 'primary'}`} />
+							</IconButton>
+							<IconButton
+								className="search-button"
+								type="submit"
+								aria-label="search"
+							>
+								<SearchIcon
+									color={`${displaySearchBar ? 'textSecondary' : 'white'}`}
+								/>
 							</IconButton>
 						</InputAdornment>
 					),
 				}}
 			/>
-			<IconButton className="search-button" type="submit" aria-label="search">
-				<SearchIcon color={`${displaySearchBar ? 'textSecondary' : 'white'}`} />
-			</IconButton>
 		</form>
 	);
 };

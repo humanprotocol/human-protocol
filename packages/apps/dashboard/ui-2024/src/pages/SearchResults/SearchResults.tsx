@@ -5,7 +5,7 @@ import WalletIcon from '@assets/icons/excluded/wallet.svg';
 import EscrowIcon from '@assets/icons/excluded/escrow.svg';
 import Clipboard from '@components/Clipboard';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import EscrowAddress from '@pages/SearchResults/EscrowAddress';
 import WalletAddress from '@pages/SearchResults/WalletAddress';
 import NothingFound from '@components/NothingFound';
@@ -18,8 +18,6 @@ import {
 	AddressDetails,
 	useAddressDetails,
 } from '@services/api/use-address-details';
-import { useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
 import { handleErrorMessage } from '@services/handle-error-message';
 import RoleDetails from '@pages/SearchResults/RoleDetails/RoleDetails';
 import { AxiosError } from 'axios';
@@ -64,9 +62,13 @@ const renderCurrentResultType = (
 
 const ResultError = ({ error }: { error: unknown }) => {
 	if (error instanceof AxiosError && error.response?.status === 400) {
-		return <NothingFound />;
+		return (
+			<Stack sx={{ paddingTop: '2rem' }}>
+				<NothingFound />
+			</Stack>
+		);
 	}
-	return <Box>{handleErrorMessage(error)}</Box>;
+	return <Stack sx={{ paddingTop: '2rem' }}>{handleErrorMessage(error)}</Stack>;
 };
 
 const Results = () => {
@@ -74,7 +76,7 @@ const Results = () => {
 	const { filterParams } = useWalletSearch();
 
 	if (status === 'pending' && !data) {
-		return <Loader height="50vh" />;
+		return <Loader height="30vh" />;
 	}
 
 	if (status === 'error') {
@@ -99,7 +101,7 @@ const Results = () => {
 };
 
 const SearchResults = () => {
-	const history = useNavigate();
+	const location = useLocation();
 	const { chainId: urlChainId, address: urlAddress } = useParams();
 	const {
 		setAddress,
@@ -109,6 +111,10 @@ const SearchResults = () => {
 	const [paramsStatus, setParamsStatus] = useState<
 		'loading' | 'error' | 'success'
 	>('loading');
+
+	useEffect(() => {
+		setParamsStatus('loading');
+	}, [location]);
 
 	useEffect(() => {
 		if (paramsStatus === 'success') return;
@@ -142,15 +148,16 @@ const SearchResults = () => {
 		if (address && chainId && paramsStatus !== 'success') {
 			setParamsStatus('success');
 		}
-		history(`/search/${chainId}/${address}`);
-	}, [address, chainId, history, paramsStatus]);
+	}, [address, chainId, paramsStatus]);
 
 	return (
 		<PageWrapper displaySearchBar className="standard-background">
 			<Breadcrumbs title="Search Results" />
 			<Search className="search-results-bar" />
 			{paramsStatus === 'loading' && <Loader />}
-			{paramsStatus === 'error' && 'Error'}
+			{paramsStatus === 'error' && (
+				<Stack sx={{ paddingTop: '2rem' }}>Something went wrong</Stack>
+			)}
 			{paramsStatus === 'success' && <Results />}
 		</PageWrapper>
 	);

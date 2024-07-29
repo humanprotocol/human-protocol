@@ -10,9 +10,11 @@ import { TransactionTableCellValue } from '@pages/SearchResults/WalletAddress/Wa
 import { TransactionsTableBodyContainer } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBodyContainer';
 import { handleErrorMessage } from '@services/handle-error-message';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 
 export const TransactionsTableBody = () => {
 	const { data, isPending, isError, error } = useTransactionDetails();
+	const { filterParams } = useWalletSearch();
 	const {
 		setLastPageIndex,
 		setPrevPage,
@@ -25,6 +27,10 @@ export const TransactionsTableBody = () => {
 			setPrevPage();
 		}
 	}, [data?.results, page, setLastPageIndex, setPrevPage]);
+
+	useEffect(() => {
+		setLastPageIndex(undefined);
+	}, [filterParams.address, filterParams.chainId, setLastPageIndex]);
 
 	if (isPending) {
 		return (

@@ -8,12 +8,14 @@ import { EscrowsTableBodyContainer } from '@pages/SearchResults/RoleDetails/Role
 import { useEscrowDetails } from '@services/api/use-escrows-details';
 import { AddressDetailsLeader } from '@services/api/use-address-details';
 import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
+import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 
 export const EscrowsTableBody = ({
 	role,
 }: {
 	role: AddressDetailsLeader['role'];
 }) => {
+	const { filterParams } = useWalletSearch();
 	const { data, isPending, isError, error } = useEscrowDetails({ role });
 	const {
 		setLastPageIndex,
@@ -27,6 +29,10 @@ export const EscrowsTableBody = ({
 			setPrevPage();
 		}
 	}, [data?.results, page, setLastPageIndex, setPrevPage]);
+
+	useEffect(() => {
+		setLastPageIndex(undefined);
+	}, [filterParams.address, filterParams.chainId, setLastPageIndex]);
 
 	if (isPending) {
 		return (
