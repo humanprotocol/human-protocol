@@ -26,8 +26,9 @@ import os
 from typing import List, Optional, Dict
 
 from web3 import Web3
+import requests
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, KVStoreKeys
 from human_protocol_sdk.utils import get_data_from_subgraph
 
 from human_protocol_sdk.kvstore.kvstore_client import KVStoreClientError
@@ -108,3 +109,134 @@ class KVStoreUtils:
             KVStoreData(key=kvstore.get("key", ""), value=kvstore.get("value", ""))
             for kvstore in kvstores
         ]
+
+    @staticmethod
+    def get(kvstore_contract, address: str, key: str) -> str:
+        """Gets the value of a key-value pair in the contract.
+
+        :param kvstore_contract: Contract instance
+        :param address: The Ethereum address associated with the key-value pair
+        :param key: The key of the key-value pair to get
+
+        :return: The value of the key-value pair if it exists
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.kvstore import KVStoreUtils
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                kvstore_contract = w3.eth.contract(
+                    address=self.network["kvstore_address"],
+                    abi=kvstore_interface["abi"]
+                )
+
+                role = KVStoreUtils.get(kvstore_contract, '0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'Role')
+        """
+
+        if not key:
+            raise KVStoreClientError("Key can not be empty")
+        if not Web3.is_address(address):
+            raise KVStoreClientError(f"Invalid address: {address}")
+        result = kvstore_contract.functions.get(address, key).call()
+        return result
+
+    @staticmethod
+    def get_file_url_and_verify_hash(
+        kvstore_contract, address: str, key: Optional[str] = "url"
+    ) -> str:
+        """Gets the URL value of the given entity, and verify its hash.
+
+        :param kvstore_contract: Contract instance
+        :param address: Address from which to get the URL value.
+        :param key: Configurable URL key. `url` by default.
+
+        :return url: The URL value of the given address if exists, and the content is valid
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.kvstore import KVStoreUtils
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                kvstore_contract = w3.eth.contract(
+                    address=self.network["kvstore_address"],
+                    abi=kvstore_interface["abi"]
+                )
+
+                url = KVStoreUtils.get_file_url_and_verify_hash(
+                    kvstore_contract,
+                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+                )
+                linkedin_url = KVStoreUtils.get_file_url_and_verify_hash(
+                    kvstore_contract,
+                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
+                    'linkedin_url'
+                )
+        """
+
+        if not Web3.is_address(address):
+            raise KVStoreClientError(f"Invalid address: {address}")
+
+        url = kvstore_contract.functions.get(address, key).call()
+        hash = kvstore_contract.functions.get(address, key + "_hash").call()
+
+        if len(url) == 0:
+            return url
+
+        content = requests.get(url).text
+        content_hash = Web3.keccak(text=content).hex()
+
+        if hash != content_hash:
+            raise KVStoreClientError(f"Invalid hash")
+
+        return url
+
+    @staticmethod
+    def get_public_key(kvstore_contract, address: str) -> str:
+        """Gets the public key of the given entity, and verify its hash.
+
+        :param kvstore_contract: Contract instance
+        :param address: Address from which to get the public key.
+
+        :return public_key: The public key of the given address if exists, and the content is valid
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.kvstore import KVStoreUtils
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                kvstore_contract = w3.eth.contract(
+                    address=self.network["kvstore_address"],
+                    abi=kvstore_interface["abi"]
+                )
+
+                public_key = KVStoreUtils.get_public_key(
+                    kvstore_contract,
+                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+                )
+        """
+
+        public_key_url = KVStoreUtils.get_file_url_and_verify_hash(
+            kvstore_contract, address, KVStoreKeys.public_key.value
+        )
+
+        if public_key_url == "":
+            return ""
+
+        public_key = requests.get(public_key_url).text
+
+        return public_key

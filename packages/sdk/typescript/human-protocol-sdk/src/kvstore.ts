@@ -277,142 +277,6 @@ export class KVStoreClient extends BaseEthersClient {
         throw Error(`Failed to set URL and hash: ${e.message}`);
     }
   }
-
-  /**
-   * Gets the value of a key-value pair in the contract.
-   *
-   * @param {string} address Address from which to get the key value.
-   * @param {string} key Key to obtain the value.
-   * @returns {string} Value of the key.
-   *
-   *
-   * **Code example**
-   *
-   * > Need to have available stake.
-   *
-   * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
-   * const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'Role');
-   * ```
-   */
-  public async get(address: string, key: string): Promise<string> {
-    if (key === '') throw ErrorKVStoreEmptyKey;
-    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-
-    try {
-      const result = await this.contract?.get(address, key);
-      return result;
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
-      return e;
-    }
-  }
-
-  /**
-   * Gets the URL value of the given entity, and verify its hash.
-   *
-   * @param {string} address Address from which to get the URL value.
-   * @param {string} urlKey  Configurable URL key. `url` by default.
-   * @returns {string} URL value for the given address if exists, and the content is valid
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
-   * const url = await kvstoreClient.getFileUrlAndVerifyHash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-   * const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
-   *    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    'linkedin_url'
-   * );
-   * ```
-   */
-  public async getFileUrlAndVerifyHash(
-    address: string,
-    urlKey = 'url'
-  ): Promise<string> {
-    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-    const hashKey = urlKey + '_hash';
-
-    let url = '',
-      hash = '';
-
-    try {
-      url = await this.contract?.get(address, urlKey);
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
-    }
-
-    // Return empty string
-    if (!url?.length) {
-      return '';
-    }
-
-    try {
-      hash = await this.contract?.get(address, hashKey);
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
-    }
-
-    const content = await fetch(url).then((res) => res.text());
-    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
-
-    if (hash !== contentHash) {
-      throw ErrorInvalidHash;
-    }
-
-    return url;
-  }
-
-  /**
-   * Gets the public key of the given entity, and verify its hash.
-   *
-   * @param {string} address Address from which to get the public key.
-   * @returns {string} Public key for the given address if exists, and the content is valid
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
-   * const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-   * ```
-   */
-  public async getPublicKey(address: string): Promise<string> {
-    const publicKeyUrl = await this.getFileUrlAndVerifyHash(
-      address,
-      KVStoreKeys.publicKey
-    );
-
-    if (publicKeyUrl === '') {
-      return '';
-    }
-
-    const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
-
-    return publicKey;
-  }
 }
 
 /**
@@ -441,46 +305,15 @@ export class KVStoreClient extends BaseEthersClient {
  * ```ts
  * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
  *
- * const KVStoreAddresses = new KVStoreUtils.getData({
- *   network: ChainId.POLYGON_AMOY
- * });
+ * const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
+ *   ChainId.POLYGON_AMOY,
+ *   "0x1234567890123456789012345678901234567890",
+ * );
  * ```
  */
 export class KVStoreUtils {
   /**
    * This function returns the KVStore data for a given address.
-   *
-   * > This uses Subgraph
-   *
-   * **Input parameters**
-   *
-   * ```ts
-   * enum ChainId {
-   *   ALL = -1,
-   *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
-   *   BSC_MAINNET = 56,
-   *   BSC_TESTNET = 97,
-   *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
-   *   POLYGON_AMOY = 80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
-   *   LOCALHOST = 1338,
-   * }
-   * ```
-   *
-   * ```ts
-   * interface IKVStore {
-   *   key: string;
-   *   value: string;
-   * }
-   * ```
    *
    * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address of the KVStore
@@ -521,5 +354,151 @@ export class KVStoreUtils {
     }));
 
     return kvStoreData || [];
+  }
+
+  /**
+   * Gets the value of a key-value pair in the contract.
+   *
+   * @param {KVStore} contract The KVStore contract instance.
+   * @param {string} address Address from which to get the key value.
+   * @param {string} key Key to obtain the value.
+   * @returns {Promise<string>} Value of the key.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const address = '0x1234567890123456789012345678901234567890';
+   * const key = 'Role';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
+   *
+   * const value = await KVStoreUtils.get(kvstoreContract, address, key);
+   * console.log(value);
+   * ```
+   */
+  public static async get(
+    contract: KVStore,
+    address: string,
+    key: string
+  ): Promise<string> {
+    if (key === '') throw ErrorKVStoreEmptyKey;
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+
+    try {
+      const result = await contract.get(address, key);
+      return result;
+    } catch (e) {
+      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
+      return e;
+    }
+  }
+
+  /**
+   * Gets the URL value of the given entity, and verify its hash.
+   *
+   * @param {KVStore} contract The KVStore contract instance.
+   * @param {string} address Address from which to get the URL value.
+   * @param {string} urlKey Configurable URL key. `url` by default.
+   * @returns {Promise<string>} URL value for the given address if exists, and the content is valid
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const address = '0x1234567890123456789012345678901234567890';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
+   *
+   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(kvstoreContract, address);
+   * console.log(url);
+   * ```
+   */
+  public static async getFileUrlAndVerifyHash(
+    contract: KVStore,
+    address: string,
+    urlKey = 'url'
+  ): Promise<string> {
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+    const hashKey = urlKey + '_hash';
+
+    let url = '',
+      hash = '';
+
+    try {
+      url = await contract.get(address, urlKey);
+    } catch (e) {
+      if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
+    }
+
+    // Return empty string
+    if (!url?.length) {
+      return '';
+    }
+
+    try {
+      hash = await contract.get(address, hashKey);
+    } catch (e) {
+      if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
+    }
+
+    const content = await fetch(url).then((res) => res.text());
+    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
+
+    if (hash !== contentHash) {
+      throw ErrorInvalidHash;
+    }
+
+    return url;
+  }
+
+  /**
+   * Gets the public key of the given entity, and verify its hash.
+   *
+   * @param {KVStore} contract The KVStore contract instance.
+   * @param {string} address Address from which to get the public key.
+   * @returns {Promise<string>} Public key for the given address if exists, and the content is valid
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const address = '0x1234567890123456789012345678901234567890';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
+   *
+   * const publicKey = await KVStoreUtils.getPublicKey(kvstoreContract, address);
+   * console.log(publicKey);
+   * ```
+   */
+  public static async getPublicKey(
+    contract: KVStore,
+    address: string
+  ): Promise<string> {
+    const publicKeyUrl = await this.getFileUrlAndVerifyHash(
+      contract,
+      address,
+      KVStoreKeys.publicKey
+    );
+
+    if (publicKeyUrl === '') {
+      return '';
+    }
+
+    const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
+
+    return publicKey;
   }
 }
