@@ -8,4 +8,7 @@ export const apiPaths = {
 	transactionDetails: {
 		path: '/details/transactions',
 	},
+	escrowDetails: {
+		path: '/details/escrows',
+	},
 } as const;

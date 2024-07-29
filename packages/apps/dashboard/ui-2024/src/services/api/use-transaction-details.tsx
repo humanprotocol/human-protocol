@@ -12,7 +12,7 @@ const transactionDetailsSuccessResponseSchema = z.object({
 	to: z.string(),
 	value: z.string(),
 	method: z.string(),
-	txHash: z.string()
+	txHash: z.string(),
 });
 
 export type TransactionDetails = z.infer<

@@ -13,25 +13,8 @@ import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { AddressDetailsLeader, Roles } from '@services/api/use-address-details';
 import { getNetwork } from '@utils/config/networks';
-
-interface RoleDetails {
-	escrows: {
-		escrowId: string;
-	}[];
-}
-//TEMPORARY INTERFACE AND DATA
-const HARDCODED_ROLE_DETAILS: RoleDetails = {
-	escrows: [
-		{
-			escrowId:
-				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
-		},
-		{
-			escrowId:
-				'3qraSH39kPbdkFwQYuhwE2kZHjXnV2dhukuprkDkhnosKa89YLLhMXXmwwHhbRu9ePS2AhNm46po2RHSANjYTDhcNS1CY4',
-		},
-	],
-};
+import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
 
 interface RoleInfoProps {
 	title: string;
@@ -178,6 +161,8 @@ const RoleDetails = ({
 }: {
 	data: AddressDetailsLeader;
 }) => {
+	const { filterParams } = useWalletSearch();
+
 	return (
 		<>
 			<Card
@@ -317,22 +302,18 @@ const RoleDetails = ({
 						>
 							Tokens Staked
 						</Typography>
-						{amountStaked ? (
-							<Typography>
-								{amountStaked}
-								<Typography
-									sx={{
-										marginLeft: 0.5,
-									}}
-									color={colorPalette.fog.main}
-									component="span"
-								>
-									HMT
-								</Typography>
+						<Typography>
+							{amountStaked}
+							<Typography
+								sx={{
+									marginLeft: 0.5,
+								}}
+								color={colorPalette.fog.main}
+								component="span"
+							>
+								HMT
 							</Typography>
-						) : (
-							<Typography>N/A</Typography>
-						)}
+						</Typography>
 					</Stack>
 					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
 						<Typography
@@ -381,48 +362,9 @@ const RoleDetails = ({
 				</Stack>
 			</Card>
 
-			<Card
-				sx={{
-					paddingX: { xs: 2, md: 8 },
-					paddingY: { xs: 4, md: 6 },
-					marginBottom: 4,
-				}}
-			>
-				<Box>
-					<Typography
-						sx={{
-							marginBottom: 3,
-						}}
-						variant="h5"
-					>
-						Escrows
-					</Typography>
-					{HARDCODED_ROLE_DETAILS.escrows.length > 1 ? (
-						<>
-							{HARDCODED_ROLE_DETAILS.escrows.map((elem) => (
-								<Typography
-									variant="h6"
-									component="p"
-									sx={{
-										marginBottom: 3,
-										'&:last-child': { marginBottom: 0 },
-									}}
-								>
-									{elem.escrowId}
-								</Typography>
-							))}
-						</>
-					) : (
-						<Typography
-							variant="h6"
-							component="p"
-							textAlign={{ xs: 'left', md: 'center' }}
-						>
-							No escrows launched yet
-						</Typography>
-					)}
-				</Box>
-			</Card>
+			{filterParams.address && filterParams.chainId ? (
+				<RoleDetailsEscrowsTable role={role} />
+			) : null}
 		</>
 	);
 };
