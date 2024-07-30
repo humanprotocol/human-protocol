@@ -1,7 +1,7 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { ethers, JsonRpcProvider } from 'ethers';
-import { KVStoreKeys, KVStoreUtils, NETWORKS } from '@human-protocol/sdk';
+import { ethers } from 'ethers';
+import { ChainId, KVStoreKeys, KVStoreUtils, NETWORKS } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { KVStore__factory } from '@human-protocol/core/typechain-types';
@@ -11,14 +11,10 @@ export class KvStoreGateway {
   get cachePrefix() {
     return 'KV_STORE:';
   }
-  private signer: JsonRpcProvider;
   constructor(
     private configService: EnvironmentConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  async onModuleInit(): Promise<void> {
-    this.signer = new ethers.JsonRpcProvider(this.configService.rpcUrl);
-  }
   async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
     const cachedUrl: string | undefined = await this.cacheManager.get(
       this.cachePrefix + address,
@@ -28,8 +24,11 @@ export class KvStoreGateway {
     }
     let fetchedUrl: string;
     try {
-      const signer = new ethers.JsonRpcProvider(this.configService.rpcUrl);
-      const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]!.kvstoreAddress!, this.signer);
+      const runner = new ethers.JsonRpcProvider(this.configService.rpcUrl);
+      const network = await runner.provider?.getNetwork();
+      const chainId: ChainId = Number(network?.chainId);
+
+      const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]!.kvstoreAddress!, runner);
       fetchedUrl = await KVStoreUtils.get(kvstoreContract, address, KVStoreKeys.url);
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
