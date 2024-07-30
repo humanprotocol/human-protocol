@@ -1,34 +1,47 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+* Added getStatusEvents function.
+* Added daily unique sender/receiver metrics to HMT statistics.
+* Add get HMT holders.
 
-### Removed
+#### Changed
 
-### Fixed
+* Added pagination and ordering to get escrows.
+* Added pagination and ordering to get transactions
 
-### Security
+#### Deprecated
 
-# How to upgrade
+#### Removed
 
-## Typescript
+* Remove fetching from an array of networks.
 
-### yarn
+#### Fixed
+
+* Rename hash to txHash in get transactions.
+
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
