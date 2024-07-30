@@ -423,7 +423,9 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
 
       const manifest: IManifest = {
         submissionsRequired: 2,
@@ -592,7 +594,9 @@ describe('JobService', () => {
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-    KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+    KVStoreUtils.get = jest
+      .fn()
+      .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
     KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey');
 
     const manifest: IManifest = {
@@ -674,7 +678,9 @@ describe('JobService', () => {
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-    KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+    KVStoreUtils.get = jest
+      .fn()
+      .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
     KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey');
 
     const manifest: IManifest = {

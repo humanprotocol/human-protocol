@@ -5,7 +5,7 @@ import {
   EscrowClient,
   StorageClient,
   NETWORKS,
-  KVStoreUtils
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import {
   BadRequestException,
@@ -87,7 +87,10 @@ export class StorageService {
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
 
-        const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]?.kvstoreAddress!, signer);
+        const kvstoreContract = KVStore__factory.connect(
+          NETWORKS[chainId]!.kvstoreAddress!,
+          signer,
+        );
         const exchangeOraclePublickKey = await KVStoreUtils.getPublicKey(
           kvstoreContract,
           signer.address,

@@ -90,7 +90,10 @@ export class StorageService {
         const reputationOracleAddress =
           await escrowClient.getReputationOracleAddress(escrowAddress);
 
-        const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]?.kvstoreAddress!, signer);
+        const kvstoreContract = KVStore__factory.connect(
+          NETWORKS[chainId]!.kvstoreAddress!,
+          signer,
+        );
 
         const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
           kvstoreContract,

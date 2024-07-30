@@ -4,7 +4,7 @@ import {
   EncryptionUtils,
   StorageClient,
   EscrowClient,
-  KVStoreUtils
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import { MOCK_ADDRESS } from '../../../test/constants';
@@ -95,8 +95,8 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey'),
-      jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
+      (KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey')),
+        jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
 
       const jobSolution = {
         workerAddress,

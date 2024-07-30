@@ -98,7 +98,10 @@ export class JobService {
   async processJobSolution(webhook: WebhookDto): Promise<string> {
     const signer = this.web3Service.getSigner(webhook.chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const kvstoreContract = KVStore__factory.connect(NETWORKS[webhook.chainId]?.kvstoreAddress!, signer);
+    const kvstoreContract = KVStore__factory.connect(
+      NETWORKS[webhook.chainId]!.kvstoreAddress!,
+      signer,
+    );
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       webhook.escrowAddress,

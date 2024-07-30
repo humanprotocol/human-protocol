@@ -31,7 +31,7 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
   KVStoreUtils: {
-    get: jest.fn()
+    get: jest.fn(),
   },
 }));
 
