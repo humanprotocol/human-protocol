@@ -6,6 +6,7 @@ const DEFAULT_REDIS_PORT = 6379;
 const DEFAULT_CACHE_HMT_PRICE_TTL = 60;
 const DEFAULT_CACHE_HMT_GENERAL_STATS_TTL = 2 * 60;
 const DEFAULT_HMT_PRICE_CACHE_KEY = 'hmt-price';
+export const HCAPTCHA_PREFIX = 'hcaptcha-';
 
 @Injectable()
 export class RedisConfigService {

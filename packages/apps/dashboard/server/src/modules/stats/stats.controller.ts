@@ -1,7 +1,13 @@
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, HttpCode } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, HttpCode, Query } from '@nestjs/common';
+
 import { StatsService } from './stats.service';
 import { HmtPriceDto } from './dto/hmt-price.dto';
+import {
+  HcaptchaDailyStatsResponseDto,
+  HcaptchaStats,
+} from './dto/hcaptcha.dto';
+import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
 
 @ApiTags('Stats')
 @Controller('/stats')
@@ -22,5 +28,53 @@ export class StatsController {
   public async hmtPrice(): Promise<HmtPriceDto> {
     const hmtPrice = await this.statsService.hmtPrice();
     return { hmtPrice };
+  }
+
+  @Get('/hcaptcha/daily')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get Hcaptcha stats',
+    description: 'Endpoint to return Hcaptcha stats.',
+  })
+  @ApiQuery({
+    name: 'from',
+    type: String,
+    description: 'Start date in the format YYYY-MM-DD',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'to',
+    type: String,
+    description: 'End date in the format YYYY-MM-DD',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Stats retrieved successfully',
+    type: HcaptchaDailyStatsResponseDto,
+  })
+  public async hcaptchaDailyStats(
+    @Query('from', DateValidationPipe) from: string,
+    @Query('to', DateValidationPipe) to: string,
+  ): Promise<HcaptchaDailyStatsResponseDto> {
+    const results = await this.statsService.hCaptchaStats(from, to);
+    return { from, to, results };
+  }
+
+  @Get('/hcaptcha/general')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get Hcaptcha general stats',
+    description: 'Endpoint to return Hcaptcha general stats.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Stats retrieved successfully',
+    type: HcaptchaStats,
+  })
+  public async hcaptchaGeneralStats(): Promise<HcaptchaStats> {
+    const result: HcaptchaStats =
+      await this.statsService.hCaptchaGeneralStats();
+    return result;
   }
 }
