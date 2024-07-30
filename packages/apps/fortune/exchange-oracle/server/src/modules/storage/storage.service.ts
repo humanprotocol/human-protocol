@@ -2,9 +2,10 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  KVStoreClient,
   EscrowClient,
   StorageClient,
+  NETWORKS,
+  KVStoreUtils
 } from '@human-protocol/sdk';
 import {
   BadRequestException,
@@ -17,6 +18,7 @@ import { ISolution } from '../../common/interfaces/job';
 import { Web3Service } from '../web3/web3.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class StorageService {
@@ -85,12 +87,13 @@ export class StorageService {
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
 
-        const kvstoreClient = await KVStoreClient.build(signer);
-
-        const exchangeOraclePublickKey = await kvstoreClient.getPublicKey(
+        const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]?.kvstoreAddress!, signer);
+        const exchangeOraclePublickKey = await KVStoreUtils.getPublicKey(
+          kvstoreContract,
           signer.address,
         );
-        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+        const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
+          kvstoreContract,
           recordingOracleAddress,
         );
         if (

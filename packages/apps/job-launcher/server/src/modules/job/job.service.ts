@@ -3,13 +3,13 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  KVStoreClient,
   EscrowUtils,
   NETWORKS,
   StakingClient,
   StorageParams,
   Encryption,
   KVStoreKeys,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -93,6 +93,7 @@ import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   HMToken,
   HMToken__factory,
+  KVStore__factory,
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
 import { StorageService } from '../storage/storage.service';
@@ -1121,11 +1122,19 @@ export class JobService {
         this.getOraclesSpecificActions[requestType];
 
       const signer = this.web3Service.getSigner(chainId);
-      const kvstore = await KVStoreClient.build(signer);
-      const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
+      const kvstoreContract = KVStore__factory.connect(
+        NETWORKS[chainId]!.kvstoreAddress!,
+        signer,
+      );
+      const publicKeys: string[] = [
+        await KVStoreUtils.getPublicKey(kvstoreContract, signer.address),
+      ];
       const oracleAddresses = getOracleAddresses();
       for (const address of Object.values(oracleAddresses)) {
-        const publicKey = await kvstore.getPublicKey(address);
+        const publicKey = await KVStoreUtils.getPublicKey(
+          kvstoreContract,
+          address,
+        );
         if (publicKey) publicKeys.push(publicKey);
       }
 
@@ -1571,9 +1580,15 @@ export class JobService {
   ): Promise<bigint> {
     const signer = this.web3Service.getSigner(chainId);
 
-    const kvStoreClient = await KVStoreClient.build(signer);
-
-    const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
+    const kvstoreContract = KVStore__factory.connect(
+      NETWORKS[chainId]!.kvstoreAddress!,
+      signer,
+    );
+    const feeValue = await KVStoreUtils.get(
+      kvstoreContract,
+      oracleAddress,
+      KVStoreKeys.fee,
+    );
 
     return BigInt(feeValue ? feeValue : 1);
   }

@@ -22,9 +22,13 @@ import {
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
-import { Wallet } from 'ethers';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
-import { ChainId, KVStoreClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  KVStoreClient,
+  KVStoreUtils,
+  NETWORKS,
+} from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { SiteKeyEntity } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
@@ -34,6 +38,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
+import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class UserService {
@@ -246,19 +251,30 @@ export class UserService {
 
     verifySignature(signedData, signature, [user.evmAddress]);
 
-    let signer: Wallet;
+    let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
-      signer = this.web3Service.getSigner(ChainId.POLYGON);
-    } else if (currentWeb3Env === Web3Env.TESTNET) {
-      signer = this.web3Service.getSigner(ChainId.POLYGON_AMOY);
+      chainId = ChainId.POLYGON;
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      chainId = ChainId.LOCALHOST;
     } else {
-      signer = this.web3Service.getSigner(ChainId.LOCALHOST);
+      chainId = ChainId.POLYGON_AMOY;
     }
+
+    const signer = this.web3Service.getSigner(chainId);
 
     const kvstore = await KVStoreClient.build(signer);
 
-    const status = await kvstore.get(signer.address, user.evmAddress);
+    const kvstoreContract = KVStore__factory.connect(
+      NETWORKS[chainId]!.kvstoreAddress!,
+      signer,
+    );
+
+    const status = await KVStoreUtils.get(
+      kvstoreContract,
+      signer.address,
+      user.evmAddress,
+    );
 
     if (status === OperatorStatus.ACTIVE) {
       throw new ControlledError(
@@ -281,19 +297,30 @@ export class UserService {
 
     verifySignature(signedData, signature, [user.evmAddress]);
 
-    let signer: Wallet;
+    let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
-      signer = this.web3Service.getSigner(ChainId.POLYGON);
-    } else if (currentWeb3Env === Web3Env.TESTNET) {
-      signer = this.web3Service.getSigner(ChainId.POLYGON_AMOY);
+      chainId = ChainId.POLYGON;
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      chainId = ChainId.LOCALHOST;
     } else {
-      signer = this.web3Service.getSigner(ChainId.LOCALHOST);
+      chainId = ChainId.POLYGON_AMOY;
     }
+
+    const signer = this.web3Service.getSigner(chainId);
 
     const kvstore = await KVStoreClient.build(signer);
 
-    const status = await kvstore.get(signer.address, user.evmAddress);
+    const kvstoreContract = KVStore__factory.connect(
+      NETWORKS[chainId]!.kvstoreAddress!,
+      signer,
+    );
+
+    const status = await KVStoreUtils.get(
+      kvstoreContract,
+      signer.address,
+      user.evmAddress,
+    );
 
     if (status === OperatorStatus.INACTIVE) {
       throw new ControlledError(

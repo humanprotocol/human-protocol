@@ -3,8 +3,9 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
-  KVStoreClient,
   KVStoreKeys,
+  KVStoreUtils,
+  NETWORKS,
 } from '@human-protocol/sdk';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -22,6 +23,7 @@ import { CaseConverter } from '../../common/utils/case-converter';
 import { EventType } from '../../common/enums/webhook';
 import { JobService } from '../job/job.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { KVStore__factory } from '@human-protocol/core/typechain-types';
 @Injectable()
 export class WebhookService {
   constructor(
@@ -102,8 +104,12 @@ export class WebhookService {
       await escrowClient.getExchangeOracleAddress(escrowAddress);
 
     // Build the KVStore client and get the webhook URL.
-    const kvStoreClient = await KVStoreClient.build(signer);
-    const exchangeOracleUrl = await kvStoreClient.get(
+    const kvstoreContract = KVStore__factory.connect(
+      NETWORKS[chainId]!.kvstoreAddress!,
+      signer,
+    );
+    const exchangeOracleUrl = await KVStoreUtils.get(
+      kvstoreContract,
       exchangeAddress,
       KVStoreKeys.webhookUrl,
     );

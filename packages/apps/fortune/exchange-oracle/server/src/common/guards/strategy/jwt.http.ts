@@ -2,12 +2,13 @@ import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { KVStoreClient, StorageClient } from '@human-protocol/sdk';
+import { NETWORKS, StorageClient, KVStoreUtils } from '@human-protocol/sdk';
 import * as jwt from 'jsonwebtoken';
-import { Web3Service } from '../../../modules/web3/web3.service';
 import { JwtUser } from '../../../common/types/jwt';
 import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
 import { Role } from '../../../common/enums/role';
+import { KVStore__factory } from '@human-protocol/core/typechain-types';
+import { Web3Service } from 'src/modules/web3/web3.service';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -23,11 +24,11 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
         try {
           const payload = jwt.decode(rawJwtToken);
           const chainId = this.web3Service.getValidChains()[0];
-          const kvstoreClient = await KVStoreClient.build(
-            this.web3Service.getSigner(chainId),
-          );
+          const signer = this.web3Service.getSigner(chainId);
 
-          const url = await kvstoreClient.getFileUrlAndVerifyHash(
+          const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]?.kvstoreAddress!, signer);
+          const url = await KVStoreUtils.getFileUrlAndVerifyHash(
+            kvstoreContract,
             (payload as any).reputation_network,
             JWT_KVSTORE_KEY,
           );

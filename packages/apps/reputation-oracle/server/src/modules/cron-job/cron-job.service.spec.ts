@@ -45,10 +45,8 @@ jest.mock('@human-protocol/sdk', () => ({
       complete: jest.fn().mockResolvedValue(null),
     })),
   },
-  KVStoreClient: {
-    build: jest.fn().mockImplementation(() => ({
-      get: jest.fn(),
-    })),
+  KVStoreUtils: {
+    get: jest.fn(),
   },
   OperatorUtils: {
     getLeader: jest.fn().mockImplementation(() => {

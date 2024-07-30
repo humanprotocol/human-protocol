@@ -3,7 +3,8 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  KVStoreClient,
+  KVStoreUtils,
+  NETWORKS,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { FortuneFinalResult } from '../../common/dto/result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class StorageService {
@@ -51,16 +53,23 @@ export class StorageService {
 
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const kvstoreClient = await KVStoreClient.build(signer);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
+    const kvstoreContract = KVStore__factory.connect(
+      NETWORKS[chainId]!.kvstoreAddress!,
+      signer,
+    );
+
+    const reputationOraclePublicKey = await KVStoreUtils.getPublicKey(
+      kvstoreContract,
       signer.address,
     );
-    const jobLauncherPublicKey =
-      await kvstoreClient.getPublicKey(jobLauncherAddress);
+    const jobLauncherPublicKey = await KVStoreUtils.getPublicKey(
+      kvstoreContract,
+      jobLauncherAddress,
+    );
 
     if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
       throw new ControlledError('Missing public key', HttpStatus.BAD_REQUEST);
