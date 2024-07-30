@@ -32,7 +32,7 @@ import { ServerConfigService } from '../common/config/server-config.service';
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
-            : (loggerOptions as LoggerOptions) ?? false,
+            : ((loggerOptions as LoggerOptions) ?? false),
         );
         return {
           name: 'default',

@@ -20,6 +20,7 @@ import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { QualificationModule } from './modules/qualification/qualification.module';
 
 @Module({
   providers: [
@@ -54,7 +55,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
-        '../../../../../',
+        '../../../../../../',
         'node_modules/swagger-ui-dist',
       ),
     }),
@@ -62,6 +63,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
     PayoutModule,
     EnvConfigModule,
     HCaptchaModule,
+    QualificationModule,
   ],
   controllers: [AppController],
 })

@@ -42,7 +42,7 @@ class TestTransactionUtils(unittest.TestCase):
             }
 
             filter = TransactionFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 from_address="0x1234567890123456789012345678901234567890",
                 to_address="0x9876543210987654321098765432109876543210",
             )
@@ -59,6 +59,9 @@ class TestTransactionUtils(unittest.TestCase):
                     "endDate": None,
                     "startBlock": None,
                     "endBlock": None,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "desc",
                 },
             )
             self.assertEqual(len(transactions), 2)
@@ -72,7 +75,7 @@ class TestTransactionUtils(unittest.TestCase):
             mock_function.return_value = {"data": {"transactions": []}}
 
             filter = TransactionFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 from_address="0x1234567890123456789012345678901234567890",
             )
 
@@ -88,13 +91,16 @@ class TestTransactionUtils(unittest.TestCase):
                     "endDate": None,
                     "startBlock": None,
                     "endBlock": None,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "desc",
                 },
             )
             self.assertEqual(len(transactions), 0)
 
     def test_get_transactions_invalid_network(self):
         with self.assertRaises(ValueError) as cm:
-            filter = TransactionFilter(networks=[ChainId(12345)])
+            filter = TransactionFilter(chain_id=ChainId(12345))
             TransactionUtils.get_transactions(filter)
         self.assertEqual("12345 is not a valid ChainId", str(cm.exception))
 
@@ -102,7 +108,7 @@ class TestTransactionUtils(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             TransactionUtils.get_transactions(
                 TransactionFilter(
-                    networks=[ChainId.POLYGON_AMOY],
+                    chain_id=ChainId.POLYGON_AMOY,
                     from_address="invalid_address",
                 )
             )
@@ -112,7 +118,7 @@ class TestTransactionUtils(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             TransactionUtils.get_transactions(
                 TransactionFilter(
-                    networks=[ChainId.POLYGON_AMOY],
+                    chain_id=ChainId.POLYGON_AMOY,
                     to_address="invalid_address",
                 )
             )
@@ -149,7 +155,7 @@ class TestTransactionUtils(unittest.TestCase):
             self.assertIsNotNone(transaction)
             self.assertEqual(transaction.chain_id, ChainId.POLYGON_AMOY)
             self.assertEqual(transaction.block, mock_transaction["block"])
-            self.assertEqual(transaction.hash, mock_transaction["txHash"])
+            self.assertEqual(transaction.tx_hash, mock_transaction["txHash"])
             self.assertEqual(transaction.from_address, mock_transaction["from"])
             self.assertEqual(transaction.to_address, mock_transaction["to"])
             self.assertEqual(transaction.timestamp, mock_transaction["timestamp"])

@@ -6,7 +6,6 @@ export const envValidator = Joi.object({
   HOST: Joi.string(),
   PORT: Joi.string(),
   FE_URL: Joi.string(),
-  SESSION_SECRET: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
   MINIMUM_FEE_USD: Joi.number(),
   // Auth
@@ -37,8 +36,10 @@ export const envValidator = Joi.object({
   HCAPTCHA_REPUTATION_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
-  // HCAPTCHA_SECRET: Joi.string().required(),
-  HCAPTCHA_EXCHANGE_URL: Joi.string().description('hcaptcha exchange url'),
+  HCAPTCHA_SECRET: Joi.string().required(),
+  HCAPTCHA_PROTECTION_URL: Joi.string().description(
+    'Endpoint for validating signin/signup hcaptcha tokens',
+  ),
   RPC_URL_SEPOLIA: Joi.string(),
   RPC_URL_POLYGON: Joi.string(),
   RPC_URL_POLYGON_AMOY: Joi.string(),
@@ -77,8 +78,6 @@ export const envValidator = Joi.object({
   // APIKey
   APIKEY_ITERATIONS: Joi.number(),
   APIKEY_KEY_LENGTH: Joi.number(),
-  // Cron Job Secret
-  CRON_SECRET: Joi.string().required(),
   //COIN API KEYS
   RATE_CACHE_TIME: Joi.number().optional(),
   COINMARKETCAP_API_KEY: Joi.string().optional(),

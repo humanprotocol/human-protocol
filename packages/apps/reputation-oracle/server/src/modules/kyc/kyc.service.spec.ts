@@ -1,31 +1,41 @@
+import { createMock } from '@golevelup/ts-jest';
+import { ChainId } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { KycService } from './kyc.service';
-import { HttpService } from '@nestjs/axios';
-import { DeepPartial } from 'typeorm';
-import { createMock } from '@golevelup/ts-jest';
-import { HttpStatus } from '@nestjs/common';
-import { KycStatus } from '../../common/enums/user';
-import { KycRepository } from './kyc.repository';
-import { KycEntity } from './kyc.entity';
 import { of } from 'rxjs';
-import { ErrorKyc } from '../../common/constants/errors';
-import { SynapsConfigService } from '../../common/config/synaps-config.service';
-import { ControlledError } from '../../common/errors/controlled';
+import { DeepPartial } from 'typeorm';
+import { MOCK_ADDRESS } from '../../../test/constants';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { SynapsConfigService } from '../../common/config/synaps-config.service';
+import { ErrorKyc, ErrorUser } from '../../common/constants/errors';
+import { KycServiceType, KycStatus } from '../../common/enums/user';
+import { ControlledError } from '../../common/errors/controlled';
+import { Web3Service } from '../web3/web3.service';
+import { KycEntity } from './kyc.entity';
+import { KycRepository } from './kyc.repository';
+import { KycService } from './kyc.service';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
   let httpService: HttpService;
   let kycRepository: KycRepository;
   let synapsConfigService: SynapsConfigService;
-  let hcaptchaConfigService: HCaptchaConfigService;
+  let web3Service: Web3Service;
 
   beforeAll(async () => {
     const mockHttpService: DeepPartial<HttpService> = {
       axiosRef: {
         request: jest.fn(),
       },
+    };
+
+    const signerMock = {
+      address: MOCK_ADDRESS,
+      getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+      signMessage: jest.fn(),
     };
 
     const moduleRef = await Test.createTestingModule({
@@ -39,6 +49,22 @@ describe('Kyc Service', () => {
           useValue: mockHttpService,
         },
         { provide: KycRepository, useValue: createMock<KycRepository>() },
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+            getOperatorAddress: jest
+              .fn()
+              .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
+          },
+        },
+        ConfigService,
+        {
+          provide: NetworkConfigService,
+          useValue: {
+            networks: [{ chainId: ChainId.LOCALHOST }],
+          },
+        },
       ],
     }).compile();
 
@@ -47,9 +73,7 @@ describe('Kyc Service', () => {
     kycRepository = moduleRef.get<KycRepository>(KycRepository);
     synapsConfigService =
       moduleRef.get<SynapsConfigService>(SynapsConfigService);
-    hcaptchaConfigService = moduleRef.get<HCaptchaConfigService>(
-      HCaptchaConfigService,
-    );
+    web3Service = moduleRef.get<Web3Service>(Web3Service);
 
     jest
       .spyOn(SynapsConfigService.prototype, 'apiKey', 'get')
@@ -236,7 +260,7 @@ describe('Kyc Service', () => {
       stepId: 'xx',
       service: 'ID DOCUMENT',
       sessionId: '123',
-      state: KycStatus.APPROVED,
+      status: KycStatus.APPROVED,
     };
 
     it('Should throw an error if the secret is invalid', async () => {
@@ -318,6 +342,7 @@ describe('Kyc Service', () => {
               session: {
                 id: '123',
                 status: KycStatus.APPROVED,
+                service: KycServiceType.ID_DOCUMENT,
               },
             },
           });
@@ -342,22 +367,23 @@ describe('Kyc Service', () => {
       });
     });
 
-    it('Should throw an error when country is not set', async () => {
+    it('Should throw save status error when country is not set', async () => {
       jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
 
       httpService.get = jest
         .fn()
-        .mockImplementationOnce((url: string, config?: any) => {
+        .mockImplementationOnce(() => {
           return of({
             data: {
               session: {
                 id: '123',
                 status: KycStatus.APPROVED,
+                service: KycServiceType.ID_DOCUMENT,
               },
             },
           });
         })
-        .mockImplementationOnce((url: string, config?: any) => {
+        .mockImplementationOnce(() => {
           return of({
             data: {
               document: {
@@ -367,14 +393,68 @@ describe('Kyc Service', () => {
           });
         });
 
-      await expect(
-        kycService.updateKycStatus(
-          synapsConfigService.webhookSecret,
-          mockKycUpdate,
-        ),
-      ).rejects.toThrow(
-        new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST),
+      await kycService.updateKycStatus(
+        synapsConfigService.webhookSecret,
+        mockKycUpdate,
       );
+
+      expect(kycRepository.updateOne).toHaveBeenCalledWith({
+        status: KycStatus.ERROR,
+      });
+    });
+  });
+
+  describe('getSignedAddress', () => {
+    it('Should throw an error if the user has no wallet address registered', async () => {
+      const mockUserEntity = {};
+
+      await expect(
+        kycService.getSignedAddress(mockUserEntity as any),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorUser.NoWalletAddresRegistered,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    it('Should throw an error if the user KYC status is not approved', async () => {
+      const mockUserEntity = {
+        evmAddress: MOCK_ADDRESS,
+        kyc: {
+          status: KycStatus.NONE,
+        },
+      };
+
+      await expect(
+        kycService.getSignedAddress(mockUserEntity as any),
+      ).rejects.toThrow(
+        new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('Should return the signed address', async () => {
+      const mockUserEntity = {
+        evmAddress: MOCK_ADDRESS,
+        kyc: {
+          status: KycStatus.APPROVED,
+        },
+      };
+
+      const signerMock = {
+        address: MOCK_ADDRESS,
+        getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+        signMessage: jest.fn().mockResolvedValue('signature'),
+      };
+
+      web3Service.getSigner = jest.fn().mockReturnValue(signerMock);
+
+      const result = await kycService.getSignedAddress(mockUserEntity as any);
+
+      expect(result).toEqual({
+        key: `KYC-${MOCK_ADDRESS.toLowerCase()}`,
+        value: 'signature',
+      });
     });
   });
 });

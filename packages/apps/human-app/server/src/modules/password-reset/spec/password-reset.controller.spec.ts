@@ -3,7 +3,7 @@ import { PasswordResetService } from '../password-reset.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { PasswordResetProfile } from '../password-reset.mapper';
+import { PasswordResetProfile } from '../password-reset.mapper.profile';
 import { serviceMock } from './password-reset.service.mock';
 import { expect, it } from '@jest/globals';
 import {
@@ -51,6 +51,7 @@ describe('PasswordResetController', () => {
       const dto: ForgotPasswordDto = forgotPasswordDtoFixture;
       const expectedCommand: ForgotPasswordCommand = {
         email: dto.email,
+        hCaptchaToken: dto.h_captcha_token,
       };
       await controller.forgotPassword(dto);
       expect(service.processForgotPassword).toHaveBeenCalledWith(

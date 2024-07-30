@@ -2,7 +2,7 @@
 import { ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 import {
   ErrorCannotUseDateAndBlockSimultaneously,
   ErrorInvalidHahsProvided,
@@ -62,13 +62,16 @@ export class TransactionUtils {
    *
    * ```ts
    * interface ITransactionsFilter {
-   *   networks: ChainId[]; // List of chain IDs to query.
+   *   chainId: ChainId; // List of chain IDs to query.
    *   fromAddress?: string; // (Optional) The address from which transactions are sent.
    *   toAddress?: string; // (Optional) The address to which transactions are sent.
    *   startDate?: Date; // (Optional) The start date to filter transactions (inclusive).
    *   endDate?: Date; // (Optional) The end date to filter transactions (inclusive).
    *   startBlock?: number; // (Optional) The start block number to filter transactions (inclusive).
    *   endBlock?: number; // (Optional) The end block number to filter transactions (inclusive).
+   *   first?: number; // (Optional) Number of transactions per page. Default is 10.
+   *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+   *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is DESC.
    * }
    * ```
    *
@@ -90,12 +93,15 @@ export class TransactionUtils {
    * **Code example**
    *
    * ```ts
-   * import { TransactionUtils, ChainId } from '@human-protocol/sdk';
+   * import { TransactionUtils, ChainId, OrderDirection } from '@human-protocol/sdk';
    *
    * const filter: ITransactionsFilter = {
-   *   networks: [ChainId.POLYGON],
+   *   chainId: ChainId.POLYGON,
    *   startDate: new Date('2022-01-01'),
-   *   endDate: new Date('2022-12-31')
+   *   endDate: new Date('2022-12-31'),
+   *   first: 10,
+   *   skip: 0,
+   *   orderDirection: OrderDirection.DESC,
    * };
    * const transactions = await TransactionUtils.getTransactions(filter);
    * ```
@@ -110,33 +116,37 @@ export class TransactionUtils {
       throw ErrorCannotUseDateAndBlockSimultaneously;
     }
 
-    const transactions_data: ITransaction[] = [];
-    for (const chainId of filter.networks) {
-      const networkData = NETWORKS[chainId];
-      if (!networkData) {
-        throw ErrorUnsupportedChainID;
-      }
-      const { transactions } = await gqlFetch<{
-        transactions: ITransaction[];
-      }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
-        fromAddress: filter?.fromAddress,
-        toAddress: filter?.toAddress,
-        startDate: filter?.startDate
-          ? Math.floor(filter?.startDate.getTime() / 1000)
-          : undefined,
-        endDate: filter.endDate
-          ? Math.floor(filter.endDate.getTime() / 1000)
-          : undefined,
-        startBlock: filter.startBlock ? filter.startBlock : undefined,
-        endBlock: filter.endBlock ? filter.endBlock : undefined,
-      });
+    const first =
+      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+    const skip = filter.skip || 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-      if (!transactions) {
-        continue;
-      }
-
-      transactions_data.push(...transactions);
+    const networkData = NETWORKS[filter.chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
     }
-    return transactions_data;
+    const { transactions } = await gqlFetch<{
+      transactions: ITransaction[];
+    }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
+      fromAddress: filter?.fromAddress,
+      toAddress: filter?.toAddress,
+      startDate: filter?.startDate
+        ? Math.floor(filter?.startDate.getTime() / 1000)
+        : undefined,
+      endDate: filter.endDate
+        ? Math.floor(filter.endDate.getTime() / 1000)
+        : undefined,
+      startBlock: filter.startBlock ? filter.startBlock : undefined,
+      endBlock: filter.endBlock ? filter.endBlock : undefined,
+      orderDirection: orderDirection,
+      first: first,
+      skip: skip,
+    });
+
+    if (!transactions) {
+      return [];
+    }
+
+    return transactions;
   }
 }

@@ -9,9 +9,6 @@ import {
 import {
   BulkPayoutEvent,
   Escrow,
-  PaidStatusEvent,
-  PartialStatusEvent,
-  PendingStatusEvent,
   SetupEvent,
   StoreResultsEvent,
 } from '../../../generated/schema';
@@ -40,15 +37,6 @@ export function handlePending(event: Pending): void {
   setupEventEntity.escrowAddress = event.address;
   setupEventEntity.sender = event.transaction.from;
   setupEventEntity.save();
-
-  // Create PendingStatusEvent entity
-  const statusEventEntity = new PendingStatusEvent(toEventId(event));
-  statusEventEntity.block = event.block.number;
-  statusEventEntity.timestamp = event.block.timestamp;
-  statusEventEntity.txHash = event.transaction.hash;
-  statusEventEntity.escrowAddress = event.address;
-  statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.save();
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
@@ -171,17 +159,10 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     const escrowStatus = escrowContract.try_status();
 
     if (!escrowStatus.reverted) {
+      // Create EscrowStatusEvent entity
       if (escrowStatus.value == EscrowStatuses.Partial) {
         // Partially Paid Status
         escrowEntity.status = 'Partially Paid';
-
-        const statusEventEntity = new PartialStatusEvent(toEventId(event));
-        statusEventEntity.block = event.block.number;
-        statusEventEntity.timestamp = event.block.timestamp;
-        statusEventEntity.txHash = event.transaction.hash;
-        statusEventEntity.escrowAddress = event.address;
-        statusEventEntity.sender = event.transaction.from;
-        statusEventEntity.save();
 
         statsEntity.partialStatusEventCount =
           statsEntity.partialStatusEventCount.plus(ONE_BI);
@@ -194,14 +175,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       } else if (escrowStatus.value == EscrowStatuses.Paid) {
         // Paid Status
         escrowEntity.status = 'Paid';
-
-        const statusEventEntity = new PaidStatusEvent(toEventId(event));
-        statusEventEntity.block = event.block.number;
-        statusEventEntity.timestamp = event.block.timestamp;
-        statusEventEntity.txHash = event.transaction.hash;
-        statusEventEntity.escrowAddress = event.address;
-        statusEventEntity.sender = event.transaction.from;
-        statusEventEntity.save();
 
         statsEntity.paidStatusEventCount =
           statsEntity.paidStatusEventCount.plus(ONE_BI);

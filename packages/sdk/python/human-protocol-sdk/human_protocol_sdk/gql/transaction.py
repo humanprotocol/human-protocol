@@ -22,6 +22,9 @@ query GetTransactions(
     $endDate: Int
     $startBlock: Int
     $endBlock: Int
+    $orderDirection: String
+    $first: Int
+    $skip: Int
 ) {{
     transactions(
         where: {{
@@ -32,8 +35,10 @@ query GetTransactions(
         {start_block_clause}
         {end_block_clause}
         }}
-        orderBy: timestamp,
-        orderDirection: asc,
+        orderBy: timestamp
+        orderDirection: $orderDirection
+        first: $first
+        skip: $skip
     ) {{
         ...TransactionFields
     }}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from human_protocol_sdk.filter import EscrowFilter
 
 escrow_fragment = """
@@ -39,6 +40,9 @@ query GetEscrows(
     $status: String
     $from: Int
     $to: Int
+    $orderDirection: String
+    $first: Int
+    $skip: Int
 ) {{
     escrows(
       where: {{
@@ -51,6 +55,10 @@ query GetEscrows(
         {from_clause}
         {to_clause}
       }}
+      orderBy: createdAt
+      orderDirection: $orderDirection
+      first: $first
+      skip: $skip
     ) {{
       ...EscrowFields
     }}
@@ -73,7 +81,7 @@ query GetEscrows(
         ),
         status_clause="status: $status" if filter.status else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",
-        to_clause="createdAt_lte: $to" if filter.date_from else "",
+        to_clause="createdAt_lte: $to" if filter.date_to else "",
     )
 
 
@@ -89,4 +97,42 @@ query GetEscrow(
 {escrow_fragment}
 """.format(
         escrow_fragment=escrow_fragment
+    )
+
+
+def get_status_query(
+    from_: datetime = None, to_: datetime = None, launcher: str = None
+):
+    return """
+query getStatus(
+    $status: [String!]!
+    $from: Int
+    $to: Int
+    $launcher: String
+    $orderDirection: String
+    $first: Int
+    $skip: Int
+) {{
+    escrowStatusEvents(
+        where: {{
+            status_in: $status
+            {from_clause}
+            {to_clause}
+            {launcher_clause}
+        }}
+        orderBy: timestamp
+        orderDirection: $orderDirection
+        first: $first
+        skip: $skip
+    ) {{
+        id
+        escrowAddress
+        timestamp
+        status
+    }}
+}}
+""".format(
+        from_clause="timestamp_gte: $from" if from_ else "",
+        to_clause="timestamp_lte: $to" if to_ else "",
+        launcher_clause=f"launcher: $launcher" if launcher else "",
     )

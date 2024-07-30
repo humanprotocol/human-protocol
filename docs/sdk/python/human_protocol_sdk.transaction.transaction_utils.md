@@ -23,11 +23,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, hash, from_address, to_address, timestamp, value, method)
+### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, block, hash, from_address, to_address, timestamp, value, method)
+#### \_\_init_\_(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
 
 ### *class* human_protocol_sdk.transaction.transaction_utils.TransactionUtils
 
@@ -77,7 +77,7 @@ Get an array of transactions based on the specified filter parameters.
   print(
       TransactionUtils.get_transactions(
           TransactionFilter(
-              networks=[ChainId.POLYGON_AMOY],
+              chain_id=ChainId.POLYGON_AMOY,
               from_address="0x1234567890123456789012345678901234567890",
               to_address="0x0987654321098765432109876543210987654321",
               start_date=datetime.datetime(2023, 5, 8),

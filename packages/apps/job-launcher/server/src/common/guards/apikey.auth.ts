@@ -35,12 +35,9 @@ export class ApiKeyGuard implements CanActivate {
           return true;
         }
       } else {
-        throw new ControlledError(
-          'Invalid API Key format',
-          HttpStatus.UNAUTHORIZED,
-        );
+        throw new ControlledError('Invalid API Key', HttpStatus.UNAUTHORIZED);
       }
     }
-    throw new ControlledError('Invalid API Key', HttpStatus.UNAUTHORIZED);
+    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
   }
 }

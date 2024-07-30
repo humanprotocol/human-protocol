@@ -7,6 +7,7 @@ import {
 import { Wallet, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import * as dotenv from 'dotenv';
+import * as Minio from 'minio';
 dotenv.config({ path: '.env.local' });
 
 export async function setup(): Promise<void> {
@@ -49,6 +50,43 @@ export async function setup(): Promise<void> {
     ],
     { nonce: 2 },
   );
+
+  if (process.env.PGP_ENCRYPT && process.env.PGP_ENCRYPT === 'true') {
+    if (!process.env.PGP_PUBLIC_KEY) {
+      throw new Error('PGP public key is empty');
+    }
+    const minioClient = new Minio.Client({
+      endPoint: process.env.S3_ENDPOINT || 'localhost',
+      port: parseInt(process.env.S3_PORT || '9000', 10),
+      useSSL: process.env.S3_USE_SSL === 'true',
+      accessKey: process.env.S3_ACCESS_KEY || 'access-key',
+      secretKey: process.env.S3_SECRET_KEY || 'secret-key',
+    });
+    const bucket = process.env.S3_BUCKET || 'bucket';
+    const fileName = 'jl-pgp-public-key.txt';
+    const exists = await minioClient.bucketExists(bucket);
+    if (!exists) {
+      throw new Error('Bucket does not exists');
+    }
+    try {
+      await minioClient.putObject(
+        bucket,
+        fileName,
+        process.env.PGP_PUBLIC_KEY,
+        {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      );
+      await kvStoreClient.setFileUrlAndHash(
+        `http://localhost:9000/bucket/${fileName}`,
+        KVStoreKeys.publicKey,
+        { nonce: 3 },
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 setup();

@@ -134,6 +134,7 @@ describe('EscrowFactory', () => {
       '2'
     );
 
+    // Transaction
     assert.fieldEquals(
       'Transaction',
       data1.transaction.hash.toHex(),

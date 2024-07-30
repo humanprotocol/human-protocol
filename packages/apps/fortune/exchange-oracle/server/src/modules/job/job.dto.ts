@@ -1,8 +1,12 @@
-import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsString,
+  IsNumber,
+  IsDate,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsValidEthereumAddress } from '../../common/validators';
 import {
   JobFieldName,
   JobSortField,
@@ -19,21 +23,13 @@ export class ManifestDto {
 }
 
 export class SolveJobDto {
-  @ApiProperty({ name: 'escrow_address' })
-  @IsString()
-  @IsValidEthereumAddress()
-  public escrowAddress: string;
-
-  @ApiProperty({
-    enum: ChainId,
-    name: 'chain_id',
-  })
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
   @ApiProperty()
   @IsString()
   public solution: string;
+
+  @ApiProperty({ name: 'assignment_id' })
+  @IsString()
+  public assignmentId: string;
 }
 
 export class GetJobsDto extends PageOptionsDto {
@@ -71,6 +67,18 @@ export class GetJobsDto extends PageOptionsDto {
   @IsEnum(JobStatus)
   @IsOptional()
   status: JobStatus;
+
+  @ApiPropertyOptional({ name: 'created_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @ApiPropertyOptional({ name: 'updated_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedAfter?: Date;
 }
 
 export class JobDto {
@@ -98,6 +106,9 @@ export class JobDto {
   @ApiProperty({ name: 'created_at' })
   createdAt?: string;
 
+  @ApiProperty({ name: 'updated_at' })
+  updatedAt?: string;
+
   constructor(
     escrowAddress: string,
     chainId: number,
@@ -109,4 +120,15 @@ export class JobDto {
     this.jobType = jobType;
     this.status = status;
   }
+}
+
+export class SolveJobResponseDto {
+  @ApiProperty({ name: 'assignment_id' })
+  assignmentId: string;
+
+  @ApiProperty({ name: 'solution' })
+  solution: string;
+
+  @ApiProperty({ name: 'message' })
+  message: string;
 }

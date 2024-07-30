@@ -15,22 +15,24 @@ import { JobService } from '../job/job.service';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { ErrorAssignment } from '../../common/constant/errors';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class AssignmentService {
-  public readonly logger = new Logger(AssignmentService.name);
+  private readonly logger = new Logger(AssignmentService.name);
 
   constructor(
-    public readonly assignmentRepository: AssignmentRepository,
-    public readonly jobRepository: JobRepository,
-    public readonly jobService: JobService,
-    public readonly web3Service: Web3Service,
+    private readonly assignmentRepository: AssignmentRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly jobService: JobService,
+    private readonly web3Service: Web3Service,
+    private readonly serverConfigService: ServerConfigService,
   ) {}
 
   public async createAssignment(
     data: CreateAssignmentDto,
     jwtUser: JwtUser,
-  ): Promise<void> {
+  ): Promise<AssignmentEntity> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       data.chainId,
       data.escrowAddress,
@@ -87,14 +89,13 @@ export class AssignmentService {
     newAssignmentEntity.rewardAmount =
       manifest.fundAmount / manifest.submissionsRequired;
     newAssignmentEntity.expiresAt = expirationDate;
-    await this.assignmentRepository.createUnique(newAssignmentEntity);
+    return this.assignmentRepository.createUnique(newAssignmentEntity);
   }
 
   public async getAssignmentList(
     data: GetAssignmentsDto,
     workerAddress: string,
     reputationNetwork: string,
-    requestUrl: string,
   ): Promise<PageDto<AssignmentDto>> {
     if (data.jobType && data.jobType !== JobType.FORTUNE)
       return new PageDto(data.page!, data.pageSize!, 0, []);
@@ -110,7 +111,7 @@ export class AssignmentService {
     const assignments = await Promise.all(
       entities.map(async (entity) => {
         const assignment = new AssignmentDto(
-          entity.id,
+          entity.id.toString(),
           entity.job.escrowAddress,
           entity.job.chainId,
           JobType.FORTUNE,
@@ -122,7 +123,10 @@ export class AssignmentService {
         );
 
         if (entity.status === AssignmentStatus.ACTIVE)
-          assignment.url = requestUrl;
+          assignment.url =
+            this.serverConfigService.feURL +
+            '/assignment/' +
+            entity.id.toString();
         else assignment.updatedAt = entity.updatedAt.toISOString();
 
         return assignment;
@@ -132,13 +136,14 @@ export class AssignmentService {
   }
 
   async resign(assignmentId: number, workerAddress: string): Promise<void> {
-    const assignment = await this.assignmentRepository.findOneByIdAndWorker(
-      assignmentId,
-      workerAddress,
-    );
+    const assignment =
+      await this.assignmentRepository.findOneById(assignmentId);
 
     if (!assignment) {
       throw new BadRequestException(ErrorAssignment.NotFound);
+    }
+    if (assignment.workerAddress !== workerAddress) {
+      throw new BadRequestException(ErrorAssignment.InvalidAssignment);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {

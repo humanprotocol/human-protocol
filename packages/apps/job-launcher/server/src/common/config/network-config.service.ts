@@ -1,6 +1,12 @@
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Web3Env } from '../enums/web3';
+import {
+  LOCALHOST_CHAIN_IDS,
+  MAINNET_CHAIN_IDS,
+  TESTNET_CHAIN_IDS,
+} from '../constants';
 
 export interface TokensList {
   [key: string]: string | undefined;
@@ -106,12 +112,29 @@ export class NetworkConfigService {
       }),
     };
 
-    // Remove networks without RPC URLs
-    Object.keys(this.networkMap).forEach((network) => {
-      if (!this.networkMap[network].rpcUrl) {
-        delete this.networkMap[network];
+    const validChainIds = (() => {
+      switch (this.configService.get<string>('WEB3_ENV')) {
+        case Web3Env.MAINNET:
+          return MAINNET_CHAIN_IDS;
+        case Web3Env.LOCALHOST:
+          return LOCALHOST_CHAIN_IDS;
+        default:
+          return TESTNET_CHAIN_IDS;
       }
-    });
+    })();
+
+    // Remove networks without RPC URLs
+    this.networkMap = Object.keys(this.networkMap)
+      .filter((network) => {
+        const networkConfig = this.networkMap[network];
+        return (
+          networkConfig.rpcUrl && validChainIds.includes(networkConfig.chainId)
+        );
+      })
+      .reduce((newNetworkMap: NetworkMapDto, network) => {
+        newNetworkMap[network] = this.networkMap[network];
+        return newNetworkMap;
+      }, {});
   }
 
   get networks(): NetworkDto[] {

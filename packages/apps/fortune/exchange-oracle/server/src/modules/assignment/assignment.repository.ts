@@ -39,27 +39,14 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     });
   }
 
-  public async findOneByIdAndWorker(
+  public async findOneById(
     assignmentId: number,
-    workerAddress: string,
   ): Promise<AssignmentEntity | null> {
     return this.findOne({
       where: {
         id: assignmentId,
-        workerAddress,
       },
-    });
-  }
-
-  public async findOneByEscrowAndWorker(
-    escrowAddress: string,
-    workerAddress: string,
-  ): Promise<AssignmentEntity | null> {
-    return this.findOne({
-      where: {
-        job: { escrowAddress },
-        workerAddress,
-      },
+      relations: ['job'],
     });
   }
 
@@ -175,6 +162,18 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     if (data.status !== undefined) {
       queryBuilder.andWhere('assignment.status = :status', {
         status: data.status,
+      });
+    }
+
+    if (data.createdAfter) {
+      queryBuilder.andWhere('assignment.createdAt >= :createdAfter', {
+        createdAfter: data.createdAfter,
+      });
+    }
+
+    if (data.updatedAfter) {
+      queryBuilder.andWhere('assignment.updatedAt >= :updatedAfter', {
+        updatedAfter: data.updatedAfter,
       });
     }
 

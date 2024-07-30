@@ -9,6 +9,7 @@ import { createTransaction } from '../utils/transaction';
 
 export function handleLaunched(event: Launched): void {
   createTransaction(event, 'createEscrow');
+
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 

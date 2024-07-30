@@ -18,7 +18,12 @@ import {
 import { ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
-import { useAccount, useReadContract, useWalletClient } from 'wagmi';
+import {
+  useAccount,
+  useReadContract,
+  useWalletClient,
+  usePublicClient,
+} from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
 import { CURRENCY } from '../../../constants/payment';
 import { useTokenRate } from '../../../hooks/useTokenRate';
@@ -47,6 +52,7 @@ export const CryptoPayForm = ({
   const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
   const [minFee, setMinFee] = useState<number>(0.01);
   const { data: signer } = useWalletClient();
+  const publicClient = usePublicClient();
   const { user } = useAppSelector((state) => state.auth);
   const { data: rate } = useTokenRate('hmt', 'usd');
 
@@ -112,6 +118,12 @@ export const CryptoPayForm = ({
               jobLauncherAddress,
               ethers.parseUnits(tokenAmount.toString(), 18),
             ],
+          });
+
+          await publicClient?.waitForTransactionReceipt({
+            hash,
+            confirmations:
+              Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
           });
 
           // create crypto payment record

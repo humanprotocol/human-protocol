@@ -13,10 +13,10 @@ export class ServerConfigService {
   get port(): number {
     return +this.configService.get<number>('PORT', 5001);
   }
+  get feURL(): string {
+    return this.configService.get<string>('FE_URL', 'http://localhost:3006');
+  }
   get maxRetryCount(): number {
     return +this.configService.get<number>('MAX_RETRY_COUNT', 5);
-  }
-  get cronSecret(): string {
-    return this.configService.get<string>('CRON_SECRET', '');
   }
 }
