@@ -23,11 +23,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, hash, from_address, to_address, timestamp, value, method)
+### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, block, hash, from_address, to_address, timestamp, value, method)
+#### \_\_init_\_(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
 
 ### *class* human_protocol_sdk.transaction.transaction_utils.TransactionUtils
 

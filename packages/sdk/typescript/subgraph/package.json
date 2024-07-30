@@ -6,7 +6,8 @@
     "generated"
   ],
   "scripts": {
-    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-hmt && graph codegen",
+    "generate-hmt": "mustache ./config/$NETWORK.json src/mapping/HMTokenTemplate.ts > src/mapping/HMToken.ts",
     "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=polygon yarn generate",

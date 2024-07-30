@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react';
 
-export function Chat() {
+export function Chat({
+  displayChatIcon = true,
+}: {
+  displayChatIcon?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -14,10 +18,15 @@ export function Chat() {
         const rootRect = root.getBoundingClientRect();
 
         chatElement.style.position = 'absolute';
-        chatElement.style.top = `${refRect.top - rootRect.top}px`;
-        chatElement.style.left = `${refRect.left - rootRect.left}px`;
-        chatElement.style.width = `${refRect.width}px`;
-        chatElement.style.height = `${refRect.height}px`;
+        if (displayChatIcon) {
+          chatElement.style.opacity = '1';
+          chatElement.style.top = `${refRect.top - rootRect.top}px`;
+          chatElement.style.left = `${refRect.left - rootRect.left}px`;
+          chatElement.style.width = `${refRect.width}px`;
+          chatElement.style.height = `${refRect.height}px`;
+        } else {
+          chatElement.style.opacity = '0';
+        }
       }
     };
 
@@ -60,7 +69,7 @@ export function Chat() {
         resizeObserverElement.parentNode.removeChild(resizeObserverElement);
       }
     };
-  }, [ref]);
+  }, [ref, displayChatIcon]);
 
   return (
     <div

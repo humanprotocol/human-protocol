@@ -37,6 +37,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { SiteKeyType } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
@@ -187,8 +188,13 @@ export class AuthService {
       reputation_network: this.web3Service.getOperatorAddress(),
     };
 
-    if (userEntity.siteKey) {
-      payload.site_key = userEntity.siteKey.siteKey;
+    if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
+      const existingHcaptchaSiteKey = userEntity.siteKeys?.find(
+        (key) => key.type === SiteKeyType.HCAPTCHA,
+      );
+      if (existingHcaptchaSiteKey) {
+        payload.site_key = existingHcaptchaSiteKey.siteKey;
+      }
     }
 
     const accessToken = await this.jwtService.signAsync(payload, {

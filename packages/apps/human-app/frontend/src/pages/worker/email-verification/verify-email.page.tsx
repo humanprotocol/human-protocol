@@ -114,7 +114,13 @@ export function VerifyEmailWorkerPage() {
             <Typography variant="body1">
               <Trans
                 components={{
-                  1: <Typography component="span" variant="buttonMedium" />,
+                  1: (
+                    <Typography
+                      component="span"
+                      fontWeight={600}
+                      variant="body1"
+                    />
+                  ),
                   2: (
                     <Link
                       rel="noreferrer"

@@ -28,6 +28,8 @@ import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
 export const HMT_STATISTICS_ENTITY_ID = toBytes('hmt-statistics-id');
+export const TOTAL_SUPPLY = BigInt.fromString('{{ HMToken.totalSupply }}');
+export const CONTRACT_DEPLOYER = '{{ HMToken.contractDeployer }}';
 
 function constructStatsEntity(): HMTokenStatistics {
   const entity = new HMTokenStatistics(HMT_STATISTICS_ENTITY_ID);
@@ -96,7 +98,11 @@ function updateHolders(
   if (holder == null) {
     holder = new Holder(id);
     holder.address = holderAddress;
-    holder.balance = BigInt.fromI32(0);
+    if (holderAddress.toHex() == CONTRACT_DEPLOYER) {
+      holder.balance = TOTAL_SUPPLY;
+    } else {
+      holder.balance = BigInt.fromI32(0);
+    }
   }
   const balanceBeforeTransfer = holder.balance;
   holder.balance = increase
