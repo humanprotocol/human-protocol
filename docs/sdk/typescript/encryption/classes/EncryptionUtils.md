@@ -95,9 +95,9 @@ const publicKeys = [publicKey1, publicKey2]
 const result = await EncriptionUtils.encrypt('message', publicKeys);
 ```
 
-#### Source
+#### Defined in
 
-[encryption.ts:422](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L422)
+[encryption.ts:422](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L422)
 
 ***
 
@@ -117,7 +117,7 @@ Name for the key pair.
 
 Email for the key pair.
 
-• **passphrase**: `string`= `''`
+• **passphrase**: `string` = `''`
 
 Passphrase to encrypt the private key. Optional.
 
@@ -150,9 +150,9 @@ const passphrase = 'YOUR_PASSPHRASE';
 const result = await EncriptionUtils.generateKeyPair(name, email, passphrase);
 ```
 
-#### Source
+#### Defined in
 
-[encryption.ts:360](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L360)
+[encryption.ts:360](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L360)
 
 ***
 
@@ -182,9 +182,9 @@ import { EncryptionUtils } from '@human-protocol/sdk';
 const signedData = await EncriptionUtils.getSignedData('message');
 ```
 
-#### Source
+#### Defined in
 
-[encryption.ts:317](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L317)
+[encryption.ts:317](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L317)
 
 ***
 
@@ -230,9 +230,9 @@ if (isEncrypted) {
 }
 ```
 
-#### Source
+#### Defined in
 
-[encryption.ts:471](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L471)
+[encryption.ts:471](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L471)
 
 ***
 
@@ -278,6 +278,6 @@ UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
 const result = await EncriptionUtils.verify('message', publicKey);
 ```
 
-#### Source
+#### Defined in
 
-[encryption.ts:284](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L284)
+[encryption.ts:284](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L284)
