@@ -109,3 +109,13 @@ export class PrepareSignatureDto {
   @IsEnum(SignatureType)
   public type: SignatureType;
 }
+
+export class RegisterOracleDto {
+  @ApiProperty({ description: 'Ethereum address of the oracle' })
+  @IsEthereumAddress()
+  public oracleAddress: string;
+}
+
+export class RegisteredOraclesDto {
+  public oracleAddresses: string[];
+}

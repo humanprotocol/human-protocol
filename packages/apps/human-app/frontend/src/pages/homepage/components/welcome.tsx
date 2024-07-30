@@ -33,13 +33,18 @@ export function Welcome({ setStage }: WelcomeProps) {
       <Grid item justifyContent="flex-end" xs={isMobile ? 12 : 6}>
         <Grid container direction="column">
           {isMobile ? (
-            <Stack alignItems="center" direction="row" justifyContent="center">
+            <Stack
+              alignItems="center"
+              direction="row"
+              justifyContent="center"
+              sx={{ svg: { margin: '-1.2rem' } }}
+            >
               <HomepageWorkIcon />
               <HomepageUserIcon />
               <HomepageLogoIcon />
             </Stack>
           ) : (
-            <Stack direction="row">
+            <Stack direction="row" sx={{ transform: 'translateX(-6%)' }}>
               <HomepageWorkIcon />
               <HomepageUserIcon />
               <HomepageLogoIcon />

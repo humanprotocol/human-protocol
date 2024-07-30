@@ -121,7 +121,7 @@ export interface IKVStore {
 
 export interface ITransaction {
   block: bigint;
-  hash: string;
+  txHash: string;
   from: string;
   to: string;
   timestamp: bigint;

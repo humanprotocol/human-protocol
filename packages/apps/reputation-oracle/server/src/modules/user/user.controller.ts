@@ -13,6 +13,7 @@ import {
   Req,
   UseGuards,
   Request,
+  Get,
 } from '@nestjs/common';
 import {
   DisableOperatorDto,
@@ -21,6 +22,8 @@ import {
   SignatureBodyDto,
   RegisterLabelerResponseDto,
   EnableOperatorDto,
+  RegisterOracleDto,
+  RegisteredOraclesDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
@@ -162,5 +165,58 @@ export class UserController {
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
     return await this.userService.prepareSignatureBody(data.type, data.address);
+  }
+
+  @Post('/registration')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Register Oracle',
+    description: 'Endpoint to save a registration process completed.',
+  })
+  @ApiBody({ type: RegisterOracleDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Oracle registered successfully',
+    type: RegisterOracleDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async registerOracle(
+    @Req() request: RequestWithUser,
+    @Body() data: RegisterOracleDto,
+  ): Promise<RegisterOracleDto> {
+    await this.userService.registerOracle(request.user, data.oracleAddress);
+    return data;
+  }
+
+  @Get('/registration')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get Registered Oracles',
+    description:
+      'Fetch the list of exchange oracles where the user completed a registration process.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of registered oracles retrieved successfully',
+    type: RegisteredOraclesDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async getRegisteredOracles(
+    @Req() request: RequestWithUser,
+  ): Promise<RegisteredOraclesDto> {
+    const oracleAddresses = await this.userService.getRegisteredOracles(
+      request.user,
+    );
+    return { oracleAddresses };
   }
 }

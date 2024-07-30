@@ -36,6 +36,7 @@ import {
 } from '../../common/constants/errors';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { SiteKeyType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -52,6 +53,7 @@ describe('UserService', () => {
   let userRepository: UserRepository;
   let web3Service: Web3Service;
   let hcaptchaService: HCaptchaService;
+  let siteKeyRepository: SiteKeyRepository;
 
   jest
     .spyOn(NetworkConfigService.prototype, 'networks', 'get')
@@ -73,6 +75,10 @@ describe('UserService', () => {
         UserService,
         HCaptchaService,
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: SiteKeyRepository,
+          useValue: createMock<SiteKeyRepository>(),
+        },
         {
           provide: SiteKeyRepository,
           useValue: createMock<SiteKeyRepository>(),
@@ -104,6 +110,7 @@ describe('UserService', () => {
     userRepository = moduleRef.get(UserRepository);
     web3Service = moduleRef.get(Web3Service);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
+    siteKeyRepository = moduleRef.get(SiteKeyRepository);
   });
 
   describe('create', () => {
@@ -252,6 +259,7 @@ describe('UserService', () => {
       const siteKeyEntity: DeepPartial<SiteKeyEntity> = {
         id: 1,
         siteKey: 'site_key',
+        type: SiteKeyType.HCAPTCHA,
       };
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
@@ -262,7 +270,7 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        siteKey: siteKeyEntity,
+        siteKeys: [siteKeyEntity],
         save: jest.fn(),
       };
 
@@ -804,6 +812,51 @@ describe('UserService', () => {
       );
 
       expect(result).toStrictEqual(expectedData);
+    });
+  });
+
+  describe('registerOracle', () => {
+    it('should register a new oracle for the user', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const oracleAddress = '0xOracleAddress';
+
+      await userService.registerOracle(userEntity as UserEntity, oracleAddress);
+
+      expect(siteKeyRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          siteKey: oracleAddress,
+          type: SiteKeyType.REGISTRATION,
+          user: userEntity,
+        }),
+      );
+    });
+  });
+
+  describe('getRegisteredOracles', () => {
+    it('should return a list of registered oracles for the user', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const siteKeys: SiteKeyEntity[] = [
+        { siteKey: '0xOracleAddress1' } as SiteKeyEntity,
+        { siteKey: '0xOracleAddress2' } as SiteKeyEntity,
+      ];
+
+      jest
+        .spyOn(siteKeyRepository, 'findByUserAndType')
+        .mockResolvedValue(siteKeys);
+
+      const result = await userService.getRegisteredOracles(
+        userEntity as UserEntity,
+      );
+
+      expect(result).toEqual(['0xOracleAddress1', '0xOracleAddress2']);
     });
   });
 });
