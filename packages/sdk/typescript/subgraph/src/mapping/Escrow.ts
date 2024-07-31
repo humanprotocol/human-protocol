@@ -212,11 +212,11 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     escrowEntity.status = event.params._isPartial ? 'Partial' : 'Paid';
 
     // Read data on-chain
-    // const escrowContract = EscrowContract.bind(event.address);
-    // const finalResultsUrl = escrowContract.try_finalResultsUrl();
-    // if (!finalResultsUrl.reverted) {
-    //   escrowEntity.finalResultsUrl = finalResultsUrl.value;
-    // }
+    const escrowContract = EscrowContract.bind(event.address);
+    const finalResultsUrl = escrowContract.try_finalResultsUrl();
+    if (!finalResultsUrl.reverted) {
+      escrowEntity.finalResultsUrl = finalResultsUrl.value;
+    }
 
     escrowEntity.save();
     statusEventEntity.launcher = escrowEntity.launcher;

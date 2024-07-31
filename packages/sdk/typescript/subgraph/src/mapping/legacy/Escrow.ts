@@ -144,7 +144,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
   // Update escrow entity
-  /*
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     // Read data on-chain
@@ -186,7 +185,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     }
     escrowEntity.save();
   }
-  */
 
   // Save statistics, and event day data
   statsEntity.save();
