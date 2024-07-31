@@ -1484,11 +1484,8 @@ export class EscrowUtils {
    *   manifestHash?: string;
    *   manifestUrl?: string;
    *   recordingOracle?: string;
-   *   recordingOracleFee?: string;
    *   reputationOracle?: string;
-   *   reputationOracleFee?: string;
    *   exchangeOracle?: string;
-   *   exchangeOracleFee?: string;
    *   status: EscrowStatus;
    *   token: string;
    *   totalFundedAmount: string;
@@ -1618,11 +1615,8 @@ export class EscrowUtils {
    *   manifestHash?: string;
    *   manifestUrl?: string;
    *   recordingOracle?: string;
-   *   recordingOracleFee?: string;
    *   reputationOracle?: string;
-   *   reputationOracleFee?: string;
    *   exchangeOracle?: string;
-   *   exchangeOracleFee?: string;
    *   status: EscrowStatus;
    *   token: string;
    *   totalFundedAmount: string;

@@ -20,8 +20,9 @@ import { Address } from '@graphprotocol/graph-ts';
 import { ONE_BI, ZERO_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
+import { toBytes } from './utils/string';
 
-export const STATISTICS_ENTITY_ID = 'leader-statistics-id';
+export const STATISTICS_ENTITY_ID = toBytes('leader-statistics-id');
 
 function constructStatsEntity(): LeaderStatistics {
   const entity = new LeaderStatistics(STATISTICS_ENTITY_ID);
@@ -42,10 +43,10 @@ export function createOrLoadLeaderStatistics(): LeaderStatistics {
 }
 
 export function createOrLoadLeader(address: Address): Leader {
-  let leader = Leader.load(address.toHex());
+  let leader = Leader.load(address);
 
   if (!leader) {
-    leader = new Leader(address.toHex());
+    leader = new Leader(address);
 
     leader.address = address;
     leader.amountStaked = ZERO_BI;

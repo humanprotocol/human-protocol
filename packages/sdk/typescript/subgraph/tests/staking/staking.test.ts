@@ -18,6 +18,7 @@ import {
   handleStakeWithdrawn,
   STATISTICS_ENTITY_ID,
 } from '../../src/mapping/Staking';
+import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
 import {
   createAllocationClosedEvent,
@@ -35,7 +36,7 @@ const escrow2Address = Address.fromString(escrow2AddressString);
 
 describe('Staking', () => {
   beforeAll(() => {
-    const escrow1 = new Escrow(escrow1Address.toHex());
+    const escrow1 = new Escrow(escrow1Address);
     escrow1.address = escrow1Address;
     escrow1.token = Address.zero();
     escrow1.factoryAddress = Address.zero();
@@ -48,7 +49,7 @@ describe('Staking', () => {
     escrow1.createdAt = BigInt.fromI32(0);
     escrow1.save();
 
-    const escrow2 = new Escrow(escrow2Address.toHex());
+    const escrow2 = new Escrow(escrow2Address);
     escrow2.address = escrow2Address;
     escrow2.token = Address.zero();
     escrow2.factoryAddress = Address.zero();
@@ -81,12 +82,8 @@ describe('Staking', () => {
     handleStakeDeposited(data1);
     handleStakeDeposited(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -145,7 +142,7 @@ describe('Staking', () => {
     // Leader statistics
     assert.fieldEquals(
       'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'leaders',
       '2'
     );
@@ -214,12 +211,8 @@ describe('Staking', () => {
     handleStakeLocked(data1);
     handleStakeLocked(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -280,7 +273,7 @@ describe('Staking', () => {
     // Leader statistics
     assert.fieldEquals(
       'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'leaders',
       '2'
     );
@@ -372,12 +365,8 @@ describe('Staking', () => {
     handleStakeWithdrawn(data1);
     handleStakeWithdrawn(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -436,7 +425,7 @@ describe('Staking', () => {
     // Leader statistics
     assert.fieldEquals(
       'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'leaders',
       '2'
     );
@@ -544,12 +533,8 @@ describe('Staking', () => {
     handleStakeAllocated(data1);
     handleStakeAllocated(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -620,7 +605,7 @@ describe('Staking', () => {
     // Leader statistics
     assert.fieldEquals(
       'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'leaders',
       '2'
     );
@@ -740,12 +725,8 @@ describe('Staking', () => {
     handleStakeSlashed(data1);
     handleStakeSlashed(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -828,7 +809,7 @@ describe('Staking', () => {
     // Leader statistics
     assert.fieldEquals(
       'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'leaders',
       '2'
     );
@@ -960,12 +941,8 @@ describe('Staking', () => {
     handleAllocationClosed(data1);
     handleAllocationClosed(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -1036,7 +1013,7 @@ describe('Staking', () => {
     // Leader statistics
     assert.fieldEquals(
       'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'leaders',
       '2'
     );

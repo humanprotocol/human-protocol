@@ -62,7 +62,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:70](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L70)
+[statistics.ts:70](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L70)
 
 ## Properties
 
@@ -72,7 +72,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:62](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L62)
+[statistics.ts:62](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L62)
 
 ***
 
@@ -82,7 +82,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:63](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L63)
+[statistics.ts:63](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L63)
 
 ## Methods
 
@@ -146,7 +146,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:124](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L124)
+[statistics.ts:124](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L124)
 
 ***
 
@@ -189,7 +189,7 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 #### Defined in
 
-[statistics.ts:466](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L466)
+[statistics.ts:466](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L466)
 
 ***
 
@@ -285,7 +285,7 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Defined in
 
-[statistics.ts:397](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L397)
+[statistics.ts:397](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L397)
 
 ***
 
@@ -367,7 +367,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:288](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L288)
+[statistics.ts:288](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L288)
 
 ***
 
@@ -426,4 +426,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:199](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L199)
+[statistics.ts:199](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L199)
