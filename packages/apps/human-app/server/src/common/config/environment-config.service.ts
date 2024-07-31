@@ -9,6 +9,7 @@ const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
   'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
+
 @Injectable()
 export class EnvironmentConfigService {
   constructor(private configService: ConfigService) {}
@@ -30,6 +31,9 @@ export class EnvironmentConfigService {
     return (
       this.configService.get('IS_AXIOS_REQUEST_LOGGING_ENABLED') === 'true'
     );
+  }
+  get allowedHost(): string {
+    return this.configService.getOrThrow('ALLOWED_HOST');
   }
   get cachePort(): number {
     return this.configService.getOrThrow<number>('REDIS_PORT');
