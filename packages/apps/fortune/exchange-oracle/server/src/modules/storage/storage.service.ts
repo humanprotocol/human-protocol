@@ -82,21 +82,18 @@ export class StorageService {
     let fileToUpload = JSON.stringify(solutions);
     if (this.pgpConfigService.encrypt) {
       try {
+        const rpcUrl = this.web3Service.getRpcUrl(chainId);
         const signer = this.web3Service.getSigner(chainId);
         const escrowClient = await EscrowClient.build(signer);
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
 
-        const kvstoreContract = KVStore__factory.connect(
-          NETWORKS[chainId]!.kvstoreAddress!,
-          signer,
-        );
         const exchangeOraclePublickKey = await KVStoreUtils.getPublicKey(
-          kvstoreContract,
+          rpcUrl,
           signer.address,
         );
         const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
-          kvstoreContract,
+          rpcUrl,
           recordingOracleAddress,
         );
         if (

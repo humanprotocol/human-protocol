@@ -24,14 +24,10 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
         try {
           const payload = jwt.decode(rawJwtToken);
           const chainId = this.web3Service.getValidChains()[0];
-          const signer = this.web3Service.getSigner(chainId);
+          const rpcUrl = this.web3Service.getRpcUrl(chainId);
           
-          const kvstoreContract = KVStore__factory.connect(
-            NETWORKS[chainId]!.kvstoreAddress!,
-            signer,
-          );
           const url = await KVStoreUtils.getFileUrlAndVerifyHash(
-            kvstoreContract,
+            rpcUrl,
             (payload as any).reputation_network,
             JWT_KVSTORE_KEY,
           );
