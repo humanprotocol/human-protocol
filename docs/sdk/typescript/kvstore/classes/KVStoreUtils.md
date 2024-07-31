@@ -51,15 +51,13 @@ const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
 
 ### get()
 
-> `static` **get**(`contract`, `address`, `key`): `Promise`\<`string`\>
+> `static` **get**(`rpcUrl`, `address`, `key`): `Promise`\<`string`\>
 
 Gets the value of a key-value pair in the contract.
 
 #### Parameters
 
-• **contract**: `KVStore`
-
-The KVStore contract instance.
+• **rpcUrl**: `string`
 
 • **address**: `string`
 
@@ -75,6 +73,14 @@ Key to obtain the value.
 
 Value of the key.
 
+#### Throws
+
+- Thrown if the network's chainId is not supported
+
+#### Throws
+
+- Thrown if the Address sent is invalid
+
 **Code example**
 
 ```ts
@@ -85,30 +91,25 @@ const rpcUrl = 'YOUR_RPC_URL';
 const address = '0x1234567890123456789012345678901234567890';
 const key = 'Role';
 
-const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
-
-const value = await KVStoreUtils.get(kvstoreContract, address, key);
+const value = await KVStoreUtils.get(rpcUrl, address, key);
 console.log(value);
 ```
 
 #### Defined in
 
-[kvstore.ts:384](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L384)
+[kvstore.ts:385](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L385)
 
 ***
 
 ### getFileUrlAndVerifyHash()
 
-> `static` **getFileUrlAndVerifyHash**(`contract`, `address`, `urlKey`): `Promise`\<`string`\>
+> `static` **getFileUrlAndVerifyHash**(`rpcUrl`, `address`, `urlKey`): `Promise`\<`string`\>
 
 Gets the URL value of the given entity, and verify its hash.
 
 #### Parameters
 
-• **contract**: `KVStore`
-
-The KVStore contract instance.
+• **rpcUrl**: `string`
 
 • **address**: `string`
 
@@ -133,16 +134,13 @@ import { providers } from 'ethers';
 const rpcUrl = 'YOUR_RPC_URL';
 const address = '0x1234567890123456789012345678901234567890';
 
-const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
-
-const url = await KVStoreUtils.getFileUrlAndVerifyHash(kvstoreContract, address);
+const url = await KVStoreUtils.getFileUrlAndVerifyHash(rpcUrl, kvstoreContract, address);
 console.log(url);
 ```
 
 #### Defined in
 
-[kvstore.ts:425](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L425)
+[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
 
 ***
 
@@ -168,6 +166,14 @@ Address of the KVStore
 
 KVStore data
 
+#### Throws
+
+- Thrown if the network's chainId is not supported
+
+#### Throws
+
+- Thrown if the Address sent is invalid
+
 **Code example**
 
 ```ts
@@ -179,21 +185,19 @@ console.log(kvStoreData);
 
 #### Defined in
 
-[kvstore.ts:331](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L331)
+[kvstore.ts:333](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L333)
 
 ***
 
 ### getPublicKey()
 
-> `static` **getPublicKey**(`contract`, `address`): `Promise`\<`string`\>
+> `static` **getPublicKey**(`rpcUrl`, `address`): `Promise`\<`string`\>
 
 Gets the public key of the given entity, and verify its hash.
 
 #### Parameters
 
-• **contract**: `KVStore`
-
-The KVStore contract instance.
+• **rpcUrl**: `string`
 
 • **address**: `string`
 
@@ -214,13 +218,10 @@ import { providers } from 'ethers';
 const rpcUrl = 'YOUR_RPC_URL';
 const address = '0x1234567890123456789012345678901234567890';
 
-const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
-
-const publicKey = await KVStoreUtils.getPublicKey(kvstoreContract, address);
+const publicKey = await KVStoreUtils.getPublicKey(rpcUrl, address);
 console.log(publicKey);
 ```
 
 #### Defined in
 
-[kvstore.ts:486](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L486)
+[kvstore.ts:493](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L493)

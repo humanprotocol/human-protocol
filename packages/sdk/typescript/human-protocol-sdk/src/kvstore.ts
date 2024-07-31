@@ -318,6 +318,8 @@ export class KVStoreUtils {
    * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address of the KVStore
    * @returns {Promise<IKVStore[]>} KVStore data
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
    *
    * **Code example**
    *
@@ -363,6 +365,8 @@ export class KVStoreUtils {
    * @param {string} address Address from which to get the key value.
    * @param {string} key Key to obtain the value.
    * @returns {Promise<string>} Value of the key.
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
    *
    * **Code example**
    *
@@ -374,20 +378,32 @@ export class KVStoreUtils {
    * const address = '0x1234567890123456789012345678901234567890';
    * const key = 'Role';
    *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
-   *
-   * const value = await KVStoreUtils.get(kvstoreContract, address, key);
+   * const value = await KVStoreUtils.get(rpcUrl, address, key);
    * console.log(value);
    * ```
    */
   public static async get(
-    contract: KVStore,
+    rpcUrl: string,
     address: string,
     key: string
   ): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+
+    const runner = new ethers.JsonRpcProvider(rpcUrl);
+    const network = await runner.provider?.getNetwork();
+    const chainId: ChainId = Number(network?.chainId);
+
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    const contract = KVStore__factory.connect(
+      networkData.kvstoreAddress,
+      runner
+    );
 
     try {
       const result = await contract.get(address, key);
@@ -415,15 +431,12 @@ export class KVStoreUtils {
    * const rpcUrl = 'YOUR_RPC_URL';
    * const address = '0x1234567890123456789012345678901234567890';
    *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
-   *
-   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(kvstoreContract, address);
+   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(rpcUrl, kvstoreContract, address);
    * console.log(url);
    * ```
    */
   public static async getFileUrlAndVerifyHash(
-    contract: KVStore,
+    rpcUrl: string,
     address: string,
     urlKey = 'url'
   ): Promise<string> {
@@ -434,7 +447,7 @@ export class KVStoreUtils {
       hash = '';
 
     try {
-      url = await contract.get(address, urlKey);
+      url = await this.get(rpcUrl, address, urlKey);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
     }
@@ -445,7 +458,7 @@ export class KVStoreUtils {
     }
 
     try {
-      hash = await contract.get(address, hashKey);
+      hash = await this.get(rpcUrl, address, hashKey);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
     }
@@ -476,19 +489,16 @@ export class KVStoreUtils {
    * const rpcUrl = 'YOUR_RPC_URL';
    * const address = '0x1234567890123456789012345678901234567890';
    *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreContract = KVStore__factory.connect(NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress, provider);
-   *
-   * const publicKey = await KVStoreUtils.getPublicKey(kvstoreContract, address);
+   * const publicKey = await KVStoreUtils.getPublicKey(rpcUrl, address);
    * console.log(publicKey);
    * ```
    */
   public static async getPublicKey(
-    contract: KVStore,
+    rpcUrl: string,
     address: string
   ): Promise<string> {
     const publicKeyUrl = await this.getFileUrlAndVerifyHash(
-      contract,
+      rpcUrl,
       address,
       KVStoreKeys.publicKey
     );

@@ -104,7 +104,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[escrow.ts:129](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L129)
+[escrow.ts:129](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L129)
 
 ## Properties
 
@@ -118,7 +118,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -132,7 +132,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -178,7 +178,7 @@ await escrowClient.abort('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 
 #### Defined in
 
-[escrow.ts:837](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L837)
+[escrow.ts:837](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L837)
 
 ***
 
@@ -229,7 +229,7 @@ await escrowClient.addTrustedHandlers('0x62dD51230A30401C455c8398d06F85e4EaB6309
 
 #### Defined in
 
-[escrow.ts:885](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L885)
+[escrow.ts:885](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L885)
 
 ***
 
@@ -296,7 +296,7 @@ await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', reci
 
 #### Defined in
 
-[escrow.ts:650](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L650)
+[escrow.ts:650](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L650)
 
 ***
 
@@ -342,7 +342,7 @@ await escrowClient.cancel('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 
 #### Defined in
 
-[escrow.ts:753](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L753)
+[escrow.ts:753](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L753)
 
 ***
 
@@ -388,7 +388,7 @@ await escrowClient.complete('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 
 #### Defined in
 
-[escrow.ts:592](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L592)
+[escrow.ts:592](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L592)
 
 ***
 
@@ -455,7 +455,7 @@ const escrowAddress = await escrowClient.createAndSetupEscrow(tokenAddress, trus
 
 #### Defined in
 
-[escrow.ts:415](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L415)
+[escrow.ts:415](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L415)
 
 ***
 
@@ -512,7 +512,7 @@ const escrowAddress = await escrowClient.createEscrow(tokenAddress, trustedHandl
 
 #### Defined in
 
-[escrow.ts:209](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L209)
+[escrow.ts:209](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L209)
 
 ***
 
@@ -561,7 +561,7 @@ await escrowClient.fund('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 
 #### Defined in
 
-[escrow.ts:463](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L463)
+[escrow.ts:463](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L463)
 
 ***
 
@@ -599,7 +599,7 @@ const balance = await escrowClient.getBalance('0x62dD51230A30401C455c8398d06F85e
 
 #### Defined in
 
-[escrow.ts:940](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L940)
+[escrow.ts:940](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L940)
 
 ***
 
@@ -637,7 +637,7 @@ const oracleAddress = await escrowClient.getExchangeOracleAddress('0x62dD51230A3
 
 #### Defined in
 
-[escrow.ts:1320](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1320)
+[escrow.ts:1320](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1320)
 
 ***
 
@@ -675,7 +675,7 @@ const factoryAddress = await escrowClient.getFactoryAddress('0x62dD51230A30401C4
 
 #### Defined in
 
-[escrow.ts:1358](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1358)
+[escrow.ts:1358](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1358)
 
 ***
 
@@ -713,7 +713,7 @@ const intemediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62
 
 #### Defined in
 
-[escrow.ts:1092](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1092)
+[escrow.ts:1092](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1092)
 
 ***
 
@@ -751,7 +751,7 @@ const jobLauncherAddress = await escrowClient.getJobLauncherAddress('0x62dD51230
 
 #### Defined in
 
-[escrow.ts:1244](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1244)
+[escrow.ts:1244](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1244)
 
 ***
 
@@ -789,7 +789,7 @@ const manifestHash = await escrowClient.getManifestHash('0x62dD51230A30401C455c8
 
 #### Defined in
 
-[escrow.ts:978](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L978)
+[escrow.ts:978](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L978)
 
 ***
 
@@ -827,7 +827,7 @@ const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c839
 
 #### Defined in
 
-[escrow.ts:1016](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1016)
+[escrow.ts:1016](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1016)
 
 ***
 
@@ -865,7 +865,7 @@ const oracleAddress = await escrowClient.getRecordingOracleAddress('0x62dD51230A
 
 #### Defined in
 
-[escrow.ts:1206](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1206)
+[escrow.ts:1206](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1206)
 
 ***
 
@@ -903,7 +903,7 @@ const oracleAddress = await escrowClient.getReputationOracleAddress('0x62dD51230
 
 #### Defined in
 
-[escrow.ts:1282](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1282)
+[escrow.ts:1282](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1282)
 
 ***
 
@@ -941,7 +941,7 @@ const resultsUrl = await escrowClient.getResultsUrl('0x62dD51230A30401C455c8398d
 
 #### Defined in
 
-[escrow.ts:1054](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1054)
+[escrow.ts:1054](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1054)
 
 ***
 
@@ -979,7 +979,7 @@ const status = await escrowClient.getStatus('0x62dD51230A30401C455c8398d06F85e4E
 
 #### Defined in
 
-[escrow.ts:1168](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1168)
+[escrow.ts:1168](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1168)
 
 ***
 
@@ -1017,7 +1017,7 @@ const tokenAddress = await escrowClient.getTokenAddress('0x62dD51230A30401C455c8
 
 #### Defined in
 
-[escrow.ts:1130](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1130)
+[escrow.ts:1130](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1130)
 
 ***
 
@@ -1078,7 +1078,7 @@ await escrowClient.setup(escrowAddress, escrowConfig);
 
 #### Defined in
 
-[escrow.ts:290](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L290)
+[escrow.ts:290](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L290)
 
 ***
 
@@ -1132,7 +1132,7 @@ await storeResults.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'h
 
 #### Defined in
 
-[escrow.ts:528](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L528)
+[escrow.ts:528](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L528)
 
 ***
 
@@ -1164,4 +1164,4 @@ Thrown if the network's chainId is not supported
 
 #### Defined in
 
-[escrow.ts:147](https://github.com/humanprotocol/human-protocol/blob/3493a5f6bcb4588fc0ed36ba47eaae2d47384450/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L147)
+[escrow.ts:147](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L147)

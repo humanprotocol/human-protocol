@@ -1,4 +1,4 @@
-specVersion: 0.0.5
+specVersion: 1.0.0
 description: '{{ description }}'
 schema:
   file: ./schema.graphql
@@ -129,7 +129,6 @@ dataSources:
         - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
           handler: handleRewardAdded
       file: ./src/mapping/RewardPool.ts
-{{ #LegacyEscrowFactory }}
   - kind: ethereum
     name: LegacyEscrowFactory
     network: '{{ network }}'
@@ -150,7 +149,6 @@ dataSources:
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
-{{ /LegacyEscrowFactory }}
 templates:
   - name: Escrow
     kind: ethereum/contract

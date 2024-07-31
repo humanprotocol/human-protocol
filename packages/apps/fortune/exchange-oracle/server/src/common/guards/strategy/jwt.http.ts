@@ -25,7 +25,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
           const payload = jwt.decode(rawJwtToken);
           const chainId = this.web3Service.getValidChains()[0];
           const signer = this.web3Service.getSigner(chainId);
-
+          
           const kvstoreContract = KVStore__factory.connect(
             NETWORKS[chainId]!.kvstoreAddress!,
             signer,

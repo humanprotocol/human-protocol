@@ -25,7 +25,7 @@ describe('TransactionUtils', () => {
 
     const mockTransaction: ITransaction = {
       block: 12345n,
-      hash: txHash,
+      txHash: txHash,
       from: '0x1234567890123456789012345678901234567890',
       to: '0x0987654321098765432109876543210987654321',
       timestamp: 1625247600n,
