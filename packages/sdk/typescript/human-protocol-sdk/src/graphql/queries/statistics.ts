@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { IStatisticsParams } from '../../interfaces';
+import { IStatisticsFilter } from '../../interfaces';
 
 const HMTOKEN_STATISTICS_FRAGMENT = gql`
   fragment HMTokenStatisticsFields on HMTokenStatistics {
@@ -70,25 +70,29 @@ export const GET_ESCROW_STATISTICS_QUERY = gql`
   ${ESCROW_STATISTICS_FRAGMENT}
 `;
 
-export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsParams) => {
-  const { from, to, limit } = params;
+export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsFilter) => {
+  const { from, to } = params;
   const WHERE_CLAUSE = `
     where: {
       ${from !== undefined ? `timestamp_gte: $from` : ''}
       ${to !== undefined ? `timestamp_lte: $to` : ''}
     }
   `;
-  const LIMIT_CLAUSE = `
-    first: ${limit ? `$limit` : `1000`}
-  `;
 
   return gql`
-    query GetEscrowDayData($from: Int, $to: Int) {
+    query GetEscrowDayData(
+        $from: Int, 
+        $to: Int,
+        $orderDirection: String
+        $first: Int
+        $skip: Int
+    ) {
       eventDayDatas(
         ${WHERE_CLAUSE},
         orderBy: timestamp,
-        orderDirection: desc,
-        ${LIMIT_CLAUSE}
+        orderDirection: $orderDirection,
+        first: $first,
+        skip: $skip
       ) {
         ...EventDayDataFields
       }
