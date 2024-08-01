@@ -8,23 +8,19 @@ import {
   JobsDiscoveryParamsCommand,
   JobsDiscoveryResponseItem,
 } from '../jobs-discovery/model/jobs-discovery.model';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class CronJobService {
-  private cacheKey = 'availableJobs';
-
   constructor(
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: EnvironmentConfigService,
   ) {}
 
   @Cron('*/1 * * * *')
-  async updateJobsCache() {
-    const jobsData = await this.fetchAllJobs();
-    await this.cacheManager.set(this.cacheKey, jobsData, 900);
-  }
-
-  async fetchAllJobs(): Promise<JobsDiscoveryResponseItem[]> {
+  async updateJobsListCache() {
     let allResults: JobsDiscoveryResponseItem[] = [];
 
     // Initial fetch to determine the total number of pages
@@ -50,7 +46,12 @@ export class CronJobService {
     }
 
     command.data.page = 0;
-    return allResults;
+
+    await this.cacheManager.set(
+      JOB_DISCOVERY_CACHE_KEY,
+      allResults,
+      this.configService.cacheTtlJobDiscovery,
+    );
   }
 
   private mergeJobs(
@@ -68,13 +69,5 @@ export class CronJobService {
     }
 
     return Array.from(jobsMap.values());
-  }
-
-  async getCachedJobs(): Promise<JobsDiscoveryResponseItem[]> {
-    return (
-      (await this.cacheManager.get<JobsDiscoveryResponseItem[]>(
-        this.cacheKey,
-      )) || []
-    );
   }
 }

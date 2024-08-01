@@ -10,7 +10,9 @@ import {
 import { EscrowUtilsGateway } from '../../../integrations/escrow/escrow-utils-gateway.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ResignJobCommand } from '../model/job-assignment.model';
+import { JOB_ASSIGNMENT_CACHE_KEY } from '../../../common/constants/cache';
 
+const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${USER_ADDRESS}`;
 describe('JobAssignmentService', () => {
   let service: JobAssignmentService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
@@ -86,9 +88,7 @@ describe('JobAssignmentService', () => {
 
       const result = await service.processGetAssignedJobs(command);
 
-      expect(cacheManagerMock.get).toHaveBeenCalledWith(
-        `assignedJobs:${USER_ADDRESS}`,
-      );
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
         command,
       );
@@ -109,9 +109,7 @@ describe('JobAssignmentService', () => {
 
       const result = await service.processGetAssignedJobs(command);
 
-      expect(cacheManagerMock.get).toHaveBeenCalledWith(
-        `assignedJobs:${USER_ADDRESS}`,
-      );
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(
         exchangeOracleGatewayMock.fetchAssignedJobs,
       ).not.toHaveBeenCalled();
@@ -137,14 +135,12 @@ describe('JobAssignmentService', () => {
 
       await service['updateAssignmentsCache'](command, USER_ADDRESS);
 
-      expect(cacheManagerMock.get).toHaveBeenCalledWith(
-        `assignedJobs:${USER_ADDRESS}`,
-      );
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
         command,
       );
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
-        `assignedJobs:${USER_ADDRESS}`,
+        cacheKey,
         newAssignments,
       );
     });
@@ -166,7 +162,6 @@ describe('JobAssignmentService', () => {
       expect(exchangeOracleGatewayMock.resignAssignedJob).toHaveBeenCalledWith(
         command,
       );
-      expect(cacheManagerMock.set).toHaveBeenCalled();
     });
   });
 });

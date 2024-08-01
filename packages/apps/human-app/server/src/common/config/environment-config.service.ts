@@ -4,6 +4,7 @@ const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_JOB_DISCOVERY = 15 * 60;
 const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
@@ -61,11 +62,16 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS,
     );
   }
-
   get cacheTtlOracleDiscovery(): number {
     return this.configService.get<number>(
       'CACHE_TTL_ORACLE_DISCOVERY',
       DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
+    );
+  }
+  get cacheTtlJobDiscovery(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_JOB_DISCOVERY',
+      DEFAULT_CACHE_TTL_JOB_DISCOVERY,
     );
   }
   get rpcUrl(): string {

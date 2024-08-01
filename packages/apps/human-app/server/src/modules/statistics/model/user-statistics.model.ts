@@ -8,7 +8,6 @@ export class UserStatisticsResponse {
   assignments_completed: number;
   assignments_rejected: number;
   assignments_expired: number;
-  disclaimer?: string;
   last_updated: string;
 }
 export class UserStatisticsCommand {

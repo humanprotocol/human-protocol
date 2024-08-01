@@ -6,10 +6,11 @@ import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exc
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { Cache } from 'cache-manager';
 import { UserStatisticsCommand } from '../model/user-statistics.model';
+import { OracleStatisticsResponse } from '../model/oracle-statistics.model';
 import {
-  OracleStatisticsCommand,
-  OracleStatisticsResponse,
-} from '../model/oracle-statistics.model';
+  ORACLE_STATISTICS_CACHE_KEY,
+  WORKER_STATISTICS_CACHE_KEY,
+} from '../../../common/constants/cache';
 const EXCHANGE_ORACLE_ADDRESS = '0x8f238b21aa2056';
 const WALLET_ADDRESS = '0x3df51d';
 const TOKEN = 'token1';
@@ -52,19 +53,16 @@ describe('StatisticsService', () => {
   });
 
   describe('getOracleStats', () => {
+    const command = { oracleAddress: EXCHANGE_ORACLE_ADDRESS };
+    const cacheKey = `${ORACLE_STATISTICS_CACHE_KEY}:${command.oracleAddress}`;
     it('should return cached data if available', async () => {
       const cachedData = { some: 'data' };
       cacheManager.get.mockResolvedValue(cachedData);
 
-      const command: OracleStatisticsCommand = {
-        oracleAddress: EXCHANGE_ORACLE_ADDRESS,
-      };
       const result: OracleStatisticsResponse =
         await service.getOracleStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(
-        service.cachePrefix + command.oracleAddress,
-      );
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(result).toEqual(cachedData);
       expect(exchangeGateway.fetchOracleStatistics).not.toHaveBeenCalled();
     });
@@ -74,29 +72,24 @@ describe('StatisticsService', () => {
       cacheManager.get.mockResolvedValue(undefined);
       exchangeGateway.fetchOracleStatistics.mockResolvedValue(newData);
 
-      const command = { oracleAddress: EXCHANGE_ORACLE_ADDRESS };
       const result = await service.getOracleStats(command);
 
-      expect(cacheManager.get).toHaveBeenCalledWith(
-        service.cachePrefix + command.oracleAddress,
-      );
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeGateway.fetchOracleStatistics).toHaveBeenCalledWith(
         command,
       );
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        service.cachePrefix + command.oracleAddress,
-        newData,
-        { ttl: configService.cacheTtlOracleStats },
-      );
+      expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, newData, {
+        ttl: configService.cacheTtlOracleStats,
+      });
 
       expect(result).toEqual(newData);
     });
   });
 
   describe('getUserStats', () => {
+    const userCacheKey = `${WORKER_STATISTICS_CACHE_KEY}:${EXCHANGE_ORACLE_ADDRESS}:${WALLET_ADDRESS}`;
     it('should return cached data if available', async () => {
       const cachedData = { userData: 'data' };
-      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + WALLET_ADDRESS;
       cacheManager.get.mockResolvedValue(cachedData);
 
       const command = {
@@ -107,13 +100,12 @@ describe('StatisticsService', () => {
       const result = await service.getUserStats(command);
 
       expect(cacheManager.get).toHaveBeenCalledWith(userCacheKey);
-      expect(result).toEqual({ ...cachedData, disclaimer: expect.any(String) });
+      expect(result).toEqual(cachedData);
       expect(exchangeGateway.fetchUserStatistics).not.toHaveBeenCalled();
     });
 
     it('should fetch, cache, and return new data if not in cache', async () => {
       const newData = { newData: 'data' };
-      const userCacheKey = EXCHANGE_ORACLE_ADDRESS + WALLET_ADDRESS;
       cacheManager.get.mockResolvedValue(undefined);
       exchangeGateway.fetchUserStatistics.mockResolvedValue(newData);
 
@@ -128,7 +120,7 @@ describe('StatisticsService', () => {
       expect(cacheManager.set).toHaveBeenCalledWith(userCacheKey, newData, {
         ttl: configService.cacheTtlUserStats,
       });
-      expect(result).toEqual({ ...newData, disclaimer: expect.any(String) });
+      expect(result).toEqual(newData);
     });
   });
 });

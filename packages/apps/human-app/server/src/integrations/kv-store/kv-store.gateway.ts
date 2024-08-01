@@ -4,12 +4,10 @@ import { ethers } from 'ethers';
 import { KVStoreClient, KVStoreKeys } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { KV_STORE_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class KvStoreGateway {
-  get cachePrefix() {
-    return 'KV_STORE:';
-  }
   private kvStoreClient: KVStoreClient;
   constructor(
     private configService: EnvironmentConfigService,
@@ -21,9 +19,8 @@ export class KvStoreGateway {
     );
   }
   async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
-    const cachedUrl: string | undefined = await this.cacheManager.get(
-      this.cachePrefix + address,
-    );
+    const key = `${KV_STORE_CACHE_KEY}:${address}`;
+    const cachedUrl: string | undefined = await this.cacheManager.get(key);
     if (cachedUrl) {
       return cachedUrl;
     }
@@ -48,7 +45,7 @@ export class KvStoreGateway {
         400,
       );
     } else {
-      await this.cacheManager.set(this.cachePrefix + address, fetchedUrl, {
+      await this.cacheManager.set(key, fetchedUrl, {
         ttl: this.configService.cacheTtlExchangeOracleUrl,
       } as any);
       return fetchedUrl;

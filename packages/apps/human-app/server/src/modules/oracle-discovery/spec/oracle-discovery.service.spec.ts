@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { OperatorUtils } from '@human-protocol/sdk';
+import { OperatorUtils, Role } from '@human-protocol/sdk';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
@@ -16,12 +16,18 @@ import {
   generateOracleDiscoveryResponseBody,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
+import { ripemd160 } from 'ethers';
 
-jest.mock('@human-protocol/sdk', () => ({
-  OperatorUtils: {
-    getReputationNetworkOperators: jest.fn(),
-  },
-}));
+jest.mock('@human-protocol/sdk', () => {
+  const actualSdk = jest.requireActual('@human-protocol/sdk');
+  return {
+    ...actualSdk,
+    OperatorUtils: {
+      getReputationNetworkOperators: jest.fn(),
+    },
+  };
+});
+
 describe('OracleDiscoveryService', () => {
   const EXCHANGE_ORACLE = 'Exchange Oracle';
   const EXPECTED_CHAIN_IDS = ['4200'];
@@ -79,7 +85,7 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(mockData);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
@@ -94,7 +100,7 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress2', role: 'validator' },
     ];
 
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockResolvedValue(mockData);
@@ -115,6 +121,7 @@ describe('OracleDiscoveryService', () => {
       );
     });
   });
+
   it('should filter responses if selectedJobTypes not empty, or url not set', async () => {
     const mockData: OracleDiscoveryResponse[] =
       generateOracleDiscoveryResponseBody();

@@ -14,6 +14,7 @@ import {
   ResignJobCommand,
 } from './model/job-assignment.model';
 import { paginateAndSortResults } from '../../common/utils/pagination.utils';
+import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class JobAssignmentService {
@@ -43,7 +44,21 @@ export class JobAssignmentService {
       );
     assignmentsParamsCommand.token = command.token;
 
-    await this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+    this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+
+    return response;
+  }
+
+  async resignJob(command: ResignJobCommand) {
+    const response =
+      await this.exchangeOracleGateway.resignAssignedJob(command);
+
+    const evmAddress = this.getEvmAddressFromToken(command.token);
+    const assignmentsParamsCommand = new JobsFetchParamsCommand();
+    assignmentsParamsCommand.oracleAddress = command.oracleAddress;
+    assignmentsParamsCommand.token = command.token;
+
+    this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
 
     return response;
   }
@@ -52,7 +67,7 @@ export class JobAssignmentService {
     command: JobsFetchParamsCommand,
   ): Promise<JobsFetchResponse> {
     const evmAddress = this.getEvmAddressFromToken(command.token);
-    const cacheKey = `assignedJobs:${evmAddress}`;
+    const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
 
     const cachedData =
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
@@ -81,7 +96,7 @@ export class JobAssignmentService {
     command: JobsFetchParamsCommand,
     evmAddress: string,
   ): Promise<void> {
-    const cacheKey = `assignedJobs:${evmAddress}`;
+    const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
 
     const cachedData =
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
@@ -153,19 +168,5 @@ export class JobAssignmentService {
     }
 
     return Array.from(assignmentsMap.values());
-  }
-
-  async resignJob(command: ResignJobCommand) {
-    const response =
-      await this.exchangeOracleGateway.resignAssignedJob(command);
-
-    const evmAddress = this.getEvmAddressFromToken(command.token);
-    const assignmentsParamsCommand = new JobsFetchParamsCommand();
-    assignmentsParamsCommand.oracleAddress = command.oracleAddress;
-    assignmentsParamsCommand.token = command.token;
-
-    await this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
-
-    return response;
   }
 }

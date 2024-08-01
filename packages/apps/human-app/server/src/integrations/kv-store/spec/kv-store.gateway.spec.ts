@@ -5,6 +5,7 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 import { ethers } from 'ethers';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { KV_STORE_CACHE_KEY } from '../../../common/constants/cache';
 
 const EXPECTED_URL = 'https://example.com';
 jest.mock('@human-protocol/sdk', () => {
@@ -83,8 +84,9 @@ describe('KvStoreGateway', () => {
   });
 
   describe('getExchangeOracleUrlByAddress', () => {
+    const testAddress = 'testAddress';
+    const cacheKey = `${KV_STORE_CACHE_KEY}:${testAddress}`;
     it('should get data from kvStoreClient, if not cached', async () => {
-      const testAddress = 'testAddress';
       const expectedUrl = EXPECTED_URL;
       mockKVStoreClient.get.mockResolvedValue(expectedUrl);
       cacheManager.get.mockResolvedValue(undefined);
@@ -93,26 +95,20 @@ describe('KvStoreGateway', () => {
         testAddress,
         KVStoreKeys.url,
       );
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        service.cachePrefix + testAddress,
-        expectedUrl,
-        { ttl: configService.cacheTtlExchangeOracleUrl },
-      );
-      expect(cacheManager.get).toHaveBeenCalledWith(
-        service.cachePrefix + testAddress,
-      );
+
+      expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, expectedUrl, {
+        ttl: configService.cacheTtlExchangeOracleUrl,
+      });
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(result).toBe(expectedUrl);
     });
     it('should get data from cache, if available', async () => {
-      const testAddress = 'testAddress';
       const expectedUrl = EXPECTED_URL;
       cacheManager.get.mockResolvedValue(expectedUrl);
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
 
       expect(service['kvStoreClient'].get).not.toHaveBeenCalled();
-      expect(cacheManager.get).toHaveBeenCalledWith(
-        service.cachePrefix + testAddress,
-      );
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(result).toBe(expectedUrl);
     });
   });
