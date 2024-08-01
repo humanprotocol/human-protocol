@@ -22,7 +22,7 @@ export class SignInDto {
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  public hCaptchaToken?: string;
 }
 
 export class RefreshDto {
