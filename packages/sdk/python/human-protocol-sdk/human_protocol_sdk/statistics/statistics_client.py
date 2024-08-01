@@ -291,11 +291,11 @@ class StatisticsClient:
             raise StatisticsClientError("Empty network configuration")
 
     def get_escrow_statistics(
-        self, param: StatisticsFilter = StatisticsFilter()
+        self, filter: StatisticsFilter = StatisticsFilter()
     ) -> EscrowStatistics:
         """Get escrow statistics data for the given date range.
 
-        :param param: Object containing the date range
+        :param filter: Object containing the date range
 
         :return: Escrow statistics data
 
@@ -332,10 +332,13 @@ class StatisticsClient:
 
         event_day_datas_data = get_data_from_subgraph(
             self.network,
-            query=get_event_day_data_query(param),
+            query=get_event_day_data_query(filter),
             params={
-                "from": int(param.date_from.timestamp()) if param.date_from else None,
-                "to": int(param.date_to.timestamp()) if param.date_to else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
             },
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
@@ -366,11 +369,11 @@ class StatisticsClient:
         )
 
     def get_worker_statistics(
-        self, param: StatisticsFilter = StatisticsFilter()
+        self, filter: StatisticsFilter = StatisticsFilter()
     ) -> WorkerStatistics:
         """Get worker statistics data for the given date range.
 
-        :param param: Object containing the date range
+        :param filter: Object containing the date range
 
         :return: Worker statistics data
 
@@ -399,10 +402,13 @@ class StatisticsClient:
 
         event_day_datas_data = get_data_from_subgraph(
             self.network,
-            query=get_event_day_data_query(param),
+            query=get_event_day_data_query(filter),
             params={
-                "from": int(param.date_from.timestamp()) if param.date_from else None,
-                "to": int(param.date_to.timestamp()) if param.date_to else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
             },
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
@@ -420,11 +426,11 @@ class StatisticsClient:
         )
 
     def get_payment_statistics(
-        self, param: StatisticsFilter = StatisticsFilter()
+        self, filter: StatisticsFilter = StatisticsFilter()
     ) -> PaymentStatistics:
         """Get payment statistics data for the given date range.
 
-        :param param: Object containing the date range
+        :param filter: Object containing the date range
 
         :return: Payment statistics data
 
@@ -454,10 +460,13 @@ class StatisticsClient:
 
         event_day_datas_data = get_data_from_subgraph(
             self.network,
-            query=get_event_day_data_query(param),
+            query=get_event_day_data_query(filter),
             params={
-                "from": int(param.date_from.timestamp()) if param.date_from else None,
-                "to": int(param.date_to.timestamp()) if param.date_to else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
             },
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
@@ -567,11 +576,11 @@ class StatisticsClient:
         ]
 
     def get_hmt_daily_data(
-        self, param: StatisticsFilter = StatisticsFilter()
+        self, filter: StatisticsFilter = StatisticsFilter()
     ) -> List[DailyHMTData]:
         """Get HMT dailt statistics data for the given date range.
 
-        :param param: Object containing the date range
+        :param filter: Object containing the date range
 
         :return: HMT statistics data
 
@@ -599,10 +608,13 @@ class StatisticsClient:
 
         event_day_datas_data = get_data_from_subgraph(
             self.network,
-            query=get_event_day_data_query(param),
+            query=get_event_day_data_query(filter),
             params={
-                "from": int(param.date_from.timestamp()) if param.date_from else None,
-                "to": int(param.date_to.timestamp()) if param.date_to else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
             },
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]

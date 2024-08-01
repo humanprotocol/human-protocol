@@ -74,7 +74,7 @@ query GetEscrowStatistics {{
 )
 
 
-def get_event_day_data_query(param: StatisticsFilter):
+def get_event_day_data_query(filter: StatisticsFilter) -> str:
     return """
 query GetEscrowDayData(
     $from: Int
@@ -99,6 +99,6 @@ query GetEscrowDayData(
 {event_day_data_fragment}
 """.format(
         event_day_data_fragment=event_day_data_fragment,
-        from_clause="timestamp_gte: $from" if param.date_from else "",
-        to_clause="timestamp_lte: $to" if param.date_to else "",
+        from_clause="timestamp_gte: $from" if filter.date_from else "",
+        to_clause="timestamp_lte: $to" if filter.date_to else "",
     )
