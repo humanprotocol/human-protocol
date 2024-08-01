@@ -1,4 +1,4 @@
-from human_protocol_sdk.statistics import StatisticsParam
+from human_protocol_sdk.filter import StatisticsFilter
 
 hmtoken_statistics_fragment = """
 fragment HMTokenStatisticsFields on HMTokenStatistics {
@@ -74,17 +74,24 @@ query GetEscrowStatistics {{
 )
 
 
-def get_event_day_data_query(param: StatisticsParam):
+def get_event_day_data_query(param: StatisticsFilter):
     return """
-query GetEscrowDayData($from: Int, $to: Int) {{
+query GetEscrowDayData(
+    $from: Int
+    $to: Int
+    $orderDirection: String
+    $first: Int
+    $skip: Int
+) {{
     eventDayDatas(
         where: {{
             {from_clause}
             {to_clause}
         }},
         orderBy: timestamp,
-        orderDirection: desc,
-        {limit_clause}
+        orderDirection: $orderDirection
+        first: $first
+        skip: $skip
     ) {{
       ...EventDayDataFields
     }}
@@ -94,5 +101,4 @@ query GetEscrowDayData($from: Int, $to: Int) {{
         event_day_data_fragment=event_day_data_fragment,
         from_clause="timestamp_gte: $from" if param.date_from else "",
         to_clause="timestamp_lte: $to" if param.date_to else "",
-        limit_clause="first: $limit" if param.limit else "first: 1000",
     )

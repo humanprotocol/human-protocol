@@ -24,6 +24,7 @@ from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.gql.hmtoken import get_holders_query
 
 from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.filter import StatisticsFilter
 
 LOG = logging.getLogger("human_protocol_sdk.statistics")
 
@@ -34,30 +35,6 @@ class StatisticsClientError(Exception):
     """
 
     pass
-
-
-class StatisticsParam:
-    """
-    A class used to specify statistics params.
-    """
-
-    def __init__(
-        self,
-        date_from: Optional[datetime] = None,
-        date_to: Optional[datetime] = None,
-        limit: Optional[int] = None,
-    ):
-        """
-        Initializes a StatisticsParam instance.
-
-        :param date_from: Statistical data from date
-        :param date_to: Statistical data to date
-        :param limit: Limit of statistical data
-        """
-
-        self.date_from = date_from
-        self.date_to = date_to
-        self.limit = limit
 
 
 class HMTHoldersParam:
@@ -279,8 +256,6 @@ class HMTStatistics:
         total_transfer_amount: int,
         total_transfer_count: int,
         total_holders: int,
-        holders: List[HMTHolder],
-        daily_hmt_data: List[DailyHMTData],
     ):
         """
         Initializes a HMTStatistics instance.
@@ -288,15 +263,11 @@ class HMTStatistics:
         :param total_transfer_amount: Total transfer amount
         :param total_transfer_count: Total transfer count
         :param total_holders: Total holders
-        :param holders: Holders
-        :param daily_hmt_data: Daily HMT data
         """
 
         self.total_transfer_amount = total_transfer_amount
         self.total_transfer_count = total_transfer_count
         self.total_holders = total_holders
-        self.holders = holders
-        self.daily_hmt_data = daily_hmt_data
 
 
 class StatisticsClient:
@@ -320,7 +291,7 @@ class StatisticsClient:
             raise StatisticsClientError("Empty network configuration")
 
     def get_escrow_statistics(
-        self, param: StatisticsParam = StatisticsParam()
+        self, param: StatisticsFilter = StatisticsFilter()
     ) -> EscrowStatistics:
         """Get escrow statistics data for the given date range.
 
@@ -332,14 +303,15 @@ class StatisticsClient:
             .. code-block:: python
 
                 from human_protocol_sdk.contants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+                from human_protocol_sdk.statistics import StatisticsClient
+                from human_protocol_sdk.filter import StatisticsFilter
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_escrow_statistics())
                 print(
                     statistics_client.get_escrow_statistics(
-                        StatisticsParam(
+                        StatisticsFilter(
                             date_from=datetime.datetime(2023, 5, 8),
                             date_to=datetime.datetime(2023, 6, 8),
                         )
@@ -394,7 +366,7 @@ class StatisticsClient:
         )
 
     def get_worker_statistics(
-        self, param: StatisticsParam = StatisticsParam()
+        self, param: StatisticsFilter = StatisticsFilter()
     ) -> WorkerStatistics:
         """Get worker statistics data for the given date range.
 
@@ -406,14 +378,15 @@ class StatisticsClient:
             .. code-block:: python
 
                 from human_protocol_sdk.contants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+                from human_protocol_sdk.statistics import StatisticsClient
+                from human_protocol_sdk.filter import StatisticsFilter
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_worker_statistics())
                 print(
                     statistics_client.get_worker_statistics(
-                        StatisticsParam(
+                        StatisticsFilter(
                             date_from=datetime.datetime(2023, 5, 8),
                             date_to=datetime.datetime(2023, 6, 8),
                         )
@@ -447,7 +420,7 @@ class StatisticsClient:
         )
 
     def get_payment_statistics(
-        self, param: StatisticsParam = StatisticsParam()
+        self, param: StatisticsFilter = StatisticsFilter()
     ) -> PaymentStatistics:
         """Get payment statistics data for the given date range.
 
@@ -459,14 +432,15 @@ class StatisticsClient:
             .. code-block:: python
 
                 from human_protocol_sdk.contants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+                from human_protocol_sdk.statistics import StatisticsClient
+                from human_protocol_sdk.filter import StatisticsFilter
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_payment_statistics())
                 print(
                     statistics_client.get_payment_statistics(
-                        StatisticsParam(
+                        StatisticsFilter(
                             date_from=datetime.datetime(2023, 5, 8),
                             date_to=datetime.datetime(2023, 6, 8),
                         )
@@ -507,12 +481,8 @@ class StatisticsClient:
             ],
         )
 
-    def get_hmt_statistics(
-        self, param: StatisticsParam = StatisticsParam()
-    ) -> HMTStatistics:
-        """Get HMT statistics data for the given date range.
-
-        :param param: Object containing the date range
+    def get_hmt_statistics(self) -> HMTStatistics:
+        """Get HMT statistics data.
 
         :return: HMT statistics data
 
@@ -520,19 +490,11 @@ class StatisticsClient:
             .. code-block:: python
 
                 from human_protocol_sdk.contants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+                from human_protocol_sdk.statistics import StatisticsClient
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
                 print(statistics_client.get_hmt_statistics())
-                print(
-                    statistics_client.get_hmt_statistics(
-                        StatisticsParam(
-                            date_from=datetime.datetime(2023, 5, 8),
-                            date_to=datetime.datetime(2023, 6, 8),
-                        )
-                    )
-                )
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
@@ -545,22 +507,6 @@ class StatisticsClient:
         )
         hmtoken_statistics = hmtoken_statistics_data["data"]["hmtokenStatistics"]
 
-        holders_data = get_data_from_subgraph(
-            self.network,
-            query=get_holders_query,
-        )
-        holders = holders_data["data"]["holders"]
-
-        event_day_datas_data = get_data_from_subgraph(
-            self.network,
-            query=get_event_day_data_query(param),
-            params={
-                "from": int(param.date_from.timestamp()) if param.date_from else None,
-                "to": int(param.date_to.timestamp()) if param.date_to else None,
-            },
-        )
-        event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
-
         return HMTStatistics(
             total_transfer_amount=int(
                 hmtoken_statistics.get("totalValueTransfered", 0)
@@ -569,33 +515,6 @@ class StatisticsClient:
                 hmtoken_statistics.get("totalTransferEventCount", 0)
             ),
             total_holders=int(hmtoken_statistics.get("holders", 0)),
-            holders=[
-                HMTHolder(
-                    address=holder.get("address", ""),
-                    balance=int(holder.get("balance", 0)),
-                )
-                for holder in holders
-            ],
-            daily_hmt_data=[
-                DailyHMTData(
-                    timestamp=datetime.fromtimestamp(
-                        int(event_day_data.get("timestamp", 0))
-                    ),
-                    total_transaction_amount=int(
-                        event_day_data.get("dailyHMTTransferAmount", 0)
-                    ),
-                    total_transaction_count=int(
-                        event_day_data.get("dailyHMTTransferCount", 0)
-                    ),
-                    daily_unique_senders=int(
-                        event_day_data.get("dailyUniqueSenders", 0)
-                    ),
-                    daily_unique_receivers=int(
-                        event_day_data.get("dailyUniqueReceivers", 0)
-                    ),
-                )
-                for event_day_data in event_day_datas
-            ],
         )
 
     def get_hmt_holders(
@@ -645,4 +564,64 @@ class StatisticsClient:
                 balance=int(holder.get("balance", 0)),
             )
             for holder in holders
+        ]
+
+    def get_hmt_daily_data(
+        self, param: StatisticsFilter = StatisticsFilter()
+    ) -> List[DailyHMTData]:
+        """Get HMT dailt statistics data for the given date range.
+
+        :param param: Object containing the date range
+
+        :return: HMT statistics data
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+                print(statistics_client.get_hmt_daily_data())
+                print(
+                    statistics_client.get_hmt_daily_data(
+                        StatisticsFilter(
+                            date_from=datetime.datetime(2023, 5, 8),
+                            date_to=datetime.datetime(2023, 6, 8),
+                        )
+                    )
+                )
+        """
+        from human_protocol_sdk.gql.statistics import (
+            get_event_day_data_query,
+        )
+
+        event_day_datas_data = get_data_from_subgraph(
+            self.network,
+            query=get_event_day_data_query(param),
+            params={
+                "from": int(param.date_from.timestamp()) if param.date_from else None,
+                "to": int(param.date_to.timestamp()) if param.date_to else None,
+            },
+        )
+        event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
+
+        return [
+            DailyHMTData(
+                timestamp=datetime.fromtimestamp(
+                    int(event_day_data.get("timestamp", 0))
+                ),
+                total_transaction_amount=int(
+                    event_day_data.get("dailyHMTTransferAmount", 0)
+                ),
+                total_transaction_count=int(
+                    event_day_data.get("dailyHMTTransferCount", 0)
+                ),
+                daily_unique_senders=int(event_day_data.get("dailyUniqueSenders", 0)),
+                daily_unique_receivers=int(
+                    event_day_data.get("dailyUniqueReceivers", 0)
+                ),
+            )
+            for event_day_data in event_day_datas
         ]
