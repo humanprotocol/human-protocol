@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, OrderDirection
 from human_protocol_sdk.gql.hmtoken import get_holders_query
 from human_protocol_sdk.gql.statistics import (
     get_event_day_data_query,
@@ -73,6 +73,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
@@ -121,6 +124,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
@@ -163,6 +169,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
@@ -283,6 +292,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
