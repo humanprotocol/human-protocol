@@ -22,6 +22,7 @@ export class SignInDto {
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
+  @IsOptional()
   public hCaptchaToken?: string;
 }
 
@@ -71,4 +72,10 @@ export class ApiKeyDto {
   @ApiProperty({ name: 'api_key' })
   @IsString()
   public apiKey: string;
+}
+function IsOptional(): (
+  target: SignInDto,
+  propertyKey: 'hCaptchaToken',
+) => void {
+  throw new Error('Function not implemented.');
 }
