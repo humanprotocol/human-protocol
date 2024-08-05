@@ -75,4 +75,4 @@ export const LOGOUT_PATH = '/auth/logout';
 
 export const E2E_TEST_ENV = 'test-e2e';
 
-export const CREATE_JOB_MUTEX_TIMEOUT = 2000; //ms
+export const MUTEX_TIMEOUT = 2000; //ms

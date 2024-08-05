@@ -38,7 +38,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { ControlledError } from '../../common/errors/controlled';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
-import { CREATE_JOB_MUTEX_TIMEOUT } from '../../common/constants';
+import { MUTEX_TIMEOUT } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -81,7 +81,7 @@ export class JobController {
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
-      CREATE_JOB_MUTEX_TIMEOUT,
+      MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
           req.user.id,
@@ -121,7 +121,7 @@ export class JobController {
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
-      CREATE_JOB_MUTEX_TIMEOUT,
+      MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
           req.user.id,
@@ -161,7 +161,7 @@ export class JobController {
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
-      CREATE_JOB_MUTEX_TIMEOUT,
+      MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(req.user.id, data.type, data);
       },
@@ -201,7 +201,7 @@ export class JobController {
     );
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
-      CREATE_JOB_MUTEX_TIMEOUT,
+      MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
           req.user.id,
@@ -292,7 +292,7 @@ export class JobController {
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
-      CREATE_JOB_MUTEX_TIMEOUT,
+      MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.requestToCancelJobByAddress(
           req.user.id,
@@ -331,7 +331,7 @@ export class JobController {
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
-      CREATE_JOB_MUTEX_TIMEOUT,
+      MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.requestToCancelJobById(
           req.user.id,
