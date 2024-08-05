@@ -51,7 +51,7 @@
     "@tanstack/eslint-plugin-query": "^5.18.1",
     "@tanstack/react-query-devtools": "^5.18.1",
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.2.1",
+    "@testing-library/react": "^15.0.7",
     "@types/lodash": "^4.14.202",
     "@types/mui-image": "^1.0.5",
     "@types/node": "^20.11.16",
