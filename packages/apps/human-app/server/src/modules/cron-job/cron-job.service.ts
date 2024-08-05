@@ -10,6 +10,9 @@ import {
 } from '../jobs-discovery/model/jobs-discovery.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
+import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
+import { OracleDiscoveryCommand } from '../oracle-discovery/model/oracle-discovery.model';
+import { WorkerService } from '../user-worker/worker.service';
 
 @Injectable()
 export class CronJobService {
@@ -17,14 +20,39 @@ export class CronJobService {
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
+    private oracleDiscoveryService: OracleDiscoveryService,
+    private workerService: WorkerService,
   ) {}
 
   @Cron('*/1 * * * *')
-  async updateJobsListCache() {
+  async updateJobsListCron() {
+    console.log('CRON START');
+
+    const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
+    const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
+      oracleDiscoveryCommand,
+    );
+
+    if (!oracles) return;
+
+    const response = await this.workerService.signinWorker({
+      email: '',
+      password: '',
+      hCaptchaToken: '',
+    });
+
+    for (const oracle of oracles) {
+      await this.updateJobsListCache(oracle.address, response.access_token);
+    }
+  }
+
+  async updateJobsListCache(oracleAddress: string, token: string){
     let allResults: JobsDiscoveryResponseItem[] = [];
 
     // Initial fetch to determine the total number of pages
     const command = new JobsDiscoveryParamsCommand();
+    command.oracleAddress = oracleAddress;
+    command.token = token;
     command.data = new JobsDiscoveryParams();
     command.data.page = 0;
     command.data.pageSize = command.data.pageSize || 10; // Max value for Exchange Oracle
@@ -68,6 +96,7 @@ export class CronJobService {
       jobsMap.set(job.escrow_address + '-' + job.chain_id, job);
     }
 
+    console.log('CRON END');
     return Array.from(jobsMap.values());
   }
 }
