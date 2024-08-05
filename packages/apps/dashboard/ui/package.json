@@ -60,7 +60,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "happy-dom": "^12.9.1",
     "identity-obj-proxy": "^3.0.0",
-    "jsdom": "^24.1.0",
+    "jsdom": "^24.1.1",
     "resize-observer-polyfill": "^1.5.1",
     "vite": "^5.0.12",
     "vite-plugin-node-polyfills": "^0.22.0",
