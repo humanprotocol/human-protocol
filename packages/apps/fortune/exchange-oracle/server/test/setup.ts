@@ -19,12 +19,14 @@ export async function setup(): Promise<void> {
       KVStoreKeys.fee,
       KVStoreKeys.webhookUrl,
       KVStoreKeys.url,
+      KVStoreKeys.jobTypes,
     ],
     [
       Role.ExchangeOracle,
       '1',
       'http://localhost:5001/webhook',
       'http://localhost:5001',
+      'FORTUNE',
     ],
     { nonce: 0 },
   );

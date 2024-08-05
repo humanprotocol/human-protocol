@@ -33,20 +33,24 @@ export class CronJobService {
       oracleDiscoveryCommand,
     );
 
-    if (!oracles) return;
+    if (!oracles || oracles.length < 1) return;
 
     const response = await this.workerService.signinWorker({
-      email: '',
-      password: '',
-      hCaptchaToken: '',
+      email: this.configService.email,
+      password: this.configService.password,
     });
 
     for (const oracle of oracles) {
-      await this.updateJobsListCache(oracle.address, response.access_token);
+      await this.updateJobsListCache(
+        oracle.address,
+        'Bearer ' + response.access_token,
+      );
     }
+
+    console.log('CRON END');
   }
 
-  async updateJobsListCache(oracleAddress: string, token: string){
+  async updateJobsListCache(oracleAddress: string, token: string) {
     let allResults: JobsDiscoveryResponseItem[] = [];
 
     // Initial fetch to determine the total number of pages
@@ -74,9 +78,8 @@ export class CronJobService {
     }
 
     command.data.page = 0;
-
     await this.cacheManager.set(
-      JOB_DISCOVERY_CACHE_KEY,
+      `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
       allResults,
       this.configService.cacheTtlJobDiscovery,
     );
@@ -96,7 +99,6 @@ export class CronJobService {
       jobsMap.set(job.escrow_address + '-' + job.chain_id, job);
     }
 
-    console.log('CRON END');
     return Array.from(jobsMap.values());
   }
 }

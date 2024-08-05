@@ -58,7 +58,7 @@ export class JobAssignmentService {
     assignmentsParamsCommand.oracleAddress = command.oracleAddress;
     assignmentsParamsCommand.token = command.token;
 
-    this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+    await this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
 
     return response;
   }

@@ -16,7 +16,7 @@ export class JobsDiscoveryService {
   async processJobsDiscovery(
     command: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
-    const allJobs = await this.getCachedJobs();
+    const allJobs = await this.getCachedJobs(command.oracleAddress);
     return paginateAndSortResults(
       allJobs || [],
       command.data.page,
@@ -26,10 +26,12 @@ export class JobsDiscoveryService {
     );
   }
 
-  async getCachedJobs(): Promise<JobsDiscoveryResponseItem[]> {
+  async getCachedJobs(
+    oracleAddress: string,
+  ): Promise<JobsDiscoveryResponseItem[]> {
     return (
       (await this.cacheManager.get<JobsDiscoveryResponseItem[]>(
-        JOB_DISCOVERY_CACHE_KEY,
+        `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
       )) || []
     );
   }

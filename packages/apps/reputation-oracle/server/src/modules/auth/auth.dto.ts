@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -7,6 +7,7 @@ import {
   IsString,
   Matches,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
 import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
@@ -34,9 +35,10 @@ export class SignInDto {
   @IsString()
   public password: string;
 
-  @ApiProperty({ name: 'h_captcha_token' })
+  @ApiPropertyOptional({ name: 'h_captcha_token' })
+  @IsOptional()
   @IsString()
-  public hCaptchaToken: string;
+  public hCaptchaToken?: string;
 }
 
 export class RefreshDto {

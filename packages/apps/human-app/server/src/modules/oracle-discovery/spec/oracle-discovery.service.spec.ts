@@ -1,22 +1,18 @@
+import { OperatorUtils } from '@human-protocol/sdk';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
-import { OracleDiscoveryService } from '../oracle-discovery.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { OperatorUtils, Role } from '@human-protocol/sdk';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-} from '../model/oracle-discovery.model';
-import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
-import { ConfigModule } from '@nestjs/config';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
+import { OracleDiscoveryService } from '../oracle-discovery.service';
 import {
   emptyCommandFixture,
   filledCommandFixture,
   generateOracleDiscoveryResponseBody,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
-import { ripemd160 } from 'ethers';
 
 jest.mock('@human-protocol/sdk', () => {
   const actualSdk = jest.requireActual('@human-protocol/sdk');
@@ -35,7 +31,6 @@ describe('OracleDiscoveryService', () => {
   const TTL = '300';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
-  let configService: EnvironmentConfigService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -65,9 +60,6 @@ describe('OracleDiscoveryService', () => {
         },
       ],
     }).compile();
-    configService = module.get<EnvironmentConfigService>(
-      EnvironmentConfigService,
-    );
     oracleDiscoveryService = module.get<OracleDiscoveryService>(
       OracleDiscoveryService,
     );

@@ -53,7 +53,7 @@ export class JobAssignmentController {
   @Get('/job')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Request to get a jobs assigned to a logged user',
+    summary: 'Request to get jobs assigned to a logged user',
   })
   public async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,

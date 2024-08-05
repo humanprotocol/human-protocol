@@ -57,15 +57,6 @@ export class AuthService {
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -75,6 +66,18 @@ export class AuthService {
       throw new ControlledError(
         ErrorAuth.InvalidEmailOrPassword,
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      userEntity.role !== UserRole.HUMAN_APP &&
+      (!data.hCaptchaToken ||
+        !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+          .success)
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 

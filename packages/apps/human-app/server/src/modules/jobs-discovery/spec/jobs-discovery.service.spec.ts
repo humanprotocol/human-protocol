@@ -44,7 +44,9 @@ describe('JobsDiscoveryService', () => {
         .mockReturnValue(responseItemsFixture);
 
       const result = await service.processJobsDiscovery(command);
-      expect(service.getCachedJobs).toHaveBeenCalledWith();
+      expect(service.getCachedJobs).toHaveBeenCalledWith(
+        jobsDiscoveryParamsCommandFixture.oracleAddress,
+      );
       expect(result.results).toEqual(responseItemsFixture);
     });
   });
