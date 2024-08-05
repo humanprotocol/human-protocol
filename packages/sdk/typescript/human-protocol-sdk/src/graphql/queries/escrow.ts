@@ -16,11 +16,8 @@ const ESCROW_FRAGMENT = gql`
     manifestHash
     manifestUrl
     recordingOracle
-    recordingOracleFee
     reputationOracle
-    reputationOracleFee
     exchangeOracle
-    exchangeOracleFee
     status
     token
     totalFundedAmount

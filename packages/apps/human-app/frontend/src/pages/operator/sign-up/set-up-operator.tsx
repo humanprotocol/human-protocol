@@ -17,7 +17,6 @@ export function SetUpOperatorPage() {
           {t('operator.connectWallet.successAlert')}
         </Alert>
       }
-      backArrowPath={-1}
       title={t('operator.connectWallet.title')}
     >
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>

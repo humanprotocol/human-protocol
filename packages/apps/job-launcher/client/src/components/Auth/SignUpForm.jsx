@@ -171,9 +171,6 @@ export const SignUpForm = ({ onFinish, setMode, setTabValue }) => {
             >
               <HCaptcha
                 sitekey={import.meta.env.VITE_APP_HCAPTCHA_SITE_KEY}
-                endpoint={import.meta.env.VITE_APP_HCAPTCHA_EXCHANGE_URL}
-                reportapi={import.meta.env.VITE_APP_HCAPTCHA_LABELING_BASE_URL}
-                custom
                 onVerify={(token) => setFieldValue('hcaptchaToken', token)}
                 ref={captchaRef}
               />

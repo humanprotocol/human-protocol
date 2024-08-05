@@ -45,11 +45,7 @@ export function ConnectWalletOperatorPage() {
   }
 
   return (
-    <PageCard
-      alert={getAlert()}
-      backArrowPath={-1}
-      title={t('operator.connectWallet.title')}
-    >
+    <PageCard alert={getAlert()} title={t('operator.connectWallet.title')}>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
         <Typography variant="body1">
           {t('operator.connectWallet.description')}

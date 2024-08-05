@@ -52,12 +52,12 @@ export enum ErrorEscrow {
  * Represents error messages related to user.
  */
 export enum ErrorUser {
-  NotFound = 'User not found',
-  AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
-  InvalidCredentials = 'Invalid credentials',
-  UserNotActive = 'User not active',
-  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
+  NotFound = 'User not found.',
+  AccountCannotBeRegistered = 'Account cannot be registered.',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
+  InvalidCredentials = 'Invalid credentials.',
+  UserNotActive = 'User not active.',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
 }
 
 /**
@@ -71,7 +71,7 @@ export enum ErrorAuth {
   TokenExpired = 'Token has expired',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
   ApiKeyNotFound = 'API key not found',
-  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least 8 characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
   InvalidToken = 'Invalid token',
 }
 

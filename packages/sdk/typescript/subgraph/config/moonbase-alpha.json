@@ -1,10 +1,6 @@
 {
   "network": "mbase",
   "description": "Human subgraph on Moonbase Alpha network",
-  "graft": {
-    "base": "QmeMPFuH9eorte4yeySqGWrbpYdazyxSn3m8WsZn7dG92v",
-    "block": 4446285
-  },
   "EscrowFactory": {
     "address": "0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed",
     "startBlock": 3950929,
@@ -13,7 +9,9 @@
   "HMToken": {
     "address": "0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3",
     "startBlock": 3950738,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0xf183b3B34E70Dd17859455389A3aB54D49D41e6f"
   },
   "Escrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"

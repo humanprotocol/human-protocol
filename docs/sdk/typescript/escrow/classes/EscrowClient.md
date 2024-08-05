@@ -102,21 +102,11 @@ The Runner object to interact with the Ethereum network
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`constructor`](../../base/classes/BaseEthersClient.md#constructors)
 
-#### Source
+#### Defined in
 
-[escrow.ts:129](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L129)
+[escrow.ts:129](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L129)
 
 ## Properties
-
-### escrowFactoryContract
-
-> `private` **escrowFactoryContract**: `EscrowFactory`
-
-#### Source
-
-[escrow.ts:121](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L121)
-
-***
 
 ### networkData
 
@@ -126,9 +116,9 @@ The Runner object to interact with the Ethereum network
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata)
 
-#### Source
+#### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -140,9 +130,9 @@ The Runner object to interact with the Ethereum network
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner)
 
-#### Source
+#### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -158,7 +148,7 @@ This function cancels the specified escrow, sends the balance to the canceler an
 
 Address of the escrow.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -186,9 +176,9 @@ const escrowClient = await EscrowClient.build(signer);
 await escrowClient.abort('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:837](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L837)
+[escrow.ts:837](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L837)
 
 ***
 
@@ -208,7 +198,7 @@ Address of the escrow.
 
 Array of addresses of trusted handlers to add.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -237,9 +227,9 @@ const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6
 await escrowClient.addTrustedHandlers('0x62dD51230A30401C455c8398d06F85e4EaB6309f', trustedHandlers);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:885](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L885)
+[escrow.ts:885](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L885)
 
 ***
 
@@ -271,7 +261,7 @@ Final results file url.
 
 Final results file hash.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -304,9 +294,9 @@ const resultsHash'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
 await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:650](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L650)
+[escrow.ts:650](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L650)
 
 ***
 
@@ -322,7 +312,7 @@ This function cancels the specified escrow and sends the balance to the canceler
 
 Address of the escrow to cancel.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -350,9 +340,9 @@ const escrowClient = await EscrowClient.build(signer);
 await escrowClient.cancel('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:753](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L753)
+[escrow.ts:753](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L753)
 
 ***
 
@@ -368,7 +358,7 @@ This function sets the status of an escrow to completed.
 
 Address of the escrow.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -396,9 +386,9 @@ const escrowClient = await EscrowClient.build(signer);
 await escrowClient.complete('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:592](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L592)
+[escrow.ts:592](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L592)
 
 ***
 
@@ -463,9 +453,9 @@ const escrowConfig = {
 const escrowAddress = await escrowClient.createAndSetupEscrow(tokenAddress, trustedHandlers, jobRequesterId, escrowConfig);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:415](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L415)
+[escrow.ts:415](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L415)
 
 ***
 
@@ -489,7 +479,7 @@ Array of addresses that can perform actions on the contract.
 
 Job Requester Id
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -520,9 +510,9 @@ const jobRequesterId = "job-requester-id";
 const escrowAddress = await escrowClient.createEscrow(tokenAddress, trustedHandlers, jobRequesterId);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:209](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L209)
+[escrow.ts:209](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L209)
 
 ***
 
@@ -542,7 +532,7 @@ Address of the escrow to fund.
 
 Amount to be added as funds.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -569,9 +559,9 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await escrowClient.fund('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:463](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L463)
+[escrow.ts:463](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L463)
 
 ***
 
@@ -607,31 +597,9 @@ const escrowClient = await EscrowClient.build(signer);
 const balance = await escrowClient.getBalance('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:940](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L940)
-
-***
-
-### getEscrowContract()
-
-> `private` **getEscrowContract**(`escrowAddress`): `Escrow`
-
-Connects to the escrow contract
-
-#### Parameters
-
-• **escrowAddress**: `string`
-
-Escrow address to connect to
-
-#### Returns
-
-`Escrow`
-
-#### Source
-
-[escrow.ts:169](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L169)
+[escrow.ts:940](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L940)
 
 ***
 
@@ -667,9 +635,9 @@ const escrowClient = await EscrowClient.build(signer);
 const oracleAddress = await escrowClient.getExchangeOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1320](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1320)
+[escrow.ts:1320](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1320)
 
 ***
 
@@ -705,9 +673,9 @@ const escrowClient = await EscrowClient.build(signer);
 const factoryAddress = await escrowClient.getFactoryAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1358](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1358)
+[escrow.ts:1358](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1358)
 
 ***
 
@@ -743,9 +711,9 @@ const escrowClient = await EscrowClient.build(signer);
 const intemediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1092](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1092)
+[escrow.ts:1092](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1092)
 
 ***
 
@@ -781,9 +749,9 @@ const escrowClient = await EscrowClient.build(signer);
 const jobLauncherAddress = await escrowClient.getJobLauncherAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1244](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1244)
+[escrow.ts:1244](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1244)
 
 ***
 
@@ -819,9 +787,9 @@ const escrowClient = await EscrowClient.build(signer);
 const manifestHash = await escrowClient.getManifestHash('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:978](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L978)
+[escrow.ts:978](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L978)
 
 ***
 
@@ -857,9 +825,9 @@ const escrowClient = await EscrowClient.build(signer);
 const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1016](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1016)
+[escrow.ts:1016](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1016)
 
 ***
 
@@ -895,9 +863,9 @@ const escrowClient = await EscrowClient.build(signer);
 const oracleAddress = await escrowClient.getRecordingOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1206](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1206)
+[escrow.ts:1206](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1206)
 
 ***
 
@@ -933,9 +901,9 @@ const escrowClient = await EscrowClient.build(signer);
 const oracleAddress = await escrowClient.getReputationOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1282](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1282)
+[escrow.ts:1282](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1282)
 
 ***
 
@@ -971,9 +939,9 @@ const escrowClient = await EscrowClient.build(signer);
 const resultsUrl = await escrowClient.getResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1054](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1054)
+[escrow.ts:1054](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1054)
 
 ***
 
@@ -1009,9 +977,9 @@ const escrowClient = await EscrowClient.build(signer);
 const status = await escrowClient.getStatus('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1168](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1168)
+[escrow.ts:1168](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1168)
 
 ***
 
@@ -1047,9 +1015,9 @@ const escrowClient = await EscrowClient.build(signer);
 const tokenAddress = await escrowClient.getTokenAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:1130](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1130)
+[escrow.ts:1130](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1130)
 
 ***
 
@@ -1069,7 +1037,7 @@ Address of the escrow to set up.
 
 Escrow configuration parameters.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -1108,9 +1076,9 @@ const escrowConfig = {
 await escrowClient.setup(escrowAddress, escrowConfig);
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:290](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L290)
+[escrow.ts:290](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L290)
 
 ***
 
@@ -1134,7 +1102,7 @@ Results file url.
 
 Results file hash.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -1162,9 +1130,9 @@ const escrowClient = await EscrowClient.build(signer);
 await storeResults.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
 ```
 
-#### Source
+#### Defined in
 
-[escrow.ts:528](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L528)
+[escrow.ts:528](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L528)
 
 ***
 
@@ -1194,6 +1162,6 @@ Thrown if the provider does not exist for the provided Signer
 
 Thrown if the network's chainId is not supported
 
-#### Source
+#### Defined in
 
-[escrow.ts:147](https://github.com/humanprotocol/human-protocol/blob/8d975cea1abbae7bc4c000b3bf81cca8faa7415f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L147)
+[escrow.ts:147](https://github.com/humanprotocol/human-protocol/blob/c4fdb1a29e88dfe9f3982c3b18d5c6939416bda0/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L147)

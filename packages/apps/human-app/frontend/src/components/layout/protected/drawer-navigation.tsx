@@ -12,6 +12,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { paddingX } from '@/components/layout/protected/navbar';
 
 const drawerWidth = 240;
 
@@ -45,7 +46,11 @@ export function DrawerNavigation({
   const isMobile = useIsMobile();
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+      sx={{
+        display: 'flex',
+      }}
+    >
       <CssBaseline />
       <Drawer
         anchor="left"
@@ -62,7 +67,7 @@ export function DrawerNavigation({
         variant="persistent"
       >
         {!isMobile && (
-          <Stack alignItems="center">
+          <Stack alignItems="flex-start" sx={{ paddingLeft: '60px' }}>
             <HumanLogoNavbarIcon />
           </Stack>
         )}
@@ -80,16 +85,11 @@ export function DrawerNavigation({
             {topMenuItems?.map((item, index) => {
               if (!('label' in item)) {
                 return (
-                  <ListItem
-                    key={crypto.randomUUID()}
-                    onClick={() => {
-                      setDrawerOpen(false);
-                    }}
-                  >
+                  <ListItem key={crypto.randomUUID()}>
                     <Stack
                       direction="row"
                       sx={{
-                        ml: isMobile ? '28px' : '56px',
+                        ml: isMobile ? '28px' : paddingX,
                       }}
                     >
                       {item}
@@ -98,12 +98,16 @@ export function DrawerNavigation({
                 );
               }
 
-              const { link, label, disabled, href } = item;
+              const { link, label, disabled, href, onClick } = item;
               return (
                 <ListItem disablePadding key={link}>
                   <ListItemButton
                     disabled={disabled}
                     onClick={() => {
+                      if (onClick) {
+                        onClick();
+                        return;
+                      }
                       if (disabled) return;
                       if (isMobile) setDrawerOpen(false);
                       if (href) {
@@ -122,7 +126,7 @@ export function DrawerNavigation({
                     <Stack
                       direction="row"
                       sx={{
-                        ml: isMobile ? '28px' : '56px',
+                        ml: isMobile ? '28px' : paddingX,
                       }}
                     >
                       <ListItemText
@@ -147,11 +151,15 @@ export function DrawerNavigation({
             })}
           </List>
           <List>
-            {bottomMenuItems?.map(({ label, link, icon, href }) => (
+            {bottomMenuItems?.map(({ label, link, icon, href, onClick }) => (
               <ListItem alignItems="center" disablePadding key={link}>
                 <ListItemButton
                   alignItems="center"
                   onClick={() => {
+                    if (onClick) {
+                      onClick();
+                      return;
+                    }
                     if (isMobile) setDrawerOpen(false);
                     if (href) {
                       const element = document.createElement('a');
@@ -171,7 +179,7 @@ export function DrawerNavigation({
                     direction="row"
                     justifyContent="center"
                     sx={{
-                      ml: isMobile ? '12px' : '56px',
+                      ml: isMobile ? '28px' : paddingX,
                     }}
                   >
                     {icon}

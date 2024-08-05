@@ -66,7 +66,7 @@ export function OperatorProfilePage() {
             backgroundColor: colorPalette.white,
             height: '100%',
             boxShadow: 'none',
-            padding: '40px',
+            padding: isMobile ? 0 : '40px',
             borderRadius: '20px',
           }}
         >
@@ -176,7 +176,7 @@ export function OperatorProfilePage() {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            padding: '40px',
+            padding: isMobile ? 0 : '40px',
             borderRadius: '20px',
           }}
         >

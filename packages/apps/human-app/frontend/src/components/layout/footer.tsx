@@ -4,11 +4,13 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
 import { env } from '@/shared/env';
 import { Chat } from '@/pages/homepage/components/chat';
+import { breakpoints } from '@/styles/theme';
 
 interface FooterProps {
+  displayChatIcon?: boolean;
   isProtected?: boolean;
 }
-export function Footer({ isProtected }: FooterProps) {
+export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile('md');
 
@@ -31,22 +33,36 @@ export function Footer({ isProtected }: FooterProps) {
         pl: parseLeftPadding(),
         pb: isMobile ? 0 : '44px',
         pt: '32px',
+        [breakpoints.mobile]: {
+          pr: 0,
+          pl: 0,
+          pb: 0,
+          pt: 0,
+          padding: '32px',
+        },
       }}
     >
       <Grid
         alignItems="flex-start"
+        display="flex"
+        flexDirection="column"
+        gap="24px"
         item
         justifyContent="center"
-        sx={{
-          px: isMobile ? '32px' : 0,
-        }}
         xs={isMobile ? 12 : 11}
       >
-        <Stack direction={isMobile ? 'column' : 'row'}>
+        <Stack
+          direction={isMobile ? 'column' : 'row'}
+          sx={{
+            gap: '24px',
+            [breakpoints.mobile]: {
+              gap: '24px',
+            },
+          }}
+        >
           <Link
             href={env.VITE_PRIVACY_POLICY_URL}
             rel="noreferrer"
-            sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
             target="_blank"
             underline="none"
           >
@@ -57,7 +73,6 @@ export function Footer({ isProtected }: FooterProps) {
           <Link
             href={env.VITE_TERMS_OF_SERVICE_URL}
             rel="noreferrer"
-            sx={{ mr: 1.5, mb: isMobile ? '10px' : 0 }}
             target="_blank"
             underline="none"
           >
@@ -78,17 +93,17 @@ export function Footer({ isProtected }: FooterProps) {
               {t('components.footer.humanProtocol')}
             </Typography>
           </Link>
+          {isMobile ? (
+            <Typography color={colorPalette.text.secondary} variant="caption">
+              {t('components.footer.copyrightNote')}
+            </Typography>
+          ) : null}
         </Stack>
-        <Typography
-          align={isMobile ? 'left' : 'center'}
-          color={colorPalette.text.secondary}
-          sx={{
-            pb: isMobile ? '32px' : 0,
-          }}
-          variant="caption"
-        >
-          {t('components.footer.copyrightNote')}
-        </Typography>
+        {!isMobile ? (
+          <Typography color={colorPalette.text.secondary} variant="caption">
+            {t('components.footer.copyrightNote')}
+          </Typography>
+        ) : null}
       </Grid>
       <Grid
         item
@@ -101,7 +116,7 @@ export function Footer({ isProtected }: FooterProps) {
         }}
         xs={isMobile ? 12 : 1}
       >
-        <Chat />
+        <Chat displayChatIcon={displayChatIcon} />
       </Grid>
     </Grid>
   );

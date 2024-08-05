@@ -28,7 +28,7 @@ import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { SiteKeyEntity } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
-import { OracleType } from '../../common/enums';
+import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
@@ -141,8 +141,13 @@ export class UserService {
       throw new BadRequestException(ErrorUser.KycNotApproved);
     }
 
-    if (user.siteKey) {
-      return user.siteKey.siteKey;
+    if (user.siteKeys && user.siteKeys.length > 0) {
+      const existingHcaptchaSiteKey = user.siteKeys?.find(
+        (key) => key.type === SiteKeyType.HCAPTCHA,
+      );
+      if (existingHcaptchaSiteKey) {
+        return existingHcaptchaSiteKey.siteKey;
+      }
     }
 
     // Register user as a labeler at hcaptcha foundation
@@ -175,7 +180,7 @@ export class UserService {
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = siteKey;
     newSiteKey.user = user;
-    newSiteKey.type = OracleType.HCAPTCHA;
+    newSiteKey.type = SiteKeyType.HCAPTCHA;
 
     await this.siteKeyRepository.createUnique(newSiteKey);
 
@@ -350,5 +355,25 @@ export class UserService {
       contents: content,
       nonce: nonce ?? undefined,
     };
+  }
+
+  public async registerOracle(
+    user: UserEntity,
+    oracleAddress: string,
+  ): Promise<void> {
+    const newSiteKey = new SiteKeyEntity();
+    newSiteKey.siteKey = oracleAddress;
+    newSiteKey.type = SiteKeyType.REGISTRATION;
+    newSiteKey.user = user;
+
+    await this.siteKeyRepository.createUnique(newSiteKey);
+  }
+
+  public async getRegisteredOracles(user: UserEntity): Promise<string[]> {
+    const siteKeys = await this.siteKeyRepository.findByUserAndType(
+      user,
+      SiteKeyType.REGISTRATION,
+    );
+    return siteKeys.map((siteKey) => siteKey.siteKey);
   }
 }

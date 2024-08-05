@@ -7,7 +7,7 @@ export function createTransaction(
   to: Address | null = null,
   value: BigInt | null = null
 ): void {
-  const transaction = new Transaction(event.transaction.hash.toHex());
+  const transaction = new Transaction(event.transaction.hash);
 
   transaction.from = event.transaction.from;
   transaction.to = to !== null ? to : event.transaction.to;
