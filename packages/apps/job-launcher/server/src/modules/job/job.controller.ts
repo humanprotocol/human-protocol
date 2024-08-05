@@ -80,7 +80,7 @@ export class JobController {
     @Body() data: JobQuickLaunchDto,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
-      req.user.id,
+      { id: `user${req.user.id}` },
       CREATE_JOB_MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
@@ -120,7 +120,7 @@ export class JobController {
     @Body() data: JobFortuneDto,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
-      req.user.id,
+      { id: `user${req.user.id}` },
       CREATE_JOB_MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
@@ -160,7 +160,7 @@ export class JobController {
     @Body() data: JobCvatDto,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
-      req.user.id,
+      { id: `user${req.user.id}` },
       CREATE_JOB_MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(req.user.id, data.type, data);
@@ -200,7 +200,7 @@ export class JobController {
       HttpStatus.UNAUTHORIZED,
     );
     return await this.mutexManagerService.runExclusive(
-      req.user.id,
+      { id: `user${req.user.id}` },
       CREATE_JOB_MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
@@ -291,7 +291,7 @@ export class JobController {
     @Param('escrow_address') escrowAddress: string,
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
-      req.user.id,
+      { id: `user${req.user.id}` },
       CREATE_JOB_MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.requestToCancelJobByAddress(
@@ -330,7 +330,7 @@ export class JobController {
     @Param() params: JobCancelDto,
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
-      req.user.id,
+      { id: `user${req.user.id}` },
       CREATE_JOB_MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.requestToCancelJobById(

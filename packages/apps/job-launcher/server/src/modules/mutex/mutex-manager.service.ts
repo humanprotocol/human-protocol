@@ -5,7 +5,7 @@ import { Mutex, MutexInterface, withTimeout, E_TIMEOUT } from 'async-mutex';
 export class MutexManagerService implements OnModuleDestroy {
   private mutexes: WeakMap<object, MutexInterface> = new WeakMap();
   private mutexTimeouts: Map<object, NodeJS.Timeout> = new Map();
-  private mutexTimeoutDuration = 120000; // 1 minute
+  private mutexTimeoutDuration = 120000; // 2 minutes
 
   private getMutex(key: object, timeout: number): MutexInterface {
     if (!this.mutexes.has(key)) {
