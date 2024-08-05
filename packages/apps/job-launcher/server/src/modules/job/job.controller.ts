@@ -37,6 +37,8 @@ import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
 import { ControlledError } from '../../common/errors/controlled';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { MutexManagerService } from '../mutex/mutex-manager.service';
+import { CREATE_JOB_MUTEX_TIMEOUT } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -44,7 +46,10 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 @ApiKey()
 @Controller('/job')
 export class JobController {
-  constructor(private readonly jobService: JobService) {}
+  constructor(
+    private readonly jobService: JobService,
+    private readonly mutexManagerService: MutexManagerService,
+  ) {}
 
   @ApiOperation({
     summary: 'Create a job via quick launch',
@@ -74,7 +79,17 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, data.requestType, data);
+    return await this.mutexManagerService.runExclusive(
+      req.user.id,
+      CREATE_JOB_MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(
+          req.user.id,
+          data.requestType,
+          data,
+        );
+      },
+    );
   }
 
   @ApiOperation({
@@ -104,7 +119,17 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.FORTUNE, data);
+    return await this.mutexManagerService.runExclusive(
+      req.user.id,
+      CREATE_JOB_MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(
+          req.user.id,
+          JobRequestType.FORTUNE,
+          data,
+        );
+      },
+    );
   }
 
   @ApiOperation({
@@ -134,7 +159,13 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCvatDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, data.type, data);
+    return await this.mutexManagerService.runExclusive(
+      req.user.id,
+      CREATE_JOB_MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(req.user.id, data.type, data);
+      },
+    );
   }
 
   @ApiOperation({
@@ -168,10 +199,16 @@ export class JobController {
       'Hcaptcha jobs disabled temporally',
       HttpStatus.UNAUTHORIZED,
     );
-    return this.jobService.createJob(
+    return await this.mutexManagerService.runExclusive(
       req.user.id,
-      JobRequestType.HCAPTCHA,
-      data,
+      CREATE_JOB_MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(
+          req.user.id,
+          JobRequestType.HCAPTCHA,
+          data,
+        );
+      },
     );
   }
 
@@ -253,10 +290,16 @@ export class JobController {
     @Param('chain_id') chainId: ChainId,
     @Param('escrow_address') escrowAddress: string,
   ): Promise<void> {
-    await this.jobService.requestToCancelJobByAddress(
+    await this.mutexManagerService.runExclusive(
       req.user.id,
-      chainId,
-      escrowAddress,
+      CREATE_JOB_MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.requestToCancelJobByAddress(
+          req.user.id,
+          chainId,
+          escrowAddress,
+        );
+      },
     );
     return;
   }
@@ -286,7 +329,16 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
   ): Promise<void> {
-    await this.jobService.requestToCancelJobById(req.user.id, params.id);
+    await this.mutexManagerService.runExclusive(
+      req.user.id,
+      CREATE_JOB_MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.requestToCancelJobById(
+          req.user.id,
+          params.id,
+        );
+      },
+    );
     return;
   }
 
