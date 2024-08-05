@@ -46,22 +46,22 @@ export class AuthService {
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    if (
-      !(
-        await verifyToken(
-          this.authConfigService.hcaptchaProtectionUrl,
-          this.authConfigService.hCaptchaSiteKey,
-          this.authConfigService.hCaptchaSecret,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidCaptchaToken,
-        HttpStatus.FORBIDDEN,
-      );
-    }
+    // if (
+    //   !(
+    //     await verifyToken(
+    //       this.authConfigService.hcaptchaProtectionUrl,
+    //       this.authConfigService.hCaptchaSiteKey,
+    //       this.authConfigService.hCaptchaSecret,
+    //       data.hCaptchaToken,
+    //       ip,
+    //     )
+    //   ).success
+    // ) {
+    //   throw new ControlledError(
+    //     ErrorAuth.InvalidCaptchaToken,
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
