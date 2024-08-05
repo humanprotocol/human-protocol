@@ -129,6 +129,22 @@ export class CvatDataDto {
   public boxes?: StorageDataDto;
 }
 
+export class Label {
+  @ApiProperty()
+  @IsString()
+  public name: string;
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public nodes?: string[];
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public joints?: string[];
+}
+
 export class JobCvatDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
@@ -138,7 +154,7 @@ export class JobCvatDto extends JobDto {
   @IsObject()
   public data: CvatDataDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: [Label] })
   @IsArray()
   @ArrayMinSize(1)
   public labels: Label[];
@@ -374,22 +390,6 @@ export class CvatData {
   @IsUrl()
   @IsOptional()
   public boxes_url?: string;
-}
-
-export class Label {
-  @ApiProperty()
-  @IsString()
-  public name: string;
-
-  @ApiPropertyOptional()
-  @IsArray()
-  @IsOptional()
-  public nodes?: string[];
-
-  @ApiPropertyOptional()
-  @IsArray()
-  @IsOptional()
-  public joints?: string[];
 }
 
 export class Annotation {
