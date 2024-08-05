@@ -53,6 +53,6 @@ describe('MutexManagerService', () => {
       service.runExclusive(userId, timeout, async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async work
       }),
-    ).rejects.toThrow('Function execution timed out for [object Object]');
+    ).rejects.toThrow('Function execution timed out for user2');
   });
 });

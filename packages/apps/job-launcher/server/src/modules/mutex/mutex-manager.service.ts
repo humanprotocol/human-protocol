@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Mutex, MutexInterface, withTimeout, E_TIMEOUT } from 'async-mutex';
 
 @Injectable()
@@ -6,6 +6,7 @@ export class MutexManagerService implements OnModuleDestroy {
   private mutexes: WeakMap<object, MutexInterface> = new WeakMap();
   private mutexTimeouts: Map<object, NodeJS.Timeout> = new Map();
   private mutexTimeoutDuration = 120000; // 2 minutes
+  public readonly logger = new Logger(MutexManagerService.name);
 
   private getMutex(key: object, timeout: number): MutexInterface {
     if (!this.mutexes.has(key)) {
@@ -44,18 +45,35 @@ export class MutexManagerService implements OnModuleDestroy {
   ): Promise<T> {
     const mutex = this.getMutex(key, timeout);
     try {
+      this.logger.log(
+        `Attempting to acquire lock for ${(key as any).id as string}...`,
+      );
       const result = await mutex.runExclusive(async () => {
-        console.log(`Lock acquired for ${key}, executing function...`);
+        this.logger.log(
+          `Lock acquired for ${(key as any).id as string}, executing function...`,
+        );
+        this.logger.log(
+          `Function executed for ${(key as any).id as string}, lock released.`,
+        );
         return await callback();
       });
       return result;
     } catch (e) {
       if (e === E_TIMEOUT) {
-        console.error(`Function execution timed out for ${key}`);
-        throw new Error(`Function execution timed out for ${key}`);
+        this.logger.error(
+          `Function execution timed out for ${(key as any).id as string}`,
+        );
+        throw new Error(
+          `Function execution timed out for ${(key as any).id as string}`,
+        );
       }
-      console.error(`Function execution failed for ${key}`, e);
-      throw new Error(`Function execution failed for ${key}`);
+      this.logger.error(
+        `Function execution failed for ${(key as any).id as string}`,
+        e,
+      );
+      throw new Error(
+        `Function execution failed for ${(key as any).id as string}`,
+      );
     }
   }
 
