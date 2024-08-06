@@ -120,13 +120,13 @@ Initializes a HMTHoldersParam instance.
   * **address** (`Optional`[`str`]) – Filter by holder’s address
   * **order_direction** (`str`) – Optional. Direction of sorting (‘asc’ for ascending, ‘desc’ for descending)
 
-### *class* human_protocol_sdk.statistics.statistics_client.HMTStatistics(total_transfer_amount, total_transfer_count, total_holders, holders, daily_hmt_data)
+### *class* human_protocol_sdk.statistics.statistics_client.HMTStatistics(total_transfer_amount, total_transfer_count, total_holders)
 
 Bases: `object`
 
 A class used to specify HMT statistics.
 
-#### \_\_init_\_(total_transfer_amount, total_transfer_count, total_holders, holders, daily_hmt_data)
+#### \_\_init_\_(total_transfer_amount, total_transfer_count, total_holders)
 
 Initializes a HMTStatistics instance.
 
@@ -134,8 +134,6 @@ Initializes a HMTStatistics instance.
   * **total_transfer_amount** (`int`) – Total transfer amount
   * **total_transfer_count** (`int`) – Total transfer count
   * **total_holders** (`int`) – Total holders
-  * **holders** (`List`[[`HMTHolder`](#human_protocol_sdk.statistics.statistics_client.HMTHolder)]) – Holders
-  * **daily_hmt_data** (`List`[[`DailyHMTData`](#human_protocol_sdk.statistics.statistics_client.DailyHMTData)]) – Daily HMT data
 
 ### *class* human_protocol_sdk.statistics.statistics_client.PaymentStatistics(daily_payments_data)
 
@@ -163,12 +161,12 @@ Initializes a Statistics instance
 * **Parameters:**
   **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to get statistical data from
 
-#### get_escrow_statistics(param=<human_protocol_sdk.statistics.statistics_client.StatisticsParam object>)
+#### get_escrow_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
 
 Get escrow statistics data for the given date range.
 
 * **Parameters:**
-  **param** ([`StatisticsParam`](#human_protocol_sdk.statistics.statistics_client.StatisticsParam)) – Object containing the date range
+  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
 * **Return type:**
   [`EscrowStatistics`](#human_protocol_sdk.statistics.statistics_client.EscrowStatistics)
 * **Returns:**
@@ -176,14 +174,43 @@ Get escrow statistics data for the given date range.
 * **Example:**
   ```python
   from human_protocol_sdk.contants import ChainId
-  from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+  from human_protocol_sdk.statistics import StatisticsClient
+  from human_protocol_sdk.filter import StatisticsFilter
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_escrow_statistics())
   print(
       statistics_client.get_escrow_statistics(
-          StatisticsParam(
+          StatisticsFilter(
+              date_from=datetime.datetime(2023, 5, 8),
+              date_to=datetime.datetime(2023, 6, 8),
+          )
+      )
+  )
+  ```
+
+#### get_hmt_daily_data(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
+
+Get HMT dailt statistics data for the given date range.
+
+* **Parameters:**
+  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+* **Return type:**
+  `List`[[`DailyHMTData`](#human_protocol_sdk.statistics.statistics_client.DailyHMTData)]
+* **Returns:**
+  HMT statistics data
+* **Example:**
+  ```python
+  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
+
+  statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+
+  print(statistics_client.get_hmt_daily_data())
+  print(
+      statistics_client.get_hmt_daily_data(
+          StatisticsFilter(
               date_from=datetime.datetime(2023, 5, 8),
               date_to=datetime.datetime(2023, 6, 8),
           )
@@ -219,12 +246,10 @@ Get HMT holders data with optional filters and ordering.
   )
   ```
 
-#### get_hmt_statistics(param=<human_protocol_sdk.statistics.statistics_client.StatisticsParam object>)
+#### get_hmt_statistics()
 
-Get HMT statistics data for the given date range.
+Get HMT statistics data.
 
-* **Parameters:**
-  **param** ([`StatisticsParam`](#human_protocol_sdk.statistics.statistics_client.StatisticsParam)) – Object containing the date range
 * **Return type:**
   [`HMTStatistics`](#human_protocol_sdk.statistics.statistics_client.HMTStatistics)
 * **Returns:**
@@ -232,27 +257,19 @@ Get HMT statistics data for the given date range.
 * **Example:**
   ```python
   from human_protocol_sdk.contants import ChainId
-  from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+  from human_protocol_sdk.statistics import StatisticsClient
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_hmt_statistics())
-  print(
-      statistics_client.get_hmt_statistics(
-          StatisticsParam(
-              date_from=datetime.datetime(2023, 5, 8),
-              date_to=datetime.datetime(2023, 6, 8),
-          )
-      )
-  )
   ```
 
-#### get_payment_statistics(param=<human_protocol_sdk.statistics.statistics_client.StatisticsParam object>)
+#### get_payment_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
 
 Get payment statistics data for the given date range.
 
 * **Parameters:**
-  **param** ([`StatisticsParam`](#human_protocol_sdk.statistics.statistics_client.StatisticsParam)) – Object containing the date range
+  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
 * **Return type:**
   [`PaymentStatistics`](#human_protocol_sdk.statistics.statistics_client.PaymentStatistics)
 * **Returns:**
@@ -260,14 +277,15 @@ Get payment statistics data for the given date range.
 * **Example:**
   ```python
   from human_protocol_sdk.contants import ChainId
-  from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+  from human_protocol_sdk.statistics import StatisticsClient
+  from human_protocol_sdk.filter import StatisticsFilter
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_payment_statistics())
   print(
       statistics_client.get_payment_statistics(
-          StatisticsParam(
+          StatisticsFilter(
               date_from=datetime.datetime(2023, 5, 8),
               date_to=datetime.datetime(2023, 6, 8),
           )
@@ -275,12 +293,12 @@ Get payment statistics data for the given date range.
   )
   ```
 
-#### get_worker_statistics(param=<human_protocol_sdk.statistics.statistics_client.StatisticsParam object>)
+#### get_worker_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
 
 Get worker statistics data for the given date range.
 
 * **Parameters:**
-  **param** ([`StatisticsParam`](#human_protocol_sdk.statistics.statistics_client.StatisticsParam)) – Object containing the date range
+  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
 * **Return type:**
   [`WorkerStatistics`](#human_protocol_sdk.statistics.statistics_client.WorkerStatistics)
 * **Returns:**
@@ -288,14 +306,15 @@ Get worker statistics data for the given date range.
 * **Example:**
   ```python
   from human_protocol_sdk.contants import ChainId
-  from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+  from human_protocol_sdk.statistics import StatisticsClient
+  from human_protocol_sdk.filter import StatisticsFilter
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
   print(statistics_client.get_worker_statistics())
   print(
       statistics_client.get_worker_statistics(
-          StatisticsParam(
+          StatisticsFilter(
               date_from=datetime.datetime(2023, 5, 8),
               date_to=datetime.datetime(2023, 6, 8),
           )
@@ -308,21 +327,6 @@ Get worker statistics data for the given date range.
 Bases: `Exception`
 
 Raises when some error happens when getting data from subgraph.
-
-### *class* human_protocol_sdk.statistics.statistics_client.StatisticsParam(date_from=None, date_to=None, limit=None)
-
-Bases: `object`
-
-A class used to specify statistics params.
-
-#### \_\_init_\_(date_from=None, date_to=None, limit=None)
-
-Initializes a StatisticsParam instance.
-
-* **Parameters:**
-  * **date_from** (`Optional`[`datetime`]) – Statistical data from date
-  * **date_to** (`Optional`[`datetime`]) – Statistical data to date
-  * **limit** (`Optional`[`int`]) – Limit of statistical data
 
 ### *class* human_protocol_sdk.statistics.statistics_client.WorkerStatistics(daily_workers_data)
 

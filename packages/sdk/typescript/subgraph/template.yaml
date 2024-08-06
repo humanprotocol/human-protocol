@@ -1,4 +1,4 @@
-specVersion: 0.0.5
+specVersion: 1.0.0
 description: '{{ description }}'
 schema:
   file: ./schema.graphql

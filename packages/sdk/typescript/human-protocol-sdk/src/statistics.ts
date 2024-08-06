@@ -16,10 +16,12 @@ import {
   WorkerStatistics,
   HMTHolderData,
   HMTHolder,
+  DailyHMTData,
 } from './graphql';
-import { IHMTHoldersParams, IStatisticsParams } from './interfaces';
+import { IHMTHoldersParams, IStatisticsFilter } from './interfaces';
 import { NetworkData } from './types';
 import { getSubgraphUrl, throwError } from './utils';
+import { OrderDirection } from './enums';
 
 /**
  * ## Introduction
@@ -79,10 +81,12 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * interface IStatisticsFilter {
    *   from?: Date;
    *   to?: Date;
-   *   limit?: number;
+   *   first?: number; // (Optional) Number of transactions per page. Default is 10.
+   *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+   *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
    * }
    * ```
    *
@@ -103,7 +107,7 @@ export class StatisticsClient {
    * ```
    *
    *
-   * @param {IStatisticsParams} params Statistics params with duration data
+   * @param {IStatisticsFilter} filter Statistics params with duration data
    * @returns {EscrowStatistics} Escrow statistics data.
    *
    *
@@ -122,18 +126,26 @@ export class StatisticsClient {
    * ```
    */
   async getEscrowStatistics(
-    params: IStatisticsParams = {}
+    filter: IStatisticsFilter = {}
   ): Promise<EscrowStatistics> {
     try {
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.ASC;
+
       const { escrowStatistics } = await gqlFetch<{
         escrowStatistics: EscrowStatisticsData;
       }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
-        from: params.from ? params.from.getTime() / 1000 : undefined,
-        to: params.to ? params.to.getTime() / 1000 : undefined,
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
+        from: filter.from ? filter.from.getTime() / 1000 : undefined,
+        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
       });
 
       return {
@@ -159,10 +171,12 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * interface IStatisticsFilter {
    *   from?: Date;
    *   to?: Date;
-   *   limit?: number;
+   *   first?: number; // (Optional) Number of transactions per page. Default is 10.
+   *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+   *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
    * }
    * ```
    *
@@ -178,7 +192,7 @@ export class StatisticsClient {
    * ```
    *
    *
-   * @param {IStatisticsParams} params Statistics params with duration data
+   * @param {IStatisticsFilter} filter Statistics params with duration data
    * @returns {WorkerStatistics} Worker statistics data.
    *
    *
@@ -197,14 +211,22 @@ export class StatisticsClient {
    * ```
    */
   async getWorkerStatistics(
-    params: IStatisticsParams = {}
+    filter: IStatisticsFilter = {}
   ): Promise<WorkerStatistics> {
     try {
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.ASC;
+
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
-        from: params.from ? params.from.getTime() / 1000 : undefined,
-        to: params.to ? params.to.getTime() / 1000 : undefined,
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
+        from: filter.from ? filter.from.getTime() / 1000 : undefined,
+        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
       });
 
       return {
@@ -225,10 +247,12 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * ```ts
-   * interface IStatisticsParams {
+   * interface IStatisticsFilter {
    *   from?: Date;
    *   to?: Date;
-   *   limit?: number;
+   *   first?: number; // (Optional) Number of transactions per page. Default is 10.
+   *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+   *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
    * }
    * ```
    *
@@ -246,7 +270,7 @@ export class StatisticsClient {
    * ```
    *
    *
-   * @param {IStatisticsParams} params Statistics params with duration data
+   * @param {IStatisticsFilter} filter Statistics params with duration data
    * @returns {PaymentStatistics} Payment statistics data.
    *
    *
@@ -286,14 +310,22 @@ export class StatisticsClient {
    * ```
    */
   async getPaymentStatistics(
-    params: IStatisticsParams = {}
+    filter: IStatisticsFilter = {}
   ): Promise<PaymentStatistics> {
     try {
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.ASC;
+
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
-        from: params.from ? params.from.getTime() / 1000 : undefined,
-        to: params.to ? params.to.getTime() / 1000 : undefined,
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
+        from: filter.from ? filter.from.getTime() / 1000 : undefined,
+        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
       });
 
       return {
@@ -317,39 +349,14 @@ export class StatisticsClient {
    * This function returns the statistical data of HMToken.
    *
    *
-   * **Input parameters**
-   *
-   * ```ts
-   * interface IStatisticsParams {
-   *   from?: Date;
-   *   to?: Date;
-   *   limit?: number;
-   * }
-   * ```
-   *
-   * ```ts
-   * type HMTHolder = {
-   *   address: string;
-   *   balance: BigNumber;
-   * }
-   *
-   * type DailyHMTData = {
-   *   timestamp: Date;
-   *   totalTransactionAmount: BigNumber;
-   *   totalTransactionCount: number;
-   * };
-   *
    * type HMTStatistics = {
    *   totalTransferAmount: BigNumber;
    *   totalTransferCount: BigNumber;
    *   totalHolders: number;
-   *   holders: HMTHolder[];
-   *   dailyHMTData: DailyHMTData[];
    * };
    * ```
    *
    *
-   * @param {IStatisticsParams} params Statistics params with duration data
    * @returns {HMTStatistics} HMToken statistics data.
    *
    *
@@ -365,53 +372,14 @@ export class StatisticsClient {
    * console.log('HMT statistics:', {
    *   ...hmtStatistics,
    *   totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
-   *   holders: hmtStatistics.holders.map((h) => ({
-   *     ...h,
-   *     balance: h.balance.toString(),
-   *   })),
-   *   dailyHMTData: hmtStatistics.dailyHMTData.map((d) => ({
-   *     ...d,
-   *     totalTransactionAmount: d.totalTransactionAmount.toString(),
-   *   })),
-   * });
-   *
-   * const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
-   *   from: new Date(2023, 4, 8),
-   *   to: new Date(2023, 5, 8),
-   * });
-   *
-   * console.log('HMT statistics from 5/8 - 6/8:', {
-   *   ...hmtStatisticsRange,
-   *   totalTransferAmount: hmtStatisticsRange.totalTransferAmount.toString(),
-   *   holders: hmtStatisticsRange.holders.map((h) => ({
-   *     ...h,
-   *     balance: h.balance.toString(),
-   *   })),
-   *   dailyHMTData: hmtStatisticsRange.dailyHMTData.map((d) => ({
-   *     ...d,
-   *     totalTransactionAmount: d.totalTransactionAmount.toString(),
-   *   })),
    * });
    * ```
    */
-  async getHMTStatistics(
-    params: IStatisticsParams = {}
-  ): Promise<HMTStatistics> {
+  async getHMTStatistics(): Promise<HMTStatistics> {
     try {
       const { hmtokenStatistics } = await gqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
       }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
-
-      const { holders } = await gqlFetch<{
-        holders: HMTHolderData[];
-      }>(this.subgraphUrl, GET_HOLDERS_QUERY());
-
-      const { eventDayDatas } = await gqlFetch<{
-        eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
-        from: params.from ? params.from.getTime() / 1000 : undefined,
-        to: params.to ? params.to.getTime() / 1000 : undefined,
-      });
 
       return {
         totalTransferAmount: ethers.toBigInt(
@@ -419,19 +387,6 @@ export class StatisticsClient {
         ),
         totalTransferCount: Number(hmtokenStatistics.totalTransferEventCount),
         totalHolders: +hmtokenStatistics.holders,
-        holders: holders.map((holder) => ({
-          address: holder.address,
-          balance: ethers.toBigInt(holder.balance),
-        })),
-        dailyHMTData: eventDayDatas.map((eventDayData) => ({
-          timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalTransactionAmount: ethers.toBigInt(
-            eventDayData.dailyHMTTransferAmount
-          ),
-          totalTransactionCount: +eventDayData.dailyHMTTransferCount,
-          dailyUniqueSenders: +eventDayData.dailyUniqueSenders,
-          dailyUniqueReceivers: +eventDayData.dailyUniqueReceivers,
-        })),
       };
     } catch (e: any) {
       return throwError(e);
@@ -481,6 +436,89 @@ export class StatisticsClient {
       return holders.map((holder) => ({
         address: holder.address,
         balance: ethers.toBigInt(holder.balance),
+      }));
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * This function returns the statistical data of HMToken day by day.
+   *
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * interface IStatisticsFilter {
+   *   from?: Date;
+   *   to?: Date;
+   *   first?: number; // (Optional) Number of transactions per page. Default is 10.
+   *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+   *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
+   * }
+   * ```
+   *
+   * ```ts
+   * type DailyHMTData = {
+   *   timestamp: Date;
+   *   totalTransactionAmount: bigint;
+   *   totalTransactionCount: number;
+   *   dailyUniqueSenders: number;
+   *   dailyUniqueReceivers: number;
+   * }
+   * ```
+   *
+   *
+   * @param {IStatisticsFilter} filter Statistics params with duration data
+   * @returns {DailyHMTData[]} Daily HMToken statistics data.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   *
+   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+   *
+   * const dailyHMTStats = await statisticsClient.getHMTStatistics();
+   *
+   * console.log('Daily HMT statistics:', dailyHMTStats);
+   *
+   * const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
+   *   from: new Date(2023, 4, 8),
+   *   to: new Date(2023, 5, 8),
+   * });
+   *
+   * console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
+   * ```
+   */
+  async getHMTDailyData(
+    filter: IStatisticsFilter = {}
+  ): Promise<DailyHMTData[]> {
+    try {
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.ASC;
+
+      const { eventDayDatas } = await gqlFetch<{
+        eventDayDatas: EventDayData[];
+      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
+        from: filter.from ? filter.from.getTime() / 1000 : undefined,
+        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
+      });
+
+      return eventDayDatas.map((eventDayData) => ({
+        timestamp: new Date(+eventDayData.timestamp * 1000),
+        totalTransactionAmount: ethers.toBigInt(
+          eventDayData.dailyHMTTransferAmount
+        ),
+        totalTransactionCount: +eventDayData.dailyHMTTransferCount,
+        dailyUniqueSenders: +eventDayData.dailyUniqueSenders,
+        dailyUniqueReceivers: +eventDayData.dailyUniqueReceivers,
       }));
     } catch (e: any) {
       return throwError(e);

@@ -31,7 +31,8 @@
   },
   "resolutions": {
     "braces": "^3.0.3",
-    "tar": "^6.2.1"
+    "tar": "^6.2.1",
+    "fast-xml-parser": "4.4.1"
   },
   "author": {
     "name": "HUMAN Protocol"

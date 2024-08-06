@@ -25,7 +25,7 @@ export function handleLaunched(event: Launched): void {
   statusEventEntity.save();
 
   // Create Escrow entity
-  const entity = new Escrow(event.params.escrow.toHex());
+  const entity = new Escrow(event.params.escrow);
 
   entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;
@@ -64,7 +64,7 @@ export function handleLaunched(event: Launched): void {
 export function handleLaunchedV2(event: LaunchedV2): void {
   createTransaction(event, 'createEscrow');
   // Create Escrow entity
-  const entity = new Escrow(event.params.escrow.toHex());
+  const entity = new Escrow(event.params.escrow);
 
   entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;

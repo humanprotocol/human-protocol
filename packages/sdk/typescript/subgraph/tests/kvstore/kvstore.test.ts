@@ -8,6 +8,8 @@ import {
 } from 'matchstick-as/assembly';
 
 import { handleDataSaved } from '../../src/mapping/KVStore';
+import { toEventId } from '../../src/mapping/utils/event';
+import { toBytes } from '../../src/mapping/utils/string';
 import { createDataSavedEvent } from './fixtures';
 
 describe('KVStore', () => {
@@ -32,12 +34,8 @@ describe('KVStore', () => {
     handleDataSaved(data1);
     handleDataSaved(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(
@@ -62,7 +60,7 @@ describe('KVStore', () => {
       'KVStoreSetEvent',
       id1,
       'leaderAddress',
-      data1.params.sender.toHexString()
+      data1.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id1, 'key', 'role');
     assert.fieldEquals('KVStoreSetEvent', id1, 'value', 'Operator');
@@ -90,7 +88,7 @@ describe('KVStore', () => {
       'KVStoreSetEvent',
       id2,
       'leaderAddress',
-      data2.params.sender.toHexString()
+      data2.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id2, 'key', 'role');
     assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Validator');
@@ -182,13 +180,13 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'Leader',
-      data1.params.sender.toHexString(),
+      data1.params.sender.toHex(),
       'role',
       'Operator'
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.sender.toHexString(),
+      data2.params.sender.toHex(),
       'role',
       'Validator'
     );
@@ -211,18 +209,8 @@ describe('KVStore', () => {
     handleDataSaved(data1);
     handleDataSaved(data2);
 
-    assert.fieldEquals(
-      'Leader',
-      data1.params.sender.toHexString(),
-      'fee',
-      '10'
-    );
-    assert.fieldEquals(
-      'Leader',
-      data2.params.sender.toHexString(),
-      'fee',
-      '11'
-    );
+    assert.fieldEquals('Leader', data1.params.sender.toHex(), 'fee', '10');
+    assert.fieldEquals('Leader', data2.params.sender.toHex(), 'fee', '11');
   });
 
   test("Should properly update leader's public key", () => {
@@ -254,7 +242,7 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'Leader',
-      data1.params.sender.toHexString(),
+      data1.params.sender.toHex(),
       'publicKey',
       `-----BEGIN PUBLIC KEY-----
       MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCRxdc9o3XUliS8peqMEwIt8+nE
@@ -265,7 +253,7 @@ describe('KVStore', () => {
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.sender.toHexString(),
+      data2.params.sender.toHex(),
       'publicKey',
       `-----BEGIN PUBLIC KEY-----
       MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzcUeZlurLuQuDzc4ZhJMiDete
@@ -295,38 +283,38 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'Leader',
-      data1.params.sender.toHexString(),
+      data1.params.sender.toHex(),
       'webhookUrl',
       'https://operator.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data1.params.sender.toHexString()}-webhook_url`,
+      data1.params.sender.concat(toBytes('webhook_url')).toHex(),
       'key',
       'webhook_url'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data1.params.sender.toHexString()}-webhook_url`,
+      data1.params.sender.concat(toBytes('webhook_url')).toHex(),
       'url',
       'https://operator.example.com'
     );
 
     assert.fieldEquals(
       'Leader',
-      data2.params.sender.toHexString(),
+      data2.params.sender.toHex(),
       'webhookUrl',
       'https://validator.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data2.params.sender.toHexString()}-webhook_url`,
+      data2.params.sender.concat(toBytes('webhook_url')).toHex(),
       'key',
       'webhook_url'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data2.params.sender.toHexString()}-webhook_url`,
+      data2.params.sender.concat(toBytes('webhook_url')).toHex(),
       'url',
       'https://validator.example.com'
     );
@@ -351,38 +339,38 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'Leader',
-      data1.params.sender.toHexString(),
+      data1.params.sender.toHex(),
       'url',
       'https://operator.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data1.params.sender.toHexString()}-url`,
+      data1.params.sender.concat(toBytes('url')).toHex(),
       'key',
       'url'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data1.params.sender.toHexString()}-url`,
+      data1.params.sender.concat(toBytes('url')).toHex(),
       'url',
       'https://operator.example.com'
     );
 
     assert.fieldEquals(
       'Leader',
-      data2.params.sender.toHexString(),
+      data2.params.sender.toHex(),
       'url',
       'https://validator.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data2.params.sender.toHexString()}-url`,
+      data2.params.sender.concat(toBytes('url')).toHex(),
       'key',
       'url'
     );
     assert.fieldEquals(
       'LeaderURL',
-      `${data2.params.sender.toHexString()}-url`,
+      data2.params.sender.concat(toBytes('url')).toHex(),
       'url',
       'https://validator.example.com'
     );
@@ -413,21 +401,21 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'Leader',
-      data1.params.sender.toHexString(),
+      data1.params.sender.toHex(),
       'role',
       'Reputation Oracle'
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.sender.toHexString(),
+      data2.params.sender.toHex(),
       'role',
       'Job Launcher'
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.sender.toHexString(),
+      data2.params.sender.toHex(),
       'reputationNetwork',
-      data1.params.sender.toHexString()
+      data1.params.sender.toHex()
     );
   });
 
@@ -448,13 +436,13 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'KVStore',
-      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'key',
       'role'
     );
     assert.fieldEquals(
       'KVStore',
-      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'value',
       'Reputation Oracle'
     );
@@ -463,13 +451,13 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'KVStore',
-      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'key',
       'role'
     );
     assert.fieldEquals(
       'KVStore',
-      `${data1.params.sender.toHexString()}-${data1.params.key}`,
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'value',
       'Job Launcher'
     );

@@ -13,21 +13,21 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async findById(id: number): Promise<UserEntity | null> {
     return this.findOne({
       where: { id },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
   async findOneByEmail(email: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { email },
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
   async findOneByAddress(address: string): Promise<UserEntity | null> {
     return this.findOne({
-      where: { evmAddress: address },
-      relations: { kyc: true, siteKey: true },
+      where: { evmAddress: address.toLowerCase() },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
@@ -49,7 +49,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
 
     return this.find({
       where: whereConditions,
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 
@@ -59,7 +59,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
     status?: UserStatus,
   ): Promise<UserEntity[]> {
     const whereConditions = addresses.map((address) => {
-      const condition: any = { evmAddress: address };
+      const condition: any = { evmAddress: address.toLowerCase() };
       if (role) {
         condition.role = role;
       }
@@ -71,7 +71,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
 
     return this.find({
       where: whereConditions,
-      relations: { kyc: true, siteKey: true },
+      relations: { kyc: true, siteKeys: true },
     });
   }
 }

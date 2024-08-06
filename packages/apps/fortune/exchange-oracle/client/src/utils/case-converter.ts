@@ -6,12 +6,12 @@ export class CaseConverter {
       return Object.keys(obj).reduce(
         (acc: Record<string, any>, key: string) => {
           const camelCaseKey = key.replace(/_([a-z])/g, (g) =>
-            g[1].toUpperCase(),
+            g[1].toUpperCase()
           );
           acc[camelCaseKey] = CaseConverter.transformToCamelCase(obj[key]);
           return acc;
         },
-        {},
+        {}
       );
     } else {
       return obj;
@@ -28,7 +28,7 @@ export class CaseConverter {
           acc[snakeCaseKey] = CaseConverter.transformToSnakeCase(obj[key]);
           return acc;
         },
-        {},
+        {}
       );
     } else {
       return obj;

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
@@ -27,9 +27,19 @@ import { PasswordResetModule } from './modules/password-reset/password-reset.mod
 import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
 import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
 import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
+import { HCaptchaModule } from './modules/h-captcha/h-captcha.module';
+import { HCaptchaLabelingModule } from './integrations/h-captcha-labeling/h-captcha-labeling.module';
+import { HCaptchaController } from './modules/h-captcha/h-captcha.controller';
 import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
 import Joi from 'joi';
 import { ChainId } from '@human-protocol/sdk';
+import { RegisterAddressController } from './modules/register-address/register-address.controller';
+import { RegisterAddressModule } from './modules/register-address/register-address.module';
+import { InterceptorModule } from './common/interceptors/interceptor.module';
+import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
+import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
+import { EnvironmentConfigService } from './common/config/environment-config.service';
+import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
 
 @Module({
   imports: [
@@ -44,6 +54,9 @@ import { ChainId } from '@human-protocol/sdk';
         REDIS_PORT: Joi.number().required(),
         REDIS_HOST: Joi.string().required(),
         RPC_URL: Joi.string().required(),
+        HCAPTCHA_LABELING_STATS_API_URL: Joi.string().required(),
+        HCAPTCHA_LABELING_VERIFY_API_URL: Joi.string().required(),
+        HCAPTCHA_LABELING_API_KEY: Joi.string().required(),
         CHAIN_IDS_ENABLED: Joi.string()
           .custom((value) => {
             const chainIds = value.split(',');
@@ -57,6 +70,7 @@ import { ChainId } from '@human-protocol/sdk';
             return value;
           })
           .required(),
+        ALLOWED_HOST: Joi.string().required(),
       }),
     }),
     AutomapperModule.forRoot({
@@ -79,7 +93,12 @@ import { ChainId } from '@human-protocol/sdk';
     DisableOperatorModule,
     KycProcedureModule,
     PrepareSignatureModule,
+    HCaptchaModule,
+    HCaptchaLabelingModule,
     EscrowUtilsModule,
+    RegisterAddressModule,
+    InterceptorModule,
+    TokenRefreshModule,
   ],
   controllers: [
     AppController,
@@ -89,7 +108,15 @@ import { ChainId } from '@human-protocol/sdk';
     OracleDiscoveryController,
     JobAssignmentController,
     StatisticsController,
+    HCaptchaController,
+    RegisterAddressController,
+    TokenRefreshController,
   ],
   exports: [HttpModule],
+  providers: [EnvironmentConfigService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ForbidUnauthorizedHostMiddleware).forRoutes('*');
+  }
+}

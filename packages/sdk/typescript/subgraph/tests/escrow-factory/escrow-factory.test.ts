@@ -7,9 +7,10 @@ import {
   afterAll,
 } from 'matchstick-as/assembly';
 
-import { createLaunchedEvent } from './fixtures';
 import { STATISTICS_ENTITY_ID } from '../../src/mapping/Escrow';
 import { handleLaunched } from '../../src/mapping/EscrowFactory';
+import { toEventId } from '../../src/mapping/utils/event';
+import { createLaunchedEvent } from './fixtures';
 
 const factoryAddressString = '0x92a2eef7ff696bcef98957a0189872680600a958';
 const factoryAddress = Address.fromString(factoryAddressString);
@@ -121,7 +122,7 @@ describe('EscrowFactory', () => {
     // Stats Entity
     assert.fieldEquals(
       'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'totalEscrowCount',
       '2'
     );
@@ -135,9 +136,7 @@ describe('EscrowFactory', () => {
     );
 
     // EscrowStatusEvent
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
 
     assert.fieldEquals(
       'EscrowStatusEvent',

@@ -201,3 +201,43 @@ class TransactionFilter:
         self.first = min(first, 1000)
         self.skip = skip
         self.order_direction = order_direction
+
+
+class StatisticsFilter:
+    """
+    A class used to filter statistics requests.
+    """
+
+    def __init__(
+        self,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.ASC,
+    ):
+        """
+        Initializes a StatisticsFilter instance.
+
+        :param date_from: Created from date
+        :param date_to: Created to date
+        :param first: Number of items per page
+        :param skip: Page number to retrieve
+        :param order_direction: Order of results, "asc" or "desc"
+        """
+
+        if date_from and date_to and date_from > date_to:
+            raise FilterError(
+                f"Invalid dates: {date_from} must be earlier than {date_to}"
+            )
+
+        if order_direction.value not in set(
+            order_direction.value for order_direction in OrderDirection
+        ):
+            raise FilterError(f"Invalid order: {order_direction}")
+
+        self.date_from = date_from
+        self.date_to = date_to
+        self.first = min(first, 1000)
+        self.skip = skip
+        self.order_direction = order_direction
