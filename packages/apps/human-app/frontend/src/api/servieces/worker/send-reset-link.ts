@@ -17,7 +17,7 @@ export const sendResetLinkEmailDtoSchema = z.object({
 export type SendResetLinkEmail = z.infer<typeof sendResetLinkEmailDtoSchema>;
 
 export const sendResetLinkHcaptchaDtoSchema = z.object({
-  h_captcha_token: z.string(),
+  h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
 });
 
 export type SendResetLinkHcaptcha = z.infer<
