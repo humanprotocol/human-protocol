@@ -140,7 +140,7 @@ export function handlePending(event: Pending): void {
   if (escrowEntity) {
     if (escrowEntity.reputationOracle) {
       const reputationOracleLeader = createOrLoadLeader(
-        escrowEntity.reputationOracle as Address
+        Address.fromBytes(escrowEntity.reputationOracle!)
       );
       reputationOracleLeader.amountJobsProcessed =
         reputationOracleLeader.amountJobsProcessed.plus(ONE_BI);
@@ -149,7 +149,7 @@ export function handlePending(event: Pending): void {
 
     if (escrowEntity.recordingOracle) {
       const recordingOracleLeader = createOrLoadLeader(
-        escrowEntity.recordingOracle as Address
+        Address.fromBytes(escrowEntity.recordingOracle!)
       );
       recordingOracleLeader.amountJobsProcessed =
         recordingOracleLeader.amountJobsProcessed.plus(ONE_BI);
@@ -158,7 +158,7 @@ export function handlePending(event: Pending): void {
 
     if (escrowEntity.exchangeOracle) {
       const exchangeOracleLeader = createOrLoadLeader(
-        escrowEntity.exchangeOracle as Address
+        Address.fromBytes(escrowEntity.exchangeOracle!)
       );
       exchangeOracleLeader.amountJobsProcessed =
         exchangeOracleLeader.amountJobsProcessed.plus(ONE_BI);
