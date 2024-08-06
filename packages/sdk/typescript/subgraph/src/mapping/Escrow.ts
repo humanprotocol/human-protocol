@@ -6,7 +6,6 @@ import {
   IntermediateStorage,
   Pending,
 } from '../../generated/templates/Escrow/Escrow';
-import { LegacyEscrow as LegacyEscrowContract } from '../../generated/templates/Escrow/LegacyEscrow';
 import {
   BulkPayoutEvent,
   Escrow,
@@ -22,6 +21,7 @@ import { toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
+import { createOrLoadLeader } from './Staking';
 
 export const STATISTICS_ENTITY_ID = toBytes('escrow-statistics-id');
 
@@ -135,6 +135,36 @@ export function handlePending(event: Pending): void {
     statusEventEntity.launcher = escrowEntity.launcher;
   }
   statusEventEntity.save();
+
+  // Increase amount of jobs processed by leader
+  if (escrowEntity) {
+    if (escrowEntity.reputationOracle) {
+      const reputationOracleLeader = createOrLoadLeader(
+        escrowEntity.reputationOracle as Address
+      );
+      reputationOracleLeader.amountJobsProcessed =
+        reputationOracleLeader.amountJobsProcessed.plus(ONE_BI);
+      reputationOracleLeader.save();
+    }
+
+    if (escrowEntity.recordingOracle) {
+      const recordingOracleLeader = createOrLoadLeader(
+        escrowEntity.recordingOracle as Address
+      );
+      recordingOracleLeader.amountJobsProcessed =
+        recordingOracleLeader.amountJobsProcessed.plus(ONE_BI);
+      recordingOracleLeader.save();
+    }
+
+    if (escrowEntity.exchangeOracle) {
+      const exchangeOracleLeader = createOrLoadLeader(
+        escrowEntity.exchangeOracle as Address
+      );
+      exchangeOracleLeader.amountJobsProcessed =
+        exchangeOracleLeader.amountJobsProcessed.plus(ONE_BI);
+      exchangeOracleLeader.save();
+    }
+  }
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
