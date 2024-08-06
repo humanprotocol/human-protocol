@@ -4,6 +4,7 @@ import { lastValueFrom } from 'rxjs';
 import * as dayjs from 'dayjs';
 import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import {
@@ -12,6 +13,8 @@ import {
 } from '../../common/config/redis-config.service';
 import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
+import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
+import { MainnetsId } from './utils/constants';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -23,6 +26,17 @@ export class StatsService implements OnModuleInit {
     private readonly httpService: HttpService,
   ) {}
 
+  async onModuleInit() {
+    const isHistoricalDataFetched = await this.isHistoricalDataFetched();
+    const isHmtGeneralStatsFetched = await this.isHmtGeneralStatsFetched();
+    if (!isHistoricalDataFetched) {
+      await this.fetchHistoricalHcaptchaStats();
+    }
+    if (!isHmtGeneralStatsFetched) {
+      await this.fetchHmtGeneralStats();
+    }
+  }
+
   private async isHistoricalDataFetched(): Promise<boolean> {
     const data = await this.cacheManager.get<HcaptchaDailyStats>(
       `${HCAPTCHA_PREFIX}${HCAPTCHA_STATS_START_DATE}`,
@@ -30,13 +44,8 @@ export class StatsService implements OnModuleInit {
     return !!data;
   }
 
-  async onModuleInit() {
+  private async fetchHistoricalHcaptchaStats(): Promise<void> {
     this.logger.log('Fetching historical hCaptcha stats.');
-    const isFetched = await this.isHistoricalDataFetched();
-    if (isFetched) {
-      return;
-    }
-
     let startDate = dayjs(HCAPTCHA_STATS_START_DATE);
     const currentDate = dayjs();
     const dates = [];
@@ -82,6 +91,13 @@ export class StatsService implements OnModuleInit {
         }
       }
     }
+  }
+
+  private async isHmtGeneralStatsFetched(): Promise<boolean> {
+    const data = await this.cacheManager.get<HmtGeneralStatsDto>(
+      this.redisConfigService.hmtGeneralStatsCacheKey,
+    );
+    return !!data;
   }
 
   @Cron('*/15 * * * *')
@@ -137,6 +153,26 @@ export class StatsService implements OnModuleInit {
 
     await this.cacheManager.set(
       `${HCAPTCHA_PREFIX}${currentMonth}`,
+      aggregatedStats,
+    );
+  }
+
+  @Cron('*/15 * * * *')
+  async fetchHmtGeneralStats() {
+    this.logger.log('Fetching HMT general stats across multiple networks.');
+    const aggregatedStats: HmtGeneralStatsDto = {
+      totalHolders: 0,
+      totalTransactions: 0,
+    };
+    for (const network of Object.values(MainnetsId)) {
+      const statisticsClient = new StatisticsClient(NETWORKS[network]);
+      const generalStats = await statisticsClient.getHMTStatistics();
+      aggregatedStats.totalHolders += generalStats.totalHolders;
+      aggregatedStats.totalTransactions += generalStats.totalTransferCount;
+    }
+
+    await this.cacheManager.set(
+      this.redisConfigService.hmtGeneralStatsCacheKey,
       aggregatedStats,
     );
   }
@@ -224,5 +260,13 @@ export class StatsService implements OnModuleInit {
     });
 
     return aggregatedStats;
+  }
+
+  public async hmtGeneralStats(): Promise<HmtGeneralStatsDto> {
+    const data = await this.cacheManager.get<HmtGeneralStatsDto>(
+      this.redisConfigService.hmtGeneralStatsCacheKey,
+    );
+
+    return data;
   }
 }
