@@ -20,7 +20,6 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       REDIS_HOST: redis
       CACHE_TTL_ORACLE_DISCOVERY: ${CACHE_TTL_ORACLE_DISCOVERY}
-      CACHE_TTL_JOB_DISCOVERY: ${CACHE_TTL_JOB_DISCOVERY}
       RPC_URL: ${RPC_URL}
     depends_on:
       - redis

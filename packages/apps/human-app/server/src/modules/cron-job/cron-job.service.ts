@@ -24,7 +24,7 @@ export class CronJobService {
     private workerService: WorkerService,
   ) {}
 
-  @Cron('*/1 * * * *')
+  @Cron('*/2 * * * *')
   async updateJobsListCron() {
     console.log('CRON START');
 
@@ -81,7 +81,6 @@ export class CronJobService {
     await this.cacheManager.set(
       `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
       allResults,
-      this.configService.cacheTtlJobDiscovery,
     );
   }
 

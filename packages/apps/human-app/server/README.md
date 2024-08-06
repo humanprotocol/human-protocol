@@ -80,7 +80,6 @@ Models are used to define the shape and responsibilities of the data:
     * `REDIS_HOST` - URL of the Redis host
     * `REDIS_PORT` - port on which Redis is hosted
     * `CACHE_TTL_ORACLE_DISCOVERY` - time of persisting found oracles
-    * `CACHE_TTL_JOB_DISCOVERY` - time of persisting found available jobs
     * `CACHE_TTL_ORACLE_STATS` - time of persisting statistics of the given oracle
     * `CACHE_TTL_DAILY_HMT_SPENT` - time of persisting statistics of global daily HMT expenditures
     * `CACHE_TTL_USER_STATS` - time of persisting statistics of the given user
