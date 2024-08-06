@@ -218,7 +218,7 @@ type KVStoreSetEvent @entity(immutable: true) {
   value: String!
 }
 
-type KVStore @entity(immutable: true) {
+type KVStore @entity {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
