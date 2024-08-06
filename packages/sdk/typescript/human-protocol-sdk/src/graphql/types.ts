@@ -138,8 +138,6 @@ export type HMTStatistics = {
   totalTransferAmount: bigint;
   totalTransferCount: number;
   totalHolders: number;
-  holders: HMTHolder[];
-  dailyHMTData: DailyHMTData[];
 };
 
 export type IMDataEntity = {

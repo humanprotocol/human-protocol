@@ -96,15 +96,13 @@ export interface IKeyPair {
   revocationCertificate?: string;
 }
 
-export interface IStatisticsParams {
+export interface IStatisticsFilter extends IPagination {
   from?: Date;
   to?: Date;
-  limit?: number;
 }
 
-export interface IHMTHoldersParams {
+export interface IHMTHoldersParams extends IPagination {
   address?: string;
-  orderDirection?: 'asc' | 'desc';
 }
 
 export interface IPayoutFilter {
