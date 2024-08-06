@@ -14,7 +14,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import { useAuth } from '@/auth/use-auth';
 
 export const resendEmailVerificationHcaptchaSchema = z.object({
-  h_captcha_token: z.string(),
+  h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
 });
 
 export type ResendEmailVerificationHcaptchaDto = z.infer<
