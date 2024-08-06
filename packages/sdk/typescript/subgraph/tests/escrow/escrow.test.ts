@@ -223,6 +223,28 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
+
+    // Leader
+    assert.fieldEquals(
+      'Leader',
+      reputationOracleAddressString,
+      'amountJobsProcessed',
+      '1'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      recordingOracleAddressString,
+      'amountJobsProcessed',
+      '1'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      exchangeOracleAddressString,
+      'amountJobsProcessed',
+      '1'
+    );
   });
 
   test('Should properly handle Pending event for new contract, without exchange oracle', () => {
@@ -354,16 +376,16 @@ describe('Escrow', () => {
     // Leader
     assert.fieldEquals(
       'Leader',
-      reputationOracleAddress.toString(),
+      reputationOracleAddressString,
       'amountJobsProcessed',
-      '1'
+      '2'
     );
 
     assert.fieldEquals(
       'Leader',
-      recordingOracleAddress.toString(),
+      recordingOracleAddressString,
       'amountJobsProcessed',
-      '1'
+      '2'
     );
   });
 
@@ -500,23 +522,23 @@ describe('Escrow', () => {
     // Leader
     assert.fieldEquals(
       'Leader',
-      reputationOracleAddress.toString(),
+      reputationOracleAddressString,
       'amountJobsProcessed',
-      '1'
+      '3'
     );
 
     assert.fieldEquals(
       'Leader',
-      recordingOracleAddress.toString(),
+      recordingOracleAddressString,
       'amountJobsProcessed',
-      '1'
+      '3'
     );
 
     assert.fieldEquals(
       'Leader',
-      exchangeOracleAddress.toString(),
+      exchangeOracleAddressString,
       'amountJobsProcessed',
-      '1'
+      '3'
     );
   });
 
