@@ -350,6 +350,28 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
+
+    // Leader
+    assert.fieldEquals(
+      'Leader',
+      reputationOracleAddressString,
+      'amountJobsProcessed',
+      '1'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      recordingOracleAddressString,
+      'amountJobsProcessed',
+      '1'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      exchangeOracleAddressString,
+      'amountJobsProcessed',
+      '1'
+    );
   });
 
   test('Should properly handle Pending event for new contract, with exchange oracle', () => {
