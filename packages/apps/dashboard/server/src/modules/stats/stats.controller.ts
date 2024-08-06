@@ -8,6 +8,7 @@ import {
   HcaptchaStats,
 } from './dto/hcaptcha.dto';
 import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
+import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 
 @ApiTags('Stats')
 @Controller('/stats')
@@ -76,5 +77,22 @@ export class StatsController {
     const result: HcaptchaStats =
       await this.statsService.hCaptchaGeneralStats();
     return result;
+  }
+
+  @Get('/general')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get HMT general stats',
+    description: 'Endpoint to return HMT general stats.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'General stats retrieved successfully',
+    type: HmtGeneralStatsDto,
+  })
+  public async hmtGeneral(): Promise<HmtGeneralStatsDto> {
+    const results: HmtGeneralStatsDto =
+      await this.statsService.hmtGeneralStats();
+    return results;
   }
 }
