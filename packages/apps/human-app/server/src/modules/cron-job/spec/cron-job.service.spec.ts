@@ -41,7 +41,6 @@ describe('CronJobService', () => {
     configServiceMock = {
       email: 'human-app@hmt.ai',
       password: 'Test1234*',
-      cacheTtlJobDiscovery: 3600,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -128,7 +127,6 @@ describe('CronJobService', () => {
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
         initialResponse.results,
-        configServiceMock.cacheTtlJobDiscovery,
       );
     });
   });
