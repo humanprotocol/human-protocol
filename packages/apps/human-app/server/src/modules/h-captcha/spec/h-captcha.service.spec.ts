@@ -34,6 +34,7 @@ import {
   hCaptchaVerifyGatewayMock,
 } from '../../../integrations/h-captcha-labeling/spec/h-captcha-statistics-gateway.mock';
 import { HCaptchaVerifyGateway } from '../../../integrations/h-captcha-labeling/h-captcha-verify.gateway';
+import { DAILY_HMT_SPENT_CACHE_KEY } from '../../../common/constants/cache';
 
 describe('HCaptchaService', () => {
   let service: HCaptchaService;
@@ -193,7 +194,7 @@ describe('HCaptchaService', () => {
       const result = await service.getDailyHmtSpent(command);
       expect(result).toEqual(dailyHmtSpentResponseFixture);
       expect(cacheManager.set).toHaveBeenCalledWith(
-        service.dailyHmtSpentCacheKey,
+        DAILY_HMT_SPENT_CACHE_KEY,
         dailyHmtSpentResponseFixture,
         { ttl: configService.cacheTtlDailyHmtSpent },
       );

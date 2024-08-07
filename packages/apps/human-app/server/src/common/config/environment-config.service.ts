@@ -65,7 +65,6 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS,
     );
   }
-
   get cacheTtlOracleDiscovery(): number {
     return this.configService.get<number>(
       'CACHE_TTL_ORACLE_DISCOVERY',
@@ -114,5 +113,11 @@ export class EnvironmentConfigService {
   }
   get isCacheToRestart(): boolean {
     return this.configService.get('IS_CACHE_TO_RESTART') === 'true';
+  }
+  get email(): string {
+    return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
+  }
+  get password(): string {
+    return this.configService.getOrThrow<string>('HUMAN_APP_PASSWORD');
   }
 }

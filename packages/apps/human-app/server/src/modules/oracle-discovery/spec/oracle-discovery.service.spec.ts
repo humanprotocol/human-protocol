@@ -1,15 +1,12 @@
+import { OperatorUtils } from '@human-protocol/sdk';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
-import { OracleDiscoveryService } from '../oracle-discovery.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { OperatorUtils } from '@human-protocol/sdk';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-} from '../model/oracle-discovery.model';
-import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
-import { ConfigModule } from '@nestjs/config';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
+import { OracleDiscoveryService } from '../oracle-discovery.service';
 import {
   emptyCommandFixture,
   filledCommandFixture,
@@ -17,11 +14,16 @@ import {
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
 
-jest.mock('@human-protocol/sdk', () => ({
-  OperatorUtils: {
-    getReputationNetworkOperators: jest.fn(),
-  },
-}));
+jest.mock('@human-protocol/sdk', () => {
+  const actualSdk = jest.requireActual('@human-protocol/sdk');
+  return {
+    ...actualSdk,
+    OperatorUtils: {
+      getReputationNetworkOperators: jest.fn(),
+    },
+  };
+});
+
 describe('OracleDiscoveryService', () => {
   const EXCHANGE_ORACLE = 'Exchange Oracle';
   const EXPECTED_CHAIN_IDS = ['4200'];
@@ -29,7 +31,6 @@ describe('OracleDiscoveryService', () => {
   const TTL = '300';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
-  let configService: EnvironmentConfigService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -59,9 +60,6 @@ describe('OracleDiscoveryService', () => {
         },
       ],
     }).compile();
-    configService = module.get<EnvironmentConfigService>(
-      EnvironmentConfigService,
-    );
     oracleDiscoveryService = module.get<OracleDiscoveryService>(
       OracleDiscoveryService,
     );
@@ -79,7 +77,7 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress1', role: 'validator' },
       { address: 'mockAddress2', role: 'validator' },
     ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(mockData);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
@@ -94,7 +92,7 @@ describe('OracleDiscoveryService', () => {
       { address: 'mockAddress2', role: 'validator' },
     ];
 
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockResolvedValue(mockData);
@@ -115,6 +113,7 @@ describe('OracleDiscoveryService', () => {
       );
     });
   });
+
   it('should filter responses if selectedJobTypes not empty, or url not set', async () => {
     const mockData: OracleDiscoveryResponse[] =
       generateOracleDiscoveryResponseBody();
