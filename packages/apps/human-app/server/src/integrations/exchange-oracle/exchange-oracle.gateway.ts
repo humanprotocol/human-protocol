@@ -51,7 +51,7 @@ export class ExchangeOracleGateway {
       return response.data as T;
     } catch (e) {
       console.error(
-        `Error, while executing exchange oracle API call with options: ${JSON.stringify(options)}, error details: ${e}`,
+        `Error, while executing exchange oracle API call, error details: ${e}`,
       );
       throw e;
     }
