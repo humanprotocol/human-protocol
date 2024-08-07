@@ -6,6 +6,7 @@ import { HmtPriceDto } from './dto/hmt-price.dto';
 import {
   HcaptchaDailyStatsResponseDto,
   HcaptchaStats,
+  HmtDailyStatsResponseDto,
 } from './dto/hcaptcha.dto';
 import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
@@ -94,5 +95,36 @@ export class StatsController {
     const results: HmtGeneralStatsDto =
       await this.statsService.hmtGeneralStats();
     return results;
+  }
+
+  @Get('/hmt/daily')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get HMT stats',
+    description: 'Endpoint to return HMT stats.',
+  })
+  @ApiQuery({
+    name: 'from',
+    type: String,
+    description: 'Start date in the format YYYY-MM-DD',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'to',
+    type: String,
+    description: 'End date in the format YYYY-MM-DD',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Stats retrieved successfully',
+    type: HmtDailyStatsResponseDto,
+  })
+  public async hmtDailyStats(
+    @Query('from', DateValidationPipe) from: string,
+    @Query('to', DateValidationPipe) to: string,
+  ): Promise<HmtDailyStatsResponseDto> {
+    const results = await this.statsService.hmtDailyStats(from, to);
+    return { from, to, results };
   }
 }
