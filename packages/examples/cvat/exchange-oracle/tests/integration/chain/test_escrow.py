@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.encryption import EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 
 from src.chain.escrow import (
@@ -17,6 +18,10 @@ from tests.utils.constants import (
     ESCROW_ADDRESS,
     FACTORY_ADDRESS,
     JOB_LAUNCHER_ADDRESS,
+    PGP_PASSPHRASE,
+    PGP_PRIVATE_KEY1,
+    PGP_PUBLIC_KEY1,
+    PGP_PUBLIC_KEY2,
     RECORDING_ORACLE_ADDRESS,
     TOKEN_ADDRESS,
 )
@@ -87,6 +92,31 @@ class ServiceIntegrationTest(unittest.TestCase):
             manifest = get_escrow_manifest(chain_id, escrow_address)
             self.assertIsInstance(manifest, dict)
             self.assertIsNotNone(manifest)
+
+    def test_get_encrypted_escrow_manifest(self):
+        with (
+            patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function,
+            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+            patch("src.core.config.Config.encryption_config.pgp_private_key", PGP_PRIVATE_KEY1),
+            patch("src.core.config.Config.encryption_config.pgp_passphrase", PGP_PASSPHRASE),
+            patch(
+                "src.core.config.Config.encryption_config.pgp_public_key_url", "http:///some-url"
+            ),
+        ):
+            mock_function.return_value = self.escrow_data
+            original_manifest_content = {
+                "title": "test",
+            }
+            original_manifest = json.dumps(original_manifest_content)
+
+            encrypted_manifest = EncryptionUtils.encrypt(
+                original_manifest, public_keys=[PGP_PUBLIC_KEY1, PGP_PUBLIC_KEY2]
+            )
+            self.assertNotEqual(encrypted_manifest, original_manifest)
+
+            mock_download.return_value = encrypted_manifest.encode()
+            downloaded_manifest_content = get_escrow_manifest(chain_id, escrow_address)
+            self.assertDictEqual(downloaded_manifest_content, original_manifest_content)
 
     def test_get_escrow_manifest_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:

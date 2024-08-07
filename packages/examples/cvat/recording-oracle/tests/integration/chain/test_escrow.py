@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import pytest
+from human_protocol_sdk.encryption import EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClientError
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
@@ -20,6 +21,10 @@ from tests.utils.constants import (
     DEFAULT_GAS_PAYER_PRIV,
     DEFAULT_HASH,
     DEFAULT_MANIFEST_URL,
+    PGP_PASSPHRASE,
+    PGP_PRIVATE_KEY1,
+    PGP_PUBLIC_KEY1,
+    PGP_PUBLIC_KEY2,
     REPUTATION_ORACLE_ADDRESS,
 )
 from tests.utils.setup_escrow import (
@@ -96,6 +101,33 @@ class ServiceIntegrationTest(unittest.TestCase):
             manifest = get_escrow_manifest(self.network_config.chain_id, self.escrow_address)
             self.assertIsInstance(manifest, dict)
             self.assertIsNotNone(manifest)
+
+    def test_get_encrypted_escrow_manifest(self):
+        with (
+            patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function,
+            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+            patch("src.core.config.Config.encryption_config.pgp_private_key", PGP_PRIVATE_KEY1),
+            patch("src.core.config.Config.encryption_config.pgp_passphrase", PGP_PASSPHRASE),
+            patch(
+                "src.core.config.Config.encryption_config.pgp_public_key_url", "http:///some-url"
+            ),
+        ):
+            mock_function.return_value = self.escrow()
+            original_manifest_content = {
+                "title": "test",
+            }
+            original_manifest = json.dumps(original_manifest_content)
+
+            encrypted_manifest = EncryptionUtils.encrypt(
+                original_manifest, public_keys=[PGP_PUBLIC_KEY1, PGP_PUBLIC_KEY2]
+            )
+            self.assertNotEqual(encrypted_manifest, original_manifest)
+
+            mock_download.return_value = encrypted_manifest.encode()
+            downloaded_manifest_content = get_escrow_manifest(
+                self.network_config.chain_id, self.escrow_address
+            )
+            self.assertDictEqual(downloaded_manifest_content, original_manifest_content)
 
     def test_store_results(self):
         escrow_address = create_escrow(self.w3)
