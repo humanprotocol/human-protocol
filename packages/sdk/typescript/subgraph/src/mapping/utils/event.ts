@@ -1,16 +1,16 @@
-import { ethereum } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { ONE_DAY } from './number';
 
-export function toEventId(event: ethereum.Event): string {
-  return `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+export function toEventId(event: ethereum.Event): Bytes {
+  return event.transaction.hash
+    .concatI32(event.logIndex.toI32())
+    .concatI32(event.block.timestamp.toI32());
 }
 
-export function toEventDayId(event: ethereum.Event): string {
+export function toEventDayId(event: ethereum.Event): BigInt {
   const timestamp = event.block.timestamp.toI32();
   const dayID = timestamp / ONE_DAY;
   const dayStartTimestamp = dayID * ONE_DAY;
 
-  return dayStartTimestamp.toString();
+  return BigInt.fromI32(dayStartTimestamp);
 }

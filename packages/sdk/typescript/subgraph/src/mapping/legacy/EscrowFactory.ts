@@ -11,7 +11,7 @@ export function handleLaunched(event: Launched): void {
   createTransaction(event, 'createEscrow');
 
   // Create Escrow entity
-  const entity = new Escrow(event.params.escrow.toHex());
+  const entity = new Escrow(event.params.escrow);
 
   entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;
@@ -43,6 +43,6 @@ export function handleLaunched(event: Launched): void {
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsLaunched = leader.amountJobsLaunched.plus(ONE_BI);
+  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
   leader.save();
 }

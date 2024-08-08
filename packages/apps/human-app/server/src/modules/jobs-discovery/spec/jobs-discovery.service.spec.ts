@@ -3,13 +3,23 @@ import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exc
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   jobsDiscoveryParamsCommandFixture,
-  responseFixture,
+  responseItemsFixture,
+  responseItemFixture1,
+  responseItemFixture3,
 } from './jobs-discovery.fixtures';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('JobsDiscoveryService', () => {
   let service: JobsDiscoveryService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
+  let cacheManagerMock: any;
+
   beforeEach(async () => {
+    cacheManagerMock = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+
     exchangeOracleGatewayMock = {
       fetchJobs: jest.fn(),
     };
@@ -18,6 +28,7 @@ describe('JobsDiscoveryService', () => {
       providers: [
         JobsDiscoveryService,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
+        { provide: CACHE_MANAGER, useValue: cacheManagerMock },
       ],
     }).compile();
 
@@ -30,13 +41,18 @@ describe('JobsDiscoveryService', () => {
     it('should get oracle url and call api for jobs fetch', async () => {
       const command = jobsDiscoveryParamsCommandFixture;
 
-      (exchangeOracleGatewayMock.fetchJobs as jest.Mock).mockResolvedValue(
-        responseFixture,
-      );
+      jest
+        .spyOn(service as any, 'getCachedJobs')
+        .mockReturnValue(responseItemsFixture);
 
       const result = await service.processJobsDiscovery(command);
-      expect(exchangeOracleGatewayMock.fetchJobs).toHaveBeenCalledWith(command);
-      expect(result).toEqual(responseFixture);
+      expect(service.getCachedJobs).toHaveBeenCalledWith(
+        jobsDiscoveryParamsCommandFixture.oracleAddress,
+      );
+      expect(result.results).toEqual([
+        responseItemFixture3,
+        responseItemFixture1,
+      ]);
     });
   });
 });

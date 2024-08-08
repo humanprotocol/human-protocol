@@ -33,6 +33,7 @@ export const userStatsResponseFixture: UserStatisticsResponse = {
   assignments_completed: ASSIGNMENTS_COMPLETED_USER,
   assignments_rejected: ASSIGNMENTS_REJECTED_USER,
   assignments_expired: ASSIGNMENTS_EXPIRED_USER,
+  last_updated: new Date().toISOString(),
 };
 
 export const oracleStatsResponseFixture: OracleStatisticsResponse = {

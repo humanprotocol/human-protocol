@@ -1,0 +1,10 @@
+export const MainnetsId = {
+  MAINNET: 1,
+  SEPOLIA: 11155111,
+  BSC_MAINNET: 56,
+  POLYGON: 137,
+  MOONBEAM: 1284,
+  AVALANCHE: 43114,
+  CELO: 42220,
+  XLAYER: 196,
+};

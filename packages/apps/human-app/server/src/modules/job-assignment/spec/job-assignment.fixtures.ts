@@ -36,6 +36,7 @@ const EXPIRES_AT = 'test_date_3';
 const JOB_ASSIGNMENT_ID = '1';
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
+export const USER_ADDRESS = 'test_address';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
 export const workerRegisterUrl = EXCHANGE_ORACLE_URL;
@@ -134,5 +135,9 @@ export const jobsFetchResponseItemFixture: JobsFetchResponseItem = {
 };
 
 export const jobsFetchResponseFixture: JobsFetchResponse = {
-  data: [jobsFetchResponseItemFixture],
+  page: 0,
+  page_size: 10,
+  total_pages: 1,
+  total_results: 1,
+  results: [jobsFetchResponseItemFixture],
 };

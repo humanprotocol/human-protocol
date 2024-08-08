@@ -35,7 +35,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "amountSlashed": "25",
                                 "reputation": "25",
                                 "reward": "25",
-                                "amountJobsLaunched": "25",
+                                "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
                                 "publicKey": None,
@@ -67,7 +67,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].amount_slashed, 25)
             self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
-            self.assertEqual(leaders[0].amount_jobs_launched, 25)
+            self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
             self.assertEqual(leaders[0].fee, None)
             self.assertEqual(leaders[0].public_key, None)
@@ -97,7 +97,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "amountSlashed": "25",
                                 "reputation": "25",
                                 "reward": "25",
-                                "amountJobsLaunched": "25",
+                                "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
                                 "publicKey": None,
@@ -129,7 +129,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].amount_slashed, 25)
             self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
-            self.assertEqual(leaders[0].amount_jobs_launched, 25)
+            self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
             self.assertEqual(leaders[0].fee, None)
             self.assertEqual(leaders[0].public_key, None)
@@ -160,7 +160,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "amountSlashed": "25",
                                 "reputation": "25",
                                 "reward": "25",
-                                "amountJobsLaunched": "25",
+                                "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
                                 "publicKey": None,
@@ -192,7 +192,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].amount_slashed, 25)
             self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
-            self.assertEqual(leaders[0].amount_jobs_launched, 25)
+            self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
             self.assertEqual(leaders[0].fee, None)
             self.assertEqual(leaders[0].public_key, None)
@@ -249,7 +249,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "amountSlashed": "25",
                             "reputation": "25",
                             "reward": "25",
-                            "amountJobsLaunched": "25",
+                            "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
                             "publicKey": None,
@@ -280,7 +280,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.amount_slashed, 25)
             self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
-            self.assertEqual(leader.amount_jobs_launched, 25)
+            self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
             self.assertEqual(leader.fee, None)
             self.assertEqual(leader.public_key, None)
@@ -310,7 +310,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "amountSlashed": "25",
                             "reputation": "25",
                             "reward": "25",
-                            "amountJobsLaunched": "25",
+                            "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
                             "publicKey": None,
@@ -341,7 +341,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.amount_slashed, 25)
             self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
-            self.assertEqual(leader.amount_jobs_launched, 25)
+            self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
             self.assertEqual(leader.fee, None)
             self.assertEqual(leader.public_key, None)
@@ -371,7 +371,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "amountSlashed": "25",
                             "reputation": "25",
                             "reward": "25",
-                            "amountJobsLaunched": "25",
+                            "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
                             "publicKey": None,
@@ -402,7 +402,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.amount_slashed, 25)
             self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
-            self.assertEqual(leader.amount_jobs_launched, 25)
+            self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
             self.assertEqual(leader.fee, None)
             self.assertEqual(leader.public_key, None)

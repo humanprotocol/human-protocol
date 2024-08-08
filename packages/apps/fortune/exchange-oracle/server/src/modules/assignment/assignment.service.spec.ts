@@ -252,6 +252,7 @@ describe('AssignmentService', () => {
         status: AssignmentStatus.ACTIVE,
         createdAt: new Date(),
         expiresAt: new Date(),
+        updatedAt: new Date(),
         rewardAmount: 20,
       },
     ];
@@ -301,6 +302,7 @@ describe('AssignmentService', () => {
         url: expect.any(String),
         createdAt: expect.any(String),
         expiresAt: expect.any(String),
+        updatedAt: expect.any(String),
       } as AssignmentDto);
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,

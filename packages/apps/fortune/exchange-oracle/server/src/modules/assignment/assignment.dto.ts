@@ -122,6 +122,7 @@ export class AssignmentDto {
     rewardToken: string,
     createdAt: string,
     expiresAt: string,
+    updatedAt: string,
   ) {
     this.assignmentId = assignmentId;
     this.escrowAddress = escrowAddress;
@@ -132,6 +133,7 @@ export class AssignmentDto {
     this.rewardToken = rewardToken;
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
+    this.updatedAt = updatedAt;
   }
 }
 
