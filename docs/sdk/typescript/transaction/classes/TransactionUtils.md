@@ -50,7 +50,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 #### Defined in
 
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/c8d0d93f404277061825561b9b0d022138811f19/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/391dbc65a5a80b872a2659d325a004d23c3d51bc/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 ***
 
@@ -121,4 +121,4 @@ const transactions = await TransactionUtils.getTransactions(filter);
 
 #### Defined in
 
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/c8d0d93f404277061825561b9b0d022138811f19/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/391dbc65a5a80b872a2659d325a004d23c3d51bc/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
