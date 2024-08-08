@@ -20,7 +20,8 @@ import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 import { MainnetsId } from './utils/constants';
 import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
-import { CachedDailyHMTData } from './stats.interface';
+import { CachedDailyHMTData, MonthlyHMTData } from './stats.interface';
+import { HmtDailyStatsData } from './dto/hmt.dto';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -216,13 +217,13 @@ export class StatsService implements OnModuleInit {
         let skip = 0;
         let fetchedRecords: DailyHMTData[] = [];
         const dailyData: DailyHMTData[] = [];
-        const monthlyData: Record<string, DailyHMTData> = {};
+        const monthlyData: Record<string, MonthlyHMTData> = {};
 
         do {
           fetchedRecords = await statisticsClient.getHMTDailyData({
             from,
             to,
-            first: 1000,
+            first: 1000, // Max subgraph query size
             skip,
           });
 
@@ -236,7 +237,7 @@ export class StatsService implements OnModuleInit {
             record.timestamp.toISOString().split('T')[0]
           }`;
           const dailyCachedData: CachedDailyHMTData = {
-            timestamp: record.timestamp.toISOString(),
+            date: record.timestamp.toISOString(),
             totalTransactionAmount: record.totalTransactionAmount.toString(),
             totalTransactionCount: record.totalTransactionCount,
             dailyUniqueSenders: record.dailyUniqueSenders,
@@ -248,8 +249,7 @@ export class StatsService implements OnModuleInit {
           const month = dayjs(record.timestamp).format('YYYY-MM');
           if (!monthlyData[month]) {
             monthlyData[month] = {
-              timestamp: new Date(`${month}-01`),
-              totalTransactionAmount: BigInt(0),
+              totalTransactionAmount: '0',
               totalTransactionCount: 0,
               dailyUniqueSenders: 0,
               dailyUniqueReceivers: 0,
@@ -268,8 +268,7 @@ export class StatsService implements OnModuleInit {
         // Store monthly aggregated data
         for (const [month, stats] of Object.entries(monthlyData)) {
           const monthlyCacheKey = `${HMT_PREFIX}${month}`;
-          const monthlyCachedData: CachedDailyHMTData = {
-            timestamp: stats.timestamp.toISOString(),
+          const monthlyCachedData: MonthlyHMTData = {
             totalTransactionAmount: stats.totalTransactionAmount.toString(),
             totalTransactionCount: stats.totalTransactionCount,
             dailyUniqueSenders: stats.dailyUniqueSenders,
@@ -377,7 +376,7 @@ export class StatsService implements OnModuleInit {
   public async hmtDailyStats(
     from: string,
     to: string,
-  ): Promise<DailyHMTData[]> {
+  ): Promise<HmtDailyStatsData[]> {
     let startDate = dayjs(from);
     const endDate = dayjs(to);
     const dates = [];
@@ -389,16 +388,16 @@ export class StatsService implements OnModuleInit {
 
     const stats = await Promise.all(
       dates.map(async (date) => {
-        const stat: DailyHMTData = await this.cacheManager.get(
+        const stat: HmtDailyStatsData = await this.cacheManager.get(
           `${HMT_PREFIX}${date}`,
         );
         if (stat) {
-          stat.timestamp = date;
+          stat.date = date;
         }
         return stat;
       }),
     );
 
-    return stats.filter((stat): stat is DailyHMTData => stat !== null);
+    return stats.filter((stat): stat is HmtDailyStatsData => stat !== null);
   }
 }

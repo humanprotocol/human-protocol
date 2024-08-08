@@ -6,8 +6,8 @@ import { HmtPriceDto } from './dto/hmt-price.dto';
 import {
   HcaptchaDailyStatsResponseDto,
   HcaptchaStats,
-  HmtDailyStatsResponseDto,
 } from './dto/hcaptcha.dto';
+import { HmtDailyStatsResponseDto } from './dto/hmt.dto';
 import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 

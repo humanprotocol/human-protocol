@@ -1,6 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 
 export class HcaptchaStats {
   @ApiProperty({ example: 1000 })
@@ -24,17 +23,6 @@ export class HcaptchaDailyStatsResponseDto {
   @ApiProperty({ example: '2024-05-01' })
   public to: string;
 
-  @ApiProperty()
+  @ApiProperty({ isArray: true, type: HcaptchaDailyStats })
   public results: HcaptchaDailyStats[];
-}
-
-export class HmtDailyStatsResponseDto {
-  @ApiProperty({ example: '2024-05-01' })
-  public from: string;
-
-  @ApiProperty({ example: '2024-05-01' })
-  public to: string;
-
-  @ApiProperty()
-  public results: DailyHMTData[];
 }
