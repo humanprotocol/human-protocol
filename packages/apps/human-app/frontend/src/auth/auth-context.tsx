@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { useModalStore } from '@/components/ui/modal/modal.store';
 
 const extendableUserDataSchema = z.object({
   site_key: z.string().optional().nullable(),
@@ -46,6 +47,7 @@ export const AuthContext = createContext<
 >(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { openModal } = useModalStore();
   const [authState, setAuthState] = useState<{
     user: UserData | null;
     status: AuthStatus;
@@ -86,21 +88,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const validUserData = userDataSchema.parse(userDataWithSavedData);
       setAuthState({ user: validUserData, status: 'success' });
+      browserAuthProvider.signOutSubscription = () => {
+        openModal({
+          modalState: 'EXPIRATION_MODAL',
+          displayCloseButton: false,
+          maxWidth: 'sm',
+        });
+      };
     } catch (e) {
       // eslint-disable-next-line no-console -- ...
       console.error('Invalid Jwt payload:', e);
-      browserAuthProvider.signOut();
+      browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
       setAuthState({ user: null, status: 'error' });
     }
   };
 
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
-    browserAuthProvider.signIn(singIsSuccess, 'web2');
+    browserAuthProvider.signIn(singIsSuccess, 'web2', () => {
+      openModal({
+        modalState: 'EXPIRATION_MODAL',
+        displayCloseButton: false,
+        maxWidth: 'sm',
+      });
+    });
     handleSignIn();
   };
 
   const signOut = () => {
-    browserAuthProvider.signOut();
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
     setAuthState({ user: null, status: 'idle' });
   };
 

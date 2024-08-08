@@ -53,8 +53,10 @@ export function Router() {
                   open={open}
                   setDrawerOpen={setDrawerOpen}
                   signOut={() => {
-                    browserAuthProvider.signOut(() => {
-                      window.location.reload();
+                    browserAuthProvider.signOut({
+                      callback: () => {
+                        window.location.reload();
+                      },
                     });
                   }}
                   topMenuItems={workerDrawerTopMenuItems(
@@ -90,8 +92,10 @@ export function Router() {
                   open={open}
                   setDrawerOpen={setDrawerOpen}
                   signOut={() => {
-                    browserAuthProvider.signOut(() => {
-                      window.location.reload();
+                    browserAuthProvider.signOut({
+                      callback: () => {
+                        window.location.reload();
+                      },
                     });
                   }}
                 />

@@ -35,9 +35,7 @@ export function useGetAccessTokenMutation() {
           signInWeb3(refetchAccessTokenSuccess);
         }
       } catch (error) {
-        browserAuthProvider.signOut(() => {
-          window.location.reload();
-        });
+        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
       }
     },
     onSuccess: async () => {

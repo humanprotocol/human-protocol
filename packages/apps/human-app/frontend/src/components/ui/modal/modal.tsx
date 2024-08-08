@@ -6,14 +6,19 @@ interface ModalProps extends Omit<DialogMuiProps, 'open'> {
   isOpen: boolean;
 }
 
-export function Modal({ children, isOpen, ...rest }: ModalProps) {
+export function Modal({
+  children,
+  isOpen,
+  maxWidth = 'xl',
+  ...rest
+}: ModalProps) {
   return (
     <DialogMui
       {...rest}
       aria-describedby="modal-modal-description"
       aria-labelledby="modal-modal-title"
       fullWidth
-      maxWidth="xl"
+      maxWidth={maxWidth}
       open={isOpen}
     >
       <DialogContent>{children}</DialogContent>

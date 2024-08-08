@@ -9,34 +9,34 @@ const userDataKey = btoa('extendable_user_data');
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
-  signIn(
-    { access_token, refresh_token },
-    authType,
-    signOutSubscriptions?: (() => void)[]
-  ) {
+  signIn({ access_token, refresh_token }, authType, signOutSubscription) {
     browserAuthProvider.isAuthenticated = true;
     browserAuthProvider.authType = authType;
     localStorage.setItem(accessTokenKey, btoa(access_token));
     localStorage.setItem(refreshTokenKey, btoa(refresh_token));
     localStorage.setItem(authTypeKey, btoa(authType));
-    signOutSubscriptions?.forEach((fn) => {
-      this.signOutSubscriptions.push(fn);
-    });
+
+    if (signOutSubscription) {
+      this.signOutSubscription = signOutSubscription;
+    }
   },
-  signOut(callback) {
+  signOut(args) {
     browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
     localStorage.removeItem(authTypeKey);
     localStorage.removeItem(userDataKey);
-    if (callback) {
-      callback();
+
+    if (args?.callback) {
+      args.callback();
     }
-    this.signOutSubscriptions.forEach((fn) => {
-      fn();
-    });
+
+    if (args?.triggerSignOutSubscriptions && this.signOutSubscription) {
+      this.signOutSubscription();
+      this.signOutSubscription = undefined;
+    }
   },
-  signOutSubscriptions: [],
+  signOutSubscription: undefined,
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
     if (!result) {

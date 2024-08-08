@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { useModalStore } from '@/components/ui/modal/modal.store';
 
 const web3userDataSchema = z.object({
   userId: z.number(),
@@ -36,6 +37,7 @@ export const Web3AuthContext = createContext<
 >(null);
 
 export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
+  const { openModal } = useModalStore();
   const [web3AuthState, setWeb3AuthState] = useState<{
     user: Web3UserData | null;
     status: AuthStatus;
@@ -71,16 +73,29 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = jwtDecode(accessToken);
       const validUserData = web3userDataSchema.parse(userData);
       setWeb3AuthState({ user: validUserData, status: 'success' });
+      browserAuthProvider.signOutSubscription = () => {
+        openModal({
+          modalState: 'EXPIRATION_MODAL',
+          displayCloseButton: false,
+          maxWidth: 'sm',
+        });
+      };
     } catch (e) {
       // eslint-disable-next-line no-console -- ...
       console.error('Invalid Jwt payload:', e);
-      browserAuthProvider.signOut();
+      browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
       setWeb3AuthState({ user: null, status: 'error' });
     }
   };
-  // TODO correct interface of singIsSuccess from auth/web3/signing
+
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
-    browserAuthProvider.signIn(singIsSuccess, 'web3');
+    browserAuthProvider.signIn(singIsSuccess, 'web3', () => {
+      openModal({
+        modalState: 'EXPIRATION_MODAL',
+        displayCloseButton: false,
+        maxWidth: 'sm',
+      });
+    });
     handleSignIn();
   };
 
@@ -90,6 +105,7 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     handleSignIn();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
