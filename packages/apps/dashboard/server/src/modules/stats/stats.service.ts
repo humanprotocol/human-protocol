@@ -20,7 +20,7 @@ import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 import { MainnetsId } from './utils/constants';
 import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
-import { CachedDailyHMTData, MonthlyHMTData } from './stats.interface';
+import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
 
 @Injectable()
@@ -217,7 +217,7 @@ export class StatsService implements OnModuleInit {
         let skip = 0;
         let fetchedRecords: DailyHMTData[] = [];
         const dailyData: DailyHMTData[] = [];
-        const monthlyData: Record<string, MonthlyHMTData> = {};
+        const monthlyData: Record<string, CachedHMTData> = {};
 
         do {
           fetchedRecords = await statisticsClient.getHMTDailyData({
@@ -236,8 +236,7 @@ export class StatsService implements OnModuleInit {
           const dailyCacheKey = `${HMT_PREFIX}${
             record.timestamp.toISOString().split('T')[0]
           }`;
-          const dailyCachedData: CachedDailyHMTData = {
-            date: record.timestamp.toISOString(),
+          const dailyCachedData: CachedHMTData = {
             totalTransactionAmount: record.totalTransactionAmount.toString(),
             totalTransactionCount: record.totalTransactionCount,
             dailyUniqueSenders: record.dailyUniqueSenders,
@@ -268,7 +267,7 @@ export class StatsService implements OnModuleInit {
         // Store monthly aggregated data
         for (const [month, stats] of Object.entries(monthlyData)) {
           const monthlyCacheKey = `${HMT_PREFIX}${month}`;
-          const monthlyCachedData: MonthlyHMTData = {
+          const monthlyCachedData: CachedHMTData = {
             totalTransactionAmount: stats.totalTransactionAmount.toString(),
             totalTransactionCount: stats.totalTransactionCount,
             dailyUniqueSenders: stats.dailyUniqueSenders,

@@ -1,12 +1,4 @@
-export interface CachedDailyHMTData {
-  date: string;
-  totalTransactionAmount: string;
-  totalTransactionCount: number;
-  dailyUniqueSenders: number;
-  dailyUniqueReceivers: number;
-}
-
-export interface MonthlyHMTData {
+export interface CachedHMTData {
   totalTransactionAmount: string;
   totalTransactionCount: number;
   dailyUniqueSenders: number;
