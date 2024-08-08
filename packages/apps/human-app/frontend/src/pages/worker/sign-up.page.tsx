@@ -55,11 +55,24 @@ export function SignUpWorkerPage() {
     error: signUpWorkerError,
     isError: isSignUpWorkerError,
     isPending: isSignUpWorkerPending,
+    reset: signUpWorkerMutationReset,
   } = useSignUpMutation();
 
   const handleWorkerSignUp = (data: SignUpDto) => {
     signUpWorkerMutate(omit(data, ['confirmPassword']));
   };
+
+  useEffect(() => {
+    const subscription = methods.watch((_, { type }) => {
+      if (type !== undefined) {
+        signUpWorkerMutationReset();
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PageCard

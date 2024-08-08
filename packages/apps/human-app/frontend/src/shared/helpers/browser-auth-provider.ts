@@ -9,12 +9,19 @@ const userDataKey = btoa('extendable_user_data');
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
-  signIn({ access_token, refresh_token }, authType) {
+  signIn(
+    { access_token, refresh_token },
+    authType,
+    signOutSubscriptions?: (() => void)[]
+  ) {
     browserAuthProvider.isAuthenticated = true;
     browserAuthProvider.authType = authType;
     localStorage.setItem(accessTokenKey, btoa(access_token));
     localStorage.setItem(refreshTokenKey, btoa(refresh_token));
     localStorage.setItem(authTypeKey, btoa(authType));
+    signOutSubscriptions?.forEach((fn) => {
+      this.signOutSubscriptions.push(fn);
+    });
   },
   signOut(callback) {
     browserAuthProvider.isAuthenticated = false;
@@ -25,7 +32,11 @@ const browserAuthProvider: BrowserAuthProvider = {
     if (callback) {
       callback();
     }
+    this.signOutSubscriptions.forEach((fn) => {
+      fn();
+    });
   },
+  signOutSubscriptions: [],
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
     if (!result) {

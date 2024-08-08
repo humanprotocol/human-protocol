@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ...*/
 import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -21,6 +21,7 @@ import { FormCaptcha } from '@/components/h-captcha';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
+import { MailTo } from '@/components/ui/mail-to';
 
 export function VerifyEmailWorkerPage() {
   const navigate = useNavigate();
@@ -121,13 +122,7 @@ export function VerifyEmailWorkerPage() {
                       variant="body1"
                     />
                   ),
-                  2: (
-                    <Link
-                      rel="noreferrer"
-                      target="_blank"
-                      to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
-                    />
-                  ),
+                  2: <MailTo mail={env.VITE_HUMAN_SUPPORT_EMAIL} />,
                 }}
                 i18nKey="worker.verifyEmail.paragraph4"
               />

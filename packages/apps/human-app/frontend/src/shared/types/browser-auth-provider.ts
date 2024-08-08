@@ -12,6 +12,7 @@ export interface BrowserAuthProvider {
     authType: AuthType
   ) => void;
   signOut: (callback?: () => void) => void;
+  signOutSubscriptions: (() => void)[];
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
   getAuthType: () => string | null;

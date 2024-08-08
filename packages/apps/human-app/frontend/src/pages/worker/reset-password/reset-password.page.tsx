@@ -57,7 +57,7 @@ export function ResetPasswordWorkerPage() {
         ) : undefined
       }
       cancelRouterPathOrCallback={routerPaths.worker.profile}
-      hiddenCancelButton
+      hiddenArrowButton
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>

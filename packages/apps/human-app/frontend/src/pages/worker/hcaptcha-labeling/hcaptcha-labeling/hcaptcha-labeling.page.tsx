@@ -97,7 +97,7 @@ export function HcaptchaLabelingPage() {
             : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
-          padding: isMobile ? 0 : '40px',
+          padding: isMobile ? '20px' : '40px',
           borderRadius: '20px',
         }}
       >

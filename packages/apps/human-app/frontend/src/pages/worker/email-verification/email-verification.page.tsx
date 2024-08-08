@@ -62,6 +62,7 @@ export function EmailVerificationWorker({ token }: { token: string }) {
 
   return (
     <PageCard
+      hiddenArrowButton
       hiddenCancelButton
       title={<SuccessLabel>{t('worker.emailVerification.title')}</SuccessLabel>}
     >
