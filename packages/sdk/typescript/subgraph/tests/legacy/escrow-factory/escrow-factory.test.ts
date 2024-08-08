@@ -130,7 +130,7 @@ describe('EscrowFactory', () => {
     assert.fieldEquals(
       'Leader',
       launcherAddressString,
-      'amountJobsLaunched',
+      'amountJobsProcessed',
       '2'
     );
 

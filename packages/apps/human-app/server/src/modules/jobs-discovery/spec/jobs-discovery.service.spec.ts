@@ -4,6 +4,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   jobsDiscoveryParamsCommandFixture,
   responseItemsFixture,
+  responseItemFixture1,
+  responseItemFixture3,
 } from './jobs-discovery.fixtures';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
@@ -47,7 +49,10 @@ describe('JobsDiscoveryService', () => {
       expect(service.getCachedJobs).toHaveBeenCalledWith(
         jobsDiscoveryParamsCommandFixture.oracleAddress,
       );
-      expect(result.results).toEqual(responseItemsFixture);
+      expect(result.results).toEqual([
+        responseItemFixture3,
+        responseItemFixture1,
+      ]);
     });
   });
 });

@@ -73,7 +73,7 @@ class LeaderData:
         amount_slashed: int,
         reputation: int,
         reward: int,
-        amount_jobs_launched: int,
+        amount_jobs_processed: int,
         role: Optional[str] = None,
         fee: Optional[int] = None,
         public_key: Optional[str] = None,
@@ -95,7 +95,7 @@ class LeaderData:
         :param amount_slashed: Amount slashed
         :param reputation: Reputation
         :param reward: Reward
-        :param amount_jobs_launched: Amount of jobs launched
+        :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
         :param fee: Fee
         :param public_key: Public key
@@ -115,7 +115,7 @@ class LeaderData:
         self.amount_slashed = amount_slashed
         self.reputation = reputation
         self.reward = reward
-        self.amount_jobs_launched = amount_jobs_launched
+        self.amount_jobs_processed = amount_jobs_processed
         self.role = role
         self.fee = fee
         self.public_key = public_key
@@ -222,7 +222,7 @@ class OperatorUtils:
                     amount_slashed=int(leader.get("amountSlashed", 0)),
                     reputation=int(leader.get("reputation", 0)),
                     reward=int(leader.get("reward", 0)),
-                    amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                    amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
                     role=leader.get("role", None),
                     fee=int(leader.get("fee")) if leader.get("fee", None) else None,
                     public_key=leader.get("publicKey", None),
@@ -300,7 +300,7 @@ class OperatorUtils:
             amount_slashed=int(leader.get("amountSlashed", 0)),
             reputation=int(leader.get("reputation", 0)),
             reward=int(leader.get("reward", 0)),
-            amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+            amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
             role=leader.get("role", None),
             fee=int(leader.get("fee")) if leader.get("fee", None) else None,
             public_key=leader.get("publicKey", None),
