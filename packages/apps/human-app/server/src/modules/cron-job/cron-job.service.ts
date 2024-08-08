@@ -13,6 +13,7 @@ import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import { OracleDiscoveryCommand } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
+import { JobDiscoveryFieldName } from '../../common/enums/global-common';
 
 @Injectable()
 export class CronJobService {
@@ -62,7 +63,14 @@ export class CronJobService {
       command.data = new JobsDiscoveryParams();
       command.data.page = 0;
       command.data.pageSize = command.data.pageSize || 10; // Max value for Exchange Oracle
-      const initialResponse = await this.exchangeOracleGateway.fetchJobs(command);
+      command.data.fields = [
+        JobDiscoveryFieldName.CreatedAt,
+        JobDiscoveryFieldName.JobDescription,
+        JobDiscoveryFieldName.RewardAmount,
+        JobDiscoveryFieldName.RewardToken,
+      ];
+      const initialResponse =
+        await this.exchangeOracleGateway.fetchJobs(command);
       allResults = this.mergeJobs(allResults, initialResponse.results);
 
       const totalPages = initialResponse.total_pages;

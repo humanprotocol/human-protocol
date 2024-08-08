@@ -17,13 +17,42 @@ export class JobsDiscoveryService {
     command: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
     const allJobs = await this.getCachedJobs(command.oracleAddress);
+    const filteredJobs = this.applyFilters(allJobs || [], command.data);
+
     return paginateAndSortResults(
-      allJobs || [],
+      filteredJobs,
       command.data.page,
       command.data.pageSize,
       command.data.sortField as keyof JobsDiscoveryResponseItem,
       command.data.sort,
     );
+  }
+
+  private applyFilters(
+    jobs: JobsDiscoveryResponseItem[],
+    filters: JobsDiscoveryParamsCommand['data'],
+  ): JobsDiscoveryResponseItem[] {
+    return jobs.filter((job) => {
+      let matches = true;
+
+      if (filters.escrowAddress) {
+        matches = matches && job.escrow_address === filters.escrowAddress;
+      }
+
+      if (filters.chainId !== undefined && filters.chainId !== null) {
+        matches = matches && job.chain_id === filters.chainId;
+      }
+
+      if (filters.jobType) {
+        matches = matches && job.job_type === filters.jobType;
+      }
+
+      if (filters.status !== undefined && filters.status !== null) {
+        matches = matches && job.status === filters.status;
+      }
+
+      return matches;
+    });
   }
 
   async getCachedJobs(
