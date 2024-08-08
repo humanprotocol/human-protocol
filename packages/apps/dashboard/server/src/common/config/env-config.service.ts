@@ -11,6 +11,7 @@ const DEFAULT_HMT_PRICE_TO = 'usd';
 const DEFAULT_HCAPTCHA_STATS_SOURCE =
   'https://foundation-accounts.hmt.ai/support/summary-stats';
 export const HCAPTCHA_STATS_START_DATE = '2022-07-01';
+export const HMT_STATS_START_DATE = '2021-04-06';
 
 @Injectable()
 export class EnvironmentConfigService {
