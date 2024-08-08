@@ -26,7 +26,7 @@ export interface ILeader {
   amountSlashed: bigint;
   reputation: bigint;
   reward: bigint;
-  amountJobsLaunched: bigint;
+  amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
   publicKey?: string;

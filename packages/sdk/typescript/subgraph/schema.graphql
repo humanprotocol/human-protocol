@@ -40,7 +40,7 @@ type Leader @entity {
   amountSlashed: BigInt!
   reputation: BigInt!
   reward: BigInt!
-  amountJobsLaunched: BigInt!
+  amountJobsProcessed: BigInt!
 
   role: String
   fee: BigInt
