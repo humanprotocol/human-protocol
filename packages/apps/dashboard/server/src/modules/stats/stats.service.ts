@@ -225,7 +225,6 @@ export class StatsService implements OnModuleInit {
             first: 1000,
             skip,
           });
-          console.log(network, from, to, fetchedRecords.length);
 
           dailyData.push(...fetchedRecords);
           skip += 1000;
