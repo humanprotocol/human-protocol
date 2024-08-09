@@ -5,8 +5,8 @@ import { KVStoreClient, KVStoreKeys } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import {
-  KV_STORE_REGISTRATION_NEEDED_CACHE_KEY,
-  KV_STORE_URL_CACHE_KEY,
+  ORACLE_REGISTRATION_NEEDED_CACHE_KEY,
+  ORACLE_URL_CACHE_KEY,
 } from '../../common/constants/cache';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class KvStoreGateway {
   async getExchangeOracleRegistrationNeeded(
     address: string,
   ): Promise<boolean | void> {
-    const key = `${KV_STORE_REGISTRATION_NEEDED_CACHE_KEY}:${address}`;
+    const key = `${ORACLE_REGISTRATION_NEEDED_CACHE_KEY}:${address}`;
     const cachedData: string | undefined = await this.cacheManager.get(key);
     if (cachedData) {
       return cachedData.toLowerCase() === 'true';
@@ -60,7 +60,7 @@ export class KvStoreGateway {
     }
   }
   async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
-    const key = `${KV_STORE_URL_CACHE_KEY}:${address}`;
+    const key = `${ORACLE_URL_CACHE_KEY}:${address}`;
     const cachedData: string | undefined = await this.cacheManager.get(key);
     if (cachedData) {
       return cachedData;

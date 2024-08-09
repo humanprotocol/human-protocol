@@ -6,7 +6,7 @@ import {
   SignupWorkerCommand,
 } from './model/worker-registration.model';
 import { SigninWorkerCommand } from './model/worker-signin.model';
-import { KvStoreGateway } from 'src/integrations/kv-store/kv-store.gateway';
+import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
 
 @Injectable()
 export class WorkerService {

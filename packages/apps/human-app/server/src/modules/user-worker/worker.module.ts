@@ -3,7 +3,7 @@ import { ReputationOracleModule } from '../../integrations/reputation-oracle/rep
 import { WorkerProfile } from './worker.mapper.profile';
 import { Module } from '@nestjs/common';
 import { ExchangeOracleModule } from '../../integrations/exchange-oracle/exchange-oracle.module';
-import { KvStoreModule } from 'src/integrations/kv-store/kv-store.module';
+import { KvStoreModule } from '../../integrations/kv-store/kv-store.module';
 
 @Module({
   imports: [ReputationOracleModule, ExchangeOracleModule, KvStoreModule],

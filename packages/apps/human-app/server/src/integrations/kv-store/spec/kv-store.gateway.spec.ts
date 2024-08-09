@@ -6,8 +6,8 @@ import { ethers } from 'ethers';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import {
-  KV_STORE_REGISTRATION_NEEDED_CACHE_KEY,
-  KV_STORE_URL_CACHE_KEY,
+  ORACLE_REGISTRATION_NEEDED_CACHE_KEY,
+  ORACLE_URL_CACHE_KEY,
 } from '../../../common/constants/cache';
 
 const EXPECTED_URL = 'https://example.com';
@@ -92,7 +92,7 @@ describe('KvStoreGateway', () => {
 
   describe('getExchangeOracleRegistrationNeeded', () => {
     const testAddress = 'testAddress';
-    const cacheKey = `${KV_STORE_REGISTRATION_NEEDED_CACHE_KEY}:${testAddress}`;
+    const cacheKey = `${ORACLE_REGISTRATION_NEEDED_CACHE_KEY}:${testAddress}`;
     it('should get data from kvStoreClient, if not cached', async () => {
       const expectedData = EXPECTED_FLAG;
       mockKVStoreClient.get.mockResolvedValue(expectedData);
@@ -124,7 +124,7 @@ describe('KvStoreGateway', () => {
 
   describe('getExchangeOracleUrlByAddress', () => {
     const testAddress = 'testAddress';
-    const cacheKey = `${KV_STORE_URL_CACHE_KEY}:${testAddress}`;
+    const cacheKey = `${ORACLE_URL_CACHE_KEY}:${testAddress}`;
     it('should get data from kvStoreClient, if not cached', async () => {
       const expectedData = EXPECTED_URL;
       mockKVStoreClient.get.mockResolvedValue(expectedData);
