@@ -34,7 +34,10 @@ import { HttpMethod } from '../../common/enums/http-method';
 import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 import { KvStoreGateway } from '../kv-store/kv-store.gateway';
 import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
-import { RegisterWorkerCommand, RegisterWorkerData } from '../../modules/user-worker/model/worker-registration.model';
+import {
+  RegisterWorkerCommand,
+  RegisterWorkerData,
+} from '../../modules/user-worker/model/worker-registration.model';
 
 @Injectable()
 export class ExchangeOracleGateway {
@@ -172,18 +175,22 @@ export class ExchangeOracleGateway {
     };
     return this.callExternalHttpUtilRequest<JobsDiscoveryResponse>(options);
   }
-  
+
   async registerWorker(command: RegisterWorkerCommand) {
-    const isRegistrationNeeded = await this.kvStoreGateway.getExchangeOracleRegistrationNeeded(command.oracleAddress);
+    const isRegistrationNeeded =
+      await this.kvStoreGateway.getExchangeOracleRegistrationNeeded(
+        command.oracleAddress,
+      );
 
     if (!isRegistrationNeeded) {
-      throw new HttpException(
-        'Invalid request',
-        400,
-      );
+      throw new HttpException('Invalid request', 400);
     }
 
-    const data = this.mapper.map(command, RegisterWorkerCommand, RegisterWorkerData);
+    const data = this.mapper.map(
+      command,
+      RegisterWorkerCommand,
+      RegisterWorkerData,
+    );
 
     const options: AxiosRequestConfig = {
       method: HttpMethod.POST,

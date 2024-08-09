@@ -182,7 +182,9 @@ export class ReputationOracleGateway {
       ReputationOracleEndpoints.WORKER_REGISTRATION,
       data,
     );
-    return this.handleRequestToReputationOracle<RegisterWorkerResponse>(options);
+    return this.handleRequestToReputationOracle<RegisterWorkerResponse>(
+      options,
+    );
   }
 
   async sendEmailVerification(command: EmailVerificationCommand) {

@@ -21,7 +21,10 @@ import {
   JobsDiscoveryParams,
   JobsDiscoveryParamsData,
 } from '../../modules/jobs-discovery/model/jobs-discovery.model';
-import { RegisterWorkerCommand, RegisterWorkerData } from '../../modules/user-worker/model/worker-registration.model';
+import {
+  RegisterWorkerCommand,
+  RegisterWorkerData,
+} from '../../modules/user-worker/model/worker-registration.model';
 
 @Injectable()
 export class ExchangeOracleProfile extends AutomapperProfile {

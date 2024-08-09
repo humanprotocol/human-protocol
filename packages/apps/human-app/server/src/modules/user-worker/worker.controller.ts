@@ -16,9 +16,12 @@ import {
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { WorkerService } from './worker.service';
-import { SigninWorkerCommand, SigninWorkerDto, SigninWorkerResponse } from './model/worker-signin.model';
+import {
+  SigninWorkerCommand,
+  SigninWorkerDto,
+  SigninWorkerResponse,
+} from './model/worker-signin.model';
 import { Authorization } from '../../common/config/params-decorators';
-
 
 @Controller()
 export class WorkerController {
@@ -65,7 +68,7 @@ export class WorkerController {
     const registerWorkerCommand = this.mapper.map(
       registerWorkerDto,
       RegisterWorkerDto,
-      RegisterWorkerCommand
+      RegisterWorkerCommand,
     );
     registerWorkerCommand.token = token;
 

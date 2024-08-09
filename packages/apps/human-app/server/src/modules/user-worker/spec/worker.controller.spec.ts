@@ -72,7 +72,7 @@ describe('WorkerController', () => {
       expect(workerService.signinWorker).toHaveBeenCalledWith(expectedCommand);
     });
   });
-  
+
   describe('register', () => {
     it('should service a user register method with proper fields set', async () => {
       const dto: RegisterWorkerDto = {
@@ -83,7 +83,9 @@ describe('WorkerController', () => {
         oracleAddress: dto.oracle_address,
         token: workerToken,
       };
-      expect(workerService.registerWorker).toHaveBeenCalledWith(expectedCommand);
+      expect(workerService.registerWorker).toHaveBeenCalledWith(
+        expectedCommand,
+      );
     });
   });
 });

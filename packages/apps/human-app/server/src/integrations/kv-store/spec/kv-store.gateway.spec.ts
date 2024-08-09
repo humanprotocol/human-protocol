@@ -5,7 +5,10 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 import { ethers } from 'ethers';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { KV_STORE_REGISTRATION_NEEDED_CACHE_KEY, KV_STORE_URL_CACHE_KEY } from '../../../common/constants/cache';
+import {
+  KV_STORE_REGISTRATION_NEEDED_CACHE_KEY,
+  KV_STORE_URL_CACHE_KEY,
+} from '../../../common/constants/cache';
 
 const EXPECTED_URL = 'https://example.com';
 const EXPECTED_FLAG = 'true';
@@ -16,7 +19,8 @@ jest.mock('@human-protocol/sdk', () => {
     KVStoreClient: {
       build: jest.fn().mockImplementation(() =>
         Promise.resolve({
-          get: jest.fn()
+          get: jest
+            .fn()
             .mockResolvedValueOnce(EXPECTED_FLAG)
             .mockResolvedValueOnce(EXPECTED_URL),
         }),
@@ -93,7 +97,8 @@ describe('KvStoreGateway', () => {
       const expectedData = EXPECTED_FLAG;
       mockKVStoreClient.get.mockResolvedValue(expectedData);
       cacheManager.get.mockResolvedValue(undefined);
-      const result = await service.getExchangeOracleRegistrationNeeded(testAddress);
+      const result =
+        await service.getExchangeOracleRegistrationNeeded(testAddress);
       expect(service['kvStoreClient'].get).toHaveBeenCalledWith(
         testAddress,
         KVStoreKeys.registrationNeeded,
@@ -108,7 +113,8 @@ describe('KvStoreGateway', () => {
     it('should get data from cache, if available', async () => {
       const expectedData = EXPECTED_FLAG;
       cacheManager.get.mockResolvedValue(expectedData.toString());
-      const result = await service.getExchangeOracleRegistrationNeeded(testAddress);
+      const result =
+        await service.getExchangeOracleRegistrationNeeded(testAddress);
 
       expect(service['kvStoreClient'].get).not.toHaveBeenCalled();
       expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);

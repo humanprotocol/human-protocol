@@ -13,7 +13,11 @@ describe('WorkerService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WorkerService, ReputationOracleGateway, ExchangeOracleGateway],
+      providers: [
+        WorkerService,
+        ReputationOracleGateway,
+        ExchangeOracleGateway,
+      ],
     })
       .overrideProvider(ReputationOracleGateway)
       .useValue(reputationOracleGatewayMock)
@@ -66,12 +70,12 @@ describe('WorkerService', () => {
     it('should call reputation oracle gateway without doing anything else', async () => {
       const command = {
         oracleAddress: '0x34df642',
-        token: 'test-token'
+        token: 'test-token',
       };
       await service.registerWorker(command);
-      expect(reputationOracleGateway.sendWorkerRegistration).toHaveBeenCalledWith(
-        command,
-      );
+      expect(
+        reputationOracleGateway.sendWorkerRegistration,
+      ).toHaveBeenCalledWith(command);
     });
   });
 });

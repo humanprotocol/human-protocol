@@ -11,7 +11,10 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { ReputationOracleProfile } from '../reputation-oracle.mapper.profile';
 import { gatewayConfigServiceMock } from '../../../common/config/spec/gateway-config-service.mock';
-import { RegisterWorkerCommand, SignupWorkerCommand } from '../../../modules/user-worker/model/worker-registration.model';
+import {
+  RegisterWorkerCommand,
+  SignupWorkerCommand,
+} from '../../../modules/user-worker/model/worker-registration.model';
 import { SignupOperatorCommand } from '../../../modules/user-operator/model/operator-registration.model';
 import { SigninWorkerCommand } from '../../../modules/user-worker/model/worker-signin.model';
 import {
@@ -175,11 +178,9 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendWorkerRegistration', () => {
-    const command = new RegisterWorkerCommand(
-      '0x34df642',
-    );
+    const command = new RegisterWorkerCommand('0x34df642');
     const expectedData = {
-      oracle_address: '0x34df642'
+      oracle_address: '0x34df642',
     };
 
     it('should successfully call the reputation oracle worker registration endpoint', async () => {
@@ -189,7 +190,9 @@ describe('ReputationOracleGateway', () => {
 
       httpServiceMock.request.mockReturnValue(of({}));
 
-      await expect(service.sendWorkerRegistration(command)).resolves.not.toThrow();
+      await expect(
+        service.sendWorkerRegistration(command),
+      ).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
 

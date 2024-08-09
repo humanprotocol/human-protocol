@@ -34,13 +34,18 @@ import { ResignJobData } from '../../../modules/job-assignment/model/job-assignm
 import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { AxiosResponse } from 'axios';
 import { RegisterWorkerData } from '../../../modules/user-worker/model/worker-registration.model';
-import { registerWorkerCommandFixture, registerWorkerDataFixture, responseWorkerFixture } from '../../../modules/user-worker/spec/worker.fixtures';
+import {
+  registerWorkerCommandFixture,
+  registerWorkerDataFixture,
+  responseWorkerFixture,
+} from '../../../modules/user-worker/spec/worker.fixtures';
 
 describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
   let httpService: HttpService;
   let escrowGateway: EscrowUtilsGateway;
-  const EXCHANGE_ORACLE_REGISTRATION_NEEDED = 'mocked:exchange_oracle:registration_needed';
+  const EXCHANGE_ORACLE_REGISTRATION_NEEDED =
+    'mocked:exchange_oracle:registration_needed';
   const EXCHANGE_ORACLE_URL = 'mocked:exchange_oracle:url';
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

@@ -1,4 +1,8 @@
-import { RegisterWorkerCommand, RegisterWorkerData, RegisterWorkerResponse } from '../model/worker-registration.model';
+import {
+  RegisterWorkerCommand,
+  RegisterWorkerData,
+  RegisterWorkerResponse,
+} from '../model/worker-registration.model';
 
 const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
 const WALLER_ADDRESS = 'test_address';
