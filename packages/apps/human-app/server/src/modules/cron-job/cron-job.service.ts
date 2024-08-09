@@ -11,7 +11,10 @@ import {
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
-import { OracleDiscoveryCommand } from '../oracle-discovery/model/oracle-discovery.model';
+import {
+  OracleDiscoveryCommand,
+  OracleDiscoveryResponse,
+} from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
 
@@ -26,7 +29,7 @@ export class CronJobService {
     private workerService: WorkerService,
   ) {}
 
-  @Cron('*/2 * * * *')
+  @Cron('*/1 * * * *')
   async updateJobsListCron() {
     console.log('CRON START');
 
@@ -43,22 +46,19 @@ export class CronJobService {
     });
 
     for (const oracle of oracles) {
-      await this.updateJobsListCache(
-        oracle.address,
-        'Bearer ' + response.access_token,
-      );
+      await this.updateJobsListCache(oracle, 'Bearer ' + response.access_token);
     }
 
     console.log('CRON END');
   }
 
-  async updateJobsListCache(oracleAddress: string, token: string) {
+  async updateJobsListCache(oracle: OracleDiscoveryResponse, token: string) {
     try {
       let allResults: JobsDiscoveryResponseItem[] = [];
 
       // Initial fetch to determine the total number of pages
       const command = new JobsDiscoveryParamsCommand();
-      command.oracleAddress = oracleAddress;
+      command.oracleAddress = oracle.address;
       command.token = token;
       command.data = new JobsDiscoveryParams();
       command.data.page = 0;
@@ -87,13 +87,65 @@ export class CronJobService {
         allResults = this.mergeJobs(allResults, response.results);
       }
 
-      command.data.page = 0;
+      await this.resetRetriesCount(oracle);
+
+      // Cache the job results (original behavior)
       await this.cacheManager.set(
-        `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
+        `${JOB_DISCOVERY_CACHE_KEY}:${oracle.address}`,
         allResults,
       );
     } catch (e) {
       this.logger.error(e);
+      await this.handleJobListError(oracle);
+    }
+  }
+
+  private async resetRetriesCount(oracleData: OracleDiscoveryResponse) {
+    oracleData.retriesCount = 0;
+    oracleData.active = true;
+
+    const chainId = oracleData.chainId;
+    const cachedOracles =
+      await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
+
+    if (cachedOracles) {
+      const updatedOracles = cachedOracles.map((oracle) =>
+        oracle.address === oracleData.address ? oracleData : oracle,
+      );
+      await this.cacheManager.set(
+        chainId,
+        updatedOracles,
+        this.configService.cacheTtlOracleDiscovery,
+      );
+    }
+  }
+
+  private async handleJobListError(oracleData: OracleDiscoveryResponse) {
+    const chainId = oracleData.chainId;
+    const cachedOracles =
+      await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
+
+    if (cachedOracles) {
+      const cachedOracle = cachedOracles.find(
+        (oracle) => oracle.address === oracleData.address,
+      );
+
+      if (cachedOracle) {
+        cachedOracle.retriesCount = (cachedOracle.retriesCount || 0) + 1;
+        if (cachedOracle.retriesCount >= this.configService.maxRequestRetries) {
+          cachedOracle.active = false;
+        }
+
+        const updatedOracles = cachedOracles.map((oracle) =>
+          oracle.address === cachedOracle.address ? cachedOracle : oracle,
+        );
+
+        await this.cacheManager.set(
+          chainId,
+          updatedOracles,
+          this.configService.cacheTtlOracleDiscovery,
+        );
+      }
     }
   }
 

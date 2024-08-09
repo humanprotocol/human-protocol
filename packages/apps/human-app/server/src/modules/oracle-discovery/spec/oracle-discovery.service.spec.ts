@@ -65,17 +65,31 @@ describe('OracleDiscoveryService', () => {
     );
     cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
+
   it('should be defined', () => {
     expect(oracleDiscoveryService).toBeDefined();
   });
 
   it('should return cached data if available', async () => {
     const mockData: OracleDiscoveryResponse[] = [
-      { address: 'mockAddress1', role: 'validator' },
-      { address: 'mockAddress2', role: 'validator' },
+      {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '4200',
+        active: true,
+        retriesCount: 0,
+      },
+      {
+        address: 'mockAddress2',
+        role: 'validator',
+        chainId: '4200',
+        active: true,
+        retriesCount: 0,
+      },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
 
@@ -88,8 +102,21 @@ describe('OracleDiscoveryService', () => {
 
   it('should fetch and cache data if not already cached', async () => {
     const mockData: OracleDiscoveryResponse[] = [
-      { address: 'mockAddress1', role: 'validator', url: 'url1' },
-      { address: 'mockAddress2', role: 'validator' },
+      {
+        address: 'mockAddress1',
+        role: 'validator',
+        url: 'url1',
+        chainId: '4200',
+        active: true,
+        retriesCount: 0,
+      },
+      {
+        address: 'mockAddress2',
+        role: 'validator',
+        chainId: '4200',
+        active: true,
+        retriesCount: 0,
+      },
     ];
 
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
@@ -103,9 +130,11 @@ describe('OracleDiscoveryService', () => {
     expect(result).toEqual([mockData[0]]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId);
-      expect(cacheManager.set).toHaveBeenCalledWith(chainId, [mockData[0]], {
-        ttl: TTL,
-      });
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        chainId,
+        [mockData[0]],
+        TTL,
+      );
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
         Number(chainId),
         REPUTATION_ORACLE_ADDRESS,
@@ -127,5 +156,94 @@ describe('OracleDiscoveryService', () => {
       await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
 
     expect(result).toEqual([mockData[1], mockData[2]]);
+  });
+
+  it('should handle errors and return an empty array', async () => {
+    const error = new Error('Test error');
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest
+      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+      .mockRejectedValueOnce(error);
+
+    const loggerErrorSpy = jest.spyOn(
+      oracleDiscoveryService['logger'],
+      'error',
+    );
+
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
+
+    expect(result).toEqual([]);
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      `Error processing chainId 4200:`,
+      error,
+    );
+  });
+
+  it('should return an empty array if no oracles are found', async () => {
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest
+      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+      .mockResolvedValue([]);
+
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
+
+    expect(result).toEqual([]);
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      expect(cacheManager.get).toHaveBeenCalledWith(chainId);
+    });
+  });
+
+  it('should filter out inactive oracles from cached data', async () => {
+    const mockData: OracleDiscoveryResponse[] = [
+      {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '4200',
+        active: false,
+        retriesCount: 0,
+      },
+      {
+        address: 'mockAddress2',
+        role: 'validator',
+        chainId: '4200',
+        active: true,
+        retriesCount: 0,
+      },
+    ];
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
+
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
+
+    expect(result).toEqual([mockData[1]]);
+    expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
+  });
+
+  it('should return an empty array if all oracles are inactive', async () => {
+    const mockData: OracleDiscoveryResponse[] = [
+      {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '4200',
+        active: false,
+        retriesCount: 0,
+      },
+      {
+        address: 'mockAddress2',
+        role: 'validator',
+        chainId: '4200',
+        active: false,
+        retriesCount: 0,
+      },
+    ];
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
+
+    const result =
+      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
+
+    expect(result).toEqual([]);
+    expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
   });
 });

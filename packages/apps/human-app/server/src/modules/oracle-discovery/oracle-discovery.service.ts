@@ -5,12 +5,13 @@ import {
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { OperatorUtils, Role } from '@human-protocol/sdk';
+import { IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 
 @Injectable()
 export class OracleDiscoveryService {
   logger = new Logger(OracleDiscoveryService.name);
+
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
@@ -30,32 +31,52 @@ export class OracleDiscoveryService {
         );
       }),
     );
-    return filteredOracles.flat().filter(Boolean) as OracleDiscoveryResponse[];
+
+    // Filter out inactive oracles before returning
+    return filteredOracles
+      .flat()
+      .filter((oracle) => oracle.active) as OracleDiscoveryResponse[];
   }
+
   private async findOraclesByChainId(
     chainId: string,
     address: string,
     selectedJobTypes: string[] | undefined,
   ): Promise<OracleDiscoveryResponse[]> {
-    let receivedOracles: OracleDiscoveryResponse[] | undefined =
+    const receivedOracles: OracleDiscoveryResponse[] | undefined =
       await this.cacheManager.get(chainId);
     if (receivedOracles) {
       return receivedOracles;
     }
     try {
-      receivedOracles = await OperatorUtils.getReputationNetworkOperators(
-        Number(chainId),
-        address,
-        Role.ExchangeOracle,
+      const operators: IOperator[] =
+        await OperatorUtils.getReputationNetworkOperators(
+          Number(chainId),
+          address,
+          Role.ExchangeOracle,
+        );
+
+      const oraclesWithRetryData = operators.map(
+        (operator) =>
+          new OracleDiscoveryResponse(
+            operator.address,
+            chainId,
+            operator.role,
+            operator.url,
+            operator.jobTypes,
+          ),
       );
 
+      // Filter based on selected job types, and cache the result
       const filteredOracles = this.filterOracles(
-        receivedOracles,
+        oraclesWithRetryData,
         selectedJobTypes,
       );
-      await this.cacheManager.set(chainId, filteredOracles, {
-        ttl: this.configService.cacheTtlOracleDiscovery,
-      } as any);
+      await this.cacheManager.set(
+        chainId,
+        filteredOracles,
+        this.configService.cacheTtlOracleDiscovery,
+      );
       return filteredOracles;
     } catch (error) {
       this.logger.error(`Error processing chainId ${chainId}:`, error);
@@ -84,6 +105,7 @@ export class OracleDiscoveryService {
     }
     return [];
   }
+
   private areJobTypeSetsIntersect(
     oracleJobTypes: string[],
     requiredJobTypes: string[],
