@@ -182,7 +182,7 @@ export class ReputationOracleGateway {
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.WORKER_REGISTRATION,
       data,
-      command.token
+      command.token,
     );
     return this.handleRequestToReputationOracle<RegisterWorkerResponse>(
       options,
