@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { KVStoreClient, KVStoreKeys } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { KV_STORE_CACHE_KEY } from '../../common/constants/cache';
+import { KV_STORE_REGISTRATION_NEEDED_CACHE_KEY, KV_STORE_URL_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class KvStoreGateway {
@@ -18,15 +18,48 @@ export class KvStoreGateway {
       new ethers.JsonRpcProvider(this.configService.rpcUrl),
     );
   }
-  async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
-    const key = `${KV_STORE_CACHE_KEY}:${address}`;
-    const cachedUrl: string | undefined = await this.cacheManager.get(key);
-    if (cachedUrl) {
-      return cachedUrl;
+  async getExchangeOracleRegistrationNeeded(address: string): Promise<boolean | void> {
+    const key = `${KV_STORE_REGISTRATION_NEEDED_CACHE_KEY}:${address}`;
+    const cachedData: string | undefined = await this.cacheManager.get(key);
+    if (cachedData) {
+      return cachedData.toLowerCase() === 'true';
     }
-    let fetchedUrl: string;
+    let fetchedData: string;
     try {
-      fetchedUrl = await this.kvStoreClient.get(address, KVStoreKeys.url);
+      fetchedData = await this.kvStoreClient.get(address, KVStoreKeys.registrationNeeded);
+    } catch (e) {
+      if (e.toString().includes('Error: Invalid address')) {
+        throw new HttpException(
+          `Unable to retrieve registration needed flag from address: ${address}`,
+          400,
+        );
+      } else {
+        throw new Error(
+          `Error, while fetching exchange oracle registration needed flag from kv-store: ${e}`,
+        );
+      }
+    }
+    if (!fetchedData || fetchedData === '') {
+      throw new HttpException(
+        `Unable to retrieve registration needed flag from address: ${address}`,
+        400,
+      );
+    } else {
+      await this.cacheManager.set(key, fetchedData, {
+        ttl: this.configService.cacheTtlExchangeOracleRegistrationNeeded,
+      } as any);
+      return fetchedData.toLowerCase() === 'true';
+    }
+  }
+  async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
+    const key = `${KV_STORE_URL_CACHE_KEY}:${address}`;
+    const cachedData: string | undefined = await this.cacheManager.get(key);
+    if (cachedData) {
+      return cachedData;
+    }
+    let fetchedData: string;
+    try {
+      fetchedData = await this.kvStoreClient.get(address, KVStoreKeys.url);
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
         throw new HttpException(
@@ -39,16 +72,16 @@ export class KvStoreGateway {
         );
       }
     }
-    if (!fetchedUrl || fetchedUrl === '') {
+    if (!fetchedData || fetchedData === '') {
       throw new HttpException(
         `Unable to retrieve URL from address: ${address}`,
         400,
       );
     } else {
-      await this.cacheManager.set(key, fetchedUrl, {
+      await this.cacheManager.set(key, fetchedData, {
         ttl: this.configService.cacheTtlExchangeOracleUrl,
       } as any);
-      return fetchedUrl;
+      return fetchedData;
     }
   }
 }

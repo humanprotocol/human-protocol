@@ -40,7 +40,8 @@ describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
   let httpService: HttpService;
   let escrowGateway: EscrowUtilsGateway;
-  const EXCHANGE_ORACLE_ADR = 'mocked:exchange_oracle:address';
+  const EXCHANGE_ORACLE_REGISTRATION_NEEDED = 'mocked:exchange_oracle:registration_needed';
+  const EXCHANGE_ORACLE_URL = 'mocked:exchange_oracle:url';
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
@@ -52,9 +53,12 @@ describe('ExchangeOracleApiGateway', () => {
         {
           provide: KvStoreGateway,
           useValue: {
+            getExchangeOracleRegistrationNeeded: jest
+              .fn()
+              .mockReturnValue(EXCHANGE_ORACLE_REGISTRATION_NEEDED),
             getExchangeOracleUrlByAddress: jest
               .fn()
-              .mockReturnValue(EXCHANGE_ORACLE_ADR),
+              .mockReturnValue(EXCHANGE_ORACLE_URL),
           },
         },
         {
@@ -93,7 +97,7 @@ describe('ExchangeOracleApiGateway', () => {
       await gateway.fetchUserStatistics(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/stats/assignment',
+          url: EXCHANGE_ORACLE_URL + '/stats/assignment',
           method: HttpMethod.GET,
         }),
       );
@@ -118,7 +122,7 @@ describe('ExchangeOracleApiGateway', () => {
       await gateway.fetchOracleStatistics(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/stats',
+          url: EXCHANGE_ORACLE_URL + '/stats',
           method: HttpMethod.GET,
         }),
       );
@@ -154,7 +158,7 @@ describe('ExchangeOracleApiGateway', () => {
       await gateway.fetchAssignedJobs(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/assignment',
+          url: EXCHANGE_ORACLE_URL + '/assignment',
           method: HttpMethod.GET,
           params: expectedMappedData,
           headers: {
@@ -171,7 +175,7 @@ describe('ExchangeOracleApiGateway', () => {
       const data = jobAssignmentDataFixture;
       jest
         .spyOn(escrowGateway, 'getExchangeOracleAddressByEscrowAddress')
-        .mockResolvedValue(EXCHANGE_ORACLE_ADR);
+        .mockResolvedValue(EXCHANGE_ORACLE_URL);
       const matcher: RequestBodyMatcher = {
         escrowAddress: data.escrow_address,
         chainId: data.chain_id,
@@ -183,7 +187,7 @@ describe('ExchangeOracleApiGateway', () => {
       ).toHaveBeenCalledWith(command.data.chainId, command.data.escrowAddress);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/assignment',
+          url: EXCHANGE_ORACLE_URL + '/assignment',
           method: HttpMethod.POST,
         }),
       );
@@ -200,7 +204,7 @@ describe('ExchangeOracleApiGateway', () => {
       await gateway.resignAssignedJob(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/assignment/resign',
+          url: EXCHANGE_ORACLE_URL + '/assignment/resign',
           method: HttpMethod.POST,
           data: expectedMappedData,
           headers: {
@@ -231,7 +235,7 @@ describe('ExchangeOracleApiGateway', () => {
       await gateway.fetchJobs(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/job',
+          url: EXCHANGE_ORACLE_URL + '/job',
           method: HttpMethod.GET,
           params: expectedMappedData,
           headers: {
@@ -262,7 +266,7 @@ describe('ExchangeOracleApiGateway', () => {
       await gateway.registerWorker(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_ADR + '/register',
+          url: EXCHANGE_ORACLE_URL + '/register',
           method: HttpMethod.POST,
           data: expectedMappedData,
           headers: {

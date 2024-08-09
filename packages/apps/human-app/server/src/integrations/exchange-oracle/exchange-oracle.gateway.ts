@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
@@ -174,7 +174,17 @@ export class ExchangeOracleGateway {
   }
   
   async registerWorker(command: RegisterWorkerCommand) {
+    const isRegistrationNeeded = await this.kvStoreGateway.getExchangeOracleRegistrationNeeded(command.oracleAddress);
+
+    if (!isRegistrationNeeded) {
+      throw new HttpException(
+        'Invalid request',
+        400,
+      );
+    }
+
     const data = this.mapper.map(command, RegisterWorkerCommand, RegisterWorkerData);
+
     const options: AxiosRequestConfig = {
       method: HttpMethod.POST,
       url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(

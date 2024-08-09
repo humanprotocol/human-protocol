@@ -18,7 +18,6 @@ export class WorkerService {
     return this.reputationOracleGateway.sendWorkerSignin(signinWorkerCommand);
   }
   async registerWorker(registerWorkerCommand: RegisterWorkerCommand) {
-    // TODO: Check if theoracle has registration_needed: true in KVStore else throw an error
     await this.exchangeOracleGateway.registerWorker(registerWorkerCommand);
 
     return this.reputationOracleGateway.sendWorkerRegistration(registerWorkerCommand);

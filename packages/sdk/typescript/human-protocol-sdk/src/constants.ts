@@ -349,6 +349,7 @@ export const KVStoreKeys = {
   webhookUrl: 'webhook_url',
   url: 'url',
   jobTypes: 'job_types',
+  registrationNeeded: 'registration_needed',
 };
 
 export const Role = {
