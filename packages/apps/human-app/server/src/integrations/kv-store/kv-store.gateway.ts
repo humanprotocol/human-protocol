@@ -47,7 +47,6 @@ export class KvStoreGateway {
         );
       }
     }
-    fetchedData = 'true'
     if (!fetchedData || fetchedData === '') {
       throw new HttpException(
         `Unable to retrieve registration needed flag from address: ${address}`,

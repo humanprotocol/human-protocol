@@ -177,15 +177,6 @@ export class ExchangeOracleGateway {
   }
 
   async registerWorker(command: RegisterWorkerCommand) {
-    const isRegistrationNeeded =
-      await this.kvStoreGateway.getExchangeOracleRegistrationNeeded(
-        command.oracleAddress,
-      );
-
-    if (!isRegistrationNeeded) {
-      throw new HttpException('Invalid request', 400);
-    }
-
     const data = this.mapper.map(
       command,
       RegisterWorkerCommand,
