@@ -9,7 +9,7 @@ export class ForbidUnauthorizedHostMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const allowedHost = this.envConfigService.allowedHost;
     const requestHost = req.get('host');
-
+    
     if (requestHost !== allowedHost) {
       throw new ForbiddenException('Forbidden host');
     }

@@ -5,7 +5,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   RegisterWorkerCommand,
   RegisterWorkerDto,
@@ -58,6 +58,7 @@ export class WorkerController {
   }
 
   @ApiTags('User-Worker')
+  @ApiBearerAuth()
   @Post('/register')
   @ApiOperation({ summary: 'Worker signin' })
   @UsePipes(new ValidationPipe())
