@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { EditPendingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-pending-keys-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function PendingKeysForm({
   keysData,
@@ -30,6 +31,8 @@ export function PendingKeysForm({
   const handleEditPendingKey = (data: EditEthKVStoreValuesMutationData) => {
     pendingKeysMutation.mutate(data);
   };
+
+  useResetMutationErrors(pendingKeysMethods.watch, pendingKeysMutation.reset);
 
   return (
     <FormProvider<

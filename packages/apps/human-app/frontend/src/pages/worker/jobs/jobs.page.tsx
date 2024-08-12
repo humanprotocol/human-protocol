@@ -71,7 +71,7 @@ export function JobsPage() {
                 : colorPalette.white,
               height: '100%',
               boxShadow: 'none',
-              padding: isMobile ? 0 : '40px',
+              padding: isMobile ? '20px' : '40px',
               minHeight: '800px',
               borderRadius: '20px',
             }}

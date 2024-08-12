@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/ui/loader';
 import { colorPalette } from '@/styles/color-palette';
-import { MODAL_STATE, useModalStore } from '@/components/ui/modal/modal.store';
+import { useModalStore } from '@/components/ui/modal/modal.store';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -264,7 +264,7 @@ export function UiExample() {
 
       <Button
         onClick={() => {
-          openModal(MODAL_STATE.MODAL_EXAMPLE);
+          openModal({ modalState: 'MODAL_EXAMPLE' });
         }}
       >
         Open modal

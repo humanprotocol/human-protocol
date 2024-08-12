@@ -26,8 +26,7 @@ export function EnableLabeler() {
     if (status === 'success') {
       closeNotification();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
-  }, [status]);
+  }, [closeNotification, status]);
 
   if (!user.wallet_address) {
     return <Navigate replace to={routerPaths.worker.profile} />;
@@ -56,7 +55,7 @@ export function EnableLabeler() {
             : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
-          padding: isMobile ? 0 : '40px',
+          padding: isMobile ? '20px' : '40px',
           borderRadius: '20px',
         }}
       >

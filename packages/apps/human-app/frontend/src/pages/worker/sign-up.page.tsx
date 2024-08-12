@@ -23,6 +23,7 @@ import { FetchError } from '@/api/fetcher';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -55,7 +56,10 @@ export function SignUpWorkerPage() {
     error: signUpWorkerError,
     isError: isSignUpWorkerError,
     isPending: isSignUpWorkerPending,
+    reset: signUpWorkerMutationReset,
   } = useSignUpMutation();
+
+  useResetMutationErrors(methods.watch, signUpWorkerMutationReset);
 
   const handleWorkerSignUp = (data: SignUpDto) => {
     signUpWorkerMutate(omit(data, ['confirmPassword']));

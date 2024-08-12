@@ -74,6 +74,7 @@ export function MultiSelect({
           onDelete={() => {
             onDelete(value);
           }}
+          sx={{ backgroundColor: colorPalette.chip.main }}
         />
       ))}
     </Box>
