@@ -36,8 +36,8 @@ jest.mock('@human-protocol/sdk', () => ({
   OperatorUtils: {
     getLeader: jest.fn(),
   },
-  KVStoreClient: {
-    build: jest.fn(),
+  KVStoreUtils: {
+    get: jest.fn(),
   },
 }));
 

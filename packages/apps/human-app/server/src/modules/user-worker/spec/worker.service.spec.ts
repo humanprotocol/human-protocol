@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WorkerService } from '../worker.service';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { reputationOracleGatewayMock } from '../../../integrations/reputation-oracle/spec/reputation-oracle.gateway.mock';
-import { UserType } from '../../../common/enums/user';
 import { SignupWorkerCommand } from '../model/worker-registration.model';
 
 describe('WorkerService', () => {

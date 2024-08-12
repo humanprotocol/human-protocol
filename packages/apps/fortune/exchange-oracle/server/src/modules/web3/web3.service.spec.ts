@@ -47,6 +47,23 @@ describe('Web3Service', () => {
     web3ConfigService = moduleRef.get<Web3ConfigService>(Web3ConfigService);
   });
 
+  describe('getRpcUrl', () => {
+    it('should return a signer for a valid chainId on LOCALHOST', () => {
+      const validChainId = ChainId.LOCALHOST;
+
+      const rpcUrl = web3Service.getRpcUrl(validChainId);
+      expect(rpcUrl).toBeDefined();
+    });
+
+    it('should throw invalid chain id provided for the testnet environment', () => {
+      const invalidChainId = ChainId.POLYGON;
+
+      expect(() => web3Service.getRpcUrl(invalidChainId)).toThrow(
+        ErrorWeb3.InvalidChainId,
+      );
+    });
+  });
+
   describe('getSigner', () => {
     it('should return a signer for a valid chainId on LOCALHOST', () => {
       const validChainId = ChainId.LOCALHOST;

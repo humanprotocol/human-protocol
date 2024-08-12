@@ -23,3 +23,19 @@ query getKVStoreData($address: String!) {{
 }}
 {kvstore_fragment}
 """
+
+
+def get_kvstore_by_address_and_key_query() -> str:
+    return f"""
+query getKVStoreDataByKey($address: String!, $key: String!) {{
+    kvstores(
+        where: {{
+            address: $address,
+            key: $key
+        }}
+    ) {{
+      ...KVStoreFields
+    }}
+}}
+{kvstore_fragment}
+"""

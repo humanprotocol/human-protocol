@@ -2,9 +2,9 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  KVStoreClient,
   EscrowClient,
   StorageClient,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import {
   BadRequestException,
@@ -85,12 +85,12 @@ export class StorageService {
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
 
-        const kvstoreClient = await KVStoreClient.build(signer);
-
-        const exchangeOraclePublickKey = await kvstoreClient.getPublicKey(
+        const exchangeOraclePublickKey = await KVStoreUtils.getPublicKey(
+          chainId,
           signer.address,
         );
-        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+        const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
+          chainId,
           recordingOracleAddress,
         );
         if (

@@ -2,12 +2,12 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  KVStoreClient,
   StorageClient,
   EscrowClient,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { MOCK_ADDRESS } from '../../../test/constants';
+import { MOCK_ADDRESS, MOCK_RPC_URL } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
@@ -25,10 +25,8 @@ jest.mock('@human-protocol/sdk', () => ({
   EncryptionUtils: {
     encrypt: jest.fn(),
   },
-  KVStoreClient: {
-    build: jest.fn().mockImplementation(() => ({
-      getPublicKey: jest.fn(),
-    })),
+  KVStoreUtils: {
+    getPublicKey: jest.fn(),
   },
   EscrowClient: {
     build: jest.fn(),
@@ -69,6 +67,7 @@ describe('StorageService', () => {
         {
           provide: Web3Service,
           useValue: {
+            getRpcUrl: jest.fn().mockReturnValue(MOCK_RPC_URL),
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
@@ -97,10 +96,8 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      (KVStoreClient.build as jest.Mock).mockResolvedValue({
-        getPublicKey: jest.fn().mockResolvedValue('publicKey'),
-      });
-      jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
+      (KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey')),
+        jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
 
       const jobSolution = {
         workerAddress,
@@ -217,9 +214,7 @@ describe('StorageService', () => {
         .mockResolvedValue(true);
       jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
-      (KVStoreClient.build as jest.Mock).mockResolvedValue({
-        getPublicKey: jest.fn().mockResolvedValue(''),
-      });
+      KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('');
 
       const jobSolution = {
         workerAddress,

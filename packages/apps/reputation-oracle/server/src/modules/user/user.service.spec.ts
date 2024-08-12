@@ -18,7 +18,7 @@ import {
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
-import { ChainId, KVStoreClient } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
@@ -43,8 +43,10 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       set: jest.fn(),
-      get: jest.fn(),
     })),
+  },
+  KVStoreUtils: {
+    get: jest.fn(),
   },
 }));
 
@@ -586,13 +588,14 @@ describe('UserService', () => {
 
     it('should enable an operator', async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
         set: jest.fn(),
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.INACTIVE);
+
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       const result = await userService.enableOperator(
@@ -607,7 +610,8 @@ describe('UserService', () => {
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
-      expect(kvstoreClientMock.get).toHaveBeenCalledWith(
+      expect(KVStoreUtils.get).toHaveBeenCalledWith(
+        ChainId.POLYGON_AMOY,
         MOCK_ADDRESS,
         MOCK_ADDRESS,
       );
@@ -619,12 +623,13 @@ describe('UserService', () => {
 
     it("should throw ConflictException if signature doesn't match", async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
         set: jest.fn(),
       };
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
+
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.INACTIVE);
 
       (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
         throw new ControlledError(
@@ -649,13 +654,8 @@ describe('UserService', () => {
     });
 
     it('should throw BadRequestException if operator already enabled in KVStore', async () => {
-      const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
-      };
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.ACTIVE);
 
-      (KVStoreClient.build as any).mockImplementationOnce(
-        () => kvstoreClientMock,
-      );
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       await expect(
@@ -694,13 +694,14 @@ describe('UserService', () => {
 
     it('should disable an user', async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
         set: jest.fn(),
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
+
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.ACTIVE);
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       const result = await userService.disableOperator(
@@ -715,7 +716,8 @@ describe('UserService', () => {
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
-      expect(kvstoreClientMock.get).toHaveBeenCalledWith(
+      expect(KVStoreUtils.get).toHaveBeenCalledWith(
+        ChainId.POLYGON_AMOY,
         MOCK_ADDRESS,
         MOCK_ADDRESS,
       );
@@ -727,13 +729,13 @@ describe('UserService', () => {
 
     it("should throw ConflictException if signature doesn't match", async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
         set: jest.fn(),
       };
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
 
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.ACTIVE);
       (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
         throw new ControlledError(
           ErrorSignature.SignatureNotVerified,
@@ -757,13 +759,7 @@ describe('UserService', () => {
     });
 
     it('should throw BadRequestException if operator already disabled in KVStore', async () => {
-      const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
-      };
-
-      (KVStoreClient.build as any).mockImplementationOnce(
-        () => kvstoreClientMock,
-      );
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.INACTIVE);
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       await expect(
