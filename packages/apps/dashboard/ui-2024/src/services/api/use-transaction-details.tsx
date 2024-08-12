@@ -4,7 +4,7 @@ import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { useTransactionDetailsDto } from '@utils/hooks/use-transactions-details-dto';
-import { validateObject } from '@services/validate-response';
+import { validateResponse } from '@services/validate-response';
 
 const transactionDetailsSuccessResponseSchema = z.object({
 	block: z.number(),
@@ -56,20 +56,10 @@ export function useTransactionDetails() {
 				}
 			);
 
-			const {
-				data: validResponse,
-				errors,
-				originalError,
-			} = validateObject(
+			const validResponse = validateResponse(
 				data,
 				paginatedTransactionDetailsSuccessResponseSchema
 			);
-
-			if (errors) {
-				console.error('Unexpected response');
-				console.error(errors);
-				throw originalError;
-			}
 
 			return validResponse;
 		},

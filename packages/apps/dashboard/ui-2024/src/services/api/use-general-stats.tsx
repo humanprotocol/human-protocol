@@ -4,24 +4,25 @@ import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
 import { validateResponse } from '@services/validate-response';
 
-const successHMTPriceResponseSchema = z.object({
-	hmtPrice: z.number(),
+const successGeneralStatsResponseSchema = z.object({
+	totalHolders: z.number(),
+	totalTransactions: z.number(),
 });
 
-export type HMTPrice = z.infer<typeof successHMTPriceResponseSchema>;
+export type GeneralStats = z.infer<typeof successGeneralStatsResponseSchema>;
 
-export function useHMTPrice() {
+export function useGeneralStats() {
 	return useQuery({
 		queryFn: async () => {
-			const { data } = await httpService.get(apiPaths.statsHmtPrice.path);
+			const { data } = await httpService.get(apiPaths.generalStats.path);
 
 			const validResponse = validateResponse(
 				data,
-				successHMTPriceResponseSchema
+				successGeneralStatsResponseSchema
 			);
 
 			return validResponse;
 		},
-		queryKey: ['useHMTPrice'],
+		queryKey: ['useGeneralStats'],
 	});
 }

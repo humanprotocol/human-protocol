@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { validateObject } from '../../services/validate-response';
+import { validateResponse } from '../../services/validate-response';
 
 const walletSchema = z.object({
 	chainId: z.number(),
@@ -77,17 +77,10 @@ export function useAddressDetails() {
 				{ params: { chainId: filterParams.chainId || -1 } }
 			);
 
-			const {
-				data: validResponse,
-				errors,
-				originalError,
-			} = validateObject(data, addressDetailsResponseSchema);
-
-			if (errors) {
-				console.error('Unexpected response');
-				console.error(errors);
-				throw originalError;
-			}
+			const validResponse = validateResponse(
+				data,
+				addressDetailsResponseSchema
+			);
 
 			return validResponse;
 		},

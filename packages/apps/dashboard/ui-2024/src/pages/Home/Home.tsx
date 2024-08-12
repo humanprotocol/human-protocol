@@ -1,7 +1,6 @@
 import PageWrapper from '@components/PageWrapper';
 import Search from '@components/Search';
 import ShadowIcon from '@components/ShadowIcon';
-import { HMTPrice } from './HMTPrice';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
@@ -20,6 +19,10 @@ import lbank from '@assets/lbank.png';
 import cup from '@assets/cup.png';
 import Leaderboard from '@components/Home/Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
+import { HMTPrice } from '@pages/Home/HMTPrice';
+import { TotalNumberOfTasks } from '@pages/Home/TotalNumberOfTasks';
+import { Holders } from '@pages/Home/Holders';
+import { TotalTransactions } from '@pages/Home/TotalTransactions';
 
 const Home: React.FC = () => {
 	return (
@@ -52,12 +55,7 @@ const Home: React.FC = () => {
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
-						<div>
-							<Typography variant="h6" component="p">
-								Holders
-							</Typography>
-							<div className="count">32,306</div>
-						</div>
+						<Holders />
 					</div>
 				</div>
 				<div className="home-page-box">
@@ -79,14 +77,7 @@ const Home: React.FC = () => {
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
-						<div>
-							<Typography variant="h6" component="p">
-								Total Transactions
-							</Typography>
-							<div className="count">
-								1,786,573 <span>(12.8 TPS)</span>
-							</div>
-						</div>
+						<TotalTransactions />
 					</div>
 					<Divider
 						sx={{
@@ -99,12 +90,7 @@ const Home: React.FC = () => {
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
 						</div>
-						<div>
-							<Typography variant="h6" component="p">
-								Total Number of Tasks
-							</Typography>
-							<div className="count">2,658,409</div>
-						</div>
+						<TotalNumberOfTasks />
 					</div>
 				</div>
 				<div className="home-page-box">

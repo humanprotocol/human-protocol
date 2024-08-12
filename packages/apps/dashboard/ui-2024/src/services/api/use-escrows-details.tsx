@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { validateObject } from '@services/validate-response';
+import { validateResponse } from '@services/validate-response';
 import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
 import { AddressDetailsLeader } from '@services/api/use-address-details';
 
@@ -60,17 +60,10 @@ export function useEscrowDetails({
 				}
 			);
 
-			const {
-				data: validResponse,
-				errors,
-				originalError,
-			} = validateObject(data, paginatedEscrowsDetailsSuccessResponseSchema);
-
-			if (errors) {
-				console.error('Unexpected response');
-				console.error(errors);
-				throw originalError;
-			}
+			const validResponse = validateResponse(
+				data,
+				paginatedEscrowsDetailsSuccessResponseSchema
+			);
 
 			return validResponse;
 		},
