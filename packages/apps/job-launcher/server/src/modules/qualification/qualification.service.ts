@@ -18,13 +18,11 @@ export class QualificationService {
 
   public async getQualifications(): Promise<QualificationDto[]> {
     try {
-      const kvStoreData = await KVStoreUtils.getKVStoreData(
+      const reputationOracleUrl = await KVStoreUtils.get(
         ChainId.POLYGON_AMOY,
         this.web3ConfigService.reputationOracleAddress,
+        'url',
       );
-      const reputationOracleUrl = kvStoreData.find(
-        (item) => item.key === 'url',
-      )?.value;
 
       if (!reputationOracleUrl) {
         throw new ControlledError(

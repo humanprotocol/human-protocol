@@ -13,7 +13,7 @@ import { HttpStatus } from '@nestjs/common';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   KVStoreUtils: {
-    getKVStoreData: jest.fn(),
+    get: jest.fn(),
   },
 }));
 
@@ -43,9 +43,7 @@ describe.only('QualificationService', () => {
 
   describe('getQualifications', () => {
     it('should return a list of qualifications', async () => {
-      (KVStoreUtils.getKVStoreData as any).mockResolvedValue([
-        { key: 'url', value: MOCK_REPUTATION_ORACLE_URL },
-      ]);
+      (KVStoreUtils.get as any).mockResolvedValue(MOCK_REPUTATION_ORACLE_URL);
 
       const qualifications = [
         {
@@ -68,10 +66,8 @@ describe.only('QualificationService', () => {
       expect(result).toEqual(qualifications);
     });
 
-    it('should throw a ControlledError when KVStoreUtils.getKVStoreData fails', async () => {
-      (KVStoreUtils.getKVStoreData as any).mockRejectedValue(
-        new Error('KV store error'),
-      );
+    it('should throw a ControlledError when KVStoreUtils.get fails', async () => {
+      (KVStoreUtils.get as any).mockRejectedValue(new Error('KV store error'));
 
       await expect(qualificationService.getQualifications()).rejects.toThrow(
         new ControlledError(
@@ -82,7 +78,7 @@ describe.only('QualificationService', () => {
     });
 
     it('should throw a ControlledError when reputation oracle URL is not set', async () => {
-      (KVStoreUtils.getKVStoreData as any).mockResolvedValue([]);
+      (KVStoreUtils.get as any).mockResolvedValue('');
 
       await expect(qualificationService.getQualifications()).rejects.toThrow(
         new ControlledError(
@@ -93,9 +89,7 @@ describe.only('QualificationService', () => {
     });
 
     it('should throw a ControlledError when HTTP request fails', async () => {
-      (KVStoreUtils.getKVStoreData as any).mockResolvedValue([
-        { key: 'url', value: MOCK_REPUTATION_ORACLE_URL },
-      ]);
+      (KVStoreUtils.get as any).mockResolvedValue(MOCK_REPUTATION_ORACLE_URL);
 
       jest
         .spyOn(httpService, 'get')
