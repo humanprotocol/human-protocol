@@ -111,10 +111,10 @@ class KVStoreUtils:
         ]
 
     @staticmethod
-    def get(kvstore_contract, address: str, key: str) -> str:
+    def get(chain_id: ChainId, address: str, key: str) -> str:
         """Gets the value of a key-value pair in the contract.
 
-        :param kvstore_contract: Contract instance
+        :param chain_id: Network in which the KVStore data has been deployed
         :param address: The Ethereum address associated with the key-value pair
         :param key: The key of the key-value pair to get
 
@@ -123,35 +123,51 @@ class KVStoreUtils:
         :example:
             .. code-block:: python
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.providers.auto import load_provider_from_uri
-
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.kvstore import KVStoreUtils
 
-                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                kvstore_contract = w3.eth.contract(
-                    address=self.network["kvstore_address"],
-                    abi=kvstore_interface["abi"]
-                )
+                chain_id = ChainId.POLYGON_AMOY
+                address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+                key = 'Role'
 
-                role = KVStoreUtils.get(kvstore_contract, '0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'Role')
+                result = KVStoreUtils.get(chain_id, address, key)
+                print(result)
         """
+        from human_protocol_sdk.gql.kvstore import get_kvstore_by_address_and_key_query
 
         if not key:
             raise KVStoreClientError("Key can not be empty")
         if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid address: {address}")
-        result = kvstore_contract.functions.get(address, key).call()
-        return result
+
+        network = NETWORKS[ChainId(chain_id)]
+
+        kvstore_data = get_data_from_subgraph(
+            network,
+            query=get_kvstore_by_address_and_key_query(),
+            params={
+                "address": address.lower(),
+                "key": key,
+            },
+        )
+
+        if (
+            not kvstore_data
+            or "data" not in kvstore_data
+            or "kvstores" not in kvstore_data["data"]
+            or len(kvstore_data["data"]["kvstores"]) == 0
+        ):
+            raise KVStoreClientError(f"Key '{key}' not found for address {address}")
+
+        return kvstore_data["data"]["kvstores"][0]["value"]
 
     @staticmethod
     def get_file_url_and_verify_hash(
-        kvstore_contract, address: str, key: Optional[str] = "url"
+        chain_id: ChainId, address: str, key: Optional[str] = "url"
     ) -> str:
         """Gets the URL value of the given entity, and verify its hash.
 
-        :param kvstore_contract: Contract instance
+        :param chain_id: Network in which the KVStore data has been deployed
         :param address: Address from which to get the URL value.
         :param key: Configurable URL key. `url` by default.
 
@@ -160,34 +176,21 @@ class KVStoreUtils:
         :example:
             .. code-block:: python
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.providers.auto import load_provider_from_uri
-
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.kvstore import KVStoreUtils
 
-                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                kvstore_contract = w3.eth.contract(
-                    address=self.network["kvstore_address"],
-                    abi=kvstore_interface["abi"]
-                )
+                chain_id = ChainId.POLYGON_AMOY
+                address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
-                url = KVStoreUtils.get_file_url_and_verify_hash(
-                    kvstore_contract,
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                )
-                linkedin_url = KVStoreUtils.get_file_url_and_verify_hash(
-                    kvstore_contract,
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-                    'linkedin_url'
-                )
+                url = KVStoreUtils.get_file_url_and_verify_hash(chain_id, address)
+                linkedin_url = KVStoreUtils.get_file_url_and_verify_hash(chain_id, address, 'linkedin_url')
         """
 
         if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid address: {address}")
 
-        url = kvstore_contract.functions.get(address, key).call()
-        hash = kvstore_contract.functions.get(address, key + "_hash").call()
+        url = KVStoreUtils.get(chain_id, address, key)
+        hash = KVStoreUtils.get(chain_id, address, key + "_hash")
 
         if len(url) == 0:
             return url
@@ -201,10 +204,10 @@ class KVStoreUtils:
         return url
 
     @staticmethod
-    def get_public_key(kvstore_contract, address: str) -> str:
+    def get_public_key(chain_id: ChainId, address: str) -> str:
         """Gets the public key of the given entity, and verify its hash.
 
-        :param kvstore_contract: Contract instance
+        :param chain_id: Network in which the KVStore data has been deployed
         :param address: Address from which to get the public key.
 
         :return public_key: The public key of the given address if exists, and the content is valid
@@ -212,26 +215,17 @@ class KVStoreUtils:
         :example:
             .. code-block:: python
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.providers.auto import load_provider_from_uri
-
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.kvstore import KVStoreUtils
 
-                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                kvstore_contract = w3.eth.contract(
-                    address=self.network["kvstore_address"],
-                    abi=kvstore_interface["abi"]
-                )
+                chain_id = ChainId.POLYGON_AMOY
+                address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
-                public_key = KVStoreUtils.get_public_key(
-                    kvstore_contract,
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                )
+                public_key = KVStoreUtils.get_public_key(chain_id, address)
         """
 
         public_key_url = KVStoreUtils.get_file_url_and_verify_hash(
-            kvstore_contract, address, KVStoreKeys.public_key.value
+            chain_id, address, KVStoreKeys.public_key.value
         )
 
         if public_key_url == "":

@@ -17,7 +17,10 @@ import { KVStoreClient, KVStoreUtils } from '../src/kvstore';
 import { NetworkData } from '../src/types';
 import { DEFAULT_GAS_PAYER_PRIVKEY } from './utils/constants';
 import * as gqlFetch from 'graphql-request';
-import { GET_KVSTORE_BY_ADDRESS_QUERY } from '../src/graphql/queries/kvstore';
+import {
+  GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY,
+  GET_KVSTORE_BY_ADDRESS_QUERY,
+} from '../src/graphql/queries/kvstore';
 import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 global.fetch = vi.fn().mockResolvedValue({
@@ -371,7 +374,6 @@ describe('KVStoreClient', () => {
 
 describe('KVStoreUtils', () => {
   let mockKVStoreContract: any;
-  const mockRpcUrl = 'http://rpc.url';
 
   beforeEach(async () => {
     mockKVStoreContract = {
@@ -387,7 +389,7 @@ describe('KVStoreUtils', () => {
     test('should throw an error if key is empty', async () => {
       await expect(
         KVStoreUtils.get(
-          mockRpcUrl,
+          ChainId.LOCALHOST,
           '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
           ''
         )
@@ -396,65 +398,101 @@ describe('KVStoreUtils', () => {
 
     test('should throw an error if address is not valid', async () => {
       await expect(
-        KVStoreUtils.get(mockRpcUrl, 'invalid_address', 'key1')
+        KVStoreUtils.get(ChainId.LOCALHOST, 'invalid_address', 'key1')
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
+    test('should throw an error if key not found for address', async () => {
+      const key = 'key1';
+      const kvstores = [];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ kvstores });
+
+      await expect(
+        KVStoreUtils.get(ChainId.LOCALHOST, ethers.ZeroAddress, key)
+      ).rejects.toThrow(
+        `Key "${key}" not found for address ${ethers.ZeroAddress}`
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
+        { address: ethers.ZeroAddress, key: 'key1' }
+      );
+    });
+
     test('should return empty string if both address and key are valid and address does not set any value', async () => {
-      mockKVStoreContract.get.mockResolvedValue('');
+      const kvstores = [
+        {
+          id: ethers.ZeroAddress + '-fee',
+          block: '31',
+          timestamp: '1717510736',
+          address: ethers.ZeroAddress,
+          key: 'fee',
+          value: '',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ kvstores });
+
       const getSpy = vi.spyOn(KVStoreUtils, 'get');
 
       const result = await KVStoreUtils.get(
-        mockRpcUrl,
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        ChainId.LOCALHOST,
+        ethers.ZeroAddress,
         'key1'
       );
       expect(result).toBe('');
       expect(getSpy).toHaveBeenCalledWith(
-        mockRpcUrl,
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        ChainId.LOCALHOST,
+        ethers.ZeroAddress,
         'key1'
+      );
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
+        { address: ethers.ZeroAddress, key: 'key1' }
       );
     });
 
     test('should return value if both address and key are valid and address set a value', async () => {
-      mockKVStoreContract.get.mockResolvedValue('value1');
+      const kvstores = [
+        {
+          id: ethers.ZeroAddress + '-key1',
+          block: '31',
+          timestamp: '1717510736',
+          address: ethers.ZeroAddress,
+          key: 'key1',
+          value: 'value1',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ kvstores });
+
       const getSpy = vi.spyOn(KVStoreUtils, 'get');
 
       const result = await KVStoreUtils.get(
-        mockRpcUrl,
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        ChainId.LOCALHOST,
+        ethers.ZeroAddress,
         'key1'
       );
 
       expect(result).toBe('value1');
       expect(getSpy).toHaveBeenCalledWith(
-        mockRpcUrl,
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        ChainId.LOCALHOST,
+        ethers.ZeroAddress,
         'key1'
       );
-      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'key1'
-      );
-    });
-
-    test('should throw an error if a network error occurs', async () => {
-      mockKVStoreContract.get.mockRejectedValue(
-        new Error('could not detect network')
-      );
-
-      await expect(
-        KVStoreUtils.get(
-          mockRpcUrl,
-          '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-          'key1'
-        )
-      ).rejects.toThrow(Error('Failed to get value: could not detect network'));
-
-      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'key1'
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
+        { address: ethers.ZeroAddress, key: 'key1' }
       );
     });
   });
@@ -462,7 +500,10 @@ describe('KVStoreUtils', () => {
   describe('getFileUrlAndVerifyHash', () => {
     test('should throw an error if address is not valid', async () => {
       await expect(
-        KVStoreUtils.getFileUrlAndVerifyHash(mockRpcUrl, 'invalid_address')
+        KVStoreUtils.getFileUrlAndVerifyHash(
+          ChainId.LOCALHOST,
+          'invalid_address'
+        )
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -470,12 +511,12 @@ describe('KVStoreUtils', () => {
       KVStoreUtils.get = vi.fn().mockResolvedValueOnce('');
 
       const result = await KVStoreUtils.getFileUrlAndVerifyHash(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
       expect(result).toBe('');
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url'
       );
@@ -490,18 +531,18 @@ describe('KVStoreUtils', () => {
         .mockResolvedValueOnce(validHash);
 
       const result = await KVStoreUtils.getFileUrlAndVerifyHash(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
       expect(result).toBe('example.com');
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url'
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url_hash'
       );
@@ -516,19 +557,19 @@ describe('KVStoreUtils', () => {
         .mockResolvedValueOnce(validHash);
 
       const result = await KVStoreUtils.getFileUrlAndVerifyHash(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'linkedin_url'
       );
       expect(result).toBe('example.com');
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'linkedin_url'
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'linkedin_url_hash'
       );
@@ -544,18 +585,18 @@ describe('KVStoreUtils', () => {
 
       await expect(
         KVStoreUtils.getFileUrlAndVerifyHash(
-          mockRpcUrl,
+          ChainId.LOCALHOST,
           '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
         )
       ).rejects.toThrow(ErrorInvalidHash);
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url'
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url_hash'
       );
@@ -568,13 +609,13 @@ describe('KVStoreUtils', () => {
 
       await expect(
         KVStoreUtils.getFileUrlAndVerifyHash(
-          mockRpcUrl,
+          ChainId.LOCALHOST,
           '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
         )
       ).rejects.toThrow(Error('Failed to get URL: could not detect network'));
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'url'
       );
@@ -584,7 +625,7 @@ describe('KVStoreUtils', () => {
   describe('getPublicKey', () => {
     test('should throw an error if address is not valid', async () => {
       await expect(
-        KVStoreUtils.getPublicKey(mockRpcUrl, 'invalid_address')
+        KVStoreUtils.getPublicKey(ChainId.LOCALHOST, 'invalid_address')
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -592,12 +633,12 @@ describe('KVStoreUtils', () => {
       KVStoreUtils.get = vi.fn().mockResolvedValueOnce('');
 
       const result = await KVStoreUtils.getPublicKey(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
       expect(result).toBe('');
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key'
       );
@@ -612,18 +653,18 @@ describe('KVStoreUtils', () => {
         .mockResolvedValueOnce(validHash);
 
       const result = await KVStoreUtils.getPublicKey(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
       );
       expect(result).toBe('example');
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key'
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key_hash'
       );
@@ -641,18 +682,18 @@ describe('KVStoreUtils', () => {
 
       await expect(
         KVStoreUtils.getPublicKey(
-          mockRpcUrl,
+          ChainId.LOCALHOST,
           '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
         )
       ).rejects.toThrow(ErrorInvalidHash);
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key'
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key_hash'
       );
@@ -665,13 +706,13 @@ describe('KVStoreUtils', () => {
 
       await expect(
         KVStoreUtils.getPublicKey(
-          mockRpcUrl,
+          ChainId.LOCALHOST,
           '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
         )
       ).rejects.toThrow(Error('Failed to get URL: could not detect network'));
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        mockRpcUrl,
+        ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
         'public_key'
       );

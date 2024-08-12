@@ -3,7 +3,6 @@ import {
   EscrowStatus,
   KVStoreKeys,
   KVStoreUtils,
-  NETWORKS,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -28,7 +27,6 @@ import {
   WebhookDto,
 } from '../webhook/webhook.dto';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -98,10 +96,6 @@ export class JobService {
   async processJobSolution(webhook: WebhookDto): Promise<string> {
     const signer = this.web3Service.getSigner(webhook.chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const kvstoreContract = KVStore__factory.connect(
-      NETWORKS[webhook.chainId]!.kvstoreAddress!,
-      signer,
-    );
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       webhook.escrowAddress,
@@ -191,7 +185,7 @@ export class JobService {
       const reputationOracleAddress =
         await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
       const reputationOracleWebhook = (await KVStoreUtils.get(
-        kvstoreContract,
+        webhook.chainId,
         reputationOracleAddress,
         KVStoreKeys.webhookUrl,
       )) as string;
@@ -212,7 +206,7 @@ export class JobService {
     }
     if (errorSolutions.length) {
       const exchangeOracleURL = (await KVStoreUtils.get(
-        kvstoreContract,
+        webhook.chainId,
         await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
         KVStoreKeys.webhookUrl,
       )) as string;

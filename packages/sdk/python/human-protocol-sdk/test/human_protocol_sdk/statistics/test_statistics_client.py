@@ -11,7 +11,7 @@ from human_protocol_sdk.gql.statistics import (
 )
 from human_protocol_sdk.statistics import (
     StatisticsClient,
-    StatisticsParam,
+    StatisticsFilter,
     HMTHoldersParam,
 )
 
@@ -26,7 +26,7 @@ class TestStatisticsClient(unittest.TestCase):
         self.assertEqual(f"123 is not a valid ChainId", str(cm.exception))
 
     def test_get_escrow_statistics(self):
-        param = StatisticsParam(
+        param = StatisticsFilter(
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
@@ -73,6 +73,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
@@ -91,7 +94,7 @@ class TestStatisticsClient(unittest.TestCase):
             )
 
     def test_get_worker_statistics(self):
-        param = StatisticsParam(
+        param = StatisticsFilter(
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
@@ -121,6 +124,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
@@ -131,7 +137,7 @@ class TestStatisticsClient(unittest.TestCase):
             )
 
     def test_get_payment_statistics(self):
-        param = StatisticsParam(
+        param = StatisticsFilter(
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
@@ -163,6 +169,9 @@ class TestStatisticsClient(unittest.TestCase):
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
                 },
             )
 
@@ -180,10 +189,6 @@ class TestStatisticsClient(unittest.TestCase):
             )
 
     def test_get_hmt_statistics(self):
-        param = StatisticsParam(
-            date_from=datetime.fromtimestamp(1683811973),
-            date_to=datetime.fromtimestamp(1683812007),
-        )
         mock_function = MagicMock()
 
         with patch(
@@ -199,70 +204,18 @@ class TestStatisticsClient(unittest.TestCase):
                         },
                     }
                 },
-                {
-                    "data": {
-                        "holders": [
-                            {
-                                "address": "0x123",
-                                "balance": "10",
-                            },
-                        ],
-                    }
-                },
-                {
-                    "data": {
-                        "eventDayDatas": [
-                            {
-                                "timestamp": 1,
-                                "dailyHMTTransferCount": "4",
-                                "dailyHMTTransferAmount": "100",
-                                "dailyUniqueSenders": "5",
-                                "dailyUniqueReceivers": "5",
-                            },
-                        ],
-                    }
-                },
             ]
 
-            hmt_statistics = self.statistics.get_hmt_statistics(param)
+            hmt_statistics = self.statistics.get_hmt_statistics()
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
                 query=get_hmtoken_statistics_query,
             )
 
-            mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
-                query=get_holders_query,
-            )
-
-            mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
-                query=get_event_day_data_query(param),
-                params={
-                    "from": 1683811973,
-                    "to": 1683812007,
-                },
-            )
-
             self.assertEqual(hmt_statistics.total_transfer_amount, 100)
             self.assertEqual(hmt_statistics.total_transfer_count, 4)
             self.assertEqual(hmt_statistics.total_holders, 2)
-            self.assertEqual(len(hmt_statistics.holders), 1)
-            self.assertEqual(hmt_statistics.holders[0].address, "0x123")
-            self.assertEqual(hmt_statistics.holders[0].balance, 10)
-            self.assertEqual(len(hmt_statistics.daily_hmt_data), 1)
-            self.assertEqual(
-                hmt_statistics.daily_hmt_data[0].timestamp, datetime.fromtimestamp(1)
-            )
-            self.assertEqual(
-                hmt_statistics.daily_hmt_data[0].total_transaction_amount, 100
-            )
-            self.assertEqual(
-                hmt_statistics.daily_hmt_data[0].total_transaction_count, 4
-            )
-            self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_senders, 5)
-            self.assertEqual(hmt_statistics.daily_hmt_data[0].daily_unique_receivers, 5)
 
     def test_get_hmt_holders(self):
         param = HMTHoldersParam(
@@ -304,6 +257,53 @@ class TestStatisticsClient(unittest.TestCase):
             self.assertEqual(holders[0].balance, 1000)
             self.assertEqual(holders[1].address, "0x456")
             self.assertEqual(holders[1].balance, 2000)
+
+    def test_get_hmt_daily_data(self):
+        param = StatisticsFilter(
+            date_from=datetime.fromtimestamp(1683811973),
+            date_to=datetime.fromtimestamp(1683812007),
+        )
+        mock_function = MagicMock()
+
+        with patch(
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.side_effect = [
+                {
+                    "data": {
+                        "eventDayDatas": [
+                            {
+                                "timestamp": 1,
+                                "dailyHMTTransferCount": "4",
+                                "dailyHMTTransferAmount": "100",
+                                "dailyUniqueSenders": "5",
+                                "dailyUniqueReceivers": "5",
+                            },
+                        ],
+                    }
+                },
+            ]
+
+            hmt_statistics = self.statistics.get_hmt_daily_data(param)
+
+            mock_function.assert_any_call(
+                NETWORKS[ChainId.LOCALHOST],
+                query=get_event_day_data_query(param),
+                params={
+                    "from": 1683811973,
+                    "to": 1683812007,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "asc",
+                },
+            )
+
+            self.assertEqual(len(hmt_statistics), 1)
+            self.assertEqual(hmt_statistics[0].timestamp, datetime.fromtimestamp(1))
+            self.assertEqual(hmt_statistics[0].total_transaction_amount, 100)
+            self.assertEqual(hmt_statistics[0].total_transaction_count, 4)
+            self.assertEqual(hmt_statistics[0].daily_unique_senders, 5)
+            self.assertEqual(hmt_statistics[0].daily_unique_receivers, 5)
 
 
 if __name__ == "__main__":

@@ -51,13 +51,15 @@ const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
 
 ### get()
 
-> `static` **get**(`rpcUrl`, `address`, `key`): `Promise`\<`string`\>
+> `static` **get**(`chainId`, `address`, `key`): `Promise`\<`string`\>
 
-Gets the value of a key-value pair in the contract.
+Gets the value of a key-value pair in the KVStore using the subgraph.
 
 #### Parameters
 
-• **rpcUrl**: `string`
+• **chainId**: `ChainId`
+
+Network in which the KVStore is deployed
 
 • **address**: `string`
 
@@ -81,35 +83,40 @@ Value of the key.
 
 - Thrown if the Address sent is invalid
 
+#### Throws
+
+- Thrown if the key is empty
+
 **Code example**
 
 ```ts
-import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
-import { providers } from 'ethers';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
-const rpcUrl = 'YOUR_RPC_URL';
+const chainId = ChainId.POLYGON_AMOY;
 const address = '0x1234567890123456789012345678901234567890';
-const key = 'Role';
+const key = 'role';
 
-const value = await KVStoreUtils.get(rpcUrl, address, key);
+const value = await KVStoreUtils.get(chainId, address, key);
 console.log(value);
 ```
 
 #### Defined in
 
-[kvstore.ts:385](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L385)
+[kvstore.ts:385](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L385)
 
 ***
 
 ### getFileUrlAndVerifyHash()
 
-> `static` **getFileUrlAndVerifyHash**(`rpcUrl`, `address`, `urlKey`): `Promise`\<`string`\>
+> `static` **getFileUrlAndVerifyHash**(`chainId`, `address`, `urlKey`): `Promise`\<`string`\>
 
-Gets the URL value of the given entity, and verify its hash.
+Gets the URL value of the given entity, and verifies its hash.
 
 #### Parameters
 
-• **rpcUrl**: `string`
+• **chainId**: `ChainId`
+
+Network in which the KVStore is deployed
 
 • **address**: `string`
 
@@ -123,24 +130,23 @@ Configurable URL key. `url` by default.
 
 `Promise`\<`string`\>
 
-URL value for the given address if exists, and the content is valid
+URL value for the given address if it exists, and the content is valid
 
 **Code example**
 
 ```ts
-import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
-import { providers } from 'ethers';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
-const rpcUrl = 'YOUR_RPC_URL';
+const chainId = ChainId.POLYGON_AMOY;
 const address = '0x1234567890123456789012345678901234567890';
 
-const url = await KVStoreUtils.getFileUrlAndVerifyHash(rpcUrl, kvstoreContract, address);
+const url = await KVStoreUtils.getFileUrlAndVerifyHash(chainId, address);
 console.log(url);
 ```
 
 #### Defined in
 
-[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
+[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
 
 ***
 
@@ -185,19 +191,21 @@ console.log(kvStoreData);
 
 #### Defined in
 
-[kvstore.ts:333](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L333)
+[kvstore.ts:333](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L333)
 
 ***
 
 ### getPublicKey()
 
-> `static` **getPublicKey**(`rpcUrl`, `address`): `Promise`\<`string`\>
+> `static` **getPublicKey**(`chainId`, `address`): `Promise`\<`string`\>
 
-Gets the public key of the given entity, and verify its hash.
+Gets the public key of the given entity, and verifies its hash.
 
 #### Parameters
 
-• **rpcUrl**: `string`
+• **chainId**: `ChainId`
+
+Network in which the KVStore is deployed
 
 • **address**: `string`
 
@@ -207,21 +215,20 @@ Address from which to get the public key.
 
 `Promise`\<`string`\>
 
-Public key for the given address if exists, and the content is valid
+Public key for the given address if it exists, and the content is valid
 
 **Code example**
 
 ```ts
-import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
-import { providers } from 'ethers';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
-const rpcUrl = 'YOUR_RPC_URL';
+const chainId = ChainId.POLYGON_AMOY;
 const address = '0x1234567890123456789012345678901234567890';
 
-const publicKey = await KVStoreUtils.getPublicKey(rpcUrl, address);
+const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
 console.log(publicKey);
 ```
 
 #### Defined in
 
-[kvstore.ts:493](https://github.com/humanprotocol/human-protocol/blob/c1babb1b9f88b4b81c6e0bd12c34f22f4c3c91dd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L493)
+[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)

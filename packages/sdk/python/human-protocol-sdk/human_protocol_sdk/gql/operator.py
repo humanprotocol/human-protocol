@@ -14,7 +14,7 @@ fragment LeaderFields on Leader {
     amountSlashed
     reputation
     reward
-    amountJobsLaunched
+    amountJobsProcessed
     role
     fee
     publicKey

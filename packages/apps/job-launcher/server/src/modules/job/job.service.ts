@@ -93,7 +93,6 @@ import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   HMToken,
   HMToken__factory,
-  KVStore__factory,
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
 import { StorageService } from '../storage/storage.service';
@@ -1122,19 +1121,12 @@ export class JobService {
         this.getOraclesSpecificActions[requestType];
 
       const signer = this.web3Service.getSigner(chainId);
-      const kvstoreContract = KVStore__factory.connect(
-        NETWORKS[chainId]!.kvstoreAddress!,
-        signer,
-      );
       const publicKeys: string[] = [
-        await KVStoreUtils.getPublicKey(kvstoreContract, signer.address),
+        await KVStoreUtils.getPublicKey(chainId, signer.address),
       ];
       const oracleAddresses = getOracleAddresses();
       for (const address of Object.values(oracleAddresses)) {
-        const publicKey = await KVStoreUtils.getPublicKey(
-          kvstoreContract,
-          address,
-        );
+        const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
         if (publicKey) publicKeys.push(publicKey);
       }
 
@@ -1578,14 +1570,8 @@ export class JobService {
     oracleAddress: string,
     chainId: ChainId,
   ): Promise<bigint> {
-    const signer = this.web3Service.getSigner(chainId);
-
-    const kvstoreContract = KVStore__factory.connect(
-      NETWORKS[chainId]!.kvstoreAddress!,
-      signer,
-    );
     const feeValue = await KVStoreUtils.get(
-      kvstoreContract,
+      chainId,
       oracleAddress,
       KVStoreKeys.fee,
     );

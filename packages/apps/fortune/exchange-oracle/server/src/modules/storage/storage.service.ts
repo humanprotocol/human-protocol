@@ -4,7 +4,6 @@ import {
   EncryptionUtils,
   EscrowClient,
   StorageClient,
-  NETWORKS,
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import {
@@ -18,7 +17,6 @@ import { ISolution } from '../../common/interfaces/job';
 import { Web3Service } from '../web3/web3.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class StorageService {
@@ -82,18 +80,17 @@ export class StorageService {
     let fileToUpload = JSON.stringify(solutions);
     if (this.pgpConfigService.encrypt) {
       try {
-        const rpcUrl = this.web3Service.getRpcUrl(chainId);
         const signer = this.web3Service.getSigner(chainId);
         const escrowClient = await EscrowClient.build(signer);
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
 
         const exchangeOraclePublickKey = await KVStoreUtils.getPublicKey(
-          rpcUrl,
+          chainId,
           signer.address,
         );
         const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
-          rpcUrl,
+          chainId,
           recordingOracleAddress,
         );
         if (

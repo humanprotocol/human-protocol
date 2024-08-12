@@ -4,7 +4,6 @@ import {
   EncryptionUtils,
   EscrowClient,
   KVStoreUtils,
-  NETWORKS,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { FortuneFinalResult } from '../../common/dto/result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ControlledError } from '../../common/errors/controlled';
-import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class StorageService {
@@ -57,17 +55,12 @@ export class StorageService {
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const kvstoreContract = KVStore__factory.connect(
-      NETWORKS[chainId]!.kvstoreAddress!,
-      signer,
-    );
-
     const reputationOraclePublicKey = await KVStoreUtils.getPublicKey(
-      kvstoreContract,
+      chainId,
       signer.address,
     );
     const jobLauncherPublicKey = await KVStoreUtils.getPublicKey(
-      kvstoreContract,
+      chainId,
       jobLauncherAddress,
     );
 

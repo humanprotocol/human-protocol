@@ -5,13 +5,12 @@ import {
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { OperatorUtils } from '@human-protocol/sdk';
+import { OperatorUtils, Role } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 
 @Injectable()
 export class OracleDiscoveryService {
-  logger = new Logger('OracleDiscoveryService');
-  EXCHANGE_ORACLE = 'Exchange Oracle';
+  logger = new Logger(OracleDiscoveryService.name);
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
@@ -47,8 +46,9 @@ export class OracleDiscoveryService {
       receivedOracles = await OperatorUtils.getReputationNetworkOperators(
         Number(chainId),
         address,
-        this.EXCHANGE_ORACLE,
+        Role.ExchangeOracle,
       );
+
       const filteredOracles = this.filterOracles(
         receivedOracles,
         selectedJobTypes,

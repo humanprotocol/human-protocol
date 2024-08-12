@@ -7,7 +7,9 @@ import {
   HcaptchaDailyStatsResponseDto,
   HcaptchaStats,
 } from './dto/hcaptcha.dto';
+import { HmtDailyStatsResponseDto } from './dto/hmt.dto';
 import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
+import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 
 @ApiTags('Stats')
 @Controller('/stats')
@@ -76,5 +78,53 @@ export class StatsController {
     const result: HcaptchaStats =
       await this.statsService.hCaptchaGeneralStats();
     return result;
+  }
+
+  @Get('/general')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get HMT general stats',
+    description: 'Endpoint to return HMT general stats.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'General stats retrieved successfully',
+    type: HmtGeneralStatsDto,
+  })
+  public async hmtGeneral(): Promise<HmtGeneralStatsDto> {
+    const results: HmtGeneralStatsDto =
+      await this.statsService.hmtGeneralStats();
+    return results;
+  }
+
+  @Get('/hmt/daily')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get HMT stats',
+    description: 'Endpoint to return HMT stats.',
+  })
+  @ApiQuery({
+    name: 'from',
+    type: String,
+    description: 'Start date in the format YYYY-MM-DD',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'to',
+    type: String,
+    description: 'End date in the format YYYY-MM-DD',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Stats retrieved successfully',
+    type: HmtDailyStatsResponseDto,
+  })
+  public async hmtDailyStats(
+    @Query('from', DateValidationPipe) from: string,
+    @Query('to', DateValidationPipe) to: string,
+  ): Promise<HmtDailyStatsResponseDto> {
+    const results = await this.statsService.hmtDailyStats(from, to);
+    return { from, to, results };
   }
 }

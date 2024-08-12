@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { KvStoreGateway } from '../kv-store.gateway';
-import { KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { KV_STORE_CACHE_KEY } from '../../../common/constants/cache';
 
 const EXPECTED_URL = 'https://example.com';
 jest.mock('@human-protocol/sdk', () => {
@@ -11,19 +12,20 @@ jest.mock('@human-protocol/sdk', () => {
   return {
     ...actualSdk,
     KVStoreUtils: {
-      get: jest.fn().mockResolvedValue('https://example.com')
+      get: jest.fn().mockResolvedValue('https://example.com'),
     },
   };
 });
 
 jest.mock('ethers', () => {
   const actualEthers = jest.requireActual('ethers');
-  const mockProvider = 
-  { provider: {
-    getNetwork: jest.fn().mockResolvedValue({
-      chainId: 1338
-    }),
-  }};
+  const mockProvider = {
+    provider: {
+      getNetwork: jest.fn().mockResolvedValue({
+        chainId: 1338,
+      }),
+    },
+  };
   return {
     ...actualEthers,
     ethers: {
@@ -32,7 +34,6 @@ jest.mock('ethers', () => {
     },
   };
 });
-
 
 describe('KvStoreGateway', () => {
   let service: KvStoreGateway;
@@ -85,35 +86,32 @@ describe('KvStoreGateway', () => {
   describe('getExchangeOracleUrlByAddress', () => {
     it('should get data from kvStoreUtils, if not cached', async () => {
       const testAddress = 'testAddress';
+      const cacheKey = `${KV_STORE_CACHE_KEY}:${testAddress}`;
       const expectedUrl = EXPECTED_URL;
       mockKVStoreUtils.get.mockResolvedValue(expectedUrl);
       cacheManager.get.mockResolvedValue(undefined);
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        expect.any(Object),
+        ChainId.LOCALHOST,
         testAddress,
         KVStoreKeys.url,
       );
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        service.cachePrefix + testAddress,
-        expectedUrl,
-        { ttl: configService.cacheTtlExchangeOracleUrl },
-      );
-      expect(cacheManager.get).toHaveBeenCalledWith(
-        service.cachePrefix + testAddress,
-      );
+
+      expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, expectedUrl, {
+        ttl: configService.cacheTtlExchangeOracleUrl,
+      });
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(result).toBe(expectedUrl);
     });
     it('should get data from cache, if available', async () => {
       const testAddress = 'testAddress';
+      const cacheKey = `${KV_STORE_CACHE_KEY}:${testAddress}`;
       const expectedUrl = EXPECTED_URL;
       cacheManager.get.mockResolvedValue(expectedUrl);
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
 
       expect(KVStoreUtils.get).not.toHaveBeenCalled();
-      expect(cacheManager.get).toHaveBeenCalledWith(
-        service.cachePrefix + testAddress,
-      );
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(result).toBe(expectedUrl);
     });
   });

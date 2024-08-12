@@ -6,7 +6,9 @@ const DEFAULT_REDIS_PORT = 6379;
 const DEFAULT_CACHE_HMT_PRICE_TTL = 60;
 const DEFAULT_CACHE_HMT_GENERAL_STATS_TTL = 2 * 60;
 const DEFAULT_HMT_PRICE_CACHE_KEY = 'hmt-price';
+const DEFAULT_HMT_GENERAL_STATS_CACHE_KEY = 'hmt-general';
 export const HCAPTCHA_PREFIX = 'hcaptcha-';
+export const HMT_PREFIX = 'hmt-';
 
 @Injectable()
 export class RedisConfigService {
@@ -33,6 +35,12 @@ export class RedisConfigService {
     return this.configService.get<string>(
       'HMT_PRICE_CACHE_KEY',
       DEFAULT_HMT_PRICE_CACHE_KEY,
+    );
+  }
+  get hmtGeneralStatsCacheKey(): string {
+    return this.configService.get<string>(
+      'HMT_GENERAL_STATS_CACHE_KEY',
+      DEFAULT_HMT_GENERAL_STATS_CACHE_KEY,
     );
   }
 }

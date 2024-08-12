@@ -1,6 +1,5 @@
 import { WorkerController } from '../worker.controller';
 import { WorkerService } from '../worker.service';
-import { Mapper } from '@automapper/core';
 import {
   SignupWorkerCommand,
   SignupWorkerDto,

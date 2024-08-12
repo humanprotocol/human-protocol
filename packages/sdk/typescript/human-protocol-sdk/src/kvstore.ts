@@ -19,7 +19,10 @@ import {
 import gqlFetch from 'graphql-request';
 import { NetworkData } from './types';
 import { getSubgraphUrl, isValidUrl } from './utils';
-import { GET_KVSTORE_BY_ADDRESS_QUERY } from './graphql/queries/kvstore';
+import {
+  GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY,
+  GET_KVSTORE_BY_ADDRESS_QUERY,
+} from './graphql/queries/kvstore';
 import { KVStoreData } from './graphql';
 import { IKVStore } from './interfaces';
 /**
@@ -359,40 +362,36 @@ export class KVStoreUtils {
   }
 
   /**
-   * Gets the value of a key-value pair in the contract.
+   * Gets the value of a key-value pair in the KVStore using the subgraph.
    *
-   * @param {KVStore} contract The KVStore contract instance.
+   * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address from which to get the key value.
    * @param {string} key Key to obtain the value.
    * @returns {Promise<string>} Value of the key.
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
+   * @throws {ErrorKVStoreEmptyKey} - Thrown if the key is empty
    *
    * **Code example**
    *
    * ```ts
-   * import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
+   * const chainId = ChainId.POLYGON_AMOY;
    * const address = '0x1234567890123456789012345678901234567890';
-   * const key = 'Role';
+   * const key = 'role';
    *
-   * const value = await KVStoreUtils.get(rpcUrl, address, key);
+   * const value = await KVStoreUtils.get(chainId, address, key);
    * console.log(value);
    * ```
    */
   public static async get(
-    rpcUrl: string,
+    chainId: ChainId,
     address: string,
     key: string
   ): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-
-    const runner = new ethers.JsonRpcProvider(rpcUrl);
-    const network = await runner.provider?.getNetwork();
-    const chainId: ChainId = Number(network?.chainId);
 
     const networkData = NETWORKS[chainId];
 
@@ -400,43 +399,43 @@ export class KVStoreUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const contract = KVStore__factory.connect(
-      networkData.kvstoreAddress,
-      runner
+    const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
+      getSubgraphUrl(networkData),
+      GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
+      { address: address.toLowerCase(), key }
     );
 
-    try {
-      const result = await contract.get(address, key);
-      return result;
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
-      return e;
+    if (!kvstores || kvstores.length === 0) {
+      throw new Error(`Key "${key}" not found for address ${address}`);
     }
+
+    const value = kvstores[0].value;
+
+    return value;
   }
 
   /**
-   * Gets the URL value of the given entity, and verify its hash.
+   * Gets the URL value of the given entity, and verifies its hash.
    *
-   * @param {KVStore} contract The KVStore contract instance.
+   * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address from which to get the URL value.
    * @param {string} urlKey Configurable URL key. `url` by default.
-   * @returns {Promise<string>} URL value for the given address if exists, and the content is valid
+   * @returns {Promise<string>} URL value for the given address if it exists, and the content is valid
    *
    * **Code example**
    *
    * ```ts
-   * import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
+   * const chainId = ChainId.POLYGON_AMOY;
    * const address = '0x1234567890123456789012345678901234567890';
    *
-   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(rpcUrl, kvstoreContract, address);
+   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(chainId, address);
    * console.log(url);
    * ```
    */
   public static async getFileUrlAndVerifyHash(
-    rpcUrl: string,
+    chainId: ChainId,
     address: string,
     urlKey = 'url'
   ): Promise<string> {
@@ -447,7 +446,7 @@ export class KVStoreUtils {
       hash = '';
 
     try {
-      url = await this.get(rpcUrl, address, urlKey);
+      url = await this.get(chainId, address, urlKey);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
     }
@@ -458,7 +457,7 @@ export class KVStoreUtils {
     }
 
     try {
-      hash = await this.get(rpcUrl, address, hashKey);
+      hash = await this.get(chainId, address, hashKey);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
     }
@@ -474,31 +473,30 @@ export class KVStoreUtils {
   }
 
   /**
-   * Gets the public key of the given entity, and verify its hash.
+   * Gets the public key of the given entity, and verifies its hash.
    *
-   * @param {KVStore} contract The KVStore contract instance.
+   * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address from which to get the public key.
-   * @returns {Promise<string>} Public key for the given address if exists, and the content is valid
+   * @returns {Promise<string>} Public key for the given address if it exists, and the content is valid
    *
    * **Code example**
    *
    * ```ts
-   * import { KVStore__factory, KVStoreUtils } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
+   * const chainId = ChainId.POLYGON_AMOY;
    * const address = '0x1234567890123456789012345678901234567890';
    *
-   * const publicKey = await KVStoreUtils.getPublicKey(rpcUrl, address);
+   * const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
    * console.log(publicKey);
    * ```
    */
   public static async getPublicKey(
-    rpcUrl: string,
+    chainId: ChainId,
     address: string
   ): Promise<string> {
     const publicKeyUrl = await this.getFileUrlAndVerifyHash(
-      rpcUrl,
+      chainId,
       address,
       KVStoreKeys.publicKey
     );

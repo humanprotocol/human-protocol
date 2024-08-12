@@ -1,24 +1,20 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ethers } from 'ethers';
-import { ChainId, KVStoreKeys, KVStoreUtils, NETWORKS } from '@human-protocol/sdk';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { KVStore__factory } from '@human-protocol/core/typechain-types';
+import { KV_STORE_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class KvStoreGateway {
-  get cachePrefix() {
-    return 'KV_STORE:';
-  }
   constructor(
     private configService: EnvironmentConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
-    const cachedUrl: string | undefined = await this.cacheManager.get(
-      this.cachePrefix + address,
-    );
+    const key = `${KV_STORE_CACHE_KEY}:${address}`;
+    const cachedUrl: string | undefined = await this.cacheManager.get(key);
     if (cachedUrl) {
       return cachedUrl;
     }
@@ -28,8 +24,7 @@ export class KvStoreGateway {
       const network = await runner.provider?.getNetwork();
       const chainId: ChainId = Number(network?.chainId);
 
-      const kvstoreContract = KVStore__factory.connect(NETWORKS[chainId]!.kvstoreAddress!, runner);
-      fetchedUrl = await KVStoreUtils.get(kvstoreContract, address, KVStoreKeys.url);
+      fetchedUrl = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
         throw new HttpException(
@@ -48,7 +43,7 @@ export class KvStoreGateway {
         400,
       );
     } else {
-      await this.cacheManager.set(this.cachePrefix + address, fetchedUrl, {
+      await this.cacheManager.set(key, fetchedUrl, {
         ttl: this.configService.cacheTtlExchangeOracleUrl,
       } as any);
       return fetchedUrl;

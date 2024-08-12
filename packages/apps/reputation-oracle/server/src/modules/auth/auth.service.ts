@@ -33,7 +33,6 @@ import {
   KVStoreClient,
   KVStoreKeys,
   KVStoreUtils,
-  NETWORKS,
   Role,
 } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
@@ -45,8 +44,6 @@ import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { SiteKeyType } from '../../common/enums';
-import { KVStore__factory } from '@human-protocol/core/typechain-types';
-import { Wallet } from 'ethers';
 
 @Injectable()
 export class AuthService {
@@ -67,15 +64,6 @@ export class AuthService {
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -85,6 +73,18 @@ export class AuthService {
       throw new ControlledError(
         ErrorAuth.InvalidEmailOrPassword,
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      userEntity.role !== UserRole.HUMAN_APP &&
+      (!data.hCaptchaToken ||
+        !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+          .success)
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -170,16 +170,10 @@ export class AuthService {
       chainId = ChainId.POLYGON_AMOY;
     }
 
-    const signer = this.web3Service.getSigner(chainId);
-
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
-      const kvstoreContract = KVStore__factory.connect(
-        NETWORKS[chainId]!.kvstoreAddress!,
-        signer,
-      );
       const operatorStatus = await KVStoreUtils.get(
-        kvstoreContract,
+        chainId,
         this.web3Service.getOperatorAddress(),
         userEntity.evmAddress,
       );
@@ -430,37 +424,25 @@ export class AuthService {
 
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
-    const kvstoreContract = KVStore__factory.connect(
-      NETWORKS[chainId]!.kvstoreAddress!,
-      signer,
-    );
 
     if (
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await KVStoreUtils.get(kvstoreContract, data.address, KVStoreKeys.role),
+        await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      !(await KVStoreUtils.get(kvstoreContract, data.address, KVStoreKeys.fee))
-    ) {
+    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee))) {
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      !(await KVStoreUtils.get(kvstoreContract, data.address, KVStoreKeys.url))
-    ) {
+    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url))) {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
     if (
-      !(await KVStoreUtils.get(
-        kvstoreContract,
-        data.address,
-        KVStoreKeys.jobTypes,
-      ))
+      !(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.jobTypes))
     ) {
       throw new ControlledError(
         ErrorAuth.InvalidJobType,

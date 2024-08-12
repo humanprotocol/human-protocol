@@ -4,7 +4,6 @@ import {
   EncryptionUtils,
   EscrowClient,
   StorageClient,
-  NETWORKS,
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -15,7 +14,6 @@ import { SaveSolutionsDto } from '../job/job.dto';
 import { Web3Service } from '../web3/web3.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { KVStore__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class StorageService {
@@ -90,17 +88,12 @@ export class StorageService {
         const reputationOracleAddress =
           await escrowClient.getReputationOracleAddress(escrowAddress);
 
-        const kvstoreContract = KVStore__factory.connect(
-          NETWORKS[chainId]!.kvstoreAddress!,
-          signer,
-        );
-
         const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
-          kvstoreContract,
+          chainId,
           signer.address,
         );
         const reputationOraclePublicKey = await KVStoreUtils.getPublicKey(
-          kvstoreContract,
+          chainId,
           reputationOracleAddress,
         );
         if (

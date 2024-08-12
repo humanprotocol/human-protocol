@@ -1,10 +1,11 @@
 import unittest
 from test.human_protocol_sdk.utils.encryption import (
+    encrypted_message,
+    message,
     public_key,
     public_key2,
     public_key3,
     signed_message,
-    message,
 )
 
 from human_protocol_sdk.encryption import EncryptionUtils
@@ -38,3 +39,8 @@ class TestEncryptionUtils(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             EncryptionUtils.get_signed_data("Invalid message")
         self.assertEqual(f"Expected: ASCII-armored PGP data", str(cm.exception))
+
+    def test_is_encrypted(self):
+        self.assertTrue(EncryptionUtils.is_encrypted(encrypted_message))
+        self.assertFalse(EncryptionUtils.is_encrypted(signed_message))
+        self.assertFalse(EncryptionUtils.is_encrypted(message))

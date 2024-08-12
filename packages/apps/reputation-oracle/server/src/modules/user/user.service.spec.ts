@@ -611,7 +611,7 @@ describe('UserService', () => {
       expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        expect.any(Object),
+        ChainId.POLYGON_AMOY,
         MOCK_ADDRESS,
         MOCK_ADDRESS,
       );
@@ -717,7 +717,7 @@ describe('UserService', () => {
       expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
-        expect.any(Object),
+        ChainId.POLYGON_AMOY,
         MOCK_ADDRESS,
         MOCK_ADDRESS,
       );

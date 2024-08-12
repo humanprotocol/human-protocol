@@ -38,6 +38,7 @@ import { RegisterAddressModule } from './modules/register-address/register-addre
 import { InterceptorModule } from './common/interceptors/interceptor.module';
 import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
 import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
 
@@ -99,6 +100,7 @@ import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check
     RegisterAddressModule,
     InterceptorModule,
     TokenRefreshModule,
+    CronJobModule,
   ],
   controllers: [
     AppController,
