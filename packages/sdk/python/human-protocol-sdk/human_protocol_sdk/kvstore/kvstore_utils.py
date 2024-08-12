@@ -128,7 +128,7 @@ class KVStoreUtils:
 
                 chain_id = ChainId.POLYGON_AMOY
                 address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                key = 'Role'
+                key = 'role'
 
                 result = KVStoreUtils.get(chain_id, address, key)
                 print(result)
