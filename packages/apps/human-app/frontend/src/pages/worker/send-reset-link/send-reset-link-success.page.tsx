@@ -18,6 +18,7 @@ import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { FormCaptcha } from '@/components/h-captcha';
 import { MailTo } from '@/components/ui/mail-to';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function SendResetLinkWorkerSuccessPage() {
   const { t } = useTranslation();
@@ -25,7 +26,8 @@ export function SendResetLinkWorkerSuccessPage() {
     keyInStorage: 'email',
     schema: z.string().email(),
   });
-  const { mutate, error, isError, isPending } = useSendResetLinkMutation();
+  const { mutate, error, isError, isPending, reset } =
+    useSendResetLinkMutation();
 
   const handleWorkerSendResetLink = (dto: SendResetLinkHcaptcha) => {
     mutate({ ...dto, email: email || '' });
@@ -37,6 +39,8 @@ export function SendResetLinkWorkerSuccessPage() {
     },
     resolver: zodResolver(sendResetLinkHcaptchaDtoSchema),
   });
+
+  useResetMutationErrors(methods.watch, reset);
 
   return (
     <PageCard

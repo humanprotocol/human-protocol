@@ -5,14 +5,23 @@ import { Button } from '@/components/ui/button';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { breakpoints } from '@/styles/theme';
 
 export function ExpirationModal() {
   const { closeModal } = useModalStore();
   const navigate = useNavigate();
+
   return (
     <Grid
       container
-      sx={{ justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}
+      sx={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '124px',
+        [breakpoints.mobile]: {
+          padding: '32px',
+        },
+      }}
     >
       <Grid
         container
@@ -31,7 +40,7 @@ export function ExpirationModal() {
             justifyContent: 'center',
             alignItems: 'flex-start',
             flexDirection: 'column',
-            gap: '32px',
+            gap: '38px',
           }}
         >
           <Typography variant="body1">

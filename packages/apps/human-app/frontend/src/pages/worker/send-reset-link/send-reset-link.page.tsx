@@ -16,6 +16,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
 import { routerPaths } from '@/router/router-paths';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
@@ -34,7 +35,10 @@ export function SendResetLinkWorkerPage() {
     error: sendResetLinkWorkerError,
     isError: isSendResetLinkWorkerError,
     isPending: isSendResetLinkWorkerPending,
+    reset: sendResetLinkWorkerMutateReset,
   } = useSendResetLinkMutation();
+
+  useResetMutationErrors(methods.watch, sendResetLinkWorkerMutateReset);
 
   function handleWorkerSendResetLink(data: SendResetLinkDto) {
     sendResetLinkWorkerMutate(data);

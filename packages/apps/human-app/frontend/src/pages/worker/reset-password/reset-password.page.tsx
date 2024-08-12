@@ -20,6 +20,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { routerPaths } from '@/router/router-paths';
 import { FormCaptcha } from '@/components/h-captcha';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
@@ -39,7 +40,10 @@ export function ResetPasswordWorkerPage() {
     error: resetPasswordWorkerError,
     isError: isResetPasswordWorkerError,
     isPending: isResetPasswordWorkerPending,
+    reset: isResetPasswordWorkerMutationReset,
   } = useResetPasswordMutation();
+
+  useResetMutationErrors(methods.watch, isResetPasswordWorkerMutationReset);
 
   const handleWorkerResetPassword = (data: ResetPasswordDto) => {
     resetPasswordWorkerMutate(

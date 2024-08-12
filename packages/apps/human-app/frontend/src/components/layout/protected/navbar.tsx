@@ -8,7 +8,7 @@ import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
 
-export const paddingX = '44px';
+export const NAVBAR_PADDING = '44px';
 
 interface NavbarProps {
   open: boolean;
@@ -68,7 +68,7 @@ export function Navbar({
         backgroundColor: colorPalette.white,
         display: { xs: 'flex', md: 'none' },
         width: '100%',
-        px: isMobile ? paddingX : 0,
+        px: isMobile ? NAVBAR_PADDING : 0,
         py: isMobile ? '32px' : 0,
         zIndex: '1300',
         position: open ? 'sticky' : 'relative',

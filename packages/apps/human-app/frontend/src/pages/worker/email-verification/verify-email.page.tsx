@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { MailTo } from '@/components/ui/mail-to';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function VerifyEmailWorkerPage() {
   const navigate = useNavigate();
@@ -36,8 +37,10 @@ export function VerifyEmailWorkerPage() {
     }),
   });
   const mutationState = useResendEmailVerificationWorkerMutationState();
-  const { mutate: resendEmailVerificationMutation } =
-    useResendEmailVerificationWorkerMutation();
+  const {
+    mutate: resendEmailVerificationMutation,
+    reset: resendEmailVerificationMutationReset,
+  } = useResendEmailVerificationWorkerMutation();
 
   const methods = useForm<Pick<ResendEmailVerificationDto, 'h_captcha_token'>>({
     defaultValues: {
@@ -45,6 +48,8 @@ export function VerifyEmailWorkerPage() {
     },
     resolver: zodResolver(resendEmailVerificationHcaptchaSchema),
   });
+
+  useResetMutationErrors(methods.watch, resendEmailVerificationMutationReset);
 
   const handleResend = (
     data: Pick<ResendEmailVerificationDto, 'h_captcha_token'>

@@ -2,6 +2,7 @@
 import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
+import { useQueryClient } from '@tanstack/react-query';
 import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import { useModalStore } from '@/components/ui/modal/modal.store';
@@ -47,11 +48,22 @@ export const AuthContext = createContext<
 >(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const { openModal } = useModalStore();
   const [authState, setAuthState] = useState<{
     user: UserData | null;
     status: AuthStatus;
   }>({ user: null, status: 'loading' });
+
+  const displayExpirationModal = () => {
+    queryClient.setDefaultOptions({ queries: { enabled: false } });
+    openModal({
+      modalState: 'EXPIRATION_MODAL',
+      displayCloseButton: false,
+      maxWidth: 'sm',
+    });
+  };
+
   const updateUserData = (updateUserDataPayload: UpdateUserDataPayload) => {
     setAuthState((state) => {
       if (!state.user) {
@@ -88,13 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const validUserData = userDataSchema.parse(userDataWithSavedData);
       setAuthState({ user: validUserData, status: 'success' });
-      browserAuthProvider.signOutSubscription = () => {
-        openModal({
-          modalState: 'EXPIRATION_MODAL',
-          displayCloseButton: false,
-          maxWidth: 'sm',
-        });
-      };
+      browserAuthProvider.signOutSubscription = displayExpirationModal;
     } catch (e) {
       // eslint-disable-next-line no-console -- ...
       console.error('Invalid Jwt payload:', e);
@@ -104,13 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = (singIsSuccess: SignInSuccessResponse) => {
-    browserAuthProvider.signIn(singIsSuccess, 'web2', () => {
-      openModal({
-        modalState: 'EXPIRATION_MODAL',
-        displayCloseButton: false,
-        maxWidth: 'sm',
-      });
-    });
+    browserAuthProvider.signIn(singIsSuccess, 'web2');
     handleSignIn();
   };
 
@@ -121,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     handleSignIn();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

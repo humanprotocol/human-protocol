@@ -20,6 +20,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -52,7 +53,10 @@ export function SignInWorkerPage() {
     error: signInWorkerError,
     isError: isSignInWorkerError,
     isPending: isSignInWorkerPending,
+    reset: signInWorkerMutationReset,
   } = useSignInMutation();
+
+  useResetMutationErrors(methods.watch, signInWorkerMutationReset);
 
   function handleWorkerSignIn(data: SignInDto) {
     signInWorkerMutate(data);
