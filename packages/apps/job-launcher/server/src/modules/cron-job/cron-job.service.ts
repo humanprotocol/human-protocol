@@ -378,7 +378,12 @@ export class CronJobService {
         const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
         const job = jobMap.get(key);
 
-        if (!job || job.status === JobStatus.TO_CANCEL) continue;
+        if (
+          !job ||
+          job.status === JobStatus.TO_CANCEL ||
+          job.status === JobStatus.CANCELED
+        )
+          continue;
 
         let newStatus: JobStatus | null = null;
         if (

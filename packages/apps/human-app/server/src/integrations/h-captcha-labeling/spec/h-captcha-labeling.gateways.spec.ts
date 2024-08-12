@@ -16,7 +16,6 @@ import {
   verifyTokenCommandFixture,
   verifyTokenParamsFixture,
 } from '../../../modules/h-captcha/spec/h-captcha.fixtures';
-import { hCaptchaGatewayConfigServiceMock } from '../../../common/config/spec/gateway-config-service.mock';
 import { HCaptchaVerifyGateway } from '../h-captcha-verify.gateway';
 import { toCleanObjParams } from '../../../common/utils/gateway-common.utils';
 

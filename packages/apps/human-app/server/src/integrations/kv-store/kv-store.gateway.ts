@@ -1,35 +1,30 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ethers } from 'ethers';
-import { KVStoreClient, KVStoreKeys } from '@human-protocol/sdk';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { KV_STORE_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class KvStoreGateway {
-  get cachePrefix() {
-    return 'KV_STORE:';
-  }
-  private kvStoreClient: KVStoreClient;
   constructor(
     private configService: EnvironmentConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  async onModuleInit(): Promise<void> {
-    this.kvStoreClient = await KVStoreClient.build(
-      new ethers.JsonRpcProvider(this.configService.rpcUrl),
-    );
-  }
   async getExchangeOracleUrlByAddress(address: string): Promise<string | void> {
-    const cachedUrl: string | undefined = await this.cacheManager.get(
-      this.cachePrefix + address,
-    );
+    const key = `${KV_STORE_CACHE_KEY}:${address}`;
+    const cachedUrl: string | undefined = await this.cacheManager.get(key);
     if (cachedUrl) {
       return cachedUrl;
     }
     let fetchedUrl: string;
     try {
-      fetchedUrl = await this.kvStoreClient.get(address, KVStoreKeys.url);
+      const runner = new ethers.JsonRpcProvider(this.configService.rpcUrl);
+      const network = await runner.provider?.getNetwork();
+      const chainId: ChainId = Number(network?.chainId);
+
+      fetchedUrl = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
         throw new HttpException(
@@ -48,7 +43,7 @@ export class KvStoreGateway {
         400,
       );
     } else {
-      await this.cacheManager.set(this.cachePrefix + address, fetchedUrl, {
+      await this.cacheManager.set(key, fetchedUrl, {
         ttl: this.configService.cacheTtlExchangeOracleUrl,
       } as any);
       return fetchedUrl;

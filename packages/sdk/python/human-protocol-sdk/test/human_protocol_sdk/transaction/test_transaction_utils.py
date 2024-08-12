@@ -155,7 +155,7 @@ class TestTransactionUtils(unittest.TestCase):
             self.assertIsNotNone(transaction)
             self.assertEqual(transaction.chain_id, ChainId.POLYGON_AMOY)
             self.assertEqual(transaction.block, mock_transaction["block"])
-            self.assertEqual(transaction.hash, mock_transaction["txHash"])
+            self.assertEqual(transaction.tx_hash, mock_transaction["txHash"])
             self.assertEqual(transaction.from_address, mock_transaction["from"])
             self.assertEqual(transaction.to_address, mock_transaction["to"])
             self.assertEqual(transaction.timestamp, mock_transaction["timestamp"])

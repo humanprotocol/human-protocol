@@ -52,7 +52,7 @@ export function WalletConnectModal() {
                   <Link
                     rel="noreferrer"
                     target="_blank"
-                    to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
+                    to={env.VITE_WALLET_CONNECT_MODAL_LINK}
                   />
                 ),
               }}

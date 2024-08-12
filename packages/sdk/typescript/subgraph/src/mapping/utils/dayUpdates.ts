@@ -1,4 +1,4 @@
-import { ethereum } from '@graphprotocol/graph-ts';
+import { Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { EventDayData } from '../../../generated/schema';
 import { ZERO_BI, ONE_DAY } from './number';
 
@@ -7,9 +7,11 @@ export function getEventDayData(event: ethereum.Event): EventDayData {
   const dayID = timestamp / ONE_DAY;
   const dayStartTimestamp = dayID * ONE_DAY;
 
-  let eventDayData = EventDayData.load(dayID.toString());
+  const eventDayDataID = Bytes.fromI32(dayID);
+
+  let eventDayData = EventDayData.load(eventDayDataID);
   if (eventDayData === null) {
-    eventDayData = new EventDayData(dayID.toString());
+    eventDayData = new EventDayData(eventDayDataID);
     eventDayData.timestamp = dayStartTimestamp;
     eventDayData.dailyFundEventCount = ZERO_BI;
     eventDayData.dailySetupEventCount = ZERO_BI;

@@ -1,7 +1,6 @@
 /* eslint-disable camelcase -- ... */
 import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -18,6 +17,8 @@ import {
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { FormCaptcha } from '@/components/h-captcha';
+import { MailTo } from '@/components/ui/mail-to';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function SendResetLinkWorkerSuccessPage() {
   const { t } = useTranslation();
@@ -25,7 +26,8 @@ export function SendResetLinkWorkerSuccessPage() {
     keyInStorage: 'email',
     schema: z.string().email(),
   });
-  const { mutate, error, isError, isPending } = useSendResetLinkMutation();
+  const { mutate, error, isError, isPending, reset } =
+    useSendResetLinkMutation();
 
   const handleWorkerSendResetLink = (dto: SendResetLinkHcaptcha) => {
     mutate({ ...dto, email: email || '' });
@@ -37,6 +39,8 @@ export function SendResetLinkWorkerSuccessPage() {
     },
     resolver: zodResolver(sendResetLinkHcaptchaDtoSchema),
   });
+
+  useResetMutationErrors(methods.watch, reset);
 
   return (
     <PageCard
@@ -85,23 +89,20 @@ export function SendResetLinkWorkerSuccessPage() {
               type="submit"
               variant="outlined"
             >
-              {t('worker.sendResetLinkSuccess.btn')}
+              {methods.formState.submitCount > 0 ? (
+                <>{t('worker.sendResetLinkSuccess.btnAfterSend')}</>
+              ) : (
+                <>{t('worker.sendResetLinkSuccess.btn')}</>
+              )}
             </Button>
 
             <Typography variant="body1">
               <Trans
                 components={{
                   1: <Typography component="span" fontWeight={600} />,
-                  2: (
-                    <Link
-                      rel="noreferrer"
-                      target="_blank"
-                      to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
-                    />
-                  ),
+                  2: <MailTo mail={env.VITE_HUMAN_PROTOCOL_HELP_URL} />,
                 }}
                 i18nKey="worker.sendResetLinkSuccess.paragraph4"
-                values={{ email }}
               />
             </Typography>
           </Grid>

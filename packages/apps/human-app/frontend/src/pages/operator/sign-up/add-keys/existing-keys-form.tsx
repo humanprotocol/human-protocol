@@ -11,6 +11,7 @@ import {
 import { ExistingKeys } from '@/pages/operator/sign-up/add-keys/existing-keys';
 import { EditExistingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -38,6 +39,8 @@ export function ExistingKeysForm({
   const handleEditExistingKeys = (data: EditEthKVStoreValuesMutationData) => {
     existingKeysMutation.mutate(data);
   };
+
+  useResetMutationErrors(existingKeysMethods.watch, existingKeysMutation.reset);
 
   return (
     <Grid container gap="2rem" marginTop="1rem">

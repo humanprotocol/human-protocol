@@ -1,8 +1,8 @@
 import {
   EscrowClient,
   EscrowStatus,
-  KVStoreClient,
   KVStoreKeys,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -96,7 +96,6 @@ export class JobService {
   async processJobSolution(webhook: WebhookDto): Promise<string> {
     const signer = this.web3Service.getSigner(webhook.chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const kvstoreClient = await KVStoreClient.build(signer);
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       webhook.escrowAddress,
@@ -185,7 +184,8 @@ export class JobService {
     ) {
       const reputationOracleAddress =
         await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-      const reputationOracleWebhook = (await kvstoreClient.get(
+      const reputationOracleWebhook = (await KVStoreUtils.get(
+        webhook.chainId,
         reputationOracleAddress,
         KVStoreKeys.webhookUrl,
       )) as string;
@@ -205,7 +205,8 @@ export class JobService {
       return 'The requested job is completed.';
     }
     if (errorSolutions.length) {
-      const exchangeOracleURL = (await kvstoreClient.get(
+      const exchangeOracleURL = (await KVStoreUtils.get(
+        webhook.chainId,
         await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
         KVStoreKeys.webhookUrl,
       )) as string;

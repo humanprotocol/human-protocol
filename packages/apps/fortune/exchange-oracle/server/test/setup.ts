@@ -14,11 +14,22 @@ export async function setup(): Promise<void> {
 
   const kvStoreClient = await KVStoreClient.build(wallet);
   await kvStoreClient.setBulk(
-    [KVStoreKeys.role, KVStoreKeys.fee, KVStoreKeys.webhookUrl],
-    [Role.ExchangeOracle, '1', 'http://localhost:5001/webhook'],
+    [
+      KVStoreKeys.role,
+      KVStoreKeys.fee,
+      KVStoreKeys.webhookUrl,
+      KVStoreKeys.url,
+      KVStoreKeys.jobTypes,
+    ],
+    [
+      Role.ExchangeOracle,
+      '1',
+      'http://localhost:5001/webhook',
+      'http://localhost:5001',
+      'FORTUNE',
+    ],
     { nonce: 0 },
   );
-
   if (process.env.PGP_ENCRYPT && process.env.PGP_ENCRYPT === 'true') {
     if (!process.env.PGP_PUBLIC_KEY) {
       throw new Error('PGP public key is empty');

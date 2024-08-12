@@ -4,6 +4,7 @@ import {
   HomepageLogoIcon,
   HomepageUserIcon,
   HomepageWorkIcon,
+  MobileHomeIcons,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
@@ -37,11 +38,9 @@ export function Welcome({ setStage }: WelcomeProps) {
               alignItems="center"
               direction="row"
               justifyContent="center"
-              sx={{ svg: { margin: '-1.2rem' } }}
+              sx={{ svg: { margin: '-1.4rem' } }}
             >
-              <HomepageWorkIcon />
-              <HomepageUserIcon />
-              <HomepageLogoIcon />
+              <MobileHomeIcons />
             </Stack>
           ) : (
             <Stack direction="row" sx={{ transform: 'translateX(-6%)' }}>

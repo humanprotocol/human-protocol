@@ -24,7 +24,7 @@ export class SigninWorkerCommand {
   @AutoMap()
   password: string;
   @AutoMap()
-  hCaptchaToken: string;
+  hCaptchaToken?: string;
 }
 
 export class SigninWorkerData {

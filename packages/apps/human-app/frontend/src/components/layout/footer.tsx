@@ -39,6 +39,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
           pb: 0,
           pt: 0,
           padding: '32px',
+          backgroundColor: colorPalette.paper.main,
         },
       }}
     >
@@ -56,7 +57,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
           sx={{
             gap: '24px',
             [breakpoints.mobile]: {
-              gap: '24px',
+              gap: '20px',
             },
           }}
         >

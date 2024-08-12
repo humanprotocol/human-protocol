@@ -46,6 +46,7 @@ Module
 """
 
 from typing import List
+
 from pgpy import PGPKey, PGPMessage
 from pgpy.constants import SymmetricKeyAlgorithm
 from pgpy.errors import PGPError
@@ -238,4 +239,37 @@ class EncryptionUtils:
             )
             return signed_message.message.__str__()
         except PGPError as e:
+            return False
+
+    @staticmethod
+    def is_encrypted(message: str) -> bool:
+        """
+        Checks whether a provided message is encrypted or not
+
+        :param message: Text to check
+
+        :return: True if the message is a PGP message, False otherwise
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.encryption import EncryptionUtils
+
+                message_1 = "message"
+                message_2 = \"\"\"-----BEGIN PGP MESSAGE-----
+
+                wV4Dh8BoKHkyM3YSAQdAMGVFo+Meahw422JdMyDkxPA4LXeN94bOqsS9OhYGliYw
+                72HgGdhoRHrRBKmRyD+Bb2HUrGptx8YRYqYJXiFVs4ev1USt6pF/5XjH+pM0d44B
+                0j0BcVevrVhjdBia8kEr74NJKB2qiPAffbFJFRE1asYqQgFTjNC60/egqfzpdRay
+                Tj8C+e0IXRMECIXnrOaw
+                =SjJh
+                -----END PGP MESSAGE-----\"\"\"
+
+                print("The message_1 is encrypted: ", EncryptionUtils.is_encrypted(message_1))
+                print("The message_2 is encrypted: ", EncryptionUtils.is_encrypted(message_2))
+        """
+        try:
+            unarmored = PGPMessage.ascii_unarmor(message)
+            return unarmored.get("magic") == "MESSAGE"
+        except (ValueError, PGPError):
             return False
