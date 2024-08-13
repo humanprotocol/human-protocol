@@ -1,12 +1,15 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
+import { AvaliableOraclesDto, OracleDiscoveryDto } from './web3.dto';
+import { OperatorUtils, Role } from '@human-protocol/sdk';
 
 @Injectable()
 export class Web3Service {
+  public readonly logger = new Logger(Web3Service.name);
   private signers: { [key: number]: Wallet } = {};
   public readonly signerAddress: string;
 
@@ -55,5 +58,87 @@ export class Web3Service {
 
   public getOperatorAddress(): string {
     return Object.values(this.signers)[0].address;
+  }
+
+  public async getAvailableOracles(
+    chainId: string,
+    address: string,
+    selectedJobTypes: string[] | undefined,
+  ): Promise<AvaliableOraclesDto> {
+    const availableOracles = await this.findAvailableOracles(
+      chainId,
+      address,
+      selectedJobTypes,
+    );
+
+    const exchangeOracles = availableOracles
+      .filter((oracle) => oracle.role === Role.ExchangeOracle)
+      .map((oracle) => oracle.address);
+
+    const recordingOracles = availableOracles
+      .filter((oracle) => oracle.role === Role.RecordingOracle)
+      .map((oracle) => oracle.address);
+
+    return {
+      exchangeOracles: exchangeOracles,
+      recordingOracles: recordingOracles,
+    };
+  }
+
+  private async findAvailableOracles(
+    chainId: string,
+    address: string,
+    selectedJobTypes: string[] | undefined,
+  ): Promise<OracleDiscoveryDto[]> {
+    try {
+      const receivedOracles = await OperatorUtils.getReputationNetworkOperators(
+        Number(chainId),
+        address,
+      );
+
+      const filteredOracles = this.filterOracles(
+        receivedOracles,
+        selectedJobTypes,
+      );
+
+      return filteredOracles;
+    } catch (error) {
+      this.logger.error(`Error processing chainId ${chainId}:`, error);
+    }
+    return [];
+  }
+
+  private filterOracles(
+    foundOracles: OracleDiscoveryDto[] | undefined,
+    selectedJobTypes: string[] | undefined,
+  ) {
+    if (foundOracles && foundOracles.length > 0) {
+      const filteredOracles = foundOracles.filter((oracle) => {
+        if (!oracle.url || oracle.url === null) {
+          return false;
+        }
+        return true;
+      });
+      if (selectedJobTypes && selectedJobTypes.length > 0) {
+        return filteredOracles.filter((oracle) =>
+          oracle.jobTypes && oracle.jobTypes.length > 0
+            ? this.areJobTypeSetsIntersect(oracle.jobTypes, selectedJobTypes)
+            : false,
+        );
+      }
+      return filteredOracles;
+    }
+    return [];
+  }
+
+  private areJobTypeSetsIntersect(
+    oracleJobTypes: string[],
+    requiredJobTypes: string[],
+  ) {
+    return oracleJobTypes.some((job) =>
+      requiredJobTypes
+        .map((requiredJob) => requiredJob.toLowerCase())
+        .includes(job.toLowerCase()),
+    );
   }
 }
