@@ -1,7 +1,8 @@
 // this file defines contract addresses
 // from https://docs.humanprotocol.org/human-tech-docs/architecture/components/smart-contracts/contract-addresses
 
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk/src/enums';
+import { NETWORKS } from '@human-protocol/sdk/src/constants';
 
 export interface ContractsAddresses {
   HMToken: string;
