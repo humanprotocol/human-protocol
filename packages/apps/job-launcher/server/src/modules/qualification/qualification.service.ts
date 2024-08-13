@@ -5,7 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
-import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 
 @Injectable()
 export class QualificationService {
@@ -21,7 +21,7 @@ export class QualificationService {
       const reputationOracleUrl = await KVStoreUtils.get(
         ChainId.POLYGON_AMOY,
         this.web3ConfigService.reputationOracleAddress,
-        'url',
+        KVStoreKeys.url,
       );
 
       if (!reputationOracleUrl) {
