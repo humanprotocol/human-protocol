@@ -67,7 +67,6 @@ describe('StorageService', () => {
         {
           provide: Web3Service,
           useValue: {
-            getRpcUrl: jest.fn().mockReturnValue(MOCK_RPC_URL),
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
