@@ -247,7 +247,7 @@ describe('UserService', () => {
         role: Role.WORKER,
         kyc: {
           country: 'FR',
-          status: KycStatus.PENDING_VERIFICATION,
+          status: KycStatus.REVIEW,
         },
         save: jest.fn(),
       };
@@ -438,7 +438,7 @@ describe('UserService', () => {
         email: '',
         kyc: {
           country: 'FR',
-          status: KycStatus.PENDING_VERIFICATION,
+          status: KycStatus.REVIEW,
         },
       };
 
