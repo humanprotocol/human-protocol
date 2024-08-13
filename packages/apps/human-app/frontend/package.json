@@ -20,7 +20,7 @@
     "@fontsource/inter": "^5.0.17",
     "@hcaptcha/react-hcaptcha": "^0.3.6",
     "@hookform/resolvers": "^3.3.4",
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "^3.0.1",
     "@mui/icons-material": "^5.15.7",
     "@mui/material": "^5.16.6",
     "@synaps-io/verify-sdk": "^4.0.45",
