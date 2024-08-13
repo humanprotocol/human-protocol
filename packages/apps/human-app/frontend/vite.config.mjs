@@ -22,8 +22,14 @@ const config = defineConfig({
     includeSource: ['./src/**/*.{ts,tsx}'],
     setupFiles: ['./src/setup-tests.ts/'],
   },
+  optimizeDeps: {
+    include: ['@human-protocol/sdk'],
+  },
   build: {
     target: 'esnext',
+    commonjsOptions: {
+      include: [/human-protocol-sdk/, /node_modules/],
+    },
   },
   server: {
     host: '127.0.0.1',
