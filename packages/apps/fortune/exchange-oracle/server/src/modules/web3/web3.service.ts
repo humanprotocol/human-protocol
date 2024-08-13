@@ -40,18 +40,6 @@ export class Web3Service {
     return this.signers[chainId];
   }
 
-  public getRpcUrl(chainId: number): string {
-    this.validateChainId(chainId);
-    const network = this.networkConfigService.networks.find(
-      (network) => network.chainId === chainId,
-    );
-    if (!network) {
-      this.logger.log(ErrorWeb3.InvalidChainId, Web3Service.name);
-      throw new BadRequestException(ErrorWeb3.InvalidChainId);
-    }
-    return network.rpcUrl!;
-  }
-
   public validateChainId(chainId: number): void {
     const validChainIds = this.getValidChains();
     if (!validChainIds.includes(chainId)) {
