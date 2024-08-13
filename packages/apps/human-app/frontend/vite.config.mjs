@@ -22,19 +22,13 @@ const config = defineConfig({
     includeSource: ['./src/**/*.{ts,tsx}'],
     setupFiles: ['./src/setup-tests.ts/'],
   },
-  optimizeDeps: {
-    include: ['@human-protocol/sdk'],
-  },
   build: {
     target: 'esnext',
-    commonjsOptions: {
-      include: [/human-protocol-sdk/, /node_modules/],
-    },
   },
   server: {
     host: '127.0.0.1',
-    port: 3001
-  }
+    port: 3001,
+  },
 });
 
 // eslint-disable-next-line import/no-default-export -- export vite config
