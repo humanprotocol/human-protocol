@@ -9,7 +9,7 @@ import {
   addStakeAmountCallArgumentsSchema,
   useAddStakeMutation,
   type AddStakeCallArguments,
-} from '@/api/servieces/operator/add-stake';
+} from '@/api/services/operator/add-stake';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';

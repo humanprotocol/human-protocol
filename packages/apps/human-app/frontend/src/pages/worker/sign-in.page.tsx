@@ -9,11 +9,11 @@ import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
-import type { SignInDto } from '@/api/servieces/worker/sign-in';
+import type { SignInDto } from '@/api/services/worker/sign-in';
 import {
   signInDtoSchema,
   useSignInMutation,
-} from '@/api/servieces/worker/sign-in';
+} from '@/api/services/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';

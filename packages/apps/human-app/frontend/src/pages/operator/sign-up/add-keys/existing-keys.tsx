@@ -9,7 +9,7 @@ import type { EthKVStoreKeyValues } from '@/smart-contracts/EthKVStore/config';
 import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 import { OptionalText } from '@/components/ui/optional-text';
 import { EmptyPlaceholder } from '@/components/ui/empty-placeholder';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { Chips } from '@/components/ui/chips';
 import { Chip } from '@/components/ui/chip';
 import {

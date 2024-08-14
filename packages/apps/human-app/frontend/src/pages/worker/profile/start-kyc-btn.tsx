@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
-import { useKycStartMutation } from '@/api/servieces/worker/get-kyc-session-id';
+import { useKycStartMutation } from '@/api/services/worker/get-kyc-session-id';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { Button } from '@/components/ui/button';
 import { useKycErrorNotifications } from '@/hooks/use-kyc-notification';

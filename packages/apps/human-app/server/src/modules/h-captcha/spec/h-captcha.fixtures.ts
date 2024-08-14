@@ -49,7 +49,7 @@ export const jwtUserDataFixture: JwtUserData = {
   userId: ID,
   wallet_address: POLYGON_WALLET_ADDR,
   email: EMAIL,
-  kyc_status: 'APPROVED',
+  kyc_status: 'approved',
   site_key: H_CAPTCHA_SITE_KEY,
   reputation_network: REPUTATION_NETWORK,
   iat: IAT,

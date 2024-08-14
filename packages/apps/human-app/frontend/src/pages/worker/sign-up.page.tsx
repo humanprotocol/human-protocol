@@ -7,11 +7,11 @@ import Link from '@mui/material/Link';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
 import { useEffect } from 'react';
-import type { SignUpDto } from '@/api/servieces/worker/sign-up';
+import type { SignUpDto } from '@/api/services/worker/sign-up';
 import {
   signUpDtoSchema,
   useSignUpMutation,
-} from '@/api/servieces/worker/sign-up';
+} from '@/api/services/worker/sign-up';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';

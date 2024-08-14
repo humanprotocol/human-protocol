@@ -17,7 +17,7 @@ import { hmTokenApprove } from '@/smart-contracts/HMToken/hm-token-approve';
 import type { ContractCallArguments } from '@/smart-contracts/types';
 import { routerPaths } from '@/router/router-paths';
 import { hmTokenAllowance } from '@/smart-contracts/HMToken/hm-token-allowance';
-import { useHMTokenDecimals } from '@/api/servieces/operator/human-token-decimals';
+import { useHMTokenDecimals } from '@/api/services/operator/human-token-decimals';
 
 type AmountValidation = z.ZodEffects<
   z.ZodEffects<z.ZodString, string, string>,

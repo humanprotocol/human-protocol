@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
+import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
 
 const kycStartSchema = z.object({
   url: z.string(),

@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Grid from '@mui/material/Grid';
 import { useEffect } from 'react';
 import { UserStatsDetails } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-details';
-import { useHCaptchaUserStats } from '@/api/servieces/worker/hcaptcha-user-stats';
+import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 

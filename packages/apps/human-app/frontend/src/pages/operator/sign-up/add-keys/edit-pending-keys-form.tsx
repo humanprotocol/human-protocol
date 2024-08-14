@@ -6,7 +6,7 @@ import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
 import { Select } from '@/components/data-entry/select';
 import { MultiSelect } from '@/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import {
   order,
   sortFormKeys,
