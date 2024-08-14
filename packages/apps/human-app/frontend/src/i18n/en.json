@@ -17,7 +17,7 @@
   },
   "validation": {
     "required": "Required",
-    "min": "Min {{count}} characters",
+    "min": "Password should have at least eight characters.",
     "max": "Max {{count}} characters",
     "passwordWeak": "Password should be at least 8 characters long and contain at least one uppercase and one lowercase letter, one number and one special character",
     "passwordMismatch": "Passwords are not the same",
@@ -168,7 +168,7 @@
       "paragraph2": "The verification link is valid for 24 hours.",
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Resend Reset Password Email",
-      "btnAfterSend": "Resend Email" ,
+      "btnAfterSend": "Resend Email",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
     "resetPassword": {
@@ -303,7 +303,7 @@
         "jobTypes": "Job Types",
         "publicKey": "Public Key"
       },
-      "activateBtn" : "Activate",
+      "activateBtn": "Activate",
       "disable": {
         "disableBtn": "Deactivate",
         "cannotDisable": "Cannot deactivate operator"

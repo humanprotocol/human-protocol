@@ -5,15 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { passwordRegex } from '@/shared/helpers/regex';
 import { routerPaths } from '@/router/router-paths';
 
 export const resetPasswordDtoSchema = z
   .object({
     password: z
       .string()
-      .max(50, t('validation.max', { count: 50 }))
-      .regex(passwordRegex, t('validation.passwordWeak')),
+      .min(8, t('validation.min'))
+      .max(50, t('validation.max', { count: 50 })),
     confirmPassword: z
       .string()
       .min(1, t('validation.required'))
