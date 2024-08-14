@@ -62,7 +62,7 @@ class AssignmentResponse(BaseModel):
 
 
 class UserStatsResponse(BaseModel):
-    assignments_amount: int
+    assignments_total: int
     submissions_sent: int
     assignments_completed: int
     assignments_rejected: int
@@ -73,7 +73,7 @@ class OracleStatsResponse(BaseModel):
     escrows_processed: int
     escrows_active: int
     escrows_cancelled: int
-    workers_amount: int
+    workers_total: int
     assignments_completed: int
     assignments_rejected: int
     assignments_expired: int

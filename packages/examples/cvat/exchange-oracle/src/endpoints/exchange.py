@@ -405,7 +405,7 @@ async def get_user_stats(token: AuthorizationData = AuthorizationParam) -> UserS
     with SessionLocal.begin() as session:
         stats = {}
 
-        stats["assignments_amount"] = (
+        stats["assignments_total"] = (
             session.query(cvat_service.Assignment.id)
             .where(cvat_service.Assignment.user_wallet_address == wallet_address)
             .count()
@@ -486,7 +486,7 @@ async def get_stats() -> OracleStatsResponse:
             .count()
         )
 
-        stats["workers_amount"] = session.query(cvat_service.User.wallet_address).count()
+        stats["workers_total"] = session.query(cvat_service.User.wallet_address).count()
 
         stats["assignments_completed"] = (
             session.query(cvat_service.Assignment.id)
