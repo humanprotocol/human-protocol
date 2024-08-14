@@ -167,48 +167,41 @@ async def register(token: AuthorizationData = AuthorizationParam) -> UserRespons
         email_db_user = cvat_service.get_user_by_email(session, user_email, for_update=True)
         wallet_db_user = cvat_service.get_user_by_id(session, user_wallet_address, for_update=True)
 
-        if wallet_db_user and not email_db_user and wallet_db_user.email != user_email:
-            # Allow changing email for a wallet, don't allow changing wallet for a email
-            # Need to clean up existing membership
-            with suppress(cvat_api.exceptions.NotFoundException):
-                cvat_api.remove_user_from_org(wallet_db_user.cvat_id)
-
-        if not email_db_user:
-            try:
-                cvat_id = cvat_api.get_user_id(user_email)
-            except cvat_api.exceptions.ApiException as e:
-                if (
-                    e.status == status.HTTP_400_BAD_REQUEST
-                    and "The user is a member of the organization already." in e.body
-                ):
-                    # This error can indicate that we tried to add the user previously
-                    # or he was added manually
-                    raise HTTPException(
-                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                        detail="User already exists",
-                    )
-
-                elif (
-                    e.status == status.HTTP_400_BAD_REQUEST
-                    and "Enter a valid email address." in e.body
-                ):
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email address"
-                    )
-
-                raise
-
-            email_db_user = cvat_service.put_user(
-                session,
-                wallet_address=user_wallet_address,
-                cvat_email=user_email,
-                cvat_id=cvat_id,
-            )
-
-        elif email_db_user.wallet_address != user_wallet_address:
+        if email_db_user or wallet_db_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists"
             )
+
+        try:
+            cvat_id = cvat_api.get_user_id(user_email)
+        except cvat_api.exceptions.ApiException as e:
+            if (
+                e.status == status.HTTP_400_BAD_REQUEST
+                and "The user is a member of the organization already." in e.body
+            ):
+                # This error can indicate that we tried to add the user previously
+                # or he was added manually
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="User already exists",
+                )
+
+            elif (
+                e.status == status.HTTP_400_BAD_REQUEST
+                and "Enter a valid email address." in e.body
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email address"
+                )
+
+            raise
+
+        email_db_user = cvat_service.put_user(
+            session,
+            wallet_address=user_wallet_address,
+            cvat_email=user_email,
+            cvat_id=cvat_id,
+        )
 
         return UserResponse(
             wallet_address=email_db_user.wallet_address,
