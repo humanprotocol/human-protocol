@@ -158,7 +158,7 @@ async def list_jobs(
         return paginate(session, query, transformer=_page_serializer)
 
 
-@router.put("/register", description="Binds a CVAT user to a HUMAN App user")
+@router.post("/register", description="Binds a CVAT user to a HUMAN App user")
 async def register(token: AuthorizationData = AuthorizationParam) -> UserResponse:
     user_email = token.email
     user_wallet_address = token.wallet_address
@@ -212,7 +212,7 @@ async def register(token: AuthorizationData = AuthorizationParam) -> UserRespons
 
         return UserResponse(
             wallet_address=email_db_user.wallet_address,
-            cvat_email=email_db_user.cvat_email,
+            email=email_db_user.cvat_email,
         )
 
 

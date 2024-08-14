@@ -30,7 +30,7 @@ class JobResponse(BaseModel):
 
 class UserResponse(BaseModel):
     wallet_address: str = Field(min_length=1)
-    cvat_email: str = Field(min_length=1)
+    email: str = Field(min_length=1)
 
 
 class AssignmentRequest(BaseModel):
