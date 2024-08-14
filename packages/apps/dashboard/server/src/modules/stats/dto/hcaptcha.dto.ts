@@ -23,6 +23,6 @@ export class HcaptchaDailyStatsResponseDto {
   @ApiProperty({ example: '2024-05-01' })
   public to: string;
 
-  @ApiProperty()
+  @ApiProperty({ isArray: true, type: HcaptchaDailyStats })
   public results: HcaptchaDailyStats[];
 }

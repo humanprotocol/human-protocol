@@ -55,9 +55,7 @@ export function PasswordCheckLabel({
       width="unset"
     >
       {getIcon(isSubmitted, isValid)}
-      <Typography color={getColor(isSubmitted, isValid)} variant="helperText">
-        {requirementsLabel}
-      </Typography>
+      <Typography variant="helperText">{requirementsLabel}</Typography>
     </Grid>
   );
 }

@@ -8,6 +8,7 @@ const DEFAULT_CACHE_HMT_GENERAL_STATS_TTL = 2 * 60;
 const DEFAULT_HMT_PRICE_CACHE_KEY = 'hmt-price';
 const DEFAULT_HMT_GENERAL_STATS_CACHE_KEY = 'hmt-general';
 export const HCAPTCHA_PREFIX = 'hcaptcha-';
+export const HMT_PREFIX = 'hmt-';
 
 @Injectable()
 export class RedisConfigService {

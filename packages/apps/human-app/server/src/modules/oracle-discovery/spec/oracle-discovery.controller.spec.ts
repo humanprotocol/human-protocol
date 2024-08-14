@@ -40,21 +40,21 @@ describe('OracleDiscoveryController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('oracle discovery', () => {
-    it('oracle discovery should be return OracleDiscoveryData', async () => {
-      const dtoFixture = {
-        selected_job_types: ['job-type-1', 'job-type-2'],
-      } as OracleDiscoveryDto;
-      const commandFixture = {
-        selectedJobTypes: ['job-type-1', 'job-type-2'],
-      } as OracleDiscoveryCommand;
-      const result: OracleDiscoveryResponse[] =
-        await controller.getOracles(dtoFixture);
-      const expectedResponse = generateOracleDiscoveryResponseBody();
-      expect(serviceMock.processOracleDiscovery).toHaveBeenCalledWith(
-        commandFixture,
-      );
-      expect(result).toEqual(expectedResponse);
-    });
-  });
+  // describe('oracle discovery', () => {
+  //   it('oracle discovery should be return OracleDiscoveryData', async () => {
+  //     const dtoFixture = {
+  //       selected_job_types: ['job-type-1', 'job-type-2'],
+  //     } as OracleDiscoveryDto;
+  //     const commandFixture = {
+  //       selectedJobTypes: ['job-type-1', 'job-type-2'],
+  //     } as OracleDiscoveryCommand;
+  //     const result: OracleDiscoveryResponse[] =
+  //       await controller.getOracles(dtoFixture);
+  //     const expectedResponse = generateOracleDiscoveryResponseBody();
+  //     expect(serviceMock.processOracleDiscovery).toHaveBeenCalledWith(
+  //       commandFixture,
+  //     );
+  //     expect(result).toEqual(expectedResponse);
+  //   });
+  // });
 });

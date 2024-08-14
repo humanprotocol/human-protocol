@@ -6,15 +6,22 @@ import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 
-import { EnvironmentConfigService } from '../../common/config/env-config.service';
+import {
+  EnvironmentConfigService,
+  HMT_STATS_START_DATE,
+} from '../../common/config/env-config.service';
 import {
   HCAPTCHA_PREFIX,
+  HMT_PREFIX,
   RedisConfigService,
 } from '../../common/config/redis-config.service';
 import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 import { MainnetsId } from './utils/constants';
+import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
+import { CachedHMTData } from './stats.interface';
+import { HmtDailyStatsData } from './dto/hmt.dto';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -29,11 +36,15 @@ export class StatsService implements OnModuleInit {
   async onModuleInit() {
     const isHistoricalDataFetched = await this.isHistoricalDataFetched();
     const isHmtGeneralStatsFetched = await this.isHmtGeneralStatsFetched();
+    const isHmtDailyStatsFetched = await this.isHmtDailyStatsFetched();
     if (!isHistoricalDataFetched) {
       await this.fetchHistoricalHcaptchaStats();
     }
     if (!isHmtGeneralStatsFetched) {
       await this.fetchHmtGeneralStats();
+    }
+    if (!isHmtDailyStatsFetched) {
+      await this.fetchHistoricalHmtStats();
     }
   }
 
@@ -177,6 +188,97 @@ export class StatsService implements OnModuleInit {
     );
   }
 
+  private async isHmtDailyStatsFetched(): Promise<boolean> {
+    const data = await this.cacheManager.get<DailyHMTData>(
+      `${HMT_PREFIX}${HMT_STATS_START_DATE}`,
+    );
+    return !!data;
+  }
+
+  private async fetchHistoricalHmtStats(): Promise<void> {
+    const startDate = dayjs(HMT_STATS_START_DATE);
+    await this.fetchAndCacheHmtDailyStats(startDate.format('YYYY-MM-DD'));
+  }
+
+  @Cron('*/15 * * * *')
+  async fetchHmtDailyStats() {
+    const currentDate = dayjs().format('YYYY-MM-DD');
+    await this.fetchAndCacheHmtDailyStats(currentDate);
+  }
+
+  private async fetchAndCacheHmtDailyStats(date: string) {
+    const from = new Date(date);
+    const to = new Date(dayjs().format('YYYY-MM-DD'));
+
+    // Fetch daily data
+    await Promise.all(
+      Object.values(MainnetsId).map(async (network) => {
+        const statisticsClient = new StatisticsClient(NETWORKS[network]);
+        let skip = 0;
+        let fetchedRecords: DailyHMTData[] = [];
+        const dailyData: DailyHMTData[] = [];
+        const monthlyData: Record<string, CachedHMTData> = {};
+
+        do {
+          fetchedRecords = await statisticsClient.getHMTDailyData({
+            from,
+            to,
+            first: 1000, // Max subgraph query size
+            skip,
+          });
+
+          dailyData.push(...fetchedRecords);
+          skip += 1000;
+        } while (fetchedRecords.length === 1000);
+
+        // Store daily records
+        for (const record of dailyData) {
+          const dailyCacheKey = `${HMT_PREFIX}${
+            record.timestamp.toISOString().split('T')[0]
+          }`;
+          const dailyCachedData: CachedHMTData = {
+            totalTransactionAmount: record.totalTransactionAmount.toString(),
+            totalTransactionCount: record.totalTransactionCount,
+            dailyUniqueSenders: record.dailyUniqueSenders,
+            dailyUniqueReceivers: record.dailyUniqueReceivers,
+          };
+          await this.cacheManager.set(dailyCacheKey, dailyCachedData);
+
+          // Prepare for monthly aggregation
+          const month = dayjs(record.timestamp).format('YYYY-MM');
+          if (!monthlyData[month]) {
+            monthlyData[month] = {
+              totalTransactionAmount: '0',
+              totalTransactionCount: 0,
+              dailyUniqueSenders: 0,
+              dailyUniqueReceivers: 0,
+            };
+          }
+
+          monthlyData[month].totalTransactionAmount +=
+            record.totalTransactionAmount;
+          monthlyData[month].totalTransactionCount +=
+            record.totalTransactionCount;
+          monthlyData[month].dailyUniqueSenders += record.dailyUniqueSenders;
+          monthlyData[month].dailyUniqueReceivers +=
+            record.dailyUniqueReceivers;
+        }
+
+        // Store monthly aggregated data
+        for (const [month, stats] of Object.entries(monthlyData)) {
+          const monthlyCacheKey = `${HMT_PREFIX}${month}`;
+          const monthlyCachedData: CachedHMTData = {
+            totalTransactionAmount: stats.totalTransactionAmount.toString(),
+            totalTransactionCount: stats.totalTransactionCount,
+            dailyUniqueSenders: stats.dailyUniqueSenders,
+            dailyUniqueReceivers: stats.dailyUniqueReceivers,
+          };
+          await this.cacheManager.set(monthlyCacheKey, monthlyCachedData);
+        }
+      }),
+    );
+  }
+
   public async hmtPrice(): Promise<number> {
     const cachedHmtPrice: number = await this.cacheManager.get<number>(
       this.redisConfigService.hmtPriceCacheKey,
@@ -268,5 +370,33 @@ export class StatsService implements OnModuleInit {
     );
 
     return data;
+  }
+
+  public async hmtDailyStats(
+    from: string,
+    to: string,
+  ): Promise<HmtDailyStatsData[]> {
+    let startDate = dayjs(from);
+    const endDate = dayjs(to);
+    const dates = [];
+
+    while (startDate <= endDate) {
+      dates.push(startDate.format('YYYY-MM-DD'));
+      startDate = startDate.add(1, 'day');
+    }
+
+    const stats = await Promise.all(
+      dates.map(async (date) => {
+        const stat: HmtDailyStatsData = await this.cacheManager.get(
+          `${HMT_PREFIX}${date}`,
+        );
+        if (stat) {
+          stat.date = date;
+        }
+        return stat;
+      }),
+    );
+
+    return stats.filter((stat): stat is HmtDailyStatsData => stat !== null);
   }
 }

@@ -17,7 +17,7 @@ import {
 } from '@/smart-contracts/EthKVStore/config';
 import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { isArray } from '@/shared/helpers/is-array';
 
 export const editEthKVStoreValuesMutationSchema = z.object({
