@@ -253,6 +253,7 @@ async def list_assignments(
     created_after: Optional[datetime] = Query(default=None),
     updated_after: Optional[datetime] = Query(default=None),
     escrow_address: Optional[str] = Query(default=None),
+    chain_id: Optional[int] = Query(default=None),
     job_type: Optional[TaskTypes] = Query(
         default=None, json_schema_extra={"enum": list(TaskTypes.__members__.values())}
     ),
@@ -266,10 +267,15 @@ async def list_assignments(
 
     query = query.where(cvat_service.Assignment.user_wallet_address == token.wallet_address)
 
-    if escrow_address:
+    if escrow_address or chain_id:
         query = query.filter(
             cvat_service.Assignment.job.has(
-                cvat_service.Job.project.has(cvat_service.Project.escrow_address == escrow_address)
+                cvat_service.Job.project.has(
+                    *[cvat_service.Project.escrow_address == escrow_address]
+                    if escrow_address
+                    else [],
+                    *[cvat_service.Project.chain_id == chain_id] if chain_id else [],
+                )
             )
         )
 
