@@ -2,7 +2,7 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { colorPalette } from '@/styles/color-palette';
 import { RefreshIcon } from '@/components/ui/icons';
-import type { HCaptchaUserStatsSuccess } from '@/api/servieces/worker/hcaptcha-user-stats';
+import type { HCaptchaUserStatsSuccess } from '@/api/services/worker/hcaptcha-user-stats';
 
 export function UserStatsDetails({
   stats,

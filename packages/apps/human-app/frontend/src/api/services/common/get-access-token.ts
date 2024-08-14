@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { signInSuccessResponseSchema } from '@/api/servieces/worker/sign-in';
+import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
 import { useAuth } from '@/auth/use-auth';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import type { AuthType } from '@/shared/types/browser-auth-provider';

@@ -6,7 +6,7 @@ import { Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useEnableHCaptchaLabelingMutation } from '@/api/servieces/worker/enable-hcaptcha-labeling';
+import { useEnableHCaptchaLabelingMutation } from '@/api/services/worker/enable-hcaptcha-labeling';
 import { Button } from '@/components/ui/button';
 import { PageCardError } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';

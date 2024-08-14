@@ -1,14 +1,14 @@
 import { t } from 'i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { EditEthKVStoreValuesMutationData } from '@/api/servieces/operator/edit-existing-keys';
+import type { EditEthKVStoreValuesMutationData } from '@/api/services/operator/edit-existing-keys';
 import {
   editEthKVStoreValuesMutationSchema,
   useEditExistingKeysMutation,
-} from '@/api/servieces/operator/edit-existing-keys';
+} from '@/api/services/operator/edit-existing-keys';
 import { Button } from '@/components/ui/button';
 import { EditPendingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-pending-keys-form';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function PendingKeysForm({

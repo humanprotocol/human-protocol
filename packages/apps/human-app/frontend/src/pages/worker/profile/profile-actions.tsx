@@ -11,7 +11,7 @@ import { StartKycButton } from '@/pages/worker/profile/start-kyc-btn';
 import { RegisterAddressBtn } from '@/pages/worker/profile/register-address-btn';
 import { DoneLabel } from '@/pages/worker/profile/done-label';
 import { useRegisterAddressNotifications } from '@/hooks/use-register-address-notifications';
-import { useRegisterAddressMutation } from '@/api/servieces/worker/use-register-address';
+import { useRegisterAddressMutation } from '@/api/services/worker/use-register-address';
 import { RegisterAddressOnChainButton } from '@/pages/worker/profile/register-address-on-chain-btn';
 
 export function ProfileActions() {
@@ -37,7 +37,7 @@ export function ProfileActions() {
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   const emailVerified = user.status === 'ACTIVE';
-  const kycApproved = user.kyc_status === 'APPROVED';
+  const kycApproved = user.kyc_status === 'approved';
 
   const getConnectWalletBtn = () => {
     switch (true) {
@@ -57,7 +57,7 @@ export function ProfileActions() {
       case !user.wallet_address && !isWalletConnected:
         return (
           <Button
-            disabled={user.kyc_status !== 'APPROVED'}
+            disabled={user.kyc_status !== 'approved'}
             fullWidth
             loading={isRegisterAddressMutationPending}
             onClick={() => {

@@ -3,7 +3,7 @@ import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
-import type { SignInSuccessResponse } from '@/api/servieces/worker/sign-in';
+import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 

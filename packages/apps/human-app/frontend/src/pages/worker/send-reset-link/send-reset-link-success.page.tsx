@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
 import { useLocationState } from '@/hooks/use-location-state';
 import { env } from '@/shared/env';
-import type { SendResetLinkHcaptcha } from '@/api/servieces/worker/send-reset-link';
+import type { SendResetLinkHcaptcha } from '@/api/services/worker/send-reset-link';
 import {
   sendResetLinkHcaptchaDtoSchema,
   useSendResetLinkMutation,
-} from '@/api/servieces/worker/send-reset-link';
+} from '@/api/services/worker/send-reset-link';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { FormCaptcha } from '@/components/h-captcha';

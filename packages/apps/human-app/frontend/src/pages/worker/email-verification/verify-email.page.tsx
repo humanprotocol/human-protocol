@@ -9,12 +9,12 @@ import { colorPalette } from '@/styles/color-palette';
 import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
 import { env } from '@/shared/env';
-import type { ResendEmailVerificationDto } from '@/api/servieces/worker/resend-email-verification';
+import type { ResendEmailVerificationDto } from '@/api/services/worker/resend-email-verification';
 import {
   resendEmailVerificationHcaptchaSchema,
   useResendEmailVerificationWorkerMutation,
   useResendEmailVerificationWorkerMutationState,
-} from '@/api/servieces/worker/resend-email-verification';
+} from '@/api/services/worker/resend-email-verification';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { FormCaptcha } from '@/components/h-captcha';
