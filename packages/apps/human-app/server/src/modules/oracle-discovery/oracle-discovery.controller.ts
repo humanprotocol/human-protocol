@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Query,
   UsePipes,
   ValidationPipe,
@@ -28,6 +30,7 @@ export class OracleDiscoveryController {
   public getOracles(
     @Query() dto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryResponse[]> {
+    throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
     const command = this.mapper.map(
       dto,
       OracleDiscoveryDto,

@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -27,6 +27,7 @@ export class JobsDiscoveryController {
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
     @Authorization() token: string,
   ): Promise<JobsDiscoveryResponse> {
+    throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(
         jobsDiscoveryParamsDto,
