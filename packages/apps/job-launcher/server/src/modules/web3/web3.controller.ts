@@ -1,11 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UsePipes } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { ApiTags, ApiResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Web3Service } from './web3.service';
 import { ChainId } from '@human-protocol/sdk';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { AvailableOraclesDto } from './web3.dto';
-import { JobRequestType } from 'src/common/enums/job';
+import { NormalizeQueryParamsPipe } from 'src/common/pipes';
 
 @ApiTags('Web3')
 @Controller('/web3')
@@ -63,20 +63,20 @@ export class Web3Controller {
     description: 'List of available oracles',
     type: AvailableOraclesDto,
   })
-  @ApiQuery({ name: 'chainId', required: true, type: String })
-  @ApiQuery({ name: 'jobTypes', required: true, isArray: true, type: [String] })
-  @ApiQuery({ name: 'reputationOracleAddress', required: true, type: String })
+  @ApiQuery({ name: 'chain_id', required: true, type: String })
+  @ApiQuery({ name: 'job_type', required: true, type: String })
+  @ApiQuery({ name: 'reputation_oracle_address', required: true, type: String })
   @Public()
   @Get('/available-oracles')
+  @UsePipes(NormalizeQueryParamsPipe)
   async getAvailableOracles(
     @Query('chainId') chainId: ChainId,
-    @Query('jobTypes') jobTypes: string[],
+    @Query('jobType') jobType: string,
     @Query('reputationOracleAddress') reputationOracleAddress: string,
   ): Promise<AvailableOraclesDto> {
-    console.log(1111, jobTypes);
     return this.web3Service.getAvailableOracles(
       chainId,
-      jobTypes,
+      jobType,
       reputationOracleAddress,
     );
   }

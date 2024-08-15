@@ -1,7 +1,7 @@
 import { IOperator } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class OracleDiscoveryDto implements IOperator {
+export class OracleDataDto implements IOperator {
   address: string;
   role?: string;
   url?: string;

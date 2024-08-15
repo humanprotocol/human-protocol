@@ -4,9 +4,8 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
-import { AvailableOraclesDto, OracleDiscoveryDto } from './web3.dto';
+import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
-import { JobRequestType } from 'src/common/enums/job';
 
 @Injectable()
 export class Web3Service {
@@ -50,6 +49,7 @@ export class Web3Service {
   public async calculateGasPrice(chainId: number): Promise<bigint> {
     const signer = this.getSigner(chainId);
     const multiplier = this.web3ConfigService.gasPriceMultiplier;
+
     const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
     if (gasPrice) {
       return gasPrice * BigInt(multiplier);
@@ -63,13 +63,12 @@ export class Web3Service {
 
   public async getAvailableOracles(
     chainId: ChainId,
-    jobTypes: string[],
+    jobType: string,
     reputationOracleAddress: string,
   ): Promise<AvailableOraclesDto> {
-    console.log(0);
     const availableOracles = await this.findAvailableOracles(
       chainId,
-      jobTypes,
+      jobType,
       reputationOracleAddress,
     );
 
@@ -87,21 +86,18 @@ export class Web3Service {
     };
   }
 
-  private async findAvailableOracles(
+  public async findAvailableOracles(
     chainId: ChainId,
-    jobTypes: string[],
+    jobType: string,
     address: string,
-  ): Promise<OracleDiscoveryDto[]> {
+  ): Promise<OracleDataDto[]> {
     try {
-      console.log(1000000);
-      console.log(chainId, address);
       const receivedOracles = await OperatorUtils.getReputationNetworkOperators(
         chainId,
         address,
       );
-      console.log(1111, receivedOracles);
 
-      const filteredOracles = this.filterOracles(receivedOracles, jobTypes);
+      const filteredOracles = this.filterOracles(receivedOracles, jobType);
 
       return filteredOracles;
     } catch (error) {
@@ -110,9 +106,9 @@ export class Web3Service {
     return [];
   }
 
-  private filterOracles(
-    foundOracles: OracleDiscoveryDto[] | undefined,
-    jobTypes: string[] | undefined,
+  public filterOracles(
+    foundOracles: OracleDataDto[] | undefined,
+    jobType: string,
   ) {
     if (foundOracles && foundOracles.length > 0) {
       const filteredOracles = foundOracles.filter((oracle) => {
@@ -121,10 +117,10 @@ export class Web3Service {
         }
         return true;
       });
-      if (jobTypes && jobTypes.length > 0) {
+      if (jobType) {
         return filteredOracles.filter((oracle) =>
           oracle.jobTypes && oracle.jobTypes.length > 0
-            ? this.areJobTypeSetsIntersect(oracle.jobTypes, jobTypes)
+            ? this.matchesJobType(oracle.jobTypes, jobType)
             : false,
         );
       }
@@ -133,15 +129,9 @@ export class Web3Service {
     return [];
   }
 
-  private areJobTypeSetsIntersect(
-    oracleJobTypes: string[],
-    requiredJobTypes: string[],
-  ) {
-    console.log(222, requiredJobTypes);
-    return oracleJobTypes.some((job) =>
-      requiredJobTypes
-        .map((requiredJob) => requiredJob.toLowerCase())
-        .includes(job.toLowerCase()),
+  public matchesJobType(oracleJobTypes: string[], requiredJobType: string) {
+    return oracleJobTypes.some(
+      (job) => job.toLowerCase() === requiredJobType.toLowerCase(),
     );
   }
 }
