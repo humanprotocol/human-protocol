@@ -4,7 +4,7 @@ import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { KV_STORE_CACHE_KEY } from '../../../common/constants/cache';
+import { ORACLE_URL_CACHE_KEY } from '../../../common/constants/cache';
 
 const EXPECTED_URL = 'https://example.com';
 jest.mock('@human-protocol/sdk', () => {
@@ -86,9 +86,9 @@ describe('KvStoreGateway', () => {
   describe('getExchangeOracleUrlByAddress', () => {
     it('should get data from kvStoreUtils, if not cached', async () => {
       const testAddress = 'testAddress';
-      const cacheKey = `${KV_STORE_CACHE_KEY}:${testAddress}`;
-      const expectedUrl = EXPECTED_URL;
-      mockKVStoreUtils.get.mockResolvedValue(expectedUrl);
+      const cacheKey = `${ORACLE_URL_CACHE_KEY}:${testAddress}`;
+      const expectedData = EXPECTED_URL;
+      mockKVStoreUtils.get.mockResolvedValue(expectedData);
       cacheManager.get.mockResolvedValue(undefined);
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
@@ -97,22 +97,22 @@ describe('KvStoreGateway', () => {
         KVStoreKeys.url,
       );
 
-      expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, expectedUrl, {
+      expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, expectedData, {
         ttl: configService.cacheTtlExchangeOracleUrl,
       });
       expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
-      expect(result).toBe(expectedUrl);
+      expect(result).toBe(expectedData);
     });
     it('should get data from cache, if available', async () => {
       const testAddress = 'testAddress';
-      const cacheKey = `${KV_STORE_CACHE_KEY}:${testAddress}`;
-      const expectedUrl = EXPECTED_URL;
-      cacheManager.get.mockResolvedValue(expectedUrl);
+      const cacheKey = `${ORACLE_URL_CACHE_KEY}:${testAddress}`;
+      const expectedData = EXPECTED_URL;
+      cacheManager.get.mockResolvedValue(expectedData);
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
 
       expect(KVStoreUtils.get).not.toHaveBeenCalled();
       expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
-      expect(result).toBe(expectedUrl);
+      expect(result).toBe(expectedData);
     });
   });
 });

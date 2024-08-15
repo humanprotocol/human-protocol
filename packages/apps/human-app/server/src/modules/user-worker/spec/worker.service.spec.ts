@@ -3,22 +3,34 @@ import { WorkerService } from '../worker.service';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { reputationOracleGatewayMock } from '../../../integrations/reputation-oracle/spec/reputation-oracle.gateway.mock';
 import { SignupWorkerCommand } from '../model/worker-registration.model';
+import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
+import { exchangeOracleGatewayMock } from '../../../integrations/exchange-oracle/spec/exchange-oracle.gateway.mock';
 
 describe('WorkerService', () => {
   let service: WorkerService;
   let reputationOracleGateway: ReputationOracleGateway;
+  let exchangeOracleGateway: ExchangeOracleGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WorkerService, ReputationOracleGateway],
+      providers: [
+        WorkerService,
+        ReputationOracleGateway,
+        ExchangeOracleGateway,
+      ],
     })
       .overrideProvider(ReputationOracleGateway)
       .useValue(reputationOracleGatewayMock)
+      .overrideProvider(ExchangeOracleGateway)
+      .useValue(exchangeOracleGatewayMock)
       .compile();
 
     service = module.get<WorkerService>(WorkerService);
     reputationOracleGateway = module.get<ReputationOracleGateway>(
       ReputationOracleGateway,
+    );
+    exchangeOracleGateway = module.get<ExchangeOracleGateway>(
+      ExchangeOracleGateway,
     );
   });
 
@@ -51,6 +63,19 @@ describe('WorkerService', () => {
       expect(reputationOracleGateway.sendWorkerSignin).toHaveBeenCalledWith(
         command,
       );
+    });
+  });
+
+  describe('registerWorker', () => {
+    it('should call reputation oracle gateway without doing anything else', async () => {
+      const command = {
+        oracleAddress: '0x34df642',
+        token: 'test-token',
+      };
+      await service.registerWorker(command);
+      expect(
+        reputationOracleGateway.sendWorkerRegistration,
+      ).toHaveBeenCalledWith(command);
     });
   });
 });
