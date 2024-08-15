@@ -172,7 +172,8 @@ export const Header: FC = () => {
                   },
                 }}
               >
-                Beta Dashboard: minor inaccuracies may be present
+                Sorry, Dashboard is under maintenance and new dashboard is
+                coming up soon
               </Alert>
             </Collapse>
             <Box

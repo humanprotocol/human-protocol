@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { colorPalette } from '@/styles/color-palette';
+import { breakpoints } from '@/styles/theme';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -39,6 +40,9 @@ export function Layout({ withNavigation = true }: LayoutProps) {
           justifyContent: 'center',
           alignItems: 'center',
           flex: 1,
+          [breakpoints.mobile]: {
+            pt: '32px',
+          },
         }}
       >
         <Outlet />

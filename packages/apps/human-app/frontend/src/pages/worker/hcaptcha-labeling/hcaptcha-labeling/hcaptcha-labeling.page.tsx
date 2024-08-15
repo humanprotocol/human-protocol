@@ -9,12 +9,12 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
 import { breakpoints } from '@/styles/theme';
 import { Counter } from '@/components/ui/counter';
-import { useHCaptchaUserStats } from '@/api/servieces/worker/hcaptcha-user-stats';
+import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { useDailyHmtSpent } from '@/api/servieces/worker/daily-hmt-spent';
+import { useDailyHmtSpent } from '@/api/services/worker/daily-hmt-spent';
 import { getTomorrowDate } from '@/shared/helpers/counter-helpers';
-import { useSolveHCaptchaMutation } from '@/api/servieces/worker/solve-hcaptcha';
+import { useSolveHCaptchaMutation } from '@/api/services/worker/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
 
@@ -97,7 +97,7 @@ export function HcaptchaLabelingPage() {
             : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
-          padding: isMobile ? 0 : '40px',
+          padding: isMobile ? '20px' : '40px',
           borderRadius: '20px',
         }}
       >

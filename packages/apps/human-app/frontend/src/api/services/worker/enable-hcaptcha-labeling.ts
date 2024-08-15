@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
+import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
 
 const enableHCaptchaLabelingSuccessSchema = z.object({
   site_key: z.string(),

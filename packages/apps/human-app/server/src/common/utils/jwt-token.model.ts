@@ -8,7 +8,7 @@ export class JwtUserData {
   @AutoMap()
   email: string;
   @AutoMap()
-  kyc_status: 'APPROVED' | 'NONE';
+  kyc_status: 'approved' | 'none';
   @AutoMap()
   reputation_network: string;
   @AutoMap()

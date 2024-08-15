@@ -12,7 +12,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { paddingX } from '@/components/layout/protected/navbar';
+import { NAVBAR_PADDING } from '@/components/layout/protected/navbar';
 
 const drawerWidth = 240;
 
@@ -89,7 +89,7 @@ export function DrawerNavigation({
                     <Stack
                       direction="row"
                       sx={{
-                        ml: isMobile ? '28px' : paddingX,
+                        ml: isMobile ? '28px' : NAVBAR_PADDING,
                       }}
                     >
                       {item}
@@ -126,7 +126,7 @@ export function DrawerNavigation({
                     <Stack
                       direction="row"
                       sx={{
-                        ml: isMobile ? '28px' : paddingX,
+                        ml: isMobile ? '28px' : NAVBAR_PADDING,
                       }}
                     >
                       <ListItemText
@@ -179,7 +179,7 @@ export function DrawerNavigation({
                     direction="row"
                     justifyContent="center"
                     sx={{
-                      ml: isMobile ? '28px' : paddingX,
+                      ml: isMobile ? '28px' : NAVBAR_PADDING,
                     }}
                   >
                     {icon}

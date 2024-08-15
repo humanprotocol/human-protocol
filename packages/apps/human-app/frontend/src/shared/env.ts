@@ -8,6 +8,7 @@ const envSchema = z.object({
   VITE_HUMAN_PROTOCOL_URL: z.string(),
   VITE_NAVBAR__LINK__PROTOCOL_URL: z.string(),
   VITE_NAVBAR__LINK__HOW_IT_WORK_URL: z.string(),
+  VITE_HUMAN_SUPPORT_EMAIL: z.string(),
   VITE_HUMAN_PROTOCOL_HELP_URL: z.string(),
   VITE_WALLET_CONNECT_MODAL_LINK: z.string(),
   VITE_H_CAPTCHA_SITE_KEY: z.string(),
@@ -30,12 +31,6 @@ const envSchema = z.object({
     return iconsArray;
   }),
   VITE_NETWORK: z.enum(['mainnet', 'testnet']),
-  VITE_TESTNET_AMOY_STAKING_CONTRACT: z.string(),
-  VITE_TESTNET_AMOY_HMTOKEN_CONTRACT: z.string(),
-  VITE_TESTNET_AMOY_ETH_KV_STORE_CONTRACT: z.string(),
-  VITE_MAINNET_POLYGON_STAKING_CONTRACT: z.string(),
-  VITE_MAINNET_POLYGON_HMTOKEN_CONTRACT: z.string(),
-  VITE_MAINNET_POLYGON_ETH_KV_STORE_CONTRACT: z.string(),
 });
 
 let validEnvs;

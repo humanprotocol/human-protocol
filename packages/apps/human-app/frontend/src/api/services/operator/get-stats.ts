@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiClient } from '@/api/api-client';
-import { useGetKeys } from '@/api/servieces/operator/get-keys';
+import { useGetKeys } from '@/api/services/operator/get-keys';
 
 const operatorStatsSuccessResponseSchema = z.object({
   workers_total: z.number(),

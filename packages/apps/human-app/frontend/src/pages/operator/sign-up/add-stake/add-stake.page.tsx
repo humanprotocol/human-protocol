@@ -15,9 +15,9 @@ import { Alert } from '@/components/ui/alert';
 import {
   stakedAmountFormatter,
   useGetStakedAmount,
-} from '@/api/servieces/operator/get-stacked-amount';
-import { useAddStakeMutationState } from '@/api/servieces/operator/add-stake';
-import { useHMTokenDecimals } from '@/api/servieces/operator/human-token-decimals';
+} from '@/api/services/operator/get-stacked-amount';
+import { useAddStakeMutationState } from '@/api/services/operator/add-stake';
+import { useHMTokenDecimals } from '@/api/services/operator/human-token-decimals';
 
 export function AddStakeOperatorPage() {
   const [displayForm, setDisplayForm] = useState(false);

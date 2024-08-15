@@ -152,6 +152,34 @@ Extracts the signed data from an armored signed message.
   result = EncryptionUtils.get_signed_data(signed_message)
   ```
 
+#### *static* is_encrypted(message)
+
+Checks whether a provided message is encrypted or not
+
+* **Parameters:**
+  **message** (`str`) – Text to check
+* **Return type:**
+  `bool`
+* **Returns:**
+  True if the message is a PGP message, False otherwise
+* **Example:**
+  ```python
+  from human_protocol_sdk.encryption import EncryptionUtils
+
+  message_1 = "message"
+  message_2 = """-----BEGIN PGP MESSAGE-----
+
+  wV4Dh8BoKHkyM3YSAQdAMGVFo+Meahw422JdMyDkxPA4LXeN94bOqsS9OhYGliYw
+  72HgGdhoRHrRBKmRyD+Bb2HUrGptx8YRYqYJXiFVs4ev1USt6pF/5XjH+pM0d44B
+  0j0BcVevrVhjdBia8kEr74NJKB2qiPAffbFJFRE1asYqQgFTjNC60/egqfzpdRay
+  Tj8C+e0IXRMECIXnrOaw
+  =SjJh
+  -----END PGP MESSAGE-----"""
+
+  print("The message_1 is encrypted: ", EncryptionUtils.is_encrypted(message_1))
+  print("The message_2 is encrypted: ", EncryptionUtils.is_encrypted(message_2))
+  ```
+
 #### *static* verify(message, public_key)
 
 Verifies the signature of a message using the corresponding public key.

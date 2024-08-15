@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
-import type { SignedAddressSuccess } from '@/api/servieces/worker/get-signed-address';
+import type { SignedAddressSuccess } from '@/api/services/worker/get-signed-address';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { checkNetwork } from '@/smart-contracts/check-network';
 

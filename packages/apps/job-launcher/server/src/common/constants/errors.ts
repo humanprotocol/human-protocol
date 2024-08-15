@@ -130,6 +130,7 @@ export enum ErrorWeb3 {
   NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
+  ReputationOracleUrlNotSet = 'Reputation oracle URL not set',
 }
 
 /**
@@ -161,4 +162,11 @@ export enum ErrorPostgres {
 export enum ErrorCronJob {
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
+}
+
+/**
+ * Represents error messages associated with a qualification.
+ */
+export enum ErrorQualification {
+  FailedToFetchQualifications = 'Failed to fetch qualifications',
 }

@@ -8,13 +8,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { useWeb3SignUp } from '@/api/servieces/operator/web3-signup';
+import { useWeb3SignUp } from '@/api/services/operator/web3-signup';
 import { Alert } from '@/components/ui/alert';
-import type { SignatureData } from '@/api/servieces/common/prepare-signature';
+import type { SignatureData } from '@/api/services/common/prepare-signature';
 import {
   PrepareSignatureType,
   usePrepareSignature,
-} from '@/api/servieces/common/prepare-signature';
+} from '@/api/services/common/prepare-signature';
 
 export function EditExistingKeysSuccessPage() {
   const { address, signMessage } = useConnectedWallet();

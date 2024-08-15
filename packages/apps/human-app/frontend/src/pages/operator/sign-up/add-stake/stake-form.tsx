@@ -9,11 +9,12 @@ import {
   addStakeAmountCallArgumentsSchema,
   useAddStakeMutation,
   type AddStakeCallArguments,
-} from '@/api/servieces/operator/add-stake';
+} from '@/api/services/operator/add-stake';
 import { breakpoints } from '@/styles/theme';
 import { Input } from '@/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function StakeForm({
   decimals,
@@ -34,6 +35,8 @@ export function StakeForm({
       z.object({ amount: addStakeAmountCallArgumentsSchema(decimals) })
     ),
   });
+
+  useResetMutationErrors(methods.watch, addStakeMutation.reset);
 
   const addStake = (data: AddStakeCallArguments) => {
     addStakeMutation.mutate(data);

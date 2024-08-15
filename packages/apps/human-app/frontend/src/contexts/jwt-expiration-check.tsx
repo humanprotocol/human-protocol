@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
+import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { useAuth } from '@/auth/use-auth';
 

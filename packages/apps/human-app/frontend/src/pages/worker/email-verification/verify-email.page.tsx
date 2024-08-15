@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ...*/
 import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -9,18 +9,20 @@ import { colorPalette } from '@/styles/color-palette';
 import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
 import { env } from '@/shared/env';
-import type { ResendEmailVerificationDto } from '@/api/servieces/worker/resend-email-verification';
+import type { ResendEmailVerificationDto } from '@/api/services/worker/resend-email-verification';
 import {
   resendEmailVerificationHcaptchaSchema,
   useResendEmailVerificationWorkerMutation,
   useResendEmailVerificationWorkerMutationState,
-} from '@/api/servieces/worker/resend-email-verification';
+} from '@/api/services/worker/resend-email-verification';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { FormCaptcha } from '@/components/h-captcha';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
+import { MailTo } from '@/components/ui/mail-to';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function VerifyEmailWorkerPage() {
   const navigate = useNavigate();
@@ -35,8 +37,10 @@ export function VerifyEmailWorkerPage() {
     }),
   });
   const mutationState = useResendEmailVerificationWorkerMutationState();
-  const { mutate: resendEmailVerificationMutation } =
-    useResendEmailVerificationWorkerMutation();
+  const {
+    mutate: resendEmailVerificationMutation,
+    reset: resendEmailVerificationMutationReset,
+  } = useResendEmailVerificationWorkerMutation();
 
   const methods = useForm<Pick<ResendEmailVerificationDto, 'h_captcha_token'>>({
     defaultValues: {
@@ -44,6 +48,8 @@ export function VerifyEmailWorkerPage() {
     },
     resolver: zodResolver(resendEmailVerificationHcaptchaSchema),
   });
+
+  useResetMutationErrors(methods.watch, resendEmailVerificationMutationReset);
 
   const handleResend = (
     data: Pick<ResendEmailVerificationDto, 'h_captcha_token'>
@@ -121,13 +127,7 @@ export function VerifyEmailWorkerPage() {
                       variant="body1"
                     />
                   ),
-                  2: (
-                    <Link
-                      rel="noreferrer"
-                      target="_blank"
-                      to={env.VITE_HUMAN_PROTOCOL_HELP_URL}
-                    />
-                  ),
+                  2: <MailTo mail={env.VITE_HUMAN_SUPPORT_EMAIL} />,
                 }}
                 i18nKey="worker.verifyEmail.paragraph4"
               />

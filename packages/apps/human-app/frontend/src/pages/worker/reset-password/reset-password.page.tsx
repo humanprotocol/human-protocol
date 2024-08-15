@@ -10,16 +10,17 @@ import queryString from 'query-string';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
 import { PageCard } from '@/components/ui/page-card';
-import type { ResetPasswordDto } from '@/api/servieces/worker/reset-password';
+import type { ResetPasswordDto } from '@/api/services/worker/reset-password';
 import {
   resetPasswordDtoSchema,
   useResetPasswordMutation,
-} from '@/api/servieces/worker/reset-password';
+} from '@/api/services/worker/reset-password';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { routerPaths } from '@/router/router-paths';
 import { FormCaptcha } from '@/components/h-captcha';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
@@ -39,7 +40,10 @@ export function ResetPasswordWorkerPage() {
     error: resetPasswordWorkerError,
     isError: isResetPasswordWorkerError,
     isPending: isResetPasswordWorkerPending,
+    reset: isResetPasswordWorkerMutationReset,
   } = useResetPasswordMutation();
+
+  useResetMutationErrors(methods.watch, isResetPasswordWorkerMutationReset);
 
   const handleWorkerResetPassword = (data: ResetPasswordDto) => {
     resetPasswordWorkerMutate(
@@ -57,7 +61,7 @@ export function ResetPasswordWorkerPage() {
         ) : undefined
       }
       cancelRouterPathOrCallback={routerPaths.worker.profile}
-      hiddenCancelButton
+      hiddenArrowButton
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>

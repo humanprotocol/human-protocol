@@ -28,7 +28,13 @@ import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
+import {
+  ChainId,
+  KVStoreClient,
+  KVStoreKeys,
+  KVStoreUtils,
+  Role,
+} from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -154,25 +160,20 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
-    let kvstore: KVStoreClient;
+    let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON),
-      );
+      chainId = ChainId.POLYGON;
     } else if (currentWeb3Env === Web3Env.LOCALHOST) {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.LOCALHOST),
-      );
+      chainId = ChainId.LOCALHOST;
     } else {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
-      );
+      chainId = ChainId.POLYGON_AMOY;
     }
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
-      const operatorStatus = await kvstore.get(
+      const operatorStatus = await KVStoreUtils.get(
+        chainId,
         this.web3Service.getOperatorAddress(),
         userEntity.evmAddress,
       );
@@ -411,39 +412,38 @@ export class AuthService {
       );
     }
 
-    let kvstore: KVStoreClient;
+    let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON),
-      );
+      chainId = ChainId.POLYGON;
     } else if (currentWeb3Env === Web3Env.LOCALHOST) {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.LOCALHOST),
-      );
+      chainId = ChainId.LOCALHOST;
     } else {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
-      );
+      chainId = ChainId.POLYGON_AMOY;
     }
+
+    const signer = this.web3Service.getSigner(chainId);
+    const kvstore = await KVStoreClient.build(signer);
 
     if (
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await kvstore.get(data.address, KVStoreKeys.role),
+        await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await kvstore.get(data.address, KVStoreKeys.fee))) {
+    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee))) {
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await kvstore.get(data.address, KVStoreKeys.url))) {
+    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url))) {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await kvstore.get(data.address, KVStoreKeys.jobTypes))) {
+    if (
+      !(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.jobTypes))
+    ) {
       throw new ControlledError(
         ErrorAuth.InvalidJobType,
         HttpStatus.BAD_REQUEST,

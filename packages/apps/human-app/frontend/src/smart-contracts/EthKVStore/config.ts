@@ -9,7 +9,7 @@ export enum JobTypes {
   Fortune = 'Fortune',
   Points = 'Points',
   BoundingBoxes = 'Bounding Boxes',
-  BoundingBoxesFromPoints = 'Bounding Boxes from points',
+  BoundingBoxesFromPoints = 'Bounding Boxes from Points',
   SkeletonsFromBoundingBoxes = 'Skeletons from Bounding Boxes',
 }
 

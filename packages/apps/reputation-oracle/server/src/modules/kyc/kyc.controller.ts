@@ -1,8 +1,8 @@
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiHeader,
   ApiOperation,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -12,19 +12,14 @@ import {
   Get,
   HttpCode,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import {
-  KycSessionDto,
-  KycSignedAddressDto,
-  KycStatusDto,
-  KycUpdateWebhookQueryDto,
-} from './kyc.dto';
+import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycService } from './kyc.service';
+import { KycWebhookAuthGuard } from '../../common/guards/kyc-webhook.auth';
 
 @ApiTags('Kyc')
 @Controller('/kyc')
@@ -49,27 +44,35 @@ export class KycController {
   }
 
   @Post('/update')
+  @UseGuards(KycWebhookAuthGuard)
   @HttpCode(200)
   @ApiOperation({
     summary: 'Update Kyc status',
     description: 'Endpoint to update Kyc process for the user.',
   })
-  @ApiQuery({
-    name: 'secret',
-    description: 'Secret for the webhook authentication.',
-    type: String,
+  @ApiHeader({
+    name: 'x-auth-client',
+    description: 'API key for the webhook authentication',
     required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'x-hmac-signature',
+    description: 'HMAC signature for verifying the request',
+    required: true,
+    schema: {
+      type: 'string',
+    },
   })
   @ApiBody({ type: KycStatusDto })
   @ApiResponse({
     status: 200,
     description: 'Kyc status updated successfully',
   })
-  public updateKycStatus(
-    @Query() query: KycUpdateWebhookQueryDto,
-    @Body() data: KycStatusDto,
-  ): Promise<void> {
-    return this.kycService.updateKycStatus(query.secret, data);
+  public updateKycStatus(@Body() data: KycStatusDto): Promise<void> {
+    return this.kycService.updateKycStatus(data);
   }
 
   @ApiBearerAuth()

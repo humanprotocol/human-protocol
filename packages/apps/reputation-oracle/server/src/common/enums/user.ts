@@ -12,24 +12,14 @@ export enum Role {
 }
 
 export enum KycStatus {
-  NONE = 'NONE',
-  APPROVED = 'APPROVED',
-  SUBMISSION_REQUIRED = 'SUBMISSION_REQUIRED',
-  RESUBMISSION_REQUIRED = 'RESUBMISSION_REQUIRED',
-  REJECTED = 'REJECTED',
-  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
-  RESET = 'RESET',
-  ERROR = 'ERROR',
-}
-
-export enum KycServiceType {
-  ID_DOCUMENT = 'ID_DOCUMENT',
-  LIVENESS = 'LIVENESS',
-  PHONE = 'PHONE',
-  PROOF_OF_ADDRESS = 'PROOF_OF_ADDRESS',
-  EMAIL = 'EMAIL',
-  AML = 'AML',
-  DUPLICATE = 'DUPLICATE',
+  NONE = 'none',
+  APPROVED = 'approved',
+  RESUBMISSION_REQUESTED = 'resubmission_requested',
+  DECLINED = 'declined',
+  REVIEW = 'review',
+  EXPIRED = 'expired',
+  ABANDONED = 'abandoned',
+  ERROR = 'error',
 }
 
 export enum OperatorStatus {

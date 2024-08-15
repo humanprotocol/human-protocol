@@ -1,42 +1,68 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsUUID,
+} from 'class-validator';
 import { KycStatus } from '../../common/enums/user';
 
 export class KycSessionDto {
-  @ApiProperty({ name: 'session_id' })
+  @ApiProperty({ name: 'url' })
+  @IsUrl()
+  public url: string;
+}
+
+export class KycDocumentDto {
+  @ApiProperty()
   @IsString()
-  public sessionId: string;
+  public country: string;
+}
+
+export class KycVerificationDto {
+  @ApiProperty()
+  @IsUUID()
+  public id: string;
+
+  @ApiProperty()
+  @IsString()
+  public vendorData: string;
+
+  @ApiProperty()
+  @IsEnum(KycStatus)
+  public status: KycStatus;
+
+  @ApiProperty({ nullable: true })
+  @IsString()
+  @IsOptional()
+  public reason: string | null;
+
+  @ApiProperty()
+  @IsObject()
+  public document: KycDocumentDto;
+}
+
+export class TechnicalDataDto {
+  @ApiProperty({ nullable: true })
+  @IsString()
+  @IsOptional()
+  public ip: string | null;
 }
 
 export class KycStatusDto {
   @ApiProperty()
   @IsString()
-  @IsOptional()
-  public reason?: string;
+  public status: string;
 
-  @ApiProperty({ name: 'step_id' })
-  @IsString()
-  public stepId: string;
+  @ApiProperty({ type: KycVerificationDto })
+  @IsObject()
+  public verification: KycVerificationDto;
 
-  @ApiProperty()
-  @IsString()
-  public service: string;
-
-  @ApiProperty({ name: 'session_id' })
-  @IsString()
-  public sessionId: string;
-
-  @ApiProperty({
-    enum: KycStatus,
-  })
-  @IsEnum(KycStatus)
-  public status: KycStatus;
-}
-
-export class KycUpdateWebhookQueryDto {
-  @ApiProperty()
-  @IsString()
-  public secret: string;
+  @ApiProperty({ type: TechnicalDataDto })
+  @IsObject()
+  public technicalData: TechnicalDataDto;
 }
 
 export class KycSignedAddressDto {

@@ -10,6 +10,7 @@ import {
   TestnetContracts,
   type ContractsAddresses,
 } from '@/smart-contracts/contracts';
+import { env } from '@/shared/env';
 
 export type ChainWithAddresses = Chain & {
   addresses: ContractsAddresses;
@@ -38,12 +39,10 @@ export const MainnetChains: ChainWithAddresses[] = [
 ];
 
 // chains for getContractAddress function
-export const chainsWithSCAddresses: ChainWithAddresses[] = [
-  ...TestnetChains,
-  ...MainnetChains,
-];
+export const chainsWithSCAddresses: ChainWithAddresses[] =
+  env.VITE_NETWORK === 'mainnet' ? MainnetChains : TestnetChains;
 
 // chains for wallet-connect modal
-export const chains: Chain[] = [...TestnetChains, ...MainnetChains].map(
-  ({ addresses: _, ...chainData }) => chainData
-);
+export const chains: Chain[] = (
+  env.VITE_NETWORK === 'mainnet' ? MainnetChains : TestnetChains
+).map(({ addresses: _, ...chainData }) => chainData);
