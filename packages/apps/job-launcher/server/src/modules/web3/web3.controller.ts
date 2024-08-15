@@ -56,7 +56,7 @@ export class Web3Controller {
   @ApiOperation({
     summary: 'Get available oracles',
     description:
-      'Fetch the list of available oracles based on job type and reputation oracle address.',
+      'Fetch the list of available oracles based on chain id, job type and reputation oracle address.',
   })
   @ApiResponse({
     status: 200,
