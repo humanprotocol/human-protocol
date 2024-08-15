@@ -48,6 +48,7 @@ describe('OracleDiscoveryService', () => {
             chainIdsEnabled: EXPECTED_CHAIN_IDS,
             reputationOracleAddress: REPUTATION_ORACLE_ADDRESS,
             cacheTtlOracleDiscovery: TTL,
+            maxRequestRetries: 5,
           },
         },
         OracleDiscoveryService,
@@ -80,14 +81,12 @@ describe('OracleDiscoveryService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '4200',
-        active: true,
         retriesCount: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
-        active: true,
         retriesCount: 0,
       },
     ];
@@ -107,14 +106,12 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         url: 'url1',
         chainId: '4200',
-        active: true,
         retriesCount: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
-        active: true,
         retriesCount: 0,
       },
     ];
@@ -201,14 +198,12 @@ describe('OracleDiscoveryService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '4200',
-        active: false,
-        retriesCount: 0,
+        retriesCount: 5,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
-        active: true,
         retriesCount: 0,
       },
     ];
@@ -227,15 +222,13 @@ describe('OracleDiscoveryService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '4200',
-        active: false,
-        retriesCount: 0,
+        retriesCount: 5,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
-        active: false,
-        retriesCount: 0,
+        retriesCount: 5,
       },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);

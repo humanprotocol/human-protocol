@@ -10,7 +10,6 @@ export function generateOracleDiscoveryResponseBody() {
     role: 'role1',
     url: 'common-url',
     jobTypes: ['job-type-3'],
-    active: true,
     retriesCount: 0,
   };
   const response2: OracleDiscoveryResponse = {
@@ -19,7 +18,6 @@ export function generateOracleDiscoveryResponseBody() {
     role: 'role2',
     url: 'common-url',
     jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],
-    active: true,
     retriesCount: 0,
   };
   const response3: OracleDiscoveryResponse = {
@@ -28,7 +26,6 @@ export function generateOracleDiscoveryResponseBody() {
     role: 'role3',
     url: 'common-url',
     jobTypes: ['Job-Type-2'],
-    active: true,
     retriesCount: 0,
   };
   const response4: OracleDiscoveryResponse = {
@@ -36,7 +33,6 @@ export function generateOracleDiscoveryResponseBody() {
     chainId: '4200',
     role: 'role3',
     jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],
-    active: true,
     retriesCount: 0,
   };
   return [response1, response2, response3, response4];

@@ -10,7 +10,6 @@ export class OracleDiscoveryResponse implements IOperator {
   role?: string;
   url?: string;
   jobTypes?: string[];
-  active = true;
   retriesCount = 0;
   constructor(
     address: string,

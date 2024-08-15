@@ -35,7 +35,9 @@ export class OracleDiscoveryService {
     // Filter out inactive oracles before returning
     return filteredOracles
       .flat()
-      .filter((oracle) => oracle.active) as OracleDiscoveryResponse[];
+      .filter(
+        (oracle) => oracle.retriesCount < this.configService.maxRequestRetries,
+      ) as OracleDiscoveryResponse[];
   }
 
   private async findOraclesByChainId(

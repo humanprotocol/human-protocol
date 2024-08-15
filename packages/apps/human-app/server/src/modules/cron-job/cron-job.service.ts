@@ -102,7 +102,6 @@ export class CronJobService {
 
   private async resetRetriesCount(oracleData: OracleDiscoveryResponse) {
     oracleData.retriesCount = 0;
-    oracleData.active = true;
 
     const chainId = oracleData.chainId;
     const cachedOracles =
@@ -132,9 +131,6 @@ export class CronJobService {
 
       if (cachedOracle) {
         cachedOracle.retriesCount = (cachedOracle.retriesCount || 0) + 1;
-        if (cachedOracle.retriesCount >= this.configService.maxRequestRetries) {
-          cachedOracle.active = false;
-        }
 
         const updatedOracles = cachedOracles.map((oracle) =>
           oracle.address === cachedOracle.address ? cachedOracle : oracle,

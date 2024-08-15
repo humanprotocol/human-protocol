@@ -44,7 +44,6 @@ describe('CronJobService', () => {
       password: 'Test1234*',
       cacheTtlOracleDiscovery: 600,
       chainIdsEnabled: ['137', '1'],
-      maxRequestRetries: 5,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -117,7 +116,6 @@ describe('CronJobService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        active: true,
         retriesCount: 0,
       };
       const token = 'Bearer token';
@@ -145,7 +143,6 @@ describe('CronJobService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        active: true,
         retriesCount: 0,
       };
       const token = 'Bearer token';
@@ -171,7 +168,6 @@ describe('CronJobService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        active: true,
         retriesCount: 3,
       };
       const token = 'Bearer token';
@@ -268,8 +264,7 @@ describe('CronJobService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        active: false,
-        retriesCount: 3,
+        retriesCount: 5,
       };
 
       cacheManagerMock.get.mockResolvedValue([oracleData]);
@@ -277,7 +272,6 @@ describe('CronJobService', () => {
       await (service as any).resetRetriesCount(oracleData);
 
       expect(oracleData.retriesCount).toBe(0);
-      expect(oracleData.active).toBe(true);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
         [oracleData],
@@ -292,7 +286,6 @@ describe('CronJobService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        active: true,
         retriesCount: 4,
       };
 
@@ -301,7 +294,6 @@ describe('CronJobService', () => {
       await (service as any).handleJobListError(oracleData);
 
       expect(oracleData.retriesCount).toBe(5);
-      expect(oracleData.active).toBe(false);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
         [oracleData],
@@ -314,7 +306,6 @@ describe('CronJobService', () => {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        active: true,
         retriesCount: 2,
       };
 
@@ -323,7 +314,6 @@ describe('CronJobService', () => {
       await (service as any).handleJobListError(oracleData);
 
       expect(oracleData.retriesCount).toBe(3);
-      expect(oracleData.active).toBe(true);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
         [oracleData],
