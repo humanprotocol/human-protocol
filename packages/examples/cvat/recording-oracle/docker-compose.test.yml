@@ -105,7 +105,10 @@ services:
     networks:
       - test-network
     tty: true
-  
+    volumes:
+      - .:/app
+
+
 networks:
   test-network:
     driver: bridge
