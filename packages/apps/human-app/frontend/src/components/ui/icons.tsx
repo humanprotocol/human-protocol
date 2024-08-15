@@ -23,11 +23,13 @@ import LockerIcon from '@/assets/icons/locker-icon.svg';
 import FiltersButtonIcon from '@/assets/icons/filters-button-icon.svg';
 import SortArrow from '@/assets/icons/sort-arrow.svg';
 import FilersIcon from '@/assets/icons/filters-icon.svg';
+import MobileHomeIcons from '@/assets/icons/icons-homepage/mobile-home-icons.svg';
 
 export {
   HomepageLogoIcon,
   HomepageUserIcon,
   HomepageWorkIcon,
+  MobileHomeIcons,
   HumanLogoIcon,
   HumanLogoCircleIcon,
   HumanLogoNavbarIcon,

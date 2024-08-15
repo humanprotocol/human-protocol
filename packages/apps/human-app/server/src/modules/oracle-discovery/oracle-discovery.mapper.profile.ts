@@ -1,14 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import {
-  CamelCaseNamingConvention,
-  createMap,
-  forMember,
-  mapFrom,
-  Mapper,
-  namingConventions,
-  SnakeCaseNamingConvention,
-} from '@automapper/core';
+import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,

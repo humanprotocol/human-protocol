@@ -3,14 +3,15 @@ import { Grid } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { EditEthKVStoreValuesMutationData } from '@/api/servieces/operator/edit-existing-keys';
+import type { EditEthKVStoreValuesMutationData } from '@/api/services/operator/edit-existing-keys';
 import {
   getEditEthKVStoreValuesMutationSchema,
   useEditExistingKeysMutation,
-} from '@/api/servieces/operator/edit-existing-keys';
+} from '@/api/services/operator/edit-existing-keys';
 import { ExistingKeys } from '@/pages/operator/sign-up/add-keys/existing-keys';
 import { EditExistingKeysForm } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-form';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -38,6 +39,8 @@ export function ExistingKeysForm({
   const handleEditExistingKeys = (data: EditEthKVStoreValuesMutationData) => {
     existingKeysMutation.mutate(data);
   };
+
+  useResetMutationErrors(existingKeysMethods.watch, existingKeysMutation.reset);
 
   return (
     <Grid container gap="2rem" marginTop="1rem">

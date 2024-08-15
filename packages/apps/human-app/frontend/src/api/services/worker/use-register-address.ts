@@ -7,9 +7,9 @@ import { apiPaths } from '@/api/api-paths';
 import {
   PrepareSignatureType,
   prepareSignature,
-} from '@/api/servieces/common/prepare-signature';
+} from '@/api/services/common/prepare-signature';
 import type { ResponseError } from '@/shared/types/global.type';
-import { useGetAccessTokenMutation } from '@/api/servieces/common/get-access-token';
+import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 const RegisterAddressSuccessSchema = z.unknown();

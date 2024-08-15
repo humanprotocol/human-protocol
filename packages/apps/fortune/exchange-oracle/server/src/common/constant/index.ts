@@ -18,4 +18,4 @@ export const MAINNET_CHAIN_IDS = [
 ];
 
 export const JWT_KVSTORE_KEY = 'jwt_public_key';
-export const KYC_APPROVED = 'APPROVED';
+export const KYC_APPROVED = 'approved';

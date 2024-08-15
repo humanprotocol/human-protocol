@@ -9,10 +9,10 @@ import {
 } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
-import type { EditEthKVStoreValuesMutationData } from '@/api/servieces/operator/edit-existing-keys';
-import { useEditExistingKeysMutationState } from '@/api/servieces/operator/edit-existing-keys';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/api/servieces/operator/get-keys';
-import { useGetKeys } from '@/api/servieces/operator/get-keys';
+import type { EditEthKVStoreValuesMutationData } from '@/api/services/operator/edit-existing-keys';
+import { useEditExistingKeysMutationState } from '@/api/services/operator/edit-existing-keys';
+import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
+import { useGetKeys } from '@/api/services/operator/get-keys';
 import { jsonRpcErrorHandler } from '@/shared/helpers/json-rpc-error-handler';
 import { ExistingKeysForm } from '@/pages/operator/sign-up/add-keys/existing-keys-form';
 import { PendingKeysForm } from '@/pages/operator/sign-up/add-keys/pending-keys-form';

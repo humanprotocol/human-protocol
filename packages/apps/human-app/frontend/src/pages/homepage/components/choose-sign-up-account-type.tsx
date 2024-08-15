@@ -1,19 +1,12 @@
-import {
-  Container,
-  Grid,
-  IconButton,
-  List,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import { Grid, List, ListItemText, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { BackArrowIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 import { routerPaths } from '@/router/router-paths';
+import { PageCard } from '@/components/ui/page-card';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
@@ -28,47 +21,13 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
   };
 
   return (
-    <Container
-      maxWidth="md"
-      sx={{
-        paddingBottom: isMobile ? '44px' : 0,
-        paddingTop: isMobile ? '12px' : 0,
-        width: '100%',
-        maxWidth: '1600px',
-      }}
+    <PageCard
+      backArrowPath={backToWelcomeStage}
+      cancelRouterPathOrCallback={backToWelcomeStage}
+      childrenMaxWidth="876px"
+      title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >
-      <Button
-        onClick={backToWelcomeStage}
-        size="medium"
-        sx={{
-          position: 'absolute',
-          right: '30px',
-          top: isMobile ? '21px' : '30px',
-        }}
-      >
-        <Typography variant="buttonMedium">{t('homepage.cancel')}</Typography>
-      </Button>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <IconButton
-            onClick={backToWelcomeStage}
-            sx={{
-              position: isMobile ? 'relative' : 'absolute',
-              marginLeft: isMobile ? '-20px' : -7,
-              transform: isMobile ? 'scale(0.6)' : 'none',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: '50%',
-              backgroundColor: colorPalette.paper.main,
-            }}
-          >
-            <BackArrowIcon />
-          </IconButton>
-          <Typography variant="h4">{t('homepage.welcome')} 👋</Typography>
-        </Grid>
+      <Grid container spacing={4} width="100%">
         <Grid item xs={12}>
           <Typography variant="h4">{t('homepage.howWillUse')}</Typography>
         </Grid>
@@ -199,6 +158,6 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
           </Grid>
         </Grid>
       </Grid>
-    </Container>
+    </PageCard>
   );
 }

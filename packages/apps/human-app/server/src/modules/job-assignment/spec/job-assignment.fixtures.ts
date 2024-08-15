@@ -39,6 +39,7 @@ const TOKEN = 'test_user_token';
 export const USER_ADDRESS = 'test_address';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
+export const workerRegisterUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,

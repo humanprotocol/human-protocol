@@ -8,7 +8,7 @@ export const JWT_PREFIX = 'bearer ';
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
 export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
-export const SYNAPS_API_KEY_DISABLED = 'synaps-disabled';
+export const KYC_API_KEY_DISABLED = 'kyc-disabled';
 
 export const SENDGRID_TEMPLATES = {
   signup: 'd-ca99cc7410aa4e6dab3e6042d5ecb9a3',

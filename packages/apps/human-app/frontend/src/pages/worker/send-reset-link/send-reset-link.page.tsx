@@ -6,16 +6,17 @@ import { useTranslation } from 'react-i18next';
 import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
-import type { SendResetLinkDto } from '@/api/servieces/worker/send-reset-link';
+import type { SendResetLinkDto } from '@/api/services/worker/send-reset-link';
 import {
   sendResetLinkDtoSchema,
   useSendResetLinkMutation,
-} from '@/api/servieces/worker/send-reset-link';
+} from '@/api/services/worker/send-reset-link';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
 import { routerPaths } from '@/router/router-paths';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
@@ -34,7 +35,10 @@ export function SendResetLinkWorkerPage() {
     error: sendResetLinkWorkerError,
     isError: isSendResetLinkWorkerError,
     isPending: isSendResetLinkWorkerPending,
+    reset: sendResetLinkWorkerMutateReset,
   } = useSendResetLinkMutation();
+
+  useResetMutationErrors(methods.watch, sendResetLinkWorkerMutateReset);
 
   function handleWorkerSendResetLink(data: SendResetLinkDto) {
     sendResetLinkWorkerMutate(data);

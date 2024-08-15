@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { Button } from '@/components/ui/button';
-import { useRegisterAddressMutation } from '@/api/servieces/worker/use-register-address';
+import { useRegisterAddressMutation } from '@/api/services/worker/use-register-address';
 import { useRegisterAddressNotifications } from '@/hooks/use-register-address-notifications';
 
 export function RegisterAddressBtn() {

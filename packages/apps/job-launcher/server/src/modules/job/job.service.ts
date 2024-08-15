@@ -3,13 +3,13 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  KVStoreClient,
   EscrowUtils,
   NETWORKS,
   StakingClient,
   StorageParams,
   Encryption,
   KVStoreKeys,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -1121,11 +1121,12 @@ export class JobService {
         this.getOraclesSpecificActions[requestType];
 
       const signer = this.web3Service.getSigner(chainId);
-      const kvstore = await KVStoreClient.build(signer);
-      const publicKeys: string[] = [await kvstore.getPublicKey(signer.address)];
+      const publicKeys: string[] = [
+        await KVStoreUtils.getPublicKey(chainId, signer.address),
+      ];
       const oracleAddresses = getOracleAddresses();
       for (const address of Object.values(oracleAddresses)) {
-        const publicKey = await kvstore.getPublicKey(address);
+        const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
         if (publicKey) publicKeys.push(publicKey);
       }
 
@@ -1569,11 +1570,11 @@ export class JobService {
     oracleAddress: string,
     chainId: ChainId,
   ): Promise<bigint> {
-    const signer = this.web3Service.getSigner(chainId);
-
-    const kvStoreClient = await KVStoreClient.build(signer);
-
-    const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
+    const feeValue = await KVStoreUtils.get(
+      chainId,
+      oracleAddress,
+      KVStoreKeys.fee,
+    );
 
     return BigInt(feeValue ? feeValue : 1);
   }
