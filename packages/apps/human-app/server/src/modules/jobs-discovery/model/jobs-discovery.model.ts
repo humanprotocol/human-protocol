@@ -65,6 +65,8 @@ export class JobsDiscoveryParams extends PageableParams {
   fields: JobDiscoveryFieldName[];
   @AutoMap()
   status: JobStatus;
+  @AutoMap()
+  updatedAfter?: string;
 }
 export class JobsDiscoveryParamsData extends PageableData {
   @AutoMap()
@@ -79,6 +81,8 @@ export class JobsDiscoveryParamsData extends PageableData {
   fields: JobDiscoveryFieldName[];
   @AutoMap()
   status: JobStatus;
+  @AutoMap()
+  updated_after?: string;
 }
 export class JobsDiscoveryParamsCommand {
   @AutoMap()

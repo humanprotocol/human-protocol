@@ -9,6 +9,8 @@ const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
   'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
+
 @Injectable()
 export class EnvironmentConfigService {
   constructor(private configService: ConfigService) {}
@@ -30,6 +32,9 @@ export class EnvironmentConfigService {
     return (
       this.configService.get('IS_AXIOS_REQUEST_LOGGING_ENABLED') === 'true'
     );
+  }
+  get allowedHost(): string {
+    return this.configService.getOrThrow('ALLOWED_HOST');
   }
   get cachePort(): number {
     return this.configService.getOrThrow<number>('REDIS_PORT');
@@ -61,7 +66,6 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS,
     );
   }
-
   get cacheTtlOracleDiscovery(): number {
     return this.configService.get<number>(
       'CACHE_TTL_ORACLE_DISCOVERY',
@@ -91,6 +95,12 @@ export class EnvironmentConfigService {
       DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL,
     );
   }
+  get cacheTtlExchangeOracleRegistrationNeeded(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED',
+      DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED,
+    );
+  }
   get hcaptchaLabelingStatsApiUrl(): string {
     return this.configService.getOrThrow<string>(
       'HCAPTCHA_LABELING_STATS_API_URL',
@@ -110,5 +120,11 @@ export class EnvironmentConfigService {
   }
   get isCacheToRestart(): boolean {
     return this.configService.get('IS_CACHE_TO_RESTART') === 'true';
+  }
+  get email(): string {
+    return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
+  }
+  get password(): string {
+    return this.configService.getOrThrow<string>('HUMAN_APP_PASSWORD');
   }
 }

@@ -104,7 +104,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
+[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
 
 ## Properties
 
@@ -118,7 +118,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -132,137 +132,9 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
-
-### get()
-
-> **get**(`address`, `key`): `Promise`\<`string`\>
-
-Gets the value of a key-value pair in the contract.
-
-#### Parameters
-
-• **address**: `string`
-
-Address from which to get the key value.
-
-• **key**: `string`
-
-Key to obtain the value.
-
-#### Returns
-
-`Promise`\<`string`\>
-
-Value of the key.
-
-**Code example**
-
-> Need to have available stake.
-
-```ts
-import { providers } from 'ethers';
-import { KVStoreClient } from '@human-protocol/sdk';
-
-const rpcUrl = 'YOUR_RPC_URL';
-
-const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreClient = await KVStoreClient.build(provider);
-
-const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'Role');
-```
-
-#### Defined in
-
-[kvstore.ts:305](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L305)
-
-***
-
-### getFileUrlAndVerifyHash()
-
-> **getFileUrlAndVerifyHash**(`address`, `urlKey`): `Promise`\<`string`\>
-
-Gets the URL value of the given entity, and verify its hash.
-
-#### Parameters
-
-• **address**: `string`
-
-Address from which to get the URL value.
-
-• **urlKey**: `string` = `'url'`
-
-Configurable URL key. `url` by default.
-
-#### Returns
-
-`Promise`\<`string`\>
-
-URL value for the given address if exists, and the content is valid
-
-**Code example**
-
-```ts
-import { providers } from 'ethers';
-import { KVStoreClient } from '@human-protocol/sdk';
-
-const rpcUrl = 'YOUR_RPC_URL';
-
-const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreClient = await KVStoreClient.build(provider);
-
-const url = await kvstoreClient.getFileUrlAndVerifyHash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
-   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   'linkedin_url'
-);
-```
-
-#### Defined in
-
-[kvstore.ts:344](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L344)
-
-***
-
-### getPublicKey()
-
-> **getPublicKey**(`address`): `Promise`\<`string`\>
-
-Gets the public key of the given entity, and verify its hash.
-
-#### Parameters
-
-• **address**: `string`
-
-Address from which to get the public key.
-
-#### Returns
-
-`Promise`\<`string`\>
-
-Public key for the given address if exists, and the content is valid
-
-**Code example**
-
-```ts
-import { providers } from 'ethers';
-import { KVStoreClient } from '@human-protocol/sdk';
-
-const rpcUrl = 'YOUR_RPC_URL';
-
-const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreClient = await KVStoreClient.build(provider);
-
-const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-```
-
-#### Defined in
-
-[kvstore.ts:402](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L402)
-
-***
 
 ### set()
 
@@ -310,7 +182,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:167](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L167)
+[kvstore.ts:167](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L167)
 
 ***
 
@@ -362,7 +234,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:210](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L210)
+[kvstore.ts:210](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L210)
 
 ***
 
@@ -411,7 +283,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 
 #### Defined in
 
-[kvstore.ts:253](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L253)
+[kvstore.ts:253](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L253)
 
 ***
 
@@ -443,4 +315,4 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[kvstore.ts:122](https://github.com/humanprotocol/human-protocol/blob/be3631cc39e3198133a9145c1c7bd03c2836462a/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L122)
+[kvstore.ts:122](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L122)

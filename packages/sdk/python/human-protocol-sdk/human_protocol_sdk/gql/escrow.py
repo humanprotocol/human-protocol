@@ -16,11 +16,8 @@ fragment EscrowFields on Escrow {
     manifestHash
     manifestUrl
     recordingOracle
-    recordingOracleFee
     reputationOracle
-    reputationOracleFee
     exchangeOracle
-    exchangeOracleFee
     status
     token
     totalFundedAmount

@@ -46,6 +46,23 @@ Initializes a PayoutFilter instance.
   * **date_from** (`Optional`[`datetime`]) – Created from date
   * **date_to** (`Optional`[`datetime`]) – Created to date
 
+### *class* human_protocol_sdk.filter.StatisticsFilter(date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.ASC)
+
+Bases: `object`
+
+A class used to filter statistics requests.
+
+#### \_\_init_\_(date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.ASC)
+
+Initializes a StatisticsFilter instance.
+
+* **Parameters:**
+  * **date_from** (`Optional`[`datetime`]) – Created from date
+  * **date_to** (`Optional`[`datetime`]) – Created to date
+  * **first** (`int`) – Number of items per page
+  * **skip** (`int`) – Page number to retrieve
+  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order of results, “asc” or “desc”
+
 ### *class* human_protocol_sdk.filter.TransactionFilter(chain_id, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Bases: `object`

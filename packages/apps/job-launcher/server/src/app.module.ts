@@ -23,6 +23,7 @@ import { E2E_TEST_ENV } from './common/constants';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { StatisticModule } from './modules/statistic/statistic.module';
+import { QualificationModule } from './modules/qualification/qualification.module';
 
 @Module({
   providers: [
@@ -66,6 +67,7 @@ import { StatisticModule } from './modules/statistic/statistic.module';
     StorageModule,
     WebhookModule,
     StatisticModule,
+    QualificationModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,

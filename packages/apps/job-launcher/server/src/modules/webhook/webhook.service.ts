@@ -3,8 +3,8 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
-  KVStoreClient,
   KVStoreKeys,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -101,9 +101,8 @@ export class WebhookService {
     const exchangeAddress =
       await escrowClient.getExchangeOracleAddress(escrowAddress);
 
-    // Build the KVStore client and get the webhook URL.
-    const kvStoreClient = await KVStoreClient.build(signer);
-    const exchangeOracleUrl = await kvStoreClient.get(
+    const exchangeOracleUrl = await KVStoreUtils.get(
+      chainId,
       exchangeAddress,
       KVStoreKeys.webhookUrl,
     );

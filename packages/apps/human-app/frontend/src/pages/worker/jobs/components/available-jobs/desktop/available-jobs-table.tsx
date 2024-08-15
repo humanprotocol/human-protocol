@@ -12,9 +12,9 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   useGetAvailableJobsData,
   type AvailableJob,
-} from '@/api/servieces/worker/available-jobs-data';
-import type { AssignJobBody } from '@/api/servieces/worker/assign-job';
-import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
+} from '@/api/services/worker/available-jobs-data';
+import type { AssignJobBody } from '@/api/services/worker/assign-job';
+import { useAssignJobMutation } from '@/api/services/worker/assign-job';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { getNetworkName } from '@/smart-contracts/get-network-name';

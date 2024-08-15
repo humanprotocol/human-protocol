@@ -2,10 +2,12 @@ import json
 from typing import List
 
 from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
 from src.chain.web3 import get_web3
+from src.core.config import Config
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -43,9 +45,17 @@ def validate_escrow(
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url)
+    manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
 
-    return json.loads(manifest_content.decode("utf-8"))
+    # if EncryptionUtils.is_encrypted(manifest_content):
+    if is_data_encrypted(manifest_content):
+        encryption = Encryption(
+            Config.encryption_config.pgp_private_key,
+            Config.encryption_config.pgp_passphrase,
+        )
+        manifest_content = encryption.decrypt(manifest_content)
+
+    return json.loads(manifest_content)
 
 
 def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
@@ -61,3 +71,13 @@ def get_reputation_oracle_address(chain_id: int, escrow_address: str) -> str:
 
 def get_exchange_oracle_address(chain_id: int, escrow_address: str) -> str:
     return get_escrow(chain_id, escrow_address).exchange_oracle
+
+
+# FUTURE-TODO: workaround until a new Human Protocol SDK version is released.
+# Check wether data is encrypted without adding new dependencies (like PGPy) to Recording Oracle.
+# Should be replaced with EncryptionUtils.is_encrypted method.
+def is_data_encrypted(data: str) -> bool:
+    normalized_data = data.strip()
+    return normalized_data.startswith("-----BEGIN PGP MESSAGE-----") and normalized_data.endswith(
+        "-----END PGP MESSAGE-----"
+    )

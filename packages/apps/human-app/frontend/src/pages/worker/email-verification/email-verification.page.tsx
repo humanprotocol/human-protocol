@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
-import { useVerifyEmailQuery } from '@/api/servieces/worker/email-verification';
+import { useVerifyEmailQuery } from '@/api/services/worker/email-verification';
 import { SuccessLabel } from '@/components/ui/success-label';
 import {
   PageCard,
@@ -62,6 +62,7 @@ export function EmailVerificationWorker({ token }: { token: string }) {
 
   return (
     <PageCard
+      hiddenArrowButton
       hiddenCancelButton
       title={<SuccessLabel>{t('worker.emailVerification.title')}</SuccessLabel>}
     >

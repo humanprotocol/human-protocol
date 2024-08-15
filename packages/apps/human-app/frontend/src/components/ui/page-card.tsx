@@ -39,14 +39,17 @@ const commonStyles: SxProps<Theme> = {
   background: colorPalette.white,
 };
 
+type ButtonsProps = string | -1 | (() => void);
+
 interface FormCardProps {
   children: React.JSX.Element;
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
   childrenMaxWidth?: string;
-  backArrowPath?: string | -1;
-  cancelRouterPathOrCallback?: string | -1 | (() => void);
+  backArrowPath?: ButtonsProps;
+  cancelRouterPathOrCallback?: ButtonsProps;
   hiddenCancelButton?: boolean;
+  hiddenArrowButton?: boolean;
   withLayoutBackground?: boolean;
   loader?: boolean;
 }
@@ -60,6 +63,7 @@ export function PageCard({
   cancelRouterPathOrCallback = routerPaths.homePage,
   withLayoutBackground = true,
   hiddenCancelButton = false,
+  hiddenArrowButton = false,
 }: FormCardProps) {
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
@@ -71,12 +75,16 @@ export function PageCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
   }, []);
 
-  const goBack = (path: string | -1) => {
-    if (typeof path === 'string') {
-      navigate(path);
+  const goBack = (pathOrCallback: ButtonsProps) => {
+    if (pathOrCallback instanceof Function) {
+      pathOrCallback();
       return;
     }
-    navigate(path);
+    if (typeof pathOrCallback === 'string') {
+      navigate(pathOrCallback);
+      return;
+    }
+    navigate(pathOrCallback);
   };
 
   return (
@@ -139,7 +147,7 @@ export function PageCard({
               },
             }}
           >
-            {backArrowPath ? (
+            {backArrowPath && !hiddenArrowButton ? (
               <IconWrapper
                 onClick={goBack.bind(null, backArrowPath)}
                 sx={{
@@ -189,13 +197,15 @@ export function PageCard({
             md={1}
             order={{ xs: 1, md: 3 }}
             sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
               [breakpoints.mobile]: {
                 display: 'none',
               },
             }}
             xs={12}
           >
-            {backArrowPath ? (
+            {backArrowPath && !hiddenArrowButton ? (
               <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>

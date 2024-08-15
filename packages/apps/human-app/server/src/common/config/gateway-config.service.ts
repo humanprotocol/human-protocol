@@ -41,6 +41,11 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.WORKER_REGISTRATION]: {
+              endpoint: '/user/registration',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
             [ReputationOracleEndpoints.EMAIL_VERIFICATION]: {
               endpoint: '/auth/email-verification',
               method: HttpMethod.POST,

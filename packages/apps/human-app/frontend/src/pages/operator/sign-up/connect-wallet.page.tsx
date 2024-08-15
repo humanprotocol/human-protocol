@@ -52,7 +52,7 @@ export function ConnectWalletOperatorPage() {
         </Typography>
         <Button
           onClick={() => {
-            openModal('WALLET_CONNECT');
+            openModal({ modalState: 'WALLET_CONNECT' });
           }}
           variant="contained"
         >

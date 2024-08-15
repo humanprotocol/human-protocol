@@ -6,7 +6,7 @@ import {
 } from 'material-react-table';
 import Grid from '@mui/material/Grid';
 import { useNavigate } from 'react-router-dom';
-import { type OracleSuccessResponse } from '@/api/servieces/worker/oracles';
+import { type OracleSuccessResponse } from '@/api/services/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';

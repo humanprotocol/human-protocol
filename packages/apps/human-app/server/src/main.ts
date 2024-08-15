@@ -9,7 +9,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
 async function bootstrap() {
-  const logger = new Logger('bootstrap');
+  const logger = new Logger(bootstrap.name);
   const app = await NestFactory.create(AppModule);
 
   const configService: ConfigService = app.get(ConfigService);

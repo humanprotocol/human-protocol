@@ -17,7 +17,7 @@ export function ModalHeader({ closeButton }: ModalHeaderProps) {
   return (
     <Grid container direction="row" justifyContent="flex-end" width="100%">
       <Grid item>
-        {closeButton ? (
+        {closeButton?.isVisible ? (
           <Grid>
             <Button
               data-testid="button-close-modal"

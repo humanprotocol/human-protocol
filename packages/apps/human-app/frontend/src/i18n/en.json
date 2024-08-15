@@ -84,7 +84,7 @@
     },
     "pageCardError": {
       "reload": "Reload",
-      "goHome": "Back to home page"
+      "goHome": "Home page"
     }
   },
   "homepage": {
@@ -102,7 +102,7 @@
     "completeTask": "Complete simple tasks and get paid.",
     "workAnywhere": "Work anywhere, any time.",
     "signUpToComplete": "Sign Up to Complete Tasks",
-    "joinAsOperator": "I want to join as an operator",
+    "joinAsOperator": "I want to join as an Operator",
     "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
     "becomePartner": "Become a HUMAN App partner.",
     "signAsOperator": "Sign Up as an Operator",
@@ -137,13 +137,6 @@
       "submitBtn": "Sign In",
       "forgotPassword": "Forgot Password?"
     },
-    "sendEmailVerification": {
-      "title": "Verify Email",
-      "btn": "Resend Verification Email",
-      "paragraph1": "Your email address <1>{{email}}</1> is not verified.",
-      "paragraph2": "<1>Having trouble?</1> Please <2>Contact Support</2>",
-      "successResent": "Verification email has been successfully resent."
-    },
     "verifyEmail": {
       "title": "Verify Email",
       "btn": "Resend Verification Email",
@@ -170,11 +163,12 @@
       "noEmailError": "Please enter your email address."
     },
     "sendResetLinkSuccess": {
-      "title": "Reset password",
+      "title": "Reset Password",
       "paragraph1": "We've sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Resend Reset Password Email",
+      "btnAfterSend": "Resend Email" ,
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
     "resetPassword": {
@@ -182,7 +176,7 @@
         "createNewPassword": "Create New Password",
         "confirm": "Confirm New Password"
       },
-      "title": "Reset password",
+      "title": "Reset Password",
       "description": "Please enter your new password below.",
       "btn": "Reset password"
     },
@@ -205,20 +199,20 @@
       "addKYCInfoOnChain": "Add KYC Info On-chain",
       "wrongWalletAddress": "Selected wallet address doesn't match the address assigned to the account.",
       "kycInfoOnChainAdded": "KYC Info On-Chain Added",
-      "registerAddress": "Register address",
+      "registerAddress": "Register Address",
       "emailNotifications": "Email Notifications",
       "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
         "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
         "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
-        "registerAddress": "Register address"
+        "registerAddress": "Register Address"
       }
     },
     "oraclesTable": {
       "annotationTool": "Annotation tool",
       "oracleAddress": "Oracle address",
       "jobTypes": "Job types",
-      "seeJobs": "See jobs",
+      "seeJobs": "See Jobs",
       "allJobs": "All jobs"
     },
     "jobs": {
@@ -234,7 +228,7 @@
       "jobType": "Job type",
       "expiresAt": "Expires at",
       "status": "Status",
-      "selectJob": "Select job",
+      "selectJob": "Select Job",
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
@@ -388,8 +382,13 @@
   },
   "walletConnectModal": {
     "header": "Connect Wallet",
-    "paragraph": "The HUMAN App runs on Polygon. Please make sure you enter your Polygon wallet address. <1>Learn more.</1>",
+    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains. <1>Learn more or FAQ link.</1>",
     "connectBtn": "Connect Wallet",
     "cancelBtn": "Cancel"
+  },
+  "expirationModal": {
+    "header": "Session Expired",
+    "description": "Please log in again to continue using the app.",
+    "logIn": "Log In"
   }
 }

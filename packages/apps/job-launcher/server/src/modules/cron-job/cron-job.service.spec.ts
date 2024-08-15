@@ -23,7 +23,7 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
-  KVStoreClient,
+  KVStoreUtils,
   NETWORKS,
 } from '@human-protocol/sdk';
 import { JobService } from '../job/job.service';
@@ -63,10 +63,8 @@ jest.mock('@human-protocol/sdk', () => ({
       fund: jest.fn().mockResolvedValue(null),
     })),
   },
-  KVStoreClient: {
-    build: jest.fn().mockImplementation(() => ({
-      get: jest.fn(),
-    })),
+  KVStoreUtils: {
+    get: jest.fn(),
   },
   EscrowUtils: {
     getStatusEvents: jest.fn(),
@@ -707,9 +705,9 @@ describe('CronJobService', () => {
           .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
       }));
 
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
-      }));
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
 
       const manifestMock = {
         requestType: JobRequestType.FORTUNE,

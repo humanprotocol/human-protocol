@@ -9,11 +9,11 @@ import { FiltersButtonIcon } from '@/components/ui/icons';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { Alert } from '@/components/ui/alert';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
-import { useAssignJobMutation } from '@/api/servieces/worker/assign-job';
+import { useAssignJobMutation } from '@/api/services/worker/assign-job';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import type { AvailableJob } from '@/api/servieces/worker/available-jobs-data';
-import { useInfiniteGetAvailableJobsData } from '@/api/servieces/worker/available-jobs-data';
+import type { AvailableJob } from '@/api/services/worker/available-jobs-data';
+import { useInfiniteGetAvailableJobsData } from '@/api/services/worker/available-jobs-data';
 import { Loader } from '@/components/ui/loader';
 import { TableButton } from '@/components/ui/table-button';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
@@ -107,10 +107,17 @@ export function AvailableJobsTableMobile({
             }}
           >
             <List>
-              <Grid container>
+              <Grid columnSpacing="2rem" container>
                 <Grid item xs={12}>
                   <ListItem label={t('worker.jobs.jobDescription')}>
-                    <Typography variant="subtitle1">
+                    <Typography
+                      sx={{
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                      }}
+                      variant="subtitle1"
+                    >
                       {d.job_description}
                     </Typography>
                   </ListItem>

@@ -1,7 +1,8 @@
 // this file defines contract addresses
 // from https://docs.humanprotocol.org/human-tech-docs/architecture/components/smart-contracts/contract-addresses
 
-import { env } from '@/shared/env';
+import { ChainId } from '@human-protocol/sdk/src/enums';
+import { NETWORKS } from '@human-protocol/sdk/src/constants';
 
 export interface ContractsAddresses {
   HMToken: string;
@@ -14,16 +15,16 @@ export type Mainnet = 'Polygon';
 
 export const TestnetContracts: Record<Testnet, ContractsAddresses> = {
   Amoy: {
-    Staking: env.VITE_TESTNET_AMOY_STAKING_CONTRACT,
-    HMToken: env.VITE_TESTNET_AMOY_HMTOKEN_CONTRACT,
-    EthKVStore: env.VITE_TESTNET_AMOY_ETH_KV_STORE_CONTRACT,
+    Staking: NETWORKS[ChainId.POLYGON_AMOY]?.stakingAddress ?? '',
+    HMToken: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress ?? '',
+    EthKVStore: NETWORKS[ChainId.POLYGON_AMOY]?.kvstoreAddress ?? '',
   },
 };
 
 export const MainnetContracts: Record<Mainnet, ContractsAddresses> = {
   Polygon: {
-    Staking: env.VITE_MAINNET_POLYGON_STAKING_CONTRACT,
-    HMToken: env.VITE_MAINNET_POLYGON_HMTOKEN_CONTRACT,
-    EthKVStore: env.VITE_MAINNET_POLYGON_ETH_KV_STORE_CONTRACT,
+    Staking: NETWORKS[ChainId.POLYGON]?.stakingAddress ?? '',
+    HMToken: NETWORKS[ChainId.POLYGON]?.hmtAddress ?? '',
+    EthKVStore: NETWORKS[ChainId.POLYGON]?.kvstoreAddress ?? '',
   },
 };

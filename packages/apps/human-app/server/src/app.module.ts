@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
@@ -38,6 +38,9 @@ import { RegisterAddressModule } from './modules/register-address/register-addre
 import { InterceptorModule } from './common/interceptors/interceptor.module';
 import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
 import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
+import { EnvironmentConfigService } from './common/config/environment-config.service';
+import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
 
 @Module({
   imports: [
@@ -68,6 +71,7 @@ import { TokenRefreshController } from './modules/token-refresh/token-refresh.co
             return value;
           })
           .required(),
+        ALLOWED_HOST: Joi.string().required(),
       }),
     }),
     AutomapperModule.forRoot({
@@ -96,6 +100,7 @@ import { TokenRefreshController } from './modules/token-refresh/token-refresh.co
     RegisterAddressModule,
     InterceptorModule,
     TokenRefreshModule,
+    CronJobModule,
   ],
   controllers: [
     AppController,
@@ -110,5 +115,10 @@ import { TokenRefreshController } from './modules/token-refresh/token-refresh.co
     TokenRefreshController,
   ],
   exports: [HttpModule],
+  providers: [EnvironmentConfigService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ForbidUnauthorizedHostMiddleware).forRoutes('*');
+  }
+}

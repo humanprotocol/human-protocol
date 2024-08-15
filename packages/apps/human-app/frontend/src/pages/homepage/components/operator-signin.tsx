@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import Snackbar from '@mui/material/Snackbar';
 import { Button } from '@/components/ui/button';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
-import { useWeb3SignIn } from '@/api/servieces/operator/web3-signin';
+import { useWeb3SignIn } from '@/api/services/operator/web3-signin';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { PrepareSignatureType } from '@/api/servieces/common/prepare-signature';
+import { PrepareSignatureType } from '@/api/services/common/prepare-signature';
 
 export function OperatorSignIn() {
   const { isConnected, openModal, address } = useWalletConnect();
