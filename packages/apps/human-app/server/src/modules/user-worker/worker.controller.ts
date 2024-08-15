@@ -60,7 +60,7 @@ export class WorkerController {
   @ApiTags('User-Worker')
   @ApiBearerAuth()
   @Post('/register')
-  @ApiOperation({ summary: 'Worker signin' })
+  @ApiOperation({ summary: 'Worker registration completed' })
   @UsePipes(new ValidationPipe())
   public registerWorker(
     @Body() registerWorkerDto: RegisterWorkerDto,
