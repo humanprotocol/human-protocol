@@ -1,34 +1,44 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+* Add is\_encrypted function to encryption utils (python).
 
-### Removed
+#### Changed
 
-### Fixed
+* Move get functions from KVStore client to KVStore utils.
+* Replace amountJobsLaunched by amountJobsProcessed in getLeader.
+* Modify statistics module.
 
-### Security
+#### Deprecated
 
-# How to upgrade
+#### Removed
 
-## Typescript
+* Remove fee values from get escrows.
 
-### yarn
+#### Fixed
+
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
