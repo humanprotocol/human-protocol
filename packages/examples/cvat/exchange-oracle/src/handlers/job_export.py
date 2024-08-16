@@ -502,7 +502,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
             skeleton_bbox.group = skeleton_group
             skeleton_bbox.label = converted_skeleton.label
             converted_job_dataset.put(
-                converted_sample.wrap(annotations=converted_sample.annotations + [skeleton_bbox])
+                converted_sample.wrap(annotations=[*converted_sample.annotations, skeleton_bbox])
             )
 
         # Rename the job skeleton and point to the original names
