@@ -77,6 +77,35 @@ describe.only('QualificationService', () => {
       });
     });
 
+    it('should create a new qualification without expiresAt', async () => {
+      const createQualificationDto: CreateQualificationDto = {
+        reference: 'ref1',
+        title: 'title1',
+        description: 'desc1',
+      };
+
+      const qualificationEntity = new QualificationEntity();
+      qualificationEntity.reference = createQualificationDto.reference;
+      qualificationEntity.title = createQualificationDto.title;
+      qualificationEntity.description = createQualificationDto.description;
+      qualificationEntity.expiresAt = null;
+
+      qualificationRepository.save = jest
+        .fn()
+        .mockResolvedValue(qualificationEntity);
+
+      const result = await qualificationService.createQualification(
+        createQualificationDto,
+      );
+
+      expect(result).toEqual({
+        reference: createQualificationDto.reference,
+        title: createQualificationDto.title,
+        description: createQualificationDto.description,
+        expiresAt: null,
+      });
+    });
+
     it('should throw an error if the expiration date is in the past', async () => {
       const createQualificationDto: CreateQualificationDto = {
         reference: 'ref1',
@@ -117,6 +146,24 @@ describe.only('QualificationService', () => {
 
   describe('getQualifications', () => {
     it('should return a list of qualifications', async () => {
+      const qualifications = [
+        {
+          reference: 'ref1',
+          title: 'title1',
+          description: 'desc1',
+          expiresAt: null,
+        },
+      ];
+      qualificationRepository.getQualifications = jest
+        .fn()
+        .mockResolvedValue(qualifications);
+
+      const result = await qualificationService.getQualifications();
+
+      expect(result).toEqual(qualifications);
+    });
+
+    it('should return a list of qualifications with null expiresAt', async () => {
       const qualifications = [
         {
           reference: 'ref1',
@@ -195,6 +242,32 @@ describe.only('QualificationService', () => {
       ).toHaveBeenCalledTimes(1);
     });
 
+    it('should assign users to a qualification with null expiresAt', async () => {
+      const assignQualificationDto: AssignQualificationDto = {
+        reference: 'ref1',
+        workerAddresses: ['address1'],
+        workerEmails: ['email1@example.com'],
+      };
+
+      const qualificationEntity = new QualificationEntity();
+      qualificationEntity.reference = 'ref1';
+      qualificationEntity.expiresAt = null;
+      qualificationEntity.userQualifications = [];
+
+      qualificationRepository.findByReference = jest
+        .fn()
+        .mockResolvedValue(qualificationEntity);
+      qualificationService.getWorkers = jest
+        .fn()
+        .mockResolvedValue([{ id: 1 }]);
+
+      await qualificationService.assign(assignQualificationDto);
+
+      expect(
+        qualificationRepository.saveUserQualifications,
+      ).toHaveBeenCalledTimes(1);
+    });
+
     it('should throw an error if the qualification is not found', async () => {
       qualificationRepository.findByReference = jest
         .fn()
@@ -226,6 +299,34 @@ describe.only('QualificationService', () => {
 
       const qualificationEntity = new QualificationEntity();
       qualificationEntity.reference = 'ref1';
+      qualificationEntity.userQualifications = [
+        { id: 1 } as UserQualificationEntity,
+      ];
+
+      qualificationRepository.findByReference = jest
+        .fn()
+        .mockResolvedValue(qualificationEntity);
+      qualificationService.getWorkers = jest
+        .fn()
+        .mockResolvedValue([{ id: 1 }]);
+
+      await qualificationService.unassign(unassignQualificationDto);
+
+      expect(
+        qualificationRepository.saveUserQualifications,
+      ).toHaveBeenCalledTimes(0);
+    });
+
+    it('should unassign users from a qualification with null expiresAt', async () => {
+      const unassignQualificationDto: UnassignQualificationDto = {
+        reference: 'ref1',
+        workerAddresses: ['address1'],
+        workerEmails: ['email1@example.com'],
+      };
+
+      const qualificationEntity = new QualificationEntity();
+      qualificationEntity.reference = 'ref1';
+      qualificationEntity.expiresAt = null;
       qualificationEntity.userQualifications = [
         { id: 1 } as UserQualificationEntity,
       ];
