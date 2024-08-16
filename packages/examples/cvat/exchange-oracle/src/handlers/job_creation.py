@@ -1438,9 +1438,9 @@ class SkeletonsFromBoxesTaskBuilder:
         self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
 
-        self._skeleton_bbox_mapping: _MaybeUnset[
-            skeletons_from_boxes_task.SkeletonBboxMapping
-        ] = _unset
+        self._skeleton_bbox_mapping: _MaybeUnset[skeletons_from_boxes_task.SkeletonBboxMapping] = (
+            _unset
+        )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
         self._roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
         self._job_params: _MaybeUnset[List[self._JobParams]] = _unset

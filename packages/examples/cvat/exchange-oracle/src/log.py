@@ -1,4 +1,5 @@
-""" Config for the application logger"""
+"""Config for the application logger"""
+
 import logging
 from logging.config import dictConfig
 

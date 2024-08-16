@@ -42,9 +42,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     def test_get_job_launcher_url(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
@@ -56,18 +57,20 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_url_invalid_recording_address(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
             self.assertEqual(recording_url, "")
 
     def test_get_recording_oracle_url(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
@@ -80,9 +83,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")

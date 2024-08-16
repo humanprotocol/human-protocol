@@ -84,9 +84,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     def test_get_escrow_manifest(self):
-        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function, patch(
-            "src.chain.escrow.StorageUtils.download_file_from_url"
-        ) as mock_download:
+        with (
+            patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function,
+            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+        ):
             mock_download.return_value = json.dumps({"title": "test"}).encode()
             mock_function.return_value = self.escrow_data
             manifest = get_escrow_manifest(chain_id, escrow_address)

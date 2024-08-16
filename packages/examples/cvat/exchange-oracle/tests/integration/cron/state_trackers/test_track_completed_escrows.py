@@ -394,9 +394,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             def _fake_get_annotations(*args, **kwargs):
                 dummy_zip_file = io.BytesIO()
-                with zipfile.ZipFile(
-                    dummy_zip_file, "w"
-                ) as archive, TemporaryDirectory() as tempdir:
+                with (
+                    zipfile.ZipFile(dummy_zip_file, "w") as archive,
+                    TemporaryDirectory() as tempdir,
+                ):
                     mock_dataset = dm.Dataset(
                         media_type=dm.Image,
                         categories={
@@ -532,9 +533,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             def _fake_get_annotations(*args, **kwargs):
                 dummy_zip_file = io.BytesIO()
-                with zipfile.ZipFile(
-                    dummy_zip_file, "w"
-                ) as archive, TemporaryDirectory() as tempdir:
+                with (
+                    zipfile.ZipFile(dummy_zip_file, "w") as archive,
+                    TemporaryDirectory() as tempdir,
+                ):
                     mock_dataset = dm.Dataset(
                         media_type=dm.Image,
                         categories={
