@@ -13,6 +13,7 @@ const LEADER_FRAGMENT = gql`
     amountSlashed
     reputation
     reward
+    amountJobsProcessed
     role
     fee
     publicKey
