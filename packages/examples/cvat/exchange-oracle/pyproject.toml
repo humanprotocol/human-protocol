@@ -28,19 +28,80 @@ pyinstrument = "^4.6.2"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.1.0"
 pre-commit = "^3.0.4"
-isort = "^5.12.0"
+ruff = "^0.6.0"
 
-[tool.isort]
-profile = "black"
-forced_separate = ["tests"]
-line_length = 100
-skip_gitignore = true # align tool behavior with Black
-
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py310']
+target-version = "py310"
+
+
+[tool.ruff.lint]
+select = ["ALL"]
+unfixable = [
+    "RUF005",  # messes up concantenation with numpy structures
+]
+ignore = [
+    "ANN101",  # method args annotations (mypy will take care of that)
+    "ANN001",  # |
+    "ANN202",  # |
+    "ANN201",  # |
+    "ANN401",  # |
+    "ANN102",  # |
+    "RUF001",  # Allow cyrillic letters in comments
+    "COM812",  # Trailing comas are handled by ruff format
+    "ISC001",  # Recommended to be disabled when using ruff format
+    "B904",    # Raise from: modern pythons preserve previous exceptions
+    "EM",      # Forbids using literal strings in exceptions. I think it's ok
+    "TRY003",  # Forbids long messages in exceptions, again, it's ok
+    "G004",    # Logging statement uses f-string — it's ok, f-strings are fast
+    "A003",    # Class attribute `id` is shadowing a Python builtin — it's ok in class body
+    "FIX001",  # Forbids using TODOs, but TODOs are useful
+    "FIX002",  # |
+    "TD001",   # |
+    "TD002",   # |
+    "TD003",   # |
+    "E711",    # Allow == None comparisons for sqlalchemy queries
+    "E712",    # Allow == True comparisons for sqlalchemy queries
+    "PERF203", # Noisy microoptimisation
+    # Want to resolve eventually, but not now:
+    "S101",    # Allow asserts (there are too many of them right now to fix)
+    "TRY401",  # Checks for excesive logging of exception objects
+    "E501",    # Too long lines
+    "PTH118",  # Prefer pathlib instead of os.path
+    "G001",    # Forbid str.format for logging
+    "PTH123",  # Checks for uses of `os.path.splitext`
+    "D",       # Docstrings
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "PLR0913", # Annotations and args
+    "ANN202",  # |
+    "ANN201",  # |
+    "ANN001",  # |
+    "ANN003",  # |
+    "ARG001",  # |
+    "SLF001",  # Allow private attrs access
+    "PLR2004", # Allow magic values
+    "S",       # security
+    "DTZ005",  # allow datetimes without timezones
+]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+    "pydantic.validator",
+]
+
+[tool.ruff.lint.pylint]
+max-args = 9  # in the name of stupidity and lazyness, please god forgive me
+
+[tool.ruff.lint.isort]
+forced-separate = ["tests"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
 
 [build-system]
 requires = ["poetry-core"]
