@@ -4,7 +4,11 @@ import { ApiTags, ApiResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Web3Service } from './web3.service';
 import { ChainId } from '@human-protocol/sdk';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { AvailableOraclesDto, GetAvailableOraclesDto } from './web3.dto';
+import {
+  AvailableOraclesDto,
+  GetAvailableOraclesDto,
+  GetReputationOraclesDto,
+} from './web3.dto';
 
 @ApiTags('Web3')
 @Controller('/web3')
@@ -74,5 +78,28 @@ export class Web3Controller {
       jobType,
       reputationOracleAddress,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Get reputation oracles by job type',
+    description:
+      'Fetch the list of reputation oracles for a specific job type.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of reputation oracle addresses',
+    schema: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  })
+  @Public()
+  @Get('/reputation-oracles')
+  getReputationOraclesByJobType(
+    @Query() query: GetReputationOraclesDto,
+  ): Promise<string[]> {
+    const { chainId, jobType } = query;
+
+    return this.web3Service.getReputationOraclesByJobType(chainId, jobType);
   }
 }

@@ -134,4 +134,35 @@ export class Web3Service {
       (job) => job.toLowerCase() === requiredJobType.toLowerCase(),
     );
   }
+
+  public async getReputationOraclesByJobType(
+    chainId: ChainId,
+    jobType: string,
+  ): Promise<string[]> {
+    const oracleAddresses = this.web3ConfigService.reputationOracles
+      .split(',')
+      .map((address) => address.trim())
+      .filter((address) => address);
+
+    const matchingOracles = await Promise.all(
+      oracleAddresses.map(async (address) => {
+        try {
+          const leader = await OperatorUtils.getLeader(chainId, address);
+
+          return leader?.jobTypes &&
+            this.matchesJobType(leader.jobTypes, jobType)
+            ? leader.address
+            : null;
+        } catch (error) {
+          this.logger.error(
+            `Failed to fetch leader for address ${address} on chain ${chainId}:`,
+            error,
+          );
+          return null;
+        }
+      }),
+    );
+
+    return matchingOracles.filter(Boolean) as string[];
+  }
 }

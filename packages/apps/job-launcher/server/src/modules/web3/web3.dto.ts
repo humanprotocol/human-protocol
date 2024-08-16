@@ -34,3 +34,13 @@ export class GetAvailableOraclesDto {
   @IsString()
   reputationOracleAddress: string;
 }
+
+export class GetReputationOraclesDto {
+  @ApiProperty({ name: 'chain_id' })
+  @IsString()
+  chainId: ChainId;
+
+  @ApiProperty({ name: 'job_type' })
+  @IsString()
+  jobType: string;
+}
