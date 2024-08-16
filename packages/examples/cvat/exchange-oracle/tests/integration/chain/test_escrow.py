@@ -115,7 +115,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             mock_download.return_value = encrypted_manifest.encode()
             downloaded_manifest_content = get_escrow_manifest(chain_id, escrow_address)
-            self.assertDictEqual(downloaded_manifest_content, original_manifest_content)
+            assert downloaded_manifest_content == original_manifest_content
 
     def test_get_escrow_manifest_invalid_address(self):
         with pytest.raises(EscrowClientError) as error:

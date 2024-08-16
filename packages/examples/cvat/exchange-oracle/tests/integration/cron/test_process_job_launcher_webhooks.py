@@ -107,7 +107,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
-        self.assertListEqual(db_escrow_creation_tracker.projects, [db_project])
+        assert db_escrow_creation_tracker.projects == [db_project]
         assert db_escrow_creation_tracker.total_jobs == 1
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_invalid_escrow_status(
