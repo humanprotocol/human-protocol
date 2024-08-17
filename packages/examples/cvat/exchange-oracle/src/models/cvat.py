@@ -33,23 +33,23 @@ class Project(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     cvat_webhook_id = Column(Integer, nullable=True)
 
-    images: Mapped[list["Image"]] = relationship(
+    images: Mapped[list[Image]] = relationship(
         back_populates="project", cascade="all, delete", passive_deletes=True
     )
 
-    tasks: Mapped[list["Task"]] = relationship(
+    tasks: Mapped[list[Task]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
     )
 
-    jobs: Mapped[list["Job"]] = relationship(
+    jobs: Mapped[list[Job]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
     )
 
-    escrow_creation: Mapped["EscrowCreation"] = relationship(
+    escrow_creation: Mapped[EscrowCreation] = relationship(
         back_populates="projects",
         passive_deletes=True,
         # A custom join is used because the foreign keys do not actually reference any objects
@@ -79,13 +79,13 @@ class Task(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    project: Mapped["Project"] = relationship(back_populates="tasks")
-    jobs: Mapped[list["Job"]] = relationship(
+    project: Mapped[Project] = relationship(back_populates="tasks")
+    jobs: Mapped[list[Job]] = relationship(
         back_populates="task",
         cascade="all, delete",
         passive_deletes=True,
     )
-    data_upload: Mapped["DataUpload"] = relationship(
+    data_upload: Mapped[DataUpload] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
 
@@ -106,7 +106,7 @@ class EscrowCreation(Base):
 
     total_jobs = Column(Integer, nullable=False)
 
-    projects: Mapped[list["Project"]] = relationship(
+    projects: Mapped[list[Project]] = relationship(
         back_populates="escrow_creation",
         # A custom join is used because the foreign keys do not actually reference any objects
         primaryjoin=(
@@ -133,7 +133,7 @@ class DataUpload(Base):
         nullable=False,
     )
 
-    task: Mapped["Task"] = relationship(back_populates="data_upload")
+    task: Mapped[Task] = relationship(back_populates="data_upload")
 
     def __repr__(self):
         return f"DataUpload. id={self.id} task={self.task_id}"
@@ -153,9 +153,9 @@ class Job(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    task: Mapped["Task"] = relationship(back_populates="jobs")
-    project: Mapped["Project"] = relationship(back_populates="jobs")
-    assignments: Mapped[list["Assignment"]] = relationship(
+    task: Mapped[Task] = relationship(back_populates="jobs")
+    project: Mapped[Project] = relationship(back_populates="jobs")
+    assignments: Mapped[list[Assignment]] = relationship(
         back_populates="job",
         cascade="all, delete",
         passive_deletes=True,
@@ -177,7 +177,7 @@ class User(Base):
     cvat_email = Column(String, unique=True, index=True, nullable=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=True)
 
-    assignments: Mapped[list["Assignment"]] = relationship(
+    assignments: Mapped[list[Assignment]] = relationship(
         back_populates="user", cascade="all, delete", passive_deletes=True
     )
 
@@ -204,8 +204,8 @@ class Assignment(Base):
         nullable=False,
     )
 
-    user: Mapped["User"] = relationship(back_populates="assignments")
-    job: Mapped["Job"] = relationship(back_populates="assignments")
+    user: Mapped[User] = relationship(back_populates="assignments")
+    job: Mapped[Job] = relationship(back_populates="assignments")
 
     @property
     def is_finished(self) -> bool:
@@ -229,7 +229,7 @@ class Image(Base):
     )
     filename = Column(String, nullable=False)
 
-    project: Mapped["Project"] = relationship(back_populates="images")
+    project: Mapped[Project] = relationship(back_populates="images")
 
     __table_args__ = (UniqueConstraint("cvat_project_id", "filename", name="_project_filename_uc"),)
 
