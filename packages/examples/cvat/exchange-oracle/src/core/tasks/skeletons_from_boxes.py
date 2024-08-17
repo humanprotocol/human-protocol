@@ -1,7 +1,7 @@
 import os
+from collections.abc import Sequence
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Sequence
 
 import attrs
 import datumaro as dm

@@ -3,7 +3,8 @@
 
 import inspect
 import os
-from typing import ClassVar, Iterable
+from collections.abc import Iterable
+from typing import ClassVar
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv

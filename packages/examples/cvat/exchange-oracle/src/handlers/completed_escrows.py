@@ -2,8 +2,9 @@ import io
 import itertools
 import logging
 from collections import Counter
+from collections.abc import Callable
 from functools import partial
-from typing import Any, Callable
+from typing import Any
 
 from datumaro.util import take_by
 from sqlalchemy import exc as sa_errors

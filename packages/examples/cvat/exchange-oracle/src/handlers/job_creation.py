@@ -3,13 +3,14 @@ from __future__ import annotations
 import os
 import random
 import uuid
+from collections.abc import Sequence
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
 from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import Sequence, TypeVar, Union, cast
+from typing import TypeVar, Union, cast
 
 import cv2
 import datumaro as dm

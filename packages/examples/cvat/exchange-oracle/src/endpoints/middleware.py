@@ -1,6 +1,7 @@
 import json
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import fastapi
 import packaging.version as pv

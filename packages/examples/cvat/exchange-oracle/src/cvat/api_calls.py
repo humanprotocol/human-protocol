@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import zipfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import timedelta
@@ -9,7 +10,7 @@ from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from time import sleep
-from typing import Any, Generator
+from typing import Any
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint

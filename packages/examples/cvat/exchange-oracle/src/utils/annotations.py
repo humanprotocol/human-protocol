@@ -1,7 +1,8 @@
 import os
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from glob import glob
-from typing import Iterable, Sequence, TypeVar
+from typing import TypeVar
 
 import datumaro as dm
 import numpy as np
