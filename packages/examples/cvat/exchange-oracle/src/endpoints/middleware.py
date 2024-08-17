@@ -188,7 +188,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         except Exception as e:
             self.logger.exception({"path": request.url.path, "method": request.method, "reason": e})
-            raise e
+            raise
 
         else:
             return response
