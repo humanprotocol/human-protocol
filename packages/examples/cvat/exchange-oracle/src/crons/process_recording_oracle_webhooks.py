@@ -96,7 +96,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
             event = RecordingOracleEvent_TaskRejected.parse_obj(webhook.event_data)
 
             rejected_jobs = cvat_db_service.get_jobs_by_cvat_id(db_session, event.rejected_job_ids)
-            rejected_project_cvat_ids = set(j.cvat_project_id for j in rejected_jobs)
+            rejected_project_cvat_ids = {j.cvat_project_id for j in rejected_jobs}
 
             chunk_size = CronConfig.rejected_projects_chunk_size
             for chunk_ids in take_by(rejected_project_cvat_ids, chunk_size):
