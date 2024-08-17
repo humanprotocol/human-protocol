@@ -212,7 +212,7 @@ class EncryptionConfig(_BaseConfig):
         ex_prefix = "Wrong server configuration."
 
         if (cls.pgp_public_key_url or cls.pgp_passphrase) and not cls.pgp_private_key:
-            raise Exception(" ".join([ex_prefix, "The PGP_PRIVATE_KEY environment is not set."]))
+            raise Exception(f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
 
         if cls.pgp_private_key:
             try:
