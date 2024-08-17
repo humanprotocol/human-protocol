@@ -75,6 +75,7 @@ class _CompletedEscrowsHandler:
                     retry_callback()
                 else:
                     raise
+        return None
 
     def _process_plain_escrows(self):
         logger = self.logger
