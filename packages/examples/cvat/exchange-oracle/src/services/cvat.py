@@ -233,9 +233,7 @@ def delete_project(session: Session, project_id: str) -> None:
 def is_project_completed(session: Session, project_id: str) -> bool:
     project = get_project_by_id(session, project_id)
     jobs = get_jobs_by_cvat_project_id(session, project.cvat_id)
-    if len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs):
-        return True
-    return False
+    return bool(len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs))
 
 
 # EscrowCreation
