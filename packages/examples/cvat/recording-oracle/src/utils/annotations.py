@@ -181,7 +181,7 @@ class ProjectLabels(dm.ItemTransform):
             src_id: dst_label_cat.find(src_label_cat[src_id].name, src_label_cat[src_id].parent)[0]
             for src_id in range(len(src_label_cat or ()))
         }
-        self._map_id = lambda src_id: id_mapping.get(src_id, None)
+        self._map_id = lambda src_id: id_mapping.get(src_id)
 
     def categories(self):
         return self._categories
