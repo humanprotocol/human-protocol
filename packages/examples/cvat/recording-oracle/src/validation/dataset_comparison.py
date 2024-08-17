@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import itertools
 from abc import ABCMeta, abstractmethod
-from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
 import datumaro as dm
@@ -22,6 +21,8 @@ from .annotation_matching import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
+
     from datumaro.util.annotation_util import BboxCoords
 
 
