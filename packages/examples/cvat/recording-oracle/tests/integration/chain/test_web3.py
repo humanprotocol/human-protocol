@@ -55,7 +55,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_web3_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
-            w3 = get_web3(1234)
+            get_web3(1234)
         self.assertEqual(
             "1234 is not in available list of networks.",
             str(error.exception),
