@@ -45,7 +45,7 @@ class OracleWebhookQueue:
         assert not event_data or event_type, "'event_data' requires 'event_type'"
         assert bool(event) ^ bool(
             event_type
-        ), f"'event' and 'event_type' cannot be used together. Please use only one of the fields"
+        ), "'event' and 'event_type' cannot be used together. Please use only one of the fields"
 
         if event_type:
             if self.direction == OracleWebhookDirectionTags.incoming:
