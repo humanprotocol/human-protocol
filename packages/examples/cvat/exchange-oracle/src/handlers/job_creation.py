@@ -1240,7 +1240,9 @@ class BoxesFromPointsTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self._points_dataset}
 
-        _roi_key = lambda e: e.original_image_key
+        def _roi_key(e):
+            return e.original_image_key
+
         rois_by_image: dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(sorted(self._rois, key=_roi_key), key=_roi_key)
@@ -2243,7 +2245,9 @@ class SkeletonsFromBoxesTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self._boxes_dataset}
 
-        _roi_info_key = lambda e: e.original_image_key
+        def _roi_info_key(e):
+            return e.original_image_key
+
         roi_info_by_image: dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(
@@ -2293,7 +2297,9 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._job_params is not _unset
         assert self.point_labels is not _unset
 
-        _job_params_label_key = lambda ts: ts.label_id
+        def _job_params_label_key(ts):
+            return ts.label_id
+
         jobs_by_skeleton_label = {
             skeleton_label_id: list(g)
             for skeleton_label_id, g in groupby(
