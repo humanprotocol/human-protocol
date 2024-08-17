@@ -1,5 +1,5 @@
 # pylint: disable=too-few-public-methods
-""" Schema for API input&output"""
+"""Schema for API input&output"""
 
 from typing import List, Optional
 

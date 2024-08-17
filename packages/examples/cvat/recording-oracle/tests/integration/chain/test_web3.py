@@ -62,18 +62,24 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     def test_sign_message_polygon(self):
-        with patch("src.chain.web3.get_web3") as mock_function, patch(
-            "src.chain.web3.Config.polygon_mainnet.private_key",
-            DEFAULT_GAS_PAYER_PRIV,
+        with (
+            patch("src.chain.web3.get_web3") as mock_function,
+            patch(
+                "src.chain.web3.Config.polygon_mainnet.private_key",
+                DEFAULT_GAS_PAYER_PRIV,
+            ),
         ):
             mock_function.return_value = self.w3
             signed_message, _ = sign_message(ChainId.POLYGON.value, "message")
         self.assertEqual(signed_message, SIGNATURE)
 
     def test_sign_message_amoy(self):
-        with patch("src.chain.web3.get_web3") as mock_function, patch(
-            "src.chain.web3.Config.polygon_amoy.private_key",
-            DEFAULT_GAS_PAYER_PRIV,
+        with (
+            patch("src.chain.web3.get_web3") as mock_function,
+            patch(
+                "src.chain.web3.Config.polygon_amoy.private_key",
+                DEFAULT_GAS_PAYER_PRIV,
+            ),
         ):
             mock_function.return_value = self.w3
             signed_message, _ = sign_message(ChainId.POLYGON_AMOY.value, "message")

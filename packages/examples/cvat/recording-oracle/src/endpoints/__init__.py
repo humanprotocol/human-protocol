@@ -1,4 +1,5 @@
-""" API endpoints """
+"""API endpoints"""
+
 from fastapi import APIRouter, FastAPI
 
 from src.core.config import Config

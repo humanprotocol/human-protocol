@@ -1,4 +1,4 @@
-""" Validation utils"""
+"""Validation utils"""
 
 
 class ValidationResult:

@@ -25,8 +25,7 @@ from .annotation_matching import (
 class SimilarityFunction(metaclass=ABCMeta):
     "A function to compute similarity between 2 annotations"
 
-    def __call__(self, gt_ann: dm.Annotation, ds_ann: dm.Annotation) -> float:
-        ...
+    def __call__(self, gt_ann: dm.Annotation, ds_ann: dm.Annotation) -> float: ...
 
 
 class CachedSimilarityFunction(SimilarityFunction):
@@ -119,8 +118,7 @@ class DatasetComparator(metaclass=ABCMeta):
     @abstractmethod
     def compare_sample_annotations(
         self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
-    ) -> Tuple[MatchResult, SimilarityFunction]:
-        ...
+    ) -> Tuple[MatchResult, SimilarityFunction]: ...
 
 
 class BboxDatasetComparator(DatasetComparator):

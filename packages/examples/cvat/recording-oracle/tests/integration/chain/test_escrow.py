@@ -92,9 +92,10 @@ class ServiceIntegrationTest(unittest.TestCase):
                 validate_escrow(self.w3.eth.chain_id, escrow_address)
 
     def test_get_escrow_manifest(self):
-        with patch("src.chain.escrow.get_escrow") as mock_get_escrow, patch(
-            "src.chain.escrow.StorageUtils.download_file_from_url"
-        ) as mock_download:
+        with (
+            patch("src.chain.escrow.get_escrow") as mock_get_escrow,
+            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+        ):
             mock_download.return_value = json.dumps({"title": "test"}).encode()
 
             mock_get_escrow.return_value = self.escrow()
@@ -158,9 +159,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_reputation_oracle_address(self):
         escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_get_web3, patch(
-            "src.chain.escrow.get_escrow"
-        ) as mock_get_escrow:
+        with (
+            patch("src.chain.escrow.get_web3") as mock_get_web3,
+            patch("src.chain.escrow.get_escrow") as mock_get_escrow,
+        ):
             mock_get_web3.return_value = self.w3
             mock_escrow = MagicMock()
             mock_escrow.reputation_oracle = REPUTATION_ORACLE_ADDRESS

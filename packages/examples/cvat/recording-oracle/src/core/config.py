@@ -1,5 +1,6 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
-""" Project configuration from env vars """
+"""Project configuration from env vars"""
+
 import inspect
 import os
 from typing import ClassVar, Iterable, Optional
