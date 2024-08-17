@@ -140,7 +140,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
         # assumes Config.webhook_max_retries == 5
-        for i in range(4):
+        for _i in range(4):
             inbox.handle_webhook_fail(self.session, webhook_id)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
