@@ -59,7 +59,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with self.assertRaises(EscrowClientError) as error:
             validate_escrow(chain_id, "invalid_address")
 
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        self.assertEqual("Invalid escrow address: invalid_address", str(error.exception))
 
     def test_validate_escrow_invalid_status(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
@@ -79,7 +79,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             with self.assertRaises(ValueError) as error:
                 validate_escrow(chain_id, escrow_address)
         self.assertEqual(
-            f"Escrow doesn't have funds",
+            "Escrow doesn't have funds",
             str(error.exception),
         )
 
@@ -122,7 +122,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_escrow_manifest_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:
             get_escrow_manifest(chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        self.assertEqual("Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_address(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
@@ -134,12 +134,12 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_job_launcher_address_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:
             get_job_launcher_address(chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        self.assertEqual("Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_address_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
             get_job_launcher_address(123, escrow_address)
-        self.assertEqual(f"123 is not a valid ChainId", str(error.exception))
+        self.assertEqual("123 is not a valid ChainId", str(error.exception))
 
     def test_get_job_launcher_address_empty_escrow(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
@@ -159,12 +159,12 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_recording_oracle_address_invalid_address(self):
         with self.assertRaises(EscrowClientError) as error:
             get_recording_oracle_address(chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        self.assertEqual("Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_recording_oracle_address_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
             get_recording_oracle_address(123, escrow_address)
-        self.assertEqual(f"123 is not a valid ChainId", str(error.exception))
+        self.assertEqual("123 is not a valid ChainId", str(error.exception))
 
     def test_get_recording_oracle_address_empty_escrow(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:

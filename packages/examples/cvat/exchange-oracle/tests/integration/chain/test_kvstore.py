@@ -54,7 +54,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_job_launcher_url_invalid_escrow(self):
         with self.assertRaises(EscrowClientError) as error:
             get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        self.assertEqual("Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_url_invalid_recording_address(self):
         with (
@@ -80,7 +80,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_recording_oracle_url_invalid_escrow(self):
         with self.assertRaises(EscrowClientError) as error:
             get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+        self.assertEqual("Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
         with (
@@ -111,7 +111,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             hash_ = store["public_key_hash"]
 
             if hash_ != hash(public_key):
-                raise KVStoreClientError(f"Invalid hash")
+                raise KVStoreClientError("Invalid hash")
 
             return public_key
 

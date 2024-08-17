@@ -112,6 +112,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         with self.assertRaises(ValueError) as error:
             validate_address("invalid_address")
         self.assertEqual(
-            f"invalid_address is not a correct Web3 address",
+            "invalid_address is not a correct Web3 address",
             str(error.exception),
         )
