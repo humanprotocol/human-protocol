@@ -53,9 +53,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             assert recording_url == DEFAULT_MANIFEST_URL
 
     def test_get_job_launcher_url_invalid_escrow(self):
-        with pytest.raises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
             get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-        assert str(error.exception) == "Invalid escrow address: invalid_address"
 
     def test_get_job_launcher_url_invalid_recording_address(self):
         with (
@@ -79,9 +78,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             assert recording_url == DEFAULT_MANIFEST_URL
 
     def test_get_recording_oracle_url_invalid_escrow(self):
-        with pytest.raises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
             get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-        assert str(error.exception) == "Invalid escrow address: invalid_address"
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
         with (

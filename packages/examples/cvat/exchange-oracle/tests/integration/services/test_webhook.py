@@ -81,7 +81,10 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_create_incoming_webhook_none_event_type(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         signature = "signature"
-        with pytest.raises(AssertionError) as error:
+        with pytest.raises(
+            AssertionError,
+            match="'event' and 'event_type' cannot be used together. Please use only one of the fields",
+        ):
             webhook_service.inbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -89,16 +92,14 @@ class ServiceIntegrationTest(unittest.TestCase):
                 signature=signature,
                 type=OracleWebhookTypes.job_launcher,
             )
-        assert (
-            str(error.exception)
-            == "'event' and 'event_type' cannot be used together. Please use only one of the fields"
-        )
 
     def test_create_incoming_webhook_none_signature(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         chain_id = Networks.localhost.value
 
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(
+            ValueError, match="Webhook signature must be specified for incoming events"
+        ):
             webhook_service.inbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -106,7 +107,6 @@ class ServiceIntegrationTest(unittest.TestCase):
                 type=OracleWebhookTypes.job_launcher,
                 event_type=JobLauncherEventTypes.escrow_created.value,
             )
-        assert str(error.exception) == "Webhook signature must be specified for incoming events"
 
     def test_create_outgoing_webhook(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -156,24 +156,25 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_outgoing_webhook_none_event_type(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        with pytest.raises(AssertionError) as error:
+        with pytest.raises(
+            AssertionError,
+            match="'event' and 'event_type' cannot be used together. Please use only one of the fields",
+        ):
             webhook_service.outbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
                 chain_id=None,
                 type=OracleWebhookTypes.exchange_oracle,
             )
-        assert (
-            str(error.exception)
-            == "'event' and 'event_type' cannot be used together. Please use only one of the fields"
-        )
 
     def test_create_outgoing_webhook_with_signature(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         chain_id = Networks.localhost.value
         signature = "signature"
 
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(
+            ValueError, match="Webhook signature must not be specified for outgoing events"
+        ):
             webhook_service.outbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -182,7 +183,6 @@ class ServiceIntegrationTest(unittest.TestCase):
                 event=ExchangeOracleEvent_TaskFinished(),
                 signature=signature,
             )
-        assert str(error.exception) == "Webhook signature must not be specified for outgoing events"
 
     def test_get_pending_webhooks(self):
         chain_id = Networks.localhost.value

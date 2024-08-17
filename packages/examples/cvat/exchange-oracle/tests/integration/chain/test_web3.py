@@ -56,9 +56,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert w3.manager._provider.endpoint_uri == LocalhostConfig.rpc_api
 
     def test_get_web3_invalid_chain_id(self):
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError, match="1234 is not in available list of networks."):
             get_web3(1234)
-        assert str(error.exception) == "1234 is not in available list of networks."
 
     def test_sign_message_polygon(self):
         with patch("src.chain.web3.get_web3") as mock_function:
@@ -83,9 +82,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             assert serialized_message == json.dumps("message")
 
     def test_sign_message_invalid_chain_id(self):
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError, match="1234 is not in available list of networks."):
             sign_message(1234, "message")
-        assert str(error.exception) == "1234 is not in available list of networks."
 
     def test_recover_signer(self):
         with patch("src.chain.web3.get_web3") as mock_function:
@@ -104,6 +102,5 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert address == DEFAULT_GAS_PAYER
 
     def test_validate_address_invalid_address(self):
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError, match="invalid_address is not a correct Web3 address"):
             validate_address("invalid_address")
-        assert str(error.exception) == "invalid_address is not a correct Web3 address"
