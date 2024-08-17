@@ -194,13 +194,13 @@ class _TaskValidator:
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_TaskRejected(
                     # TODO: update wrt. M2 API changes, send reason
-                    rejected_job_ids=list(
+                    rejected_job_ids=[
                         jid
                         for jid, reason in validation_result.rejected_jobs.items()
                         if not isinstance(
                             reason, TooFewGtError
                         )  # prevent such jobs from reannotation, can also be handled in ExcOr
-                    )
+                    ]
                 ),
             )
 

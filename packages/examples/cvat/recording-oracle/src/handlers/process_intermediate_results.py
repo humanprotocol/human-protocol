@@ -1072,7 +1072,7 @@ def process_intermediate_results(
         validation_meta=validation_meta,
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
         average_quality=np.mean(
-            list(v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0)
+            [v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0]
             or [0]
         ),
     )
