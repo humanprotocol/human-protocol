@@ -6,10 +6,10 @@ from typing import Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
-import src.chain.escrow as escrow
 import src.core.annotation_meta as annotation
 import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
+from src.chain import escrow
 from src.core.config import Config
 from src.core.manifest import TaskManifest, parse_manifest
 from src.core.oracle_events import (
