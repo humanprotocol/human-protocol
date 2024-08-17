@@ -10,7 +10,7 @@ from itertools import chain, groupby
 from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeVar, Union, cast
 
 import cv2
 import datumaro as dm
@@ -27,7 +27,6 @@ import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
-from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
@@ -37,6 +36,9 @@ from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
+
+if TYPE_CHECKING:
+    from src.core.manifest import TaskManifest
 
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
