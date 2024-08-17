@@ -152,7 +152,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.exchange_oracle,
             event=ExchangeOracleEvent_TaskFinished(),
         )
-        with self.assertRaises(IntegrityError) as error:
+        with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_outgoing_webhook_none_event_type(self):
