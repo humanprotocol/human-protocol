@@ -1006,7 +1006,7 @@ def process_intermediate_results(
 
     should_complete = False
 
-    if 0 < Config.validation.max_escrow_iterations:
+    if Config.validation.max_escrow_iterations > 0:
         escrow_iteration = task.iteration
         if escrow_iteration and Config.validation.max_escrow_iterations <= escrow_iteration:
             logger.info(
