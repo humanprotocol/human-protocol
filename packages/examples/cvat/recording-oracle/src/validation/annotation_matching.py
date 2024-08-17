@@ -121,7 +121,7 @@ def match_annotations(
     a_unmatched = []
     b_unmatched = []
 
-    for a_idx, b_idx in zip(a_matches, b_matches):
+    for a_idx, b_idx in zip(a_matches, b_matches, strict=False):
         dist = distances[a_idx, b_idx]
         if dist > 1 - min_similarity or dist == 1:
             if a_idx < len(a_anns):
