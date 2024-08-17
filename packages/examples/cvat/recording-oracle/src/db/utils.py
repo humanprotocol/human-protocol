@@ -18,10 +18,7 @@ def maybe_for_update(query: T, enable: bool | ForUpdateParams) -> T:
     if not enable:
         return query
 
-    if isinstance(enable, ForUpdateParams):
-        params = enable
-    else:
-        params = ForUpdateParams()
+    params = enable if isinstance(enable, ForUpdateParams) else ForUpdateParams()
 
     return query.with_for_update(
         skip_locked=params.skip_locked,

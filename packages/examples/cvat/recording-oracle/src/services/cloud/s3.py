@@ -61,8 +61,5 @@ class S3Client(StorageClient):
     def list_files(self, *, bucket: str | None = None, prefix: str | None = None) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         objects = self.resource.Bucket(bucket).objects
-        if prefix:
-            objects = objects.filter(Prefix=self.normalize_prefix(prefix))
-        else:
-            objects = objects.all()
+        objects = objects.filter(Prefix=self.normalize_prefix(prefix)) if prefix else objects.all()
         return [file_info.key for file_info in objects]
