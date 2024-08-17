@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import NamedTuple, TypeVar
+from typing import TYPE_CHECKING, NamedTuple, TypeVar
 
 import datumaro as dm
 import numpy as np
@@ -18,7 +18,6 @@ import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
-from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import TaskTypes
 from src.core.validation_errors import DatasetValidationError, LowAccuracyError
@@ -36,6 +35,9 @@ from src.validation.dataset_comparison import (
     SkeletonDatasetComparator,
     TooFewGtError,
 )
+
+if TYPE_CHECKING:
+    from src.core.manifest import TaskManifest
 
 DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
