@@ -38,7 +38,7 @@ def shift_ann(
             ]
         )
     else:
-        assert False, f"Unsupported annotation type '{ann.type}'"
+        raise AssertionError(f"Unsupported annotation type '{ann.type}'")
 
     return shifted_ann
 

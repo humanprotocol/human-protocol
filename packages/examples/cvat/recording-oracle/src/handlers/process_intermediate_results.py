@@ -309,7 +309,7 @@ class _TaskValidator:
                 )
                 merged_dataset.update(gt_dataset)
             case _:
-                assert False, f"Unknown task type {manifest.annotation.type}"
+                raise AssertionError(f"Unknown task type {manifest.annotation.type}")
 
     def validate(self) -> _ValidationResult:
         with TemporaryDirectory() as tempdir:

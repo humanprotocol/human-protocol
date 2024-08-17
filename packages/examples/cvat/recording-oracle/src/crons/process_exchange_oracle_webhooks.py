@@ -74,7 +74,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session, logge
             )
 
         case _:
-            assert False, f"Unknown exchange oracle event {webhook.event_type}"
+            raise AssertionError(f"Unknown exchange oracle event {webhook.event_type}")
 
 
 def process_outgoing_exchange_oracle_webhooks():
