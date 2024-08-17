@@ -1010,9 +1010,7 @@ def process_intermediate_results(
         escrow_iteration = task.iteration
         if escrow_iteration and Config.validation.max_escrow_iterations <= escrow_iteration:
             logger.info(
-                "Validation for escrow_address={}: too many iterations, stopping annotation".format(
-                    escrow_address
-                )
+                f"Validation for escrow_address={escrow_address}: too many iterations, stopping annotation"
             )
             should_complete = True
 
@@ -1028,24 +1026,16 @@ def process_intermediate_results(
             < unverifiable_jobs_count
         ):
             logger.info(
-                "Validation for escrow_address={}: "
-                "too many assignments have insufficient GT for validation ({} of {} ({:.2f}%)), "
-                "stopping annotation".format(
-                    escrow_address,
-                    unverifiable_jobs_count,
-                    total_jobs,
-                    unverifiable_jobs_count / total_jobs * 100,
-                )
+                f"Validation for escrow_address={escrow_address}: "
+                f"too many assignments have insufficient GT for validation ({unverifiable_jobs_count} of {total_jobs} ({unverifiable_jobs_count / total_jobs * 100:.2f}%)), "
+                "stopping annotation"
             )
             should_complete = True
         elif len(rejected_jobs) == unverifiable_jobs_count:
             if unverifiable_jobs_count:
                 logger.info(
-                    "Validation for escrow_address={}: "
-                    "only unverifiable assignments left ({}), stopping annotation".format(
-                        escrow_address,
-                        unverifiable_jobs_count,
-                    )
+                    f"Validation for escrow_address={escrow_address}: "
+                    f"only unverifiable assignments left ({unverifiable_jobs_count}), stopping annotation"
                 )
 
             should_complete = True
