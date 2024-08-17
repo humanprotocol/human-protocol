@@ -38,9 +38,8 @@ def validate_escrow(
             )
         )
 
-    if status == Status.Pending and not allow_no_funds:
-        if int(escrow.balance) == 0:
-            raise ValueError("Escrow doesn't have funds")
+    if status == Status.Pending and not allow_no_funds and int(escrow.balance) == 0:
+        raise ValueError("Escrow doesn't have funds")
 
 
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
