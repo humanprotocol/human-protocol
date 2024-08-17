@@ -55,7 +55,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_job_launcher_url_invalid_escrow(self):
         with pytest.raises(EscrowClientError) as error:
             get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-        assert "Invalid escrow address: invalid_address" == str(error.exception)
+        assert str(error.exception) == "Invalid escrow address: invalid_address"
 
     def test_get_job_launcher_url_invalid_recording_address(self):
         with (
@@ -81,7 +81,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_recording_oracle_url_invalid_escrow(self):
         with pytest.raises(EscrowClientError) as error:
             get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-        assert "Invalid escrow address: invalid_address" == str(error.exception)
+        assert str(error.exception) == "Invalid escrow address: invalid_address"
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
         with (
