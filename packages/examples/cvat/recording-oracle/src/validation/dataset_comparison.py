@@ -105,7 +105,7 @@ class DatasetComparator(metaclass=ABCMeta):
                 dataset_failed_gts.add(gt_sample.id)
 
         if dataset_excluded_gts_count == len(gt_dataset):
-            raise TooFewGtError()
+            raise TooFewGtError
 
         dataset_accuracy = 0
         if dataset_total_anns_to_compare:
