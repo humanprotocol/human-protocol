@@ -22,8 +22,6 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 
 from src.db import Base
-from src.models.cvat import Job, Task
-from src.models.webhook import Webhook
 
 target_metadata = Base.metadata
 

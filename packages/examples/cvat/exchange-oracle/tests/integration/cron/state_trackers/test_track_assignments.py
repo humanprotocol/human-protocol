@@ -3,20 +3,12 @@ import uuid
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from sqlalchemy import update
-from sqlalchemy.sql import select
-
 from src.core.types import (
     AssignmentStatuses,
-    JobStatuses,
-    Networks,
-    ProjectStatuses,
-    TaskStatuses,
-    TaskTypes,
 )
 from src.crons.state_trackers import track_assignments
 from src.db import SessionLocal
-from src.models.cvat import Assignment, Job, Project, Task, User
+from src.models.cvat import Assignment, User
 
 from tests.utils.db_helper import create_project_task_and_job
 
