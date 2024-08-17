@@ -2,6 +2,7 @@ import random
 import unittest
 import uuid
 
+import pytest
 from sqlalchemy.exc import IntegrityError
 
 from src.core.types import Networks, OracleWebhookStatuses, OracleWebhookTypes
@@ -55,7 +56,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def _test_none_webhook_argument(self, argument_name, error_type):
         kwargs = dict(**self.webhook_kwargs)
         kwargs[argument_name] = None
-        with self.assertRaises(error_type):
+        with pytest.raises(error_type):
             inbox.create_webhook(**kwargs)
             self.session.commit()
 
@@ -117,7 +118,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_update_webhook_invalid_status(self):
         webhook_id = inbox.create_webhook(**self.webhook_kwargs)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             inbox.update_webhook_status(self.session, webhook_id, "Invalid status")
 
     def test_handle_webhook_success(self):

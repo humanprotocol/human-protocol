@@ -145,7 +145,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = create_escrow(self.w3)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
+            with pytest.raises(EscrowClientError) as error:
                 store_results(self.w3.eth.chain_id, escrow_address, "invalid_url", DEFAULT_HASH)
         assert "Invalid URL: invalid_url" == str(error.exception)
 
@@ -153,7 +153,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = create_escrow(self.w3)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
+            with pytest.raises(EscrowClientError) as error:
                 store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, "")
         assert "Invalid empty hash" == str(error.exception)
 
