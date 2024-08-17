@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, NamedTuple, TypeVar
 
 import datumaro as dm
 import numpy as np
-from sqlalchemy.orm import Session
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
 import src.core.tasks.simple as simple_task
@@ -37,6 +36,8 @@ from src.validation.dataset_comparison import (
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
     from src.core.manifest import TaskManifest
 
 DM_DATASET_FORMAT_MAPPING = {

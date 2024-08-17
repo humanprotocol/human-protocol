@@ -3,11 +3,11 @@ from __future__ import annotations
 import itertools
 from abc import ABCMeta, abstractmethod
 from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
 
 import datumaro as dm
 import numpy as np
 from attrs import define, field
-from datumaro.util.annotation_util import BboxCoords
 
 from src.core.config import Config
 from src.core.validation_errors import TooFewGtError
@@ -20,6 +20,9 @@ from .annotation_matching import (
     match_annotations,
     point_to_bbox_cmp,
 )
+
+if TYPE_CHECKING:
+    from datumaro.util.annotation_util import BboxCoords
 
 
 class SimilarityFunction(metaclass=ABCMeta):
