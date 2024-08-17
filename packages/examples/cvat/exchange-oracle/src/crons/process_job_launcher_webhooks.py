@@ -155,7 +155,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                 raise
 
         case _:
-            assert False, f"Unknown job launcher event {webhook.event_type}"
+            raise AssertionError(f"Unknown job launcher event {webhook.event_type}")
 
 
 def process_outgoing_job_launcher_webhooks():

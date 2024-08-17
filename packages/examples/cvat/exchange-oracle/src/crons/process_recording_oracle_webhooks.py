@@ -132,7 +132,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
         case _:
-            assert False, f"Unknown recording oracle event {webhook.event_type}"
+            raise AssertionError(f"Unknown recording oracle event {webhook.event_type}")
 
 
 def process_outgoing_recording_oracle_webhooks():

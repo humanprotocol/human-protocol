@@ -94,7 +94,7 @@ def parse_event(
         if event_type not in sender_events:
             raise ValueError(f"Unknown event '{sender}.{event_type}'")
     else:
-        assert False, f"Unknown event sender type '{sender}'"
+        raise AssertionError(f"Unknown event sender type '{sender}'")
 
     event_class = get_class_for_event_type(event_type)
     return event_class.parse_obj(event_data or {})

@@ -174,7 +174,7 @@ def shift_ann(ann: T, offset_x: float, offset_y: float, *, img_w: int, img_h: in
             ]
         )
     else:
-        assert False, f"Unsupported annotation type '{ann.type}'"
+        raise AssertionError(f"Unsupported annotation type '{ann.type}'")
 
     return shifted_ann
 
