@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional
+from typing import Optional
 from urllib.parse import unquote
 
 
@@ -25,7 +25,7 @@ class StorageClient(metaclass=ABCMeta):
     @abstractmethod
     def list_files(
         self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
-    ) -> List[str]: ...
+    ) -> list[str]: ...
 
     @staticmethod
     def normalize_prefix(prefix: Optional[str]) -> Optional[str]:

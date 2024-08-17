@@ -36,4 +36,4 @@ class MetaResponse(BaseModel):
 
     message: str
     version: str
-    supported_networks: List[SupportedNetwork]
+    supported_networks: list[SupportedNetwork]

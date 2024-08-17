@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption
@@ -21,7 +20,7 @@ def validate_escrow(
     chain_id: int,
     escrow_address: str,
     *,
-    accepted_states: List[Status] = [Status.Pending],
+    accepted_states: list[Status] = [Status.Pending],
     allow_no_funds: bool = False,
 ) -> None:
     assert accepted_states

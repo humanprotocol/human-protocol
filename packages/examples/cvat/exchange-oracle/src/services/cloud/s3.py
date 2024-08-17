@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import List, Optional
+from typing import Optional
 from urllib.parse import unquote
 
 import boto3
@@ -60,7 +60,7 @@ class S3Client(StorageClient):
 
     def list_files(
         self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         objects = self.resource.Bucket(bucket).objects
         if prefix:

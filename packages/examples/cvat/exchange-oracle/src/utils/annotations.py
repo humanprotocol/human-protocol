@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 from glob import glob
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Iterable, Optional, Sequence, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
@@ -10,7 +10,7 @@ from datumaro.util.annotation_util import find_group_leader, find_instances, max
 from defusedxml import ElementTree as ET
 
 
-def flatten_points(input_points: Sequence[dm.Points]) -> List[dm.Points]:
+def flatten_points(input_points: Sequence[dm.Points]) -> list[dm.Points]:
     results = []
 
     for pts in input_points:
@@ -98,7 +98,7 @@ def convert_point_arrays_dataset_to_1_point_skeletons(
         media_type=dm.Image,
     )
 
-    label_id_map: Dict[int, int] = {
+    label_id_map: dict[int, int] = {
         original_id: new_label_cat.find(label.name, parent=_get_skeleton_label(label.name))[0]
         for original_id, label in enumerate(dataset.categories()[dm.AnnotationType.label])
     }  # old id -> new id
@@ -214,7 +214,7 @@ class ProjectLabels(dm.ItemTransform):
     def __init__(
         self,
         extractor: dm.IExtractor,
-        dst_labels: Union[Iterable[Union[str, Tuple[str, str]]], dm.LabelCategories],
+        dst_labels: Union[Iterable[Union[str, tuple[str, str]]], dm.LabelCategories],
     ):
         super().__init__(extractor)
 

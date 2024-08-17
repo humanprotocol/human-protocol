@@ -9,7 +9,7 @@ from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from time import sleep
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Generator, Optional
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -125,12 +125,12 @@ def create_cloudstorage(
     provider: str,
     bucket_name: str,
     *,
-    credentials: Optional[Dict[str, Any]] = None,
+    credentials: Optional[dict[str, Any]] = None,
     bucket_host: Optional[str] = None,
 ) -> models.CloudStorageRead:
     # credentials: access_key | secret_key | service_account_key
     # CVAT credentials: key | secret_key | key_file
-    def _to_cvat_credentials(credentials: Dict[str, Any]) -> Dict:
+    def _to_cvat_credentials(credentials: dict[str, Any]) -> dict:
         cvat_credentials = dict()
         for cvat_field, field in {
             "key": "access_key",
@@ -314,7 +314,7 @@ def create_task(project_id: int, name: str) -> models.TaskRead:
             raise
 
 
-def get_cloudstorage_contents(cloudstorage_id: int) -> List[str]:
+def get_cloudstorage_contents(cloudstorage_id: int) -> list[str]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
@@ -418,7 +418,7 @@ def get_task_annotations(
             raise
 
 
-def fetch_task_jobs(task_id: int) -> List[models.JobRead]:
+def fetch_task_jobs(task_id: int) -> list[models.JobRead]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
@@ -509,7 +509,7 @@ def delete_cloudstorage(cvat_id: int) -> None:
             raise
 
 
-def fetch_projects(assignee: str = "") -> List[models.ProjectRead]:
+def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
@@ -529,7 +529,7 @@ class UploadStatus(str, Enum, metaclass=BetterEnumMeta):
     FAILED = "Failed"
 
 
-def get_task_upload_status(cvat_id: int) -> Tuple[Optional[UploadStatus], str]:
+def get_task_upload_status(cvat_id: int) -> tuple[Optional[UploadStatus], str]:
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:

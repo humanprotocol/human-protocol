@@ -1,7 +1,7 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, relationship
@@ -35,17 +35,17 @@ class Project(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     cvat_webhook_id = Column(Integer, nullable=True)
 
-    images: Mapped[List["Image"]] = relationship(
+    images: Mapped[list["Image"]] = relationship(
         back_populates="project", cascade="all, delete", passive_deletes=True
     )
 
-    tasks: Mapped[List["Task"]] = relationship(
+    tasks: Mapped[list["Task"]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
     )
 
-    jobs: Mapped[List["Job"]] = relationship(
+    jobs: Mapped[list["Job"]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
@@ -82,7 +82,7 @@ class Task(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     project: Mapped["Project"] = relationship(back_populates="tasks")
-    jobs: Mapped[List["Job"]] = relationship(
+    jobs: Mapped[list["Job"]] = relationship(
         back_populates="task",
         cascade="all, delete",
         passive_deletes=True,
@@ -108,7 +108,7 @@ class EscrowCreation(Base):
 
     total_jobs = Column(Integer, nullable=False)
 
-    projects: Mapped[List["Project"]] = relationship(
+    projects: Mapped[list["Project"]] = relationship(
         back_populates="escrow_creation",
         # A custom join is used because the foreign keys do not actually reference any objects
         primaryjoin=(
@@ -157,7 +157,7 @@ class Job(Base):
 
     task: Mapped["Task"] = relationship(back_populates="jobs")
     project: Mapped["Project"] = relationship(back_populates="jobs")
-    assignments: Mapped[List["Assignment"]] = relationship(
+    assignments: Mapped[list["Assignment"]] = relationship(
         back_populates="job",
         cascade="all, delete",
         passive_deletes=True,
@@ -179,7 +179,7 @@ class User(Base):
     cvat_email = Column(String, unique=True, index=True, nullable=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=True)
 
-    assignments: Mapped[List["Assignment"]] = relationship(
+    assignments: Mapped[list["Assignment"]] = relationship(
         back_populates="user", cascade="all, delete", passive_deletes=True
     )
 

@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Dict, List, Optional
+from typing import Optional
 from urllib.parse import unquote
 
 from google.cloud import storage
@@ -14,7 +14,7 @@ class GcsClient(StorageClient):
         self,
         *,
         bucket: Optional[str] = None,
-        service_account_key: Optional[Dict] = None,
+        service_account_key: Optional[dict] = None,
     ) -> None:
         super().__init__(bucket)
 
@@ -49,7 +49,7 @@ class GcsClient(StorageClient):
 
     def list_files(
         self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
-    ) -> List[str]:
+    ) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         prefix = self.normalize_prefix(prefix)
 

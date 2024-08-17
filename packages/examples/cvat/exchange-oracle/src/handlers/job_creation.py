@@ -9,7 +9,7 @@ from itertools import chain, groupby
 from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
+from typing import Optional, Sequence, TypeVar, Union, cast
 
 import cv2
 import datumaro as dm
@@ -115,7 +115,7 @@ class _ExcludedAnnotationInfo:
 
 @dataclass
 class _ExcludedAnnotationsInfo:
-    messages: List[_ExcludedAnnotationInfo] = field(default_factory=list)
+    messages: list[_ExcludedAnnotationInfo] = field(default_factory=list)
 
     excluded_count: int = 0
     "The number of excluded annotations. Can be different from len(messages)"
@@ -222,8 +222,8 @@ class SimpleTaskBuilder:
             return gt_dataset
 
     def _get_gt_filenames(
-        self, gt_dataset: dm.Dataset, data_filenames: List[str], *, manifest: TaskManifest
-    ) -> List[str]:
+        self, gt_dataset: dm.Dataset, data_filenames: list[str], *, manifest: TaskManifest
+    ) -> list[str]:
         gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
         known_data_filenames = set(data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
@@ -246,11 +246,11 @@ class SimpleTaskBuilder:
 
     def _make_job_configuration(
         self,
-        data_filenames: List[str],
-        gt_filenames: List[str],
+        data_filenames: list[str],
+        gt_filenames: list[str],
         *,
         manifest: TaskManifest,
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         # Make job layouts wrt. manifest params, 1 job per task (CVAT can't repeat images in jobs)
         gt_filenames_index = set(gt_filenames)
         data_filenames = [fn for fn in data_filenames if fn not in gt_filenames_index]
@@ -376,7 +376,7 @@ class BoxesFromPointsTaskBuilder:
         self._bbox_point_mapping: _MaybeUnset[boxes_from_points_task.BboxPointMapping] = _unset
         "bbox_id -> point_id"
 
-        self._roi_size_estimations: _MaybeUnset[Dict[int, Tuple[float, float]]] = _unset
+        self._roi_size_estimations: _MaybeUnset[dict[int, tuple[float, float]]] = _unset
         "label_id -> (rel. w, rel. h)"
 
         self._rois: _MaybeUnset[boxes_from_points_task.RoiInfos] = _unset
@@ -776,9 +776,9 @@ class BoxesFromPointsTaskBuilder:
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
-            input_skeletons: List[dm.Skeleton],
-            gt_boxes: List[dm.Bbox],
-        ) -> List[Tuple[dm.Skeleton, dm.Bbox]]:
+            input_skeletons: list[dm.Skeleton],
+            gt_boxes: list[dm.Bbox],
+        ) -> list[tuple[dm.Skeleton, dm.Bbox]]:
             matches = [
                 [
                     (input_skeleton.label == gt_bbox.label)
@@ -795,7 +795,7 @@ class BoxesFromPointsTaskBuilder:
             ambiguous_boxes: list[int] = set()
             ambiguous_skeletons: list[int] = set()
             for skeleton_idx, input_skeleton in enumerate(input_skeletons):
-                matched_boxes: List[dm.Bbox] = [
+                matched_boxes: list[dm.Bbox] = [
                     gt_boxes[j] for j in range(len(gt_boxes)) if matches[skeleton_idx][j]
                 ]
 
@@ -818,7 +818,7 @@ class BoxesFromPointsTaskBuilder:
                     continue
 
             for gt_idx, gt_bbox in enumerate(gt_boxes):
-                matched_skeletons: List[dm.Skeleton] = [
+                matched_skeletons: list[dm.Skeleton] = [
                     input_skeletons[i] for i in range(len(input_skeletons)) if matches[i][gt_idx]
                 ]
 
@@ -854,7 +854,7 @@ class BoxesFromPointsTaskBuilder:
                     excluded_gt_info.excluded_count += 1  # an error
                     continue
 
-            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
             for skeleton_idx, input_skeleton in enumerate(input_skeletons):
                 if input_skeleton.id in ambiguous_skeletons:
                     continue
@@ -874,9 +874,9 @@ class BoxesFromPointsTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_boxes(
-            input_skeletons: List[dm.Skeleton],
-            gt_boxes: List[dm.Bbox],
-        ) -> List[dm.Bbox]:
+            input_skeletons: list[dm.Skeleton],
+            gt_boxes: list[dm.Bbox],
+        ) -> list[dm.Bbox]:
             matches = _find_unambiguous_matches(input_skeletons, gt_boxes)
 
             matched_boxes = []
@@ -1054,7 +1054,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._roi_size_estimations is not _unset
         assert self._points_dataset is not _unset
 
-        rois: List[boxes_from_points_task.RoiInfo] = []
+        rois: list[boxes_from_points_task.RoiInfo] = []
         for sample in self._points_dataset:
             for skeleton in sample.annotations:
                 if not isinstance(skeleton, dm.Skeleton):
@@ -1268,7 +1268,7 @@ class BoxesFromPointsTaskBuilder:
         filename_to_sample = {sample.image.path: sample for sample in self._points_dataset}
 
         _roi_key = lambda e: e.original_image_key
-        rois_by_image: Dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
+        rois_by_image: dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(sorted(self._rois, key=_roi_key), key=_roi_key)
         }
@@ -1420,7 +1420,7 @@ class SkeletonsFromBoxesTaskBuilder:
     @dataclass
     class _JobParams:
         label_id: int
-        roi_ids: List[int]
+        roi_ids: list[int]
 
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
         self.exit_stack = ExitStack()
@@ -1442,8 +1442,8 @@ class SkeletonsFromBoxesTaskBuilder:
             _unset
         )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
-        self._roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
-        self._job_params: _MaybeUnset[List[self._JobParams]] = _unset
+        self._roi_filenames: _MaybeUnset[dict[int, str]] = _unset
+        self._job_params: _MaybeUnset[list[self._JobParams]] = _unset
 
         self._excluded_gt_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
         self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
@@ -1849,11 +1849,11 @@ class SkeletonsFromBoxesTaskBuilder:
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
-            input_boxes: List[dm.Bbox],
-            gt_skeletons: List[dm.Skeleton],
+            input_boxes: list[dm.Bbox],
+            gt_skeletons: list[dm.Skeleton],
             *,
-            gt_annotations: List[dm.Annotation],
-        ) -> List[Tuple[dm.Bbox, dm.Skeleton]]:
+            gt_annotations: list[dm.Annotation],
+        ) -> list[tuple[dm.Bbox, dm.Skeleton]]:
             matches = [
                 [
                     (input_bbox.label == gt_skeleton.label)
@@ -1871,7 +1871,7 @@ class SkeletonsFromBoxesTaskBuilder:
             ambiguous_boxes: list[int] = set()
             ambiguous_skeletons: list[int] = set()
             for bbox_idx, input_bbox in enumerate(input_boxes):
-                matched_skeletons: List[dm.Skeleton] = [
+                matched_skeletons: list[dm.Skeleton] = [
                     gt_skeletons[j] for j in range(len(gt_skeletons)) if matches[bbox_idx][j]
                 ]
 
@@ -1894,7 +1894,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     continue
 
             for skeleton_idx, gt_skeleton in enumerate(gt_skeletons):
-                matched_boxes: List[dm.Bbox] = [
+                matched_boxes: list[dm.Bbox] = [
                     input_boxes[i] for i in range(len(input_boxes)) if matches[i][skeleton_idx]
                 ]
 
@@ -1930,7 +1930,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     excluded_gt_info.excluded_count += 1  # an error
                     continue
 
-            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
             for bbox_idx, input_bbox in enumerate(input_boxes):
                 if input_bbox.id in ambiguous_boxes:
                     continue
@@ -1950,11 +1950,11 @@ class SkeletonsFromBoxesTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_skeletons(
-            input_boxes: List[dm.Bbox],
-            gt_skeletons: List[dm.Skeleton],
+            input_boxes: list[dm.Bbox],
+            gt_skeletons: list[dm.Skeleton],
             *,
-            gt_annotations: List[dm.Annotation],
-        ) -> List[dm.Bbox]:
+            gt_annotations: list[dm.Annotation],
+        ) -> list[dm.Bbox]:
             matches = _find_unambiguous_matches(
                 input_boxes, gt_skeletons, gt_annotations=gt_annotations
             )
@@ -2080,7 +2080,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._gt_dataset is not _unset
         assert self._boxes_dataset is not _unset
 
-        rois: List[skeletons_from_boxes_task.RoiInfo] = []
+        rois: list[skeletons_from_boxes_task.RoiInfo] = []
         for sample in self._boxes_dataset:
             for bbox in sample.annotations:
                 if not isinstance(bbox, dm.Bbox):
@@ -2150,7 +2150,7 @@ class SkeletonsFromBoxesTaskBuilder:
         gt_ratio = self.manifest.validation.val_size / (self.manifest.annotation.job_size or 1)
         job_size_mult = self.job_size_mult
 
-        job_params: List[self._JobParams] = []
+        job_params: list[self._JobParams] = []
 
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
         for label_id, _ in enumerate(self.manifest.annotation.labels):
@@ -2290,7 +2290,7 @@ class SkeletonsFromBoxesTaskBuilder:
         filename_to_sample = {sample.image.path: sample for sample in self._boxes_dataset}
 
         _roi_info_key = lambda e: e.original_image_key
-        roi_info_by_image: Dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
+        roi_info_by_image: dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(
                 sorted(self._roi_infos, key=_roi_info_key), key=_roi_info_key
@@ -2485,15 +2485,15 @@ def is_image(path: str) -> bool:
     return trunk and ext.lower() in IMAGE_EXTENSIONS
 
 
-def filter_image_files(data_filenames: List[str]) -> List[str]:
+def filter_image_files(data_filenames: list[str]) -> list[str]:
     return list(fn for fn in data_filenames if is_image(fn))
 
 
-def strip_bucket_prefix(data_filenames: List[str], prefix: str) -> List[str]:
+def strip_bucket_prefix(data_filenames: list[str], prefix: str) -> list[str]:
     return list(os.path.relpath(fn, prefix) for fn in data_filenames)
 
 
-def make_label_configuration(manifest: TaskManifest) -> List[dict]:
+def make_label_configuration(manifest: TaskManifest) -> list[dict]:
     return [
         {
             "name": label.name,
@@ -2503,7 +2503,7 @@ def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     ]
 
 
-def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> Dict:
+def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
     CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
         CloudProviders.aws: "AWS_S3_BUCKET",
         CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",

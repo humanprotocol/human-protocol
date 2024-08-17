@@ -3,7 +3,7 @@ import itertools
 import logging
 from collections import Counter
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 from datumaro.util import take_by
 from sqlalchemy import exc as sa_errors
@@ -113,7 +113,7 @@ class _CompletedEscrowsHandler:
                 jobs = cvat_service.get_jobs_by_cvat_project_id(session, project.cvat_id)
 
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[project.job_type]
-                job_annotations: Dict[int, FileDescriptor] = {}
+                job_annotations: dict[int, FileDescriptor] = {}
 
                 for jobs_batch in take_by(
                     jobs, count=CronConfig.track_completed_escrows_jobs_downloading_batch_size
@@ -170,7 +170,7 @@ class _CompletedEscrowsHandler:
                     file=project_annotations_file,
                 )
 
-                annotation_files: List[FileDescriptor] = []
+                annotation_files: list[FileDescriptor] = []
                 annotation_files.append(project_annotations_file_desc)
 
                 annotation_metafile = prepare_annotation_metafile(
@@ -297,7 +297,7 @@ class _CompletedEscrowsHandler:
                     f"Downloading results for the escrow (escrow_address={escrow_address})"
                 )
 
-                jobs: List[cvat_models.Job] = list(
+                jobs: list[cvat_models.Job] = list(
                     itertools.chain.from_iterable(
                         cvat_service.get_jobs_by_cvat_project_id(session, p.cvat_id)
                         for p in escrow_projects
@@ -305,7 +305,7 @@ class _CompletedEscrowsHandler:
                 )
 
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
-                job_annotations: Dict[int, FileDescriptor] = {}
+                job_annotations: dict[int, FileDescriptor] = {}
 
                 # Collect raw annotations from CVAT, validate and convert them
                 # into a recording oracle suitable format
@@ -347,7 +347,7 @@ class _CompletedEscrowsHandler:
                     file=None,
                 )
 
-                annotation_files: List[FileDescriptor] = []
+                annotation_files: list[FileDescriptor] = []
                 annotation_files.append(resulting_annotations_file_desc)
 
                 annotation_metafile = prepare_annotation_metafile(

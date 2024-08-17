@@ -3,7 +3,7 @@ import os
 import zipfile
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Type
+from typing import Optional
 
 import datumaro as dm
 from datumaro.components.dataset import Dataset
@@ -43,7 +43,7 @@ class FileDescriptor:
 
 
 def prepare_annotation_metafile(
-    jobs: List[Job], job_annotations: Dict[int, FileDescriptor]
+    jobs: list[Job], job_annotations: dict[int, FileDescriptor]
 ) -> FileDescriptor:
     """
     Prepares a task/project annotation descriptor file with annotator mapping.
@@ -69,11 +69,11 @@ class _TaskProcessor:
         self,
         escrow_address: str,
         chain_id: int,
-        annotations: List[FileDescriptor],
+        annotations: list[FileDescriptor],
         merged_annotation: FileDescriptor,
         *,
         manifest: TaskManifest,
-        project_images: List[Image],
+        project_images: list[Image],
     ):
         self.escrow_address = escrow_address
         self.chain_id = chain_id
@@ -186,7 +186,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
 
         roi_info_by_id = {roi_info.point_id: roi_info for roi_info in roi_infos}
 
-        self.roi_name_to_roi_info: Dict[str, boxes_from_points_task.RoiInfo] = {
+        self.roi_name_to_roi_info: dict[str, boxes_from_points_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -281,7 +281,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
 
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in roi_infos}
 
-        self.roi_name_to_roi_info: Dict[str, skeletons_from_boxes_task.RoiInfo] = {
+        self.roi_name_to_roi_info: dict[str, skeletons_from_boxes_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -572,16 +572,16 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
 def postprocess_annotations(
     escrow_address: str,
     chain_id: int,
-    annotations: List[FileDescriptor],
+    annotations: list[FileDescriptor],
     merged_annotation: FileDescriptor,
     *,
     manifest: TaskManifest,
-    project_images: List[Image],
+    project_images: list[Image],
 ) -> None:
     """
     Processes annotations and updates the files list inplace
     """
-    processor_classes: Dict[TaskTypes, Type[_TaskProcessor]] = {
+    processor_classes: dict[TaskTypes, type[_TaskProcessor]] = {
         TaskTypes.image_label_binary: _LabelsTaskProcessor,
         TaskTypes.image_boxes: _BoxesTaskProcessor,
         TaskTypes.image_points: _PointsTaskProcessor,

@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -58,7 +58,7 @@ _event_type_map = {
 }
 
 
-def get_class_for_event_type(event_type: str) -> Type[OracleEvent]:
+def get_class_for_event_type(event_type: str) -> type[OracleEvent]:
     event_class = next((v for k, v in _event_type_map.items() if k == event_type), None)
 
     if not event_class:
@@ -68,7 +68,7 @@ def get_class_for_event_type(event_type: str) -> Type[OracleEvent]:
 
 
 def get_type_tag_for_event_class(
-    event_class: Type[OracleEvent],
+    event_class: type[OracleEvent],
 ) -> EventTypeTag:
     event_type = next((k for k, v in _event_type_map.items() if v == event_class), None)
 
