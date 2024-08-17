@@ -78,7 +78,7 @@ def parse_event(
 
     sender_events = sender_events_mapping.get(sender)
     if sender_events is not None:
-        if not event_type in sender_events:
+        if event_type not in sender_events:
             raise ValueError(f"Unknown event '{sender}.{event_type}'")
     else:
         assert False, f"Unknown event sender type '{sender}'"
