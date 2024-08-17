@@ -7,7 +7,7 @@ class ValidationResult:
     It encapsulates validation logic and helping during generating response body
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.is_valid = True
         self.errors = []
 

@@ -136,7 +136,7 @@ class SimpleTaskBuilder:
     Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
     """
 
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
@@ -356,7 +356,7 @@ class SimpleTaskBuilder:
 
 
 class BoxesFromPointsTaskBuilder:
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
@@ -1395,7 +1395,7 @@ class SkeletonsFromBoxesTaskBuilder:
         label_id: int
         roi_ids: list[int]
 
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address

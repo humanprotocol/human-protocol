@@ -62,7 +62,7 @@ class Project(Base):
         foreign_keys=[escrow_address, chain_id],
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Project. id={self.id}"
 
 
@@ -89,7 +89,7 @@ class Task(Base):
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Task. id={self.id}"
 
 
@@ -118,7 +118,7 @@ class EscrowCreation(Base):
         foreign_keys=[Project.escrow_address, Project.chain_id],
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"
 
 
@@ -135,7 +135,7 @@ class DataUpload(Base):
 
     task: Mapped[Task] = relationship(back_populates="data_upload")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"DataUpload. id={self.id} task={self.task_id}"
 
 
@@ -167,7 +167,7 @@ class Job(Base):
         assignments = self.assignments
         return assignments[0] if assignments else None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Job. id={self.id}"
 
 
@@ -181,7 +181,7 @@ class User(Base):
         back_populates="user", cascade="all, delete", passive_deletes=True
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"User. wallet_address={self.wallet_address} cvat_id={self.cvat_id}"
 
 
@@ -215,7 +215,7 @@ class Assignment(Base):
             or self.status != AssignmentStatuses.created
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Assignment. id={self.id} user={self.user.cvat_id} job={self.job.cvat_id}"
 
 
@@ -233,7 +233,7 @@ class Image(Base):
 
     __table_args__ = (UniqueConstraint("cvat_project_id", "filename", name="_project_filename_uc"),)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Image. id={self.id} cvat_project_id={self.cvat_project_id} filename={self.filename}"
         )

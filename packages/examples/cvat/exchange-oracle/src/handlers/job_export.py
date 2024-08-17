@@ -73,7 +73,7 @@ class _TaskProcessor:
         *,
         manifest: TaskManifest,
         project_images: list[Image],
-    ):
+    ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.annotation_files = annotations
@@ -175,7 +175,7 @@ class _PointsTaskProcessor(_TaskProcessor):
 
 
 class _BoxesFromPointsTaskProcessor(_TaskProcessor):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         roi_filenames, roi_infos, points_dataset = self._download_task_meta()
@@ -270,7 +270,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
 
 
 class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         roi_filenames, roi_infos, boxes_dataset, job_label_mapping = self._download_task_meta()
