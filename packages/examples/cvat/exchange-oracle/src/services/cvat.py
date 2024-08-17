@@ -53,10 +53,7 @@ def get_project_by_id(
     for_update: bool | ForUpdateParams = False,
     status_in: list[ProjectStatuses] | None = None,
 ) -> Project | None:
-    if status_in:
-        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
-    else:
-        status_filter_arg = []
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
 
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
@@ -73,10 +70,7 @@ def get_projects_by_cvat_ids(
     status_in: list[ProjectStatuses] | None = None,
     limit: int = 5,
 ) -> list[Project]:
-    if status_in:
-        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
-    else:
-        status_filter_arg = []
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
 
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
