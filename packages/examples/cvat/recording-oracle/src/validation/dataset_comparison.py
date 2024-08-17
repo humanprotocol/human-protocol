@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Dict, Optional, Sequence, Set, Tuple, Union
+from typing import Callable, Optional, Sequence, Union
 
 import datumaro as dm
 import numpy as np
@@ -30,9 +30,9 @@ class SimilarityFunction(metaclass=ABCMeta):
 
 class CachedSimilarityFunction(SimilarityFunction):
     def __init__(
-        self, sim_fn: Callable, *, cache: Optional[Dict[Tuple[int, int], float]] = None
+        self, sim_fn: Callable, *, cache: Optional[dict[tuple[int, int], float]] = None
     ) -> None:
-        self.cache: Dict[Tuple[int, int], float] = cache or {}
+        self.cache: dict[tuple[int, int], float] = cache or {}
         self.sim_fn = sim_fn
 
     def __call__(self, gt_ann: dm.Annotation, ds_ann: dm.Annotation) -> float:
@@ -55,9 +55,9 @@ class CachedSimilarityFunction(SimilarityFunction):
 @define
 class DatasetComparator(metaclass=ABCMeta):
     _min_similarity_threshold: float
-    _gt_weights: Dict[str, float] = field(factory=dict)
+    _gt_weights: dict[str, float] = field(factory=dict)
 
-    failed_gts: Set[str] = field(factory=set, init=False)
+    failed_gts: set[str] = field(factory=set, init=False)
     "Recorded list of failed GT samples, available after compare() call"
 
     def compare(self, gt_dataset: dm.Dataset, ds_dataset: dm.Dataset) -> float:
@@ -118,13 +118,13 @@ class DatasetComparator(metaclass=ABCMeta):
     @abstractmethod
     def compare_sample_annotations(
         self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
-    ) -> Tuple[MatchResult, SimilarityFunction]: ...
+    ) -> tuple[MatchResult, SimilarityFunction]: ...
 
 
 class BboxDatasetComparator(DatasetComparator):
     def compare_sample_annotations(
         self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
-    ) -> Tuple[MatchResult, SimilarityFunction]:
+    ) -> tuple[MatchResult, SimilarityFunction]:
         similarity_fn = CachedSimilarityFunction(bbox_iou)
 
         ds_boxes = [
@@ -151,7 +151,7 @@ class BboxDatasetComparator(DatasetComparator):
 class PointsDatasetComparator(DatasetComparator):
     def compare_sample_annotations(
         self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
-    ) -> Tuple[MatchResult, SimilarityFunction]:
+    ) -> tuple[MatchResult, SimilarityFunction]:
         similarity_fn = CachedSimilarityFunction(point_to_bbox_cmp)
 
         ds_points = [
@@ -184,7 +184,7 @@ _SkeletonInfo = list[str]
 
 @define
 class SkeletonDatasetComparator(DatasetComparator):
-    _skeleton_info: Dict[int, _SkeletonInfo] = field(factory=dict, init=False)
+    _skeleton_info: dict[int, _SkeletonInfo] = field(factory=dict, init=False)
     _categories: Optional[dm.CategoriesInfo] = field(default=None, init=False)
 
     # TODO: find better strategy for sigma estimation
@@ -196,7 +196,7 @@ class SkeletonDatasetComparator(DatasetComparator):
 
     def compare_sample_annotations(
         self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
-    ) -> Tuple[MatchResult, SimilarityFunction]:
+    ) -> tuple[MatchResult, SimilarityFunction]:
         return self._match_skeletons(
             gt_sample, ds_sample, similarity_threshold=similarity_threshold
         )
@@ -218,7 +218,7 @@ class SkeletonDatasetComparator(DatasetComparator):
 
     def _match_skeletons(
         self, item_a: dm.DatasetItem, item_b: dm.DatasetItem, *, similarity_threshold: float
-    ) -> Tuple[MatchResult, SimilarityFunction]:
+    ) -> tuple[MatchResult, SimilarityFunction]:
         a_skeletons = [a for a in item_a.annotations if isinstance(a, dm.Skeleton)]
         b_skeletons = [a for a in item_b.annotations if isinstance(a, dm.Skeleton)]
 
@@ -301,7 +301,7 @@ class SkeletonDatasetComparator(DatasetComparator):
 
     def _instance_bbox(
         self, instance_anns: Sequence[dm.Annotation]
-    ) -> Tuple[float, float, float, float]:
+    ) -> tuple[float, float, float, float]:
         return dm.ops.max_bbox(
             a.get_bbox() if isinstance(a, dm.Skeleton) else a
             for a in instance_anns

@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, NamedTuple, Optional, Set, Type, TypeVar, Union
+from typing import NamedTuple, Optional, TypeVar, Union
 
 import datumaro as dm
 import numpy as np
@@ -54,7 +54,7 @@ DM_GT_DATASET_FORMAT_MAPPING = {
 }
 
 
-DATASET_COMPARATOR_TYPE_MAP: Dict[TaskTypes, Type[DatasetComparator]] = {
+DATASET_COMPARATOR_TYPE_MAP: dict[TaskTypes, type[DatasetComparator]] = {
     # TaskType.image_label_binary: TagDatasetComparator, # TODO: implement if support is needed
     TaskTypes.image_boxes: BboxDatasetComparator,
     TaskTypes.image_points: PointsDatasetComparator,
@@ -62,21 +62,21 @@ DATASET_COMPARATOR_TYPE_MAP: Dict[TaskTypes, Type[DatasetComparator]] = {
     TaskTypes.image_skeletons_from_boxes: SkeletonDatasetComparator,
 }
 
-_JobResults = Dict[int, float]
+_JobResults = dict[int, float]
 
-_RejectedJobs = Dict[int, DatasetValidationError]
+_RejectedJobs = dict[int, DatasetValidationError]
 
-_FailedGtAttempts = Dict[str, int]
+_FailedGtAttempts = dict[str, int]
 "gt key -> attempts"
 
 
 @dataclass
 class _UpdatedFailedGtInfo:
-    failed_jobs: Set[int] = field(default_factory=set)
+    failed_jobs: set[int] = field(default_factory=set)
     occurrences: int = 0
 
 
-_UpdatedFailedGtStats = Dict[str, _UpdatedFailedGtInfo]
+_UpdatedFailedGtStats = dict[str, _UpdatedFailedGtInfo]
 
 
 @dataclass
@@ -100,7 +100,7 @@ class _TaskValidator:
         chain_id: int,
         manifest: TaskManifest,
         *,
-        job_annotations: Dict[int, io.IOBase],
+        job_annotations: dict[int, io.IOBase],
         merged_annotations: io.IOBase,
         gt_stats: Optional[_FailedGtAttempts] = None,
     ):
@@ -109,7 +109,7 @@ class _TaskValidator:
         self.manifest = manifest
 
         self._initial_gt_attempts: _FailedGtAttempts = gt_stats or {}
-        self._job_annotations: Dict[int, io.IOBase] = job_annotations
+        self._job_annotations: dict[int, io.IOBase] = job_annotations
         self._merged_annotations: io.IOBase = merged_annotations
 
         self._updated_merged_dataset_archive: Optional[io.IOBase] = None
@@ -133,7 +133,7 @@ class _TaskValidator:
 
         return weight
 
-    def _get_gt_weights(self) -> Dict[str, float]:
+    def _get_gt_weights(self) -> dict[str, float]:
         weights = {}
 
         ban_threshold = Config.validation.gt_ban_threshold
@@ -331,7 +331,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
     def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
         raise NotImplementedError
 
-    def _get_gt_weights(self, *, job_cvat_id: int, job_gt_dataset: dm.Dataset) -> Dict[str, float]:
+    def _get_gt_weights(self, *, job_cvat_id: int, job_gt_dataset: dm.Dataset) -> dict[str, float]:
         weights = {}
 
         ban_threshold = Config.validation.gt_ban_threshold
@@ -448,7 +448,7 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
         self._point_key_to_bbox_key = {v: k for k, v in boxes_to_points_mapping.items()}
         self._roi_info_by_id = {roi_info.point_id: roi_info for roi_info in roi_infos}
-        self._roi_name_to_roi_info: Dict[str, boxes_from_points_task.RoiInfo] = {
+        self._roi_name_to_roi_info: dict[str, boxes_from_points_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: self._roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -589,7 +589,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
 
         self._bbox_key_to_skeleton_key = {v: k for k, v in skeletons_to_boxes_mapping.items()}
         self._roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in roi_infos}
-        self._roi_name_to_roi_info: Dict[str, skeletons_from_boxes_task.RoiInfo] = {
+        self._roi_name_to_roi_info: dict[str, skeletons_from_boxes_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: self._roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -910,7 +910,7 @@ def process_intermediate_results(
     escrow_address: str,
     chain_id: int,
     meta: AnnotationMeta,
-    job_annotations: Dict[int, io.RawIOBase],
+    job_annotations: dict[int, io.RawIOBase],
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
@@ -979,7 +979,7 @@ def process_intermediate_results(
 
         db_service.update_gt_stats(session, task.id, updated_gt_stats)
 
-    job_final_result_ids: Dict[int, str] = {}
+    job_final_result_ids: dict[int, str] = {}
     for job_meta in meta.jobs:
         job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
         if not job:

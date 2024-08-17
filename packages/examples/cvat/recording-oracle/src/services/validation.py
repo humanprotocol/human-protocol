@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from sqlalchemy import update
 from sqlalchemy.orm import Session
@@ -39,7 +39,7 @@ def get_task_by_id(
 
 def get_task_validation_results(
     session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[ValidationResult]:
+) -> list[ValidationResult]:
     return (
         _maybe_for_update(session.query(ValidationResult), enable=for_update)
         .where(ValidationResult.job.has(Job.task_id == task_id))
@@ -115,7 +115,7 @@ def get_validation_result_by_assignment_id(
 
 def get_task_gt_stats(
     session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[GtStats]:
+) -> list[GtStats]:
     return (
         _maybe_for_update(session.query(GtStats), enable=for_update)
         .where(GtStats.task_id == task_id)
@@ -123,7 +123,7 @@ def get_task_gt_stats(
     )
 
 
-def update_gt_stats(session: Session, task_id: str, values: Dict[str, int]):
+def update_gt_stats(session: Session, task_id: str, values: dict[str, int]):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
 

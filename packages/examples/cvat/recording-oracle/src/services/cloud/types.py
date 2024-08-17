@@ -4,7 +4,7 @@ import json
 from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum, auto
 from inspect import isclass
-from typing import Dict, Optional, Type, Union
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 from src.core import manifest
@@ -31,14 +31,14 @@ class CloudProviders(Enum, metaclass=BetterEnumMeta):
 
 
 class BucketCredentials:
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         if not is_dataclass(self):
             raise NotImplementedError
 
         return asdict(self)
 
     @classmethod
-    def from_storage_config(cls, config: Type[IStorageConfig]) -> Optional[BucketCredentials]:
+    def from_storage_config(cls, config: type[IStorageConfig]) -> Optional[BucketCredentials]:
         credentials = None
 
         if (config.access_key or config.secret_key) and config.provider.lower() != "aws":
@@ -71,7 +71,7 @@ class BucketCredentials:
 
 @dataclass
 class GcsBucketCredentials(BucketCredentials):
-    service_account_key: Dict
+    service_account_key: dict
 
 
 @dataclass
@@ -129,7 +129,7 @@ class BucketAccessInfo:
             raise ValueError(f"{parsed_url.netloc} cloud provider is not supported.")
 
     @classmethod
-    def _from_dict(cls, data: Dict) -> BucketAccessInfo:
+    def _from_dict(cls, data: dict) -> BucketAccessInfo:
         for required_field in (
             "provider",
             "bucket_name",
@@ -159,7 +159,7 @@ class BucketAccessInfo:
         return BucketAccessInfo(**data)
 
     @classmethod
-    def from_storage_config(cls, config: Type[IStorageConfig]) -> BucketAccessInfo:
+    def from_storage_config(cls, config: type[IStorageConfig]) -> BucketAccessInfo:
         credentials = BucketCredentials.from_storage_config(config)
 
         return BucketAccessInfo(
@@ -175,7 +175,7 @@ class BucketAccessInfo:
 
     @classmethod
     def parse_obj(
-        cls, data: Union[str, Type[IStorageConfig], manifest.BucketUrl]
+        cls, data: Union[str, type[IStorageConfig], manifest.BucketUrl]
     ) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)

@@ -1,14 +1,14 @@
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, Sequence, Tuple
+from typing import Sequence
 
 import attrs
 import datumaro as dm
 from attrs import frozen
 from datumaro.util import dump_json, parse_json
 
-SkeletonBboxMapping = Dict[int, int]
+SkeletonBboxMapping = dict[int, int]
 
 
 # TODO: migrate to pydantic
@@ -34,9 +34,9 @@ class RoiInfo:
 
 RoiInfos = Sequence[RoiInfo]
 
-RoiFilenames = Dict[int, str]
+RoiFilenames = dict[int, str]
 
-PointLabelsMapping = Dict[Tuple[str, str], str]
+PointLabelsMapping = dict[tuple[str, str], str]
 "(skeleton, point) -> job point name"
 
 

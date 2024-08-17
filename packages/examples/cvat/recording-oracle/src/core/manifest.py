@@ -1,6 +1,6 @@
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, Field, root_validator
 
@@ -28,7 +28,7 @@ class AwsBucketUrl(BucketUrlBase, BaseModel):
 
 class GcsBucketUrl(BucketUrlBase, BaseModel):
     provider: Literal[BucketProviders.gcs]
-    service_account_key: Dict[str, Any] = {}  # (optional) Contents of GCS key file
+    service_account_key: dict[str, Any] = {}  # (optional) Contents of GCS key file
 
 
 BucketUrl = Annotated[Union[AwsBucketUrl, GcsBucketUrl], Field(discriminator="provider")]
@@ -67,7 +67,7 @@ class PlainLabelInfo(LabelInfoBase):
 class SkeletonLabelInfo(LabelInfoBase):
     type: Literal[LabelTypes.skeleton]
 
-    nodes: List[str] = Field(min_items=1)
+    nodes: list[str] = Field(min_items=1)
     """
     A list of node label names (only points are supposed to be nodes).
     Example:
@@ -76,7 +76,7 @@ class SkeletonLabelInfo(LabelInfoBase):
     ]
     """
 
-    joints: Optional[List[Tuple[int, int]]] = Field(default_factory=list)
+    joints: Optional[list[tuple[int, int]]] = Field(default_factory=list)
     "A list of node adjacency, e.g. [[0, 1], [1, 2], [1, 3]]"
 
     @root_validator

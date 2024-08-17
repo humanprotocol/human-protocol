@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Iterable, Optional, Tuple, Union
+from typing import Iterable, Optional, Union
 
 import datumaro as dm
 import numpy as np
@@ -79,7 +79,7 @@ class ProjectLabels(dm.ItemTransform):
     def __init__(
         self,
         extractor: dm.IExtractor,
-        dst_labels: Union[Iterable[Union[str, Tuple[str, str]]], dm.LabelCategories],
+        dst_labels: Union[Iterable[Union[str, tuple[str, str]]], dm.LabelCategories],
     ):
         super().__init__(extractor)
 

@@ -1,8 +1,6 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
-from typing import List
-
 from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
@@ -20,10 +18,10 @@ class Task(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     iteration = Column(Integer, server_default="0", nullable=False)
 
-    jobs: Mapped[List["Job"]] = relationship(
+    jobs: Mapped[list["Job"]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
-    gt_stats: Mapped[List["GtStats"]] = relationship(
+    gt_stats: Mapped[list["GtStats"]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
 
@@ -35,7 +33,7 @@ class Job(Base):
     task_id = Column(String, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
 
     task: Mapped["Task"] = relationship(back_populates="jobs")
-    validation_results: Mapped[List["ValidationResult"]] = relationship(
+    validation_results: Mapped[list["ValidationResult"]] = relationship(
         back_populates="job", cascade="all, delete", passive_deletes=True
     )
 

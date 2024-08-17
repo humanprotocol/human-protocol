@@ -1,5 +1,5 @@
 import itertools
-from typing import Callable, List, NamedTuple, Sequence, Tuple, TypeVar
+from typing import Callable, NamedTuple, Sequence, TypeVar
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -77,10 +77,10 @@ def point_to_bbox_cmp(
 
 
 class MatchResult(NamedTuple):
-    matches: List[Tuple[Annotation, Annotation]]
-    mispred: List[Tuple[Annotation, Annotation]]
-    a_extra: List[Annotation]
-    b_extra: List[Annotation]
+    matches: list[tuple[Annotation, Annotation]]
+    mispred: list[tuple[Annotation, Annotation]]
+    a_extra: list[Annotation]
+    b_extra: list[Annotation]
 
 
 def match_annotations(

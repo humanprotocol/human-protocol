@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from attrs import define
 from sqlalchemy import case, update
@@ -94,7 +94,7 @@ class OracleWebhookQueue:
         *,
         limit: int = 10,
         for_update: Union[bool, ForUpdateParams] = False,
-    ) -> List[Webhook]:
+    ) -> list[Webhook]:
         webhooks = (
             _maybe_for_update(session.query(Webhook), enable=for_update)
             .where(
