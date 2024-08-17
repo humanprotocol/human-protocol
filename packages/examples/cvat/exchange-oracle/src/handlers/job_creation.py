@@ -1006,7 +1006,7 @@ class BoxesFromPointsTaskBuilder:
         if classes_with_default_roi:
             label_cat = self._gt_dataset.categories()[dm.AnnotationType.label]
             labels_by_reason = {
-                g_reason: list(v[0] for v in g_items)
+                g_reason: [v[0] for v in g_items]
                 for g_reason, g_items in groupby(
                     sorted(classes_with_default_roi.items(), key=lambda v: v[1]), key=lambda v: v[1]
                 )
@@ -2440,11 +2440,11 @@ def is_image(path: str) -> bool:
 
 
 def filter_image_files(data_filenames: list[str]) -> list[str]:
-    return list(fn for fn in data_filenames if is_image(fn))
+    return [fn for fn in data_filenames if is_image(fn)]
 
 
 def strip_bucket_prefix(data_filenames: list[str], prefix: str) -> list[str]:
-    return list(os.path.relpath(fn, prefix) for fn in data_filenames)
+    return [os.path.relpath(fn, prefix) for fn in data_filenames]
 
 
 def make_label_configuration(manifest: TaskManifest) -> list[dict]:
