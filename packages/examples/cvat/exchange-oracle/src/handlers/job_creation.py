@@ -253,7 +253,7 @@ class SimpleTaskBuilder:
     ) -> List[List[str]]:
         # Make job layouts wrt. manifest params, 1 job per task (CVAT can't repeat images in jobs)
         gt_filenames_index = set(gt_filenames)
-        data_filenames = [fn for fn in data_filenames if not fn in gt_filenames_index]
+        data_filenames = [fn for fn in data_filenames if fn not in gt_filenames_index]
         random.shuffle(data_filenames)
 
         job_layout = []
@@ -1133,9 +1133,9 @@ class BoxesFromPointsTaskBuilder:
         data_filenames = [
             fn
             for point_id, fn in self._roi_filenames.items()
-            if not point_id in gt_point_ids
-            if not original_image_id_to_filename[point_id_to_original_image_id[point_id]]
-            in input_gt_filenames
+            if point_id not in gt_point_ids
+            if original_image_id_to_filename[point_id_to_original_image_id[point_id]]
+            not in input_gt_filenames
         ]
         random.shuffle(data_filenames)
 
