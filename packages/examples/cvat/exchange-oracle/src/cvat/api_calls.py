@@ -355,7 +355,7 @@ def put_task_data(
         )
         try:
             (_, response) = api_client.tasks_api.create_data(task_id, data_request=data_request)
-            return None
+            return
 
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.put_task_data: {e}\n")
@@ -557,7 +557,7 @@ def clear_job_annotations(job_id: int) -> None:
             )
         except exceptions.ApiException as e:
             if e.status == 404:
-                return None
+                return
 
             logger.exception(f"Exception when calling JobsApi.partial_update_annotations(): {e}\n")
             raise
