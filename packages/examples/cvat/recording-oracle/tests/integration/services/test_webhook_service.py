@@ -13,14 +13,14 @@ from src.services.webhook import OracleWebhookDirectionTags, inbox
 class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.session = SessionLocal()
-        self.webhook_kwargs = dict(
-            session=self.session,
-            escrow_address="0x1234567890123456789012345678901234567890",
-            chain_id=Networks.polygon_mainnet.value,
-            type=OracleWebhookTypes.exchange_oracle,
-            signature="signature",
-            event_type="task_finished",
-        )
+        self.webhook_kwargs = {
+            "session": self.session,
+            "escrow_address": "0x1234567890123456789012345678901234567890",
+            "chain_id": Networks.polygon_mainnet.value,
+            "type": OracleWebhookTypes.exchange_oracle,
+            "signature": "signature",
+            "event_type": "task_finished",
+        }
         random.seed(42)
 
     def tearDown(self):

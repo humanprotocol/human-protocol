@@ -137,11 +137,11 @@ def update_gt_stats(session: Session, task_id: str, values: dict[str, int]):
 
     statement = psql_insert(GtStats).values(
         [
-            dict(
-                task_id=task_id,
-                gt_key=gt_key,
-                failed_attempts=failed_attempts,
-            )
+            {
+                "task_id": task_id,
+                "gt_key": gt_key,
+                "failed_attempts": failed_attempts,
+            }
             for gt_key, failed_attempts in values.items()
         ],
     )

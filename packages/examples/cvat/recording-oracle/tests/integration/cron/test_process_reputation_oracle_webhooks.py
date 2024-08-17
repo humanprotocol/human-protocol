@@ -70,7 +70,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id = Networks.localhost.value
             escrow_address = create_escrow(self.w3)
             store_kvstore_value("webhook_url", expected_url)
-            event_data = dict()
+            event_data = {}
             mock_signature.return_value = (None, SIGNATURE)
 
             webhook = self.get_webhook(escrow_address, chain_id, event_data)
