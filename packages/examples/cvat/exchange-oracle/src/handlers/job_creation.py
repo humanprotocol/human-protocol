@@ -1576,7 +1576,8 @@ class SkeletonsFromBoxesTaskBuilder:
 
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
-                assert len(element.points) == 2 and len(element.visibility) == 1
+                assert len(element.points) == 2
+                assert len(element.visibility) == 1
 
                 if element.visibility[0] == dm.Points.Visibility.absent:
                     continue
