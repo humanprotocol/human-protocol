@@ -727,11 +727,11 @@ def add_project_images(session: Session, cvat_project_id: int, filenames: list[s
     session.execute(
         insert(Image),
         [
-            dict(
-                id=str(uuid.uuid4()),
-                cvat_project_id=cvat_project_id,
-                filename=fn,
-            )
+            {
+                "id": str(uuid.uuid4()),
+                "cvat_project_id": cvat_project_id,
+                "filename": fn,
+            }
             for fn in filenames
         ],
     )

@@ -21,8 +21,8 @@ class S3Client(StorageClient):
     ) -> None:
         super().__init__(bucket)
         session = boto3.Session(
-            **(dict(aws_access_key_id=access_key) if access_key else {}),
-            **(dict(aws_secret_access_key=secret_key) if secret_key else {}),
+            **({"aws_access_key_id": access_key} if access_key else {}),
+            **({"aws_secret_access_key": secret_key} if secret_key else {}),
         )
         s3 = session.resource(
             "s3", **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {})

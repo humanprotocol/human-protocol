@@ -132,7 +132,7 @@ def create_cloudstorage(
     # credentials: access_key | secret_key | service_account_key
     # CVAT credentials: key | secret_key | key_file
     def _to_cvat_credentials(credentials: dict[str, Any]) -> dict:
-        cvat_credentials = dict()
+        cvat_credentials = {}
         for cvat_field, field in {
             "key": "access_key",
             "secret_key": "secret_key",
@@ -148,7 +148,7 @@ def create_cloudstorage(
                     cvat_credentials[cvat_field] = value
         return cvat_credentials
 
-    request_kwargs = dict()
+    request_kwargs = {}
 
     if credentials:
         request_kwargs.update(_to_cvat_credentials(credentials))
@@ -516,7 +516,7 @@ def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
         try:
             return get_paginated_collection(
                 api_client.projects_api.list_endpoint,
-                **(dict(assignee=assignee) if assignee else {}),
+                **({"assignee": assignee} if assignee else {}),
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
