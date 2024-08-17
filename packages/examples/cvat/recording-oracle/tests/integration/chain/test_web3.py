@@ -57,7 +57,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_web3_invalid_chain_id(self):
         with pytest.raises(ValueError) as error:
             get_web3(1234)
-        assert "1234 is not in available list of networks." == str(error.exception)
+        assert str(error.exception) == "1234 is not in available list of networks."
 
     def test_sign_message_polygon(self):
         with (
@@ -86,7 +86,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_sign_message_invalid_chain_id(self):
         with pytest.raises(ValueError) as error:
             sign_message(1234, "message")
-        assert "1234 is not in available list of networks." == str(error.exception)
+        assert str(error.exception) == "1234 is not in available list of networks."
 
     def test_recover_signer(self):
         with patch("src.chain.web3.get_web3") as mock_function:
@@ -107,4 +107,4 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_validate_address_invalid_address(self):
         with pytest.raises(ValueError) as error:
             validate_address("invalid_address")
-        assert "invalid_address is not a correct Web3 address" == str(error.exception)
+        assert str(error.exception) == "invalid_address is not a correct Web3 address"

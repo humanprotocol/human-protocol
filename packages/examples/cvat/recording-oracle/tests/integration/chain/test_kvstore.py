@@ -86,7 +86,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_function.return_value = self.w3
             with pytest.raises(KVStoreClientError) as error:
                 get_role_by_address(self.w3.eth.chain_id, "invalid_address")
-        assert "Invalid address: invalid_address" == str(error.exception)
+        assert str(error.exception) == "Invalid address: invalid_address"
 
     def test_get_role_by_address_invalid_address(self):
         create_escrow(self.w3)
