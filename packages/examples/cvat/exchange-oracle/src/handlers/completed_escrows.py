@@ -78,7 +78,7 @@ class _CompletedEscrowsHandler:
     def _process_plain_escrows(self):
         logger = self.logger
 
-        plain_task_types = [t for t in TaskTypes if not t == TaskTypes.image_skeletons_from_boxes]
+        plain_task_types = [t for t in TaskTypes if t != TaskTypes.image_skeletons_from_boxes]
         with SessionLocal.begin() as session:
             completed_projects = cvat_service.get_projects_by_status(
                 session,
