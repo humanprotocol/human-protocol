@@ -50,8 +50,7 @@ class S3Client(StorageClient):
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
                 return False
-            else:
-                raise
+            raise
 
     def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
         bucket = unquote(bucket) if bucket else self._bucket

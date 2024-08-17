@@ -100,7 +100,7 @@ class BucketAccessInfo:
                 bucket_name=parsed_url.netloc.split(".")[0],
                 path=parsed_url.path.lstrip("/"),
             )
-        elif parsed_url.netloc.endswith(DEFAULT_GCS_HOST):
+        if parsed_url.netloc.endswith(DEFAULT_GCS_HOST):
             # Google Cloud Storage (GCS) bucket
             # Virtual hosted-style is expected:
             # https://BUCKET_NAME.storage.googleapis.com/OBJECT_NAME
@@ -110,7 +110,7 @@ class BucketAccessInfo:
                 host_url=f"{parsed_url.scheme}://{DEFAULT_GCS_HOST}",
                 path=parsed_url.path.lstrip("/"),
             )
-        elif Config.features.enable_custom_cloud_host:
+        if Config.features.enable_custom_cloud_host:
             if is_ipv4(parsed_url.netloc):
                 host = parsed_url.netloc
                 bucket_name, path = parsed_url.path.lstrip("/").split("/", maxsplit=1)
@@ -125,8 +125,7 @@ class BucketAccessInfo:
                 bucket_name=bucket_name,
                 path=path,
             )
-        else:
-            raise ValueError(f"{parsed_url.netloc} cloud provider is not supported.")
+        raise ValueError(f"{parsed_url.netloc} cloud provider is not supported.")
 
     @classmethod
     def _from_dict(cls, data: Dict) -> BucketAccessInfo:
@@ -179,9 +178,9 @@ class BucketAccessInfo:
     ) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)
-        elif isinstance(data, str):
+        if isinstance(data, str):
             return cls.from_url(data)
-        elif isclass(data) and issubclass(data, StorageConfig):
+        if isclass(data) and issubclass(data, StorageConfig):
             return cls.from_storage_config(data)
 
         raise TypeError(f"Unsupported data type ({type(data)}) was provided")

@@ -239,8 +239,7 @@ def is_project_completed(session: Session, project_id: str) -> bool:
     jobs = get_jobs_by_cvat_project_id(session, project.cvat_id)
     if len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs):
         return True
-    else:
-        return False
+    return False
 
 
 # EscrowCreation

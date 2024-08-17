@@ -44,8 +44,7 @@ async def profile_request(request: Request, call_next: Callable):
         response_data = profiler.output(renderer=renderer)
         if profile_type == "html":
             return HTMLResponse(response_data)
-        else:
-            return StreamingResponse(iter(response_data))
+        return StreamingResponse(iter(response_data))
 
     # Proceed without profiling
     return await call_next(request)
