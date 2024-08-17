@@ -44,12 +44,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, self.webhook_kwargs["escrow_address"])
-        self.assertEqual(webhook.chain_id, self.webhook_kwargs["chain_id"])
-        self.assertEqual(webhook.attempts, 0)
-        self.assertEqual(webhook.signature, self.webhook_kwargs["signature"])
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending)
+        assert webhook.escrow_address == self.webhook_kwargs["escrow_address"]
+        assert webhook.chain_id == self.webhook_kwargs["chain_id"]
+        assert webhook.attempts == 0
+        assert webhook.signature == self.webhook_kwargs["signature"]
+        assert webhook.type == OracleWebhookTypes.exchange_oracle
+        assert webhook.status == OracleWebhookStatuses.pending
         # TODO: check intended fields and verify those
 
     def _test_none_webhook_argument(self, argument_name, error_type):
@@ -95,25 +95,25 @@ class ServiceIntegrationTest(unittest.TestCase):
         pending_webhooks = inbox.get_pending_webhooks(
             self.session, OracleWebhookTypes.exchange_oracle
         )
-        self.assertEqual(len(pending_webhooks), 2)
-        self.assertEqual(pending_webhooks[0].id, webhook1.id)
-        self.assertEqual(pending_webhooks[1].id, webhook2.id)
+        assert len(pending_webhooks) == 2
+        assert pending_webhooks[0].id == webhook1.id
+        assert pending_webhooks[1].id == webhook2.id
 
         pending_webhooks = inbox.get_pending_webhooks(
             self.session, OracleWebhookTypes.reputation_oracle
         )
-        self.assertEqual(len(pending_webhooks), 1)
-        self.assertEqual(pending_webhooks[0].id, webhook4.id)
+        assert len(pending_webhooks) == 1
+        assert pending_webhooks[0].id == webhook4.id
 
     def test_update_webhook_status(self):
         webhook_id = inbox.create_webhook(**self.webhook_kwargs)
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending)
+        assert webhook.status == OracleWebhookStatuses.pending
 
         inbox.update_webhook_status(self.session, webhook_id, OracleWebhookStatuses.completed)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
-        self.assertEqual(webhook.status, OracleWebhookStatuses.completed)
+        assert webhook.status == OracleWebhookStatuses.completed
 
     def test_update_webhook_invalid_status(self):
         webhook_id = inbox.create_webhook(**self.webhook_kwargs)
@@ -127,17 +127,17 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.attempts, 1)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.completed.value)
+        assert webhook.attempts == 1
+        assert webhook.status == OracleWebhookStatuses.completed.value
 
     def test_handle_webhook_fail(self):
         webhook_id = inbox.create_webhook(**self.webhook_kwargs)
         inbox.handle_webhook_fail(self.session, webhook_id)
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.attempts, 1)
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
+        assert webhook.attempts == 1
+        assert webhook.type == OracleWebhookTypes.exchange_oracle.value
+        assert webhook.status == OracleWebhookStatuses.pending.value
 
         # assumes Config.webhook_max_retries == 5
         for _i in range(4):
@@ -145,5 +145,5 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.attempts, 5)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.failed.value)
+        assert webhook.attempts == 5
+        assert webhook.status == OracleWebhookStatuses.failed.value
