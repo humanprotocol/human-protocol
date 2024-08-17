@@ -262,7 +262,7 @@ class _TaskValidator:
     @classmethod
     def _put_gt_into_merged_dataset(
         cls, gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
-    ):
+    ) -> None:
         """
         Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
         """

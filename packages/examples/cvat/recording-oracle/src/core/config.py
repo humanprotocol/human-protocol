@@ -37,7 +37,7 @@ class Postgres:
     lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
-    def connection_url(cls):
+    def connection_url(cls) -> str:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
