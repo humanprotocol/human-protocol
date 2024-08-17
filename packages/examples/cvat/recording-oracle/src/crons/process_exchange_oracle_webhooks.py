@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 import httpx
 from sqlalchemy.orm import Session

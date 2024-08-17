@@ -22,7 +22,6 @@ from src.db import Base
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from src.models.webhook import Webhook
 
 target_metadata = Base.metadata
 
