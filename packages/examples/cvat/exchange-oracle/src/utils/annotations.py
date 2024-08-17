@@ -235,7 +235,7 @@ class ProjectLabels(dm.ItemTransform):
                 dst_label_cat = dm.LabelCategories(attributes=deepcopy(src_label_cat.attributes))
 
                 for dst_label in dst_labels:
-                    assert isinstance(dst_label, str) or isinstance(dst_label, tuple)
+                    assert isinstance(dst_label, (str, tuple))
 
                     dst_parent = ""
                     if isinstance(dst_label, tuple):
