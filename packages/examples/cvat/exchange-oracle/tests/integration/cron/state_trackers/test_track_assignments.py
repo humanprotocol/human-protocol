@@ -59,8 +59,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignments = sorted(
             self.session.query(Assignment).all(), key=lambda assignment: assignment.user.cvat_id
         )
-        self.assertEqual(db_assignments[0].status, AssignmentStatuses.created.value)
-        self.assertEqual(db_assignments[1].status, AssignmentStatuses.created.value)
+        assert db_assignments[0].status == AssignmentStatuses.created.value
+        assert db_assignments[1].status == AssignmentStatuses.created.value
 
         with patch("src.crons.state_trackers.cvat_api.update_job_assignee") as mock_cvat_api:
             track_assignments()
@@ -71,8 +71,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignments = sorted(
             self.session.query(Assignment).all(), key=lambda assignment: assignment.user.cvat_id
         )
-        self.assertEqual(db_assignments[0].status, AssignmentStatuses.created.value)
-        self.assertEqual(db_assignments[1].status, AssignmentStatuses.expired.value)
+        assert db_assignments[0].status == AssignmentStatuses.created.value
+        assert db_assignments[1].status == AssignmentStatuses.expired.value
 
     # TODO:
     # Fix src/crons/state_trackers.py
