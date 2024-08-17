@@ -103,7 +103,7 @@ class _TaskValidator:
         job_annotations: dict[int, io.IOBase],
         merged_annotations: io.IOBase,
         gt_stats: _FailedGtAttempts | None = None,
-    ):
+    ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.manifest = manifest
@@ -217,7 +217,7 @@ class _TaskValidator:
 
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
-            def __init__(self, extractor: dm.IExtractor, *, prefix: str):
+            def __init__(self, extractor: dm.IExtractor, *, prefix: str) -> None:
                 super().__init__(extractor)
                 self._prefix = prefix
 
@@ -418,7 +418,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
 
 
 class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         (
@@ -554,7 +554,7 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
 
 class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         (

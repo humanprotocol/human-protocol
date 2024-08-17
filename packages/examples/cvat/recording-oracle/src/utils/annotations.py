@@ -80,7 +80,7 @@ class ProjectLabels(dm.ItemTransform):
         self,
         extractor: dm.IExtractor,
         dst_labels: Iterable[str | tuple[str, str]] | dm.LabelCategories,
-    ):
+    ) -> None:
         super().__init__(extractor)
 
         self._categories = {}
