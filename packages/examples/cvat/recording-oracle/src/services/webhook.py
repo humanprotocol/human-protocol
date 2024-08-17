@@ -94,7 +94,7 @@ class OracleWebhookQueue:
         limit: int = 10,
         for_update: bool | ForUpdateParams = False,
     ) -> list[Webhook]:
-        webhooks = (
+        return (
             _maybe_for_update(session.query(Webhook), enable=for_update)
             .where(
                 Webhook.direction == self.direction.value,
@@ -105,7 +105,6 @@ class OracleWebhookQueue:
             .limit(limit)
             .all()
         )
-        return webhooks
 
     def update_webhook_status(
         self, session: Session, webhook_id: str, status: OracleWebhookStatuses
