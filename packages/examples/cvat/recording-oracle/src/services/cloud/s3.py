@@ -1,5 +1,4 @@
 from io import BytesIO
-from typing import Optional
 from urllib.parse import unquote
 
 import boto3
@@ -15,10 +14,10 @@ class S3Client(StorageClient):
     def __init__(
         self,
         *,
-        bucket: Optional[str] = None,
-        access_key: Optional[str] = None,
-        secret_key: Optional[str] = None,
-        endpoint_url: Optional[str] = None,
+        bucket: str | None = None,
+        access_key: str | None = None,
+        secret_key: str | None = None,
+        endpoint_url: str | None = None,
     ) -> None:
         super().__init__(bucket)
         session = boto3.Session(
@@ -34,15 +33,15 @@ class S3Client(StorageClient):
         if not access_key and not secret_key:
             self.client.meta.events.register("choose-signer.s3.*", disable_signing)
 
-    def create_file(self, key: str, data: bytes = b"", *, bucket: Optional[str] = None):
+    def create_file(self, key: str, data: bytes = b"", *, bucket: str | None = None):
         bucket = unquote(bucket) if bucket else self._bucket
         self.client.put_object(Body=data, Bucket=bucket, Key=unquote(key))
 
-    def remove_file(self, key: str, *, bucket: Optional[str] = None):
+    def remove_file(self, key: str, *, bucket: str | None = None):
         bucket = unquote(bucket) if bucket else self._bucket
         self.client.delete_object(Bucket=bucket, Key=unquote(key))
 
-    def file_exists(self, key: str, *, bucket: Optional[str] = None) -> bool:
+    def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket
         try:
             self.client.head_object(Bucket=bucket, Key=unquote(key))
@@ -53,15 +52,13 @@ class S3Client(StorageClient):
             else:
                 raise
 
-    def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
+    def download_file(self, key: str, *, bucket: str | None = None) -> bytes:
         bucket = unquote(bucket) if bucket else self._bucket
         with BytesIO() as data:
             self.client.download_fileobj(Bucket=bucket, Key=unquote(key), Fileobj=data)
             return data.getvalue()
 
-    def list_files(
-        self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
-    ) -> list[str]:
+    def list_files(self, *, bucket: str | None = None, prefix: str | None = None) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         objects = self.resource.Bucket(bucket).objects
         if prefix:

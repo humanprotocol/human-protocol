@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import NamedTuple, Optional, TypeVar, Union
+from typing import NamedTuple, TypeVar
 
 import datumaro as dm
 import numpy as np
@@ -102,7 +102,7 @@ class _TaskValidator:
         *,
         job_annotations: dict[int, io.IOBase],
         merged_annotations: io.IOBase,
-        gt_stats: Optional[_FailedGtAttempts] = None,
+        gt_stats: _FailedGtAttempts | None = None,
     ):
         self.escrow_address = escrow_address
         self.chain_id = chain_id
@@ -112,15 +112,15 @@ class _TaskValidator:
         self._job_annotations: dict[int, io.IOBase] = job_annotations
         self._merged_annotations: io.IOBase = merged_annotations
 
-        self._updated_merged_dataset_archive: Optional[io.IOBase] = None
-        self._updated_gt_stats: Optional[_UpdatedFailedGtStats] = None
-        self._job_results: Optional[_JobResults] = None
-        self._rejected_jobs: Optional[_RejectedJobs] = None
+        self._updated_merged_dataset_archive: io.IOBase | None = None
+        self._updated_gt_stats: _UpdatedFailedGtStats | None = None
+        self._job_results: _JobResults | None = None
+        self._rejected_jobs: _RejectedJobs | None = None
 
-        self._temp_dir: Optional[Path] = None
-        self._gt_dataset: Optional[dm.Dataset] = None
+        self._temp_dir: Path | None = None
+        self._gt_dataset: dm.Dataset | None = None
 
-    def _require_field(self, field: Optional[T]) -> T:
+    def _require_field(self, field: T | None) -> T:
         assert field is not None
         return field
 
@@ -351,7 +351,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
 
     def _gt_key_to_sample_id(
         self, gt_key: str, *, job_cvat_id: int, job_gt_dataset: dm.Dataset
-    ) -> Optional[str]:
+    ) -> str | None:
         return gt_key
 
     def _update_gt_stats(
@@ -847,7 +847,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
 
     def _gt_key_to_sample_id(
         self, gt_key: str, *, job_cvat_id: int, job_gt_dataset: dm.Dataset
-    ) -> Optional[str]:
+    ) -> str | None:
         parsed_gt_key = self._parse_gt_key(gt_key)
         job_label_id = self._get_gt_dataset_label_id(job_gt_dataset)
         if (parsed_gt_key.skeleton_id, parsed_gt_key.point_id) != job_label_id:
@@ -914,7 +914,7 @@ def process_intermediate_results(
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
-) -> Union[ValidationSuccess, ValidationFailure]:
+) -> ValidationSuccess | ValidationFailure:
     # actually validate jobs
 
     task_type = manifest.annotation.type

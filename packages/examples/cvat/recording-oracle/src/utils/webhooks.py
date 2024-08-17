@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from src.chain.web3 import sign_message
 from src.core.oracle_events import parse_event
@@ -11,7 +10,7 @@ def prepare_outgoing_webhook_body(
     chain_id: Networks,
     event_type: str,
     event_data: dict,
-    timestamp: Optional[datetime],
+    timestamp: datetime | None,
 ) -> dict:
     body = {"escrow_address": escrow_address, "chain_id": chain_id}
 
@@ -31,8 +30,8 @@ def prepare_outgoing_webhook_body(
 def prepare_signed_message(
     escrow_address: str,
     chain_id: Networks,
-    message: Optional[str] = None,
-    body: Optional[dict] = None,
+    message: str | None = None,
+    body: dict | None = None,
 ) -> tuple[str, str]:
     """
     Sign the message with the service identity.

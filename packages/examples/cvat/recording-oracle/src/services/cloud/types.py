@@ -4,7 +4,6 @@ import json
 from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum, auto
 from inspect import isclass
-from typing import Optional, Union
 from urllib.parse import urlparse
 
 from src.core import manifest
@@ -38,7 +37,7 @@ class BucketCredentials:
         return asdict(self)
 
     @classmethod
-    def from_storage_config(cls, config: type[IStorageConfig]) -> Optional[BucketCredentials]:
+    def from_storage_config(cls, config: type[IStorageConfig]) -> BucketCredentials | None:
         credentials = None
 
         if (config.access_key or config.secret_key) and config.provider.lower() != "aws":
@@ -85,8 +84,8 @@ class BucketAccessInfo:
     provider: CloudProviders
     host_url: str
     bucket_name: str
-    path: Optional[str] = None
-    credentials: Optional[BucketCredentials] = None
+    path: str | None = None
+    credentials: BucketCredentials | None = None
 
     @classmethod
     def from_url(cls, url: str) -> BucketAccessInfo:
@@ -174,9 +173,7 @@ class BucketAccessInfo:
         return cls._from_dict(bucket_url.dict())
 
     @classmethod
-    def parse_obj(
-        cls, data: Union[str, type[IStorageConfig], manifest.BucketUrl]
-    ) -> BucketAccessInfo:
+    def parse_obj(cls, data: str | type[IStorageConfig] | manifest.BucketUrl) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)
         elif isinstance(data, str):

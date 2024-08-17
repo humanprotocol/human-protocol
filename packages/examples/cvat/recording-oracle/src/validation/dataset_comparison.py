@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Optional, Sequence, Union
+from typing import Callable, Sequence
 
 import datumaro as dm
 import numpy as np
@@ -30,7 +30,7 @@ class SimilarityFunction(metaclass=ABCMeta):
 
 class CachedSimilarityFunction(SimilarityFunction):
     def __init__(
-        self, sim_fn: Callable, *, cache: Optional[dict[tuple[int, int], float]] = None
+        self, sim_fn: Callable, *, cache: dict[tuple[int, int], float] | None = None
     ) -> None:
         self.cache: dict[tuple[int, int], float] = cache or {}
         self.sim_fn = sim_fn
@@ -185,7 +185,7 @@ _SkeletonInfo = list[str]
 @define
 class SkeletonDatasetComparator(DatasetComparator):
     _skeleton_info: dict[int, _SkeletonInfo] = field(factory=dict, init=False)
-    _categories: Optional[dm.CategoriesInfo] = field(default=None, init=False)
+    _categories: dm.CategoriesInfo | None = field(default=None, init=False)
 
     # TODO: find better strategy for sigma estimation
     _oks_sigma: float = Config.validation.default_oks_sigma
@@ -334,11 +334,11 @@ class SkeletonDatasetComparator(DatasetComparator):
             a: dm.Points,
             b: dm.Points,
             *,
-            sigma: Union[float, np.ndarray] = 0.1,
-            bbox: Optional[BboxCoords] = None,
-            scale: Union[None, float, np.ndarray] = None,
-            visibility_a: Union[None, bool, Sequence[bool]] = None,
-            visibility_b: Union[None, bool, Sequence[bool]] = None,
+            sigma: float | np.ndarray = 0.1,
+            bbox: BboxCoords | None = None,
+            scale: None | float | np.ndarray = None,
+            visibility_a: None | bool | Sequence[bool] = None,
+            visibility_b: None | bool | Sequence[bool] = None,
         ) -> float:
             """
             Computes Object Keypoint Similarity metric for a pair of point sets.

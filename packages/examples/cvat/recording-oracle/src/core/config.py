@@ -3,7 +3,7 @@
 
 import inspect
 import os
-from typing import ClassVar, Iterable, Optional
+from typing import ClassVar, Iterable
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
@@ -42,9 +42,9 @@ class Postgres:
 
 class _NetworkConfig:
     chain_id: ClassVar[int]
-    rpc_api: ClassVar[Optional[str]]
-    private_key: ClassVar[Optional[str]]
-    addr: ClassVar[Optional[str]]
+    rpc_api: ClassVar[str | None]
+    private_key: ClassVar[str | None]
+    addr: ClassVar[str | None]
 
     @classmethod
     def is_configured(cls) -> bool:
@@ -102,12 +102,12 @@ class IStorageConfig:
     data_bucket_name: ClassVar[str]
     secure: ClassVar[bool]
     endpoint_url: ClassVar[str]  # TODO: probably should be optional
-    region: ClassVar[Optional[str]]
+    region: ClassVar[str | None]
     # AWS S3 specific attributes
-    access_key: ClassVar[Optional[str]]
-    secret_key: ClassVar[Optional[str]]
+    access_key: ClassVar[str | None]
+    secret_key: ClassVar[str | None]
     # GCS specific attributes
-    key_file_path: ClassVar[Optional[str]]
+    key_file_path: ClassVar[str | None]
 
     @classmethod
     def get_scheme(cls) -> str:

@@ -2,7 +2,7 @@ import io
 import os
 from collections import Counter
 from logging import Logger
-from typing import Optional, Union
+from typing import Union
 
 from sqlalchemy.orm import Session
 
@@ -48,9 +48,9 @@ class _TaskValidator:
 
         self.data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
-        self.annotation_meta: Optional[annotation.AnnotationMeta] = None
-        self.job_annotations: Optional[dict[int, bytes]] = None
-        self.merged_annotations: Optional[bytes] = None
+        self.annotation_meta: annotation.AnnotationMeta | None = None
+        self.job_annotations: dict[int, bytes] | None = None
+        self.merged_annotations: bytes | None = None
 
     def set_logger(self, logger: Logger):
         self.logger = logger
