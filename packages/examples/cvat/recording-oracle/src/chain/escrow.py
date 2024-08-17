@@ -21,9 +21,11 @@ def validate_escrow(
     chain_id: int,
     escrow_address: str,
     *,
-    accepted_states: list[Status] = [Status.Pending],
+    accepted_states: list[Status] = None,
     allow_no_funds: bool = False,
 ) -> None:
+    if accepted_states is None:
+        accepted_states = [Status.Pending]
     assert accepted_states
 
     escrow = get_escrow(chain_id, escrow_address)
