@@ -151,7 +151,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
                 )
 
-            except Exception as ex:
+            except Exception:
                 raise
 
         case _:
