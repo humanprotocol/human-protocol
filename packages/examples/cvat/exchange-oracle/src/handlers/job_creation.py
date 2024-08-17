@@ -164,7 +164,7 @@ class SimpleTaskBuilder:
         return self
 
     def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
     ) -> str:
         if max_items is None:
             max_items = self.list_display_threshold
@@ -604,7 +604,7 @@ class BoxesFromPointsTaskBuilder:
         self._validate_gt_annotations()
 
     def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
     ) -> str:
         if max_items is None:
             max_items = self.list_display_threshold
@@ -1770,7 +1770,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._validate_boxes_annotations()
 
     def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
     ) -> str:
         if max_items is None:
             max_items = self.list_display_threshold

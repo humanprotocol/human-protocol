@@ -20,7 +20,7 @@ def validate_escrow(
     chain_id: int,
     escrow_address: str,
     *,
-    accepted_states: list[Status] = None,
+    accepted_states: list[Status] | None = None,
     allow_no_funds: bool = False,
 ) -> None:
     if accepted_states is None:
