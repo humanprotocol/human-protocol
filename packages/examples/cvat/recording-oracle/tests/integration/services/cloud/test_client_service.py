@@ -35,7 +35,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert len(client.list_files()) == 0
 
         file_name = "test_file"
-        data = "this is a test".encode("utf-8")
+        data = b"this is a test"
 
         assert not client.file_exists(file_name)
         client.create_file(file_name, data)
