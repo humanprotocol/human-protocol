@@ -18,10 +18,10 @@ class Task(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     iteration = Column(Integer, server_default="0", nullable=False)
 
-    jobs: Mapped[list["Job"]] = relationship(
+    jobs: Mapped[list[Job]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
-    gt_stats: Mapped[list["GtStats"]] = relationship(
+    gt_stats: Mapped[list[GtStats]] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
 
@@ -32,8 +32,8 @@ class Job(Base):
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     task_id = Column(String, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
 
-    task: Mapped["Task"] = relationship(back_populates="jobs")
-    validation_results: Mapped[list["ValidationResult"]] = relationship(
+    task: Mapped[Task] = relationship(back_populates="jobs")
+    validation_results: Mapped[list[ValidationResult]] = relationship(
         back_populates="job", cascade="all, delete", passive_deletes=True
     )
 
@@ -46,7 +46,7 @@ class ValidationResult(Base):
     annotator_wallet_address = Column(String, nullable=False)
     annotation_quality = Column(Float, nullable=False)
 
-    job: Mapped["Job"] = relationship(back_populates="validation_results")
+    job: Mapped[Job] = relationship(back_populates="validation_results")
 
 
 class GtStats(Base):
@@ -62,4 +62,4 @@ class GtStats(Base):
 
     failed_attempts = Column(Integer, default=0, nullable=False)
 
-    task: Mapped["Task"] = relationship(back_populates="gt_stats")
+    task: Mapped[Task] = relationship(back_populates="gt_stats")
