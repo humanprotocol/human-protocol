@@ -839,7 +839,7 @@ class BoxesFromPointsTaskBuilder:
                     ambiguous_boxes.add(gt_bbox.id)
                     ambiguous_skeletons.update(a.id for a in matched_skeletons)
                     continue
-                elif not matched_skeletons:
+                if not matched_skeletons:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
                         "Sample '{}': GT bbox #{} ({}) skipped - "
@@ -1915,7 +1915,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     ambiguous_skeletons.add(gt_skeleton.id)
                     ambiguous_boxes.update(b.id for b in matched_boxes)
                     continue
-                elif not matched_boxes:
+                if not matched_boxes:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
