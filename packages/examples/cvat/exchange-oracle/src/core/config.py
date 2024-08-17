@@ -37,7 +37,7 @@ class PostgresConfig:
     lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
-    def connection_url(cls):
+    def connection_url(cls) -> str:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
@@ -172,11 +172,11 @@ class StorageConfig:
         return "https://" if cls.secure else "http://"
 
     @classmethod
-    def provider_endpoint_url(cls):
+    def provider_endpoint_url(cls) -> str:
         return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
-    def bucket_url(cls):
+    def bucket_url(cls) -> str:
         if is_ipv4(cls.endpoint_url):
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
