@@ -141,9 +141,7 @@ def get_projects_by_status(
     if included_types is not None:
         projects = projects.where(Project.job_type.in_([t.value for t in included_types]))
 
-    projects = projects.limit(limit).all()
-
-    return projects
+    return projects.limit(limit).all()
 
 
 def get_escrows_by_project_status(
@@ -162,9 +160,7 @@ def get_escrows_by_project_status(
     if included_types:
         escrows = escrows.where(Project.job_type.in_([t.value for t in included_types]))
 
-    escrows = escrows.limit(limit).all()
-
-    return escrows
+    return escrows.limit(limit).all()
 
 
 def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:

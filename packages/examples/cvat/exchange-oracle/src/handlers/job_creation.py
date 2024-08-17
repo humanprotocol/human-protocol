@@ -1207,15 +1207,13 @@ class BoxesFromPointsTaskBuilder:
             (255, 255, 255),
             cv2.FILLED,
         )
-        roi_pixels = cv2.circle(
+        return cv2.circle(
             roi_pixels,
             center,
             point_size,
             self.embedded_point_color,
             cv2.FILLED,
         )
-
-        return roi_pixels
 
     def _extract_and_upload_rois(self):
         # TODO: maybe optimize via splitting into separate threads (downloading, uploading, processing)
