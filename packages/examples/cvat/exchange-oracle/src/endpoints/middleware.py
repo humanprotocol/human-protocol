@@ -61,7 +61,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """
 
     @staticmethod
-    async def _set_body(request: Request, body: bytes):
+    async def _set_body(request: Request, body: bytes) -> None:
         # Before FastAPI 0.108.0 infinite hang is expected,
         # if request body is awaited more than once.
         # It's not needed when using FastAPI >= 0.108.0.
