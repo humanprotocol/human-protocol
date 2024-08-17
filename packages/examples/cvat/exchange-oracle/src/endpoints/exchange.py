@@ -56,7 +56,7 @@ async def register(
                         status_code=HTTPStatus.NOT_FOUND, detail="User with this email not found"
                     ) from e
 
-                elif (
+                if (
                     e.status == HTTPStatus.BAD_REQUEST
                     and "The user is a member of the organization already." in e.body
                 ):
@@ -66,9 +66,7 @@ async def register(
                         status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="User already exists"
                     )
 
-                elif (
-                    e.status == HTTPStatus.BAD_REQUEST and "Enter a valid email address." in e.body
-                ):
+                if e.status == HTTPStatus.BAD_REQUEST and "Enter a valid email address." in e.body:
                     raise HTTPException(
                         status_code=HTTPStatus.BAD_REQUEST, detail="Invalid email address"
                     )

@@ -46,9 +46,7 @@ class BucketCredentials:
                 "Invalid storage configuration. The access_key/secret_key pair"
                 f"cannot be specified with {config.provider} provider"
             )
-        elif (
-            bool(config.access_key) ^ bool(config.secret_key)
-        ) and config.provider.lower() == "aws":
+        if (bool(config.access_key) ^ bool(config.secret_key)) and config.provider.lower() == "aws":
             raise ValueError(
                 "Invalid storage configuration. "
                 "Either none or both access_key and secret_key must be specified for an AWS storage"
