@@ -97,7 +97,7 @@ class _CompletedEscrowsHandler:
                     # TODO: such escrows can fill all the queried completed projects
                     # need to improve handling for such projects
                     # (e.g. cancel depending on the escrow status)
-                    logger.error(
+                    logger.exception(
                         f"Failed to handle completed project id {project.cvat_id} for escrow {project.escrow_address}: {e}"
                     )
                     continue
@@ -247,7 +247,7 @@ class _CompletedEscrowsHandler:
                 # TODO: such escrows can fill all the queried completed projects
                 # need to improve handling for such projects
                 # (e.g. cancel depending on the escrow status)
-                logger.error(
+                logger.exception(
                     f"Failed to handle completed projects for escrow {escrow_address}: {e}"
                 )
                 continue
