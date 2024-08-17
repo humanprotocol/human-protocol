@@ -231,9 +231,7 @@ class SimpleTaskBuilder:
         if len(gt_filenames) != len(matched_gt_filenames):
             missing_gt = gt_filenames - matched_gt_filenames
             raise DatasetValidationError(
-                "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(list(missing_gt))
-                )
+                f"Failed to find several validation samples in the dataset files: {self._format_list(list(missing_gt))}"
             )
 
         if len(gt_filenames) < manifest.validation.val_size:
@@ -501,9 +499,7 @@ class BoxesFromPointsTaskBuilder:
         manifest_labels = set(label.name for label in self.manifest.annotation.labels)
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
-                "GT labels do not match job labels. Unknown labels: {}".format(
-                    self._format_list(list(gt_labels - manifest_labels)),
-                )
+                f"GT labels do not match job labels. Unknown labels: {self._format_list(list(gt_labels - manifest_labels))}"
             )
 
         self._input_gt_dataset.transform(
@@ -521,9 +517,7 @@ class BoxesFromPointsTaskBuilder:
             extra_gt = list(map(os.path.basename, gt_filenames - matched_gt_filenames))
 
             raise MismatchingAnnotations(
-                "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(extra_gt)
-                )
+                f"Failed to find several validation samples in the dataset files: {self._format_list(extra_gt)}"
             )
 
         if len(gt_filenames) < self.manifest.validation.val_size:
@@ -550,9 +544,7 @@ class BoxesFromPointsTaskBuilder:
                     and (0 <= int(bbox.y) < int(bbox.y + bbox.h) <= img_h)
                 ):
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT bbox #{} ({}) - invalid coordinates".format(
-                            gt_sample.id, bbox.id, label_cat[bbox.label].name
-                        ),
+                        f"Sample '{gt_sample.id}': GT bbox #{bbox.id} ({label_cat[bbox.label].name}) - invalid coordinates",
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
@@ -560,9 +552,7 @@ class BoxesFromPointsTaskBuilder:
 
                 if bbox.id in visited_ids:
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT bbox #{} ({}) skipped - repeated annotation id {}".format(
-                            gt_sample.id, bbox.id, label_cat[bbox.label].name, bbox.id
-                        ),
+                        f"Sample '{gt_sample.id}': GT bbox #{bbox.id} ({label_cat[bbox.label].name}) skipped - repeated annotation id {bbox.id}",
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
@@ -671,9 +661,7 @@ class BoxesFromPointsTaskBuilder:
             )
 
             raise MismatchingAnnotations(
-                "Failed to find several samples in the dataset files: {}".format(
-                    self._format_list(extra_point_samples),
-                )
+                f"Failed to find several samples in the dataset files: {self._format_list(extra_point_samples)}"
             )
 
     def _validate_points_annotations(self):
@@ -683,7 +671,7 @@ class BoxesFromPointsTaskBuilder:
 
             if len(skeleton.elements) != 1:
                 raise DatasetValidationError(
-                    "invalid points count ({}), expected 1".format(len(skeleton.elements))
+                    f"invalid points count ({len(skeleton.elements)}), expected 1"
                 )
 
             point = skeleton.elements[0]
@@ -709,18 +697,14 @@ class BoxesFromPointsTaskBuilder:
                     _validate_skeleton(skeleton, sample_bbox=sample_bbox)
                 except InvalidCoordinates as error:
                     excluded_points_info.add_message(
-                        "Sample '{}': point #{} ({}) skipped - {}".format(
-                            sample.id, skeleton.id, label_cat[skeleton.label].name, error
-                        ),
+                        f"Sample '{sample.id}': point #{skeleton.id} ({label_cat[skeleton.label].name}) skipped - {error}",
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
                     continue
                 except DatasetValidationError as error:
                     excluded_points_info.add_message(
-                        "Sample '{}': point #{} ({}) - {}".format(
-                            sample.id, skeleton.id, label_cat[skeleton.label].name, error
-                        ),
+                        f"Sample '{sample.id}': point #{skeleton.id} ({label_cat[skeleton.label].name}) - {error}",
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
@@ -842,12 +826,8 @@ class BoxesFromPointsTaskBuilder:
                 if not matched_skeletons:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT bbox #{} ({}) skipped - "
-                        "no matching points found".format(
-                            gt_sample.id,
-                            gt_bbox.id,
-                            gt_label_cat[gt_bbox.label].name,
-                        ),
+                        f"Sample '{gt_sample.id}': GT bbox #{gt_bbox.id} ({gt_label_cat[gt_bbox.label].name}) skipped - "
+                        "no matching points found",
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
@@ -954,11 +934,8 @@ class BoxesFromPointsTaskBuilder:
             excluded_gt_info.total_count * self.max_discarded_threshold
         ):
             raise DatasetValidationError(
-                "Too many GT boxes discarded ({} out of {}). "
-                "Please make sure each GT box matches exactly 1 point".format(
-                    excluded_gt_info.total_count - len(bbox_point_mapping),
-                    excluded_gt_info.total_count,
-                )
+                f"Too many GT boxes discarded ({excluded_gt_info.total_count - len(bbox_point_mapping)} out of {excluded_gt_info.total_count}). "
+                "Please make sure each GT box matches exactly 1 point"
             )
 
         self.logger.info(
@@ -979,9 +956,7 @@ class BoxesFromPointsTaskBuilder:
         ]
         if gt_labels_without_anns:
             raise DatasetValidationError(
-                "No matching GT boxes/points annotations found for some classes: {}".format(
-                    self._format_list(gt_labels_without_anns)
-                )
+                f"No matching GT boxes/points annotations found for some classes: {self._format_list(gt_labels_without_anns)}"
             )
 
         self._gt_dataset = updated_gt_dataset
@@ -1038,10 +1013,7 @@ class BoxesFromPointsTaskBuilder:
             self.logger.warning(
                 "Some classes will use the full image instead of RoI - {}".format(
                     "; ".join(
-                        "{}: {}".format(
-                            g_reason,
-                            self._format_list([label_cat[label_id].name for label_id in g_labels]),
-                        )
+                        f"{g_reason}: {self._format_list([label_cat[label_id].name for label_id in g_labels])}"
                         for g_reason, g_labels in labels_by_reason.items()
                     )
                 )
@@ -1585,9 +1557,7 @@ class SkeletonsFromBoxesTaskBuilder:
             extra_gt = list(map(os.path.basename, gt_filenames - matched_gt_filenames))
 
             raise MismatchingAnnotations(
-                "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(extra_gt)
-                )
+                f"Failed to find several validation samples in the dataset files: {self._format_list(extra_gt)}"
             )
 
         if len(gt_filenames) < self.manifest.validation.val_size:
@@ -1629,9 +1599,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     _validate_skeleton(skeleton, sample_bbox=sample_bbox)
                 except DatasetValidationError as error:
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - {}".format(
-                            gt_sample.id, skeleton.id, label_cat[skeleton.label].name, error
-                        ),
+                        f"Sample '{gt_sample.id}': GT skeleton #{skeleton.id} ({label_cat[skeleton.label].name}) skipped - {error}",
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
@@ -1717,9 +1685,7 @@ class SkeletonsFromBoxesTaskBuilder:
             )
 
             raise MismatchingAnnotations(
-                "Failed to find several samples in the dataset files: {}".format(
-                    self._format_list(extra_bbox_samples),
-                )
+                f"Failed to find several samples in the dataset files: {self._format_list(extra_bbox_samples)}"
             )
 
     def _validate_boxes_annotations(self):
@@ -1744,9 +1710,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     and (0 <= int(bbox.y) < int(bbox.y + bbox.h) <= image_h)
                 ):
                     excluded_boxes_info.add_message(
-                        "Sample '{}': bbox #{} ({}) skipped - invalid coordinates".format(
-                            sample.id, bbox.id, label_cat[bbox.label].name
-                        ),
+                        f"Sample '{sample.id}': bbox #{bbox.id} ({label_cat[bbox.label].name}) skipped - invalid coordinates",
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
@@ -1754,9 +1718,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
                 if bbox.id in visited_ids:
                     excluded_boxes_info.add_message(
-                        "Sample '{}': bbox #{} ({}) skipped - repeated annotation id {}".format(
-                            sample.id, bbox.id, label_cat[bbox.label].name, bbox.id
-                        ),
+                        f"Sample '{sample.id}': bbox #{bbox.id} ({label_cat[bbox.label].name}) skipped - repeated annotation id {bbox.id}",
                         sample_id=sample.id,
                         sample_subset=sample.subset,
                     )
@@ -1918,12 +1880,8 @@ class SkeletonsFromBoxesTaskBuilder:
                 if not matched_boxes:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - "
-                        "no matching boxes found".format(
-                            gt_sample.id,
-                            gt_skeleton.id,
-                            gt_label_cat[gt_skeleton.label].name,
-                        ),
+                        f"Sample '{gt_sample.id}': GT skeleton #{gt_skeleton.id} ({gt_label_cat[gt_skeleton.label].name}) skipped - "
+                        "no matching boxes found",
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
                     )
@@ -2042,12 +2000,9 @@ class SkeletonsFromBoxesTaskBuilder:
             self.max_discarded_threshold * excluded_gt_info.total_count
         ):
             raise DatasetValidationError(
-                "Too many GT skeletons discarded ({} out of {}). "
+                f"Too many GT skeletons discarded ({excluded_gt_info.total_count - len(skeleton_bbox_mapping)} out of {excluded_gt_info.total_count}). "
                 "Please make sure each GT skeleton matches exactly 1 bbox "
-                "and has at least 1 visible point".format(
-                    excluded_gt_info.total_count - len(skeleton_bbox_mapping),
-                    excluded_gt_info.total_count,
-                )
+                "and has at least 1 visible point"
             )
 
         self.logger.info(
@@ -2068,9 +2023,7 @@ class SkeletonsFromBoxesTaskBuilder:
         ]
         if labels_with_few_gt:
             raise DatasetValidationError(
-                "Too few matching GT boxes/points annotations found for some classes: {}".format(
-                    self._format_list(labels_with_few_gt)
-                )
+                f"Too few matching GT boxes/points annotations found for some classes: {self._format_list(labels_with_few_gt)}"
             )
 
         self._gt_dataset = updated_gt_dataset
