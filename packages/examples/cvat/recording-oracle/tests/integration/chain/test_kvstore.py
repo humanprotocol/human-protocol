@@ -150,7 +150,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertEquals(
+                self.assertEqual(
                     kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
                     PGP_PUBLIC_KEY_URL_1,
                 )
@@ -171,7 +171,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 store["public_key_hash"] = "corrupted_hash"
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertNotEquals(store["public_key_hash"], "corrupted_hash")
+                self.assertNotEqual(store["public_key_hash"], "corrupted_hash")
 
             # check that a new public key URL will be written to KVStore when an outdated URL is stored there
             with (
@@ -186,7 +186,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertEquals(
+                self.assertEqual(
                     kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
                     PGP_PUBLIC_KEY_URL_2,
                 )
