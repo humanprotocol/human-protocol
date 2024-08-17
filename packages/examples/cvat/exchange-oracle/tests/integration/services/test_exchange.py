@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+import pytest
 from fastapi import HTTPException
 from pydantic import ValidationError
 
@@ -114,7 +115,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert isinstance(data, service_api.TaskResponse)
 
     def test_serialize_task_invalid_project(self):
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             serialize_task(project_id=str(uuid.uuid4()))
 
     def test_serialize_task_invalid_manifest(self):
@@ -126,7 +127,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest:
             mock_get_manifest.return_value = None
-            with self.assertRaises(ValidationError):
+            with pytest.raises(ValidationError):
                 serialize_task(project_id=cvat_project.id)
 
     def test_get_available_tasks(self):
@@ -284,7 +285,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.commit()
 
-        with self.assertRaises(HTTPException):
+        with pytest.raises(HTTPException):
             create_assignment(cvat_project_1.id, "invalid_address")
 
     def test_create_assignment_invalid_project(self):
@@ -297,7 +298,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(user)
         self.session.commit()
 
-        with self.assertRaises(HTTPException):
+        with pytest.raises(HTTPException):
             create_assignment("1", user_address)
 
     def test_create_assignment_unfinished_assignment(self):
@@ -329,7 +330,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
 
-            with self.assertRaises(HTTPException):
+            with pytest.raises(HTTPException):
                 create_assignment("1", user_address)
 
     def test_create_assignment_no_available_jobs_completed_assignment(self):

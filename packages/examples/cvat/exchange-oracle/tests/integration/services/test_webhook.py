@@ -1,6 +1,7 @@
 import unittest
 import uuid
 
+import pytest
 from sqlalchemy.exc import IntegrityError
 
 import src.services.webhook as webhook_service
@@ -60,7 +61,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.job_launcher,
             event_type=JobLauncherEventTypes.escrow_created.value,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_incoming_webhook_none_chain_id(self):
@@ -74,13 +75,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.job_launcher,
             event_type=JobLauncherEventTypes.escrow_created.value,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_incoming_webhook_none_event_type(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         signature = "signature"
-        with self.assertRaises(AssertionError) as error:
+        with pytest.raises(AssertionError) as error:
             webhook_service.inbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -97,7 +98,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         chain_id = Networks.localhost.value
 
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(ValueError) as error:
             webhook_service.inbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -138,7 +139,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.exchange_oracle,
             event=ExchangeOracleEvent_TaskFinished(),
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_outgoing_webhook_none_chain_id(self):
@@ -150,12 +151,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.exchange_oracle,
             event=ExchangeOracleEvent_TaskFinished(),
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_outgoing_webhook_none_event_type(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        with self.assertRaises(AssertionError) as error:
+        with pytest.raises(AssertionError) as error:
             webhook_service.outbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -172,7 +173,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         chain_id = Networks.localhost.value
         signature = "signature"
 
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(ValueError) as error:
             webhook_service.outbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,

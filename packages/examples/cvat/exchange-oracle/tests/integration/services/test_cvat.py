@@ -2,6 +2,7 @@ import unittest
 import uuid
 from datetime import datetime, timedelta
 
+import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
@@ -86,7 +87,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id,
             bucket_url,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_cvat_id(self):
@@ -104,7 +105,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id,
             bucket_url,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_cvat_cloudstorage_id(self):
@@ -122,7 +123,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id,
             bucket_url,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_job_type(self):
@@ -140,7 +141,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id,
             bucket_url,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_escrow_address(self):
@@ -158,7 +159,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id,
             bucket_url,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_chain_id(self):
@@ -177,7 +178,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             None,
             bucket_url,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_bucket_url(self):
@@ -195,7 +196,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id,
             None,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_get_project_by_id(self):
@@ -520,7 +521,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         projects = self.session.query(Project).all()
         assert len(projects) == 1
-        with self.assertRaises(UnmappedInstanceError):
+        with pytest.raises(UnmappedInstanceError):
             cvat_service.delete_project(self.session, "project_id")
 
     def test_create_task(self):
@@ -553,22 +554,22 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         cvat_service.create_task(self.session, cvat_id, cvat_project.cvat_id, status)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_tas_without_project(self):
         cvat_service.create_task(self.session, 123, 123, TaskStatuses.annotation)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_task_none_cvat_id(self):
         cvat_service.create_task(self.session, None, 123, TaskStatuses.annotation)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_task_none_cvat_project_id(self):
         cvat_service.create_task(self.session, 123, None, TaskStatuses.annotation)
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_get_task_by_id(self):
@@ -790,7 +791,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_job_without_task(self):
@@ -803,7 +804,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=None,
             status=JobStatuses.new,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_job_invalid_task_reference(self):
@@ -818,7 +819,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_job_invalid_project_reference(self):
@@ -833,7 +834,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=122,
             status=JobStatuses.new,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_job_duplicated_cvat_id(self):
@@ -856,7 +857,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_get_job_by_id(self):
@@ -1124,7 +1125,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             email,
             2,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_put_user_duplicated_id(self):
@@ -1142,7 +1143,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             "test2@hmt.ai",
             cvat_id,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_get_user_by_id(self):
@@ -1219,7 +1220,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_job_id=cvat_job.cvat_id,
             expires_at=datetime.now(),
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_assignment_invalid_address(self):
@@ -1237,7 +1238,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_job_id=0,
             expires_at=datetime.now(),
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_get_assignments_by_id(self):
@@ -1552,7 +1553,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             "image1.jpg",
             "image2.jpg",
         ]
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             cvat_service.add_project_images(self.session, cvat_project_id=1, filenames=filenames)
 
     def test_add_project_images(self):

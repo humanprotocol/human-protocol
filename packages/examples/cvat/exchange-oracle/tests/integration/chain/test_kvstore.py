@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
@@ -52,7 +53,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             assert recording_url == DEFAULT_MANIFEST_URL
 
     def test_get_job_launcher_url_invalid_escrow(self):
-        with self.assertRaises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError) as error:
             get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
         assert "Invalid escrow address: invalid_address" == str(error.exception)
 
@@ -78,7 +79,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             assert recording_url == DEFAULT_MANIFEST_URL
 
     def test_get_recording_oracle_url_invalid_escrow(self):
-        with self.assertRaises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError) as error:
             get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
         assert "Invalid escrow address: invalid_address" == str(error.exception)
 
