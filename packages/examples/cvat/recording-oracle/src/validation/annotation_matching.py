@@ -1,5 +1,6 @@
 import itertools
-from typing import Callable, NamedTuple, Sequence, TypeVar
+from collections.abc import Callable, Sequence
+from typing import NamedTuple, TypeVar
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
