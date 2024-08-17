@@ -3,7 +3,7 @@
 
 import inspect
 import os
-from typing import ClassVar, Iterable, Optional
+from typing import ClassVar, Iterable
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
@@ -42,9 +42,9 @@ class PostgresConfig:
 
 class _NetworkConfig:
     chain_id: ClassVar[int]
-    rpc_api: ClassVar[Optional[str]]
-    private_key: ClassVar[Optional[str]]
-    addr: ClassVar[Optional[str]]
+    rpc_api: ClassVar[str | None]
+    private_key: ClassVar[str | None]
+    addr: ClassVar[str | None]
 
     @classmethod
     def is_configured(cls) -> bool:
@@ -155,16 +155,16 @@ class StorageConfig:
     endpoint_url: ClassVar[str] = os.environ[
         "STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
-    region: ClassVar[Optional[str]] = os.environ.get("STORAGE_REGION")
+    region: ClassVar[str | None] = os.environ.get("STORAGE_REGION")
     results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
 
     # S3 specific attributes
-    access_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_ACCESS_KEY")
-    secret_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_SECRET_KEY")
+    access_key: ClassVar[str | None] = os.environ.get("STORAGE_ACCESS_KEY")
+    secret_key: ClassVar[str | None] = os.environ.get("STORAGE_SECRET_KEY")
 
     # GCS specific attributes
-    key_file_path: ClassVar[Optional[str]] = os.environ.get("STORAGE_KEY_FILE_PATH")
+    key_file_path: ClassVar[str | None] = os.environ.get("STORAGE_KEY_FILE_PATH")
 
     @classmethod
     def get_scheme(cls) -> str:

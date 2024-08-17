@@ -1,6 +1,5 @@
 from contextlib import suppress
 from http import HTTPStatus
-from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Path, Query
 
@@ -16,7 +15,7 @@ router = APIRouter()
 
 @router.get("/tasks", description="Lists available tasks")
 async def list_tasks(
-    wallet_address: Optional[str] = Query(default=None),
+    wallet_address: str | None = Query(default=None),
     signature: str = Header(description="Calling service signature"),
 ) -> list[TaskResponse]:
     await validate_human_app_signature(signature)

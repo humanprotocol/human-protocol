@@ -9,7 +9,7 @@ from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from time import sleep
-from typing import Any, Generator, Optional
+from typing import Any, Generator
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -50,7 +50,7 @@ def _get_annotations(
     cvat_id: int,
     format_name: str,
     attempt_interval: int = 5,
-    timeout: Optional[int] = _NOTSET,
+    timeout: int | None = _NOTSET,
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -125,8 +125,8 @@ def create_cloudstorage(
     provider: str,
     bucket_name: str,
     *,
-    credentials: Optional[dict[str, Any]] = None,
-    bucket_host: Optional[str] = None,
+    credentials: dict[str, Any] | None = None,
+    bucket_host: str | None = None,
 ) -> models.CloudStorageRead:
     # credentials: access_key | secret_key | service_account_key
     # CVAT credentials: key | secret_key | key_file
@@ -186,7 +186,7 @@ def create_cloudstorage(
 
 
 def create_project(
-    name: str, *, labels: Optional[list] = None, user_guide: str = ""
+    name: str, *, labels: list | None = None, user_guide: str = ""
 ) -> models.ProjectRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -239,7 +239,7 @@ def request_project_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_project_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -332,7 +332,7 @@ def put_task_data(
     task_id: int,
     cloudstorage_id: int,
     *,
-    filenames: Optional[list[str]] = None,
+    filenames: list[str] | None = None,
     sort_images: bool = True,
 ) -> None:
     logger = logging.getLogger("app")
@@ -388,7 +388,7 @@ def request_task_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_task_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -459,7 +459,7 @@ def request_job_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_job_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -529,7 +529,7 @@ class UploadStatus(str, Enum, metaclass=BetterEnumMeta):
     FAILED = "Failed"
 
 
-def get_task_upload_status(cvat_id: int) -> tuple[Optional[UploadStatus], str]:
+def get_task_upload_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -563,7 +563,7 @@ def clear_job_annotations(job_id: int) -> None:
             raise
 
 
-def update_job_assignee(id: str, assignee_id: Optional[int]):
+def update_job_assignee(id: str, assignee_id: int | None):
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -577,7 +577,7 @@ def update_job_assignee(id: str, assignee_id: Optional[int]):
             raise
 
 
-def restart_job(id: str, *, assignee_id: Optional[int] = None):
+def restart_job(id: str, *, assignee_id: int | None = None):
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:

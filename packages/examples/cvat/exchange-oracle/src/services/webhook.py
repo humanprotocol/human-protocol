@@ -1,7 +1,6 @@
 import datetime
 import uuid
 from enum import Enum
-from typing import Optional
 
 from attrs import define
 from sqlalchemy import case, update
@@ -25,7 +24,7 @@ class OracleWebhookDirectionTags(str, Enum, metaclass=BetterEnumMeta):
 @define
 class OracleWebhookQueue:
     direction: OracleWebhookDirectionTags
-    default_sender: Optional[OracleWebhookTypes] = None
+    default_sender: OracleWebhookTypes | None = None
 
     def create_webhook(
         self,
@@ -33,10 +32,10 @@ class OracleWebhookQueue:
         escrow_address: str,
         chain_id: int,
         type: OracleWebhookTypes,
-        signature: Optional[str] = None,
-        event_type: Optional[str] = None,
-        event_data: Optional[dict] = None,
-        event: Optional[OracleEvent] = None,
+        signature: str | None = None,
+        event_type: str | None = None,
+        event_data: dict | None = None,
+        event: OracleEvent | None = None,
     ) -> str:
         """
         Creates a webhook in a database

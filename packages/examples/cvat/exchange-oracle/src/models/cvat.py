@@ -1,8 +1,6 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
-from typing import Optional
-
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
@@ -165,7 +163,7 @@ class Job(Base):
     )
 
     @property
-    def latest_assignment(self) -> Optional[Assignment]:
+    def latest_assignment(self) -> Assignment | None:
         assignments = self.assignments
         return assignments[0] if assignments else None
 

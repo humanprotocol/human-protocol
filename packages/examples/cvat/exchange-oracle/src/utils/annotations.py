@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 from glob import glob
-from typing import Iterable, Optional, Sequence, TypeVar, Union
+from typing import Iterable, Sequence, TypeVar
 
 import datumaro as dm
 import numpy as np
@@ -214,7 +214,7 @@ class ProjectLabels(dm.ItemTransform):
     def __init__(
         self,
         extractor: dm.IExtractor,
-        dst_labels: Union[Iterable[Union[str, tuple[str, str]]], dm.LabelCategories],
+        dst_labels: Iterable[str | tuple[str, str]] | dm.LabelCategories,
     ):
         super().__init__(extractor)
 
@@ -222,8 +222,8 @@ class ProjectLabels(dm.ItemTransform):
 
         src_categories = self._extractor.categories()
 
-        src_label_cat: Optional[dm.LabelCategories] = src_categories.get(dm.AnnotationType.label)
-        src_point_cat: Optional[dm.PointsCategories] = src_categories.get(dm.AnnotationType.points)
+        src_label_cat: dm.LabelCategories | None = src_categories.get(dm.AnnotationType.label)
+        src_point_cat: dm.PointsCategories | None = src_categories.get(dm.AnnotationType.points)
 
         if isinstance(dst_labels, dm.LabelCategories):
             dst_label_cat = deepcopy(dst_labels)

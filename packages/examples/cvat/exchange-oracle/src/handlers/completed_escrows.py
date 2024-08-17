@@ -3,7 +3,7 @@ import itertools
 import logging
 from collections import Counter
 from functools import partial
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from datumaro.util import take_by
 from sqlalchemy import exc as sa_errors
@@ -43,7 +43,7 @@ class _CompletedEscrowsHandler:
     4. Prepares a webhook to recording oracle
     """
 
-    def __init__(self, logger: Optional[logging.Logger]) -> None:
+    def __init__(self, logger: logging.Logger | None) -> None:
         self.logger = logger or NullLogger()
 
     def _download_with_retries(
@@ -51,7 +51,7 @@ class _CompletedEscrowsHandler:
         download_callback: Callable[[], io.RawIOBase],
         retry_callback: Callable[[], Any],
         *,
-        max_attempts: Optional[int] = None,
+        max_attempts: int | None = None,
     ) -> io.RawIOBase:
         """
         Sometimes CVAT downloading can fail with the 500 error.

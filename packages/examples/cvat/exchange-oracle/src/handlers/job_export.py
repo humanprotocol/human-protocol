@@ -3,7 +3,6 @@ import os
 import zipfile
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
-from typing import Optional
 
 import datumaro as dm
 from datumaro.components.dataset import Dataset
@@ -39,7 +38,7 @@ CVAT_EXPORT_FORMAT_TO_DM_MAPPING = {
 @dataclass
 class FileDescriptor:
     filename: str
-    file: Optional[io.RawIOBase]
+    file: io.RawIOBase | None
 
 
 def prepare_annotation_metafile(

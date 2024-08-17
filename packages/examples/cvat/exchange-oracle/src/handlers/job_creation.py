@@ -9,7 +9,7 @@ from itertools import chain, groupby
 from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import Optional, Sequence, TypeVar, Union, cast
+from typing import Sequence, TypeVar, Union, cast
 
 import cv2
 import datumaro as dm
@@ -198,7 +198,7 @@ class SimpleTaskBuilder:
             )
 
     def _parse_gt_dataset(
-        self, gt_file_data: bytes, *, add_prefix: Optional[str] = None
+        self, gt_file_data: bytes, *, add_prefix: str | None = None
     ) -> dm.Dataset:
         with TemporaryDirectory() as gt_temp_dir:
             gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
