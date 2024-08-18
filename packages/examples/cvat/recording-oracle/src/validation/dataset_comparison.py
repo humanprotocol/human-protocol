@@ -10,8 +10,7 @@ from attrs import define, field
 
 from src.core.config import Config
 from src.core.validation_errors import TooFewGtError
-
-from .annotation_matching import (
+from src.validation.annotation_matching import (
     Bbox,
     MatchResult,
     Point,
