@@ -87,6 +87,8 @@ ignore = [
     "S",       # security
     "DTZ005",  # allow datetimes without timezones
 ]
+# alembic is not a package in a traditional sense, so putting __init__.py there doesn't make sense
+"alembic/*" = ["INP001"]
 
 [tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
