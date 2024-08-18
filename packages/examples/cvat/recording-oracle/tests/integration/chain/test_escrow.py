@@ -145,17 +145,15 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = create_escrow(self.w3)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            with pytest.raises(EscrowClientError) as error:
+            with pytest.raises(EscrowClientError, match="Invalid URL: invalid_url"):
                 store_results(self.w3.eth.chain_id, escrow_address, "invalid_url", DEFAULT_HASH)
-        assert str(error.exception) == "Invalid URL: invalid_url"
 
     def test_store_results_invalid_hash(self):
         escrow_address = create_escrow(self.w3)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            with pytest.raises(EscrowClientError) as error:
+            with pytest.raises(EscrowClientError, match="Invalid empty hash"):
                 store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, "")
-        assert str(error.exception) == "Invalid empty hash"
 
     def test_get_reputation_oracle_address(self):
         escrow_address = create_escrow(self.w3)
