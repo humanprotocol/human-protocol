@@ -128,7 +128,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             downloaded_manifest_content = get_escrow_manifest(
                 self.network_config.chain_id, self.escrow_address
             )
-            self.assertDictEqual(downloaded_manifest_content, original_manifest_content)
+            assert downloaded_manifest_content == original_manifest_content
 
     def test_store_results(self):
         escrow_address = create_escrow(self.w3)
