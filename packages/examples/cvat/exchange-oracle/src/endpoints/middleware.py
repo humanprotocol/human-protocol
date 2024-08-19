@@ -119,7 +119,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         try:
             body = await request.body()
             await self._set_body(request, body)
-        except Exception:
+        except Exception:  # noqa: BLE001
             body = None
         else:
             if body is not None:

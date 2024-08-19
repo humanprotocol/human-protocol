@@ -9,11 +9,7 @@ from src.core.types import (
     RecordingOracleEventTypes,
 )
 
-EventTypeTag = Union[
-    ExchangeOracleEventTypes,
-    JobLauncherEventTypes,
-    RecordingOracleEventTypes,
-]
+EventTypeTag = ExchangeOracleEventTypes | JobLauncherEventTypes | RecordingOracleEventTypes
 
 
 class OracleEvent(BaseModel):

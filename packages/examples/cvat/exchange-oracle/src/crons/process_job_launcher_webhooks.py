@@ -109,51 +109,46 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                 raise
 
         case JobLauncherEventTypes.escrow_canceled:
-            try:
-                validate_escrow(
-                    webhook.chain_id,
-                    webhook.escrow_address,
-                    accepted_states=[EscrowStatus.Pending, EscrowStatus.Cancelled],
-                )
+            validate_escrow(
+                webhook.chain_id,
+                webhook.escrow_address,
+                accepted_states=[EscrowStatus.Pending, EscrowStatus.Cancelled],
+            )
 
-                projects = cvat_db_service.get_projects_by_escrow_address(
-                    db_session, webhook.escrow_address, for_update=True, limit=None
+            projects = cvat_db_service.get_projects_by_escrow_address(
+                db_session, webhook.escrow_address, for_update=True, limit=None
+            )
+            if not projects:
+                logger.error(
+                    "Received escrow cancel event "
+                    f"(escrow_address={webhook.escrow_address}). "
+                    "The project doesn't exist, ignoring"
                 )
-                if not projects:
+                return
+
+            for project in projects:
+                if project.status in [
+                    ProjectStatuses.canceled,
+                    ProjectStatuses.recorded,
+                ]:
                     logger.error(
                         "Received escrow cancel event "
                         f"(escrow_address={webhook.escrow_address}). "
-                        "The project doesn't exist, ignoring"
+                        "The project is already finished, ignoring"
                     )
-                    return
+                    continue
 
-                for project in projects:
-                    if project.status in [
-                        ProjectStatuses.canceled,
-                        ProjectStatuses.recorded,
-                    ]:
-                        logger.error(
-                            "Received escrow cancel event "
-                            f"(escrow_address={webhook.escrow_address}). "
-                            "The project is already finished, ignoring"
-                        )
-                        continue
-
-                    logger.info(
-                        f"Received escrow cancel event (escrow_address={webhook.escrow_address}). "
-                        "Canceling the project"
-                    )
-                    cvat_db_service.update_project_status(
-                        db_session, project.id, ProjectStatuses.canceled
-                    )
-
-                cvat_db_service.finish_escrow_creations_by_escrow_address(
-                    db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+                logger.info(
+                    f"Received escrow cancel event (escrow_address={webhook.escrow_address}). "
+                    "Canceling the project"
+                )
+                cvat_db_service.update_project_status(
+                    db_session, project.id, ProjectStatuses.canceled
                 )
 
-            except Exception:
-                raise
-
+            cvat_db_service.finish_escrow_creations_by_escrow_address(
+                db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+            )
         case _:
             raise AssertionError(f"Unknown job launcher event {webhook.event_type}")
 

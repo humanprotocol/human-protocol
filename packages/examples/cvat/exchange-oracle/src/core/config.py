@@ -16,7 +16,7 @@ from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
 dotenv_path = os.getenv("DOTENV_PATH", None)
-if dotenv_path and not os.path.exists(dotenv_path):
+if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 
 load_dotenv(dotenv_path)
@@ -30,7 +30,7 @@ class _BaseConfig:
 
 class PostgresConfig:
     port = os.environ.get("PG_PORT", "5432")
-    host = os.environ.get("PG_HOST", "0.0.0.0")
+    host = os.environ.get("PG_HOST", "0.0.0.0")  # noqa: S104
     user = os.environ.get("PG_USER", "admin")
     password = os.environ.get("PG_PASSWORD", "admin")
     database = os.environ.get("PG_DB", "exchange_oracle")
@@ -189,10 +189,10 @@ class FeaturesConfig:
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
-    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", False))
+    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
     "Allow to log request details for each request"
 
-    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
+    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
 
 
@@ -228,7 +228,7 @@ class EncryptionConfig(_BaseConfig):
         if cls.pgp_private_key:
             try:
                 Encryption(cls.pgp_private_key, passphrase=cls.pgp_passphrase)
-            except Exception as ex:
+            except Exception as ex:  # noqa: BLE001
                 # Possible reasons:
                 # - private key is invalid
                 # - private key is locked but no passphrase is provided
@@ -265,9 +265,12 @@ class Config:
                 attr_or_method.validate()
 
     @classmethod
-    def get_network_configs(cls, only_configured: bool = True) -> Iterable[_NetworkConfig]:
+    def get_network_configs(cls, *, only_configured: bool = True) -> Iterable[_NetworkConfig]:
         for attr_or_method in cls.__dict__:
             attr_or_method = getattr(cls, attr_or_method)
-            if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _NetworkConfig):
-                if not only_configured or attr_or_method.is_configured():
-                    yield attr_or_method
+            if (
+                inspect.isclass(attr_or_method)
+                and issubclass(attr_or_method, _NetworkConfig)
+                and (not only_configured or attr_or_method.is_configured())
+            ):
+                yield attr_or_method

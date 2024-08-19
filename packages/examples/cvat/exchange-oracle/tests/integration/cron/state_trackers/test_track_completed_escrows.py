@@ -147,8 +147,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert db_project.status == ProjectStatuses.validation
 
-    @patch("src.cvat.api_calls.get_job_annotations")
-    def test_retrieve_annotations_error_getting_annotations(self, mock_annotations):
+    def test_retrieve_annotations_error_getting_annotations(self):
         cvat_project_id = 1
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         project_id = str(uuid.uuid4())

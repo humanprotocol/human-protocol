@@ -107,7 +107,7 @@ class _Undefined:
 
 _unset = _Undefined()
 
-_MaybeUnset = Union[T, _Undefined]
+_MaybeUnset = T | _Undefined
 
 
 @dataclass
@@ -2348,7 +2348,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 # Each skeleton point uses the same file layout in jobs
                 skeleton_label_filenames = []
                 for skeleton_label_job in skeleton_label_jobs:
-                    skeleton_label_filenames.append(
+                    skeleton_label_filenames.append(  # noqa: PERF401
                         [
                             compose_data_bucket_filename(
                                 self.escrow_address, self.chain_id, self._roi_filenames[roi_id]

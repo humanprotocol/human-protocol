@@ -122,7 +122,7 @@ class _TaskProcessor:
         output_dataset = self._process_dataset(input_dataset, ann_descriptor=ann_descriptor)
         self._export_dataset(output_dataset, output_dir)
 
-    def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> dm.Dataset:
+    def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> dm.Dataset:  # noqa: ARG002
         return dm.Dataset.import_from(dataset_dir, self.input_format)
 
     def _export_dataset(self, dataset: dm.Dataset, output_dir: str):

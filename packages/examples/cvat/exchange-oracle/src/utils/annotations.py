@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from glob import glob
@@ -8,7 +9,7 @@ import datumaro as dm
 import numpy as np
 from datumaro.util import filter_dict, mask_tools
 from datumaro.util.annotation_util import find_group_leader, find_instances, max_bbox
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 
 def flatten_points(input_points: Sequence[dm.Points]) -> list[dm.Points]:
@@ -49,7 +50,7 @@ def prepare_cvat_annotations_for_dm(dataset_root: str):
 
     for annotation_filename in glob(os.path.join(dataset_root, "**/*.xml"), recursive=True):
         with open(annotation_filename, "rb+") as f:
-            doc = ET.parse(f)
+            doc = ElementTree.parse(f)
             doc_root = doc.getroot()
 
             if doc_root.find("meta/project"):
@@ -174,7 +175,7 @@ def shift_ann(ann: T, offset_x: float, offset_y: float, *, img_w: int, img_h: in
             ]
         )
     else:
-        raise AssertionError(f"Unsupported annotation type '{ann.type}'")
+        raise TypeError(f"Unsupported annotation type '{ann.type}'")
 
     return shifted_ann
 
@@ -201,7 +202,7 @@ class ProjectLabels(dm.ItemTransform):
     """
 
     @classmethod
-    def build_cmdline_parser(cls, **kwargs):
+    def build_cmdline_parser(cls, **kwargs) -> ArgumentParser:
         parser = super().build_cmdline_parser(**kwargs)
         parser.add_argument(
             "-l",
@@ -212,7 +213,7 @@ class ProjectLabels(dm.ItemTransform):
         )
         return parser
 
-    def __init__(
+    def __init__(  # noqa: PLR0912
         self,
         extractor: dm.IExtractor,
         dst_labels: Iterable[str | tuple[str, str]] | dm.LabelCategories,
