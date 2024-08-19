@@ -8,6 +8,7 @@ import {
   MOCK_ADDRESS,
   MOCK_GAS_PRICE_MULTIPLIER,
   MOCK_PRIVATE_KEY,
+  MOCK_REPUTATION_ORACLES,
 } from './../../../test/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -21,6 +22,7 @@ jest.mock('@human-protocol/sdk', () => {
     ...actualSdk,
     OperatorUtils: {
       getReputationNetworkOperators: jest.fn(),
+      getLeader: jest.fn(),
     },
   };
 });
@@ -41,6 +43,8 @@ describe('Web3Service', () => {
             return MOCK_GAS_PRICE_MULTIPLIER;
           case 'RPC_URL_POLYGON_AMOY':
             return 'http://0.0.0.0:8545';
+          case 'REPUTATION_ORACLES':
+            return MOCK_REPUTATION_ORACLES;
           default:
             return defaultValue;
         }
@@ -296,6 +300,103 @@ describe('Web3Service', () => {
 
       const result = (web3Service as any).filterOracles(mockOracles, '');
       expect(result).toEqual(mockOracles);
+    });
+  });
+
+  describe('getReputationOraclesByJobType', () => {
+    beforeEach(async () => {
+      mockConfigService.get = jest
+        .fn()
+        .mockReturnValue(MOCK_REPUTATION_ORACLES);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return matching oracle addresses based on job type', async () => {
+      const mockLeader1 = {
+        address: '0x0000000000000000000000000000000000000001',
+        jobTypes: ['Points'],
+      };
+      const mockLeader2 = {
+        address: '0x0000000000000000000000000000000000000002',
+        jobTypes: ['Fortune'],
+      };
+      const mockLeader3 = {
+        address: '0x0000000000000000000000000000000000000003',
+        jobTypes: ['Points', 'Fortune'],
+      };
+
+      (OperatorUtils.getLeader as jest.Mock)
+        .mockResolvedValueOnce(mockLeader1)
+        .mockResolvedValueOnce(mockLeader2)
+        .mockResolvedValueOnce(mockLeader3);
+
+      const result = await web3Service.getReputationOraclesByJobType(
+        ChainId.POLYGON_AMOY,
+        'Points',
+      );
+
+      expect(result).toEqual([
+        '0x0000000000000000000000000000000000000001',
+        '0x0000000000000000000000000000000000000003',
+      ]);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(3);
+    });
+
+    it('should return an empty array if no oracles match the job type', async () => {
+      const mockLeader1 = {
+        address: '0x0000000000000000000000000000000000000001',
+        jobTypes: ['NewJobType1'],
+      };
+      const mockLeader2 = {
+        address: '0x0000000000000000000000000000000000000002',
+        jobTypes: ['NewJobType2'],
+      };
+      const mockLeader3 = {
+        address: '0x0000000000000000000000000000000000000003',
+        jobTypes: ['NewJobType3'],
+      };
+
+      (OperatorUtils.getLeader as jest.Mock)
+        .mockResolvedValueOnce(mockLeader1)
+        .mockResolvedValueOnce(mockLeader2)
+        .mockResolvedValueOnce(mockLeader3);
+
+      const result = await web3Service.getReputationOraclesByJobType(
+        ChainId.POLYGON_AMOY,
+        'Points',
+      );
+
+      expect(result).toEqual([]);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(3);
+    });
+
+    it('should handle errors from getLeader and return an empty array', async () => {
+      (OperatorUtils.getLeader as jest.Mock).mockRejectedValueOnce(
+        new Error('Failed to fetch leader'),
+      );
+
+      const result = await web3Service.getReputationOraclesByJobType(
+        ChainId.POLYGON_AMOY,
+        'Points',
+      );
+
+      expect(result).toEqual([]);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(3);
+    });
+
+    it('should return an empty array if no reputation oracles are configured', async () => {
+      mockConfigService.get = jest.fn().mockReturnValue('');
+
+      const result = await web3Service.getReputationOraclesByJobType(
+        ChainId.POLYGON_AMOY,
+        'Points',
+      );
+
+      expect(result).toEqual([]);
+      expect(OperatorUtils.getLeader).not.toHaveBeenCalled();
     });
   });
 });
