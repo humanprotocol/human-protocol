@@ -375,8 +375,7 @@ class OperatorUtils:
             not reputation_network_data
             or "data" not in reputation_network_data
             or "reputationNetwork" not in reputation_network_data["data"]
-            or "operators" not in reputation_network_data["data"]["reputationNetwork"]
-            or not reputation_network_data["data"]["reputationNetwork"]["operators"]
+            or not reputation_network_data["data"]["reputationNetwork"]
         ):
             return []
 
@@ -434,7 +433,7 @@ class OperatorUtils:
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},
         )
-        print(reward_added_events_data)
+
         if (
             not reward_added_events_data
             or "data" not in reward_added_events_data
