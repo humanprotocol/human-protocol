@@ -12,7 +12,10 @@ import {
 export function createPendingEvent(
   sender: Address,
   manifest: string,
-  hash: string
+  hash: string,
+  reputationOracleAddress: Address,
+  recordingOracleAddress: Address,
+  exchangeOracleAddress: Address
 ): Pending {
   const newPendingEvent = changetype<Pending>(newMockEvent());
 
@@ -28,9 +31,24 @@ export function createPendingEvent(
     'hash',
     ethereum.Value.fromString(hash)
   );
+  const reputationOracleAddressParam = new ethereum.EventParam(
+    'reputationOracleAddress',
+    ethereum.Value.fromAddress(reputationOracleAddress)
+  );
+  const recordingOracleAddressParam = new ethereum.EventParam(
+    'recordingOracleAddress',
+    ethereum.Value.fromAddress(recordingOracleAddress)
+  );
+  const exchangeOracleAddressParam = new ethereum.EventParam(
+    'exchangeOracleAddress',
+    ethereum.Value.fromAddress(exchangeOracleAddress)
+  );
 
   newPendingEvent.parameters.push(manifestParam);
   newPendingEvent.parameters.push(hashParam);
+  newPendingEvent.parameters.push(reputationOracleAddressParam);
+  newPendingEvent.parameters.push(recordingOracleAddressParam);
+  newPendingEvent.parameters.push(exchangeOracleAddressParam);
 
   return newPendingEvent;
 }
@@ -68,6 +86,7 @@ export function createBulkTransferEvent(
   recipients: Address[],
   amounts: i32[],
   isPartial: boolean,
+  finalResultsUrl: string,
   timestamp: BigInt
 ): BulkTransfer {
   const newBTEvent = changetype<BulkTransfer>(newMockEvent());
@@ -93,11 +112,16 @@ export function createBulkTransferEvent(
     '_isPartial',
     ethereum.Value.fromBoolean(isPartial)
   );
+  const finalResultsUrlParam = new ethereum.EventParam(
+    '_finalResultsUrl',
+    ethereum.Value.fromString(finalResultsUrl)
+  );
 
   newBTEvent.parameters.push(txIdParam);
   newBTEvent.parameters.push(recipientsParam);
   newBTEvent.parameters.push(amountsParam);
   newBTEvent.parameters.push(isPartialParam);
+  newBTEvent.parameters.push(finalResultsUrlParam);
 
   return newBTEvent;
 }

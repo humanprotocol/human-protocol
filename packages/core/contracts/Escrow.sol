@@ -22,12 +22,19 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(string _url, string _hash);
-    event Pending(string manifest, string hash);
+    event Pending(
+        string manifest,
+        string hash,
+        address reputationOracle,
+        address recordingOracle,
+        address exchangeOracle
+    );
     event BulkTransfer(
         uint256 indexed _txId,
         address[] _recipients,
         uint256[] _amounts,
-        bool _isPartial
+        bool _isPartial,
+        string finalResultsUrl
     );
     event Cancelled();
     event Completed();
@@ -150,7 +157,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
         manifestUrl = _url;
         manifestHash = _hash;
         status = EscrowStatuses.Pending;
-        emit Pending(manifestUrl, manifestHash);
+        emit Pending(
+            manifestUrl,
+            manifestHash,
+            reputationOracle,
+            recordingOracle,
+            exchangeOracle
+        );
     }
 
     function abort() external override trusted notComplete notPaid {
@@ -293,7 +306,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
             isPartial = true;
         }
 
-        emit BulkTransfer(_txId, _recipients, finalAmounts, isPartial);
+        emit BulkTransfer(
+            _txId,
+            _recipients,
+            finalAmounts,
+            isPartial,
+            finalResultsUrl
+        );
     }
 
     function finalizePayouts(

@@ -65,22 +65,6 @@ describe('Escrow', () => {
       new DataSourceContext()
     );
 
-    createMockedFunction(
-      escrowAddress,
-      'reputationOracle',
-      'reputationOracle():(address)'
-    ).returns([ethereum.Value.fromAddress(reputationOracleAddress)]);
-    createMockedFunction(
-      escrowAddress,
-      'recordingOracle',
-      'recordingOracle():(address)'
-    ).returns([ethereum.Value.fromAddress(recordingOracleAddress)]);
-    createMockedFunction(
-      escrowAddress,
-      'finalResultsUrl',
-      'finalResultsUrl():(string)'
-    ).returns([ethereum.Value.fromString('test.com')]);
-
     const escrow = new Escrow(escrowAddress);
     escrow.address = escrowAddress;
     escrow.token = Address.zero();
@@ -104,13 +88,14 @@ describe('Escrow', () => {
     const URL = 'test.com';
     const HASH = 'is_hash_1';
 
-    createMockedFunction(
-      escrowAddress,
-      'exchangeOracle',
-      'exchangeOracle():(address)'
-    ).reverts();
-
-    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+    const newPending1 = createPendingEvent(
+      operatorAddress,
+      URL,
+      HASH,
+      reputationOracleAddress,
+      recordingOracleAddress,
+      exchangeOracleAddress
+    );
 
     handlePending(newPending1);
 
@@ -229,13 +214,14 @@ describe('Escrow', () => {
     const URL = 'test.com';
     const HASH = 'is_hash_1';
 
-    createMockedFunction(
-      escrowAddress,
-      'exchangeOracle',
-      'exchangeOracle():(address)'
-    ).reverts();
-
-    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+    const newPending1 = createPendingEvent(
+      operatorAddress,
+      URL,
+      HASH,
+      reputationOracleAddress,
+      recordingOracleAddress,
+      exchangeOracleAddress
+    );
 
     handlePending(newPending1);
 
@@ -371,13 +357,14 @@ describe('Escrow', () => {
     const URL = 'test.com';
     const HASH = 'is_hash_1';
 
-    createMockedFunction(
-      escrowAddress,
-      'exchangeOracle',
-      'exchangeOracle():(address)'
-    ).returns([ethereum.Value.fromAddress(exchangeOracleAddress)]);
-
-    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+    const newPending1 = createPendingEvent(
+      operatorAddress,
+      URL,
+      HASH,
+      reputationOracleAddress,
+      recordingOracleAddress,
+      exchangeOracleAddress
+    );
 
     handlePending(newPending1);
 
@@ -516,7 +503,7 @@ describe('Escrow', () => {
       'Leader',
       exchangeOracleAddressString,
       'amountJobsProcessed',
-      '1'
+      '3'
     );
   });
 
@@ -594,6 +581,7 @@ describe('Escrow', () => {
       [workerAddress, workerAddress],
       [1, 1],
       true,
+      'test.com',
       BigInt.fromI32(10)
     );
 
@@ -679,6 +667,7 @@ describe('Escrow', () => {
       [workerAddress, workerAddress, workerAddress, worker2Address],
       [1, 1, 1, 95],
       false,
+      'test.com',
       BigInt.fromI32(11)
     );
 
@@ -962,12 +951,18 @@ describe('Escrow', () => {
       const newPending1 = createPendingEvent(
         operatorAddress,
         'test.com',
-        'is_hash_1'
+        'is_hash_1',
+        reputationOracleAddress,
+        recordingOracleAddress,
+        exchangeOracleAddress
       );
       const newPending2 = createPendingEvent(
         operatorAddress,
         'test.com',
-        'is_hash_1'
+        'is_hash_1',
+        reputationOracleAddress,
+        recordingOracleAddress,
+        exchangeOracleAddress
       );
 
       handlePending(newPending1);
@@ -1065,6 +1060,7 @@ describe('Escrow', () => {
           ],
           [1, 1, 1, 1, 1],
           true,
+          'test.com',
           BigInt.fromI32(11)
         )
       );
@@ -1075,6 +1071,7 @@ describe('Escrow', () => {
           [workerAddress, workerAddress, workerAddress, workerAddress],
           [1, 1, 1, 1],
           false,
+          'test.com',
           BigInt.fromI32(11)
         )
       );

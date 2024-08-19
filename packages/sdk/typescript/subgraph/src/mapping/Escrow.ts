@@ -2,7 +2,6 @@ import {
   BulkTransfer,
   Cancelled,
   Completed,
-  Escrow as EscrowContract,
   IntermediateStorage,
   Pending,
 } from '../../generated/templates/Escrow/Escrow';
@@ -113,31 +112,18 @@ export function handlePending(event: Pending): void {
     escrowEntity.manifestHash = event.params.hash;
     escrowEntity.status = 'Pending';
 
-    // Read data on-chain
-    const escrowContract = EscrowContract.bind(event.address);
-
-    const reputationOracle = escrowContract.try_reputationOracle();
-    if (!reputationOracle.reverted) {
-      escrowEntity.reputationOracle = reputationOracle.value;
-    }
-
-    const recordingOracle = escrowContract.try_recordingOracle();
-    if (!recordingOracle.reverted) {
-      escrowEntity.recordingOracle = recordingOracle.value;
-    }
-
-    const exchangeOracle = escrowContract.try_exchangeOracle();
-    if (!exchangeOracle.reverted) {
-      escrowEntity.exchangeOracle = exchangeOracle.value;
-    }
+    // Assign the new oracle addresses from the event
+    escrowEntity.reputationOracle = event.params.reputationOracle;
+    escrowEntity.recordingOracle = event.params.recordingOracle;
+    escrowEntity.exchangeOracle = event.params.exchangeOracle;
 
     escrowEntity.save();
     statusEventEntity.launcher = escrowEntity.launcher;
-  }
-  statusEventEntity.save();
 
-  // Increase amount of jobs processed by leader
-  if (escrowEntity) {
+    statusEventEntity.save();
+
+    // Increase amount of jobs processed by leader
+
     if (escrowEntity.reputationOracle) {
       const reputationOracleLeader = createOrLoadLeader(
         Address.fromBytes(escrowEntity.reputationOracle!)
@@ -239,14 +225,9 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
+    // Assign finalResultsUrl from the event
+    escrowEntity.finalResultsUrl = event.params.finalResultsUrl;
     escrowEntity.status = event.params._isPartial ? 'Partial' : 'Paid';
-
-    // Read data on-chain
-    const escrowContract = EscrowContract.bind(event.address);
-    const finalResultsUrl = escrowContract.try_finalResultsUrl();
-    if (!finalResultsUrl.reverted) {
-      escrowEntity.finalResultsUrl = finalResultsUrl.value;
-    }
 
     escrowEntity.save();
     statusEventEntity.launcher = escrowEntity.launcher;
@@ -254,22 +235,18 @@ export function handleBulkTransfer(event: BulkTransfer): void {
 
   if (event.params._isPartial) {
     statusEventEntity.status = 'Partial';
-
     statsEntity.partialStatusEventCount =
       statsEntity.partialStatusEventCount.plus(ONE_BI);
     statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-
     eventDayData.dailyPartialStatusEventCount =
       eventDayData.dailyPartialStatusEventCount.plus(ONE_BI);
     eventDayData.dailyTotalEventCount =
       eventDayData.dailyTotalEventCount.plus(ONE_BI);
   } else {
     statusEventEntity.status = 'Paid';
-
     statsEntity.paidStatusEventCount =
       statsEntity.paidStatusEventCount.plus(ONE_BI);
     statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-
     eventDayData.dailyPaidStatusEventCount =
       eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
     eventDayData.dailyTotalEventCount =

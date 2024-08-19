@@ -173,9 +173,9 @@ templates:
       eventHandlers:
         - event: IntermediateStorage(string,string)
           handler: handleIntermediateStorage
-        - event: Pending(string,string)
+        - event: Pending(string,string,address,address,address)
           handler: handlePending
-        - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
+        - event: BulkTransfer(indexed uint256,address[],uint256[],bool,string)
           handler: handleBulkTransfer
         - event: Cancelled()
           handler: handleCancelled
