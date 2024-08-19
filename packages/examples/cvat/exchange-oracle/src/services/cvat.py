@@ -87,11 +87,20 @@ def get_projects_by_cvat_ids(
 
 
 def get_project_by_escrow_address(
-    session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
+    session: Session,
+    escrow_address: str,
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+    status_in: Optional[List[ProjectStatuses]] = None,
 ) -> Optional[Project]:
+    if status_in:
+        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
+    else:
+        status_filter_arg = []
+
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
-        .where(Project.escrow_address == escrow_address)
+        .where(Project.escrow_address == escrow_address, *status_filter_arg)
         .first()
     )
 

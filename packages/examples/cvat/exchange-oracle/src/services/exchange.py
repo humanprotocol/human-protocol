@@ -3,108 +3,20 @@ from typing import Optional
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
-from src.chain.escrow import get_escrow_manifest
-from src.core.types import AssignmentStatuses, PlatformTypes, ProjectStatuses, TaskTypes
+from src.core.types import Networks, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
-from src.schemas import exchange as service_api
-from src.utils.assignments import (
-    compose_assignment_url,
-    get_default_assignment_size,
-    get_default_assignment_timeout,
-    parse_manifest,
-)
+from src.utils.assignments import get_default_assignment_timeout
 from src.utils.requests import get_or_404
 from src.utils.time import utcnow
-
-
-def serialize_task(
-    project_id: str, *, assignment_id: Optional[str] = None
-) -> service_api.TaskResponse:
-    with SessionLocal.begin() as session:
-        project = cvat_service.get_project_by_id(session, project_id)
-
-        assignment = None
-        if assignment_id:
-            assignment = cvat_service.get_assignments_by_id(session, [assignment_id])[0]
-
-        manifest = parse_manifest(get_escrow_manifest(project.chain_id, project.escrow_address))
-
-        serialized_assignment = None
-        if assignment:
-            serialized_assignment = service_api.AssignmentResponse(
-                assignment_url=compose_assignment_url(
-                    task_id=assignment.job.cvat_task_id,
-                    job_id=assignment.cvat_job_id,
-                    project=project,
-                ),
-                started_at=assignment.created_at,
-                finishes_at=assignment.expires_at,
-            )
-
-        return service_api.TaskResponse(
-            id=project.id,
-            escrow_address=project.escrow_address,
-            title=f"Task {project.escrow_address[:10]}",
-            description=manifest.annotation.description,
-            job_bounty=manifest.job_bounty,
-            job_time_limit=get_default_assignment_timeout(manifest.annotation.type),
-            job_size=get_default_assignment_size(manifest),
-            job_type=project.job_type,
-            platform=PlatformTypes.CVAT,
-            assignment=serialized_assignment,
-            status=project.status,
-        )
-
-
-def get_available_tasks() -> list[service_api.TaskResponse]:
-    results = []
-
-    with SessionLocal.begin() as session:
-        cvat_projects = cvat_service.get_available_projects(session)
-
-        for project in cvat_projects:
-            results.append(serialize_task(project.id))
-
-    return results
-
-
-def get_tasks_by_assignee(
-    wallet_address: Optional[str] = None,
-) -> list[service_api.TaskResponse]:
-    results = []
-
-    with SessionLocal.begin() as session:
-        cvat_projects = cvat_service.get_projects_by_assignee(
-            session, wallet_address=wallet_address
-        )
-        user_assignments = {
-            assignment.job.project.id: assignment
-            for assignment in cvat_service.get_user_assignments_in_cvat_projects(
-                session,
-                wallet_address=wallet_address,
-                cvat_projects=[p.cvat_id for p in cvat_projects],
-            )
-            if assignment.status == AssignmentStatuses.created
-            if not assignment.is_finished
-        }
-
-        for project in cvat_projects:
-            assignment = user_assignments.get(project.id)
-            results.append(
-                serialize_task(
-                    project.id,
-                    assignment_id=assignment.id if assignment else None,
-                )
-            )
-
-    return results
 
 
 class UserHasUnfinishedAssignmentError(Exception):
     pass
 
 
-def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
+def create_assignment(
+    escrow_address: str, chain_id: Networks, wallet_address: str
+) -> Optional[str]:
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
@@ -112,9 +24,10 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
             "user",
         )
 
-        project = cvat_service.get_project_by_id(
+        # There can be several projects with under one escrow, we need any
+        project = cvat_service.get_project_by_escrow_address(
             session,
-            project_id,
+            escrow_address,
             status_in=[
                 ProjectStatuses.annotation
             ],  # avoid unnecessary locking on completed projects
@@ -124,9 +37,11 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
         if not project:
             # Retry without a lock to check if the project doesn't exist
             get_or_404(
-                cvat_service.get_project_by_id(session, project_id),
-                project_id,
-                "task",
+                cvat_service.get_project_by_escrow_address(
+                    session, escrow_address, status_in=[ProjectStatuses.annotation]
+                ),
+                escrow_address,
+                "job",
             )
             return None
 
@@ -162,3 +77,30 @@ def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
         # rollback is automatic within the transaction
 
     return assignment_id
+
+
+class NoAccessError(Exception):
+    pass
+
+
+async def resign_assignment(assignment_id: int, wallet_address: str) -> None:
+    with SessionLocal.begin() as session:
+        assignments = cvat_service.get_assignments_by_id(session, [assignment_id], for_update=True)
+        assignment = get_or_404(next(iter(assignments), None), assignment_id, "assignment")
+
+        # Can only resign from an active assignment in a job
+        # TODO: maybe optimize to a single DB request
+
+        if assignment.is_finished:
+            raise NoAccessError()  # TODO: maybe can be ignored
+
+        if assignment.user_wallet_address != wallet_address:
+            raise NoAccessError()
+
+        last_job_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
+            session, assignment.cvat_job_id, for_update=True
+        )
+        if assignment.id != last_job_assignment.id:
+            raise NoAccessError()
+
+        cvat_service.cancel_assignment(session, assignment_id)

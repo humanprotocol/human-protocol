@@ -12,8 +12,23 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data/pgdata
     ports:
-      - 5431:5432
+      - 5432:5432
     command: ["postgres", "-c", "log_statement=all"]
+
+  redis:
+    container_name: redis
+    image: redis:7.2.3-alpine
+    restart: always
+    command: [
+      "redis-server",
+      "--save", "60", "100",
+      "--appendonly", "yes",
+    ]
+    volumes:
+      - redis:/data
+    ports:
+      - 6379:6379
 
 volumes:
   postgres:
+  redis:

@@ -68,7 +68,7 @@ def test_incoming_webhook_400_missing_field(client: TestClient) -> None:
         "errors": [
             {
                 "field": "event_type",
-                "message": "field required",
+                "message": "Field required",
             }
         ]
     }
@@ -92,7 +92,7 @@ def test_incoming_webhook_400_invalid_address(client: TestClient) -> None:
         "errors": [
             {
                 "field": "escrow_address",
-                "message": "bad_address is not a correct Web3 address",
+                "message": "Value error, bad_address is not a correct Web3 address",
             }
         ]
     }
@@ -116,7 +116,7 @@ def test_incoming_webhook_400_invalid_chain_id(client: TestClient) -> None:
         "errors": [
             {
                 "field": "chain_id",
-                "message": "value is not a valid enumeration member; permitted: 137, 80002, 1338",
+                "message": "Input should be 137, 80002 or 1338",
             }
         ]
     }

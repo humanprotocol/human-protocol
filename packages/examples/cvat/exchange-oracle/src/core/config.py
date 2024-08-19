@@ -25,8 +25,17 @@ class PostgresConfig:
     lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
-    def connection_url(cls):
+    def connection_url(cls) -> str:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
+
+
+class RedisConfig:
+    port = os.environ.get("REDIS_PORT", "6379")
+    host = os.environ.get("REDIS_HOST", "0.0.0.0")
+
+    @classmethod
+    def connection_url(cls) -> str:
+        return f"redis://{cls.host}:{cls.port}/"
 
 
 class PolygonMainnetConfig:
@@ -145,11 +154,11 @@ class StorageConfig:
         return "https://" if cls.secure else "http://"
 
     @classmethod
-    def provider_endpoint_url(cls):
+    def provider_endpoint_url(cls) -> str:
         return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
-    def bucket_url(cls):
+    def bucket_url(cls) -> str:
         if is_ipv4(cls.endpoint_url):
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
@@ -184,7 +193,13 @@ class CoreConfig:
 
 
 class HumanAppConfig:
-    signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
+    jwt_key = os.environ.get("HUMAN_APP_JWT_KEY", "sample")
+
+
+class ApiConfig:
+    default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
+
+    stats_rps_limit = int(os.environ.get("STATS_RPS_LIMIT", 4))
 
 
 class Config:
@@ -200,6 +215,8 @@ class Config:
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig
+    redis_config = RedisConfig
+    api_config = ApiConfig
     human_app_config = HumanAppConfig
 
     cron_config = CronConfig

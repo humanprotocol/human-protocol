@@ -1,5 +1,7 @@
 from enum import EnumMeta
 
+from strenum import StrEnum  # added in python 3.11
+
 
 class BetterEnumMeta(EnumMeta):
     """
@@ -8,3 +10,5 @@ class BetterEnumMeta(EnumMeta):
 
     def __contains__(cls, item):
         return isinstance(item, cls) or item in [v.value for v in cls.__members__.values()]
+
+    # TODO: implement __get_pydantic_json_schema__ for OpenAPI compatibility

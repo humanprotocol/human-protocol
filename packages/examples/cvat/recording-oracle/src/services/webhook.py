@@ -56,7 +56,7 @@ class OracleWebhookQueue:
             validate_event(sender, event_type, event_data)
         elif event:
             event_type = event.get_type()
-            event_data = event.dict()
+            event_data = event.model_dump()
 
         if self.direction == OracleWebhookDirectionTags.incoming and not signature:
             raise ValueError("Webhook signature must be specified for incoming events")

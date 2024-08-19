@@ -61,7 +61,9 @@ def prepare_annotation_metafile(
         ]
     )
 
-    return FileDescriptor(ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.json().encode()))
+    return FileDescriptor(
+        ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.model_dump_json().encode())
+    )
 
 
 class _TaskProcessor:

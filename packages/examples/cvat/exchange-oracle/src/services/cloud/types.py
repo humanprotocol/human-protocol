@@ -7,6 +7,8 @@ from inspect import isclass
 from typing import Dict, Optional, Type, Union
 from urllib.parse import urlparse
 
+import pydantic
+
 from src.core import manifest
 from src.core.config import Config, StorageConfig
 from src.services.cloud.gcs import DEFAULT_GCS_HOST
@@ -171,16 +173,18 @@ class BucketAccessInfo:
 
     @classmethod
     def from_bucket_url(cls, bucket_url: manifest.BucketUrl) -> BucketAccessInfo:
-        return cls._from_dict(bucket_url.dict())
+        return cls._from_dict(bucket_url.model_dump())
 
     @classmethod
     def parse_obj(
-        cls, data: Union[str, Type[StorageConfig], manifest.BucketUrl]
+        cls, data: Union[str, Type[StorageConfig], manifest.BucketUrl, pydantic.AnyUrl]
     ) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)
         elif isinstance(data, str):
             return cls.from_url(data)
+        elif isinstance(data, pydantic.AnyUrl):
+            return cls.from_url(str(data))
         elif isclass(data) and issubclass(data, StorageConfig):
             return cls.from_storage_config(data)
 

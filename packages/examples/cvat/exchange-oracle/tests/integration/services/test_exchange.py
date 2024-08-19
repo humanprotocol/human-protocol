@@ -6,17 +6,18 @@ from unittest.mock import patch
 
 from fastapi import HTTPException
 from pydantic import ValidationError
+from pydantic_core import Url
 
 import src.services.cvat as cvat_service
-from src.core.types import AssignmentStatuses, JobStatuses, PlatformTypes, ProjectStatuses
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.models.cvat import Assignment, User
 from src.schemas import exchange as service_api
 from src.services.exchange import (
     create_assignment,
-    get_available_tasks,
-    get_tasks_by_assignee,
-    serialize_task,
+    get_available_jobs,
+    get_jobs_by_assignee,
+    serialize_job,
 )
 
 from tests.utils.db_helper import (
@@ -47,7 +48,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            data = serialize_task(cvat_project.id)
+            data = serialize_job(cvat_project.id)
 
         self.assertEqual(data.id, cvat_project.id)
         self.assertEqual(data.escrow_address, escrow_address)
@@ -61,7 +62,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(data.platform, PlatformTypes.CVAT)
         self.assertEqual(data.status, cvat_project.status)
         self.assertIsNone(data.assignment)
-        self.assertIsInstance(data, service_api.TaskResponse)
+        self.assertIsInstance(data, service_api.JobResponse)
 
     def test_serialize_task_with_assignment(self):
         cvat_id = 1
@@ -94,7 +95,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            data = serialize_task(project_id=cvat_project.id, assignment_id=assignment.id)
+            data = serialize_job(project_id=cvat_project.id, assignment_id=assignment.id)
 
         self.assertEqual(data.id, cvat_project.id)
         self.assertEqual(data.escrow_address, escrow_address)
@@ -108,14 +109,14 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(data.platform, PlatformTypes.CVAT)
         self.assertEqual(data.status, cvat_project.status)
         self.assertIsNotNone(data.assignment)
-        self.assertIsInstance(data.assignment.assignment_url, str)
+        self.assertIsInstance(data.assignment.assignment_url, Url)
         self.assertEqual(data.assignment.started_at, assignment.created_at)
         self.assertEqual(data.assignment.finishes_at, assignment.expires_at)
-        self.assertIsInstance(data, service_api.TaskResponse)
+        self.assertIsInstance(data, service_api.JobResponse)
 
     def test_serialize_task_invalid_project(self):
         with self.assertRaises(AttributeError):
-            serialize_task(project_id=str(uuid.uuid4()))
+            serialize_job(project_id=str(uuid.uuid4()))
 
     def test_serialize_task_invalid_manifest(self):
         cvat_id = 1
@@ -127,7 +128,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest:
             mock_get_manifest.return_value = None
             with self.assertRaises(ValidationError):
-                serialize_task(project_id=cvat_project.id)
+                serialize_job(project_id=cvat_project.id)
 
     def test_get_available_tasks(self):
         cvat_project_1, _, _ = create_project_task_and_job(
@@ -144,11 +145,11 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            tasks = get_available_tasks()
+            tasks = get_available_jobs()
 
             self.assertEqual(len(tasks), 2)
-            self.assertIsInstance(tasks[0], service_api.TaskResponse)
-            self.assertIsInstance(tasks[1], service_api.TaskResponse)
+            self.assertIsInstance(tasks[0], service_api.JobResponse)
+            self.assertIsInstance(tasks[1], service_api.JobResponse)
             self.assertTrue(any(task.id == cvat_project_1.id for task in tasks))
             self.assertTrue(any(task.id == cvat_project_2.id for task in tasks))
 
@@ -156,10 +157,10 @@ class ServiceIntegrationTest(unittest.TestCase):
                 self.session, cvat_project_2.id, ProjectStatuses.completed
             )
             self.session.commit()
-            tasks = get_available_tasks()
+            tasks = get_available_jobs()
 
             self.assertEqual(len(tasks), 1)
-            self.assertIsInstance(tasks[0], service_api.TaskResponse)
+            self.assertIsInstance(tasks[0], service_api.JobResponse)
             self.assertEqual(tasks[0].id, cvat_project_1.id)
 
     def test_get_tasks_by_assignee(self):
@@ -193,15 +194,15 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            tasks = get_tasks_by_assignee(user_address)
+            tasks = get_jobs_by_assignee(user_address)
 
             self.assertEqual(len(tasks), 1)
-            self.assertIsInstance(tasks[0], service_api.TaskResponse)
+            self.assertIsInstance(tasks[0], service_api.JobResponse)
             self.assertEqual(tasks[0].id, cvat_project_1.id)
             self.assertIsNotNone(tasks[0].assignment)
 
     def test_get_tasks_by_assignee_invalid_address(self):
-        tasks = get_tasks_by_assignee("invalid_address")
+        tasks = get_jobs_by_assignee("invalid_address")
         self.assertEqual(len(tasks), 0)
 
     def test_create_assignment(self):
