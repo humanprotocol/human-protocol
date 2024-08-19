@@ -3,7 +3,7 @@ import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { EventLog, Signer } from 'ethers';
-import { Escrow, HMToken } from '../typechain-types';
+import { USDT, Escrow, HMToken } from '../typechain-types';
 
 const MOCK_URL = 'http://google.com/fake';
 const MOCK_HASH = 'kGKmnj9BRf';
@@ -27,13 +27,14 @@ let owner: Signer,
   restAccounts: Signer[],
   trustedHandlers: Signer[];
 
-let token: HMToken, escrow: Escrow;
+let hmtoken: HMToken, escrow: Escrow;
+let usdt: USDT;
 
 async function deployEscrow() {
   // Deploy Escrow Contract
   const Escrow = await ethers.getContractFactory('contracts/Escrow.sol:Escrow');
   escrow = (await Escrow.deploy(
-    await token.getAddress(),
+    await usdt.getAddress(),
     await launcher.getAddress(),
     await owner.getAddress(),
     100,
@@ -60,10 +61,10 @@ async function setupEscrow() {
 
 async function fundEscrow() {
   const amount = 100;
-  await token.connect(owner).transfer(escrow.getAddress(), amount);
+  await usdt.connect(owner).transfer(escrow.getAddress(), amount);
 }
 
-describe('Escrow', function () {
+describe('Escrow with USDT', function () {
   this.beforeAll(async () => {
     [
       owner,
@@ -81,12 +82,18 @@ describe('Escrow', function () {
     const HMToken = await ethers.getContractFactory(
       'contracts/HMToken.sol:HMToken'
     );
-    token = (await HMToken.deploy(
+    hmtoken = (await HMToken.deploy(
       1000000000,
       'Human Token',
       18,
       'HMT'
     )) as HMToken;
+
+    // Deploy USDT Contract
+    const USDT = await ethers.getContractFactory(
+      'contracts/test/USDT.sol:USDT'
+    );
+    usdt = (await USDT.deploy()) as USDT;
   });
 
   describe('deployment', () => {
@@ -96,7 +103,7 @@ describe('Escrow', function () {
 
     it('Should set the right token address', async () => {
       const result = await escrow.token();
-      expect(result).to.equal(await token.getAddress());
+      expect(result).to.equal(await usdt.getAddress());
     });
 
     it('Should set the right launched status', async () => {
@@ -121,7 +128,7 @@ describe('Escrow', function () {
 
     it('Should topup and return the right escrow balance', async () => {
       const amount = 1000;
-      await token.connect(owner).transfer(escrow.getAddress(), amount);
+      await usdt.connect(owner).transfer(escrow.getAddress(), amount);
 
       const result = await escrow.connect(launcher)['getBalance()']();
       expect(result).to.equal(amount.toString());
@@ -164,23 +171,23 @@ describe('Escrow', function () {
 
       it('Should transfer tokens to owner if contract funded when abort is called', async function () {
         const amount = 100;
-        await token.connect(owner).transfer(escrow.getAddress(), amount);
+        await usdt.connect(owner).transfer(escrow.getAddress(), amount);
 
         await escrow.connect(owner).abort();
 
         expect(
-          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
+          (await usdt.connect(owner).balanceOf(escrow.getAddress())).toString()
         ).to.equal('0', 'Escrow has not been properly aborted');
       });
 
       it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
         const amount = 100;
-        await token.connect(owner).transfer(escrow.getAddress(), amount);
+        await usdt.connect(owner).transfer(escrow.getAddress(), amount);
 
         await escrow.connect(trustedHandlers[0]).abort();
 
         expect(
-          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
+          (await usdt.connect(owner).balanceOf(escrow.getAddress())).toString()
         ).to.equal('0', 'Escrow has not been properly aborted');
       });
     });
@@ -560,7 +567,7 @@ describe('Escrow', function () {
         expect(ststus).to.equal(Status.Cancelled);
 
         expect(
-          await token.connect(owner).balanceOf(escrow.getAddress())
+          await usdt.connect(owner).balanceOf(escrow.getAddress())
         ).to.equal('0', 'Escrow has not been properly canceled');
       });
 
@@ -570,7 +577,7 @@ describe('Escrow', function () {
         expect(ststus).to.equal(Status.Cancelled);
 
         expect(
-          await token.connect(owner).balanceOf(escrow.getAddress())
+          await usdt.connect(owner).balanceOf(escrow.getAddress())
         ).to.equal('0', 'Escrow has not been properly canceled');
       });
     });
@@ -685,22 +692,22 @@ describe('Escrow', function () {
         const account2 = await restAccounts[1].getAddress();
         const account3 = await restAccounts[2].getAddress();
 
-        const initialBalanceAccount1 = await token
+        const initialBalanceAccount1 = await usdt
           .connect(owner)
           .balanceOf(account1);
-        const initialBalanceAccount2 = await token
+        const initialBalanceAccount2 = await usdt
           .connect(owner)
           .balanceOf(account2);
-        const initialBalanceAccount3 = await token
+        const initialBalanceAccount3 = await usdt
           .connect(owner)
           .balanceOf(account3);
-        const initialBalanceRecordingOracle = await token
+        const initialBalanceRecordingOracle = await usdt
           .connect(owner)
           .balanceOf(await recordingOracle.getAddress());
-        const initialBalanceReputationOracle = await token
+        const initialBalanceReputationOracle = await usdt
           .connect(owner)
           .balanceOf(await reputationOracle.getAddress());
-        const initialBalanceExchangeOracle = await token
+        const initialBalanceExchangeOracle = await usdt
           .connect(owner)
           .balanceOf(await exchangeOracle.getAddress());
 
@@ -711,22 +718,22 @@ describe('Escrow', function () {
           .connect(reputationOracle)
           .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000');
 
-        const finalBalanceAccount1 = await token
+        const finalBalanceAccount1 = await usdt
           .connect(owner)
           .balanceOf(account1);
-        const finalBalanceAccount2 = await token
+        const finalBalanceAccount2 = await usdt
           .connect(owner)
           .balanceOf(account2);
-        const finalBalanceAccount3 = await token
+        const finalBalanceAccount3 = await usdt
           .connect(owner)
           .balanceOf(account3);
-        const finalBalanceRecordingOracle = await token
+        const finalBalanceRecordingOracle = await usdt
           .connect(owner)
           .balanceOf(await recordingOracle.getAddress());
-        const finalBalanceReputationOracle = await token
+        const finalBalanceReputationOracle = await usdt
           .connect(owner)
           .balanceOf(await reputationOracle.getAddress());
-        const finalBalanceExchangeOracle = await token
+        const finalBalanceExchangeOracle = await usdt
           .connect(owner)
           .balanceOf(await exchangeOracle.getAddress());
 
@@ -754,7 +761,7 @@ describe('Escrow', function () {
           (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
         ).to.equal('6');
 
-        expect((await escrow.balance()).toString()).to.equal('40');
+        expect(await escrow.balance()).to.equal('40');
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {
@@ -846,6 +853,37 @@ describe('Escrow', function () {
         await escrow.connect(trustedHandlers[0]).complete();
         expect(await escrow.status()).to.equal(Status.Complete);
       });
+    });
+  });
+
+  describe('can fund hmtoken to escrow, and then withdraw', () => {
+    before(async () => {
+      await deployEscrow();
+      await fundEscrow();
+      await setupEscrow();
+    });
+
+    it('Should fund escrow with HMTokens', async () => {
+      const amount = 10;
+      await hmtoken.connect(owner).transfer(escrow.getAddress(), amount);
+
+      const result = await hmtoken
+        .connect(owner)
+        .balanceOf(escrow.getAddress());
+      expect(result.toString()).to.equal(amount.toString());
+
+      expect(await escrow.balance()).to.equal('100');
+    });
+
+    it('Should withdraw HMTokens from escrow', async () => {
+      await escrow.connect(owner)['cancel(address)'](hmtoken.getAddress());
+
+      const result = await hmtoken
+        .connect(owner)
+        .balanceOf(escrow.getAddress());
+      expect(result.toString()).to.equal('0');
+
+      expect(await escrow.balance()).to.equal('100');
     });
   });
 });

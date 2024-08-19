@@ -31,6 +31,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
     );
     event Cancelled();
     event Completed();
+    event Fund(uint256 _amount);
+    event BulkPayout(uint256 _amount);
 
     EscrowStatuses public override status;
 
@@ -59,6 +61,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     mapping(address => bool) public areTrustedHandlers;
 
+    uint256 public balance;
+
     constructor(
         address _token,
         address _launcher,
@@ -82,6 +86,16 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     function getBalance() public view returns (uint256) {
         (bool success, bytes memory returnData) = token.staticcall(
+            abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
+        );
+        if (success) {
+            return abi.decode(returnData, (uint256));
+        }
+        return 0;
+    }
+
+    function getBalance(address _token) public view returns (uint256) {
+        (bool success, bytes memory returnData) = _token.staticcall(
             abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
         );
         if (success) {
@@ -150,7 +164,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         manifestUrl = _url;
         manifestHash = _hash;
         status = EscrowStatuses.Pending;
+
+        balance = getBalance();
+        require(balance > 0, 'Escrow balance is zero');
+
         emit Pending(manifestUrl, manifestHash);
+        emit Fund(balance);
     }
 
     function abort() external override trusted notComplete notPaid {
@@ -172,7 +191,15 @@ contract Escrow is IEscrow, ReentrancyGuard {
     {
         _safeTransfer(canceler, getBalance());
         status = EscrowStatuses.Cancelled;
+        balance = 0;
         emit Cancelled();
+        return true;
+    }
+
+    function cancel(
+        address _token
+    ) public override trusted notComplete notPaid nonReentrant returns (bool) {
+        _safeTransfer(_token, canceler, getBalance(_token));
         return true;
     }
 
@@ -244,7 +271,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             'Invalid status'
         );
 
-        uint256 balance = getBalance();
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
             require(_amounts[i] > 0, 'Amount should be greater than zero');
@@ -252,6 +278,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
         require(aggregatedBulkAmount <= balance, 'Not enough balance');
+
+        balance -= aggregatedBulkAmount;
 
         require(bytes(_url).length != 0, "URL can't be empty");
         require(bytes(_hash).length != 0, "Hash can't be empty");
@@ -282,8 +310,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _safeTransfer(exchangeOracle, exchangeOracleFee);
         }
 
-        balance = getBalance();
-
         bool isPartial;
         if (balance == 0) {
             status = EscrowStatuses.Paid;
@@ -294,6 +320,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
 
         emit BulkTransfer(_txId, _recipients, finalAmounts, isPartial);
+        emit BulkPayout(aggregatedBulkAmount);
     }
 
     function finalizePayouts(
@@ -351,6 +378,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         SafeERC20.safeTransfer(IERC20(token), to, value);
     }
 
+    function _safeTransfer(address _token, address to, uint256 value) internal {
+        SafeERC20.safeTransfer(IERC20(_token), to, value);
+    }
+
     modifier trusted() {
         require(areTrustedHandlers[msg.sender], 'Address calling not trusted');
         _;
@@ -373,7 +404,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     modifier notBroke() {
-        require(getBalance() != 0, 'Token contract out of funds');
+        require(balance != 0, 'Token contract out of funds');
         _;
     }
 
