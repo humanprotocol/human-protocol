@@ -28,7 +28,7 @@ def prepare_outgoing_webhook_body(
 
 
 def prepare_signed_message(
-    escrow_address: str,
+    escrow_address: str,  # noqa: ARG001
     chain_id: Networks,
     message: str | None = None,
     body: dict | None = None,

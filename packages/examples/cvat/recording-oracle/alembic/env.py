@@ -16,7 +16,7 @@ config.set_main_option("sqlalchemy.url", Config.postgres_config.connection_url()
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from src.db import Base
+from src.db import Base  # noqa: E402
 
 # add your model's MetaData object here
 # for 'autogenerate' support

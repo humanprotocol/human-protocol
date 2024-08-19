@@ -167,7 +167,7 @@ class _TaskValidator:
             )
         )
 
-    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
+    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:  # noqa: ARG002
         manifest = self._require_field(self.manifest)
 
         return dm.Dataset.import_from(
@@ -353,7 +353,11 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
         return weights
 
     def _gt_key_to_sample_id(
-        self, gt_key: str, *, job_cvat_id: int, job_gt_dataset: dm.Dataset
+        self,
+        gt_key: str,
+        *,
+        job_cvat_id: int,  # noqa: ARG002
+        job_gt_dataset: dm.Dataset,  # noqa: ARG002
     ) -> str | None:
         return gt_key
 
@@ -524,7 +528,7 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
         return boxes_to_points_mapping, roi_filenames, rois, gt_dataset, points_dataset
 
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
+    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:  # noqa: ARG002
         job_gt_dataset = dm.Dataset(categories=self._gt_dataset.categories(), media_type=dm.Image)
 
         for job_sample in job_dataset:
@@ -734,7 +738,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
 
         return updated_dataset
 
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
+    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:  # noqa: ARG002
         job_label_cat: dm.LabelCategories = job_dataset.categories()[dm.AnnotationType.label]
         assert len(job_label_cat) == 2
         job_skeleton_label_id, job_skeleton_label = next(
@@ -835,8 +839,8 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
     def _get_gt_dataset_label_id(self, job_gt_dataset: dm.Dataset) -> _LabelId:
         label_cat: dm.LabelCategories = job_gt_dataset.categories()[dm.AnnotationType.label]
         assert len(label_cat) == 2
-        job_skeleton_label = next(l for l in label_cat if not l.parent)
-        job_point_label = next(l for l in label_cat if l.parent)
+        job_skeleton_label = next(label for label in label_cat if not label.parent)
+        job_point_label = next(label for label in label_cat if label.parent)
 
         return self._LabelId(
             *next(
@@ -849,7 +853,11 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
         )
 
     def _gt_key_to_sample_id(
-        self, gt_key: str, *, job_cvat_id: int, job_gt_dataset: dm.Dataset
+        self,
+        gt_key: str,
+        *,
+        job_cvat_id: int,  # noqa: ARG002
+        job_gt_dataset: dm.Dataset,
     ) -> str | None:
         parsed_gt_key = self._parse_gt_key(gt_key)
         job_label_id = self._get_gt_dataset_label_id(job_gt_dataset)
@@ -907,7 +915,7 @@ def _compute_gt_stats_update(
     return updated_gt_stats
 
 
-def process_intermediate_results(
+def process_intermediate_results(  # noqa: PLR0912
     session: Session,
     *,
     escrow_address: str,

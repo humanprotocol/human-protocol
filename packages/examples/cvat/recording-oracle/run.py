@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         app="src:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # noqa: S104
         port=int(Config.port),
         workers=Config.workers_amount,
         reload=is_dev,

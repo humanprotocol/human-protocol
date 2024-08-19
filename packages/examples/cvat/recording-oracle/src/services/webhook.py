@@ -59,7 +59,7 @@ class OracleWebhookQueue:
 
         if self.direction == OracleWebhookDirectionTags.incoming and not signature:
             raise ValueError("Webhook signature must be specified for incoming events")
-        elif self.direction == OracleWebhookDirectionTags.outgoing and signature:
+        if self.direction == OracleWebhookDirectionTags.outgoing and signature:
             raise ValueError("Webhook signature must not be specified for outgoing events")
 
         if signature:

@@ -94,7 +94,7 @@ class _TaskValidator:
         self._download_results_meta()
         self._download_annotations()
 
-    ValidationResult = Union[ValidationSuccess, ValidationFailure]
+    ValidationResult = ValidationSuccess | ValidationFailure
 
     def _process_annotation_results(self) -> ValidationResult:
         assert self.annotation_meta is not None
@@ -159,7 +159,7 @@ class _TaskValidator:
             escrow.store_results(
                 chain_id,
                 escrow_address,
-                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),
+                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),  # noqa: PTH120
                 compute_resulting_annotations_hash(validation_result.resulting_annotations),
             )
 

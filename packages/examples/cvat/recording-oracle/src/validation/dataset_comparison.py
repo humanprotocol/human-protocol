@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
 import datumaro as dm
@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 class SimilarityFunction(metaclass=ABCMeta):
     "A function to compute similarity between 2 annotations"
 
+    @abstractmethod
     def __call__(self, gt_ann: dm.Annotation, ds_ann: dm.Annotation) -> float: ...
 
 
@@ -354,12 +355,12 @@ class SkeletonDatasetComparator(DatasetComparator):
                 return 0
 
             if visibility_a is None:
-                visibility_a = np.full(len(p1), True)
+                visibility_a = np.full(len(p1), fill_value=True)
             else:
                 visibility_a = np.asarray(visibility_a, dtype=bool)
 
             if visibility_b is None:
-                visibility_b = np.full(len(p2), True)
+                visibility_b = np.full(len(p2), fill_value=True)
             else:
                 visibility_b = np.asarray(visibility_b, dtype=bool)
 

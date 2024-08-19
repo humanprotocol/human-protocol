@@ -4,10 +4,7 @@ from pydantic import BaseModel
 
 from src.core.types import ExchangeOracleEventTypes, OracleWebhookTypes, RecordingOracleEventTypes
 
-EventTypeTag = Union[
-    ExchangeOracleEventTypes,
-    RecordingOracleEventTypes,
-]
+EventTypeTag = ExchangeOracleEventTypes | RecordingOracleEventTypes
 
 
 class OracleEvent(BaseModel):

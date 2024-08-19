@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from collections.abc import Iterable
 from copy import deepcopy
 
@@ -38,7 +39,7 @@ def shift_ann(
             ]
         )
     else:
-        raise AssertionError(f"Unsupported annotation type '{ann.type}'")
+        raise TypeError(f"Unsupported annotation type '{ann.type}'")
 
     return shifted_ann
 
@@ -65,7 +66,7 @@ class ProjectLabels(dm.ItemTransform):
     """
 
     @classmethod
-    def build_cmdline_parser(cls, **kwargs):
+    def build_cmdline_parser(cls, **kwargs) -> ArgumentParser:
         parser = super().build_cmdline_parser(**kwargs)
         parser.add_argument(
             "-l",
@@ -76,7 +77,7 @@ class ProjectLabels(dm.ItemTransform):
         )
         return parser
 
-    def __init__(
+    def __init__(  # noqa: PLR0912
         self,
         extractor: dm.IExtractor,
         dst_labels: Iterable[str | tuple[str, str]] | dm.LabelCategories,

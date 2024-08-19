@@ -71,6 +71,29 @@ ignore = [
     "G001",    # Forbid str.format for logging
     "PTH123",  # Checks for uses of `os.path.splitext`
     "D",       # Docstrings
+    "N806",    # Variable in function should be lowercase
+    "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
+    "SLF001",  # Private member accessed
+    "F811",    # Redefinition of unused
+    "RUF005",  # Consider iterable unpacking instead of concatenation
+    "A002",    # Argument is shadowing a Python builtin
+    "N818",    # Exception name should be named with an Error suffix
+    "TRY002",  # Create your own exception
+    "ANN003",  # Missing type annotation for `**kwargs`
+    "ANN204",  # Missing return type annotation for special method
+    "ERA001",  # Found commented-out code
+    "N801",    # Class name should use CapWords convention
+    "PLR0915", # Too many statements
+    "F401",    # Imported but unused
+    "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
+    "ANN002",  # Missing type annotation for `*args`
+    "TRY300",  # Consider moving this statement to an `else` block
+    "C901",    # Function is too complex
+    "PLW2901", # Variable overwritten by assignment target
+    "PTH118",  # Prefer pathlib instead of os.path
+    "PTH119",  # `os.path.basename()` should be replaced by `Path.name`
+    "PTH122",  # `os.path.splitext()` should be replaced by `Path.suffix`, `Path.stem`, and `Path.parent`
+    "PTH207",  # Replace `glob` with `Path.glob` or `Path.rglob`
 ]
 
 

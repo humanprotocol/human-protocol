@@ -56,7 +56,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def _test_none_webhook_argument(self, argument_name, error_type):
         kwargs = dict(**self.webhook_kwargs)
         kwargs[argument_name] = None
-        with pytest.raises(error_type):
+        with pytest.raises(error_type):  # noqa: PT012
             inbox.create_webhook(**kwargs)
             self.session.commit()
 
