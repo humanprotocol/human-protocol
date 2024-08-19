@@ -20,7 +20,6 @@ import { env } from '@/shared/env';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
-import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
@@ -90,8 +89,6 @@ export function SignUpWorkerPage() {
             <Password
               label={t('worker.signUpForm.fields.password')}
               name="password"
-              passwordCheckHeader="Password must contain at least:"
-              passwordChecks={passwordChecks}
             />
             <Password
               label={t('worker.signUpForm.fields.confirmPassword')}
