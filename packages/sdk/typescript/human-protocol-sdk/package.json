@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@human-protocol/core": "*",
-    "aws-sdk": "^2.1528.0",
+    "aws-sdk": "^2.1677.0",
     "axios": "^1.4.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
