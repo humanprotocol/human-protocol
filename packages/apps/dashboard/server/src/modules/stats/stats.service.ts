@@ -18,7 +18,7 @@ import {
 import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
-import { MainnetsId } from './utils/constants';
+import { MainnetsId } from '../../common/utils/constants';
 import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';

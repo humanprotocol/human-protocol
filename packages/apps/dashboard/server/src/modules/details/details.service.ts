@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-
+import { MainnetsId } from '../../common/utils/constants';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ChainId,
@@ -116,5 +116,60 @@ export class DetailsService {
     });
 
     return result;
+  }
+  public async getBestLeadersByRole(chainId: ChainId): Promise<LeaderDto[]> {
+    const chainIds =
+      chainId === ChainId.ALL ? Object.values(MainnetsId) : [chainId];
+
+    const leadersByRole: { [role: string]: LeaderDto } = {};
+
+    for (const id of chainIds) {
+      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
+
+      for (const leaderData of leadersData) {
+        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
+          excludeExtraneousValues: true,
+        });
+        leaderDto.chainId = id;
+
+        const role = leaderDto.role;
+
+        if (Object.values(Role).includes(role)) {
+          if (
+            !leadersByRole[role] ||
+            BigInt(leaderDto.amountStaked) >
+              BigInt(leadersByRole[role].amountStaked)
+          ) {
+            leadersByRole[role] = leaderDto;
+          }
+        }
+      }
+    }
+
+    return Object.values(leadersByRole);
+  }
+
+  public async getAllLeaders(chainId: ChainId): Promise<LeaderDto[]> {
+    const chainIds =
+      chainId === ChainId.ALL ? Object.values(MainnetsId) : [chainId];
+
+    const allLeaders: LeaderDto[] = [];
+
+    for (const id of chainIds) {
+      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
+
+      for (const leaderData of leadersData) {
+        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
+          excludeExtraneousValues: true,
+        });
+        leaderDto.chainId = id;
+
+        if (leaderDto.role) {
+          allLeaders.push(leaderDto);
+        }
+      }
+    }
+
+    return allLeaders;
   }
 }
