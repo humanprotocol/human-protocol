@@ -85,11 +85,9 @@ export class StatsService implements OnModuleInit {
     }
 
     for (const monthData of results) {
-      for (const [date, value] of Object.entries<HcaptchaDailyStats>(
-        monthData,
-      )) {
+      for (const [date, value] of Object.entries<any>(monthData)) {
         const multiplier = date <= '2022-11-30' ? 18 : 9;
-        value.served *= multiplier;
+        if (value.served) delete value.served;
         value.solved *= multiplier;
         if (date !== 'total') {
           await this.cacheManager.set(`${HCAPTCHA_PREFIX}${date}`, value);
@@ -131,7 +129,7 @@ export class StatsService implements OnModuleInit {
     const multiplier = today <= '2022-11-30' ? 18 : 9;
     const stats = data[today];
     if (stats) {
-      stats.served *= multiplier;
+      if (stats.served) delete stats.served;
       stats.solved *= multiplier;
       await this.cacheManager.set(`${HCAPTCHA_PREFIX}${today}`, stats);
     }
@@ -149,16 +147,15 @@ export class StatsService implements OnModuleInit {
         const dailyStats: HcaptchaDailyStats = await this.cacheManager.get(
           `${HCAPTCHA_PREFIX}${date}`,
         );
-        return dailyStats || { served: 0, solved: 0 };
+        return dailyStats || { solved: 0 };
       }),
     ).then((statsArray) =>
       statsArray.reduce(
         (acc, stats) => {
-          acc.served += stats.served;
           acc.solved += stats.solved;
           return acc;
         },
-        { served: 0, solved: 0 },
+        { solved: 0 },
       ),
     );
 
@@ -355,7 +352,6 @@ export class StatsService implements OnModuleInit {
 
     const aggregatedStats: HcaptchaStats = stats.reduce((acc, stat) => {
       if (stat) {
-        acc.served += stat.served;
         acc.solved += stat.solved;
       }
       return acc;

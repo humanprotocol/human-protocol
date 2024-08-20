@@ -4,10 +4,6 @@ import { ApiProperty } from '@nestjs/swagger';
 export class HcaptchaStats {
   @ApiProperty({ example: 1000 })
   @IsNumber()
-  public served: number;
-
-  @ApiProperty({ example: 1000 })
-  @IsNumber()
   public solved: number;
 }
 
