@@ -62,18 +62,19 @@ const ToggleCharts = ({
 								<Typography fontWeight={600}>{elem.title}</Typography>
 								<Typography variant="h4" component="p">
 									{elem.amount ? elem.amount.toLocaleString('en-US') : ''}
-									{elem.name === 'transferAmount' && elem.isAreaChart && (
-										<Typography
-											variant="h4"
-											component="span"
-											sx={{
-												marginLeft: 1,
-												color: colorPalette.fog.main,
-											}}
-										>
-											HMT
-										</Typography>
-									)}
+									{elem.name === 'totalTransactionAmount' &&
+										elem.isAreaChart && (
+											<Typography
+												variant="h4"
+												component="span"
+												sx={{
+													marginLeft: 1,
+													color: colorPalette.fog.main,
+												}}
+											>
+												HMT
+											</Typography>
+										)}
 								</Typography>
 							</>
 						}

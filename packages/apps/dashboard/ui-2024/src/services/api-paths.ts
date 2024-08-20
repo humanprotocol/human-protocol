@@ -8,6 +8,12 @@ export const apiPaths = {
 	statsHmtPrice: {
 		path: '/stats/hmt-price',
 	},
+	hmtDailyStats: {
+		path: '/stats/hmt/daily',
+	},
+	hcaptchaStatsDaily: {
+		path: '/stats/hcaptcha/daily',
+	},
 	addressDetails: {
 		path: '/details',
 	},

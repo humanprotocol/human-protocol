@@ -1,20 +1,22 @@
 import { TooltipProps } from 'recharts';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { colorPalette } from '@assets/styles/color-palette';
 import { formatDate } from '@helpers/formatDate';
+import { GraphPageChartDataConfigObject } from '@components/Charts/AreaChart';
 
 const renderTitle = (title: string) => {
-	const currentTitle: Record<string, string> = {
-		transferAmount: 'Transfer Amount',
-		transactionsCount: 'Transactions Count',
-		uniqueReceivers: 'Unique Receivers',
-		uniqueSenders: 'Unique Senders',
+	const currentTitle: GraphPageChartDataConfigObject<string> = {
+		totalTransactionAmount: 'Transfer Amount',
+		totalTransactionCount: 'Transactions Count',
+		solved: 'Number of Tasks',
+		dailyUniqueReceivers: 'Unique Receivers',
+		dailyUniqueSenders: 'Unique Senders',
 	};
-	return currentTitle[title];
+	return currentTitle[title as keyof GraphPageChartDataConfigObject<string>];
 };
 
 const CustomChartTooltip = ({
@@ -26,13 +28,13 @@ const CustomChartTooltip = ({
 		return (
 			<Card
 				sx={{
-					border: `2px solid ${colorPalette.fog.light}`,
+					border: `1px solid ${colorPalette.fog.light}`,
+					borderRadius: '10px',
 				}}
 			>
 				<Box
 					sx={{
-						paddingX: 2,
-						paddingY: 1,
+						padding: '6px 10px',
 					}}
 				>
 					<Typography
@@ -40,24 +42,41 @@ const CustomChartTooltip = ({
 						variant="subtitle1"
 						fontWeight={500}
 					>
-						{formatDate(label, 'MMMM d, YYYY')}
+						{formatDate(label, 'MMMM DD, YYYY')}
 					</Typography>
 					{payload?.map((elem) => (
-						<Stack key={elem.name} direction="row" alignItems="center" gap={2}>
-							<Stack direction="row" alignItems="center" gap={1}>
-								<FiberManualRecordIcon
-									sx={{
-										color: elem.stroke,
-									}}
-								/>
-								<Typography fontWeight={500} variant="subtitle1">
-									{renderTitle(elem.name ?? '')}
-								</Typography>
+						<Box
+							key={elem.name}
+							sx={{
+								display: 'grid',
+								gap: 1,
+								gridTemplateColumns: 'repeat(2, 1fr)',
+							}}
+						>
+							<Stack direction="row" alignItems="center" gap={1} width="100%">
+								<Grid container alignItems="center" gap={1}>
+									<FiberManualRecordIcon
+										sx={{
+											color: elem.stroke,
+											fontSize: '12px',
+										}}
+									/>
+									<Typography fontWeight={500} variant="subtitle1">
+										{renderTitle(elem.name ?? '')}
+									</Typography>
+								</Grid>
 							</Stack>
-							<Typography variant="subtitle2">
-								{elem.value} {elem.name === 'transferAmount' ? 'HMT' : ''}
-							</Typography>
-						</Stack>
+							<Grid container width="100%">
+								<Typography
+									whiteSpace="nowrap"
+									textAlign="start"
+									variant="subtitle2"
+								>
+									{elem.value}{' '}
+									{elem.name === 'totalTransactionAmount' ? 'HMT' : ''}
+								</Typography>
+							</Grid>
+						</Box>
 					))}
 				</Box>
 			</Card>

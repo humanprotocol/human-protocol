@@ -1,4 +1,4 @@
-import { LineChart, AreaChart } from '@components/Charts';
+import { AreaChart, LineChart } from '@components/Charts';
 import Tabs from '@mui/material/Tabs';
 import TabPanel from '@mui/lab/TabPanel';
 import Tab from '@mui/material/Tab';
@@ -12,10 +12,10 @@ type graphType = 'bucketed' | 'cumulative';
 
 const Graph = () => {
 	const [graphType, setGraphType] = useState<graphType>('bucketed');
-
 	const handleGraphTypeChange = (_: unknown, newValue: graphType) => {
 		setGraphType(newValue);
 	};
+
 	return (
 		<PageWrapper displaySearchBar className="standard-background">
 			<Breadcrumbs title="Charts" />

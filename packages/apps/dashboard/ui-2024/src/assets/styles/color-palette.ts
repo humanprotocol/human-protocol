@@ -43,6 +43,7 @@ export const colorPalette = {
 	ocean: {
 		main: '#304FFE',
 		light: '#8C9EFF',
+		dark: '#03A9F4',
 	},
 	orange: {
 		main: '#ED6C02',

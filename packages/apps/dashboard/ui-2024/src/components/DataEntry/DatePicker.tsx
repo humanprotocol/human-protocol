@@ -80,9 +80,10 @@ const CustomDaterPicker = ({ props }: CustomDatePickerProps) => {
 interface DatePickerPropsMui {
 	value: Dayjs;
 	onChange: (value: Dayjs | null) => void;
+	customProps?: Omit<CustomDatePickerProps, 'value' | 'onChange'>['props'];
 }
 
-const DatePicker = ({ value, onChange }: DatePickerPropsMui) => {
+const DatePicker = ({ value, onChange, customProps }: DatePickerPropsMui) => {
 	return (
 		<LocalizationProvider dateAdapter={AdapterDayjs}>
 			<CustomDaterPicker
@@ -90,6 +91,7 @@ const DatePicker = ({ value, onChange }: DatePickerPropsMui) => {
 					label: value.format('DD MMM, YYYY'),
 					value: value,
 					onChange: onChange,
+					...customProps,
 				}}
 			/>
 		</LocalizationProvider>
