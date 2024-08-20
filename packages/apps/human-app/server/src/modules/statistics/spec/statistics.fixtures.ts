@@ -37,13 +37,13 @@ export const userStatsResponseFixture: UserStatisticsResponse = {
 };
 
 export const oracleStatsResponseFixture: OracleStatisticsResponse = {
-  escrows_processed: ESCROWS_PROCESSED,
-  escrows_active: ESCROWS_ACTIVE,
-  escrows_cancelled: ESCROWS_CANCELLED,
-  workers_amount: WORKERS_AMOUNT,
+  workers_total: WORKERS_AMOUNT,
   assignments_completed: ASSIGNMENTS_COMPLETED_ORACLE,
   assignments_rejected: ASSIGNMENTS_REJECTED_ORACLE,
   assignments_expired: ASSIGNMENTS_EXPIRED_ORACLE,
+  escrows_processed: ESCROWS_PROCESSED,
+  escrows_active: ESCROWS_ACTIVE,
+  escrows_cancelled: ESCROWS_CANCELLED,
 };
 
 export const generalUserStatsCommandFixture: UserStatisticsCommand = {
@@ -72,3 +72,4 @@ export const oracleStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
   url: `${EXCHANGE_ORACLE_URL}/stats`,
 };
+
