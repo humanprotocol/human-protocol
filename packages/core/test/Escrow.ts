@@ -105,7 +105,7 @@ describe('Escrow', function () {
     });
 
     it('Should set the right escrow balance', async () => {
-      const result = await escrow.connect(launcher)['getBalance()']();
+      const result = await escrow.connect(launcher).getBalance();
       expect(result.toString()).to.equal('0');
     });
 
@@ -123,7 +123,7 @@ describe('Escrow', function () {
       const amount = 1000;
       await token.connect(owner).transfer(escrow.getAddress(), amount);
 
-      const result = await escrow.connect(launcher)['getBalance()']();
+      const result = await escrow.connect(launcher).getBalance();
       expect(result).to.equal(amount.toString());
     });
   });
@@ -163,9 +163,6 @@ describe('Escrow', function () {
       });
 
       it('Should transfer tokens to owner if contract funded when abort is called', async function () {
-        const amount = 100;
-        await token.connect(owner).transfer(escrow.getAddress(), amount);
-
         await escrow.connect(owner).abort();
 
         expect(
@@ -174,9 +171,6 @@ describe('Escrow', function () {
       });
 
       it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
-        const amount = 100;
-        await token.connect(owner).transfer(escrow.getAddress(), amount);
-
         await escrow.connect(trustedHandlers[0]).abort();
 
         expect(
@@ -530,19 +524,19 @@ describe('Escrow', function () {
 
       it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
-          escrow.connect(externalAddress)['cancel()']()
+          escrow.connect(externalAddress).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if address calling is reputation oracle', async function () {
         await expect(
-          escrow.connect(reputationOracle)['cancel()']()
+          escrow.connect(reputationOracle).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if address calling is recording oracle', async function () {
         await expect(
-          escrow.connect(recordingOracle)['cancel()']()
+          escrow.connect(recordingOracle).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
     });
@@ -555,7 +549,7 @@ describe('Escrow', function () {
       });
 
       it('Should succeed when the contract was canceled', async () => {
-        await escrow.connect(owner)['cancel()']();
+        await escrow.connect(owner).cancel();
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
@@ -565,7 +559,7 @@ describe('Escrow', function () {
       });
 
       it('Should succeed when the contract was canceled by trusted handler', async () => {
-        await escrow.connect(trustedHandlers[0])['cancel()']();
+        await escrow.connect(trustedHandlers[0]).cancel();
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
@@ -754,7 +748,7 @@ describe('Escrow', function () {
           (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
         ).to.equal('6');
 
-        expect((await escrow.balance()).toString()).to.equal('40');
+        expect((await escrow.remainingFunds()).toString()).to.equal('40');
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {

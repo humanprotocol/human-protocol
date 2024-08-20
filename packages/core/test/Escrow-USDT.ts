@@ -112,7 +112,7 @@ describe('Escrow with USDT', function () {
     });
 
     it('Should set the right escrow balance', async () => {
-      const result = await escrow.connect(launcher)['getBalance()']();
+      const result = await escrow.connect(launcher).getBalance();
       expect(result.toString()).to.equal('0');
     });
 
@@ -130,7 +130,7 @@ describe('Escrow with USDT', function () {
       const amount = 1000;
       await usdt.connect(owner).transfer(escrow.getAddress(), amount);
 
-      const result = await escrow.connect(launcher)['getBalance()']();
+      const result = await escrow.connect(launcher).getBalance();
       expect(result).to.equal(amount.toString());
     });
   });
@@ -170,9 +170,6 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should transfer tokens to owner if contract funded when abort is called', async function () {
-        const amount = 100;
-        await usdt.connect(owner).transfer(escrow.getAddress(), amount);
-
         await escrow.connect(owner).abort();
 
         expect(
@@ -181,9 +178,6 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
-        const amount = 100;
-        await usdt.connect(owner).transfer(escrow.getAddress(), amount);
-
         await escrow.connect(trustedHandlers[0]).abort();
 
         expect(
@@ -537,19 +531,19 @@ describe('Escrow with USDT', function () {
 
       it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
-          escrow.connect(externalAddress)['cancel()']()
+          escrow.connect(externalAddress).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if address calling is reputation oracle', async function () {
         await expect(
-          escrow.connect(reputationOracle)['cancel()']()
+          escrow.connect(reputationOracle).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if address calling is recording oracle', async function () {
         await expect(
-          escrow.connect(recordingOracle)['cancel()']()
+          escrow.connect(recordingOracle).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
     });
@@ -562,7 +556,7 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should succeed when the contract was canceled', async () => {
-        await escrow.connect(owner)['cancel()']();
+        await escrow.connect(owner).cancel();
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
@@ -572,7 +566,7 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should succeed when the contract was canceled by trusted handler', async () => {
-        await escrow.connect(trustedHandlers[0])['cancel()']();
+        await escrow.connect(trustedHandlers[0]).cancel();
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
@@ -761,7 +755,7 @@ describe('Escrow with USDT', function () {
           (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
         ).to.equal('6');
 
-        expect(await escrow.balance()).to.equal('40');
+        expect(await escrow.remainingFunds()).to.equal('40');
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {
@@ -872,18 +866,35 @@ describe('Escrow with USDT', function () {
         .balanceOf(escrow.getAddress());
       expect(result.toString()).to.equal(amount.toString());
 
-      expect(await escrow.balance()).to.equal('100');
+      expect(await escrow.remainingFunds()).to.equal('100');
     });
 
     it('Should withdraw HMTokens from escrow', async () => {
-      await escrow.connect(owner)['cancel(address)'](hmtoken.getAddress());
+      await escrow.connect(owner).withdraw(hmtoken.getAddress());
 
       const result = await hmtoken
         .connect(owner)
         .balanceOf(escrow.getAddress());
       expect(result.toString()).to.equal('0');
 
-      expect(await escrow.balance()).to.equal('100');
+      expect(await escrow.remainingFunds()).to.equal('100');
+    });
+
+    it('Should not allow USDT withdrawal from escrow', async () => {
+      await expect(
+        escrow.connect(owner).withdraw(usdt.getAddress())
+      ).to.be.revertedWith('No funds to withdraw');
+    });
+
+    it('Should allow additional USDT withdrawal from escrow', async () => {
+      await usdt.connect(owner).transfer(escrow.getAddress(), 100);
+
+      await escrow.connect(owner).withdraw(usdt.getAddress());
+
+      const result = await usdt.connect(owner).balanceOf(escrow.getAddress());
+      expect(result.toString()).to.equal('100');
+
+      expect(await escrow.remainingFunds()).to.equal('100');
     });
   });
 });

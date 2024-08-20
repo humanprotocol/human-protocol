@@ -31,7 +31,7 @@ interface IEscrow {
 
     function cancel() external returns (bool);
 
-    function cancel(address _token) external returns (bool);
+    function withdraw(address _token) external returns (bool);
 
     function complete() external;
 
