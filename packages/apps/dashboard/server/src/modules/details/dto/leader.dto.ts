@@ -17,6 +17,7 @@ export class LeaderDto {
 
   @ApiProperty({ example: '0xb794f5ea0ba39494ce839613fffba74279579268' })
   @IsString()
+  @Expose()
   public address: string;
 
   @ApiProperty({ example: '0.07007358932392' })
@@ -36,11 +37,11 @@ export class LeaderDto {
   @Expose()
   public amountStaked: string;
 
-  @ApiProperty({ example: 1 })
-  @Transform(({ value }) => Number(value))
-  @IsNumber()
+  @ApiProperty({ example: 'High' })
+  @Transform(({ value }) => value.toString())
+  @IsString()
   @Expose()
-  public reputation: number;
+  public reputation: string;
 
   @ApiProperty({ example: 3 })
   @Transform(({ value }) => Number(value))
