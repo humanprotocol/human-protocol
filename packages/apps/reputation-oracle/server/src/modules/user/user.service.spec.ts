@@ -616,7 +616,7 @@ describe('UserService', () => {
         MOCK_ADDRESS,
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
-        MOCK_ADDRESS,
+        MOCK_ADDRESS.toLowerCase(),
         OperatorStatus.ACTIVE,
       );
     });
@@ -692,7 +692,7 @@ describe('UserService', () => {
       jest.resetAllMocks();
     });
 
-    it('should disable an user', async () => {
+    it('should disable a user', async () => {
       const kvstoreClientMock = {
         set: jest.fn(),
       };
@@ -722,7 +722,7 @@ describe('UserService', () => {
         MOCK_ADDRESS,
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
-        MOCK_ADDRESS,
+        MOCK_ADDRESS.toLowerCase(),
         OperatorStatus.INACTIVE,
       );
     });
