@@ -35,7 +35,6 @@ export class DetailsService {
         excludeExtraneousValues: true,
       });
 
-      leaderDto.address = address;
       leaderDto.chainId = chainId;
       // TODO: Balance fetching
       leaderDto.balance = '0.01';

@@ -17,6 +17,7 @@ export class LeaderDto {
 
   @ApiProperty({ example: '0xb794f5ea0ba39494ce839613fffba74279579268' })
   @IsString()
+  @Expose()
   public address: string;
 
   @ApiProperty({ example: '0.07007358932392' })
