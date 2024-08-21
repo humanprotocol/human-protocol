@@ -301,7 +301,7 @@ Sets the status of an escrow to completed.
   escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
   ```
 
-#### create_and_setup_escrow(token_address, trusted_handlers, job_requester_id, escrow_config)
+#### create_and_setup_escrow(token_address, trusted_handlers, job_requester_id, escrow_config, amount)
 
 Creates and sets up an escrow.
 
@@ -354,11 +354,13 @@ Creates and sets up an escrow.
       "htttp://localhost/manifest.json",
       "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
   )
+  amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
   escrow_address = escrow_client.create_and_setup_escrow(
       token_address,
       trusted_handlers,
       job_requester_id,
-      escrow_config
+      escrow_config,
+      amount
   )
   ```
 
@@ -882,6 +884,52 @@ Stores the results url.
   )
   ```
 
+#### withdraw(escrow_address, token_address, tx_options=None)
+
+Withdraws additional tokens in the escrow to the canceler.
+
+* **Parameters:**
+  * **escrow_address** (`str`) – Address of the escrow to withdraw
+  * **token_address** (`str`) – Address of the token to withdraw
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
+* **Return type:**
+  [`EscrowWithdraw`](#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw)
+* **Returns:**
+  EscrowWithdraw:
+  An instance of the EscrowWithdraw class containing details of the withdrawal transaction,
+  including the transaction hash and the token address and amount withdrawn.
+* **Raises:**
+  * [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+  * [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If the transfer event associated with the withdrawal
+    is not found in the transaction logs
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  def get_w3_with_priv_key(priv_key: str):
+      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      gas_payer = w3.eth.account.from_key(priv_key)
+      w3.eth.default_account = gas_payer.address
+      w3.middleware_onion.add(
+          construct_sign_and_send_raw_middleware(gas_payer),
+          "construct_sign_and_send_raw_middleware",
+      )
+      return (w3, gas_payer)
+
+  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+  escrow_client = EscrowClient(w3)
+
+  escrow_cancel_data = escrow_client.withdraw(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+      "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+  )
+  ```
+
 ### *exception* human_protocol_sdk.escrow.escrow_client.EscrowClientError
 
 Bases: `Exception`
@@ -905,3 +953,16 @@ Initializes a Escrow instance.
   * **reputation_oracle_fee** (`Decimal`) – Fee percentage of the Reputation Oracle
   * **manifest_url** (`str`) – Manifest file url
   * **hash** (`str`) – Manifest file hash
+
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, amount_withdrawn)
+
+Bases: `object`
+
+#### \_\_init_\_(tx_hash, token_address, amount_withdrawn)
+
+Represents the result of an escrow cancellation transaction.
+
+* **Parameters:**
+  * **tx_hash** (`str`) – The hash of the transaction associated with the escrow withdrawal.
+  * **token_address** (`str`) – The address of the token used for the withdrawal.
+  * **amount_withdrawn** (`any`) – The amount withdrawn from the escrow.

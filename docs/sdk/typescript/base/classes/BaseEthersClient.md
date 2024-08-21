@@ -38,9 +38,9 @@ The network information required to connect to the contracts
 
 [`BaseEthersClient`](BaseEthersClient.md)
 
-#### Defined in
+#### Source
 
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/7a0fcc6c74080a714102154b00044ff4fd204ba0/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
@@ -48,9 +48,9 @@ The network information required to connect to the contracts
 
 > **networkData**: `NetworkData`
 
-#### Defined in
+#### Source
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/7a0fcc6c74080a714102154b00044ff4fd204ba0/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -58,6 +58,6 @@ The network information required to connect to the contracts
 
 > `protected` **runner**: `ContractRunner`
 
-#### Defined in
+#### Source
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/40ca4fc6fa284e6f349d05d988dc6f3efddb4747/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/7a0fcc6c74080a714102154b00044ff4fd204ba0/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
