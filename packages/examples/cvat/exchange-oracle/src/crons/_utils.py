@@ -4,11 +4,16 @@ from collections.abc import Callable
 from contextlib import contextmanager, nullcontext
 from functools import wraps
 
+import httpx
 from sqlalchemy.orm import Session
 
+import src.services.webhook as oracle_db_service
 import src.services.webhook as webhook_service
+from src.core.types import OracleWebhookTypes
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.models.webhook import Webhook
+from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_message
 
 
 def cron_job(logger_name: str) -> Callable[[Callable[..., None]], Callable[[], None]]:
@@ -84,3 +89,43 @@ def handle_webhook(logger: logging.Logger, session: Session, webhook: Webhook):
     else:
         webhook_service.outbox.handle_webhook_success(session, webhook.id)
         logger.debug("Webhook handled successfully")
+
+
+def send_webhook(url: str, webhook: Webhook, *, with_timestamp: bool = True) -> None:
+    body = prepare_outgoing_webhook_body(
+        webhook.escrow_address,
+        webhook.chain_id,
+        webhook.event_type,
+        webhook.event_data,
+        timestamp=webhook.created_at if with_timestamp else None,
+    )
+    _, signature = prepare_signed_message(
+        webhook.escrow_address,
+        webhook.chain_id,
+        body=body,
+    )
+    headers = {"human-signature": signature}
+    with httpx.Client() as client:
+        response = client.post(url, headers=headers, json=body)
+        response.raise_for_status()
+
+
+def process_outgoing_webhooks(
+    logger: logging.Logger,
+    session: Session,
+    webhook_type: OracleWebhookTypes,
+    url_getter: Callable[[int, str], str],
+    chunk_size: int,
+    *,
+    with_timestamp: bool = True,
+):
+    webhooks = oracle_db_service.outbox.get_pending_webhooks(
+        session,
+        webhook_type,
+        limit=chunk_size,
+        for_update=ForUpdateParams(skip_locked=True),
+    )
+    for webhook in webhooks:
+        with handle_webhook(logger, session, webhook):
+            webhook_url = url_getter(webhook.chain_id, webhook.escrow_address)
+            send_webhook(webhook_url, webhook, with_timestamp=with_timestamp)

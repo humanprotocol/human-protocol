@@ -1,6 +1,5 @@
 import logging
 
-import httpx
 from human_protocol_sdk.constants import Status as EscrowStatus
 from sqlalchemy.orm import Session
 
@@ -12,12 +11,11 @@ from src.chain.kvstore import get_job_launcher_url
 from src.core.config import Config, CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
 from src.core.types import JobLauncherEventTypes, OracleWebhookTypes, ProjectStatuses
-from src.crons._utils import cron_job, handle_webhook
+from src.crons._utils import cron_job, handle_webhook, send_webhook
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
-from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_message
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
@@ -135,11 +133,6 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
 
 @cron_job(module_logger_name)
 def process_outgoing_job_launcher_webhooks(logger: logging.Logger, session: Session):
-    """
-    Process webhooks that needs to be sent to recording oracle:
-      * Retrieves `webhook_url` from KVStore
-      * Sends webhook to recording oracle
-    """
     webhooks = oracle_db_service.outbox.get_pending_webhooks(
         session,
         OracleWebhookTypes.job_launcher,
@@ -148,22 +141,5 @@ def process_outgoing_job_launcher_webhooks(logger: logging.Logger, session: Sess
     )
     for webhook in webhooks:
         with handle_webhook(logger, session, webhook):
-            body = prepare_outgoing_webhook_body(
-                webhook.escrow_address,
-                webhook.chain_id,
-                webhook.event_type,
-                webhook.event_data,
-                timestamp=None,  # TODO: launcher doesn't support it yet
-            )
-
-            _, signature = prepare_signed_message(
-                webhook.escrow_address,
-                webhook.chain_id,
-                body=body,
-            )
-
-            headers = {"human-signature": signature}
             webhook_url = get_job_launcher_url(webhook.chain_id, webhook.escrow_address)
-            with httpx.Client() as client:
-                response = client.post(webhook_url, headers=headers, json=body)
-                response.raise_for_status()
+            send_webhook(webhook_url, webhook, with_timestamp=False)

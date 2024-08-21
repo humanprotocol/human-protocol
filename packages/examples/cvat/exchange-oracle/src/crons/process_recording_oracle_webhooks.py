@@ -1,6 +1,5 @@
 import logging
 
-import httpx
 from datumaro.util import take_by
 from sqlalchemy.orm import Session
 
@@ -16,11 +15,10 @@ from src.core.types import (
     RecordingOracleEventTypes,
     TaskStatuses,
 )
-from src.crons._utils import cron_job, handle_webhook
+from src.crons._utils import cron_job, handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
-from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_message
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
@@ -136,36 +134,10 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
 @cron_job(module_logger_name)
 def process_outgoing_recording_oracle_webhooks(logger: logging.Logger, session: Session):
-    """
-    Process webhooks that needs to be sent to recording oracle:
-      * Retrieves `webhook_url` from KVStore
-      * Sends webhook to recording oracle
-    """
-    webhooks = oracle_db_service.outbox.get_pending_webhooks(
+    process_outgoing_webhooks(
+        logger,
         session,
         OracleWebhookTypes.recording_oracle,
-        limit=CronConfig.process_recording_oracle_webhooks_chunk_size,
-        for_update=ForUpdateParams(skip_locked=True),
+        get_recording_oracle_url,
+        CronConfig.process_recording_oracle_webhooks_chunk_size,
     )
-    for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
-            body = prepare_outgoing_webhook_body(
-                webhook.escrow_address,
-                webhook.chain_id,
-                webhook.event_type,
-                webhook.event_data,
-                timestamp=webhook.created_at,
-            )
-
-            _, signature = prepare_signed_message(
-                webhook.escrow_address,
-                webhook.chain_id,
-                body=body,
-            )
-
-            headers = {"human-signature": signature}
-            webhook_url = get_recording_oracle_url(webhook.chain_id, webhook.escrow_address)
-            with httpx.Client() as client:
-                response = client.post(webhook_url, headers=headers, json=body)
-                response.raise_for_status()
-            logger.debug("Webhook handled successfully")
