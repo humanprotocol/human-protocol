@@ -72,6 +72,11 @@ class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     task_rejected = "task_rejected"
 
 
+class ReputationOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
+    # TODO: rename to ReputationOracleEventType
+    escrow_finished = "escrow_finished"
+
+
 class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
     pending = "pending"
     completed = "completed"

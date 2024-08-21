@@ -6,6 +6,7 @@ from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
 from src.core.config import Config
+from src.core.types import OracleWebhookTypes
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -56,12 +57,16 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     return json.loads(manifest_content)
 
 
-def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
-    return get_escrow(chain_id, escrow_address).launcher
-
-
-def get_recording_oracle_address(chain_id: int, escrow_address: str) -> str:
-    if address := Config.localhost.recording_oracle_address:
-        return address
-
-    return get_escrow(chain_id, escrow_address).recording_oracle
+def get_available_webhook_types(
+    chain_id: int, escrow_address: str
+) -> dict[str, OracleWebhookTypes]:
+    escrow = get_escrow(chain_id, escrow_address)
+    return {
+        escrow.launcher.lower(): OracleWebhookTypes.job_launcher,
+        (
+            Config.localhost.recording_oracle_address or escrow.recording_oracle
+        ).lower(): OracleWebhookTypes.recording_oracle,
+        (
+            Config.localhost.reputation_oracle_url or escrow.reputation_oracle
+        ).lower(): OracleWebhookTypes.reputation_oracle,
+    }

@@ -7,6 +7,7 @@ from src.core.types import (
     JobLauncherEventTypes,
     OracleWebhookTypes,
     RecordingOracleEventTypes,
+    ReputationOracleEventTypes,
 )
 
 EventTypeTag = ExchangeOracleEventTypes | JobLauncherEventTypes | RecordingOracleEventTypes
@@ -44,6 +45,10 @@ class ExchangeOracleEvent_TaskFinished(OracleEvent):
     pass  # escrow is enough for now
 
 
+class ReputationOracleEvent_EscrowFinished(OracleEvent):  # (will refactor later)
+    pass
+
+
 _event_type_map = {
     JobLauncherEventTypes.escrow_created: JobLauncherEvent_EscrowCreated,
     JobLauncherEventTypes.escrow_canceled: JobLauncherEvent_EscrowCanceled,
@@ -51,6 +56,7 @@ _event_type_map = {
     RecordingOracleEventTypes.task_rejected: RecordingOracleEvent_TaskRejected,
     ExchangeOracleEventTypes.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
     ExchangeOracleEventTypes.task_finished: ExchangeOracleEvent_TaskFinished,
+    ReputationOracleEventTypes.escrow_finished: ReputationOracleEvent_EscrowFinished,
 }
 
 
