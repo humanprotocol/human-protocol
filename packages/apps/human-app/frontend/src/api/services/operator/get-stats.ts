@@ -9,6 +9,9 @@ const operatorStatsSuccessResponseSchema = z.object({
   assignments_completed: z.number(),
   assignments_expired: z.number(),
   assignments_rejected: z.number(),
+  escrows_processed: z.number(),
+  escrows_active: z.number(),
+  escrows_cancelled: z.number(),
 });
 
 export type OperatorStatsSuccessResponse = z.infer<
@@ -20,6 +23,9 @@ const failedResponse = {
   assignments_completed: '-',
   assignments_expired: '-',
   assignments_rejected: '-',
+  escrows_processed: '-',
+  escrows_active: '-',
+  escrows_cancelled: '-',
 };
 
 export function useGetOperatorStats() {

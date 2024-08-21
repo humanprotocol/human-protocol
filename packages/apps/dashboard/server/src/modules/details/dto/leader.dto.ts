@@ -66,5 +66,5 @@ export class LeaderDto {
   @ApiProperty({ example: 1 })
   @IsNumber()
   @Expose()
-  public amountJobsLaunched: number;
+  public amountJobsProcessed: number;
 }
