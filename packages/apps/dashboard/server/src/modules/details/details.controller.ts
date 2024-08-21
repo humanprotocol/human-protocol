@@ -72,7 +72,7 @@ export class DetailsController {
   }
 
   @Get('/:address')
-  @ApiQuery({ name: 'chainId', enum: MainnetsId, required: false })
+  @ApiQuery({ name: 'chainId', enum: MainnetsId })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get address details',
@@ -85,7 +85,7 @@ export class DetailsController {
   })
   public async details(
     @Param('address', AddressValidationPipe) address: string,
-    @Query('chainId') chainId?: ChainId,
+    @Query('chainId') chainId: ChainId,
   ): Promise<DetailsResponseDto> {
     const details: WalletDto | EscrowDto | LeaderDto =
       await this.detailsService.getDetails(chainId, address);
