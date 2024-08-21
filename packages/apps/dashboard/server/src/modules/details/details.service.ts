@@ -116,9 +116,12 @@ export class DetailsService {
 
     return result;
   }
-  public async getBestLeadersByRole(chainId: ChainId): Promise<LeaderDto[]> {
-    const chainIds =
-      chainId === ChainId.ALL ? Object.values(MainnetsId) : [chainId];
+  public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
+    const chainIds = !chainId
+      ? (Object.values(MainnetsId).filter(
+          (value) => typeof value === 'number',
+        ) as number[])
+      : [chainId];
 
     const leadersByRole: { [role: string]: LeaderDto } = {};
 
@@ -148,9 +151,12 @@ export class DetailsService {
     return Object.values(leadersByRole);
   }
 
-  public async getAllLeaders(chainId: ChainId): Promise<LeaderDto[]> {
-    const chainIds =
-      chainId === ChainId.ALL ? Object.values(MainnetsId) : [chainId];
+  public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
+    const chainIds = !chainId
+      ? (Object.values(MainnetsId).filter(
+          (value) => typeof value === 'number',
+        ) as number[])
+      : [chainId];
 
     const allLeaders: LeaderDto[] = [];
 
