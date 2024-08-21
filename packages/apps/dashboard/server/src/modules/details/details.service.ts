@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { MainnetsId } from '../../common/utils/constants';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ChainId,
   EscrowUtils,
@@ -8,16 +8,23 @@ import {
   OperatorUtils,
   IEscrowsFilter,
   Role,
+  NETWORKS,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { ethers } from 'ethers';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class DetailsService {
   private readonly logger = new Logger(DetailsService.name);
+
+  constructor(private readonly networkConfig: NetworkConfigService) {}
+
   public async getDetails(
     chainId: ChainId,
     address: string,
@@ -37,7 +44,7 @@ export class DetailsService {
 
       leaderDto.chainId = chainId;
       // TODO: Balance fetching
-      leaderDto.balance = '0.01';
+      leaderDto.balance = await this.getHmtBalance(chainId, address);
 
       return leaderDto;
     }
@@ -45,10 +52,23 @@ export class DetailsService {
       chainId,
       address,
       // TODO: Balance fetching
-      balance: '0.01',
+      balance: await this.getHmtBalance(chainId, address),
     });
 
     return walletDto;
+  }
+
+  private async getHmtBalance(chainId: ChainId, hmtAddress: string) {
+    const network = this.networkConfig.networks.find(
+      (network) => network.chainId === chainId,
+    );
+    if (!network) throw new BadRequestException('Invalid chainId provided');
+    const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+    const hmtContract = HMToken__factory.connect(
+      NETWORKS[chainId].hmtAddress,
+      provider,
+    );
+    return ethers.formatEther(await hmtContract.balanceOf(hmtAddress));
   }
 
   public async getTransactions(
