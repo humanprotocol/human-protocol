@@ -1,9 +1,11 @@
-export const MainnetsId = {
-  MAINNET: 1,
-  BSC_MAINNET: 56,
-  POLYGON: 137,
-  MOONBEAM: 1284,
-  AVALANCHE: 43114,
-  CELO: 42220,
-  XLAYER: 196,
-};
+import { ChainId } from '@human-protocol/sdk';
+
+export enum MainnetsId {
+  MAINNET = ChainId.MAINNET,
+  BSC_MAINNET = ChainId.BSC_MAINNET,
+  POLYGON = ChainId.POLYGON,
+  MOONBEAM = ChainId.MOONBEAM,
+  AVALANCHE = ChainId.AVALANCHE,
+  CELO = ChainId.CELO,
+  XLAYER = ChainId.XLAYER,
+}
