@@ -209,7 +209,7 @@ class TestOperatorUtils(unittest.TestCase):
         with patch(
             "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
         ) as mock_function:
-            mock_function.side_effect = [
+            mock_function.return_value = [
                 {
                     "data": {
                         "leaders": None,
@@ -418,7 +418,7 @@ class TestOperatorUtils(unittest.TestCase):
         with patch(
             "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
         ) as mock_function:
-            mock_function.side_effect = [{"data": {"leader": None}}]
+            mock_function.return_value = [{"data": {"leader": None}}]
 
             leader = OperatorUtils.get_leader(ChainId.POLYGON, staker_address)
 
@@ -579,7 +579,7 @@ class TestOperatorUtils(unittest.TestCase):
         with patch(
             "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
         ) as mock_function:
-            mock_function.side_effect = [{"data": {"reputationNetwork": None}}]
+            mock_function.return_value = [{"data": {"reputationNetwork": None}}]
 
             operators = OperatorUtils.get_reputation_network_operators(
                 ChainId.POLYGON, reputation_address

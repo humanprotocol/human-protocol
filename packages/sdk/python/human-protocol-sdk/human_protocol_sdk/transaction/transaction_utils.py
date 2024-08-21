@@ -101,10 +101,15 @@ class TransactionUtils:
             query=get_transaction_query(),
             params={"hash": hash.lower()},
         )
-        transaction = transaction_data["data"]["transaction"]
-
-        if not transaction:
+        if (
+            not transaction_data
+            or "data" not in transaction_data
+            or "transaction" not in transaction_data["data"]
+            or not transaction_data["data"]["transaction"]
+        ):
             return None
+
+        transaction = transaction_data["data"]["transaction"]
 
         return TransactionData(
             chain_id=chain_id,
@@ -170,7 +175,12 @@ class TransactionUtils:
                 "orderDirection": filter.order_direction.value,
             },
         )
-        if not data or "data" not in data or "transactions" not in data["data"]:
+        if (
+            not data
+            or "data" not in data
+            or "transactions" not in data["data"]
+            or not data["data"]["transactions"]
+        ):
             return []
 
         transactions_raw = data["data"]["transactions"]

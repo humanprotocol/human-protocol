@@ -11,6 +11,7 @@ import {
 } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
+import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
 
 describe('CronJobService', () => {
   let service: CronJobService;
@@ -41,6 +42,8 @@ describe('CronJobService', () => {
     configServiceMock = {
       email: 'human-app@hmt.ai',
       password: 'Test1234*',
+      cacheTtlOracleDiscovery: 600,
+      chainIdsEnabled: ['137', '1'],
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -101,7 +104,7 @@ describe('CronJobService', () => {
         password: configServiceMock.password,
       });
       expect(updateJobsListCacheSpy).toHaveBeenCalledWith(
-        oracles[0].address,
+        oracles[0],
         'Bearer token',
       );
     });
@@ -109,7 +112,12 @@ describe('CronJobService', () => {
 
   describe('updateJobsListCache', () => {
     it('should fetch all jobs and update the cache', async () => {
-      const oracleAddress = '0x123';
+      const oracle: OracleDiscoveryResponse = {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '137',
+        retriesCount: 0,
+      };
       const token = 'Bearer token';
       const initialResponse = {
         results: [{ escrow_address: '0xabc', chain_id: '1' }],
@@ -119,15 +127,66 @@ describe('CronJobService', () => {
         initialResponse,
       );
 
-      await service.updateJobsListCache(oracleAddress, token);
+      await service.updateJobsListCache(oracle, token);
 
       expect(exchangeOracleGatewayMock.fetchJobs).toHaveBeenCalledWith(
         expect.any(JobsDiscoveryParamsCommand),
       );
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
-        `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
+        `${JOB_DISCOVERY_CACHE_KEY}:${oracle.address}`,
         initialResponse.results,
       );
+    });
+
+    it('should handle errors and call handleJobListError', async () => {
+      const oracle: OracleDiscoveryResponse = {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '137',
+        retriesCount: 0,
+      };
+      const token = 'Bearer token';
+      const error = new Error('Test error');
+      (exchangeOracleGatewayMock.fetchJobs as jest.Mock).mockRejectedValue(
+        error,
+      );
+
+      const handleJobListErrorSpy = jest.spyOn(
+        service as any,
+        'handleJobListError',
+      );
+      const loggerErrorSpy = jest.spyOn(service['logger'], 'error');
+
+      await service.updateJobsListCache(oracle, token);
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(error);
+      expect(handleJobListErrorSpy).toHaveBeenCalledWith(oracle);
+    });
+
+    it('should reset retries count after successful job fetch', async () => {
+      const oracle: OracleDiscoveryResponse = {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '137',
+        retriesCount: 3,
+      };
+      const token = 'Bearer token';
+      const initialResponse = {
+        results: [{ escrow_address: '0xabc', chain_id: '1' }],
+        total_pages: 1,
+      };
+      (exchangeOracleGatewayMock.fetchJobs as jest.Mock).mockResolvedValue(
+        initialResponse,
+      );
+
+      const resetRetriesCountSpy = jest.spyOn(
+        service as any,
+        'resetRetriesCount',
+      );
+
+      await service.updateJobsListCache(oracle, token);
+
+      expect(resetRetriesCountSpy).toHaveBeenCalledWith(oracle);
     });
   });
 
@@ -196,6 +255,78 @@ describe('CronJobService', () => {
           status: JobStatus.COMPLETED,
         },
       ]);
+    });
+  });
+
+  describe('resetRetriesCount', () => {
+    it('should reset retries count and activate oracle', async () => {
+      const oracleData: OracleDiscoveryResponse = {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '137',
+        retriesCount: 5,
+      };
+
+      cacheManagerMock.get.mockResolvedValue([oracleData]);
+
+      await (service as any).resetRetriesCount(oracleData);
+
+      expect(oracleData.retriesCount).toBe(0);
+      expect(cacheManagerMock.set).toHaveBeenCalledWith(
+        oracleData.chainId,
+        [oracleData],
+        configServiceMock.cacheTtlOracleDiscovery,
+      );
+    });
+  });
+
+  describe('handleJobListError', () => {
+    it('should increment retries count and deactivate oracle after 5 failures', async () => {
+      const oracleData: OracleDiscoveryResponse = {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '137',
+        retriesCount: 4,
+      };
+
+      cacheManagerMock.get.mockResolvedValue([oracleData]);
+
+      await (service as any).handleJobListError(oracleData);
+
+      expect(oracleData.retriesCount).toBe(5);
+      expect(cacheManagerMock.set).toHaveBeenCalledWith(
+        oracleData.chainId,
+        [oracleData],
+        configServiceMock.cacheTtlOracleDiscovery,
+      );
+    });
+
+    it('should increment retries count but keep oracle active if less than 5 failures', async () => {
+      const oracleData: OracleDiscoveryResponse = {
+        address: 'mockAddress1',
+        role: 'validator',
+        chainId: '137',
+        retriesCount: 2,
+      };
+
+      cacheManagerMock.get.mockResolvedValue([oracleData]);
+
+      await (service as any).handleJobListError(oracleData);
+
+      expect(oracleData.retriesCount).toBe(3);
+      expect(cacheManagerMock.set).toHaveBeenCalledWith(
+        oracleData.chainId,
+        [oracleData],
+        configServiceMock.cacheTtlOracleDiscovery,
+      );
+    });
+
+    it('should do nothing if oracle is not found in cache', async () => {
+      cacheManagerMock.get.mockResolvedValue([]);
+
+      await (service as any).handleJobListError('unknownAddress');
+
+      expect(cacheManagerMock.set).not.toHaveBeenCalled();
     });
   });
 });

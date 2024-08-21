@@ -14,22 +14,22 @@ export class StatsService {
 
   async getOracleStats(): Promise<OracleStatsDto> {
     return new OracleStatsDto({
-      activeEscrows: await this.jobRepository.countJobsByStatus(
-        JobStatus.ACTIVE,
-      ),
-      completedEscrows: await this.jobRepository.countJobsByStatus(
-        JobStatus.COMPLETED,
-      ),
-      canceledEscrows: await this.jobRepository.countJobsByStatus(
-        JobStatus.CANCELED,
-      ),
       workersTotal: await this.assignmentRepository.countTotalWorkers(),
       assignmentsCompleted:
         await this.assignmentRepository.countCompletedAssignments(),
-      assignmentsExpired:
-        await this.assignmentRepository.countExpiredAssignments(),
       assignmentsRejected:
         await this.assignmentRepository.countRejectedAssignments(),
+      assignmentsExpired:
+        await this.assignmentRepository.countExpiredAssignments(),
+      escrowsProcessed: await this.jobRepository.countJobsByStatus(
+        JobStatus.COMPLETED,
+      ),
+      escrowsActive: await this.jobRepository.countJobsByStatus(
+        JobStatus.ACTIVE,
+      ),
+      escrowsCancelled: await this.jobRepository.countJobsByStatus(
+        JobStatus.CANCELED,
+      ),
     });
   }
   async getAssignmentStats(workerAddress: string): Promise<AssignmentStatsDto> {
