@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 import boto3
@@ -8,6 +9,8 @@ from botocore.handlers import disable_signing
 from src.services.cloud.client import StorageClient
 
 DEFAULT_S3_HOST = "s3.amazonaws.com"
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
 
 
 class S3Client(StorageClient):
@@ -28,7 +31,8 @@ class S3Client(StorageClient):
             "s3", **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {})
         )
         self.resource = s3
-        self.client = s3.meta.client
+
+        self.client: S3Client = s3.meta.client
 
         if not access_key and not secret_key:
             self.client.meta.events.register("choose-signer.s3.*", disable_signing)
@@ -40,6 +44,11 @@ class S3Client(StorageClient):
     def remove_file(self, key: str, *, bucket: str | None = None):
         bucket = unquote(bucket) if bucket else self._bucket
         self.client.delete_object(Bucket=bucket, Key=unquote(key))
+
+    def remove_files(self, keys: list[str], *, bucket: str | None = None):
+        bucket = unquote(bucket) if bucket else self._bucket
+        objects = {"Objects": [{"Key": unquote(key)} for key in keys]}
+        self.client.delete_objects(Bucket=bucket, Delete=objects)
 
     def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket
