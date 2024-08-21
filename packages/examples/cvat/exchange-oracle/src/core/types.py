@@ -23,11 +23,13 @@ class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
     validation = "validation"
     canceled = "canceled"
     recorded = "recorded"
+    finished = "finished"
 
 
 class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
     annotation = "annotation"
     completed = "completed"
+    finished = "finished"
 
 
 class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -35,6 +37,7 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     in_progress = "in progress"
     rejected = "rejected"
     completed = "completed"
+    finished = "finished"
 
 
 class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -55,11 +58,13 @@ class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
     exchange_oracle = "exchange_oracle"
     job_launcher = "job_launcher"
     recording_oracle = "recording_oracle"
+    reputation_oracle = "reputation_oracle"
 
 
 class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     task_creation_failed = "task_creation_failed"
     task_finished = "task_finished"
+    escrow_cleaned = "escrow_cleaned"
 
 
 class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):

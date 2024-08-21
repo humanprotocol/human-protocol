@@ -10,6 +10,7 @@ from src.crons.process_recording_oracle_webhooks import (
     process_incoming_recording_oracle_webhooks,
     process_outgoing_recording_oracle_webhooks,
 )
+from src.crons.process_reputation_oracle_webhooks import process_incoming_reputation_oracle_webhooks
 from src.crons.state_trackers import (
     track_assignments,
     track_completed_escrows,
@@ -20,7 +21,7 @@ from src.crons.state_trackers import (
 )
 
 
-def setup_cron_jobs(app: FastAPI):
+def setup_cron_jobs(app: FastAPI) -> None:
     @app.on_event("startup")
     def cron_record():
         scheduler = BackgroundScheduler()
@@ -73,5 +74,10 @@ def setup_cron_jobs(app: FastAPI):
             track_assignments,
             "interval",
             seconds=Config.cron_config.track_assignments_int,
+        )
+        scheduler.add_job(
+            process_incoming_reputation_oracle_webhooks,
+            "interval",
+            seconds=Config.cron_config.track_finished_projects_int,
         )
         scheduler.start()
