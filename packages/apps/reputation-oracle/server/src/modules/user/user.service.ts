@@ -272,7 +272,7 @@ export class UserService {
       );
     }
 
-    await kvstore.set(user.evmAddress, OperatorStatus.ACTIVE);
+    await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.ACTIVE);
   }
 
   public async disableOperator(
@@ -313,7 +313,7 @@ export class UserService {
       );
     }
 
-    await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
+    await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.INACTIVE);
   }
 
   public async prepareSignatureBody(
