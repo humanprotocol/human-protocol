@@ -625,6 +625,9 @@ class TestEscrowClient(unittest.TestCase):
     def test_create_and_setup_escrow(self):
         mock_function_create = MagicMock()
         self.escrow.factory_contract.functions.createEscrow = mock_function_create
+        token_address = "0x1234567890123456789012345678901234567890"
+        amount = 100
+        self.escrow.get_token_address = MagicMock(return_value=token_address)
         mock_contract = MagicMock()
         mock_contract.functions.setup = MagicMock()
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
@@ -652,7 +655,11 @@ class TestEscrowClient(unittest.TestCase):
                     args=SimpleNamespace(escrow=escrow_address)
                 )
                 response = self.escrow.create_and_setup_escrow(
-                    token_address, trusted_handlers, job_requester_id, escrow_config
+                    token_address,
+                    trusted_handlers,
+                    job_requester_id,
+                    escrow_config,
+                    amount,
                 )
 
                 self.assertEqual(response, escrow_address)
@@ -661,6 +668,8 @@ class TestEscrowClient(unittest.TestCase):
                 )
                 mock_function_next.assert_called_once()
 
+                self.escrow.get_token_address.assert_called_once_with(escrow_address)
+
                 mock_function.assert_any_call(
                     self.w3,
                     "Create Escrow",
@@ -668,7 +677,10 @@ class TestEscrowClient(unittest.TestCase):
                     EscrowClientError,
                     None,
                 )
-                mock_function.assert_called_with(
+                mock_function.assert_any_call(
+                    self.w3, "Fund", ANY, EscrowClientError, None
+                )
+                mock_function.assert_any_call(
                     self.w3,
                     "Setup",
                     mock_contract.functions.setup.return_value,
@@ -691,10 +703,11 @@ class TestEscrowClient(unittest.TestCase):
             "https://www.example.com/result",
             "test",
         )
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_and_setup_escrow(
-                token_address, trusted_handlers, job_requester_id, escrow_config
+                token_address, trusted_handlers, job_requester_id, escrow_config, amount
             )
         self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
         self.escrow.setup.assert_not_called()
@@ -714,10 +727,11 @@ class TestEscrowClient(unittest.TestCase):
             "https://www.example.com/result",
             "test",
         )
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_and_setup_escrow(
-                token_address, trusted_handlers, job_requester_id, escrow_config
+                token_address, trusted_handlers, job_requester_id, escrow_config, amount
             )
         self.assertEqual(
             f"Invalid handler address: {trusted_handlers[0]}", str(cm.exception)
@@ -746,10 +760,11 @@ class TestEscrowClient(unittest.TestCase):
             "https://www.example.com/result",
             "test",
         )
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.create_and_setup_escrow(
-                token_address, trusted_handlers, job_requester_id, escrow_config
+                token_address, trusted_handlers, job_requester_id, escrow_config, amount
             )
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
         escrowClient.setup.assert_not_called()
@@ -1885,16 +1900,219 @@ class TestEscrowClient(unittest.TestCase):
                 tx_options,
             )
 
+    def test_withdraw(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.withdraw = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0xa76507AbFE3B67cB25F16DbC75a883D4190B7e46"
+        token_address = "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            tx_hash = bytes.fromhex(
+                "01682095d5abb0270d11a31139b9a1f410b363c84add467004e728ec831bd529"
+            )
+            amount_withdrawn = 187744067287473730
+            mock_function.return_value = {
+                "transactionHash": tx_hash,
+                "logs": [
+                    {
+                        "logIndex": 0,
+                        "transactionIndex": 0,
+                        "transactionHash": tx_hash,
+                        "blockHash": bytes.fromhex(
+                            "92abf9325a3959a911a2581e9ea36cba3060d8b293b50e5738ff959feb95258a"
+                        ),
+                        "blockNumber": 5,
+                        "address": token_address,
+                        "data": bytes.fromhex(
+                            "000000000000000000000000000000000000000000000000029b003c075b5e42"
+                        ),
+                        "topics": [
+                            bytes.fromhex(
+                                "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+                            ),
+                            bytes.fromhex(
+                                "000000000000000000000000a76507abfe3b67cb25f16dbc75a883d4190b7e46"
+                            ),
+                            bytes.fromhex(
+                                "0000000000000000000000005607acf0828e238099aa1784541a5abd7f975c76"
+                            ),
+                        ],
+                    }
+                ],
+            }
+
+            escrow_withdraw_data = self.escrow.withdraw(escrow_address, token_address)
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.withdraw.assert_called_once_with(token_address)
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Withdraw",
+                mock_contract.functions.withdraw.return_value,
+                EscrowClientError,
+                None,
+            )
+
+            self.assertEqual(escrow_withdraw_data.txHash, tx_hash.hex())
+            self.assertEqual(escrow_withdraw_data.tokenAddress, token_address)
+            self.assertEqual(escrow_withdraw_data.amountWithdrawn, amount_withdrawn)
+
+    def test_withdraw_invalid_escrow_address(self):
+        escrow_address = "invalid_address"
+        token_address = "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.withdraw(escrow_address, token_address)
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
+
+    def test_withdraw_invalid_token_address(self):
+        escrow_address = "0xa76507AbFE3B67cB25F16DbC75a883D4190B7e46"
+        token_address = "invalid_address"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.withdraw(escrow_address, token_address)
+        self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
+
+    def test_withdraw_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        escrowClient = EscrowClient(w3)
+
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            escrowClient.withdraw(escrow_address, token_address)
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
+
+    def test_withdraw_invalid_status(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.withdraw = MagicMock()
+        mock_contract.functions.withdraw.return_value.transact.side_effect = Exception(
+            "Error: VM Exception while processing transaction: reverted with reason string 'Escrow in Paid status state'."
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.withdraw(escrow_address, token_address)
+        self.assertEqual(
+            "Withdraw transaction failed: Escrow in Paid status state",
+            str(cm.exception),
+        )
+
+    def test_withdraw_invalid_caller(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.withdraw = MagicMock()
+        mock_contract.functions.withdraw.return_value.transact.side_effect = Exception(
+            "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.withdraw(escrow_address, token_address)
+        self.assertEqual(
+            "Withdraw transaction failed: Address calling not trusted",
+            str(cm.exception),
+        )
+
+    def test_withdraw_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.withdraw(escrow_address, token_address)
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
+    def test_withdraw_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.withdraw = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        tx_options = {"gas": 50000}
+
+        escrow_address = "0xa76507AbFE3B67cB25F16DbC75a883D4190B7e46"
+        token_address = "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            tx_hash = bytes.fromhex(
+                "01682095d5abb0270d11a31139b9a1f410b363c84add467004e728ec831bd529"
+            )
+            amount_withdrawn = 187744067287473730
+            mock_function.return_value = {
+                "transactionHash": tx_hash,
+                "logs": [
+                    {
+                        "logIndex": 0,
+                        "transactionIndex": 0,
+                        "transactionHash": tx_hash,
+                        "blockHash": bytes.fromhex(
+                            "92abf9325a3959a911a2581e9ea36cba3060d8b293b50e5738ff959feb95258a"
+                        ),
+                        "blockNumber": 5,
+                        "address": token_address,
+                        "data": bytes.fromhex(
+                            "000000000000000000000000000000000000000000000000029b003c075b5e42"
+                        ),
+                        "topics": [
+                            bytes.fromhex(
+                                "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+                            ),
+                            bytes.fromhex(
+                                "000000000000000000000000a76507abfe3b67cb25f16dbc75a883d4190b7e46"
+                            ),
+                            bytes.fromhex(
+                                "0000000000000000000000005607acf0828e238099aa1784541a5abd7f975c76"
+                            ),
+                        ],
+                    }
+                ],
+            }
+
+            escrow_withdraw_data = self.escrow.withdraw(
+                escrow_address, token_address, tx_options
+            )
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.withdraw.assert_called_once_with(token_address)
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Withdraw",
+                mock_contract.functions.withdraw.return_value,
+                EscrowClientError,
+                tx_options,
+            )
+
+            self.assertEqual(escrow_withdraw_data.txHash, tx_hash.hex())
+            self.assertEqual(escrow_withdraw_data.tokenAddress, token_address)
+            self.assertEqual(escrow_withdraw_data.amountWithdrawn, amount_withdrawn)
+
     def test_get_balance(self):
         mock_contract = MagicMock()
         mock_contract.functions.getBalance = MagicMock()
+        mock_remaining_funds = MagicMock()
+        mock_remaining_funds.side_effect = Exception("Test")
+        mock_contract.functions.remainingFunds = mock_remaining_funds
         mock_contract.functions.getBalance.return_value.call.return_value = 100
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = self.escrow.get_balance(escrow_address)
 
-        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        self.escrow._get_escrow_contract.assert_called_with(escrow_address)
         mock_contract.functions.getBalance.assert_called_once_with()
         self.assertEqual(result, 100)
 
@@ -1911,6 +2129,9 @@ class TestEscrowClient(unittest.TestCase):
 
         escrowClient = EscrowClient(w3)
         mock_contract = MagicMock()
+        mock_remaining_funds = MagicMock()
+        mock_remaining_funds.side_effect = Exception("Test")
+        mock_contract.functions.remainingFunds = mock_remaining_funds
         mock_contract.functions.getBalance = MagicMock()
         mock_contract.functions.getBalance.return_value.call.return_value = 100
         escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
@@ -1918,7 +2139,7 @@ class TestEscrowClient(unittest.TestCase):
 
         result = escrowClient.get_balance(escrow_address)
 
-        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
+        escrowClient._get_escrow_contract.assert_called_with(escrow_address)
         mock_contract.functions.getBalance.assert_called_once_with()
         self.assertEqual(result, 100)
 
@@ -1929,6 +2150,19 @@ class TestEscrowClient(unittest.TestCase):
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )
+
+    def test_get_balance_new_escrow(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.remainingFunds = MagicMock()
+        mock_contract.functions.remainingFunds.return_value.call.return_value = 100
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_balance(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.remainingFunds.assert_called_once_with()
+        self.assertEqual(result, 100)
 
     def test_get_manifest_hash(self):
         mock_contract = MagicMock()

@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  ERC20,
+  ERC20__factory,
   Escrow,
   EscrowFactory,
   EscrowFactory__factory,
@@ -45,7 +47,12 @@ import {
   StatusEvent,
 } from './graphql';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
-import { EscrowCancel, EscrowStatus, NetworkData } from './types';
+import {
+  EscrowCancel,
+  EscrowStatus,
+  EscrowWithdraw,
+  NetworkData,
+} from './types';
 import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 
 /**
@@ -407,8 +414,15 @@ export class EscrowClient extends BaseEthersClient {
    *    manifestUrl: 'htttp://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    *
-   * const escrowAddress = await escrowClient.createAndSetupEscrow(tokenAddress, trustedHandlers, jobRequesterId, escrowConfig);
+   * const escrowAddress = await escrowClient.createAndSetupEscrow(
+   *    tokenAddress,
+   *    trustedHandlers,
+   *    jobRequesterId,
+   *    escrowConfig,
+   *    amount
+   * );
    * ```
    */
   @requiresSigner
@@ -416,7 +430,8 @@ export class EscrowClient extends BaseEthersClient {
     tokenAddress: string,
     trustedHandlers: string[],
     jobRequesterId: string,
-    escrowConfig: IEscrowConfig
+    escrowConfig: IEscrowConfig,
+    amount: bigint
   ): Promise<string> {
     try {
       const escrowAddress = await this.createEscrow(
@@ -424,6 +439,8 @@ export class EscrowClient extends BaseEthersClient {
         trustedHandlers,
         jobRequesterId
       );
+
+      await this.fund(escrowAddress, amount);
 
       await this.setup(escrowAddress, escrowConfig);
 
@@ -854,7 +871,7 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
-   * This function sets the status of an escrow to completed.
+   * This function adds an array of addresses to the trusted handlers list.
    *
    * @param {string} escrowAddress Address of the escrow.
    * @param {string[]} trustedHandlers Array of addresses of trusted handlers to add.
@@ -918,6 +935,99 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
+   * This function withdraws additional tokens in the escrow to the canceler.
+   *
+   * @param {string} escrowAddress Address of the escrow to withdraw.
+   * @param {string} tokenAddress Address of the token to withdraw.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns {EscrowWithdraw} Returns the escrow withdrawal data including transaction hash and withdrawal amount. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * > Only Job Launcher or a trusted handler can call it.
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const escrowClient = await EscrowClient.build(signer);
+   *
+   * await escrowClient.withdraw(
+   *  '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
+   *  '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4'
+   * );
+   * ```
+   */
+  @requiresSigner
+  async withdraw(
+    escrowAddress: string,
+    tokenAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<EscrowWithdraw> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!ethers.isAddress(tokenAddress)) {
+      throw ErrorInvalidTokenAddress;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      const transactionReceipt = await (
+        await escrowContract.withdraw(tokenAddress, txOptions)
+      ).wait();
+
+      let amountTransferred: bigint | undefined = undefined;
+
+      const tokenContract: ERC20 = ERC20__factory.connect(
+        tokenAddress,
+        this.runner
+      );
+      if (transactionReceipt)
+        for (const log of transactionReceipt.logs) {
+          if (log.address === tokenAddress) {
+            const parsedLog = tokenContract.interface.parseLog({
+              topics: log.topics as string[],
+              data: log.data,
+            });
+
+            const from = parsedLog?.args[0];
+            if (parsedLog?.name === 'Transfer' && from === escrowAddress) {
+              amountTransferred = parsedLog?.args[2];
+              break;
+            }
+          }
+        }
+
+      if (amountTransferred === undefined) {
+        throw ErrorTransferEventNotFoundInTransactionLogs;
+      }
+
+      const escrowWithdrawData: EscrowWithdraw = {
+        txHash: transactionReceipt?.hash || '',
+        tokenAddress,
+        amountWithdrawn: amountTransferred,
+      };
+
+      return escrowWithdrawData;
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
    * This function returns the balance for a specified escrow address.
    *
    * @param {string} escrowAddress Address of the escrow.
@@ -949,7 +1059,13 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      return escrowContract.getBalance();
+      try {
+        return await escrowContract.remainingFunds();
+      } catch {
+        // Use getBalance() method below if remainingFunds() is not available
+      }
+
+      return await escrowContract.getBalance();
     } catch (e) {
       return throwError(e);
     }
