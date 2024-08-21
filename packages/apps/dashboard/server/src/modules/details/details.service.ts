@@ -195,11 +195,12 @@ export class DetailsService {
       const response = await firstValueFrom(
         this.httpService.get(
           this.configService.reputationSource + '/reputation',
+          { params: { chain_id: ChainId.POLYGON, role: 'OPERATOR' } },
         ),
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching reputations:', error);
+      this.logger.error('Error fetching reputations:', error);
       return [];
     }
   }
@@ -211,8 +212,6 @@ export class DetailsService {
     const reputationMap = new Map(
       reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
     );
-    console.log(leaders);
-    console.log(reputationMap);
     leaders.forEach((leader) => {
       const reputation = reputationMap.get(leader.address.toLowerCase());
       if (reputation) {

@@ -9,6 +9,7 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { Transform } from 'class-transformer';
+import { Role } from '../../common/enums/user';
 
 export class ReputationCreateDto {
   @ApiProperty({ name: 'chain_id' })
@@ -43,6 +44,14 @@ export class ReputationGetAllQueryDto {
   @IsOptional()
   @Transform(({ value }) => Number(value))
   public chainId?: ChainId;
+
+  @ApiPropertyOptional({
+    enum: Role,
+    name: 'role',
+  })
+  @IsEnum(Role)
+  @IsOptional()
+  public role?: Role;
 }
 
 export class ReputationGetParamsDto {

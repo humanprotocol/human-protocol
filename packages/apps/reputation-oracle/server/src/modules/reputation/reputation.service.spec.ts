@@ -541,7 +541,7 @@ describe('ReputationService', () => {
       };
 
       jest
-        .spyOn(reputationRepository, 'findByChainId')
+        .spyOn(reputationRepository, 'findByChainIdAndTypes')
         .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
 
       const result = await reputationService.getAllReputations();
@@ -552,7 +552,7 @@ describe('ReputationService', () => {
         reputation: ReputationLevel.LOW,
       };
 
-      expect(reputationRepository.findByChainId).toHaveBeenCalled();
+      expect(reputationRepository.findByChainIdAndTypes).toHaveBeenCalled();
       expect(result).toEqual([resultReputation]);
     });
   });
