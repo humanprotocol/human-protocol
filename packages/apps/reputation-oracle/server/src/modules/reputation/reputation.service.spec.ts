@@ -134,6 +134,10 @@ describe('ReputationService', () => {
           .mockResolvedValueOnce(manifest) // Mock manifest
           .mockResolvedValueOnce([]); // Mock final results
 
+        jest
+          .spyOn(reputationService, 'increaseReputation')
+          .mockResolvedValueOnce();
+
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
         ).rejects.toThrow(
@@ -230,6 +234,10 @@ describe('ReputationService', () => {
           .spyOn(storageService, 'download')
           .mockResolvedValueOnce(manifest) // Mock manifest
           .mockResolvedValueOnce([]); // Mock final results
+
+        jest
+          .spyOn(reputationService, 'increaseReputation')
+          .mockResolvedValueOnce();
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
