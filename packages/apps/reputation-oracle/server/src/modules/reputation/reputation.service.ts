@@ -15,7 +15,6 @@ import {
   ErrorManifest,
   ErrorReputation,
   ErrorResults,
-  ErrorRoles,
 } from '../../common/constants/errors';
 import { ReputationDto } from './reputation.dto';
 import { StorageService } from '../storage/storage.service';
@@ -32,7 +31,6 @@ import { CvatManifestDto } from '../../common/dto/manifest';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
 import { ControlledError } from '../../common/errors/controlled';
-import { Role } from '../../common/enums/user';
 
 @Injectable()
 export class ReputationService {
@@ -385,32 +383,8 @@ export class ReputationService {
    */
   public async getAllReputations(
     chainId?: ChainId,
-    role?: Role,
+    types?: ReputationEntityType[],
   ): Promise<ReputationDto[]> {
-    let types: ReputationEntityType[] | undefined;
-    switch (role) {
-      case Role.WORKER:
-        types = [ReputationEntityType.WORKER];
-        break;
-      case Role.OPERATOR:
-        types = [
-          ReputationEntityType.JOB_LAUNCHER,
-          ReputationEntityType.EXCHANGE_ORACLE,
-          ReputationEntityType.RECORDING_ORACLE,
-          ReputationEntityType.REPUTATION_ORACLE,
-        ];
-        break;
-      case Role.ADMIN:
-      case Role.HUMAN_APP:
-        throw new ControlledError(
-          ErrorRoles.InvalidRole,
-          HttpStatus.BAD_REQUEST,
-        );
-      default:
-        types = undefined;
-        break;
-    }
-
     const reputations = await this.reputationRepository.findByChainIdAndTypes(
       chainId,
       types,

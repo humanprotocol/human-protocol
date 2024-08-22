@@ -124,7 +124,7 @@ export class DetailsService {
 
     return result;
   }
-  
+
   public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
       ? (Object.values(MainnetsId).filter(
@@ -200,7 +200,17 @@ export class DetailsService {
       const response = await firstValueFrom(
         this.httpService.get(
           this.configService.reputationSource + '/reputation',
-          { params: { chain_id: ChainId.POLYGON, role: 'OPERATOR' } },
+          {
+            params: {
+              chain_id: ChainId.POLYGON,
+              roles: [
+                'JOB_LAUNCHER',
+                'EXCHANGE_ORACLE',
+                'RECORDING_ORACLE',
+                'REPUTATION_ORACLE',
+              ],
+            },
+          },
         ),
       );
       return response.data;

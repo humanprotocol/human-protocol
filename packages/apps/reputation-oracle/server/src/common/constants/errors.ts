@@ -149,10 +149,3 @@ export enum ErrorQualification {
   NoWorkersFound = 'No workers found for the provided addresses or emails',
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
 }
-
-/**
- * Represents error messages related to roles.
- */
-export enum ErrorRoles {
-  InvalidRole = 'Invalid role',
-}
