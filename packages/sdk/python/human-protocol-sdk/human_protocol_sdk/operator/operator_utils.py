@@ -80,6 +80,8 @@ class LeaderData:
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
         job_types: Optional[List[str]] = None,
+        reputation_network: Optional[str] = None,
+        reputation_networks: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -102,6 +104,8 @@ class LeaderData:
         :param webhook_url: Webhook url
         :param url: Url
         :param job_types: Job types
+        :param reputation_network: Reputation network
+        :param reputation_networks: List of reputation networks
         """
 
         self.chain_id = chain_id
@@ -122,6 +126,8 @@ class LeaderData:
         self.webhook_url = webhook_url
         self.url = url
         self.job_types = job_types
+        self.reputation_network = reputation_network
+        self.reputation_networks = reputation_networks
 
 
 class RewardData:
@@ -207,14 +213,33 @@ class OperatorUtils:
 
         leaders_raw = leaders_data["data"]["leaders"]
 
-        job_types = []
-        if isinstance(job_types, str):
-            job_types = job_types.split(",")
-        elif isinstance(job_types, list):
-            job_types = job_types
+        for leader in leaders_raw:
+            job_types = []
+            reputation_network = ""
+            reputation_networks = []
 
-        leaders.extend(
-            [
+            if isinstance(leader.get("jobTypes"), str):
+                job_types = leader["jobTypes"].split(",")
+            elif isinstance(leader.get("jobTypes"), list):
+                job_types = leader["jobTypes"]
+
+            if leader.get("reputationNetwork"):
+                reputation_network = leader["reputationNetwork"].get("address", "")
+
+            if leader.get("reputationNetworks") and isinstance(
+                leader.get("reputationNetworks"), list
+            ):
+                reputation_networks = [
+                    network["address"] for network in leader["reputationNetworks"]
+                ]
+
+            # Check if reputationNetwork exists but is not in reputationNetworks
+            if leader.get("reputationNetwork"):
+                reputation_address = leader["reputationNetwork"].get("address", "")
+                if reputation_address and reputation_address not in reputation_networks:
+                    reputation_networks.append(reputation_address)
+
+            leaders.append(
                 LeaderData(
                     chain_id=filter.chain_id,
                     id=leader.get("id", ""),
@@ -233,19 +258,11 @@ class OperatorUtils:
                     public_key=leader.get("publicKey", None),
                     webhook_url=leader.get("webhookUrl", None),
                     url=leader.get("url", None),
-                    job_types=(
-                        leader.get("jobTypes").split(",")
-                        if isinstance(leader.get("jobTypes"), str)
-                        else (
-                            leader.get("jobTypes", [])
-                            if isinstance(leader.get("jobTypes"), list)
-                            else []
-                        )
-                    ),
+                    job_types=job_types,
+                    reputation_network=reputation_network,
+                    reputation_networks=reputation_networks,
                 )
-                for leader in leaders_raw
-            ]
-        )
+            )
 
         return leaders
 
@@ -299,6 +316,31 @@ class OperatorUtils:
 
         leader = leader_data["data"]["leader"]
 
+        job_types = []
+        reputation_network = ""
+        reputation_networks = []
+
+        if isinstance(leader.get("jobTypes"), str):
+            job_types = leader["jobTypes"].split(",")
+        elif isinstance(leader.get("jobTypes"), list):
+            job_types = leader["jobTypes"]
+
+        if leader.get("reputationNetwork"):
+            reputation_network = leader["reputationNetwork"].get("address", "")
+
+        if leader.get("reputationNetworks") and isinstance(
+            leader.get("reputationNetworks"), list
+        ):
+            reputation_networks = [
+                network["address"] for network in leader["reputationNetworks"]
+            ]
+
+        # Check if reputationNetwork exists but is not in reputationNetworks
+        if leader.get("reputationNetwork"):
+            reputation_address = leader["reputationNetwork"].get("address", "")
+            if reputation_address and reputation_address not in reputation_networks:
+                reputation_networks.append(reputation_address)
+
         return LeaderData(
             chain_id=chain_id,
             id=leader.get("id", ""),
@@ -317,15 +359,9 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
-            job_types=(
-                leader.get("jobTypes").split(",")
-                if isinstance(leader.get("jobTypes"), str)
-                else (
-                    leader.get("jobTypes", [])
-                    if isinstance(leader.get("jobTypes"), list)
-                    else []
-                )
-            ),
+            job_types=job_types,
+            reputation_network=reputation_network,
+            reputation_networks=reputation_networks,
         )
 
     @staticmethod

@@ -102,10 +102,21 @@ export function handleDataSaved(event: DataSaved): void {
 
     const operator = createOrLoadLeader(ethAddress);
 
+    if (!operator.reputationNetworks) {
+      operator.reputationNetworks = [];
+    }
+
     if (event.params.value == 'ACTIVE') {
-      operator.reputationNetwork = reputationNetwork.id;
+      if (!operator.reputationNetworks) {
+        operator.reputationNetworks = [];
+      }
+      operator.reputationNetworks = operator.reputationNetworks.concat([
+        reputationNetwork.id,
+      ]);
     } else if (event.params.value == 'INACTIVE') {
-      operator.reputationNetwork = null;
+      operator.reputationNetworks = operator.reputationNetworks.filter(
+        (id) => id != reputationNetwork.id
+      );
     }
     operator.save();
   }

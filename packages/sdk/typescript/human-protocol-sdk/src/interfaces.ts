@@ -33,10 +33,18 @@ export interface ILeader {
   webhookUrl?: string;
   url?: string;
   jobTypes?: string[];
+  reputationNetwork?: string;
+  reputationNetworks?: string[];
 }
 
-export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+export interface ILeaderSubgraph
+  extends Omit<
+    ILeader,
+    'jobTypes' | 'reputationNetwork' | 'reputationNetworks'
+  > {
   jobTypes?: string;
+  reputationNetwork?: { address: string };
+  reputationNetworks?: { address: string }[];
 }
 
 export interface ILeadersFilter {

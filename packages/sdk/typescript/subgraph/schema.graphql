@@ -50,6 +50,7 @@ type Leader @entity {
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
   reputationNetwork: ReputationNetwork
+  reputationNetworks: [ReputationNetwork!]
 }
 
 type LeaderURL @entity {
@@ -62,7 +63,7 @@ type LeaderURL @entity {
 type ReputationNetwork @entity {
   id: Bytes!
   address: Bytes!
-  operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
+  operators: [Leader!]! @derivedFrom(field: "reputationNetworks")
 }
 
 type Escrow @entity {

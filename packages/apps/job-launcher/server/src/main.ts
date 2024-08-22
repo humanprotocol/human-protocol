@@ -8,6 +8,12 @@ import { useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ServerConfigService } from './common/config/server-config.service';
+import {
+  ChainId,
+  ILeadersFilter,
+  NETWORKS,
+  OperatorUtils,
+} from '@human-protocol/sdk';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -38,6 +44,18 @@ async function bootstrap() {
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
   });
+
+  if (!NETWORKS[ChainId.POLYGON_AMOY]) {
+    return;
+  }
+
+  const filter: ILeadersFilter = {
+    chainId: ChainId.POLYGON_AMOY,
+  };
+
+  const leaders = await OperatorUtils.getLeaders(filter);
+
+  console.log('Leaders:', leaders);
 }
 
 void bootstrap();
