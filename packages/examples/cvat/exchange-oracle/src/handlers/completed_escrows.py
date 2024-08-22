@@ -98,7 +98,9 @@ class _CompletedEscrowsHandler:
                     # need to improve handling for such projects
                     # (e.g. cancel depending on the escrow status)
                     logger.exception(
-                        f"Failed to handle completed project id {project.cvat_id} for escrow {project.escrow_address}: {e}"
+                        "Failed to handle completed project id {} for escrow {}: {}".format(
+                            project.cvat_id, project.escrow_address, e
+                        )
                     )
                     continue
 
@@ -140,7 +142,13 @@ class _CompletedEscrowsHandler:
 
                         job_assignment = job.latest_assignment
                         job_annotations[job.cvat_id] = FileDescriptor(
-                            filename=f"project_{project.cvat_id}-task_{job.cvat_task_id}-job_{job.cvat_id}-user_{job_assignment.user.cvat_id}-assignment_{job_assignment.id}.zip",
+                            filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
+                                project.cvat_id,
+                                job.cvat_task_id,
+                                job.cvat_id,
+                                job_assignment.user.cvat_id,
+                                job_assignment.id,
+                            ),
                             file=job_annotations_file,
                         )
 
@@ -324,7 +332,13 @@ class _CompletedEscrowsHandler:
 
                         job_assignment = job.latest_assignment
                         job_annotations[job.cvat_id] = FileDescriptor(
-                            filename=f"project_{job.cvat_project_id}-task_{job.cvat_task_id}-job_{job.cvat_id}-user_{job_assignment.user.cvat_id}-assignment_{job_assignment.id}.zip",
+                            filename="project_{}-task_{}-job_{}-user_{}-assignment_{}.zip".format(
+                                job.cvat_project_id,
+                                job.cvat_task_id,
+                                job.cvat_id,
+                                job_assignment.user.cvat_id,
+                                job_assignment.id,
+                            ),
                             file=job_annotations_file,
                         )
 

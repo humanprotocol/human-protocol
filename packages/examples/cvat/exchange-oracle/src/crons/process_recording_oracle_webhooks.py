@@ -81,14 +81,21 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 for project in projects_chunk:
                     if project.status != ProjectStatuses.validation:
                         logger.error(
-                            f"Unexpected event {webhook.event_type} received for a project in the {project.status} status, "
-                            f"ignoring (escrow_address={webhook.escrow_address}, project={project.cvat_id})"
+                            "Unexpected event {} received for a project in the {} status, "
+                            "ignoring (escrow_address={}, project={})".format(
+                                webhook.event_type,
+                                project.status,
+                                webhook.escrow_address,
+                                project.cvat_id,
+                            )
                         )
                         return
 
                     new_status = ProjectStatuses.recorded
                     logger.info(
-                        f"Changing project status to {new_status} (escrow_address={webhook.escrow_address}, project={project.cvat_id})"
+                        "Changing project status to {} (escrow_address={}, project={})".format(
+                            new_status, webhook.escrow_address, project.cvat_id
+                        )
                     )
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
@@ -107,8 +114,13 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 for project in projects_chunk:
                     if project.status != ProjectStatuses.validation:
                         logger.error(
-                            f"Unexpected event {webhook.event_type} received for a project in the {project.status} status, "
-                            f"ignoring (escrow_address={webhook.escrow_address}, project_id={project.cvat_id})"
+                            "Unexpected event {} received for a project in the {} status, "
+                            "ignoring (escrow_address={}, project_id={})".format(
+                                webhook.event_type,
+                                project.status,
+                                webhook.escrow_address,
+                                project.cvat_id,
+                            )
                         )
                         continue
 
@@ -127,7 +139,9 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
                     new_status = ProjectStatuses.annotation
                     logger.info(
-                        f"Changing project status to {new_status} (escrow_address={webhook.escrow_address}, project={project.cvat_id})"
+                        "Changing project status to {} (escrow_address={}, project={})".format(
+                            new_status, webhook.escrow_address, project.cvat_id
+                        )
                     )
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
