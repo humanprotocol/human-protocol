@@ -48,9 +48,6 @@ describe('OperatorUtils', () => {
       reward: ethers.parseEther('25'),
       amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
-      reputationNetwork: {
-        address: '0x01',
-      },
       reputationNetworks: [
         {
           address: '0x01',
@@ -61,7 +58,6 @@ describe('OperatorUtils', () => {
     const mockLeader: ILeader = {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
-      reputationNetwork: '0x01',
       reputationNetworks: ['0x01'],
     };
 
@@ -90,7 +86,6 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: [],
-        reputationNetwork: '0x01',
         reputationNetworks: ['0x01'],
       };
 
@@ -118,7 +113,6 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
-        reputationNetwork: '0x01',
         reputationNetworks: ['0x01'],
       };
 
@@ -196,9 +190,6 @@ describe('OperatorUtils', () => {
       reward: ethers.parseEther('25'),
       amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
-      reputationNetwork: {
-        address: '0x01',
-      },
       reputationNetworks: [
         {
           address: '0x01',
@@ -209,7 +200,6 @@ describe('OperatorUtils', () => {
     const mockLeader: ILeader = {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
-      reputationNetwork: '0x01',
       reputationNetworks: ['0x01'],
     };
 
@@ -236,7 +226,6 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: [],
-        reputationNetwork: '0x01',
         reputationNetworks: ['0x01'],
       };
 
@@ -262,7 +251,6 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
-        reputationNetwork: '0x01',
         reputationNetworks: ['0x01'],
       };
 

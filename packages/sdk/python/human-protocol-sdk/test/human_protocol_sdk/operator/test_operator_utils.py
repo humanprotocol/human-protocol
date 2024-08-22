@@ -42,8 +42,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "webhookUrl": None,
                                 "url": None,
                                 "jobTypes": "type1,type2",
-                                "jobTypes": "type1,type2",
-                                "reputationNetwork": {"address": "0x01"},
                                 "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
@@ -77,7 +75,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].webhook_url, None)
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(leaders[0].job_types, ["type1", "type2"])
-            self.assertEqual(leaders[0].reputation_network, "0x01")
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_none(self):
@@ -109,7 +106,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "webhookUrl": None,
                                 "url": None,
                                 "jobTypes": None,
-                                "reputationNetwork": {"address": "0x01"},
                                 "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
@@ -144,7 +140,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].url, None)
             # Should rerutn empty array
             self.assertEqual(leaders[0].job_types, [])
-            self.assertEqual(leaders[0].reputation_network, "0x01")
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_array(self):
@@ -176,7 +171,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "webhookUrl": None,
                                 "url": None,
                                 "jobTypes": ["type1", "type2", "type3"],
-                                "reputationNetwork": {"address": "0x01"},
                                 "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
@@ -212,7 +206,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(
                 leaders[0].job_types, ["type1", "type2", "type3"]
             )  # Should the same array
-            self.assertEqual(leaders[0].reputation_network, "0x01")
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_empty_data(self):
@@ -269,7 +262,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "webhookUrl": None,
                             "url": None,
                             "jobTypes": "type1,type2",
-                            "reputationNetwork": {"address": "0x01"},
                             "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
@@ -302,7 +294,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2"])
-            self.assertEqual(leader.reputation_network, "0x01")
             self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_when_job_types_is_none(self):
@@ -334,7 +325,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "webhookUrl": None,
                             "url": None,
                             "jobTypes": None,
-                            "reputationNetwork": {"address": "0x01"},
                             "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
@@ -367,7 +357,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, [])
-            self.assertEqual(leader.reputation_network, "0x01")
             self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_when_job_types_is_array(self):
@@ -399,7 +388,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "webhookUrl": None,
                             "url": None,
                             "jobTypes": ["type1", "type2", "type3"],
-                            "reputationNetwork": {"address": "0x01"},
                             "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
@@ -432,7 +420,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2", "type3"])
-            self.assertEqual(leader.reputation_network, "0x01")
             self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_empty_data(self):

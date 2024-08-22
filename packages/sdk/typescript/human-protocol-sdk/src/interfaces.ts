@@ -33,17 +33,12 @@ export interface ILeader {
   webhookUrl?: string;
   url?: string;
   jobTypes?: string[];
-  reputationNetwork?: string;
   reputationNetworks?: string[];
 }
 
 export interface ILeaderSubgraph
-  extends Omit<
-    ILeader,
-    'jobTypes' | 'reputationNetwork' | 'reputationNetworks'
-  > {
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks'> {
   jobTypes?: string;
-  reputationNetwork?: { address: string };
   reputationNetworks?: { address: string }[];
 }
 

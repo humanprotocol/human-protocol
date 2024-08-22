@@ -65,7 +65,6 @@ export class OperatorUtils {
     }
 
     let jobTypes: string[] = [];
-    let reputationNetwork = '';
     let reputationNetworks: string[] = [];
 
     if (typeof leader.jobTypes === 'string') {
@@ -74,30 +73,15 @@ export class OperatorUtils {
       jobTypes = leader.jobTypes;
     }
 
-    if (leader.reputationNetwork) {
-      reputationNetwork = leader.reputationNetwork.address;
-    }
-
     if (leader.reputationNetworks && Array.isArray(leader.reputationNetworks)) {
       reputationNetworks = leader.reputationNetworks.map(
         (network) => network.address
       );
     }
 
-    // Check if reputationNetwork exists but is not in reputationNetworks
-    if (leader.reputationNetwork) {
-      if (
-        leader.reputationNetwork.address &&
-        !reputationNetworks.includes(leader.reputationNetwork.address)
-      ) {
-        reputationNetworks.push(leader.reputationNetwork.address);
-      }
-    }
-
     return {
       ...leader,
       jobTypes,
-      reputationNetwork,
       reputationNetworks,
     };
   }
@@ -142,17 +126,12 @@ export class OperatorUtils {
     leaders_data = leaders_data.concat(
       leaders.map((leader) => {
         let jobTypes: string[] = [];
-        let reputationNetwork = '';
         let reputationNetworks: string[] = [];
 
         if (typeof leader.jobTypes === 'string') {
           jobTypes = leader.jobTypes.split(',');
         } else if (Array.isArray(leader.jobTypes)) {
           jobTypes = leader.jobTypes;
-        }
-
-        if (leader.reputationNetwork) {
-          reputationNetwork = leader.reputationNetwork.address;
         }
 
         if (
@@ -164,20 +143,9 @@ export class OperatorUtils {
           );
         }
 
-        // Check if reputationNetwork exists but is not in reputationNetworks
-        if (leader.reputationNetwork) {
-          if (
-            leader.reputationNetwork.address &&
-            !reputationNetworks.includes(leader.reputationNetwork.address)
-          ) {
-            reputationNetworks.push(leader.reputationNetwork.address);
-          }
-        }
-
         return {
           ...leader,
           jobTypes,
-          reputationNetwork,
           reputationNetworks,
         };
       })
