@@ -43,7 +43,6 @@ export class DetailsService {
       });
 
       leaderDto.chainId = chainId;
-      // TODO: Balance fetching
       leaderDto.balance = await this.getHmtBalance(chainId, address);
 
       return leaderDto;
@@ -51,7 +50,6 @@ export class DetailsService {
     const walletDto: WalletDto = plainToInstance(WalletDto, {
       chainId,
       address,
-      // TODO: Balance fetching
       balance: await this.getHmtBalance(chainId, address),
     });
 
