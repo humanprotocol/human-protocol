@@ -150,12 +150,10 @@ export const Table = ({
 											zIndex: 2,
 											backgroundColor: colorPalette.whiteBackground,
 											'&::after': {
-												content: '""',
-												position: 'absolute',
-												bottom: '0',
-												right: '0',
-												height: index === 0 ? '85%' : '100%',
-												width: '1px',
+												...getAfterElementProperties(
+													index === 0,
+													visibleRows.length === index + 1
+												),
 												backgroundColor: `${colorPalette.skyOpacity}`,
 											},
 										},
@@ -208,3 +206,39 @@ export const Table = ({
 		</MuiTable>
 	);
 };
+
+function getAfterElementProperties(
+	isFirstElement: boolean,
+	isLastElement: boolean
+) {
+	if (isFirstElement) {
+		return {
+			content: '""',
+			position: 'absolute',
+			bottom: '0',
+			right: '0',
+			height: '85%',
+			width: '1px',
+		};
+	}
+
+	if (isLastElement) {
+		return {
+			content: '""',
+			position: 'absolute',
+			top: '0',
+			right: '0',
+			height: '85%',
+			width: '1px',
+		};
+	}
+
+	return {
+		content: '""',
+		position: 'absolute',
+		bottom: '0',
+		right: '0',
+		height: '100%',
+		width: '1px',
+	};
+}
