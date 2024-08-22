@@ -13,11 +13,13 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
 	if (isPending) {
 		return '...';
 	}
-	const valueInDollars = ethers.formatEther(`${data.hmtPrice * Number(value)}`);
+	const valueInDollars = (
+		Number(ethers.formatEther(value)) * data.hmtPrice
+	).toFixed(2);
 
 	return (
 		<Typography>
-			{ethers.formatEther(value)}
+			{Number(ethers.formatEther(value)).toFixed()}
 			<Typography component="span">HMT</Typography>
 			<Typography
 				sx={{

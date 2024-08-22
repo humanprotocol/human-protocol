@@ -5,6 +5,24 @@ import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { validateResponse } from '../../services/validate-response';
 
+const transformOptionalTokenAmount = (
+	value: string | undefined,
+	ctx: z.RefinementCtx
+) => {
+	if (value === undefined) return value;
+
+	const valueAsNumber = Number(value);
+
+	if (Number.isNaN(valueAsNumber)) {
+		ctx.addIssue({
+			path: ['amountStaked'],
+			code: z.ZodIssueCode.custom,
+		});
+	}
+
+	return valueAsNumber / 10 ** 18;
+};
+
 const walletSchema = z.object({
 	chainId: z.number(),
 	address: z.string(),
@@ -45,16 +63,19 @@ const leaderSchema = z.object({
 	address: z.string(),
 	balance: z.string(),
 	role: z.nativeEnum(Roles),
-	amountStaked: z.string(),
-	amountAllocated: z.string(),
-	amountLocked: z.string(),
-	lockedUntilTimestamp: z.string(),
+	amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
+	amountAllocated: z
+		.string()
+		.optional()
+		.transform(transformOptionalTokenAmount),
+	amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
+	lockedUntilTimestamp: z.string().optional(),
 	reputation: z.number(),
 	fee: z.number(),
 	jobTypes: z.array(z.string()).optional().nullable(),
 	url: z.string().optional().nullable(),
-	reward: z.string(),
-	amountJobsLaunched: z.string(),
+	reward: z.string().optional(),
+	amountJobsProcessed: z.string(),
 });
 
 export type AddressDetailsLeader = z.infer<typeof leaderSchema>;

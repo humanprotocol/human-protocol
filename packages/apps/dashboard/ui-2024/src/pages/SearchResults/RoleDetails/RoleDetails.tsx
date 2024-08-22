@@ -153,7 +153,7 @@ const RoleDetails = ({
 		role,
 		chainId,
 		reputation,
-		amountJobsLaunched,
+		amountJobsProcessed,
 		amountStaked,
 		amountAllocated,
 		amountLocked,
@@ -266,7 +266,7 @@ const RoleDetails = ({
 						>
 							Jobs Launched
 						</Typography>
-						<Typography>{amountJobsLaunched}</Typography>
+						<Typography>{amountJobsProcessed}</Typography>
 					</Stack>
 				</Stack>
 			</Card>
@@ -315,50 +315,60 @@ const RoleDetails = ({
 							</Typography>
 						</Typography>
 					</Stack>
-					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
-						<Typography
-							sx={{
-								width: 300,
-							}}
-							fontWeight={600}
+					{amountAllocated !== undefined ? (
+						<Stack
+							gap={{ xs: 1, md: 0 }}
+							direction={{ sm: 'column', md: 'row' }}
 						>
-							Tokens Allocated
-						</Typography>
-						<Typography>
-							{amountAllocated}
 							<Typography
 								sx={{
-									marginLeft: 0.5,
+									width: 300,
 								}}
-								color={colorPalette.fog.main}
-								component="span"
+								fontWeight={600}
 							>
-								HMT
+								Tokens Allocated
 							</Typography>
-						</Typography>
-					</Stack>
-					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
-						<Typography
-							sx={{
-								width: 300,
-							}}
-							fontWeight={600}
+							<Typography>
+								{amountAllocated}
+								<Typography
+									sx={{
+										marginLeft: 0.5,
+									}}
+									color={colorPalette.fog.main}
+									component="span"
+								>
+									HMT
+								</Typography>
+							</Typography>
+						</Stack>
+					) : null}
+					{amountLocked !== undefined ? (
+						<Stack
+							gap={{ xs: 1, md: 0 }}
+							direction={{ sm: 'column', md: 'row' }}
 						>
-							Tokens Locked
-						</Typography>
-						<Typography>
-							{amountLocked}
 							<Typography
 								sx={{
-									marginLeft: 0.5,
+									width: 300,
 								}}
-								color={colorPalette.fog.main}
-								component="span"
+								fontWeight={600}
 							>
-								HMT
+								Tokens Locked
 							</Typography>
-						</Typography>
-					</Stack>
+							<Typography>
+								{amountLocked}
+								<Typography
+									sx={{
+										marginLeft: 0.5,
+									}}
+									color={colorPalette.fog.main}
+									component="span"
+								>
+									HMT
+								</Typography>
+							</Typography>
+						</Stack>
+					) : null}
 				</Stack>
 			</Card>
 
