@@ -15,6 +15,9 @@ import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
+import { EnvironmentConfigService } from '../../common/config/env-config.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -22,8 +25,11 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 @Injectable()
 export class DetailsService {
   private readonly logger = new Logger(DetailsService.name);
-
-  constructor(private readonly networkConfig: NetworkConfigService) {}
+  constructor(
+    private readonly configService: EnvironmentConfigService,
+    private readonly httpService: HttpService,
+    private readonly networkConfig: NetworkConfigService,
+  ) {}
 
   public async getDetails(
     chainId: ChainId,
@@ -134,6 +140,7 @@ export class DetailsService {
 
     return result;
   }
+
   public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
       ? (Object.values(MainnetsId).filter(
@@ -166,6 +173,9 @@ export class DetailsService {
       }
     }
 
+    const reputations = await this.fetchReputations();
+    this.assignReputationsToLeaders(Object.values(leadersByRole), reputations);
+
     return Object.values(leadersByRole);
   }
 
@@ -193,6 +203,51 @@ export class DetailsService {
       }
     }
 
+    const reputations = await this.fetchReputations();
+    this.assignReputationsToLeaders(allLeaders, reputations);
+
     return allLeaders;
+  }
+
+  private async fetchReputations(): Promise<
+    { address: string; reputation: string }[]
+  > {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(
+          this.configService.reputationSource + '/reputation',
+          {
+            params: {
+              chain_id: ChainId.POLYGON,
+              roles: [
+                'JOB_LAUNCHER',
+                'EXCHANGE_ORACLE',
+                'RECORDING_ORACLE',
+                'REPUTATION_ORACLE',
+              ],
+            },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error fetching reputations:', error);
+      return [];
+    }
+  }
+
+  private assignReputationsToLeaders(
+    leaders: LeaderDto[],
+    reputations: { address: string; reputation: string }[],
+  ) {
+    const reputationMap = new Map(
+      reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
+    );
+    leaders.forEach((leader) => {
+      const reputation = reputationMap.get(leader.address.toLowerCase());
+      if (reputation) {
+        leader.reputation = reputation;
+      }
+    });
   }
 }
