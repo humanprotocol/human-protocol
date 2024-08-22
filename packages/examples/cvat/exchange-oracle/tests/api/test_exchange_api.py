@@ -38,9 +38,7 @@ def test_empty_list_tasks_200_without_address(client: TestClient) -> None:
 
 
 def test_list_tasks_200_with_address(client: TestClient) -> None:
-    with (
-        SessionLocal.begin() as session,
-    ):
+    with SessionLocal.begin() as session:
         _, _, cvat_job_1 = create_project_task_and_job(
             session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
         )
@@ -97,9 +95,7 @@ def test_list_tasks_200_with_address(client: TestClient) -> None:
 
 
 def test_list_tasks_200_without_address(client: TestClient) -> None:
-    with (
-        SessionLocal.begin() as session,
-    ):
+    with SessionLocal.begin() as session:
         _, _, cvat_job_1 = create_project_task_and_job(
             session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
         )
