@@ -102,25 +102,25 @@ class Case:
             project_status=ProjectStatuses.completed,
             task_status=TaskStatuses.completed,
             job_status=JobStatuses.completed,
-            expected_project_status=ProjectStatuses.finished,
-            expected_task_status=TaskStatuses.finished,
-            expected_job_status=JobStatuses.finished,
+            expected_project_status=ProjectStatuses.deleted,
+            expected_task_status=TaskStatuses.deleted,
+            expected_job_status=JobStatuses.deleted,
         ),
         Case(
-            project_status=ProjectStatuses.finished,
-            task_status=TaskStatuses.finished,
-            job_status=JobStatuses.finished,
-            expected_project_status=ProjectStatuses.finished,
-            expected_task_status=TaskStatuses.finished,
-            expected_job_status=JobStatuses.finished,
+            project_status=ProjectStatuses.deleted,
+            task_status=TaskStatuses.deleted,
+            job_status=JobStatuses.deleted,
+            expected_project_status=ProjectStatuses.deleted,
+            expected_task_status=TaskStatuses.deleted,
+            expected_job_status=JobStatuses.deleted,
         ),
         Case(
             project_status=ProjectStatuses.annotation,
             task_status=TaskStatuses.annotation,
             job_status=JobStatuses.in_progress,
-            expected_project_status=ProjectStatuses.finished,
-            expected_task_status=TaskStatuses.finished,
-            expected_job_status=JobStatuses.finished,
+            expected_project_status=ProjectStatuses.deleted,
+            expected_task_status=TaskStatuses.deleted,
+            expected_job_status=JobStatuses.deleted,
         ),
     ],
     ids=["completed", "finished", "in progress"],
@@ -148,7 +148,7 @@ def test_process_incoming_reputation_oracle_webhooks_task_rejected_type(
     session.add(cvat_job)
 
     webhook = create_webhook(
-        ReputationOracleEventTypes.escrow_finished, OracleWebhookDirectionTags.incoming
+        ReputationOracleEventTypes.escrow_completed, OracleWebhookDirectionTags.incoming
     )
     mock_storage_client = mocker.MagicMock(spec=StorageClient)
     mocker.patch.object(cloud, cloud.make_client.__name__, return_value=mock_storage_client)

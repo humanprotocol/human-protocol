@@ -23,13 +23,13 @@ class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
     validation = "validation"
     canceled = "canceled"
     recorded = "recorded"
-    finished = "finished"
+    deleted = "deleted"
 
 
 class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
     annotation = "annotation"
     completed = "completed"
-    finished = "finished"
+    deleted = "deleted"
 
 
 class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -37,7 +37,7 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     in_progress = "in progress"
     rejected = "rejected"
     completed = "completed"
-    finished = "finished"
+    deleted = "deleted"
 
 
 class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -79,7 +79,7 @@ class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
 
 class ReputationOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     # TODO: rename to ReputationOracleEventType
-    escrow_finished = "escrow_finished"
+    escrow_completed = "escrow_completed"
 
 
 class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):

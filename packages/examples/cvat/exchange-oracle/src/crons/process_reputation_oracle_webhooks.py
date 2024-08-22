@@ -36,7 +36,7 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
     for webhook in webhooks:
         with handle_webhook(logger, session, webhook):
             match webhook.event_type:
-                case ReputationOracleEventTypes.escrow_finished:
+                case ReputationOracleEventTypes.escrow_completed:
                     projects = db_service.get_projects_by_escrow_address(
                         session, webhook.escrow_address
                     )
@@ -48,9 +48,9 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
                         session,
                         webhook.escrow_address,
                         webhook.chain_id,
-                        status=ProjectStatuses.finished,
-                        tasks_status=TaskStatuses.finished,
-                        jobs_status=JobStatuses.finished,
+                        status=ProjectStatuses.deleted,
+                        tasks_status=TaskStatuses.deleted,
+                        jobs_status=JobStatuses.deleted,
                     )
 
                     oracle_db_service.outbox.create_webhook(

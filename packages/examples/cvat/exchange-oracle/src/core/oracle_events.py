@@ -47,7 +47,7 @@ class ExchangeOracleEvent_EscrowCleaned(OracleEvent):
     pass  # escrow is enough for now
 
 
-class ReputationOracleEvent_EscrowFinished(OracleEvent):  # (will refactor later)
+class ReputationOracleEvent_EscrowCompleted(OracleEvent):  # (will refactor later)
     pass
 
 
@@ -59,7 +59,7 @@ _event_type_map = {
     ExchangeOracleEventTypes.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
     ExchangeOracleEventTypes.task_finished: ExchangeOracleEvent_TaskFinished,
     ExchangeOracleEventTypes.escrow_cleaned: ExchangeOracleEvent_EscrowCleaned,
-    ReputationOracleEventTypes.escrow_finished: ReputationOracleEvent_EscrowFinished,
+    ReputationOracleEventTypes.escrow_completed: ReputationOracleEvent_EscrowCompleted,
 }
 
 
