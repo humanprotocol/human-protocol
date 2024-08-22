@@ -42,15 +42,28 @@ unfixable = [
     "RUF005",  # messes up concantenation with numpy structures
 ]
 ignore = [
-    "ANN101",  # method args annotations (mypy will take care of that)
+    "W191",    # Rules conflicting with ruff format (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
+    "E111",    # |
+    "E114",    # |
+    "E117",    # |
+    "D206",    # |
+    "D300",    # |
+    "Q000",    # |
+    "Q001",    # |
+    "Q002",    # |
+    "Q003",    # |
+    "COM812",  # |
+    "COM819",  # |
+    "ISC001",  # |
+    "ISC002",  # |
+    "ANN101",  # Method args annotations (mypy will take care of that)
     "ANN001",  # |
     "ANN202",  # |
     "ANN201",  # |
     "ANN401",  # |
     "ANN102",  # |
     "RUF001",  # Allow cyrillic letters in comments
-    "COM812",  # Trailing comas are handled by ruff format
-    "ISC001",  # Recommended to be disabled when using ruff format
+
     "B904",    # Raise from: modern pythons preserve previous exceptions
     "EM",      # Forbids using literal strings in exceptions.
                # Sujested way of dealing with exceptions increases verbosity
