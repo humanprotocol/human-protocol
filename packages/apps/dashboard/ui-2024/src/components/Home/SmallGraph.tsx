@@ -14,32 +14,9 @@ import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { formatDate } from '@helpers/formatDate';
 import { formatNumber } from '@helpers/formatNumber';
-
-const TIME_PERIOD_OPTIONS = [
-	{
-		value: '24H',
-		name: '24H',
-	},
-	{
-		value: '1W',
-		name: '1W',
-	},
-	{
-		value: '2W',
-		name: '2W',
-	},
-	{
-		value: '1M',
-		name: '1M',
-	},
-	{
-		value: 'All',
-		name: 'All',
-	},
-];
 
 const CustomSmallChartTooltip = ({
 	payload,
@@ -77,23 +54,13 @@ const CustomSmallChartTooltip = ({
 
 interface SmallGraphProps {
 	graphData: {
-		name: string;
+		date: string;
 		value: number;
 	}[];
 	title: string;
 }
 
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
-	const [selectedTimePeriod, selectTimePeriod] = useState<string>('24H');
-
-	const handleTimePeriod = (
-		_event: React.MouseEvent<HTMLElement>,
-		value: string | null
-	) => {
-		if (value !== null) {
-			selectTimePeriod(value);
-		}
-	};
 	return (
 		<>
 			<ResponsiveContainer height={150}>
@@ -118,12 +85,11 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 						}}
 						axisLine={false}
 						interval="preserveStartEnd"
-						dataKey="name"
+						dataKey="date"
 						stroke={colorPalette.fog.main}
-						tickFormatter={(value) => formatDate(value, 'd MMM')}
+						tickFormatter={(value) => formatDate(value, 'DD MMM')}
 						tick={{ dy: 10 }}
 						tickSize={0}
-						ticks={[graphData[0].name, graphData[graphData.length - 1].name]}
 					/>
 					<YAxis
 						style={{
@@ -136,7 +102,6 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 						tickSize={0}
 						stroke={colorPalette.fog.main}
 						tickFormatter={formatNumber}
-						ticks={[0, graphData[graphData.length - 1].value]}
 					/>
 					<CartesianGrid stroke="#ccc" strokeDasharray="7" vertical={false} />
 					<Tooltip content={<CustomSmallChartTooltip />} />
@@ -160,11 +125,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 				<Typography fontWeight={400} variant="h6" component="p">
 					{title}
 				</Typography>
-				<ToggleButtons
-					buttonOptions={TIME_PERIOD_OPTIONS}
-					onValueChange={handleTimePeriod}
-					selectedValue={selectedTimePeriod}
-				/>
+				<ToggleButtons />
 			</Stack>
 		</>
 	);

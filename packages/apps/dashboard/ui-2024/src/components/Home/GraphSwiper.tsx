@@ -3,23 +3,39 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import SmallGraph from '@components/Home/SmallGraph';
 import 'swiper/css';
 import 'swiper/css/navigation';
-
-const firstGraphData = [
-	{
-		name: '2024-01-01',
-		value: 3000000,
-	},
-	{
-		name: '2024-01-02',
-		value: 4000000,
-	},
-	{
-		name: '2024-01-03',
-		value: 5000000,
-	},
-];
+import { useGraphPageChartData } from '@services/api/use-graph-page-chart-data';
 
 const GraphSwiper = () => {
+	const { data } = useGraphPageChartData();
+	const transactionHistoryData = (data || []).map(
+		({ totalTransactionCount, date }) => ({
+			value: totalTransactionCount,
+			date,
+		})
+	);
+	const transferAmount = (data || []).map(
+		({ totalTransactionAmount, date }) => ({
+			value: totalTransactionAmount,
+			date,
+		})
+	);
+	const solvedTasks = (data || []).map(({ solved, date }) => ({
+		value: solved,
+		date,
+	}));
+
+	const uniqueSenders = (data || []).map(({ dailyUniqueSenders, date }) => ({
+		value: dailyUniqueSenders,
+		date,
+	}));
+
+	const uniqueReceivers = (data || []).map(
+		({ dailyUniqueReceivers, date }) => ({
+			value: dailyUniqueReceivers,
+			date,
+		})
+	);
+
 	return (
 		<Swiper
 			loop={true}
@@ -28,13 +44,22 @@ const GraphSwiper = () => {
 			className="mySwiper"
 		>
 			<SwiperSlide>
-				<SmallGraph graphData={firstGraphData} title="Transaction history" />
+				<SmallGraph
+					graphData={transactionHistoryData}
+					title="Transaction history"
+				/>
 			</SwiperSlide>
 			<SwiperSlide>
-				<SmallGraph graphData={firstGraphData} title="Transaction history 2" />
+				<SmallGraph graphData={transferAmount} title="Transfer Amount" />
 			</SwiperSlide>
 			<SwiperSlide>
-				<SmallGraph graphData={firstGraphData} title="Transaction history 3" />
+				<SmallGraph graphData={solvedTasks} title="Number of Tasks" />
+			</SwiperSlide>
+			<SwiperSlide>
+				<SmallGraph graphData={uniqueSenders} title="Unique Senders" />
+			</SwiperSlide>
+			<SwiperSlide>
+				<SmallGraph graphData={uniqueReceivers} title="Unique Receivers" />
 			</SwiperSlide>
 		</Swiper>
 	);
