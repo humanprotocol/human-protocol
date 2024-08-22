@@ -52,9 +52,11 @@ ignore = [
     "COM812",  # Trailing comas are handled by ruff format
     "ISC001",  # Recommended to be disabled when using ruff format
     "B904",    # Raise from: modern pythons preserve previous exceptions
-    "EM",      # Forbids using literal strings in exceptions. I think it's ok
-    "TRY003",  # Forbids long messages in exceptions, again, it's ok
-    "G004",    # Logging statement uses f-string — it's ok, f-strings are fast
+    "EM",      # Forbids using literal strings in exceptions.
+               # Sujested way of dealing with exceptions increases verbosity
+               # while giving little to no benefit in readability
+    "TRY003",  # |
+    "G004",    # Forbids using f-strings in logging. This project doesn't rely on lazy % formatting when using logging.
     "A003",    # Class attribute `id` is shadowing a Python builtin — it's ok in class body
     "FIX001",  # Forbids using TODOs, but TODOs are useful
     "FIX002",  # |
@@ -119,7 +121,7 @@ classmethod-decorators = [
 ]
 
 [tool.ruff.lint.pylint]
-max-args = 9  # in the name of stupidity and lazyness, please god forgive me
+max-args = 9  # Lower number might be beneficial to reduce cognitive load. Consider using data containers.
 
 [tool.ruff.lint.isort]
 forced-separate = ["tests"]
