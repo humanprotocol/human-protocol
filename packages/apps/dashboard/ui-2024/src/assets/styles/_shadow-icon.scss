@@ -2,7 +2,14 @@
   display: flex;
   gap: 16px;
   height: 90px;
+  &__icon {
+    width: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   img {
+    transform: translateY(17%);
     width: 130px;
     height: 130px;
   }

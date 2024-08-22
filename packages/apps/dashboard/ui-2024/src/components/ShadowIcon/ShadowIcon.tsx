@@ -8,7 +8,10 @@ const ShadowIcon: FC<{ className?: string; title?: string; img: string }> = ({
 }) => {
 	return (
 		<div className={clsx('shadow-icon', className)}>
+			<div className='shadow-icon__icon'>
+
 			<img src={img} alt="logo" />
+			</div>
 			<span>{title}</span>
 		</div>
 	);
