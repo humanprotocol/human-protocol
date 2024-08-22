@@ -163,7 +163,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             AssertionError,
             match=(
                 "'event' and 'event_type' cannot be used together. "
-                "Please use only one of the fields",
+                "Please use only one of the fields"
             ),
         ):
             webhook_service.outbox.create_webhook(
