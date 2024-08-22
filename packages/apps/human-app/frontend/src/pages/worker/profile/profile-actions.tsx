@@ -12,7 +12,7 @@ import { RegisterAddressBtn } from '@/pages/worker/profile/register-address-btn'
 import { DoneLabel } from '@/pages/worker/profile/done-label';
 import { useRegisterAddressNotifications } from '@/hooks/use-register-address-notifications';
 import { useRegisterAddressMutation } from '@/api/services/worker/use-register-address';
-import { RegisterAddressOnChainButton } from '@/pages/worker/profile/register-address-on-chain-btn';
+// import { RegisterAddressOnChainButton } from '@/pages/worker/profile/register-address-on-chain-btn';
 
 export function ProfileActions() {
   const {
@@ -99,7 +99,7 @@ export function ProfileActions() {
           <RegisterAddressBtn />
         </Grid>
       ) : null}
-      <Grid>
+      {/* <Grid>
         {kycApproved && user.wallet_address ? (
           <RegisterAddressOnChainButton />
         ) : (
@@ -107,7 +107,7 @@ export function ProfileActions() {
             {t('worker.profile.addKYCInfoOnChain')}
           </Button>
         )}
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }
