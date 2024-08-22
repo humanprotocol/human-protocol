@@ -108,6 +108,7 @@ ignore = [
     "PTH119",  # `os.path.basename()` should be replaced by `Path.name`
     "PTH122",  # `os.path.splitext()` should be replaced by `Path.suffix`, `Path.stem`, and `Path.parent`
     "PTH207",  # Replace `glob` with `Path.glob` or `Path.rglob`
+    "UP032",   # Upgrades .format() to f-strings. Disabling until it ignores line-length
 ]
 
 
