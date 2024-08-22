@@ -82,7 +82,6 @@ ignore = [
     # Want to resolve eventually, but not now:
     "S101",    # Allow asserts (there are too many of them right now to fix)
     "TRY401",  # Checks for excesive logging of exception objects
-    "E501",    # Too long lines
     "G001",    # Forbid str.format for logging
     "PTH123",  # Checks for uses of `os.path.splitext`
     "D",       # Docstrings

@@ -159,7 +159,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_not_called()
 
-            # check that public key URL and hash will be updated in KVStore if previous hash is outdated/corrupted
+            # check that public key URL and hash will be updated in KVStore
+            # if previous hash is outdated/corrupted
             with patch(
                 "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
             ) as mock_set_file_url_and_hash:
@@ -169,7 +170,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.assert_called_once()
                 assert store["public_key_hash"] != "corrupted_hash"
 
-            # check that a new public key URL will be written to KVStore when an outdated URL is stored there
+            # check that a new public key URL will be written to KVStore when
+            # an outdated URL is stored there
             with (
                 patch(
                     "src.core.config.Config.encryption_config.pgp_public_key_url",

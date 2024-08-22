@@ -1247,7 +1247,8 @@ class BoxesFromPointsTaskBuilder:
         )
 
     def _extract_and_upload_rois(self):
-        # TODO: maybe optimize via splitting into separate threads (downloading, uploading, processing)
+        # TODO: maybe optimize via splitting into separate
+        #  threads (downloading, uploading, processing)
 
         # Watch for the memory used, as the whole dataset can be quite big (gigabytes, terabytes)
         # Consider also packing RoIs cut into archives
@@ -2453,8 +2454,10 @@ class SkeletonsFromBoxesTaskBuilder:
                         )
                         db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                        # Actual task creation in CVAT takes some time, so it's done in an async process.
-                        # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                        # Actual task creation in CVAT takes some time,
+                        # so it's done in an async process.
+                        # The task is fully created once 'update:task' or 'update:job'
+                        # webhook is received.
                         cvat_api.put_task_data(
                             cvat_task.id,
                             cvat_cloud_storage.id,

@@ -300,7 +300,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert db_project.status == ProjectStatuses.canceled.value
 
-    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_with_multiple_creating_projects(
+    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_with_multiple_creating_projects(  # noqa: E501
         self,
     ):
         project_ids = []

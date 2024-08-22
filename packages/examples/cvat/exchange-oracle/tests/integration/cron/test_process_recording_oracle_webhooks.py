@@ -193,7 +193,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert db_job.status == JobStatuses.new.value
 
-    def test_process_incoming_recording_oracle_webhooks_task_task_rejected_type_invalid_project_status(
+    def test_process_incoming_recording_oracle_webhooks_task_task_rejected_type_invalid_project_status(  # noqa: E501
         self,
     ):
         cvat_id = 1
