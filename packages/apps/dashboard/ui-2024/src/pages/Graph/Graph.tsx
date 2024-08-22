@@ -1,4 +1,4 @@
-import { AreaChart, LineChart } from '@components/Charts';
+import { AreaChart } from '@components/Charts';
 import Tabs from '@mui/material/Tabs';
 import TabPanel from '@mui/lab/TabPanel';
 import Tab from '@mui/material/Tab';
@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import PageWrapper from '@components/PageWrapper';
 import Breadcrumbs from '@components/Breadcrumbs';
 
-type graphType = 'bucketed' | 'cumulative';
+type graphType = 'bucketed';
 
 const Graph = () => {
 	const [graphType, setGraphType] = useState<graphType>('bucketed');
@@ -34,13 +34,6 @@ const Graph = () => {
 						label={<Typography fontWeight={600}>Bucketed</Typography>}
 						value="bucketed"
 					/>
-					<Tab
-						sx={{
-							width: { xs: '50%', sm: 'auto' },
-						}}
-						label={<Typography fontWeight={600}>Cumulative</Typography>}
-						value="cumulative"
-					/>
 				</Tabs>
 				<TabPanel
 					sx={{
@@ -49,14 +42,6 @@ const Graph = () => {
 					value="bucketed"
 				>
 					<AreaChart />
-				</TabPanel>
-				<TabPanel
-					sx={{
-						p: 0,
-					}}
-					value="cumulative"
-				>
-					<LineChart />
 				</TabPanel>
 			</TabContext>
 		</PageWrapper>
