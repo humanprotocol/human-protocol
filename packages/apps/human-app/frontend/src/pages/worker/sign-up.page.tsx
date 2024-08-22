@@ -21,9 +21,9 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
 import { passwordChecks } from '@/components/data-entry/password/password-checks';
-import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -32,13 +32,9 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 }
 
 export function SignUpWorkerPage() {
-  const { user, signOut } = useAuth();
-
   useEffect(() => {
-    if (user) {
-      signOut();
-    }
-  }, [signOut, user]);
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: false });
+  }, []);
 
   const methods = useForm<SignUpDto>({
     defaultValues: {
