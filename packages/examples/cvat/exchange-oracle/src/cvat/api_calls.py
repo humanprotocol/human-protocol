@@ -615,7 +615,7 @@ def remove_user_from_org(user_id: int):
     with get_api_client() as api_client:
         try:
             (page, _) = api_client.users_api.list(
-                filter=f'{{"==":[{{"var":"id"}},"{user_id}"]}}',
+                filter='{"==":[{"var":"id"},"%s"]}' % user_id,  # noqa: UP031
                 org=Config.cvat_config.cvat_org_slug,
             )
             if not page.results:
