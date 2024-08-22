@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
-import src.services.cvat as db_service
 from src.core.config import Config
 from src.core.storage import (
     compose_data_bucket_prefix,
@@ -14,16 +13,14 @@ from src.core.storage import (
 from src.services.cloud.utils import BucketAccessInfo
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
-
-    from src.core.types import Networks
+    from src.models.cvat import Project
 
 
 @dataclass
 class EscrowCleaner:
     escrow_address: str
-    chain_id: Networks
-    session: Session
+    chain_id: int
+    projects: list[Project]
 
     def cleanup(self) -> None:
         self._cleanup_cvat()
@@ -31,15 +28,15 @@ class EscrowCleaner:
 
     def _cleanup_cvat(self) -> None:
         deleted_cloud_storage_ids = set()
-        for project in db_service.get_projects_by_escrow_address(self.session, self.escrow_address):
+        for project in self.projects:
             if (
-                project.cvat_cloudstorage_id
+                project.cvat_cloudstorage_id is not None
                 and project.cvat_cloudstorage_id not in deleted_cloud_storage_ids
             ):
                 # probably will allways call this just once
                 cvat_api.delete_cloudstorage(project.cvat_cloudstorage_id)
                 deleted_cloud_storage_ids.add(project.cvat_cloudstorage_id)
-            if project.cvat_id:
+            if project.cvat_id is not None:
                 cvat_api.delete_project(project.cvat_id)
 
     def _cleanup_storage(self) -> None:

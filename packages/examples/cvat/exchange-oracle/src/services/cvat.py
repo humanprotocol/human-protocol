@@ -247,6 +247,10 @@ def delete_project(session: Session, project_id: str) -> None:
     session.delete(project)
 
 
+def delete_projects(session: Session, project_ids: list[str]) -> None:
+    session.execute(delete(Project).where(Project.id.in_(project_ids)))
+
+
 def is_project_completed(session: Session, project_id: str) -> bool:
     project = get_project_by_id(session, project_id)
     jobs = get_jobs_by_cvat_project_id(session, project.cvat_id)

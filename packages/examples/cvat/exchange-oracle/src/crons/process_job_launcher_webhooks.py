@@ -9,11 +9,15 @@ import src.services.webhook as oracle_db_service
 from src.chain.escrow import validate_escrow
 from src.chain.kvstore import get_job_launcher_url
 from src.core.config import Config, CronConfig
-from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
-from src.core.types import JobLauncherEventTypes, OracleWebhookTypes, ProjectStatuses
+from src.core.oracle_events import (
+    ExchangeOracleEvent_EscrowCleaned,
+    ExchangeOracleEvent_TaskCreationFailed,
+)
+from src.core.types import JobLauncherEventTypes, Networks, OracleWebhookTypes, ProjectStatuses
 from src.crons._utils import cron_job, handle_webhook, send_webhook
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
+from src.handlers.escrow_cleanup import EscrowCleaner
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
 
@@ -66,10 +70,15 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                 cvat.create_task(webhook.escrow_address, webhook.chain_id)
 
             except Exception as ex:
-                try:
-                    cvat.remove_task(webhook.escrow_address)
-                except Exception as ex_remove:
-                    logger.exception(ex_remove)
+                projects = cvat_db_service.get_projects_by_escrow_address(
+                    db_session, webhook.escrow_address
+                )
+
+                EscrowCleaner(
+                    webhook.escrow_address, Networks(webhook.chain_id), projects
+                ).cleanup()
+
+                cvat_db_service.delete_projects(db_session, [project.id for project in projects])
 
                 # We should not notify before the webhook handling attempts have expired
                 if webhook.attempts + 1 >= Config.webhook_max_retries:
@@ -120,12 +129,21 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     f"Received escrow cancel event (escrow_address={webhook.escrow_address}). "
                     "Canceling the project"
                 )
-                cvat_db_service.update_project_status(
-                    db_session, project.id, ProjectStatuses.canceled
-                )
 
             cvat_db_service.finish_escrow_creations_by_escrow_address(
                 db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+            )
+            cvat_db_service.update_project_statuses_by_escrow_address(
+                db_session, webhook.escrow_address, webhook.chain_id, ProjectStatuses.canceled
+            )
+            EscrowCleaner(webhook.escrow_address, Networks(webhook.chain_id), projects).cleanup()
+
+            oracle_db_service.outbox.create_webhook(
+                session=db_session,
+                escrow_address=webhook.escrow_address,
+                chain_id=webhook.chain_id,
+                type=OracleWebhookTypes.recording_oracle,
+                event=ExchangeOracleEvent_EscrowCleaned(),
             )
         case _:
             raise AssertionError(f"Unknown job launcher event {webhook.event_type}")

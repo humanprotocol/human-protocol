@@ -2,6 +2,7 @@ import logging
 
 from sqlalchemy.orm import Session
 
+import src.services.cvat as db_service
 import src.services.webhook as oracle_db_service
 from src.chain.kvstore import get_reputation_oracle_url
 from src.core.config import CronConfig
@@ -22,7 +23,6 @@ from src.handlers.escrow_cleanup import EscrowCleaner
 from src.log import ROOT_LOGGER_NAME
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
-import src.services.cvat as db_service
 
 
 @cron_job(module_logger_name)
@@ -37,8 +37,11 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
         with handle_webhook(logger, session, webhook):
             match webhook.event_type:
                 case ReputationOracleEventTypes.escrow_finished:
+                    projects = db_service.get_projects_by_escrow_address(
+                        session, webhook.escrow_address
+                    )
                     EscrowCleaner(
-                        webhook.escrow_address, Networks(webhook.chain_id), session
+                        webhook.escrow_address, Networks(webhook.chain_id), projects
                     ).cleanup()
 
                     db_service.update_project_statuses_by_escrow_address(
