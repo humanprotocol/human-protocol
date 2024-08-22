@@ -9,7 +9,7 @@ import { DataSaved } from '../../generated/KVStore/KVStore';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { isValidEthAddress } from './utils/ethAdrress';
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
@@ -102,22 +102,25 @@ export function handleDataSaved(event: DataSaved): void {
 
     const operator = createOrLoadLeader(ethAddress);
 
-    if (!operator.reputationNetworks) {
-      operator.reputationNetworks = [];
+    let reputationNetworks = operator.reputationNetworks;
+    if (reputationNetworks === null) {
+      reputationNetworks = [];
     }
 
     if (event.params.value == 'ACTIVE') {
-      if (!operator.reputationNetworks) {
-        operator.reputationNetworks = [];
-      }
-      operator.reputationNetworks = operator.reputationNetworks.concat([
-        reputationNetwork.id,
-      ]);
+      reputationNetworks.push(reputationNetwork.id);
     } else if (event.params.value == 'INACTIVE') {
-      operator.reputationNetworks = operator.reputationNetworks.filter(
-        (id) => id != reputationNetwork.id
-      );
+      const filteredNetworks: Bytes[] = [];
+      for (let i = 0; i < reputationNetworks.length; i++) {
+        if (reputationNetworks[i] != reputationNetwork.id) {
+          filteredNetworks.push(reputationNetworks[i]);
+        }
+      }
+      reputationNetworks = filteredNetworks;
     }
+
+    operator.reputationNetworks = reputationNetworks;
+
     operator.save();
   }
 
