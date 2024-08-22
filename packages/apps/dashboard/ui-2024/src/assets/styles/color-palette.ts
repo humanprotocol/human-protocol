@@ -1,5 +1,8 @@
 export const colorPalette = {
 	white: '#F9FAFF',
+	whiteBackground: '#FFF',
+	whiteSolid: '#F6F5FC',
+	skyOpacity: '#DADEF0CC',
 	primary: {
 		main: '#320a8d',
 		light: '#320a8d',

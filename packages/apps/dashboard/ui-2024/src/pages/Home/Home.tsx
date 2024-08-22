@@ -8,7 +8,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Divider from '@mui/material/Divider';
 import { Link } from 'react-router-dom';
 import cup from '@assets/cup.png';
-import Leaderboard from '@components/Home/Leaderboard';
+import Leaderboard from '@components/Home/Leaderboard/Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
 import { HMTPrice } from '@pages/Home/HMTPrice';
 import { TotalNumberOfTasks } from '@pages/Home/TotalNumberOfTasks';
@@ -96,7 +96,7 @@ const Home: React.FC = () => {
 				img={cup}
 			/>
 
-			<Leaderboard pagination />
+			<Leaderboard />
 		</PageWrapper>
 	);
 };

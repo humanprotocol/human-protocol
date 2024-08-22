@@ -5,7 +5,6 @@ import { apiPaths } from '../api-paths';
 import { validateResponse } from '@services/validate-response';
 
 const successHcaptchaGeneralStatsResponseSchema = z.object({
-	served: z.number(),
 	solved: z.number(),
 });
 

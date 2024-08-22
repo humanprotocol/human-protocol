@@ -14,6 +14,12 @@ export const apiPaths = {
 	hcaptchaStatsDaily: {
 		path: '/stats/hcaptcha/daily',
 	},
+	leaderboardDetails: {
+		path: '/details/leaders',
+	},
+	leaderboardDetailsAll: {
+		path: '/details/leaders/all',
+	},
 	addressDetails: {
 		path: '/details',
 	},

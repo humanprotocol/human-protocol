@@ -10,7 +10,9 @@ interface AbbreviateClipboardProps {
 }
 const AbbreviateClipboard = ({ value }: AbbreviateClipboardProps) => (
 	<Stack direction="row" gap={1}>
-		<Typography>{abbreviateValue(value)}</Typography>
+		<Typography sx={{ whiteSpace: 'nowrap' }}>
+			{abbreviateValue(value)}
+		</Typography>
 		<IconButton
 			onClick={() => {
 				navigator.clipboard.writeText(value);
