@@ -18,11 +18,25 @@ export class QualificationService {
 
   public async getQualifications(): Promise<QualificationDto[]> {
     try {
-      const reputationOracleUrl = await KVStoreUtils.get(
-        ChainId.POLYGON_AMOY,
-        this.web3ConfigService.reputationOracleAddress,
-        KVStoreKeys.url,
-      );
+      let reputationOracleUrl: string | undefined;
+
+      try {
+        reputationOracleUrl = await KVStoreUtils.get(
+          ChainId.POLYGON_AMOY,
+          this.web3ConfigService.reputationOracleAddress,
+          KVStoreKeys.url,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Error fetching reputation oracle URL: ${error.message}`,
+          error.stack,
+          QualificationService.name,
+        );
+        throw new ControlledError(
+          ErrorWeb3.ReputationOracleUrlNotSet,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
       if (!reputationOracleUrl) {
         throw new ControlledError(
@@ -42,6 +56,11 @@ export class QualificationService {
       if (error instanceof ControlledError) {
         throw error;
       } else {
+        this.logger.error(
+          `Failed to fetch qualifications: ${error.message}`,
+          error.stack,
+          QualificationService.name,
+        );
         throw new ControlledError(
           ErrorQualification.FailedToFetchQualifications,
           HttpStatus.BAD_REQUEST,

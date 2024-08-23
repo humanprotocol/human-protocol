@@ -233,7 +233,6 @@ export class UserService {
       value: signature,
     };
   }
-
   public async enableOperator(
     user: UserEntity,
     signature: string,
@@ -256,14 +255,18 @@ export class UserService {
     }
 
     const signer = this.web3Service.getSigner(chainId);
-
     const kvstore = await KVStoreClient.build(signer);
 
-    const status = await KVStoreUtils.get(
-      chainId,
-      signer.address,
-      user.evmAddress,
-    );
+    let status: string | undefined;
+    try {
+      status = await KVStoreUtils.get(chainId, signer.address, user.evmAddress);
+    } catch (error) {
+      this.logger.error(
+        `Error fetching operator status for address ${user.evmAddress}: ${error.message}`,
+        error.stack,
+        UserService,
+      );
+    }
 
     if (status === OperatorStatus.ACTIVE) {
       throw new ControlledError(

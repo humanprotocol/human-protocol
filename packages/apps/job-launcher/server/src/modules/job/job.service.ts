@@ -1570,11 +1570,20 @@ export class JobService {
     oracleAddress: string,
     chainId: ChainId,
   ): Promise<bigint> {
-    const feeValue = await KVStoreUtils.get(
-      chainId,
-      oracleAddress,
-      KVStoreKeys.fee,
-    );
+    let feeValue: string | undefined;
+
+    try {
+      feeValue = await KVStoreUtils.get(
+        chainId,
+        oracleAddress,
+        KVStoreKeys.fee,
+      );
+    } catch (error) {
+      this.logger.log(
+        `Error fetching oracle fee for address ${oracleAddress} on chain ${chainId}: ${error.message}`,
+        JobService.name,
+      );
+    }
 
     return BigInt(feeValue ? feeValue : 1);
   }

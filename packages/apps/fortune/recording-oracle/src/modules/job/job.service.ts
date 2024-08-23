@@ -182,56 +182,77 @@ export class JobService {
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
       submissionsRequired
     ) {
-      const reputationOracleAddress =
-        await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-      const reputationOracleWebhook = (await KVStoreUtils.get(
-        webhook.chainId,
-        reputationOracleAddress,
-        KVStoreKeys.webhookUrl,
-      )) as string;
+      let reputationOracleWebhook: string | null = null;
+      try {
+        const reputationOracleAddress =
+          await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+        reputationOracleWebhook = (await KVStoreUtils.get(
+          webhook.chainId,
+          reputationOracleAddress,
+          KVStoreKeys.webhookUrl,
+        )) as string;
+      } catch (error: any) {
+        this.logger.log(
+          `Error fetching reputation oracle webhook: ${error.message}`,
+          JobService.name,
+        );
+      }
 
-      await sendWebhook(
-        this.httpService,
-        this.logger,
-        reputationOracleWebhook,
-        {
-          chainId: webhook.chainId,
-          escrowAddress: webhook.escrowAddress,
-          eventType: EventType.TASK_COMPLETED,
-        },
-        this.web3ConfigService.privateKey,
-      );
+      if (reputationOracleWebhook) {
+        await sendWebhook(
+          this.httpService,
+          this.logger,
+          reputationOracleWebhook,
+          {
+            chainId: webhook.chainId,
+            escrowAddress: webhook.escrowAddress,
+            eventType: EventType.TASK_COMPLETED,
+          },
+          this.web3ConfigService.privateKey,
+        );
 
-      return 'The requested job is completed.';
+        return 'The requested job is completed.';
+      }
     }
+
     if (errorSolutions.length) {
-      const exchangeOracleURL = (await KVStoreUtils.get(
-        webhook.chainId,
-        await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
-        KVStoreKeys.webhookUrl,
-      )) as string;
+      let exchangeOracleURL: string | null = null;
+      try {
+        exchangeOracleURL = (await KVStoreUtils.get(
+          webhook.chainId,
+          await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
+          KVStoreKeys.webhookUrl,
+        )) as string;
+      } catch (error: any) {
+        this.logger.log(
+          `Error fetching exchange oracle URL: ${error.message}`,
+          JobService.name,
+        );
+      }
 
-      const eventData: AssignmentRejection[] = errorSolutions.map(
-        (solution) => ({
-          assigneeId: solution.workerAddress,
-          reason: solution.error as SolutionError,
-        }),
-      );
+      if (exchangeOracleURL) {
+        const eventData: AssignmentRejection[] = errorSolutions.map(
+          (solution) => ({
+            assigneeId: solution.workerAddress,
+            reason: solution.error as SolutionError,
+          }),
+        );
 
-      const webhookBody: WebhookDto = {
-        escrowAddress: webhook.escrowAddress,
-        chainId: webhook.chainId,
-        eventType: EventType.SUBMISSION_REJECTED,
-        eventData: { assignments: eventData },
-      };
+        const webhookBody: WebhookDto = {
+          escrowAddress: webhook.escrowAddress,
+          chainId: webhook.chainId,
+          eventType: EventType.SUBMISSION_REJECTED,
+          eventData: { assignments: eventData },
+        };
 
-      await sendWebhook(
-        this.httpService,
-        this.logger,
-        exchangeOracleURL,
-        webhookBody,
-        this.web3ConfigService.privateKey,
-      );
+        await sendWebhook(
+          this.httpService,
+          this.logger,
+          exchangeOracleURL,
+          webhookBody,
+          this.web3ConfigService.privateKey,
+        );
+      }
     }
 
     return 'Solutions recorded.';

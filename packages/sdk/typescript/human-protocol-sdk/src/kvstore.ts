@@ -15,6 +15,7 @@ import {
   ErrorKVStoreEmptyKey,
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
+  InvalidKeyError,
 } from './error';
 import gqlFetch from 'graphql-request';
 import { NetworkData } from './types';
@@ -406,7 +407,7 @@ export class KVStoreUtils {
     );
 
     if (!kvstores || kvstores.length === 0) {
-      return '';
+      throw new InvalidKeyError(key, address);
     }
 
     return kvstores[0].value;

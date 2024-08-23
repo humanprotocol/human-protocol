@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -47,6 +47,7 @@ import { SiteKeyType } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly salt: string;
 
   constructor(
@@ -172,17 +173,23 @@ export class AuthService {
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
-      //Try to fetch status from subgraph, in case the data is not indexed yet, just use status from database.
       try {
         const operatorStatus = await KVStoreUtils.get(
           chainId,
           this.web3Service.getOperatorAddress(),
           userEntity.evmAddress.toLowerCase(),
         );
+
         if (operatorStatus && operatorStatus !== '') {
           status = operatorStatus;
         }
-      } catch (e) {}
+      } catch (error) {
+        this.logger.error(
+          `Error fetching operator status for user ${userEntity.id} on chain ${chainId}: ${error.message}`,
+          error.stack,
+          AuthService.name,
+        );
+      }
     }
 
     const payload: any = {
@@ -196,7 +203,7 @@ export class AuthService {
     };
 
     if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
-      const existingHcaptchaSiteKey = userEntity.siteKeys?.find(
+      const existingHcaptchaSiteKey = userEntity.siteKeys.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
       );
       if (existingHcaptchaSiteKey) {
@@ -397,7 +404,6 @@ export class AuthService {
   public compareToken(token: string, hashedToken: string): boolean {
     return this.hashToken(token) === hashedToken;
   }
-
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
     const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
@@ -428,25 +434,80 @@ export class AuthService {
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
+    let role;
+    try {
+      role = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role);
+    } catch (error) {
+      this.logger.error(
+        `Error fetching role: ${error.message}`,
+        error.stack,
+        AuthService.name,
+      );
+      throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
+    }
+
     if (
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role),
+        role,
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee))) {
+    try {
+      const fee = await KVStoreUtils.get(
+        chainId,
+        data.address,
+        KVStoreKeys.fee,
+      );
+      if (!fee) {
+        throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error fetching fee: ${error.message}`,
+        error.stack,
+        AuthService.name,
+      );
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url))) {
+    try {
+      const url = await KVStoreUtils.get(
+        chainId,
+        data.address,
+        KVStoreKeys.url,
+      );
+      if (!url) {
+        throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error fetching URL: ${error.message}`,
+        error.stack,
+        AuthService.name,
+      );
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      !(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.jobTypes))
-    ) {
+    try {
+      const jobTypes = await KVStoreUtils.get(
+        chainId,
+        data.address,
+        KVStoreKeys.jobTypes,
+      );
+      if (!jobTypes) {
+        throw new ControlledError(
+          ErrorAuth.InvalidJobType,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error fetching job types: ${error.message}`,
+        error.stack,
+        AuthService.name,
+      );
       throw new ControlledError(
         ErrorAuth.InvalidJobType,
         HttpStatus.BAD_REQUEST,
