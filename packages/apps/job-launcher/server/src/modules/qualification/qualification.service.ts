@@ -18,7 +18,7 @@ export class QualificationService {
 
   public async getQualifications(): Promise<QualificationDto[]> {
     try {
-      let reputationOracleUrl: string | undefined;
+      let reputationOracleUrl: string;
 
       try {
         reputationOracleUrl = await KVStoreUtils.get(
@@ -32,13 +32,6 @@ export class QualificationService {
           error.stack,
           QualificationService.name,
         );
-        throw new ControlledError(
-          ErrorWeb3.ReputationOracleUrlNotSet,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      if (!reputationOracleUrl) {
         throw new ControlledError(
           ErrorWeb3.ReputationOracleUrlNotSet,
           HttpStatus.BAD_REQUEST,
