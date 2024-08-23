@@ -3,7 +3,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from human_protocol_sdk.escrow import EscrowClientError
-from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
+from human_protocol_sdk.kvstore import KVStoreClientError, KVStoreUtils
+from human_protocol_sdk.constants import ChainId
 from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 
@@ -130,7 +131,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 "src.core.config.Config.encryption_config.pgp_public_key_url", PGP_PUBLIC_KEY_URL_1
             ),
             patch(
-                "human_protocol_sdk.kvstore.KVStoreClient.get_file_url_and_verify_hash",
+                "human_protocol_sdk.kvstore.KVStoreUtils.get_file_url_and_verify_hash",
                 get_file_url_and_verify_hash,
             ),
             patch("src.core.config.LocalhostConfig.is_configured") as mock_localhost_configured,
@@ -139,8 +140,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_localhost_configured.return_value = True
             mock_web3.return_value = self.w3
 
-            kvstore_client = KVStoreClient(self.w3)
-            assert kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr) is None
+            assert KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr) is None
 
             # check that public key will be set to KVStore at first time
             with patch(
@@ -149,9 +149,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                assert (
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
-                    == PGP_PUBLIC_KEY_URL_1
+                self.assertEquals(
+                    KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr),
+                    PGP_PUBLIC_KEY_URL_1,
                 )
 
             # check that the same public key URL is not written to KVStore a second time
@@ -187,7 +187,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                assert (
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
-                    == PGP_PUBLIC_KEY_URL_2
+                self.assertEquals(
+                    KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr),
+                    PGP_PUBLIC_KEY_URL_2,
                 )
