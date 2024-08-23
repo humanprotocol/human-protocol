@@ -148,4 +148,5 @@ export enum ErrorQualification {
   NotFound = 'Qualification not found',
   NoWorkersFound = 'No workers found for the provided addresses or emails',
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
+  CannotDeleteAssignedQualification = 'Cannot delete qualification because it is assigned to users',
 }
