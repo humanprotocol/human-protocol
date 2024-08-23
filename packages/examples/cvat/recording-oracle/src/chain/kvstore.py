@@ -8,9 +8,7 @@ from src.core.config import Config
 
 
 def get_role_by_address(chain_id: int, address: str) -> str:
-    role = KVStoreUtils.get(chain_id, address, "role")
-
-    return role
+    return KVStoreUtils.get(chain_id, address, "role")
 
 
 def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
@@ -40,9 +38,7 @@ def register_in_kvstore() -> None:
 
             try:
                 kvstore_public_key_url = KVStoreUtils.get_file_url_and_verify_hash(
-                    network_config.chain_id,
-                    network_config.addr,
-                    KVStoreKeys.public_key.value
+                    network_config.chain_id, network_config.addr, KVStoreKeys.public_key.value
                 )
             except KVStoreClientError as ex:
                 if "Invalid hash" not in str(ex):
