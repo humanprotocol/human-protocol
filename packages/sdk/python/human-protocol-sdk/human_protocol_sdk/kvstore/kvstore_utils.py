@@ -157,7 +157,7 @@ class KVStoreUtils:
             or "kvstores" not in kvstore_data["data"]
             or len(kvstore_data["data"]["kvstores"]) == 0
         ):
-            return ""
+            raise KVStoreClientError(f"Key '{key}' not found for address {address}")
 
         return kvstore_data["data"]["kvstores"][0]["value"]
 
