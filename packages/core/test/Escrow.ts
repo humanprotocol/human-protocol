@@ -662,8 +662,14 @@ describe('Escrow', function () {
         )
           .to.emit(escrow, 'BulkTransfer')
           .withArgs(anyValue, recepients, [7], true)
-          .to.emit(escrow, 'BulkPayout')
-          .withArgs(10);
+          .to.emit(escrow, 'Payout')
+          .withArgs(recepients[0], 7)
+          .to.emit(escrow, 'Payout')
+          .withArgs(await reputationOracle.getAddress(), 1)
+          .to.emit(escrow, 'Payout')
+          .withArgs(await recordingOracle.getAddress(), 1)
+          .to.emit(escrow, 'Payout')
+          .withArgs(await exchangeOracle.getAddress(), 1);
       });
     });
 

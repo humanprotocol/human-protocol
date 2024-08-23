@@ -7,6 +7,8 @@ import {
   BulkTransfer,
   Cancelled,
   Completed,
+  Fund,
+  Payout,
 } from '../../generated/templates/Escrow/Escrow';
 
 export function createPendingEvent(
@@ -120,4 +122,56 @@ export function createCompletedEvent(sender: Address): Completed {
   newCompletedEvent.parameters = [];
 
   return newCompletedEvent;
+}
+
+export function createFundEvent(
+  sender: Address,
+  amount: i32,
+  timestamp: BigInt
+): Fund {
+  const newFundEvent = changetype<Fund>(newMockEvent());
+
+  newFundEvent.block.timestamp = timestamp;
+
+  newFundEvent.transaction.from = sender;
+
+  newFundEvent.parameters = [];
+
+  const amountParam = new ethereum.EventParam(
+    '_amount',
+    ethereum.Value.fromI32(amount)
+  );
+
+  newFundEvent.parameters.push(amountParam);
+
+  return newFundEvent;
+}
+
+export function createPayoutEvent(
+  sender: Address,
+  to: Address,
+  amount: i32,
+  timestamp: BigInt
+): Payout {
+  const newPayoutEvent = changetype<Payout>(newMockEvent());
+
+  newPayoutEvent.block.timestamp = timestamp;
+
+  newPayoutEvent.transaction.from = sender;
+
+  newPayoutEvent.parameters = [];
+
+  const toParam = new ethereum.EventParam(
+    '_to',
+    ethereum.Value.fromAddress(to)
+  );
+  const amountParam = new ethereum.EventParam(
+    '_amount',
+    ethereum.Value.fromI32(amount)
+  );
+
+  newPayoutEvent.parameters.push(toParam);
+  newPayoutEvent.parameters.push(amountParam);
+
+  return newPayoutEvent;
 }

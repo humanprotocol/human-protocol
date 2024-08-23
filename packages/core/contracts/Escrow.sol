@@ -32,7 +32,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event Cancelled();
     event Completed();
     event Fund(uint256 _amount);
-    event BulkPayout(uint256 _amount);
+    event Payout(address _to, uint256 _amount);
 
     EscrowStatuses public override status;
 
@@ -306,17 +306,21 @@ contract Escrow is IEscrow, ReentrancyGuard {
         for (uint256 i = 0; i < _recipients.length; ++i) {
             if (finalAmounts[i] > 0) {
                 _safeTransfer(token, _recipients[i], finalAmounts[i]);
+                emit Payout(_recipients[i], finalAmounts[i]);
             }
         }
 
         if (reputationOracleFee > 0) {
             _safeTransfer(token, reputationOracle, reputationOracleFee);
+            emit Payout(reputationOracle, reputationOracleFee);
         }
         if (recordingOracleFee > 0) {
             _safeTransfer(token, recordingOracle, recordingOracleFee);
+            emit Payout(recordingOracle, recordingOracleFee);
         }
         if (exchangeOracleFee > 0) {
             _safeTransfer(token, exchangeOracle, exchangeOracleFee);
+            emit Payout(exchangeOracle, exchangeOracleFee);
         }
 
         bool isPartial;
@@ -329,7 +333,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
 
         emit BulkTransfer(_txId, _recipients, finalAmounts, isPartial);
-        emit BulkPayout(aggregatedBulkAmount);
     }
 
     function finalizePayouts(

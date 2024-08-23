@@ -84,6 +84,7 @@ type Escrow @entity {
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
   jobRequesterId: String # string
+  isNonHMT: Boolean
   createdAt: BigInt!
 }
 
