@@ -7,12 +7,6 @@ from src.chain.web3 import get_web3
 from src.core.config import Config
 
 
-def get_role_by_address(chain_id: int, address: str) -> str:
-    role = KVStoreUtils.get(chain_id, address, "role")
-
-    return role
-
-
 def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
     if url := Config.localhost.exchange_oracle_url:
         return url
