@@ -142,7 +142,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_web3.return_value = self.w3
 
             kvstore_client = KVStoreClient(self.w3)
-            self.assertIsNone(KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr))
+            self.assertIsNone(KVStoreUtils.get_file_url_and_verify_hash(ChainId(self.w3.eth.chain_id), LocalhostConfig.addr))
 
             # check that public key will be set to KVStore at first time
             with patch(
@@ -152,7 +152,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
                 self.assertEquals(
-                    KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr),
+                    KVStoreUtils.get_file_url_and_verify_hash(ChainId(self.w3.eth.chain_id), LocalhostConfig.addr),
                     PGP_PUBLIC_KEY_URL_1,
                 )
 
@@ -188,6 +188,6 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
                 self.assertEquals(
-                    KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr),
+                    KVStoreUtils.get_file_url_and_verify_hash(ChainId(self.w3.eth.chain_id), LocalhostConfig.addr),
                     PGP_PUBLIC_KEY_URL_2,
                 )
