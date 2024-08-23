@@ -1,7 +1,7 @@
 import json
 
 from human_protocol_sdk.constants import ChainId, Status
-from human_protocol_sdk.encryption import Encryption
+from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
