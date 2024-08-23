@@ -5,11 +5,10 @@ import {
   IsEnum,
   IsEthereumAddress,
   IsString,
-  Matches,
   IsUUID,
   IsOptional,
+  MinLength,
 } from 'class-validator';
-import { IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
 import { Role } from '../../common/enums/user';
@@ -48,12 +47,10 @@ export class RefreshDto {
 }
 
 export class ValidatePasswordDto {
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/, {
-    message:
-      'Password is not strong enough. Password must be at least 8 characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character.',
+  @MinLength(8, {
+    message: 'Password must be at least 8 characters long.',
   })
   @ApiProperty()
-  @IsPassword()
   public password: string;
 }
 

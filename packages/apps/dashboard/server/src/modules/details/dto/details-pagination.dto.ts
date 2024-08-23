@@ -6,15 +6,18 @@ import {
   IsString,
   Min,
   Max,
+  IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
 
 import { IsRoleValid } from './validation/role-validation';
+import { MainnetsId } from '../../../common/utils/constants';
 
 export class DetailsTransactionsPaginationDto {
-  @ApiProperty()
+  @ApiProperty({ enum: MainnetsId })
   @IsEnum(ChainId)
+  @IsIn(Object.values(MainnetsId))
   @Transform(({ value }) => parseInt(value))
   public chainId: ChainId;
 
@@ -42,8 +45,9 @@ export class DetailsTransactionsPaginationDto {
 }
 
 export class DetailsEscrowsPaginationDto {
-  @ApiProperty()
+  @ApiProperty({ enum: MainnetsId })
   @IsEnum(ChainId)
+  @IsIn(Object.values(MainnetsId))
   @Transform(({ value }) => parseInt(value))
   public chainId: ChainId;
 

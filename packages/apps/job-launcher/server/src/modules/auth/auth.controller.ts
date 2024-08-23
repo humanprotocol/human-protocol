@@ -8,7 +8,6 @@ import {
   UseInterceptors,
   Request,
   Logger,
-  UsePipes,
   Ip,
   HttpCode,
   HttpStatus,
@@ -37,7 +36,6 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
-import { PasswordValidationPipe } from '../../common/pipes';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
 import { ControlledError } from '../../common/errors/controlled';
@@ -68,7 +66,6 @@ export class AuthJwtController {
     private readonly tokenRepository: TokenRepository,
   ) {}
 
-  @UsePipes(new PasswordValidationPipe())
   @Public()
   @Post('/signup')
   @UseInterceptors(ClassSerializerInterceptor)

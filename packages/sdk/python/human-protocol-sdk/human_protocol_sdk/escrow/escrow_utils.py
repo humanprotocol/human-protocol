@@ -200,6 +200,7 @@ class EscrowUtils:
             not escrows_data
             or "data" not in escrows_data
             or "escrows" not in escrows_data["data"]
+            or not escrows_data["data"]["escrows"]
         ):
             return []
 
@@ -395,7 +396,12 @@ class EscrowUtils:
             },
         )
 
-        if not data or "data" not in data or "escrowStatusEvents" not in data["data"]:
+        if (
+            not data
+            or "data" not in data
+            or "escrowStatusEvents" not in data["data"]
+            or not data["data"]["escrowStatusEvents"]
+        ):
             return []
 
         status_events = data["data"]["escrowStatusEvents"]

@@ -15,7 +15,6 @@ import {
   UseGuards,
   UseInterceptors,
   Logger,
-  UsePipes,
   Ip,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
@@ -35,7 +34,6 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
-import { PasswordValidationPipe } from '../../common/pipes';
 import { TokenType } from './token.entity';
 
 @ApiTags('Auth')
@@ -64,7 +62,6 @@ export class AuthJwtController {
     private readonly tokenRepository: TokenRepository,
   ) {}
 
-  @UsePipes(new PasswordValidationPipe())
   @Public()
   @Post('/signup')
   @UseInterceptors(ClassSerializerInterceptor)
