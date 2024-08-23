@@ -1,34 +1,41 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+* Use specific versions of subgraph to avoid conflicts with upgrades
 
-### Fixed
+#### Deprecated
 
-### Security
+#### Removed
 
-# How to upgrade
+#### Fixed
 
-## Typescript
+* Avoid `NoneType object has no attribute get` errors
+* Fix bytes problem in statistics clients
 
-### yarn
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
