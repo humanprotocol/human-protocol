@@ -70,7 +70,7 @@ export function Navbar({
         width: '100%',
         px: isMobile ? NAVBAR_PADDING : 0,
         py: isMobile ? '32px' : 0,
-        zIndex: '1300',
+        zIndex: '130',
         position: open ? 'sticky' : 'relative',
         top: open ? '0' : 'unset',
       }}
