@@ -41,6 +41,11 @@ class S3Client(StorageClient):
         bucket = unquote(bucket) if bucket else self._bucket
         self.client.delete_object(Bucket=bucket, Key=unquote(key))
 
+    def remove_files(self, keys: list[str], *, bucket: str | None = None):
+        bucket = unquote(bucket) if bucket else self._bucket
+        objects = {"Objects": [{"Key": unquote(key)} for key in keys]}
+        self.client.delete_objects(Bucket=bucket, Delete=objects)
+
     def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket
         try:

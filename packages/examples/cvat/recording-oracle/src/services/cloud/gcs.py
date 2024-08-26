@@ -32,6 +32,11 @@ class GcsClient(StorageClient):
         bucket_client = self.client.get_bucket(bucket)
         bucket_client.delete_blob(unquote(key))
 
+    def remove_files(self, keys: list[str], *, bucket: str | None = None):
+        bucket = unquote(bucket) if bucket else self._bucket
+        bucket_client = self.client.get_bucket(bucket)
+        bucket_client.delete_blobs([unquote(key) for key in keys])
+
     def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)

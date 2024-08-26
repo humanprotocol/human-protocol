@@ -33,6 +33,7 @@ class OracleWebhookStatuses(str, Enum):
 class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     task_creation_failed = "task_creation_failed"
     task_finished = "task_finished"
+    escrow_cleaned = "escrow_cleaned"
 
 
 class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
