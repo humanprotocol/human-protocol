@@ -5,7 +5,6 @@ import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
-import { passwordRegex } from '@/shared/helpers/regex';
 
 export const signUpDtoSchema = z
   .object({
@@ -21,8 +20,8 @@ export const signUpDtoSchema = z
       .object({
         password: z
           .string()
-          .max(50, t('validation.max', { count: 50 }))
-          .regex(passwordRegex, t('validation.passwordWeak')),
+          .min(8, t('validation.min'))
+          .max(50, t('validation.max', { count: 50 })),
         confirmPassword: z
           .string()
           .min(1, t('validation.required'))

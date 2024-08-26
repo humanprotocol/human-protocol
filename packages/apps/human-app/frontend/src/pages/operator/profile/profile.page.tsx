@@ -194,15 +194,15 @@ export function OperatorProfilePage() {
             <List>
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsProcessed')}
-                paragraph="-"
+                paragraph={statsData.escrows_processed.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsActive')}
-                paragraph="-"
+                paragraph={statsData.escrows_active.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsCancelled')}
-                paragraph="-"
+                paragraph={statsData.escrows_cancelled.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.workersAmount')}

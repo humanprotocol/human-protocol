@@ -17,6 +17,11 @@ export const gatewayConfigServiceMock = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
+      WORKER_REGISTRATION: {
+        endpoint: '/user/registration',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      },
       EMAIL_VERIFICATION: {
         endpoint: '/auth/email-verification',
         method: 'POST',

@@ -43,6 +43,16 @@ export class ReputationGetAllQueryDto {
   @IsOptional()
   @Transform(({ value }) => Number(value))
   public chainId?: ChainId;
+
+  @ApiPropertyOptional({
+    type: [ReputationEntityType],
+    enum: ReputationEntityType,
+    name: 'roles',
+  })
+  @IsEnum(ReputationEntityType, { each: true })
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  public roles?: ReputationEntityType[];
 }
 
 export class ReputationGetParamsDto {

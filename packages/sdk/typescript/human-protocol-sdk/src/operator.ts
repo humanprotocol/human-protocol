@@ -165,6 +165,8 @@ export class OperatorUtils {
       role: role,
     });
 
+    if (!reputationNetwork) return [];
+
     return reputationNetwork.operators.map((operator) => {
       let jobTypes: string[] = [];
 
@@ -214,6 +216,8 @@ export class OperatorUtils {
     }>(getSubgraphUrl(networkData), GET_REWARD_ADDED_EVENTS_QUERY, {
       slasherAddress: slasherAddress.toLowerCase(),
     });
+
+    if (!rewardAddedEvents) return [];
 
     return rewardAddedEvents.map((reward: any) => {
       return {

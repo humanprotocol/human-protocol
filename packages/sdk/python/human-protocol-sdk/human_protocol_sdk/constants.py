@@ -40,7 +40,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/ethereum/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BtC96WCK6ZpZ35v94MK6rZNiBzDEZYHFzDmhMYyZ369D"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWGUDcQG1e8bjp9LRcyWCo4xfWcVCdgApi59sY6rgdRkS"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -74,7 +74,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/UMLaZHtLE9LxzDyvBLBgfWj4erzYzYMeGUbQtxtyMaE"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmfCCRC1cGKWuoRtaj2ZJKyaw97Ry15TbGiC4u3veTq8iX"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
@@ -91,7 +91,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc/version/latest"
         ),
         "subgraph_url_api_key": (
-            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/JBJPC3YmRSNjyjRTTpazhhSX5CCZ4CeBx6ptRsM8PCBb"
+            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWNVgcdzBkDyCNBYd7jBp1vChj9B3ah7nKMSXoDkzzXYm"
         ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
@@ -108,7 +108,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BnaC4CDqgdbGvcgM7KoZ6d7Yeebsm7NvLFrr61Lxg6Ao"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmaEPv3KDMJJJ8EWfcKWX7FJGDBudHhuHDCMR2LkbYhdNR"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -127,7 +127,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/polygon/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HHYwCHBvDrjckpNB4jbB8k63pSot6rGtBYLBygGji3vD"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmS2jKUstRaGWyAhytjA2b84grhXFKouZ3fzP9fPp2etum"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
@@ -163,7 +163,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FmdCVzHV3bB4abPVYtBALtBHr7ZRZmZ67m5c432S7GZH"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVfssyiU81KwrTVL1QRjj4LPpTkA1ZmexHTRVg51J5YxP"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
@@ -180,7 +180,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/moonbeam/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BH5Sm6exn76o5frV5VeCufChB43DCfMXCQsdtWt4AuQP"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmU5hSFUvu2fp8EWU3uqxcz477gWjXjRq3jnpMT3KG14Sg"
         ),
         "hmt_address": "0x3b25BC1dC591D24d60560d0135D6750A561D4764",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -199,7 +199,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/moonbase-alpha/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/AmmRkJszUbjfUwHubcRkU6CfG1Q9psRWRbbHADVmsLjE"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmf9qH6CCxBzxkruDLLJzJTm4ig8LkSZYErGCNfJC5vsgQ"
         ),
         "hmt_address": "0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3",
         "factory_address": "0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed",
@@ -216,7 +216,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/avalanche/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FweDaDWZ6ZDcsA63wsjnWgdgw4aCbkiVQYMYvtcP5p2u"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmbKoD9diMdiLoVgAzJmjM4Qj6jeUQAD8ztquPMMcaZVFA"
         ),
         "hmt_address": "0x12365293cb6477d4fc2686e46BB97E3Fb64f1550",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -235,7 +235,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/fuji/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CnZCDsWziQF3jNoqgQMkmJbF9frof5osM3hN5eUgyL5u"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXcSyzYPk4AFyWq4wubxrgVNYuse8zHiQYUZR7WFinRSj"
         ),
         "hmt_address": "0x9406d5c635AD22b0d76c75E52De57A2177919ca3",
         "factory_address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
@@ -254,7 +254,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/celo/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HTgMnYWGsdsw41o8dyph1bwhotuXh6va3L8r8DGgLjsA"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXCUVfazFdQ9s1gWHyr7eNGTUY1zLVhmVGoVYhLbkT4ib"
         ),
         "hmt_address": "0x19Ead835951493A763c96910255d5eeF147E914F",
         "factory_address": "0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08",
@@ -271,7 +271,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/celo-alfajores/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/EGWCWuzBNkbypW8ipRKuyGwq8azoCy6LKKosGgSPMGRD"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWSLvacfR6xiJ8dYJbABtMg3r2TuoKBSjMGSofJVh2uoR"
         ),
         "hmt_address": "0x2736B33455A872dC478E1E004106D04c35472468",
         "factory_address": "0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569",
@@ -288,7 +288,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/xlayer/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmY7z7abXHxFBSqzeM67q5AYxF4uRLFvpVrQQQpwVJqMkQ"
         ),
         "hmt_address": "0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa",
         "factory_address": "0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15",
@@ -305,7 +305,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/xlayer-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/9zd1LcywWjuSUtde4ofC8oyyzpawPwGUiPsvqTq247xk"
+            "https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVw3K8cdbommhhH6jhmkLGQAbPjgWuYYeUfBCQv6rmJTr"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e",
@@ -367,3 +367,5 @@ class KVStoreKeys(Enum):
     webhook_url = "webhook_url"
     url = "url"
     job_types = "job_types"
+    registration_needed = "registration_needed"
+    registration_instructions = "registration_instructions"

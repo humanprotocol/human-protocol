@@ -2,21 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class OracleStatsDto {
   @ApiProperty({
-    name: 'active_escrows',
-  })
-  activeEscrows: number;
-
-  @ApiProperty({
-    name: 'completed_escrows',
-  })
-  completedEscrows: number;
-
-  @ApiProperty({
-    name: 'canceled_escrows',
-  })
-  canceledEscrows: number;
-
-  @ApiProperty({
     name: 'workers_total',
   })
   workersTotal: number;
@@ -35,6 +20,21 @@ export class OracleStatsDto {
     name: 'assignments_expired',
   })
   assignmentsExpired: number;
+  
+  @ApiProperty({
+    name: 'escrows_processed',
+  })
+  escrowsProcessed: number;
+
+  @ApiProperty({
+    name: 'escrows_active',
+  })
+  escrowsActive: number;
+
+  @ApiProperty({
+    name: 'escrows_cancelled',
+  })
+  escrowsCancelled: number;
 
   constructor(init?: Partial<OracleStatsDto>) {
     Object.assign(this, init);

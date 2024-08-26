@@ -4,6 +4,9 @@ import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
+  RegisterWorkerCommand,
+  RegisterWorkerData,
+  RegisterWorkerResponse,
   SignupWorkerCommand,
   SignupWorkerData,
 } from '../../modules/user-worker/model/worker-registration.model';
@@ -124,6 +127,7 @@ export class ReputationOracleGateway {
       ReputationOracleEndpoints.WORKER_SIGNUP,
       signupWorkerData,
     );
+
     return this.handleRequestToReputationOracle<void>(options);
   }
 
@@ -167,6 +171,22 @@ export class ReputationOracleGateway {
       data,
     );
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
+  }
+
+  async sendWorkerRegistration(command: RegisterWorkerCommand) {
+    const data = this.mapper.map(
+      command,
+      RegisterWorkerCommand,
+      RegisterWorkerData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.WORKER_REGISTRATION,
+      data,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<RegisterWorkerResponse>(
+      options,
+    );
   }
 
   async sendEmailVerification(command: EmailVerificationCommand) {

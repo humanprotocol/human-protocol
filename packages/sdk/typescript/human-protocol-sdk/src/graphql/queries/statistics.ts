@@ -52,18 +52,22 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
   }
 `;
 
+const hmtStatisticsId = Buffer.from('hmt-statistics-id').toString('hex');
+
 export const GET_HMTOKEN_STATISTICS_QUERY = gql`
   query GetHMTokenStatistics {
-    hmtokenStatistics(id: "hmt-statistics-id") {
+    hmtokenStatistics(id: "${hmtStatisticsId}") {
       ...HMTokenStatisticsFields
     }
   }
   ${HMTOKEN_STATISTICS_FRAGMENT}
 `;
 
+const escrowStatisticsId = Buffer.from('escrow-statistics-id').toString('hex');
+
 export const GET_ESCROW_STATISTICS_QUERY = gql`
   query GetEscrowStatistics {
-    escrowStatistics(id: "escrow-statistics-id") {
+    escrowStatistics(id: "${escrowStatisticsId}") {
       ...EscrowStatisticsFields
     }
   }

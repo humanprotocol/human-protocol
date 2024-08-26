@@ -17,7 +17,6 @@ import {
 } from '@/api/services/worker/reset-password';
 import { Alert } from '@/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { passwordChecks } from '@/components/data-entry/password/password-checks';
 import { routerPaths } from '@/router/router-paths';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
@@ -77,8 +76,6 @@ export function ResetPasswordWorkerPage() {
             <Password
               label={t('worker.resetPassword.fields.createNewPassword')}
               name="password"
-              passwordCheckHeader="Password must contain at least:"
-              passwordChecks={passwordChecks}
             />
             <Password
               label={t('worker.resetPassword.fields.confirm')}
