@@ -228,7 +228,7 @@ class SimpleTaskBuilder:
     def _get_gt_filenames(
         self, gt_dataset: dm.Dataset, data_filenames: list[str], *, manifest: TaskManifest
     ) -> list[str]:
-        gt_filenames = {s.id + s.media.ext for s in gt_dataset}
+        gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
         known_data_filenames = set(data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
 
@@ -497,12 +497,12 @@ class BoxesFromPointsTaskBuilder:
         )
 
     def _validate_gt_labels(self):
-        gt_labels = {
+        gt_labels = set(
             label.name
             for label in self._input_gt_dataset.categories()[dm.AnnotationType.label]
             if not label.parent
-        }
-        manifest_labels = {label.name for label in self.manifest.annotation.labels}
+        )
+        manifest_labels = set(label.name for label in self.manifest.annotation.labels)
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
@@ -516,7 +516,7 @@ class BoxesFromPointsTaskBuilder:
         self._input_gt_dataset.init_cache()
 
     def _validate_gt_filenames(self):
-        gt_filenames = {s.id + s.media.ext for s in self._input_gt_dataset}
+        gt_filenames = set(s.id + s.media.ext for s in self._input_gt_dataset)
 
         known_data_filenames = set(self._data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
@@ -653,8 +653,8 @@ class BoxesFromPointsTaskBuilder:
                 )
             )
 
-        points_labels = {label.name for label in points_dataset_label_cat if not label.parent}
-        manifest_labels = {label.name for label in self.manifest.annotation.labels}
+        points_labels = set(label.name for label in points_dataset_label_cat if not label.parent)
+        manifest_labels = set(label.name for label in self.manifest.annotation.labels)
         if manifest_labels != points_labels:
             raise DatasetValidationError("Point labels do not match job labels")
 
@@ -664,7 +664,7 @@ class BoxesFromPointsTaskBuilder:
         self._points_dataset.init_cache()
 
     def _validate_points_filenames(self):
-        points_filenames = {sample.id + sample.media.ext for sample in self._points_dataset}
+        points_filenames = set(sample.id + sample.media.ext for sample in self._points_dataset)
 
         known_data_filenames = set(self._data_filenames)
         matched_points_filenames = points_filenames.intersection(known_data_filenames)
@@ -1125,7 +1125,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._input_gt_dataset is not _unset
 
         # This list can be different from what is selected for validation
-        input_gt_filenames = {sample.media.path for sample in self._input_gt_dataset}
+        input_gt_filenames = set(sample.media.path for sample in self._input_gt_dataset)
         original_image_id_to_filename = {
             sample.attributes["id"]: sample.media.path for sample in self._points_dataset
         }
@@ -1551,10 +1551,10 @@ class SkeletonsFromBoxesTaskBuilder:
         )
 
     def _validate_gt_labels(self):
-        gt_labels = {
+        gt_labels = set(
             (label.name, label.parent)
             for label in self._input_gt_dataset.categories()[dm.AnnotationType.label]
-        }
+        )
 
         manifest_labels = set()
         for skeleton_label in self.manifest.annotation.labels:
@@ -1581,7 +1581,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._input_gt_dataset.init_cache()
 
     def _validate_gt_filenames(self):
-        gt_filenames = {s.id + s.media.ext for s in self._input_gt_dataset}
+        gt_filenames = set(s.id + s.media.ext for s in self._input_gt_dataset)
 
         known_data_filenames = set(self._data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
@@ -1654,7 +1654,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     excluded_samples.add((gt_sample.id, gt_sample.subset))
                 else:
                     # Skeleton boxes can be in the list as well with the same ids / groups
-                    skeleton_ids = {a.id for a in valid_skeletons} - {0}
+                    skeleton_ids = set(a.id for a in valid_skeletons) - {0}
                     self._input_gt_dataset.put(
                         gt_sample.wrap(
                             annotations=[a for a in gt_sample.annotations if a.id in skeleton_ids]
@@ -1700,8 +1700,8 @@ class SkeletonsFromBoxesTaskBuilder:
             dm.AnnotationType.label
         ]
 
-        boxes_labels = {label.name for label in boxes_dataset_label_cat if not label.parent}
-        manifest_labels = {label.name for label in self.manifest.annotation.labels}
+        boxes_labels = set(label.name for label in boxes_dataset_label_cat if not label.parent)
+        manifest_labels = set(label.name for label in self.manifest.annotation.labels)
         if manifest_labels != boxes_labels:
             raise DatasetValidationError("Bbox labels do not match job labels")
 
@@ -1712,7 +1712,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._boxes_dataset.init_cache()
 
     def _validate_boxes_filenames(self):
-        boxes_filenames = {sample.id + sample.media.ext for sample in self._boxes_dataset}
+        boxes_filenames = set(sample.id + sample.media.ext for sample in self._boxes_dataset)
 
         known_data_filenames = set(self._data_filenames)
         matched_boxes_filenames = boxes_filenames.intersection(known_data_filenames)
@@ -1788,7 +1788,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 )
             )
 
-        excluded_samples = {(e.sample_id, e.sample_subset) for e in excluded_boxes_info.messages}
+        excluded_samples = set((e.sample_id, e.sample_subset) for e in excluded_boxes_info.messages)
         for excluded_sample in excluded_samples:
             self._boxes_dataset.remove(*excluded_sample)
 
@@ -2142,7 +2142,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._input_gt_dataset is not _unset
 
         # This list can be different from what is selected for validation
-        input_gt_filenames = {sample.media.path for sample in self._input_gt_dataset}
+        input_gt_filenames = set(sample.media.path for sample in self._input_gt_dataset)
         image_id_to_filename = {
             sample.attributes["id"]: sample.media.path for sample in self._boxes_dataset
         }
@@ -2160,11 +2160,11 @@ class SkeletonsFromBoxesTaskBuilder:
 
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
         for label_id, _ in enumerate(self.manifest.annotation.labels):
-            label_gt_roi_ids = {
+            label_gt_roi_ids = set(
                 roi_id
                 for roi_id in self._skeleton_bbox_mapping.values()
                 if roi_info_by_id[roi_id].bbox_label == label_id
-            }
+            )
 
             label_data_roi_ids = [
                 roi_info.bbox_id

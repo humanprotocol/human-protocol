@@ -242,7 +242,7 @@ def track_task_creation() -> None:
                         existing_jobs = cvat_service.get_jobs_by_cvat_task_id(
                             session, upload.task_id
                         )
-                        existing_job_ids = {j.cvat_id for j in existing_jobs}
+                        existing_job_ids = set(j.cvat_id for j in existing_jobs)
 
                         for cvat_job in cvat_jobs:
                             if cvat_job.id in existing_job_ids:
