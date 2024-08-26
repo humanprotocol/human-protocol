@@ -48,9 +48,9 @@ import { TransactionUtils, ChainId } from '@human-protocol/sdk';
 const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 ***
 
@@ -119,6 +119,6 @@ const filter: ITransactionsFilter = {
 const transactions = await TransactionUtils.getTransactions(filter);
 ```
 
-#### Source
+#### Defined in
 
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)

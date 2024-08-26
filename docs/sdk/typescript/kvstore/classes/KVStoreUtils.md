@@ -100,9 +100,9 @@ const value = await KVStoreUtils.get(chainId, address, key);
 console.log(value);
 ```
 
-#### Source
+#### Defined in
 
-[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
+[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
 
 ***
 
@@ -122,7 +122,7 @@ Network in which the KVStore is deployed
 
 Address from which to get the URL value.
 
-• **urlKey**: `string`= `'url'`
+• **urlKey**: `string` = `'url'`
 
 Configurable URL key. `url` by default.
 
@@ -144,9 +144,9 @@ const url = await KVStoreUtils.getFileUrlAndVerifyHash(chainId, address);
 console.log(url);
 ```
 
-#### Source
+#### Defined in
 
-[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
+[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
 
 ***
 
@@ -189,9 +189,9 @@ const kvStoreData = await KVStoreUtils.getKVStoreData(ChainId.POLYGON_AMOY, "0x1
 console.log(kvStoreData);
 ```
 
-#### Source
+#### Defined in
 
-[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
+[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
 
 ***
 
@@ -229,6 +229,6 @@ const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
 console.log(publicKey);
 ```
 
-#### Source
+#### Defined in
 
-[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)
+[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)

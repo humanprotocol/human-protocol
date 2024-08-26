@@ -39,7 +39,7 @@
     "@graphql-eslint/eslint-plugin": "^3.19.1",
     "@human-protocol/core": "*",
     "graphql": "^16.6.0",
-    "matchstick-as": "^0.5.2",
+    "matchstick-as": "^0.6.0",
     "mustache": "^4.2.0"
   },
   "lint-staged": {

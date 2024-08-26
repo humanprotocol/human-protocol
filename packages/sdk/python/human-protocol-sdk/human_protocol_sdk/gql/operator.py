@@ -12,15 +12,16 @@ fragment LeaderFields on Leader {
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
-    reputation
     reward
     amountJobsProcessed
     role
     fee
     publicKey
     webhookUrl
-    url,
+    url
     jobTypes
+    registrationNeeded
+    registrationInstructions
 }
 """
 

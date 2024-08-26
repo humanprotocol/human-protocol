@@ -102,9 +102,9 @@ The Runner object to interact with the Ethereum network
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`constructor`](../../base/classes/BaseEthersClient.md#constructors)
 
-#### Source
+#### Defined in
 
-[staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
+[staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
 
 ## Properties
 
@@ -112,9 +112,9 @@ The Runner object to interact with the Ethereum network
 
 > **escrowFactoryContract**: `EscrowFactory`
 
-#### Source
+#### Defined in
 
-[staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
+[staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
 
 ***
 
@@ -126,9 +126,9 @@ The Runner object to interact with the Ethereum network
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata)
 
-#### Source
+#### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -136,9 +136,9 @@ The Runner object to interact with the Ethereum network
 
 > **rewardPoolContract**: `RewardPool`
 
-#### Source
+#### Defined in
 
-[staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
+[staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
 
 ***
 
@@ -150,9 +150,9 @@ The Runner object to interact with the Ethereum network
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner)
 
-#### Source
+#### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ***
 
@@ -160,9 +160,9 @@ The Runner object to interact with the Ethereum network
 
 > **stakingContract**: `Staking`
 
-#### Source
+#### Defined in
 
-[staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
+[staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
 
 ***
 
@@ -170,9 +170,9 @@ The Runner object to interact with the Ethereum network
 
 > **tokenContract**: `HMToken`
 
-#### Source
+#### Defined in
 
-[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
+[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
 
 ## Methods
 
@@ -194,7 +194,7 @@ Address of the escrow contract to allocate in.
 
 Amount in WEI of tokens to allocate.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -221,9 +221,9 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
+[staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
 
 ***
 
@@ -239,7 +239,7 @@ This function approves the staking contract to transfer a specified amount of to
 
 Amount in WEI of tokens to approve for stake.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -266,31 +266,9 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.approveStake(amount);
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
-
-***
-
-### checkValidEscrow()
-
-> `private` **checkValidEscrow**(`escrowAddress`): `Promise`\<`void`\>
-
-Check if escrow exists
-
-#### Parameters
-
-• **escrowAddress**: `string`
-
-Escrow address to check against
-
-#### Returns
-
-`Promise`\<`void`\>
-
-#### Source
-
-[staking.ts:167](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L167)
+[staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
 
 ***
 
@@ -309,7 +287,7 @@ This function drops the allocation from a specific escrow.
 
 Address of the escrow contract to close allocation from.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -335,9 +313,9 @@ const stakingClient = await StakingClient.build(signer);
 await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
+[staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
 
 ***
 
@@ -355,7 +333,7 @@ This function drops the allocation from a specific escrow.
 
 Escrow address from which rewards are distributed.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -381,9 +359,9 @@ const stakingClient = await StakingClient.build(signer);
 await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
+[staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
 
 ***
 
@@ -419,9 +397,9 @@ const stakingClient = await StakingClient.build(provider);
 const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
+[staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
 
 ***
 
@@ -449,7 +427,7 @@ Address of the escrow which allocation will be slashed
 
 Amount in WEI of tokens to unstake.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -476,9 +454,9 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
+[staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
 
 ***
 
@@ -496,7 +474,7 @@ This function stakes a specified amount of tokens on a specific network.
 
 Amount in WEI of tokens to stake.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -524,9 +502,9 @@ await stakingClient.approveStake(amount); // if it was already approved before, 
 await stakingClient.approveStake(amount);
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
+[staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
 
 ***
 
@@ -544,7 +522,7 @@ This function unstakes tokens from staking contract. The unstaked tokens stay lo
 
 Amount in WEI of tokens to unstake.
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -571,9 +549,9 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.unstake(amount);
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
+[staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
 
 ***
 
@@ -587,7 +565,7 @@ This function withdraws unstaked and non locked tokens form staking contract to 
 
 #### Parameters
 
-• **txOptions?**: `Overrides`= `{}`
+• **txOptions?**: `Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -613,9 +591,9 @@ const stakingClient = await StakingClient.build(signer);
 await stakingClient.withdraw();
 ```
 
-#### Source
+#### Defined in
 
-[staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
+[staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
 
 ***
 
@@ -645,6 +623,6 @@ The Runner object to interact with the Ethereum network
 
 - Thrown if the network's chainId is not supported
 
-#### Source
+#### Defined in
 
-[staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/c6dc36fb82707d056ee8dd65f431cc3591149101/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)
+[staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)

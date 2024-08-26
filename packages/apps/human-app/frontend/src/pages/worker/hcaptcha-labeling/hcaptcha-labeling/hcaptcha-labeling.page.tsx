@@ -60,8 +60,8 @@ export function HcaptchaLabelingPage() {
   const canSolveCaptcha =
     dailyHmtSpent &&
     hcaptchaUserStats &&
-    (hcaptchaUserStats.solved < env.VITE_DAILY_SOLVED_CAPTCHA_LIMIT ||
-      dailyHmtSpent.spend < env.VITE_HMT_DAILY_SPENT_LIMIT);
+    hcaptchaUserStats.solved < env.VITE_DAILY_SOLVED_CAPTCHA_LIMIT &&
+    dailyHmtSpent.spend < env.VITE_HMT_DAILY_SPENT_LIMIT;
 
   const hcaptchaOnSuccess = (token: string) => {
     solveHCaptchaMutation({ token });
