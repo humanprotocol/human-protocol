@@ -109,6 +109,8 @@ ignore = [
     "PTH122",  # `os.path.splitext()` should be replaced by `Path.suffix`, `Path.stem`, and `Path.parent`
     "PTH207",  # Replace `glob` with `Path.glob` or `Path.rglob`
     "UP032",   # Upgrades .format() to f-strings. Disabling until it ignores line-length
+    "C401",    # set comprehensions are apparently can be hard to distinguish from dict comprehensions
+    "RET505",  # Unnecessary elif/else statements after/before raise/return.
 ]
 
 
