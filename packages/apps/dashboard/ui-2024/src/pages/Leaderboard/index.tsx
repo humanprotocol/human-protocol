@@ -2,15 +2,13 @@ import Breadcrumbs from '@components/Breadcrumbs';
 import PageWrapper from '@components/PageWrapper';
 import ShadowIcon from '@components/ShadowIcon';
 import cup from '@assets/cup.png';
-import { useLeaderboardDetails } from '@services/api/use-leaderboard-details';
-import TableContainer from '@mui/material/TableContainer';
-import { SelectNetwork } from '@components/Home/Leaderboard/components/SelectNetwork';
-import SimpleBar from 'simplebar-react';
-import { Table } from '@components/Home/Leaderboard/components/Table/Table';
-import Paper from '@mui/material/Paper';
+import { Leaderboard } from '../../features/Leaderboard/index';
+import { useLeaderboardAllDetails } from '@services/api/use-leaderboard-all-details';
 
 export const LeaderBoard = () => {
-	const { data, status, error } = useLeaderboardDetails();
+	const { data, status, error } = useLeaderboardAllDetails();
+	const isMoreThatFiveEntries = data?.length && data.length > 5;
+
 	return (
 		<PageWrapper displaySearchBar className="standard-background">
 			<Breadcrumbs title="Leaderboard" />
@@ -19,17 +17,11 @@ export const LeaderBoard = () => {
 				title="Leaderboard"
 				img={cup}
 			/>
-			<TableContainer
-				component={Paper}
-				sx={{ padding: '32px', marginTop: '30px' }}
-			>
-				<div className="mobile-select">
-					<SelectNetwork />
-				</div>
-				<SimpleBar>
-					<Table data={data} status={status} error={error} />
-				</SimpleBar>
-			</TableContainer>
+			<Leaderboard
+				data={isMoreThatFiveEntries ? data.slice(0, 5) : data}
+				status={status}
+				error={error}
+			/>
 		</PageWrapper>
 	);
 };

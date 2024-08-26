@@ -6,13 +6,10 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Tooltip from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-import {
-	Order,
-	SortableFieldsInLeaderBoardData,
-} from '@components/Home/Leaderboard/components/Table/sorting';
-import { SelectNetwork } from '@components/Home/Leaderboard/components/SelectNetwork';
+import { SelectNetwork } from './SelectNetwork';
 import { colorPalette } from '@assets/styles/color-palette';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { Order, SortableFieldsInLeaderBoardData } from '../helpers/sorting';
 
 interface TableHeadProps {
 	onRequestSort: (

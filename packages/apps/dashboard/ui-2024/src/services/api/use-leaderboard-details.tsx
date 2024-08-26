@@ -29,7 +29,7 @@ const leaderBoardEntity = z.object({
 	chainId: z.number(),
 });
 
-const leaderBoardSuccessResponseSchema = z.array(leaderBoardEntity);
+export const leaderBoardSuccessResponseSchema = z.array(leaderBoardEntity);
 export type LeaderBoardEntity = z.infer<typeof leaderBoardEntity>;
 export type LeaderBoardData = z.infer<typeof leaderBoardSuccessResponseSchema>;
 

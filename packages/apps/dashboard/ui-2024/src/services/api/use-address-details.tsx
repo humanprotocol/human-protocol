@@ -70,7 +70,9 @@ const leaderSchema = z.object({
 		.transform(transformOptionalTokenAmount),
 	amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
 	lockedUntilTimestamp: z.string().optional(),
-	reputation: z.number(),
+	reputation: z.union([z.string(), z.number()]).transform((value) => {
+		return `${value}`;
+	}),
 	fee: z.number(),
 	jobTypes: z.array(z.string()).optional().nullable(),
 	url: z.string().optional().nullable(),
