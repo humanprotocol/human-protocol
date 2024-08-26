@@ -71,7 +71,6 @@ class LeaderData:
         locked_until_timestamp: int,
         amount_withdrawn: int,
         amount_slashed: int,
-        reputation: int,
         reward: int,
         amount_jobs_processed: int,
         role: Optional[str] = None,
@@ -80,6 +79,8 @@ class LeaderData:
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
         job_types: Optional[List[str]] = None,
+        registration_needed: Optional[bool] = None,
+        registration_instructions: Optional[str] = None,
         reputation_networks: Optional[List[str]] = None,
     ):
         """
@@ -94,7 +95,6 @@ class LeaderData:
         :param locked_until_timestamp: Locked until timestamp
         :param amount_withdrawn: Amount withdrawn
         :param amount_slashed: Amount slashed
-        :param reputation: Reputation
         :param reward: Reward
         :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
@@ -115,7 +115,6 @@ class LeaderData:
         self.locked_until_timestamp = locked_until_timestamp
         self.amount_withdrawn = amount_withdrawn
         self.amount_slashed = amount_slashed
-        self.reputation = reputation
         self.reward = reward
         self.amount_jobs_processed = amount_jobs_processed
         self.role = role
@@ -124,6 +123,8 @@ class LeaderData:
         self.webhook_url = webhook_url
         self.url = url
         self.job_types = job_types
+        self.registration_needed = registration_needed
+        self.registration_instructions = registration_instructions
         self.reputation_networks = reputation_networks
 
 
@@ -237,7 +238,6 @@ class OperatorUtils:
                     locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
                     amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
                     amount_slashed=int(leader.get("amountSlashed", 0)),
-                    reputation=int(leader.get("reputation", 0)),
                     reward=int(leader.get("reward", 0)),
                     amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
                     role=leader.get("role", None),
@@ -246,6 +246,10 @@ class OperatorUtils:
                     webhook_url=leader.get("webhookUrl", None),
                     url=leader.get("url", None),
                     job_types=job_types,
+                    registration_needed=leader.get("registrationNeeded", None),
+                    registration_instructions=leader.get(
+                        "registrationInstructions", None
+                    ),
                     reputation_networks=reputation_networks,
                 )
             )
@@ -327,7 +331,6 @@ class OperatorUtils:
             locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
             amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
             amount_slashed=int(leader.get("amountSlashed", 0)),
-            reputation=int(leader.get("reputation", 0)),
             reward=int(leader.get("reward", 0)),
             amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
             role=leader.get("role", None),
@@ -336,6 +339,8 @@ class OperatorUtils:
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
             job_types=job_types,
+            registration_needed=leader.get("registrationNeeded", None),
+            registration_instructions=leader.get("registrationInstructions", None),
             reputation_networks=reputation_networks,
         )
 

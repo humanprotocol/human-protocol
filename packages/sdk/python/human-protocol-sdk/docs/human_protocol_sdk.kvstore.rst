@@ -13,3 +13,4 @@ Submodules
    :maxdepth: 4
 
    human_protocol_sdk.kvstore.kvstore_client
+   human_protocol_sdk.kvstore.kvstore_utils

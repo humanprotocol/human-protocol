@@ -38,7 +38,6 @@ type Leader @entity {
   lockedUntilTimestamp: BigInt!
   amountWithdrawn: BigInt!
   amountSlashed: BigInt!
-  reputation: BigInt!
   reward: BigInt!
   amountJobsProcessed: BigInt!
 
@@ -49,6 +48,8 @@ type Leader @entity {
   jobTypes: [String!]
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
+  registrationNeeded: Boolean
+  registrationInstructions: String
   reputationNetworks: [ReputationNetwork!]
 }
 

@@ -12,7 +12,6 @@ fragment LeaderFields on Leader {
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
-    reputation
     reward
     amountJobsProcessed
     role
@@ -21,9 +20,8 @@ fragment LeaderFields on Leader {
     webhookUrl
     url
     jobTypes
-    reputationNetwork {
-      address
-    }
+    registrationNeeded
+    registrationInstructions
     reputationNetworks {
       address
     }

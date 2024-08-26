@@ -24,7 +24,6 @@ export interface ILeader {
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  reputation: bigint;
   reward: bigint;
   amountJobsProcessed: bigint;
   role?: string;
@@ -33,6 +32,8 @@ export interface ILeader {
   webhookUrl?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
   reputationNetworks?: string[];
 }
 
