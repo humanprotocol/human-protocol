@@ -179,7 +179,8 @@ class StorageConfig:
     def bucket_url(cls) -> str:
         if is_ipv4(cls.endpoint_url):
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
-        return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
+        else:
+            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class FeaturesConfig:

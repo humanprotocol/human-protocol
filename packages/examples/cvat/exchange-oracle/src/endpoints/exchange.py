@@ -22,7 +22,8 @@ async def list_tasks(
 
     if not wallet_address:
         return oracle_service.get_available_tasks()
-    return oracle_service.get_tasks_by_assignee(wallet_address=wallet_address)
+    else:
+        return oracle_service.get_tasks_by_assignee(wallet_address=wallet_address)
 
 
 @router.put("/register", description="Binds a CVAT user a to HUMAN App user")
