@@ -102,7 +102,7 @@ console.log(value);
 
 #### Defined in
 
-[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
+[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/26306326c85fb8c7501973952d670f809ecb43c6/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
 
 ***
 
@@ -146,7 +146,7 @@ console.log(url);
 
 #### Defined in
 
-[kvstore.ts:437](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L437)
+[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/26306326c85fb8c7501973952d670f809ecb43c6/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
 
 ***
 
@@ -191,7 +191,7 @@ console.log(kvStoreData);
 
 #### Defined in
 
-[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
+[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/26306326c85fb8c7501973952d670f809ecb43c6/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
 
 ***
 
@@ -231,4 +231,4 @@ console.log(publicKey);
 
 #### Defined in
 
-[kvstore.ts:494](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L494)
+[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/26306326c85fb8c7501973952d670f809ecb43c6/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)
