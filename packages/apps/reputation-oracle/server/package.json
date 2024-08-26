@@ -67,7 +67,7 @@
     "@types/jest": "29.5.12",
     "@types/node": "20.12.12",
     "@types/supertest": "^6.0.2",
-    "@types/uuid": "^9.0.6",
+    "@types/uuid": "^10.0.0",
     "@types/zxcvbn": "4.4.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
