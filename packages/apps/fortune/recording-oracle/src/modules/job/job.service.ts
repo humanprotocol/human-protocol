@@ -191,11 +191,8 @@ export class JobService {
           reputationOracleAddress,
           KVStoreKeys.webhookUrl,
         )) as string;
-      } catch (error: any) {
-        this.logger.log(
-          `Error fetching reputation oracle webhook: ${error.message}`,
-          JobService.name,
-        );
+      } catch (e) {
+        //Ignore the error
       }
 
       if (reputationOracleWebhook) {
@@ -223,11 +220,8 @@ export class JobService {
           await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
           KVStoreKeys.webhookUrl,
         )) as string;
-      } catch (error: any) {
-        this.logger.log(
-          `Error fetching exchange oracle URL: ${error.message}`,
-          JobService.name,
-        );
+      } catch {
+        //Ignore the error
       }
 
       if (exchangeOracleURL) {

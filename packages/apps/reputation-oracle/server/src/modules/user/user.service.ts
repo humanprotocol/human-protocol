@@ -233,6 +233,7 @@ export class UserService {
       value: signature,
     };
   }
+
   public async enableOperator(
     user: UserEntity,
     signature: string,
@@ -260,13 +261,7 @@ export class UserService {
     let status: string | undefined;
     try {
       status = await KVStoreUtils.get(chainId, signer.address, user.evmAddress);
-    } catch (error) {
-      this.logger.error(
-        `Error fetching operator status for address ${user.evmAddress}: ${error.message}`,
-        error.stack,
-        UserService,
-      );
-    }
+    } catch {}
 
     if (status === OperatorStatus.ACTIVE) {
       throw new ControlledError(

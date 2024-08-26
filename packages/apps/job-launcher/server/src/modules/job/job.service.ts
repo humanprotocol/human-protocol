@@ -1578,12 +1578,7 @@ export class JobService {
         oracleAddress,
         KVStoreKeys.fee,
       );
-    } catch (error) {
-      this.logger.log(
-        `Error fetching oracle fee for address ${oracleAddress} on chain ${chainId}: ${error.message}`,
-        JobService.name,
-      );
-    }
+    } catch {}
 
     return BigInt(feeValue ? feeValue : 1);
   }

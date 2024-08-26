@@ -173,22 +173,17 @@ export class AuthService {
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
+      let operatorStatus = '';
       try {
-        const operatorStatus = await KVStoreUtils.get(
+        operatorStatus = await KVStoreUtils.get(
           chainId,
           this.web3Service.getOperatorAddress(),
           userEntity.evmAddress.toLowerCase(),
         );
+      } catch {}
 
-        if (operatorStatus && operatorStatus !== '') {
-          status = operatorStatus;
-        }
-      } catch (error) {
-        this.logger.error(
-          `Error fetching operator status for user ${userEntity.id} on chain ${chainId}: ${error.message}`,
-          error.stack,
-          AuthService.name,
-        );
+      if (operatorStatus && operatorStatus !== '') {
+        status = operatorStatus;
       }
     }
 
@@ -434,19 +429,15 @@ export class AuthService {
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
-    let role;
+    let role = '';
     try {
       role = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role);
-    } catch (error) {
-      this.logger.error(
-        `Error fetching role: ${error.message}`,
-        error.stack,
-        AuthService.name,
-      );
-      throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
+    } catch {
+      // No hacemos nada con el error
     }
 
     if (
+      role === '' ||
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
         role,
       )
@@ -454,60 +445,34 @@ export class AuthService {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
+    let fee = '';
     try {
-      const fee = await KVStoreUtils.get(
-        chainId,
-        data.address,
-        KVStoreKeys.fee,
-      );
-      if (!fee) {
-        throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error fetching fee: ${error.message}`,
-        error.stack,
-        AuthService.name,
-      );
+      fee = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee);
+    } catch {}
+
+    if (!fee) {
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
+    let url = '';
     try {
-      const url = await KVStoreUtils.get(
-        chainId,
-        data.address,
-        KVStoreKeys.url,
-      );
-      if (!url) {
-        throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error fetching URL: ${error.message}`,
-        error.stack,
-        AuthService.name,
-      );
+      url = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url);
+    } catch {}
+
+    if (!url || url === '') {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
+    let jobTypes = '';
     try {
-      const jobTypes = await KVStoreUtils.get(
+      jobTypes = await KVStoreUtils.get(
         chainId,
         data.address,
         KVStoreKeys.jobTypes,
       );
-      if (!jobTypes) {
-        throw new ControlledError(
-          ErrorAuth.InvalidJobType,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error fetching job types: ${error.message}`,
-        error.stack,
-        AuthService.name,
-      );
+    } catch {}
+
+    if (!jobTypes || jobTypes === '') {
       throw new ControlledError(
         ErrorAuth.InvalidJobType,
         HttpStatus.BAD_REQUEST,
