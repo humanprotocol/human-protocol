@@ -406,12 +406,10 @@ export class KVStoreUtils {
     );
 
     if (!kvstores || kvstores.length === 0) {
-      throw new Error(`Key "${key}" not found for address ${address}`);
+      return '';
     }
 
-    const value = kvstores[0].value;
-
-    return value;
+    return kvstores[0].value;
   }
 
   /**
