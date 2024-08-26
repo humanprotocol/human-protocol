@@ -32,6 +32,8 @@ export interface ILeader {
   webhookUrl?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
 }
 
 export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {

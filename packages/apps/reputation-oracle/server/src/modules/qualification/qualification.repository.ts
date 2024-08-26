@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
-import { DataSource, In, MoreThan } from 'typeorm';
+import { DataSource, In, IsNull, MoreThan } from 'typeorm';
 import { QualificationEntity } from './qualification.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
@@ -18,17 +18,24 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
   ): Promise<QualificationEntity | null> {
     const currentDate = new Date();
 
-    const qualificationEntity = this.findOne({
-      where: { reference, expiresAt: MoreThan(currentDate) },
+    const qualificationEntity = await this.findOne({
+      where: [
+        { reference, expiresAt: MoreThan(currentDate) },
+        { reference, expiresAt: IsNull() },
+      ],
       relations: ['userQualifications', 'userQualifications.user'],
     });
+
     return qualificationEntity;
   }
 
   async getQualifications(): Promise<QualificationEntity[]> {
     const currentDate = new Date();
 
-    return this.findBy({ expiresAt: MoreThan(currentDate) });
+    return this.findBy([
+      { expiresAt: MoreThan(currentDate) },
+      { expiresAt: IsNull() },
+    ]);
   }
 
   async saveUserQualifications(
