@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { EditEthKVStoreValuesMutationData } from '@/api/services/operator/edit-existing-keys';
 import {
-  editEthKVStoreValuesMutationSchema,
+  setEthKVStoreValuesMutationSchema,
   useEditExistingKeysMutation,
 } from '@/api/services/operator/edit-existing-keys';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ export function PendingKeysForm({
     EditEthKVStoreValuesMutationData
   >({
     defaultValues: {},
-    resolver: zodResolver(editEthKVStoreValuesMutationSchema),
+    resolver: zodResolver(setEthKVStoreValuesMutationSchema(keysData)),
   });
 
   const handleEditPendingKey = (data: EditEthKVStoreValuesMutationData) => {

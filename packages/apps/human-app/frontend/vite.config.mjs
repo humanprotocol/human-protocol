@@ -30,7 +30,13 @@ const config = defineConfig({
     port: 3001,
   },
   optimizeDeps: {
-    include: ['@mui/material', '@emotion/react', '@emotion/styled'],
+    include: [
+      '@mui/material',
+      '@emotion/react',
+      '@emotion/styled',
+      '@mui/material/Tooltip',
+      '@mui/material/Paper',
+    ],
   },
 });
 

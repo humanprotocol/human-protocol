@@ -92,11 +92,11 @@ export function EditExistingKeysForm({
         {sortedKeys.map((key) => {
           const formInputsConfigKey = key as EthKVStoreKeyValues;
           return (
-            <span key={key}>
-              {existingKeysInitialState[formInputsConfigKey]
-                ? formInputsConfig[formInputsConfigKey]
-                : null}
-            </span>
+            <>
+              {existingKeysInitialState[formInputsConfigKey] ? (
+                <span key={key}>{formInputsConfig[formInputsConfigKey]}</span>
+              ) : null}
+            </>
           );
         })}
 
