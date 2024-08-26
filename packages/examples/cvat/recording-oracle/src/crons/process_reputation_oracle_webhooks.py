@@ -16,7 +16,8 @@ def process_outgoing_reputation_oracle_webhooks(logger: logging.Logger, session:
     process_outgoing_webhooks(
         logger,
         session,
-        OracleWebhookTypes.recording_oracle,
+        OracleWebhookTypes.reputation_oracle,
         get_reputation_oracle_url,
         CronConfig.process_reputation_oracle_webhooks_chunk_size,
+        with_timestamp=False,
     )
