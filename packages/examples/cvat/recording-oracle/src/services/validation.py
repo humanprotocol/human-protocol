@@ -1,7 +1,6 @@
 import uuid
 
-from sqlalchemy import func
-from sqlalchemy import update
+from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
 from src.db import engine as db_engine
