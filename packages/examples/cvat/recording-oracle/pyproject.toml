@@ -41,19 +41,34 @@ unfixable = [
     "RUF005",  # messes up concantenation with numpy structures
 ]
 ignore = [
-    "ANN101",  # method args annotations (mypy will take care of that)
+    "W191",    # Rules conflicting with ruff format (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
+    "E111",    # |
+    "E114",    # |
+    "E117",    # |
+    "D206",    # |
+    "D300",    # |
+    "Q000",    # |
+    "Q001",    # |
+    "Q002",    # |
+    "Q003",    # |
+    "COM812",  # |
+    "COM819",  # |
+    "ISC001",  # |
+    "ISC002",  # |
+    "ANN101",  # Method args annotations (mypy will take care of that)
     "ANN001",  # |
     "ANN202",  # |
     "ANN201",  # |
     "ANN401",  # |
     "ANN102",  # |
     "RUF001",  # Allow cyrillic letters in comments
-    "COM812",  # Trailing comas are handled by ruff format
-    "ISC001",  # Recommended to be disabled when using ruff format
+
     "B904",    # Raise from: modern pythons preserve previous exceptions
-    "EM",      # Forbids using literal strings in exceptions. I think it's ok
-    "TRY003",  # Forbids long messages in exceptions, again, it's ok
-    "G004",    # Logging statement uses f-string — it's ok, f-strings are fast
+    "EM",      # Forbids using literal strings in exceptions.
+               # Sujested way of dealing with exceptions increases verbosity
+               # while giving little to no benefit in readability
+    "TRY003",  # |
+    "G004",    # Forbids using f-strings in logging. This project doesn't rely on lazy % formatting when using logging.
     "A003",    # Class attribute `id` is shadowing a Python builtin — it's ok in class body
     "FIX001",  # Forbids using TODOs, but TODOs are useful
     "FIX002",  # |
@@ -66,8 +81,6 @@ ignore = [
     # Want to resolve eventually, but not now:
     "S101",    # Allow asserts (there are too many of them right now to fix)
     "TRY401",  # Checks for excesive logging of exception objects
-    "E501",    # Too long lines
-    "PTH118",  # Prefer pathlib instead of os.path
     "G001",    # Forbid str.format for logging
     "PTH123",  # Checks for uses of `os.path.splitext`
     "D",       # Docstrings
@@ -84,7 +97,6 @@ ignore = [
     "ERA001",  # Found commented-out code
     "N801",    # Class name should use CapWords convention
     "PLR0915", # Too many statements
-    "F401",    # Imported but unused
     "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
     "ANN002",  # Missing type annotation for `*args`
     "TRY300",  # Consider moving this statement to an `else` block
@@ -112,6 +124,7 @@ ignore = [
 ]
 # alembic is not a package in a traditional sense, so putting __init__.py there doesn't make sense
 "alembic/*" = ["INP001"]
+"__init__.py" = ["F401"]
 
 [tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
@@ -119,13 +132,14 @@ classmethod-decorators = [
 ]
 
 [tool.ruff.lint.pylint]
-max-args = 9  # in the name of stupidity and lazyness, please god forgive me
+max-args = 9  # Lower number might be beneficial to reduce cognitive load. Consider using data containers.
 
 [tool.ruff.lint.isort]
 forced-separate = ["tests"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

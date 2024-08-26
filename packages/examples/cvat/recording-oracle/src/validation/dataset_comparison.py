@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
 import datumaro as dm

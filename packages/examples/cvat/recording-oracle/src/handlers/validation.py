@@ -2,7 +2,6 @@ import io
 import os
 from collections import Counter
 from logging import Logger
-from typing import Union
 
 from sqlalchemy.orm import Session
 

@@ -1,5 +1,3 @@
-from typing import Union
-
 from pydantic import BaseModel
 
 from src.core.types import ExchangeOracleEventTypes, OracleWebhookTypes, RecordingOracleEventTypes
