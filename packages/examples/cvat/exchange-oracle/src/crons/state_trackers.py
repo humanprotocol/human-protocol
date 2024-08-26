@@ -104,10 +104,11 @@ def track_assignments(logger: logging.Logger) -> None:
         for assignment in assignments:
             logger.info(
                 "Expiring the unfinished assignment {} (user {}, job id {})".format(
-                        assignment.id,
-                        assignment.user_wallet_address,
-                        assignment.cvat_job_id,
-            ))
+                    assignment.id,
+                    assignment.user_wallet_address,
+                    assignment.cvat_job_id,
+                )
+            )
 
             latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
                 session, assignment.cvat_job_id
@@ -133,10 +134,10 @@ def track_assignments(logger: logging.Logger) -> None:
                 logger.warning(
                     "Canceling the unfinished assignment {} (user {}, job id {}) - "
                     "the project state is not annotation".format(
-                            assignment.id,
-                            assignment.user_wallet_address,
-                            assignment.cvat_job_id,
-                        )
+                        assignment.id,
+                        assignment.user_wallet_address,
+                        assignment.cvat_job_id,
+                    )
                 )
 
                 latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
