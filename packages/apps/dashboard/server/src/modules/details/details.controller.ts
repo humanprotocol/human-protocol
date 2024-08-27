@@ -24,6 +24,7 @@ import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
+import { MainnetsId } from '../../common/utils/constants';
 
 @ApiTags('Details')
 @Controller('/details')
@@ -32,7 +33,7 @@ export class DetailsController {
   constructor(private readonly detailsService: DetailsService) {}
 
   @Get('/leaders')
-  @ApiQuery({ name: 'chainId', enum: ChainId })
+  @ApiQuery({ name: 'chainId', enum: MainnetsId, required: false })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get the best leaders by role',
@@ -46,13 +47,13 @@ export class DetailsController {
     isArray: true,
   })
   public async leaders(
-    @Query('chainId') chainId: ChainId,
+    @Query('chainId') chainId?: ChainId,
   ): Promise<LeaderDto[]> {
     return this.detailsService.getBestLeadersByRole(chainId);
   }
 
   @Get('/leaders/all')
-  @ApiQuery({ name: 'chainId', enum: ChainId })
+  @ApiQuery({ name: 'chainId', enum: MainnetsId, required: false })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get all leaders',
@@ -65,13 +66,13 @@ export class DetailsController {
     isArray: true,
   })
   public async allLeaders(
-    @Query('chainId') chainId: ChainId,
+    @Query('chainId') chainId?: ChainId,
   ): Promise<LeaderDto[]> {
     return this.detailsService.getAllLeaders(chainId);
   }
 
   @Get('/:address')
-  @ApiQuery({ name: 'chainId', enum: ChainId })
+  @ApiQuery({ name: 'chainId', enum: MainnetsId })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get address details',
@@ -109,7 +110,6 @@ export class DetailsController {
   }
 
   @Get('/transactions/:address')
-  @ApiQuery({ name: 'chainId', enum: ChainId })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get transactions by address',
@@ -144,7 +144,6 @@ export class DetailsController {
   }
 
   @Get('/escrows/:address')
-  @ApiQuery({ name: 'chainId', enum: ChainId })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get escrows by address',

@@ -69,4 +69,7 @@ export class EnvironmentConfigService {
       DEFAULT_HCAPTCHA_STATS_SOURCE,
     );
   }
+  get reputationSource(): string {
+    return this.configService.getOrThrow<string>('REPUTATION_SOURCE_URL');
+  }
 }
