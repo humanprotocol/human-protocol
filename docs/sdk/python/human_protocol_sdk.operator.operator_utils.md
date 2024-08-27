@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
 
 Initializes an LeaderData instance.
 
@@ -35,7 +35,6 @@ Initializes an LeaderData instance.
   * **locked_until_timestamp** (`int`) – Locked until timestamp
   * **amount_withdrawn** (`int`) – Amount withdrawn
   * **amount_slashed** (`int`) – Amount slashed
-  * **reputation** (`int`) – Reputation
   * **reward** (`int`) – Reward
   * **amount_jobs_processed** (`int`) – Amount of jobs launched
   * **role** (`Optional`[`str`]) – Role

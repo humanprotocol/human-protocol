@@ -53,6 +53,11 @@
       * [Module](human_protocol_sdk.kvstore.kvstore_client.md#module)
       * [`KVStoreClient`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClient)
       * [`KVStoreClientError`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClientError)
+    * [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
+      * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
+      * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
+      * [`KVStoreData`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData)
+      * [`KVStoreUtils`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils)
 * [human_protocol_sdk.operator package](human_protocol_sdk.operator.md)
   * [Submodules](human_protocol_sdk.operator.md#submodules)
     * [human_protocol_sdk.operator.operator_utils module](human_protocol_sdk.operator.operator_utils.md)
@@ -100,6 +105,14 @@
       * [`StorageFileNotFoundError`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.StorageFileNotFoundError)
     * [human_protocol_sdk.storage.storage_utils module](human_protocol_sdk.storage.storage_utils.md)
       * [`StorageUtils`](human_protocol_sdk.storage.storage_utils.md#human_protocol_sdk.storage.storage_utils.StorageUtils)
+* [human_protocol_sdk.transaction package](human_protocol_sdk.transaction.md)
+  * [Submodules](human_protocol_sdk.transaction.md#submodules)
+    * [human_protocol_sdk.transaction.transaction_utils module](human_protocol_sdk.transaction.transaction_utils.md)
+      * [Code Example](human_protocol_sdk.transaction.transaction_utils.md#code-example)
+      * [Module](human_protocol_sdk.transaction.transaction_utils.md#module)
+      * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
+      * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
+      * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
 
 ## Submodules
 

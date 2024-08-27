@@ -33,7 +33,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
@@ -68,7 +67,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
@@ -101,7 +99,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
@@ -134,7 +131,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
@@ -166,7 +162,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
@@ -199,7 +194,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
@@ -257,7 +251,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
@@ -291,7 +284,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
@@ -324,7 +316,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
@@ -356,7 +347,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
@@ -389,7 +379,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
@@ -421,7 +410,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
