@@ -48,7 +48,7 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ***
 
@@ -83,7 +83,7 @@ const leaders = await OperatorUtils.getLeaders(filter);
 
 #### Defined in
 
-[operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
+[operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
 
 ***
 
@@ -121,7 +121,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-[operator.ts:151](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L151)
+[operator.ts:151](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L151)
 
 ***
 
@@ -155,4 +155,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
-[operator.ts:201](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L201)
+[operator.ts:201](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L201)

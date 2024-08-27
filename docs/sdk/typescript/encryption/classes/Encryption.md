@@ -2,7 +2,7 @@
 
 ***
 
-[@human-protocol/sdk](../../modules.md) / [index](../README.md) / Encryption
+[@human-protocol/sdk](../../modules.md) / [encryption](../README.md) / Encryption
 
 # Class: Encryption
 
@@ -66,7 +66,7 @@ The private key.
 
 #### Defined in
 
-[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
+[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
 
 ## Methods
 
@@ -118,7 +118,7 @@ const resultMessage = await encription.decrypt('message');
 
 #### Defined in
 
-[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
+[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
 
 ***
 
@@ -154,7 +154,7 @@ const resultMessage = await encription.sign('message');
 
 #### Defined in
 
-[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
+[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
 
 ***
 
@@ -219,7 +219,7 @@ const resultMessage = await encription.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
-[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
+[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
 
 ***
 
@@ -247,4 +247,4 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
-[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)
+[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)

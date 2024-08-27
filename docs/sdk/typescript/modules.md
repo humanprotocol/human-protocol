@@ -6,10 +6,11 @@
 
 ## Modules
 
+- [base](base/README.md)
+- [encryption](encryption/README.md)
 - [enums](enums/README.md)
 - [escrow](escrow/README.md)
 - [graphql/types](graphql/types/README.md)
-- [index](index/README.md)
 - [interfaces](interfaces/README.md)
 - [kvstore](kvstore/README.md)
 - [operator](operator/README.md)
