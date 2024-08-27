@@ -11,9 +11,7 @@ def get_role_by_address(chain_id: int, address: str) -> str:
     web3 = get_web3(chain_id)
     kvstore_client = KVStoreClient(web3)
 
-    role = kvstore_client.get(address, "role")
-
-    return role
+    return kvstore_client.get(address, "role")
 
 
 def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
