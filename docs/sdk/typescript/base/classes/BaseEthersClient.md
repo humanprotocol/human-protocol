@@ -40,7 +40,7 @@ The network information required to connect to the contracts
 
 #### Defined in
 
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/461add708f27237be835ba57e7d3374c05cd4608/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
@@ -50,7 +50,7 @@ The network information required to connect to the contracts
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/461add708f27237be835ba57e7d3374c05cd4608/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -60,4 +60,4 @@ The network information required to connect to the contracts
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/461add708f27237be835ba57e7d3374c05cd4608/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
