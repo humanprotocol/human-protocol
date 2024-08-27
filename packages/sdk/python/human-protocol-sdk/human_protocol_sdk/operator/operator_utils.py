@@ -71,6 +71,7 @@ class LeaderData:
         locked_until_timestamp: int,
         amount_withdrawn: int,
         amount_slashed: int,
+        reputation: int,
         reward: int,
         amount_jobs_processed: int,
         role: Optional[str] = None,
@@ -95,6 +96,7 @@ class LeaderData:
         :param locked_until_timestamp: Locked until timestamp
         :param amount_withdrawn: Amount withdrawn
         :param amount_slashed: Amount slashed
+        :param reputation: Reputation
         :param reward: Reward
         :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
@@ -115,6 +117,7 @@ class LeaderData:
         self.locked_until_timestamp = locked_until_timestamp
         self.amount_withdrawn = amount_withdrawn
         self.amount_slashed = amount_slashed
+        self.reputation = reputation
         self.reward = reward
         self.amount_jobs_processed = amount_jobs_processed
         self.role = role
@@ -238,6 +241,7 @@ class OperatorUtils:
                     locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
                     amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
                     amount_slashed=int(leader.get("amountSlashed", 0)),
+                    reputation=int(leader.get("reputation", 0)),
                     reward=int(leader.get("reward", 0)),
                     amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
                     role=leader.get("role", None),
@@ -331,6 +335,7 @@ class OperatorUtils:
             locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
             amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
             amount_slashed=int(leader.get("amountSlashed", 0)),
+            reputation=int(leader.get("reputation", 0)),
             reward=int(leader.get("reward", 0)),
             amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
             role=leader.get("role", None),
