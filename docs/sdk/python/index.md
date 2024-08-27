@@ -40,11 +40,8 @@ pip install human-protocol-sdk[agreement]
       * [Submodules](human_protocol_sdk.statistics.md#submodules)
     * [human_protocol_sdk.storage package](human_protocol_sdk.storage.md)
       * [Submodules](human_protocol_sdk.storage.md#submodules)
-<<<<<<< HEAD
     * [human_protocol_sdk.transaction package](human_protocol_sdk.transaction.md)
       * [Submodules](human_protocol_sdk.transaction.md#submodules)
-=======
->>>>>>> develop
   * [Submodules](human_protocol_sdk.md#submodules)
     * [human_protocol_sdk.constants module](human_protocol_sdk.constants.md)
       * [`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)

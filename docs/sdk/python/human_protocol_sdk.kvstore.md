@@ -13,7 +13,6 @@ This module allows the contract interaction with the key value storage on chain.
     * [`KVStoreClient.set_bulk()`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClient.set_bulk)
     * [`KVStoreClient.set_file_url_and_hash()`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClient.set_file_url_and_hash)
   * [`KVStoreClientError`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClientError)
-<<<<<<< HEAD
 * [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
   * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
   * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
@@ -24,5 +23,3 @@ This module allows the contract interaction with the key value storage on chain.
     * [`KVStoreUtils.get_file_url_and_verify_hash()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_file_url_and_verify_hash)
     * [`KVStoreUtils.get_kvstore_data()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_kvstore_data)
     * [`KVStoreUtils.get_public_key()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_public_key)
-=======
->>>>>>> develop

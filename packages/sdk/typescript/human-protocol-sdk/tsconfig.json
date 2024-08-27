@@ -14,5 +14,21 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "include": ["./src"]
+  "include": ["./src"],
+  "typedocOptions": {
+    "entryPoints": [
+      "src/index.ts",
+      "src/escrow.ts",
+      "src/kvstore.ts",
+      "src/operator.ts",
+      "src/staking.ts",
+      "src/statistics.ts",
+      "src/storage.ts",
+      "src/transaction.ts",
+      "src/enums.ts",
+      "src/graphql/types.ts",
+      "src/interfaces.ts",
+      "src/types.ts"
+    ]
+  }
 }

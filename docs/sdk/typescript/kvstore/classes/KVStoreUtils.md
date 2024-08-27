@@ -57,7 +57,7 @@ Gets the value of a key-value pair in the KVStore using the subgraph.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 Network in which the KVStore is deployed
 
@@ -102,11 +102,7 @@ console.log(value);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
-=======
-[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
->>>>>>> develop
+[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
 
 ***
 
@@ -118,7 +114,7 @@ Gets the URL value of the given entity, and verifies its hash.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 Network in which the KVStore is deployed
 
@@ -150,23 +146,19 @@ console.log(url);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
-=======
-[kvstore.ts:437](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L437)
->>>>>>> develop
+[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
 
 ***
 
 ### getKVStoreData()
 
-> `static` **getKVStoreData**(`chainId`, `address`): `Promise`\<`IKVStore`[]\>
+> `static` **getKVStoreData**(`chainId`, `address`): `Promise`\<[`IKVStore`](../../interfaces/interfaces/IKVStore.md)[]\>
 
 This function returns the KVStore data for a given address.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 Network in which the KVStore is deployed
 
@@ -176,7 +168,7 @@ Address of the KVStore
 
 #### Returns
 
-`Promise`\<`IKVStore`[]\>
+`Promise`\<[`IKVStore`](../../interfaces/interfaces/IKVStore.md)[]\>
 
 KVStore data
 
@@ -199,11 +191,7 @@ console.log(kvStoreData);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
-=======
-[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
->>>>>>> develop
+[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
 
 ***
 
@@ -215,7 +203,7 @@ Gets the public key of the given entity, and verifies its hash.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 Network in which the KVStore is deployed
 
@@ -243,8 +231,4 @@ console.log(publicKey);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)
-=======
-[kvstore.ts:494](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L494)
->>>>>>> develop
+[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)

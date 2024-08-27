@@ -1,39 +1,18 @@
 import { ChainId } from './enums';
 import { NetworkData } from './types';
 
-/**
- * @constant Default public bucket name
- */
 export const DEFAULT_PUBLIC_BUCKET = 'escrow-public-results';
 
-/**
- * @constant Default storage endpoint
- */
 export const DEFAULT_ENDPOINT = 'localhost';
 
-/**
- * @constant Default storage region
- */
 export const DEFAULT_REGION = 'eu';
 
-/**
- * @constant Default storage port
- */
 export const DEFAULT_PORT = 9000;
 
-/**
- * @constant Default storage port
- */
 export const DEFAULT_USE_SSL = false;
 
-/**
- * @constant Default tx Id
- */
 export const DEFAULT_TX_ID = 1;
 
-/**
- * @constant Default Enum for escrow statuses.
- */
 export enum HttpStatus {
   OK = 200,
   CREATED = 201,
@@ -45,9 +24,6 @@ export enum HttpStatus {
   INTERNAL_SERVER_ERROR = 500,
 }
 
-/**
- * @constant Default network parameters
- */
 export const NETWORKS: {
   [chainId in ChainId]?: NetworkData;
 } = {

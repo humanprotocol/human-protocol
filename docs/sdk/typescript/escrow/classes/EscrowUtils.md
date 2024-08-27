@@ -50,7 +50,7 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 ### getEscrow()
 
-> `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<`EscrowData`\>
+> `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)\>
 
 This function returns the escrow data for a given address.
 
@@ -105,7 +105,7 @@ type EscrowData = {
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 Network in which the escrow has been deployed
 
@@ -115,7 +115,7 @@ Address of the escrow
 
 #### Returns
 
-`Promise`\<`EscrowData`\>
+`Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)\>
 
 Escrow data
 
@@ -129,17 +129,13 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Defined in
 
-<<<<<<< HEAD
-[escrow.ts:1756](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1756)
-=======
-[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
->>>>>>> develop
+[escrow.ts:1756](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1756)
 
 ***
 
 ### getEscrows()
 
-> `static` **getEscrows**(`filter`): `Promise`\<`EscrowData`[]\>
+> `static` **getEscrows**(`filter`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)[]\>
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -228,13 +224,13 @@ type EscrowData = {
 
 #### Parameters
 
-• **filter**: `IEscrowsFilter`
+• **filter**: [`IEscrowsFilter`](../../interfaces/interfaces/IEscrowsFilter.md)
 
 Filter parameters.
 
 #### Returns
 
-`Promise`\<`EscrowData`[]\>
+`Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)[]\>
 
 List of escrows that match the filter.
 
@@ -254,17 +250,13 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-<<<<<<< HEAD
-[escrow.ts:1630](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1630)
-=======
-[escrow.ts:1514](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1514)
->>>>>>> develop
+[escrow.ts:1630](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1630)
 
 ***
 
 ### getStatusEvents()
 
-> `static` **getStatusEvents**(`chainId`, `statuses`?, `from`?, `to`?, `launcher`?, `first`?, `skip`?, `orderDirection`?): `Promise`\<`StatusEvent`[]\>
+> `static` **getStatusEvents**(`chainId`, `statuses`?, `from`?, `to`?, `launcher`?, `first`?, `skip`?, `orderDirection`?): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
 This function returns the status events for a given set of networks within an optional date range.
 
@@ -313,11 +305,11 @@ type Status = {
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 List of network IDs to query for status events.
 
-• **statuses?**: `EscrowStatus`[]
+• **statuses?**: [`EscrowStatus`](../../types/enumerations/EscrowStatus.md)[]
 
 Optional array of statuses to query for. If not provided, queries for all statuses.
 
@@ -341,13 +333,13 @@ Optional number of transactions per page. Default is 10.
 
 Optional number of transactions to skip. Default is 0.
 
-• **orderDirection?**: `OrderDirection`
+• **orderDirection?**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
 Optional order of the results. Default is DESC.
 
 #### Returns
 
-`Promise`\<`StatusEvent`[]\>
+`Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
 - Array of status events with their corresponding statuses.
 
@@ -371,8 +363,4 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 
 #### Defined in
 
-<<<<<<< HEAD
-[escrow.ts:1854](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1854)
-=======
-[escrow.ts:1738](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1738)
->>>>>>> develop
+[escrow.ts:1854](https://github.com/humanprotocol/human-protocol/blob/0de84fbe0e3df6d9c9e1e985a33c1467fa40ea55/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1854)
