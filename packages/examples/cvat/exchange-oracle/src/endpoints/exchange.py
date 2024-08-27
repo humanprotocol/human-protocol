@@ -1,6 +1,5 @@
 from contextlib import suppress
 from http import HTTPStatus
-from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Path, Query
 
@@ -16,7 +15,7 @@ router = APIRouter()
 
 @router.get("/tasks", description="Lists available tasks")
 async def list_tasks(
-    wallet_address: Optional[str] = Query(default=None),
+    wallet_address: str | None = Query(default=None),
     signature: str = Header(description="Calling service signature"),
 ) -> list[TaskResponse]:
     await validate_human_app_signature(signature)
@@ -57,7 +56,7 @@ async def register(
                         status_code=HTTPStatus.NOT_FOUND, detail="User with this email not found"
                     ) from e
 
-                elif (
+                if (
                     e.status == HTTPStatus.BAD_REQUEST
                     and "The user is a member of the organization already." in e.body
                 ):
@@ -67,9 +66,7 @@ async def register(
                         status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="User already exists"
                     )
 
-                elif (
-                    e.status == HTTPStatus.BAD_REQUEST and "Enter a valid email address." in e.body
-                ):
+                if e.status == HTTPStatus.BAD_REQUEST and "Enter a valid email address." in e.body:
                     raise HTTPException(
                         status_code=HTTPStatus.BAD_REQUEST, detail="Invalid email address"
                     )

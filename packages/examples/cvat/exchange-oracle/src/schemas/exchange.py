@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import AnyUrl, BaseModel, Field
 
@@ -22,7 +21,7 @@ class TaskResponse(BaseModel):
     job_size: int
     job_time_limit: int
     job_type: TaskTypes
-    assignment: Optional[AssignmentResponse] = None
+    assignment: AssignmentResponse | None = None
     status: ProjectStatuses
 
 

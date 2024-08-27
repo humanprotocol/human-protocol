@@ -71,9 +71,7 @@ def sign_message(chain_id: Networks, message) -> str:
 def recover_signer(chain_id: Networks, message, signature: str) -> str:
     w3 = get_web3(chain_id)
     message_hash = encode_defunct(text=serialize_message(message))
-    signer = w3.eth.account.recover_message(message_hash, signature=signature)
-
-    return signer
+    return w3.eth.account.recover_message(message_hash, signature=signature)
 
 
 def validate_address(escrow_address: str) -> str:

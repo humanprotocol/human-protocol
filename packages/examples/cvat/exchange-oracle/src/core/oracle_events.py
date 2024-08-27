@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Union
 
 from pydantic import BaseModel
 
@@ -9,11 +9,7 @@ from src.core.types import (
     RecordingOracleEventTypes,
 )
 
-EventTypeTag = Union[
-    ExchangeOracleEventTypes,
-    JobLauncherEventTypes,
-    RecordingOracleEventTypes,
-]
+EventTypeTag = ExchangeOracleEventTypes | JobLauncherEventTypes | RecordingOracleEventTypes
 
 
 class OracleEvent(BaseModel):
@@ -58,7 +54,7 @@ _event_type_map = {
 }
 
 
-def get_class_for_event_type(event_type: str) -> Type[OracleEvent]:
+def get_class_for_event_type(event_type: str) -> type[OracleEvent]:
     event_class = next((v for k, v in _event_type_map.items() if k == event_type), None)
 
     if not event_class:
@@ -68,7 +64,7 @@ def get_class_for_event_type(event_type: str) -> Type[OracleEvent]:
 
 
 def get_type_tag_for_event_class(
-    event_class: Type[OracleEvent],
+    event_class: type[OracleEvent],
 ) -> EventTypeTag:
     event_type = next((k for k, v in _event_type_map.items() if v == event_class), None)
 
@@ -81,7 +77,7 @@ def get_type_tag_for_event_class(
 def parse_event(
     sender: OracleWebhookTypes,
     event_type: str,
-    event_data: Optional[dict] = None,
+    event_data: dict | None = None,
 ) -> OracleEvent:
     sender_events_mapping = {
         OracleWebhookTypes.job_launcher: JobLauncherEventTypes,
@@ -91,10 +87,10 @@ def parse_event(
 
     sender_events = sender_events_mapping.get(sender)
     if sender_events is not None:
-        if not event_type in sender_events:
+        if event_type not in sender_events:
             raise ValueError(f"Unknown event '{sender}.{event_type}'")
     else:
-        assert False, f"Unknown event sender type '{sender}'"
+        raise AssertionError(f"Unknown event sender type '{sender}'")
 
     event_class = get_class_for_event_type(event_type)
     return event_class.parse_obj(event_data or {})

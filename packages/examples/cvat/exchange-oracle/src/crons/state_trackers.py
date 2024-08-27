@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
@@ -221,8 +219,8 @@ def track_task_creation() -> None:
                 )
             )
 
-            completed: List[cvat_models.DataUpload] = []
-            failed: List[cvat_models.DataUpload] = []
+            completed: list[cvat_models.DataUpload] = []
+            failed: list[cvat_models.DataUpload] = []
             for upload in uploads:
                 status, reason = cvat_api.get_task_upload_status(upload.task_id)
                 project = upload.task.project
@@ -313,7 +311,7 @@ def track_escrow_creation() -> None:
                 )
             )
 
-            finished: List[cvat_models.EscrowCreation] = []
+            finished: list[cvat_models.EscrowCreation] = []
             for creation in creations:
                 created_jobs_count = cvat_service.count_jobs_by_escrow_address(
                     session,

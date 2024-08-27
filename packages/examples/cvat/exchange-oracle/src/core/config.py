@@ -1,8 +1,10 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
-""" Project configuration from env vars """
+"""Project configuration from env vars"""
+
 import inspect
 import os
-from typing import ClassVar, Iterable, Optional
+from collections.abc import Iterable
+from typing import ClassVar
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
@@ -14,7 +16,7 @@ from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
 dotenv_path = os.getenv("DOTENV_PATH", None)
-if dotenv_path and not os.path.exists(dotenv_path):
+if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 
 load_dotenv(dotenv_path)
@@ -28,22 +30,22 @@ class _BaseConfig:
 
 class PostgresConfig:
     port = os.environ.get("PG_PORT", "5432")
-    host = os.environ.get("PG_HOST", "0.0.0.0")
+    host = os.environ.get("PG_HOST", "0.0.0.0")  # noqa: S104
     user = os.environ.get("PG_USER", "admin")
     password = os.environ.get("PG_PASSWORD", "admin")
     database = os.environ.get("PG_DB", "exchange_oracle")
     lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
-    def connection_url(cls):
+    def connection_url(cls) -> str:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
 class _NetworkConfig:
     chain_id: ClassVar[int]
-    rpc_api: ClassVar[Optional[str]]
-    private_key: ClassVar[Optional[str]]
-    addr: ClassVar[Optional[str]]
+    rpc_api: ClassVar[str | None]
+    private_key: ClassVar[str | None]
+    addr: ClassVar[str | None]
 
     @classmethod
     def is_configured(cls) -> bool:
@@ -154,27 +156,27 @@ class StorageConfig:
     endpoint_url: ClassVar[str] = os.environ[
         "STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
-    region: ClassVar[Optional[str]] = os.environ.get("STORAGE_REGION")
+    region: ClassVar[str | None] = os.environ.get("STORAGE_REGION")
     results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
 
     # S3 specific attributes
-    access_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_ACCESS_KEY")
-    secret_key: ClassVar[Optional[str]] = os.environ.get("STORAGE_SECRET_KEY")
+    access_key: ClassVar[str | None] = os.environ.get("STORAGE_ACCESS_KEY")
+    secret_key: ClassVar[str | None] = os.environ.get("STORAGE_SECRET_KEY")
 
     # GCS specific attributes
-    key_file_path: ClassVar[Optional[str]] = os.environ.get("STORAGE_KEY_FILE_PATH")
+    key_file_path: ClassVar[str | None] = os.environ.get("STORAGE_KEY_FILE_PATH")
 
     @classmethod
     def get_scheme(cls) -> str:
         return "https://" if cls.secure else "http://"
 
     @classmethod
-    def provider_endpoint_url(cls):
+    def provider_endpoint_url(cls) -> str:
         return f"{cls.get_scheme()}{cls.endpoint_url}"
 
     @classmethod
-    def bucket_url(cls):
+    def bucket_url(cls) -> str:
         if is_ipv4(cls.endpoint_url):
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         else:
@@ -188,10 +190,10 @@ class FeaturesConfig:
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
-    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", False))
+    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
     "Allow to log request details for each request"
 
-    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", False))
+    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
 
 
@@ -222,12 +224,12 @@ class EncryptionConfig(_BaseConfig):
         ex_prefix = "Wrong server configuration."
 
         if (cls.pgp_public_key_url or cls.pgp_passphrase) and not cls.pgp_private_key:
-            raise Exception(" ".join([ex_prefix, "The PGP_PRIVATE_KEY environment is not set."]))
+            raise Exception(f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
 
         if cls.pgp_private_key:
             try:
                 Encryption(cls.pgp_private_key, passphrase=cls.pgp_passphrase)
-            except Exception as ex:
+            except Exception as ex:  # noqa: BLE001
                 # Possible reasons:
                 # - private key is invalid
                 # - private key is locked but no passphrase is provided
@@ -264,9 +266,12 @@ class Config:
                 attr_or_method.validate()
 
     @classmethod
-    def get_network_configs(cls, only_configured: bool = True) -> Iterable[_NetworkConfig]:
+    def get_network_configs(cls, *, only_configured: bool = True) -> Iterable[_NetworkConfig]:
         for attr_or_method in cls.__dict__:
             attr_or_method = getattr(cls, attr_or_method)
-            if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _NetworkConfig):
-                if not only_configured or attr_or_method.is_configured():
-                    yield attr_or_method
+            if (
+                inspect.isclass(attr_or_method)
+                and issubclass(attr_or_method, _NetworkConfig)
+                and (not only_configured or attr_or_method.is_configured())
+            ):
+                yield attr_or_method
