@@ -93,9 +93,9 @@ export function EditExistingKeysForm({
           const formInputsConfigKey = key as EthKVStoreKeyValues;
           return (
             <>
-              {existingKeysInitialState[formInputsConfigKey]
-                ? formInputsConfig[formInputsConfigKey]
-                : null}
+              {existingKeysInitialState[formInputsConfigKey] ? (
+                <span key={key}>{formInputsConfig[formInputsConfigKey]}</span>
+              ) : null}
             </>
           );
         })}
