@@ -69,7 +69,9 @@ export const GET_REPUTATION_NETWORK_QUERY = (role?: string) => {
           address,
           role,
           url,
-          jobTypes
+          jobTypes,
+          registrationNeeded,
+          registrationInstructions
         }
       }
     }

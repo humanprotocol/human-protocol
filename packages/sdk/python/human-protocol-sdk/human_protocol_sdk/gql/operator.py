@@ -73,7 +73,10 @@ query getReputationNetwork(
       address,
       role,
       url,
-      jobTypes
+      jobTypes,
+      registrationNeeded,
+      registrationInstructions
+
     }}
   }}
 }}

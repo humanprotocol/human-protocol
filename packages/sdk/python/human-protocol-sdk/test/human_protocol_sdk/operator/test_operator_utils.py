@@ -454,6 +454,8 @@ class TestOperatorUtils(unittest.TestCase):
                                     "role": role,
                                     "url": url,
                                     "jobTypes": job_types,
+                                    "registrationNeeded": True,
+                                    "registrationInstructions": url,
                                 }
                             ],
                         }
@@ -476,6 +478,8 @@ class TestOperatorUtils(unittest.TestCase):
         self.assertEqual(operators[0].role, role)
         self.assertEqual(operators[0].url, url)
         self.assertEqual(operators[0].job_types, ["type1", "type2"])
+        self.assertEqual(operators[0].registration_needed, True)
+        self.assertEqual(operators[0].registration_instructions, url)
 
     def test_get_reputation_network_operators_when_job_types_is_none(self):
         reputation_address = "0x1234567890123456789012345678901234567891"
@@ -501,6 +505,8 @@ class TestOperatorUtils(unittest.TestCase):
                                     "role": role,
                                     "url": url,
                                     "jobTypes": job_types,
+                                    "registrationNeeded": True,
+                                    "registrationInstructions": url,
                                 }
                             ],
                         }
@@ -523,6 +529,8 @@ class TestOperatorUtils(unittest.TestCase):
         self.assertEqual(operators[0].role, role)
         self.assertEqual(operators[0].url, url)
         self.assertEqual(operators[0].job_types, [])
+        self.assertEqual(operators[0].registration_needed, True)
+        self.assertEqual(operators[0].registration_instructions, url)
 
     def test_get_reputation_network_operators_when_job_types_is_array(self):
         reputation_address = "0x1234567890123456789012345678901234567891"
@@ -548,6 +556,8 @@ class TestOperatorUtils(unittest.TestCase):
                                     "role": role,
                                     "url": url,
                                     "jobTypes": job_types,
+                                    "registrationNeeded": True,
+                                    "registrationInstructions": url,
                                 }
                             ],
                         }
@@ -570,6 +580,8 @@ class TestOperatorUtils(unittest.TestCase):
         self.assertEqual(operators[0].role, role)
         self.assertEqual(operators[0].url, url)
         self.assertEqual(operators[0].job_types, ["type1", "type2", "type3"])
+        self.assertEqual(operators[0].registration_needed, True)
+        self.assertEqual(operators[0].registration_instructions, url)
 
     def test_get_reputation_network_operators_empty_data(self):
         reputation_address = "0x1234567890123456789012345678901234567891"
