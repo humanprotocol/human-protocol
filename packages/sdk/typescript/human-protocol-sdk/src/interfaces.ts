@@ -24,6 +24,7 @@ export interface ILeader {
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
+  reputation: bigint;
   reward: bigint;
   amountJobsProcessed: bigint;
   role?: string;
