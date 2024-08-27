@@ -25,6 +25,7 @@ boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
 pyinstrument = "^4.6.2"
 human-protocol-sdk = "^3.0.4"
+hexbytes = ">=1.2.0" # required for to_0x_hex() function
 
 
 [tool.poetry.group.dev.dependencies]

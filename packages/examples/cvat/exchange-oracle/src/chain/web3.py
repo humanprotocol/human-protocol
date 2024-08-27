@@ -65,7 +65,7 @@ def sign_message(chain_id: Networks, message) -> str:
         encode_defunct(text=serialized_message), private_key
     )
 
-    return signed_message.signature.hex(), serialized_message
+    return signed_message.signature.to_0x_hex(), serialized_message
 
 
 def recover_signer(chain_id: Networks, message, signature: str) -> str:
