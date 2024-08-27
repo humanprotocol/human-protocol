@@ -34,10 +34,13 @@ export interface ILeader {
   jobTypes?: string[];
   registrationNeeded?: boolean;
   registrationInstructions?: string;
+  reputationNetworks?: string[];
 }
 
-export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+export interface ILeaderSubgraph
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks'> {
   jobTypes?: string;
+  reputationNetworks?: { address: string }[];
 }
 
 export interface ILeadersFilter {

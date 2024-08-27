@@ -22,6 +22,9 @@ const LEADER_FRAGMENT = gql`
     jobTypes
     registrationNeeded
     registrationInstructions
+    reputationNetworks {
+      address
+    }
   }
 `;
 

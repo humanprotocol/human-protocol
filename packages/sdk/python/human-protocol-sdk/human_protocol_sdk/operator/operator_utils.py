@@ -81,6 +81,7 @@ class LeaderData:
         job_types: Optional[List[str]] = None,
         registration_needed: Optional[bool] = None,
         registration_instructions: Optional[str] = None,
+        reputation_networks: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -102,6 +103,7 @@ class LeaderData:
         :param webhook_url: Webhook url
         :param url: Url
         :param job_types: Job types
+        :param reputation_networks: List of reputation networks
         :param registration_needed: True,
         :param registration_instructions: Instructions url,
         """
@@ -125,6 +127,7 @@ class LeaderData:
         self.job_types = job_types
         self.registration_needed = registration_needed
         self.registration_instructions = registration_instructions
+        self.reputation_networks = reputation_networks
 
 
 class RewardData:
@@ -220,14 +223,23 @@ class OperatorUtils:
 
         leaders_raw = leaders_data["data"]["leaders"]
 
-        job_types = []
-        if isinstance(job_types, str):
-            job_types = job_types.split(",")
-        elif isinstance(job_types, list):
-            job_types = job_types
+        for leader in leaders_raw:
+            job_types = []
+            reputation_networks = []
 
-        leaders.extend(
-            [
+            if isinstance(leader.get("jobTypes"), str):
+                job_types = leader["jobTypes"].split(",")
+            elif isinstance(leader.get("jobTypes"), list):
+                job_types = leader["jobTypes"]
+
+            if leader.get("reputationNetworks") and isinstance(
+                leader.get("reputationNetworks"), list
+            ):
+                reputation_networks = [
+                    network["address"] for network in leader["reputationNetworks"]
+                ]
+
+            leaders.append(
                 LeaderData(
                     chain_id=filter.chain_id,
                     id=leader.get("id", ""),
@@ -245,23 +257,14 @@ class OperatorUtils:
                     public_key=leader.get("publicKey", None),
                     webhook_url=leader.get("webhookUrl", None),
                     url=leader.get("url", None),
-                    job_types=(
-                        leader.get("jobTypes").split(",")
-                        if isinstance(leader.get("jobTypes"), str)
-                        else (
-                            leader.get("jobTypes", [])
-                            if isinstance(leader.get("jobTypes"), list)
-                            else []
-                        )
-                    ),
+                    job_types=job_types,
                     registration_needed=leader.get("registrationNeeded", None),
                     registration_instructions=leader.get(
                         "registrationInstructions", None
                     ),
+                    reputation_networks=reputation_networks,
                 )
-                for leader in leaders_raw
-            ]
-        )
+            )
 
         return leaders
 
@@ -315,6 +318,21 @@ class OperatorUtils:
 
         leader = leader_data["data"]["leader"]
 
+        job_types = []
+        reputation_networks = []
+
+        if isinstance(leader.get("jobTypes"), str):
+            job_types = leader["jobTypes"].split(",")
+        elif isinstance(leader.get("jobTypes"), list):
+            job_types = leader["jobTypes"]
+
+        if leader.get("reputationNetworks") and isinstance(
+            leader.get("reputationNetworks"), list
+        ):
+            reputation_networks = [
+                network["address"] for network in leader["reputationNetworks"]
+            ]
+
         return LeaderData(
             chain_id=chain_id,
             id=leader.get("id", ""),
@@ -332,17 +350,10 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
-            job_types=(
-                leader.get("jobTypes").split(",")
-                if isinstance(leader.get("jobTypes"), str)
-                else (
-                    leader.get("jobTypes", [])
-                    if isinstance(leader.get("jobTypes"), list)
-                    else []
-                )
-            ),
+            job_types=job_types,
             registration_needed=leader.get("registrationNeeded", None),
             registration_instructions=leader.get("registrationInstructions", None),
+            reputation_networks=reputation_networks,
         )
 
     @staticmethod

@@ -411,11 +411,12 @@ describe('KVStore', () => {
       'role',
       'Job Launcher'
     );
+
     assert.fieldEquals(
       'Leader',
       data2.params.sender.toHex(),
-      'reputationNetwork',
-      data1.params.sender.toHex()
+      'reputationNetworks',
+      `[${data1.params.sender.toHex()}]`
     );
   });
 
