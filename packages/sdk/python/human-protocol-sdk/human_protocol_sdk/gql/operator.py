@@ -12,6 +12,7 @@ fragment LeaderFields on Leader {
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
+    reputation
     reward
     amountJobsProcessed
     role
