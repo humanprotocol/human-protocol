@@ -16,9 +16,6 @@ export class Web3ConfigService {
   get reputationOracleAddress(): string {
     return this.configService.get<string>('REPUTATION_ORACLE_ADDRESS', '');
   }
-  get reputationOracles(): string {
-    return this.configService.get<string>('REPUTATION_ORACLES', '');
-  }
   get fortuneExchangeOracleAddress(): string {
     return this.configService.get<string>(
       'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
