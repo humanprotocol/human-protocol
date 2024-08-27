@@ -20,8 +20,6 @@ const LEADER_FRAGMENT = gql`
     webhookUrl
     url
     jobTypes
-    registrationNeeded
-    registrationInstructions
   }
 `;
 

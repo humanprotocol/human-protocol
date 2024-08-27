@@ -41,8 +41,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "webhookUrl": None,
                                 "url": None,
                                 "jobTypes": "type1,type2",
-                                "registrationNeeded": True,
-                                "registrationInstructions": "www.google.com",
                             }
                         ],
                     }
@@ -74,8 +72,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].webhook_url, None)
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(leaders[0].job_types, ["type1", "type2"])
-            self.assertEqual(leaders[0].registration_needed, True)
-            self.assertEqual(leaders[0].registration_instructions, "www.google.com")
 
     def test_get_leaders_when_job_types_is_none(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -135,8 +131,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].public_key, None)
             self.assertEqual(leaders[0].webhook_url, None)
             self.assertEqual(leaders[0].url, None)
-            self.assertEqual(leaders[0].registration_needed, None)
-            self.assertEqual(leaders[0].registration_instructions, None)
             # Should rerutn empty array
             self.assertEqual(leaders[0].job_types, [])
 
@@ -255,8 +249,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "webhookUrl": None,
                             "url": None,
                             "jobTypes": "type1,type2",
-                            "registrationNeeded": True,
-                            "registrationInstructions": "www.google.com",
                         }
                     }
                 }
@@ -287,8 +279,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2"])
-            self.assertEqual(leader.registration_needed, True)
-            self.assertEqual(leader.registration_instructions, "www.google.com")
 
     def test_get_leader_when_job_types_is_none(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -348,8 +338,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, [])
-            self.assertEqual(leader.registration_needed, None)
-            self.assertEqual(leader.registration_instructions, None)
 
     def test_get_leader_when_job_types_is_array(self):
         staker_address = "0x1234567890123456789012345678901234567891"
