@@ -80,8 +80,6 @@ class LeaderData:
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
         job_types: Optional[List[str]] = None,
-        registration_needed: Optional[bool] = None,
-        registration_instructions: Optional[str] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -124,8 +122,6 @@ class LeaderData:
         self.webhook_url = webhook_url
         self.url = url
         self.job_types = job_types
-        self.registration_needed = registration_needed
-        self.registration_instructions = registration_instructions
 
 
 class RewardData:
@@ -246,10 +242,6 @@ class OperatorUtils:
                             else []
                         )
                     ),
-                    registration_needed=leader.get("registrationNeeded", None),
-                    registration_instructions=leader.get(
-                        "registrationInstructions", None
-                    ),
                 )
                 for leader in leaders_raw
             ]
@@ -334,8 +326,6 @@ class OperatorUtils:
                     else []
                 )
             ),
-            registration_needed=leader.get("registrationNeeded", None),
-            registration_instructions=leader.get("registrationInstructions", None),
         )
 
     @staticmethod
