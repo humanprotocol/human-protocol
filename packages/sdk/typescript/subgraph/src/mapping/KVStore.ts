@@ -122,6 +122,10 @@ export function handleDataSaved(event: DataSaved): void {
     operator.reputationNetworks = reputationNetworks;
 
     operator.save();
+  } else if (key == 'registration_needed') {
+    leader.registrationNeeded = event.params.value == 'true';
+  } else if (key == 'registration_instructions') {
+    leader.registrationInstructions = event.params.value;
   }
 
   if (key.indexOf('url') > -1) {

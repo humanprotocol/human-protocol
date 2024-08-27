@@ -303,6 +303,8 @@ describe('OperatorUtils', () => {
       role: Role.JobLauncher,
       url: 'www.google.com',
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
     };
     const mockOperator: IOperator = {
       ...mockOperatorSubgraph,
