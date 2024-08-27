@@ -35,7 +35,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert len(client.list_files()) == 0
 
         file_name = "test_file"
-        data = "this is a test".encode("utf-8")
+        data = b"this is a test"
 
         assert not client.file_exists(file_name)
         client.create_file(file_name, data)
@@ -68,7 +68,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         client.remove_file(invalid_file, bucket=self.bucket_name)
 
     def test_degenerate_client(self):
-        with pytest.raises(EndpointConnectionError):
+        with pytest.raises(EndpointConnectionError):  # noqa: PT012
             invalid_client = S3Client(
                 endpoint_url="http://not.an.url:1234",
                 access_key=self.access_key,
@@ -76,5 +76,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             )
             invalid_client.create_file("test.txt", bucket=self.bucket_name)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             S3Client(endpoint_url="nonsense-stuff")

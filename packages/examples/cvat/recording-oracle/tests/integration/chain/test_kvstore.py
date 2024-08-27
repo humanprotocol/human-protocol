@@ -47,7 +47,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
 
             reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(reputation_url, DEFAULT_MANIFEST_URL)
+            assert reputation_url == DEFAULT_MANIFEST_URL
 
     def test_get_reputation_oracle_url_invalid_escrow(self):
         with patch("src.chain.kvstore.get_web3") as mock_function:
@@ -72,21 +72,20 @@ class ServiceIntegrationTest(unittest.TestCase):
             reputation_url = get_reputation_oracle_url(
                 self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
             )
-            self.assertEqual(reputation_url, "")
+            assert reputation_url == ""
 
     def test_get_role_by_address(self):
         store_kvstore_value("role", "Reputation Oracle")
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
             reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
-            self.assertEqual(reputation_url, "Reputation Oracle")
+            assert reputation_url == "Reputation Oracle"
 
     def test_get_role_by_address_invalid_escrow(self):
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            with self.assertRaises(KVStoreClientError) as error:
+            with pytest.raises(KVStoreClientError, match="Invalid address: invalid_address"):
                 get_role_by_address(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid address: invalid_address", str(error.exception))
 
     def test_get_role_by_address_invalid_address(self):
         create_escrow(self.w3)
@@ -94,7 +93,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
             reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
-            self.assertEqual(reputation_url, "")
+            assert reputation_url == ""
 
     def test_store_public_key(self):
         PGP_PUBLIC_KEY_URL_1 = "http://pgp-public-key-url-1"
@@ -114,7 +113,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             hash_ = store["public_key_hash"]
 
             if hash_ != hash(public_key):
-                raise KVStoreClientError(f"Invalid hash")
+                raise KVStoreClientError("Invalid hash")
 
             return public_key
 
@@ -141,7 +140,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_web3.return_value = self.w3
 
             kvstore_client = KVStoreClient(self.w3)
-            self.assertIsNone(kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr))
+            assert kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr) is None
 
             # check that public key will be set to KVStore at first time
             with patch(
@@ -150,9 +149,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertEquals(
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
-                    PGP_PUBLIC_KEY_URL_1,
+                assert (
+                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
+                    == PGP_PUBLIC_KEY_URL_1
                 )
 
             # check that the same public key URL is not written to KVStore a second time
@@ -163,7 +162,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_not_called()
 
-            # check that public key URL and hash will be updated in KVStore if previous hash is outdated/corrupted
+            # check that public key URL and hash will be updated in KVStore
+            # if previous hash is outdated/corrupted
             with patch(
                 "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
             ) as mock_set_file_url_and_hash:
@@ -171,9 +171,10 @@ class ServiceIntegrationTest(unittest.TestCase):
                 store["public_key_hash"] = "corrupted_hash"
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertNotEquals(store["public_key_hash"], "corrupted_hash")
+                assert store["public_key_hash"] != "corrupted_hash"
 
-            # check that a new public key URL will be written to KVStore when an outdated URL is stored there
+            # check that a new public key URL will be written to KVStore
+            # when an outdated URL is stored there
             with (
                 patch(
                     "src.core.config.Config.encryption_config.pgp_public_key_url",
@@ -186,7 +187,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertEquals(
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
-                    PGP_PUBLIC_KEY_URL_2,
+                assert (
+                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
+                    == PGP_PUBLIC_KEY_URL_2
                 )

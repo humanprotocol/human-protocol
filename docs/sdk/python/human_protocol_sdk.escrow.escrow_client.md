@@ -301,7 +301,11 @@ Sets the status of an escrow to completed.
   escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
   ```
 
+<<<<<<< HEAD
 #### create_and_setup_escrow(token_address, trusted_handlers, job_requester_id, escrow_config, amount)
+=======
+#### create_and_setup_escrow(token_address, trusted_handlers, job_requester_id, escrow_config)
+>>>>>>> develop
 
 Creates and sets up an escrow.
 
@@ -354,13 +358,20 @@ Creates and sets up an escrow.
       "htttp://localhost/manifest.json",
       "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
   )
+<<<<<<< HEAD
   amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
+=======
+>>>>>>> develop
   escrow_address = escrow_client.create_and_setup_escrow(
       token_address,
       trusted_handlers,
       job_requester_id,
+<<<<<<< HEAD
       escrow_config,
       amount
+=======
+      escrow_config
+>>>>>>> develop
   )
   ```
 
@@ -884,6 +895,7 @@ Stores the results url.
   )
   ```
 
+<<<<<<< HEAD
 #### withdraw(escrow_address, token_address, tx_options=None)
 
 Withdraws additional tokens in the escrow to the canceler.
@@ -930,6 +942,8 @@ Withdraws additional tokens in the escrow to the canceler.
   )
   ```
 
+=======
+>>>>>>> develop
 ### *exception* human_protocol_sdk.escrow.escrow_client.EscrowClientError
 
 Bases: `Exception`
@@ -953,6 +967,7 @@ Initializes a Escrow instance.
   * **reputation_oracle_fee** (`Decimal`) – Fee percentage of the Reputation Oracle
   * **manifest_url** (`str`) – Manifest file url
   * **hash** (`str`) – Manifest file hash
+<<<<<<< HEAD
 
 ### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, amount_withdrawn)
 
@@ -966,3 +981,5 @@ Represents the result of an escrow cancellation transaction.
   * **tx_hash** (`str`) – The hash of the transaction associated with the escrow withdrawal.
   * **token_address** (`str`) – The address of the token used for the withdrawal.
   * **amount_withdrawn** (`any`) – The amount withdrawn from the escrow.
+=======
+>>>>>>> develop

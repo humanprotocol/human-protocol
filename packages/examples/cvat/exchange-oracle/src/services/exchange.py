@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Optional
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
@@ -18,7 +17,7 @@ from src.utils.time import utcnow
 
 
 def serialize_task(
-    project_id: str, *, assignment_id: Optional[str] = None
+    project_id: str, *, assignment_id: str | None = None
 ) -> service_api.TaskResponse:
     with SessionLocal.begin() as session:
         project = cvat_service.get_project_by_id(session, project_id)
@@ -57,19 +56,14 @@ def serialize_task(
 
 
 def get_available_tasks() -> list[service_api.TaskResponse]:
-    results = []
-
     with SessionLocal.begin() as session:
         cvat_projects = cvat_service.get_available_projects(session)
 
-        for project in cvat_projects:
-            results.append(serialize_task(project.id))
-
-    return results
+        return [serialize_task(project.id) for project in cvat_projects]
 
 
 def get_tasks_by_assignee(
-    wallet_address: Optional[str] = None,
+    wallet_address: str | None = None,
 ) -> list[service_api.TaskResponse]:
     results = []
 
@@ -104,7 +98,7 @@ class UserHasUnfinishedAssignmentError(Exception):
     pass
 
 
-def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
+def create_assignment(project_id: int, wallet_address: str) -> str | None:
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),

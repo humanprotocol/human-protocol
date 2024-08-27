@@ -20,7 +20,6 @@ Subpackages
    human_protocol_sdk.staking
    human_protocol_sdk.statistics
    human_protocol_sdk.storage
-   human_protocol_sdk.transaction
 
 Submodules
 ----------

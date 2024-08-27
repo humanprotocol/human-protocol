@@ -18,9 +18,9 @@ import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
-import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -30,13 +30,10 @@ function formattedSignInErrorMessage(unknownError: unknown) {
 
 export function SignInWorkerPage() {
   const { t } = useTranslation();
-  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      signOut();
-    }
-  }, [signOut, user]);
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: false });
+  }, []);
 
   const methods = useForm<SignInDto>({
     defaultValues: {

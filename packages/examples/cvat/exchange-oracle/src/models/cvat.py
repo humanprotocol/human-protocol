@@ -1,8 +1,6 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
-from typing import List, Optional
-
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
@@ -35,23 +33,23 @@ class Project(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     cvat_webhook_id = Column(Integer, nullable=True)
 
-    images: Mapped[List["Image"]] = relationship(
+    images: Mapped[list[Image]] = relationship(
         back_populates="project", cascade="all, delete", passive_deletes=True
     )
 
-    tasks: Mapped[List["Task"]] = relationship(
+    tasks: Mapped[list[Task]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
     )
 
-    jobs: Mapped[List["Job"]] = relationship(
+    jobs: Mapped[list[Job]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
     )
 
-    escrow_creation: Mapped["EscrowCreation"] = relationship(
+    escrow_creation: Mapped[EscrowCreation] = relationship(
         back_populates="projects",
         passive_deletes=True,
         # A custom join is used because the foreign keys do not actually reference any objects
@@ -64,7 +62,7 @@ class Project(Base):
         foreign_keys=[escrow_address, chain_id],
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Project. id={self.id}"
 
 
@@ -81,17 +79,17 @@ class Task(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    project: Mapped["Project"] = relationship(back_populates="tasks")
-    jobs: Mapped[List["Job"]] = relationship(
+    project: Mapped[Project] = relationship(back_populates="tasks")
+    jobs: Mapped[list[Job]] = relationship(
         back_populates="task",
         cascade="all, delete",
         passive_deletes=True,
     )
-    data_upload: Mapped["DataUpload"] = relationship(
+    data_upload: Mapped[DataUpload] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Task. id={self.id}"
 
 
@@ -108,7 +106,7 @@ class EscrowCreation(Base):
 
     total_jobs = Column(Integer, nullable=False)
 
-    projects: Mapped[List["Project"]] = relationship(
+    projects: Mapped[list[Project]] = relationship(
         back_populates="escrow_creation",
         # A custom join is used because the foreign keys do not actually reference any objects
         primaryjoin=(
@@ -120,7 +118,7 @@ class EscrowCreation(Base):
         foreign_keys=[Project.escrow_address, Project.chain_id],
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"
 
 
@@ -135,9 +133,9 @@ class DataUpload(Base):
         nullable=False,
     )
 
-    task: Mapped["Task"] = relationship(back_populates="data_upload")
+    task: Mapped[Task] = relationship(back_populates="data_upload")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"DataUpload. id={self.id} task={self.task_id}"
 
 
@@ -155,9 +153,9 @@ class Job(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    task: Mapped["Task"] = relationship(back_populates="jobs")
-    project: Mapped["Project"] = relationship(back_populates="jobs")
-    assignments: Mapped[List["Assignment"]] = relationship(
+    task: Mapped[Task] = relationship(back_populates="jobs")
+    project: Mapped[Project] = relationship(back_populates="jobs")
+    assignments: Mapped[list[Assignment]] = relationship(
         back_populates="job",
         cascade="all, delete",
         passive_deletes=True,
@@ -165,11 +163,11 @@ class Job(Base):
     )
 
     @property
-    def latest_assignment(self) -> Optional[Assignment]:
+    def latest_assignment(self) -> Assignment | None:
         assignments = self.assignments
         return assignments[0] if assignments else None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Job. id={self.id}"
 
 
@@ -179,11 +177,11 @@ class User(Base):
     cvat_email = Column(String, unique=True, index=True, nullable=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=True)
 
-    assignments: Mapped[List["Assignment"]] = relationship(
+    assignments: Mapped[list[Assignment]] = relationship(
         back_populates="user", cascade="all, delete", passive_deletes=True
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"User. wallet_address={self.wallet_address} cvat_id={self.cvat_id}"
 
 
@@ -206,8 +204,8 @@ class Assignment(Base):
         nullable=False,
     )
 
-    user: Mapped["User"] = relationship(back_populates="assignments")
-    job: Mapped["Job"] = relationship(back_populates="assignments")
+    user: Mapped[User] = relationship(back_populates="assignments")
+    job: Mapped[Job] = relationship(back_populates="assignments")
 
     @property
     def is_finished(self) -> bool:
@@ -217,7 +215,7 @@ class Assignment(Base):
             or self.status != AssignmentStatuses.created
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Assignment. id={self.id} user={self.user.cvat_id} job={self.job.cvat_id}"
 
 
@@ -231,11 +229,11 @@ class Image(Base):
     )
     filename = Column(String, nullable=False)
 
-    project: Mapped["Project"] = relationship(back_populates="images")
+    project: Mapped[Project] = relationship(back_populates="images")
 
     __table_args__ = (UniqueConstraint("cvat_project_id", "filename", name="_project_filename_uc"),)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Image. id={self.id} cvat_project_id={self.cvat_project_id} filename={self.filename}"
         )

@@ -6,10 +6,9 @@ import uuid
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
-from logging import Logger
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeVar, Union, cast
 
 import cv2
 import datumaro as dm
@@ -26,7 +25,6 @@ import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
-from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
@@ -36,6 +34,12 @@ from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from logging import Logger
+
+    from src.core.manifest import TaskManifest
 
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
@@ -103,7 +107,7 @@ class _Undefined:
 
 _unset = _Undefined()
 
-_MaybeUnset = Union[T, _Undefined]
+_MaybeUnset = T | _Undefined
 
 
 @dataclass
@@ -115,7 +119,7 @@ class _ExcludedAnnotationInfo:
 
 @dataclass
 class _ExcludedAnnotationsInfo:
-    messages: List[_ExcludedAnnotationInfo] = field(default_factory=list)
+    messages: list[_ExcludedAnnotationInfo] = field(default_factory=list)
 
     excluded_count: int = 0
     "The number of excluded annotations. Can be different from len(messages)"
@@ -135,7 +139,7 @@ class SimpleTaskBuilder:
     Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
     """
 
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
@@ -163,7 +167,7 @@ class SimpleTaskBuilder:
         return self
 
     def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
     ) -> str:
         if max_items is None:
             max_items = self.list_display_threshold
@@ -198,7 +202,7 @@ class SimpleTaskBuilder:
             )
 
     def _parse_gt_dataset(
-        self, gt_file_data: bytes, *, add_prefix: Optional[str] = None
+        self, gt_file_data: bytes, *, add_prefix: str | None = None
     ) -> dm.Dataset:
         with TemporaryDirectory() as gt_temp_dir:
             gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
@@ -222,8 +226,8 @@ class SimpleTaskBuilder:
             return gt_dataset
 
     def _get_gt_filenames(
-        self, gt_dataset: dm.Dataset, data_filenames: List[str], *, manifest: TaskManifest
-    ) -> List[str]:
+        self, gt_dataset: dm.Dataset, data_filenames: list[str], *, manifest: TaskManifest
+    ) -> list[str]:
         gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
         known_data_filenames = set(data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
@@ -246,14 +250,14 @@ class SimpleTaskBuilder:
 
     def _make_job_configuration(
         self,
-        data_filenames: List[str],
-        gt_filenames: List[str],
+        data_filenames: list[str],
+        gt_filenames: list[str],
         *,
         manifest: TaskManifest,
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         # Make job layouts wrt. manifest params, 1 job per task (CVAT can't repeat images in jobs)
         gt_filenames_index = set(gt_filenames)
-        data_filenames = [fn for fn in data_filenames if not fn in gt_filenames_index]
+        data_filenames = [fn for fn in data_filenames if fn not in gt_filenames_index]
         random.shuffle(data_filenames)
 
         job_layout = []
@@ -357,7 +361,7 @@ class SimpleTaskBuilder:
 
 
 class BoxesFromPointsTaskBuilder:
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
@@ -376,7 +380,7 @@ class BoxesFromPointsTaskBuilder:
         self._bbox_point_mapping: _MaybeUnset[boxes_from_points_task.BboxPointMapping] = _unset
         "bbox_id -> point_id"
 
-        self._roi_size_estimations: _MaybeUnset[Dict[int, Tuple[float, float]]] = _unset
+        self._roi_size_estimations: _MaybeUnset[dict[int, tuple[float, float]]] = _unset
         "label_id -> (rel. w, rel. h)"
 
         self._rois: _MaybeUnset[boxes_from_points_task.RoiInfos] = _unset
@@ -613,7 +617,7 @@ class BoxesFromPointsTaskBuilder:
         self._validate_gt_annotations()
 
     def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
     ) -> str:
         if max_items is None:
             max_items = self.list_display_threshold
@@ -683,7 +687,7 @@ class BoxesFromPointsTaskBuilder:
 
             if len(skeleton.elements) != 1:
                 raise DatasetValidationError(
-                    "invalid points count ({}), expected 1".format(len(skeleton.elements))
+                    f"invalid points count ({len(skeleton.elements)}), expected 1"
                 )
 
             point = skeleton.elements[0]
@@ -776,9 +780,9 @@ class BoxesFromPointsTaskBuilder:
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
-            input_skeletons: List[dm.Skeleton],
-            gt_boxes: List[dm.Bbox],
-        ) -> List[Tuple[dm.Skeleton, dm.Bbox]]:
+            input_skeletons: list[dm.Skeleton],
+            gt_boxes: list[dm.Bbox],
+        ) -> list[tuple[dm.Skeleton, dm.Bbox]]:
             matches = [
                 [
                     (input_skeleton.label == gt_bbox.label)
@@ -795,7 +799,7 @@ class BoxesFromPointsTaskBuilder:
             ambiguous_boxes: list[int] = set()
             ambiguous_skeletons: list[int] = set()
             for skeleton_idx, input_skeleton in enumerate(input_skeletons):
-                matched_boxes: List[dm.Bbox] = [
+                matched_boxes: list[dm.Bbox] = [
                     gt_boxes[j] for j in range(len(gt_boxes)) if matches[skeleton_idx][j]
                 ]
 
@@ -818,7 +822,7 @@ class BoxesFromPointsTaskBuilder:
                     continue
 
             for gt_idx, gt_bbox in enumerate(gt_boxes):
-                matched_skeletons: List[dm.Skeleton] = [
+                matched_skeletons: list[dm.Skeleton] = [
                     input_skeletons[i] for i in range(len(input_skeletons)) if matches[i][gt_idx]
                 ]
 
@@ -839,7 +843,7 @@ class BoxesFromPointsTaskBuilder:
                     ambiguous_boxes.add(gt_bbox.id)
                     ambiguous_skeletons.update(a.id for a in matched_skeletons)
                     continue
-                elif not matched_skeletons:
+                if not matched_skeletons:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
                         "Sample '{}': GT bbox #{} ({}) skipped - "
@@ -854,7 +858,7 @@ class BoxesFromPointsTaskBuilder:
                     excluded_gt_info.excluded_count += 1  # an error
                     continue
 
-            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
             for skeleton_idx, input_skeleton in enumerate(input_skeletons):
                 if input_skeleton.id in ambiguous_skeletons:
                     continue
@@ -874,9 +878,9 @@ class BoxesFromPointsTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_boxes(
-            input_skeletons: List[dm.Skeleton],
-            gt_boxes: List[dm.Bbox],
-        ) -> List[dm.Bbox]:
+            input_skeletons: list[dm.Skeleton],
+            gt_boxes: list[dm.Bbox],
+        ) -> list[dm.Bbox]:
             matches = _find_unambiguous_matches(input_skeletons, gt_boxes)
 
             matched_boxes = []
@@ -1030,7 +1034,7 @@ class BoxesFromPointsTaskBuilder:
         if classes_with_default_roi:
             label_cat = self._gt_dataset.categories()[dm.AnnotationType.label]
             labels_by_reason = {
-                g_reason: list(v[0] for v in g_items)
+                g_reason: [v[0] for v in g_items]
                 for g_reason, g_items in groupby(
                     sorted(classes_with_default_roi.items(), key=lambda v: v[1]), key=lambda v: v[1]
                 )
@@ -1054,7 +1058,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._roi_size_estimations is not _unset
         assert self._points_dataset is not _unset
 
-        rois: List[boxes_from_points_task.RoiInfo] = []
+        rois: list[boxes_from_points_task.RoiInfo] = []
         for sample in self._points_dataset:
             for skeleton in sample.annotations:
                 if not isinstance(skeleton, dm.Skeleton):
@@ -1133,9 +1137,9 @@ class BoxesFromPointsTaskBuilder:
         data_filenames = [
             fn
             for point_id, fn in self._roi_filenames.items()
-            if not point_id in gt_point_ids
-            if not original_image_id_to_filename[point_id_to_original_image_id[point_id]]
-            in input_gt_filenames
+            if point_id not in gt_point_ids
+            if original_image_id_to_filename[point_id_to_original_image_id[point_id]]
+            not in input_gt_filenames
         ]
         random.shuffle(data_filenames)
 
@@ -1234,7 +1238,7 @@ class BoxesFromPointsTaskBuilder:
             (255, 255, 255),
             cv2.FILLED,
         )
-        roi_pixels = cv2.circle(
+        return cv2.circle(
             roi_pixels,
             center,
             point_size,
@@ -1242,10 +1246,9 @@ class BoxesFromPointsTaskBuilder:
             cv2.FILLED,
         )
 
-        return roi_pixels
-
     def _extract_and_upload_rois(self):
-        # TODO: maybe optimize via splitting into separate threads (downloading, uploading, processing)
+        # TODO: maybe optimize via splitting into separate
+        #  threads (downloading, uploading, processing)
 
         # Watch for the memory used, as the whole dataset can be quite big (gigabytes, terabytes)
         # Consider also packing RoIs cut into archives
@@ -1267,8 +1270,10 @@ class BoxesFromPointsTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self._points_dataset}
 
-        _roi_key = lambda e: e.original_image_key
-        rois_by_image: Dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
+        def _roi_key(e):
+            return e.original_image_key
+
+        rois_by_image: dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(sorted(self._rois, key=_roi_key), key=_roi_key)
         }
@@ -1420,9 +1425,9 @@ class SkeletonsFromBoxesTaskBuilder:
     @dataclass
     class _JobParams:
         label_id: int
-        roi_ids: List[int]
+        roi_ids: list[int]
 
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
@@ -1438,12 +1443,12 @@ class SkeletonsFromBoxesTaskBuilder:
         self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
 
-        self._skeleton_bbox_mapping: _MaybeUnset[
-            skeletons_from_boxes_task.SkeletonBboxMapping
-        ] = _unset
+        self._skeleton_bbox_mapping: _MaybeUnset[skeletons_from_boxes_task.SkeletonBboxMapping] = (
+            _unset
+        )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
-        self._roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
-        self._job_params: _MaybeUnset[List[self._JobParams]] = _unset
+        self._roi_filenames: _MaybeUnset[dict[int, str]] = _unset
+        self._job_params: _MaybeUnset[list[self._JobParams]] = _unset
 
         self._excluded_gt_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
         self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
@@ -1603,7 +1608,8 @@ class SkeletonsFromBoxesTaskBuilder:
 
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
-                assert len(element.points) == 2 and len(element.visibility) == 1
+                assert len(element.points) == 2
+                assert len(element.visibility) == 1
 
                 if element.visibility[0] == dm.Points.Visibility.absent:
                     continue
@@ -1806,7 +1812,7 @@ class SkeletonsFromBoxesTaskBuilder:
         self._validate_boxes_annotations()
 
     def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
     ) -> str:
         if max_items is None:
             max_items = self.list_display_threshold
@@ -1849,11 +1855,11 @@ class SkeletonsFromBoxesTaskBuilder:
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
-            input_boxes: List[dm.Bbox],
-            gt_skeletons: List[dm.Skeleton],
+            input_boxes: list[dm.Bbox],
+            gt_skeletons: list[dm.Skeleton],
             *,
-            gt_annotations: List[dm.Annotation],
-        ) -> List[Tuple[dm.Bbox, dm.Skeleton]]:
+            gt_annotations: list[dm.Annotation],
+        ) -> list[tuple[dm.Bbox, dm.Skeleton]]:
             matches = [
                 [
                     (input_bbox.label == gt_skeleton.label)
@@ -1871,7 +1877,7 @@ class SkeletonsFromBoxesTaskBuilder:
             ambiguous_boxes: list[int] = set()
             ambiguous_skeletons: list[int] = set()
             for bbox_idx, input_bbox in enumerate(input_boxes):
-                matched_skeletons: List[dm.Skeleton] = [
+                matched_skeletons: list[dm.Skeleton] = [
                     gt_skeletons[j] for j in range(len(gt_skeletons)) if matches[bbox_idx][j]
                 ]
 
@@ -1894,7 +1900,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     continue
 
             for skeleton_idx, gt_skeleton in enumerate(gt_skeletons):
-                matched_boxes: List[dm.Bbox] = [
+                matched_boxes: list[dm.Bbox] = [
                     input_boxes[i] for i in range(len(input_boxes)) if matches[i][skeleton_idx]
                 ]
 
@@ -1915,7 +1921,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     ambiguous_skeletons.add(gt_skeleton.id)
                     ambiguous_boxes.update(b.id for b in matched_boxes)
                     continue
-                elif not matched_boxes:
+                if not matched_boxes:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
@@ -1930,7 +1936,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     excluded_gt_info.excluded_count += 1  # an error
                     continue
 
-            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
             for bbox_idx, input_bbox in enumerate(input_boxes):
                 if input_bbox.id in ambiguous_boxes:
                     continue
@@ -1950,11 +1956,11 @@ class SkeletonsFromBoxesTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_skeletons(
-            input_boxes: List[dm.Bbox],
-            gt_skeletons: List[dm.Skeleton],
+            input_boxes: list[dm.Bbox],
+            gt_skeletons: list[dm.Skeleton],
             *,
-            gt_annotations: List[dm.Annotation],
-        ) -> List[dm.Bbox]:
+            gt_annotations: list[dm.Annotation],
+        ) -> list[dm.Bbox]:
             matches = _find_unambiguous_matches(
                 input_boxes, gt_skeletons, gt_annotations=gt_annotations
             )
@@ -2080,7 +2086,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._gt_dataset is not _unset
         assert self._boxes_dataset is not _unset
 
-        rois: List[skeletons_from_boxes_task.RoiInfo] = []
+        rois: list[skeletons_from_boxes_task.RoiInfo] = []
         for sample in self._boxes_dataset:
             for bbox in sample.annotations:
                 if not isinstance(bbox, dm.Bbox):
@@ -2150,7 +2156,7 @@ class SkeletonsFromBoxesTaskBuilder:
         gt_ratio = self.manifest.validation.val_size / (self.manifest.annotation.job_size or 1)
         job_size_mult = self.job_size_mult
 
-        job_params: List[self._JobParams] = []
+        job_params: list[self._JobParams] = []
 
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
         for label_id, _ in enumerate(self.manifest.annotation.labels):
@@ -2289,8 +2295,10 @@ class SkeletonsFromBoxesTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self._boxes_dataset}
 
-        _roi_info_key = lambda e: e.original_image_key
-        roi_info_by_image: Dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
+        def _roi_info_key(e):
+            return e.original_image_key
+
+        roi_info_by_image: dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(
                 sorted(self._roi_infos, key=_roi_info_key), key=_roi_info_key
@@ -2339,7 +2347,9 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._job_params is not _unset
         assert self.point_labels is not _unset
 
-        _job_params_label_key = lambda ts: ts.label_id
+        def _job_params_label_key(ts):
+            return ts.label_id
+
         jobs_by_skeleton_label = {
             skeleton_label_id: list(g)
             for skeleton_label_id, g in groupby(
@@ -2386,7 +2396,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 # Each skeleton point uses the same file layout in jobs
                 skeleton_label_filenames = []
                 for skeleton_label_job in skeleton_label_jobs:
-                    skeleton_label_filenames.append(
+                    skeleton_label_filenames.append(  # noqa: PERF401
                         [
                             compose_data_bucket_filename(
                                 self.escrow_address, self.chain_id, self._roi_filenames[roi_id]
@@ -2444,8 +2454,10 @@ class SkeletonsFromBoxesTaskBuilder:
                         )
                         db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                        # Actual task creation in CVAT takes some time, so it's done in an async process.
-                        # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                        # Actual task creation in CVAT takes some time,
+                        # so it's done in an async process.
+                        # The task is fully created once 'update:task' or 'update:job'
+                        # webhook is received.
                         cvat_api.put_task_data(
                             cvat_task.id,
                             cvat_cloud_storage.id,
@@ -2485,15 +2497,15 @@ def is_image(path: str) -> bool:
     return trunk and ext.lower() in IMAGE_EXTENSIONS
 
 
-def filter_image_files(data_filenames: List[str]) -> List[str]:
-    return list(fn for fn in data_filenames if is_image(fn))
+def filter_image_files(data_filenames: list[str]) -> list[str]:
+    return [fn for fn in data_filenames if is_image(fn)]
 
 
-def strip_bucket_prefix(data_filenames: List[str], prefix: str) -> List[str]:
-    return list(os.path.relpath(fn, prefix) for fn in data_filenames)
+def strip_bucket_prefix(data_filenames: list[str], prefix: str) -> list[str]:
+    return [os.path.relpath(fn, prefix) for fn in data_filenames]
 
 
-def make_label_configuration(manifest: TaskManifest) -> List[dict]:
+def make_label_configuration(manifest: TaskManifest) -> list[dict]:
     return [
         {
             "name": label.name,
@@ -2503,7 +2515,7 @@ def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     ]
 
 
-def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> Dict:
+def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
     CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
         CloudProviders.aws: "AWS_S3_BUCKET",
         CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",

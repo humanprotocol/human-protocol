@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
@@ -42,52 +43,54 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     def test_get_job_launcher_url(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(recording_url, DEFAULT_MANIFEST_URL)
+            assert recording_url == DEFAULT_MANIFEST_URL
 
     def test_get_job_launcher_url_invalid_escrow(self):
-        with self.assertRaises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
             get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_url_invalid_recording_address(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")
             recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(recording_url, "")
+            assert recording_url == ""
 
     def test_get_recording_oracle_url(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(recording_url, DEFAULT_MANIFEST_URL)
+            assert recording_url == DEFAULT_MANIFEST_URL
 
     def test_get_recording_oracle_url_invalid_escrow(self):
-        with self.assertRaises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
             get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_recording_oracle_url_invalid_recording_address(self):
-        with patch("src.chain.kvstore.get_escrow") as mock_escrow, patch(
-            "src.chain.kvstore.OperatorUtils.get_leader"
-        ) as mock_leader:
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+        ):
             self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")
             recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
-            self.assertEqual(recording_url, "")
+            assert recording_url == ""
 
     def test_store_public_key(self):
         PGP_PUBLIC_KEY_URL_1 = "http://pgp-public-key-url-1"
@@ -107,7 +110,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             hash_ = store["public_key_hash"]
 
             if hash_ != hash(public_key):
-                raise KVStoreClientError(f"Invalid hash")
+                raise KVStoreClientError("Invalid hash")
 
             return public_key
 
@@ -134,7 +137,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_web3.return_value = self.w3
 
             kvstore_client = KVStoreClient(self.w3)
-            self.assertIsNone(kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr))
+            assert kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr) is None
 
             # check that public key will be set to KVStore at first time
             with patch(
@@ -143,9 +146,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertEquals(
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
-                    PGP_PUBLIC_KEY_URL_1,
+                assert (
+                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
+                    == PGP_PUBLIC_KEY_URL_1
                 )
 
             # check that the same public key URL is not written to KVStore a second time
@@ -156,7 +159,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_not_called()
 
-            # check that public key URL and hash will be updated in KVStore if previous hash is outdated/corrupted
+            # check that public key URL and hash will be updated in KVStore
+            # if previous hash is outdated/corrupted
             with patch(
                 "human_protocol_sdk.kvstore.KVStoreClient.set_file_url_and_hash", Mock()
             ) as mock_set_file_url_and_hash:
@@ -164,9 +168,10 @@ class ServiceIntegrationTest(unittest.TestCase):
                 store["public_key_hash"] = "corrupted_hash"
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertNotEquals(store["public_key_hash"], "corrupted_hash")
+                assert store["public_key_hash"] != "corrupted_hash"
 
-            # check that a new public key URL will be written to KVStore when an outdated URL is stored there
+            # check that a new public key URL will be written to KVStore when
+            # an outdated URL is stored there
             with (
                 patch(
                     "src.core.config.Config.encryption_config.pgp_public_key_url",
@@ -179,7 +184,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 mock_set_file_url_and_hash.side_effect = set_file_url_and_hash
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
-                self.assertEquals(
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr),
-                    PGP_PUBLIC_KEY_URL_2,
+                assert (
+                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
+                    == PGP_PUBLIC_KEY_URL_2
                 )

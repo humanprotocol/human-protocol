@@ -104,7 +104,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
+=======
+[staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
+>>>>>>> develop
 
 ## Properties
 
@@ -114,7 +118,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
+=======
+[staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
+>>>>>>> develop
 
 ***
 
@@ -128,7 +136,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+=======
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+>>>>>>> develop
 
 ***
 
@@ -138,7 +150,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
+=======
+[staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
+>>>>>>> develop
 
 ***
 
@@ -152,7 +168,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+=======
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+>>>>>>> develop
 
 ***
 
@@ -162,7 +182,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
+=======
+[staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
+>>>>>>> develop
 
 ***
 
@@ -172,7 +196,11 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
+=======
+[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
+>>>>>>> develop
 
 ## Methods
 
@@ -223,7 +251,11 @@ await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amoun
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
+=======
+[staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
+>>>>>>> develop
 
 ***
 
@@ -268,7 +300,11 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
+=======
+[staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
+>>>>>>> develop
 
 ***
 
@@ -315,7 +351,11 @@ await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
+=======
+[staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
+>>>>>>> develop
 
 ***
 
@@ -361,7 +401,11 @@ await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
+=======
+[staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
+>>>>>>> develop
 
 ***
 
@@ -399,7 +443,11 @@ const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
+=======
+[staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
+>>>>>>> develop
 
 ***
 
@@ -456,7 +504,11 @@ await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
+=======
+[staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
+>>>>>>> develop
 
 ***
 
@@ -504,7 +556,11 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
+=======
+[staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
+>>>>>>> develop
 
 ***
 
@@ -551,7 +607,11 @@ await stakingClient.unstake(amount);
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
+=======
+[staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
+>>>>>>> develop
 
 ***
 
@@ -593,7 +653,11 @@ await stakingClient.withdraw();
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
+=======
+[staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
+>>>>>>> develop
 
 ***
 
@@ -625,4 +689,8 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)
+=======
+[staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)
+>>>>>>> develop

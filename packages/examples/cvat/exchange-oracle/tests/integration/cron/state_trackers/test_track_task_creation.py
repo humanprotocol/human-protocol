@@ -38,9 +38,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             track_task_creation()
 
         webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
-        self.assertIsNotNone(webhook)
+        assert webhook is not None
         data_upload = self.session.query(DataUpload).filter_by(id=upload_id).first()
-        self.assertIsNone(data_upload)
+        assert data_upload is None
 
     def test_track_track_completed_task_creation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -75,11 +75,11 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         jobs = self.session.query(Job).all()
-        self.assertIsNotNone(jobs)
-        self.assertEqual(len(jobs), 2)
-        self.assertTrue(any(job.cvat_id == 2 for job in jobs))
+        assert jobs is not None
+        assert len(jobs) == 2
+        assert any(job.cvat_id == 2 for job in jobs)
         data_upload = self.session.query(DataUpload).filter_by(id=upload_id).first()
-        self.assertIsNone(data_upload)
+        assert data_upload is None
 
     def test_track_track_completed_task_creation_error(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -107,5 +107,5 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
-        self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_creation_failed)
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.task_creation_failed

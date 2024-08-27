@@ -54,8 +54,11 @@ Enum for KVStore keys
 
 #### public_key *= 'public_key'*
 
+<<<<<<< HEAD
 #### registration_instructions *= 'registration_instructions'*
 
+=======
+>>>>>>> develop
 #### registration_needed *= 'registration_needed'*
 
 #### role *= 'role'*

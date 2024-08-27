@@ -1,4 +1,5 @@
-""" Custom error handlers for the FastAPI"""
+"""Custom error handlers for the FastAPI"""
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse

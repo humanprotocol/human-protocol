@@ -6,7 +6,7 @@ import {
 import last from 'lodash/last';
 import { useNavigate } from 'react-router-dom';
 import type { JsonRpcSigner } from 'ethers';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
@@ -20,24 +20,57 @@ import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { isArray } from '@/shared/helpers/is-array';
 
+const fieldsValidations = {
+  [EthKVStoreKeys.PublicKey]: z.string().min(1),
+  [EthKVStoreKeys.Url]: z.string(),
+  [EthKVStoreKeys.WebhookUrl]: z.string().url(),
+  [EthKVStoreKeys.Role]: z.nativeEnum(Role),
+  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobTypes)).min(1),
+  [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
+};
+
 export const editEthKVStoreValuesMutationSchema = z.object({
-  [EthKVStoreKeys.PublicKey]: z.string().min(1).optional(),
-  [EthKVStoreKeys.Url]: z.string().url().optional(),
-  [EthKVStoreKeys.WebhookUrl]: z.string().url().optional(),
-  [EthKVStoreKeys.Role]: z.nativeEnum(Role).optional(),
-  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobTypes)).optional(),
-  [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1).optional(),
+  [EthKVStoreKeys.PublicKey]:
+    fieldsValidations[EthKVStoreKeys.PublicKey].optional(),
+  [EthKVStoreKeys.Url]: fieldsValidations[EthKVStoreKeys.Url].optional(),
+  [EthKVStoreKeys.WebhookUrl]:
+    fieldsValidations[EthKVStoreKeys.WebhookUrl].optional(),
+  [EthKVStoreKeys.Role]: fieldsValidations[EthKVStoreKeys.Role].optional(),
+  [EthKVStoreKeys.JobTypes]:
+    fieldsValidations[EthKVStoreKeys.JobTypes].optional(),
+  [EthKVStoreKeys.Fee]: fieldsValidations[EthKVStoreKeys.Fee].optional(),
 });
 
 export type EditEthKVStoreValuesMutationData = z.infer<
   typeof editEthKVStoreValuesMutationSchema
 >;
 
+export const setEthKVStoreValuesMutationSchema = (
+  initialFields: GetEthKVStoreValuesSuccessResponse
+) => {
+  return editEthKVStoreValuesMutationSchema.superRefine((newData, ctx) => {
+    Object.keys(initialFields).forEach((key) => {
+      const typedKey = key as keyof GetEthKVStoreValuesSuccessResponse;
+      const initialField = initialFields[typedKey];
+      if (!initialField) {
+        try {
+          fieldsValidations[typedKey].parse(newData[typedKey]);
+        } catch (error) {
+          if (error instanceof ZodError) {
+            error.issues[0].path = [typedKey];
+            ctx.addIssue(error.issues[0]);
+          }
+        }
+      }
+    });
+  });
+};
+
 export const getEditEthKVStoreValuesMutationSchema = (
   initialData: GetEthKVStoreValuesSuccessResponse
 ) => {
   return editEthKVStoreValuesMutationSchema.transform((newData, ctx) => {
-    const result: EditEthKVStoreValuesMutationData = {};
+    const fieldsThatHasChanges: EditEthKVStoreValuesMutationData = {};
     Object.values(EthKVStoreKeys).forEach((key) => {
       const newFiledData = newData[key];
       const initialFiledData = initialData[key];
@@ -47,7 +80,7 @@ export const getEditEthKVStoreValuesMutationSchema = (
         isArray(initialFiledData) &&
         newFiledData.sort().toString() !== initialFiledData.sort().toString()
       ) {
-        Object.assign(result, { [key]: newFiledData.toString() });
+        Object.assign(fieldsThatHasChanges, { [key]: newFiledData.toString() });
         return;
       }
 
@@ -55,16 +88,17 @@ export const getEditEthKVStoreValuesMutationSchema = (
         typeof newFiledData === 'number' &&
         newFiledData.toString() !== initialFiledData?.toString()
       ) {
-        Object.assign(result, { [key]: newFiledData });
+        Object.assign(fieldsThatHasChanges, { [key]: newFiledData });
         return;
       }
 
-      if (newFiledData !== initialFiledData) {
-        Object.assign(result, { [key]: newFiledData });
+      // eslint-disable-next-line eqeqeq -- expect to do conversion for this compare
+      if (newFiledData != initialFiledData) {
+        Object.assign(fieldsThatHasChanges, { [key]: newFiledData });
       }
     });
 
-    if (!Object.values(result).length) {
+    if (!Object.values(fieldsThatHasChanges).length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: t('operator.addKeysPage.editKeysForm.error'),
@@ -72,7 +106,7 @@ export const getEditEthKVStoreValuesMutationSchema = (
       });
     }
 
-    return result;
+    return fieldsThatHasChanges;
   });
 };
 

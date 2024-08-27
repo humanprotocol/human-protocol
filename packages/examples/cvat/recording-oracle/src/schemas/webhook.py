@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, validator
 
@@ -11,8 +10,8 @@ class OracleWebhook(BaseModel):
     escrow_address: str
     chain_id: Networks
     event_type: str
-    event_data: Optional[dict] = None
-    timestamp: Optional[datetime] = None  # TODO: remove optional
+    event_data: dict | None = None
+    timestamp: datetime | None = None  # TODO: remove optional
 
     @validator("escrow_address", allow_reuse=True)
     def validate_escrow_(cls, value):

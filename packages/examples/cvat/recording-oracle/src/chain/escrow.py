@@ -1,8 +1,7 @@
 import json
-from typing import List
 
 from human_protocol_sdk.constants import ChainId, Status
-from human_protocol_sdk.encryption import Encryption, EncryptionUtils
+from human_protocol_sdk.encryption import Encryption
 from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
@@ -22,9 +21,11 @@ def validate_escrow(
     chain_id: int,
     escrow_address: str,
     *,
-    accepted_states: List[Status] = [Status.Pending],
+    accepted_states: list[Status] | None = None,
     allow_no_funds: bool = False,
 ) -> None:
+    if accepted_states is None:
+        accepted_states = [Status.Pending]
     assert accepted_states
 
     escrow = get_escrow(chain_id, escrow_address)
@@ -37,9 +38,8 @@ def validate_escrow(
             )
         )
 
-    if status == Status.Pending and not allow_no_funds:
-        if int(escrow.balance) == 0:
-            raise ValueError("Escrow doesn't have funds")
+    if status == Status.Pending and not allow_no_funds and int(escrow.balance) == 0:
+        raise ValueError("Escrow doesn't have funds")
 
 
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:

@@ -350,7 +350,6 @@ export const KVStoreKeys = {
   url: 'url',
   jobTypes: 'job_types',
   registrationNeeded: 'registration_needed',
-  registrationInstructions: 'registration_instructions',
 };
 
 export const Role = {

@@ -48,7 +48,11 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+=======
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+>>>>>>> develop
 
 ***
 
@@ -83,7 +87,11 @@ const leaders = await OperatorUtils.getLeaders(filter);
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
+=======
+[operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
+>>>>>>> develop
 
 ***
 
@@ -121,7 +129,11 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:151](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L151)
+=======
+[operator.ts:151](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L151)
+>>>>>>> develop
 
 ***
 
@@ -155,4 +167,8 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:201](https://github.com/humanprotocol/human-protocol/blob/fa754a045070bb9969427d44e4db73f28ad75a06/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L201)
+=======
+[operator.ts:201](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L201)
+>>>>>>> develop

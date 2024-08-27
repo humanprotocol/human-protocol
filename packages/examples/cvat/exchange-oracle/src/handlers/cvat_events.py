@@ -1,5 +1,3 @@
-from typing import List
-
 from dateutil.parser import parse as parse_aware_datetime
 from sqlalchemy import exc as sa_errors
 
@@ -42,7 +40,7 @@ def handle_update_job_event(payload: dict) -> None:
                 webhook_time = parse_aware_datetime(payload.job["updated_date"])
                 webhook_assignee_id = (payload.job["assignee"] or {}).get("id")
 
-                job_assignments: List[models.Assignment] = sorted(
+                job_assignments: list[models.Assignment] = sorted(
                     job_assignments, key=lambda a: a.created_at, reverse=True
                 )
                 latest_assignment = job.assignments[0]

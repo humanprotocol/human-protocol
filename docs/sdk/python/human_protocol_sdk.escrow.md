@@ -34,12 +34,18 @@ obtain information from both the contracts and subgraph.
     * [`EscrowClient.get_token_address()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_token_address)
     * [`EscrowClient.setup()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.setup)
     * [`EscrowClient.store_results()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.store_results)
+<<<<<<< HEAD
     * [`EscrowClient.withdraw()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.withdraw)
   * [`EscrowClientError`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError)
   * [`EscrowConfig`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig)
     * [`EscrowConfig.__init__()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig.__init__)
   * [`EscrowWithdraw`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw)
     * [`EscrowWithdraw.__init__()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw.__init__)
+=======
+  * [`EscrowClientError`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError)
+  * [`EscrowConfig`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig)
+    * [`EscrowConfig.__init__()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig.__init__)
+>>>>>>> develop
 * [human_protocol_sdk.escrow.escrow_utils module](human_protocol_sdk.escrow.escrow_utils.md)
   * [Code Example](human_protocol_sdk.escrow.escrow_utils.md#code-example)
   * [Module](human_protocol_sdk.escrow.escrow_utils.md#module)

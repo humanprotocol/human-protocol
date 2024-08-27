@@ -2,6 +2,7 @@ import json
 import unittest
 from unittest.mock import patch
 
+import pytest
 from human_protocol_sdk.constants import ChainId
 from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
@@ -32,9 +33,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with patch("src.chain.web3.Config.polygon_mainnet", PolygonMainnetConfig):
             w3 = get_web3(ChainId.POLYGON.value)
-        self.assertIsInstance(w3, Web3)
-        self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
-        self.assertEqual(w3.manager._provider.endpoint_uri, PolygonMainnetConfig.rpc_api)
+        assert isinstance(w3, Web3)
+        assert w3.eth.default_account == DEFAULT_GAS_PAYER
+        assert w3.manager._provider.endpoint_uri == PolygonMainnetConfig.rpc_api
 
     def test_get_web3_amoy(self):
         class PolygonAmoyConfig:
@@ -44,23 +45,19 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with patch("src.chain.web3.Config.polygon_amoy", PolygonAmoyConfig):
             w3 = get_web3(ChainId.POLYGON_AMOY.value)
-        self.assertIsInstance(w3, Web3)
-        self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
-        self.assertEqual(w3.manager._provider.endpoint_uri, PolygonAmoyConfig.rpc_api)
+        assert isinstance(w3, Web3)
+        assert w3.eth.default_account == DEFAULT_GAS_PAYER
+        assert w3.manager._provider.endpoint_uri == PolygonAmoyConfig.rpc_api
 
     def test_get_web3_localhost(self):
         w3 = get_web3(ChainId.LOCALHOST.value)
-        self.assertIsInstance(w3, Web3)
-        self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
-        self.assertEqual(w3.manager._provider.endpoint_uri, LocalhostConfig.rpc_api)
+        assert isinstance(w3, Web3)
+        assert w3.eth.default_account == DEFAULT_GAS_PAYER
+        assert w3.manager._provider.endpoint_uri == LocalhostConfig.rpc_api
 
     def test_get_web3_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as error:
-            w3 = get_web3(1234)
-        self.assertEqual(
-            "1234 is not in available list of networks.",
-            str(error.exception),
-        )
+        with pytest.raises(ValueError, match="1234 is not in available list of networks."):
+            get_web3(1234)
 
     def test_sign_message_polygon(self):
         with patch("src.chain.web3.get_web3") as mock_function:
@@ -70,8 +67,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             ):
                 mock_function.return_value = self.w3
                 signature, serialized_message = sign_message(ChainId.POLYGON.value, "message")
-            self.assertEqual(signature, SIGNATURE)
-            self.assertEqual(serialized_message, json.dumps("message"))
+            assert signature == SIGNATURE
+            assert serialized_message == json.dumps("message")
 
     def test_sign_message_amoy(self):
         with patch("src.chain.web3.get_web3") as mock_function:
@@ -81,37 +78,29 @@ class ServiceIntegrationTest(unittest.TestCase):
             ):
                 mock_function.return_value = self.w3
                 signature, serialized_message = sign_message(ChainId.POLYGON_AMOY.value, "message")
-            self.assertEqual(signature, SIGNATURE)
-            self.assertEqual(serialized_message, json.dumps("message"))
+            assert signature == SIGNATURE
+            assert serialized_message == json.dumps("message")
 
     def test_sign_message_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(ValueError, match="1234 is not in available list of networks."):
             sign_message(1234, "message")
-        self.assertEqual(
-            "1234 is not in available list of networks.",
-            str(error.exception),
-        )
 
     def test_recover_signer(self):
         with patch("src.chain.web3.get_web3") as mock_function:
             mock_function.return_value = self.w3
             signer = recover_signer(ChainId.POLYGON.value, "message", SIGNATURE)
-        self.assertEqual(signer, DEFAULT_GAS_PAYER)
+        assert signer == DEFAULT_GAS_PAYER
 
     def test_recover_signer_invalid_signature(self):
         with patch("src.chain.web3.get_web3") as mock_function:
             mock_function.return_value = self.w3
             signer = recover_signer(ChainId.POLYGON.value, "test", SIGNATURE)
-        self.assertNotEqual(signer, DEFAULT_GAS_PAYER)
+        assert signer != DEFAULT_GAS_PAYER
 
     def test_validate_address(self):
         address = validate_address(DEFAULT_GAS_PAYER)
-        self.assertEqual(address, DEFAULT_GAS_PAYER)
+        assert address == DEFAULT_GAS_PAYER
 
     def test_validate_address_invalid_address(self):
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(ValueError, match="invalid_address is not a correct Web3 address"):
             validate_address("invalid_address")
-        self.assertEqual(
-            f"invalid_address is not a correct Web3 address",
-            str(error.exception),
-        )

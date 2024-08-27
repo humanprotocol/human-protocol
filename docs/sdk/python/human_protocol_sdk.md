@@ -40,7 +40,10 @@
       * [`EscrowClient`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient)
       * [`EscrowClientError`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError)
       * [`EscrowConfig`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig)
+<<<<<<< HEAD
       * [`EscrowWithdraw`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw)
+=======
+>>>>>>> develop
     * [human_protocol_sdk.escrow.escrow_utils module](human_protocol_sdk.escrow.escrow_utils.md)
       * [Code Example](human_protocol_sdk.escrow.escrow_utils.md#code-example)
       * [Module](human_protocol_sdk.escrow.escrow_utils.md#module)
@@ -54,11 +57,14 @@
       * [Module](human_protocol_sdk.kvstore.kvstore_client.md#module)
       * [`KVStoreClient`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClient)
       * [`KVStoreClientError`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClientError)
+<<<<<<< HEAD
     * [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
       * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
       * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
       * [`KVStoreData`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData)
       * [`KVStoreUtils`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils)
+=======
+>>>>>>> develop
 * [human_protocol_sdk.operator package](human_protocol_sdk.operator.md)
   * [Submodules](human_protocol_sdk.operator.md#submodules)
     * [human_protocol_sdk.operator.operator_utils module](human_protocol_sdk.operator.operator_utils.md)
@@ -106,6 +112,7 @@
       * [`StorageFileNotFoundError`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.StorageFileNotFoundError)
     * [human_protocol_sdk.storage.storage_utils module](human_protocol_sdk.storage.storage_utils.md)
       * [`StorageUtils`](human_protocol_sdk.storage.storage_utils.md#human_protocol_sdk.storage.storage_utils.StorageUtils)
+<<<<<<< HEAD
 * [human_protocol_sdk.transaction package](human_protocol_sdk.transaction.md)
   * [Submodules](human_protocol_sdk.transaction.md#submodules)
     * [human_protocol_sdk.transaction.transaction_utils module](human_protocol_sdk.transaction.transaction_utils.md)
@@ -114,6 +121,8 @@
       * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
       * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
       * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
+=======
+>>>>>>> develop
 
 ## Submodules
 
@@ -141,7 +150,10 @@
     * [`KVStoreKeys.fee`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.fee)
     * [`KVStoreKeys.job_types`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.job_types)
     * [`KVStoreKeys.public_key`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.public_key)
+<<<<<<< HEAD
     * [`KVStoreKeys.registration_instructions`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.registration_instructions)
+=======
+>>>>>>> develop
     * [`KVStoreKeys.registration_needed`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.registration_needed)
     * [`KVStoreKeys.role`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.role)
     * [`KVStoreKeys.url`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.url)
