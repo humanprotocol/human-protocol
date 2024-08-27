@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -47,7 +47,6 @@ import { SiteKeyType } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   private readonly salt: string;
 
   constructor(
@@ -173,7 +172,7 @@ export class AuthService {
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
-      let operatorStatus = '';
+      let operatorStatus: string | undefined;
       try {
         operatorStatus = await KVStoreUtils.get(
           chainId,
@@ -399,6 +398,7 @@ export class AuthService {
   public compareToken(token: string, hashedToken: string): boolean {
     return this.hashToken(token) === hashedToken;
   }
+
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
     const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
@@ -429,15 +429,13 @@ export class AuthService {
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
-    let role = '';
+    let role: string | undefined;
     try {
       role = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role);
-    } catch {
-      // No hacemos nada con el error
-    }
+    } catch {}
 
     if (
-      role === '' ||
+      !role ||
       ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
         role,
       )
@@ -445,16 +443,16 @@ export class AuthService {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    let fee = '';
+    let fee: string | undefined;
     try {
       fee = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee);
     } catch {}
 
-    if (!fee) {
+    if (!fee || fee === '') {
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
-    let url = '';
+    let url: string | undefined;
     try {
       url = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url);
     } catch {}
@@ -463,7 +461,7 @@ export class AuthService {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
-    let jobTypes = '';
+    let jobTypes: string | undefined;
     try {
       jobTypes = await KVStoreUtils.get(
         chainId,
