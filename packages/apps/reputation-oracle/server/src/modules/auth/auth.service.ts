@@ -172,14 +172,17 @@ export class AuthService {
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
-      const operatorStatus = await KVStoreUtils.get(
-        chainId,
-        this.web3Service.getOperatorAddress(),
-        userEntity.evmAddress,
-      );
-      if (operatorStatus && operatorStatus !== '') {
-        status = operatorStatus;
-      }
+      //Try to fetch status from subgraph, in case the data is not indexed yet, just use status from database.
+      try {
+        const operatorStatus = await KVStoreUtils.get(
+          chainId,
+          this.web3Service.getOperatorAddress(),
+          userEntity.evmAddress.toLowerCase(),
+        );
+        if (operatorStatus && operatorStatus !== '') {
+          status = operatorStatus;
+        }
+      } catch (e) {}
     }
 
     const payload: any = {
@@ -452,7 +455,7 @@ export class AuthService {
 
     const userEntity = await this.userService.createWeb3User(data.address);
 
-    await kvstore.set(data.address, OperatorStatus.ACTIVE);
+    await kvstore.set(data.address.toLowerCase(), OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }

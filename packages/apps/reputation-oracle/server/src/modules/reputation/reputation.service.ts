@@ -381,8 +381,14 @@ export class ReputationService {
    * @param chainId Optional. The ID of the blockchain chain.
    * @returns {Promise<ReputationDto[]>} A Promise containing an array of reputation data.
    */
-  public async getAllReputations(chainId?: ChainId): Promise<ReputationDto[]> {
-    const reputations = await this.reputationRepository.findByChainId(chainId);
+  public async getAllReputations(
+    chainId?: ChainId,
+    types?: ReputationEntityType[],
+  ): Promise<ReputationDto[]> {
+    const reputations = await this.reputationRepository.findByChainIdAndTypes(
+      chainId,
+      types,
+    );
 
     return reputations.map((reputation) => ({
       chainId: reputation.chainId,

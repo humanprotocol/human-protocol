@@ -1,8 +1,9 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable, Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { ReputationEntity } from './reputation.entity';
+import { ReputationEntityType } from '../../common/enums';
 
 @Injectable()
 export class ReputationRepository extends BaseRepository<ReputationEntity> {
@@ -30,6 +31,21 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
   public findByChainId(chainId?: ChainId): Promise<ReputationEntity[]> {
     return this.find({
       where: chainId && { chainId },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  public findByChainIdAndTypes(
+    chainId?: ChainId,
+    types?: ReputationEntityType[],
+  ): Promise<ReputationEntity[]> {
+    return this.find({
+      where: {
+        ...(chainId && { chainId }),
+        ...(types && types.length > 0 && { type: In(types) }),
+      },
       order: {
         createdAt: 'DESC',
       },

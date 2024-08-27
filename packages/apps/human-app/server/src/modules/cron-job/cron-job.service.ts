@@ -29,7 +29,7 @@ export class CronJobService {
     private workerService: WorkerService,
   ) {}
 
-  @Cron('*/1 * * * *')
+  @Cron('*/3 * * * *')
   async updateJobsListCron() {
     console.log('CRON START');
 

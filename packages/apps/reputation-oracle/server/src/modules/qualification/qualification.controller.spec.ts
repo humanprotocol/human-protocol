@@ -62,6 +62,31 @@ describe('QualificationController', () => {
         createQualificationDto,
       );
     });
+
+    it('should create a qualification without expiresAt', async () => {
+      const createQualificationDto: CreateQualificationDto = {
+        reference: 'test-ref',
+        title: 'Test Title',
+        description: 'Test Description',
+      };
+      const result: QualificationDto = {
+        reference: 'test-ref',
+        title: 'Test Title',
+        description: 'Test Description',
+        expiresAt: null,
+      };
+
+      jest
+        .spyOn(qualificationService, 'createQualification')
+        .mockResolvedValue(result);
+
+      expect(await qualificationController.create(createQualificationDto)).toBe(
+        result,
+      );
+      expect(qualificationService.createQualification).toHaveBeenCalledWith(
+        createQualificationDto,
+      );
+    });
   });
 
   describe('getQualifications', () => {
