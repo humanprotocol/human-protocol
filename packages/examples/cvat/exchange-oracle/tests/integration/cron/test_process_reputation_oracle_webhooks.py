@@ -31,14 +31,14 @@ escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost
 
 
-@pytest.fixture
+@pytest.fixture()
 def session():
     session = SessionLocal()
     yield session
     session.close()
 
 
-@pytest.fixture
+@pytest.fixture()
 def create_project(session):
     cvat_id = 0
 
@@ -63,7 +63,7 @@ def create_project(session):
     return _create_project
 
 
-@pytest.fixture
+@pytest.fixture()
 def create_webhook(session):
     def _create_webhook(event_type, direction, event_data=None):
         webhook_id = str(uuid.uuid4())
@@ -88,42 +88,16 @@ def create_webhook(session):
 @dataclass
 class Case:
     project_status: ProjectStatuses
-    task_status: TaskStatuses
-    job_status: JobStatuses
     expected_project_status: ProjectStatuses
-    expected_task_status: TaskStatuses
-    expected_job_status: JobStatuses
 
 
 @pytest.mark.parametrize(
-    "case",
+    ("project_status", "expected_project_status"),
     [
-        Case(
-            project_status=ProjectStatuses.completed,
-            task_status=TaskStatuses.completed,
-            job_status=JobStatuses.completed,
-            expected_project_status=ProjectStatuses.deleted,
-            expected_task_status=TaskStatuses.deleted,
-            expected_job_status=JobStatuses.deleted,
-        ),
-        Case(
-            project_status=ProjectStatuses.deleted,
-            task_status=TaskStatuses.deleted,
-            job_status=JobStatuses.deleted,
-            expected_project_status=ProjectStatuses.deleted,
-            expected_task_status=TaskStatuses.deleted,
-            expected_job_status=JobStatuses.deleted,
-        ),
-        Case(
-            project_status=ProjectStatuses.annotation,
-            task_status=TaskStatuses.annotation,
-            job_status=JobStatuses.in_progress,
-            expected_project_status=ProjectStatuses.deleted,
-            expected_task_status=TaskStatuses.deleted,
-            expected_job_status=JobStatuses.deleted,
-        ),
+        (ProjectStatuses.completed, ProjectStatuses.deleted),
+        (ProjectStatuses.deleted, ProjectStatuses.deleted),
+        (ProjectStatuses.annotation, ProjectStatuses.deleted),
     ],
-    ids=["completed", "finished", "in progress"],
 )
 def test_process_incoming_reputation_oracle_webhooks_task_rejected_type(
     *,
@@ -131,18 +105,21 @@ def test_process_incoming_reputation_oracle_webhooks_task_rejected_type(
     create_project,
     create_webhook,
     mocker,
-    case,
+    project_status,
+    expected_project_status,
 ) -> None:
-    project = create_project(case.project_status)
-    project2 = create_project(case.project_status)
+    project = create_project(project_status)
+    project2 = create_project(project_status)
 
-    cvat_task = Task(id=str(uuid.uuid4()), cvat_id=1, cvat_project_id=1, status=case.task_status)
+    cvat_task = Task(
+        id=str(uuid.uuid4()), cvat_id=1, cvat_project_id=1, status=JobStatuses.completed
+    )
     cvat_job = Job(
         id=str(uuid.uuid4()),
         cvat_id=1,
         cvat_project_id=1,
         cvat_task_id=cvat_task.cvat_id,
-        status=case.job_status,
+        status=TaskStatuses.completed,
     )
     session.add(cvat_task)
     session.add(cvat_job)
@@ -166,10 +143,7 @@ def test_process_incoming_reputation_oracle_webhooks_task_rejected_type(
     assert webhook.status == OracleWebhookStatuses.completed
     assert webhook.attempts == 1
 
-    assert project.status == case.expected_project_status
-    assert project.tasks[0].status == case.expected_task_status
-    assert project.jobs[0].status == case.expected_job_status
-
+    assert project.status == expected_project_status
     assert mock_storage_client.remove_files.mock_calls == [
         mocker.call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
         mocker.call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),

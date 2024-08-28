@@ -48,8 +48,6 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
                         webhook.escrow_address,
                         webhook.chain_id,
                         status=ProjectStatuses.deleted,
-                        tasks_status=TaskStatuses.deleted,
-                        jobs_status=JobStatuses.deleted,
                     )
 
                     oracle_db_service.outbox.create_webhook(

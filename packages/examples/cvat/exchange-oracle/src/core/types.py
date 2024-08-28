@@ -29,7 +29,6 @@ class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
 class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
     annotation = "annotation"
     completed = "completed"
-    deleted = "deleted"
 
 
 class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -37,7 +36,6 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     in_progress = "in progress"
     rejected = "rejected"
     completed = "completed"
-    deleted = "deleted"
 
 
 class TaskTypes(str, Enum, metaclass=BetterEnumMeta):

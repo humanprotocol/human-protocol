@@ -207,11 +207,8 @@ def update_project_statuses_by_escrow_address(
     escrow_address: str,
     chain_id: int,
     status: ProjectStatuses,
-    tasks_status: TaskStatuses | None = None,
-    jobs_status: JobStatuses | None = None,
 ) -> None:
-    # Update the status of the projects and return the updated project IDs
-    project_update_statement = (
+    statement = (
         update(Project)
         .where(
             Project.escrow_address == escrow_address,
@@ -220,26 +217,8 @@ def update_project_statuses_by_escrow_address(
         .values(status=status.value)
         .returning(Project.cvat_id)
     )
-    updated_project_ids = set(session.execute(project_update_statement).scalars())
+    session.execute(statement)
 
-    if not updated_project_ids:
-        return
-
-    if tasks_status is not None:
-        task_update_statement = (
-            update(Task)
-            .where(Task.cvat_project_id.in_(updated_project_ids))
-            .values(status=tasks_status.value)
-        )
-        session.execute(task_update_statement)
-
-    if jobs_status is not None:
-        job_update_statement = (
-            update(Job)
-            .where(Job.cvat_project_id.in_(updated_project_ids))
-            .values(status=jobs_status.value)
-        )
-        session.execute(job_update_statement)
 
 
 def delete_project(session: Session, project_id: str) -> None:
