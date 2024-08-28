@@ -10,7 +10,7 @@ import src.services.webhook as oracle_db_service
 from src.core.config import CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
-from src.crons._utils import cron_job
+from src.crons._cron_job import cron_job
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams

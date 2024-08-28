@@ -17,7 +17,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.crons.process_job_launcher_webhooks import (
+from src.crons.webhooks.job_launcher import (
     process_incoming_job_launcher_webhooks,
     process_outgoing_job_launcher_webhooks,
 )

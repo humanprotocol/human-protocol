@@ -15,7 +15,9 @@ from src.core.types import (
     RecordingOracleEventTypes,
     TaskStatuses,
 )
-from src.crons._utils import cron_job, handle_webhook, process_outgoing_webhooks
+from src.crons._cron_job import cron_job
+from src.crons.webhooks._common import process_outgoing_webhooks
+from src.crons.webhooks._common import handle_webhook
 from src.db.utils import ForUpdateParams
 from src.models.webhook import Webhook
 

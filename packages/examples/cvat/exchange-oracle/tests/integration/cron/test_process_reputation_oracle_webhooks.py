@@ -16,7 +16,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.crons.process_reputation_oracle_webhooks import (
+from src.crons.webhooks.reputation_oracle import (
     process_incoming_reputation_oracle_webhooks,
 )
 from src.cvat import api_calls

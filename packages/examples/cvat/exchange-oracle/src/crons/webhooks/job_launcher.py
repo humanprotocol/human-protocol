@@ -14,7 +14,8 @@ from src.core.oracle_events import (
     ExchangeOracleEvent_TaskCreationFailed,
 )
 from src.core.types import JobLauncherEventTypes, Networks, OracleWebhookTypes, ProjectStatuses
-from src.crons._utils import cron_job, handle_webhook, send_webhook
+from src.crons._cron_job import cron_job
+from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks, _send_webhook
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.escrow_cleanup import EscrowCleaner
@@ -148,13 +149,10 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
 
 @cron_job
 def process_outgoing_job_launcher_webhooks(logger: logging.Logger, session: Session):
-    webhooks = oracle_db_service.outbox.get_pending_webhooks(
+    process_outgoing_webhooks(
+        logger,
         session,
         OracleWebhookTypes.job_launcher,
-        limit=CronConfig.process_job_launcher_webhooks_chunk_size,
-        for_update=ForUpdateParams(skip_locked=True),
+        get_job_launcher_url,
+        CronConfig.process_job_launcher_webhooks_chunk_size,
     )
-    for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
-            webhook_url = get_job_launcher_url(webhook.chain_id, webhook.escrow_address)
-            send_webhook(webhook_url, webhook, with_timestamp=False)
