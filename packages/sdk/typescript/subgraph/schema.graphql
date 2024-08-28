@@ -38,7 +38,6 @@ type Leader @entity {
   lockedUntilTimestamp: BigInt!
   amountWithdrawn: BigInt!
   amountSlashed: BigInt!
-  reputation: BigInt!
   reward: BigInt!
   amountJobsProcessed: BigInt!
 
@@ -49,7 +48,9 @@ type Leader @entity {
   jobTypes: [String!]
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
-  reputationNetwork: ReputationNetwork
+  registrationNeeded: Boolean
+  registrationInstructions: String
+  reputationNetworks: [ReputationNetwork!]
 }
 
 type LeaderURL @entity {
@@ -62,7 +63,7 @@ type LeaderURL @entity {
 type ReputationNetwork @entity {
   id: Bytes!
   address: Bytes!
-  operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
+  operators: [Leader!]! @derivedFrom(field: "reputationNetworks")
 }
 
 type Escrow @entity {

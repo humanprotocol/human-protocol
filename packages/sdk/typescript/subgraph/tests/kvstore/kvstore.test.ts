@@ -411,11 +411,12 @@ describe('KVStore', () => {
       'role',
       'Job Launcher'
     );
+
     assert.fieldEquals(
       'Leader',
       data2.params.sender.toHex(),
-      'reputationNetwork',
-      data1.params.sender.toHex()
+      'reputationNetworks',
+      `[${data1.params.sender.toHex()}]`
     );
   });
 
@@ -460,6 +461,70 @@ describe('KVStore', () => {
       data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'value',
       'Job Launcher'
+    );
+  });
+
+  test("Should properly update leader's registration needed", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'registration_needed',
+      'true',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'registration_needed',
+      'false',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHex(),
+      'registrationNeeded',
+      'true'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      data2.params.sender.toHex(),
+      'registrationNeeded',
+      'false'
+    );
+  });
+
+  test("Should properly update leader's registration instructions", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'registration_instructions',
+      'https://validator.example.com',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'registration_instructions',
+      'https://validator.example.com',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHex(),
+      'registrationInstructions',
+      'https://validator.example.com'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      data2.params.sender.toHex(),
+      'registrationInstructions',
+      'https://validator.example.com'
     );
   });
 });
