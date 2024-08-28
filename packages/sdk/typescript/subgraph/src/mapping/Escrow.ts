@@ -1,9 +1,12 @@
 import {
   BulkTransfer,
+  BulkTransferV2,
   Cancelled,
   Completed,
+  Escrow as EscrowContract,
   IntermediateStorage,
   Pending,
+  PendingV2,
 } from '../../generated/templates/Escrow/Escrow';
 import {
   BulkPayoutEvent,
@@ -14,7 +17,7 @@ import {
   StoreResultsEvent,
   Worker,
 } from '../../generated/schema';
-import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
+import { Address, BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
@@ -65,8 +68,36 @@ export function createOrLoadWorker(address: Address): Worker {
   return worker;
 }
 
-export function handlePending(event: Pending): void {
-  createTransaction(event, 'setup');
+// Update statistics
+function updateStatistics(): void {
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.setupEventCount = statsEntity.setupEventCount.plus(ONE_BI);
+  statsEntity.pendingStatusEventCount =
+    statsEntity.pendingStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
+    ONE_BI.plus(ONE_BI)
+  );
+  statsEntity.save();
+}
+
+// Update event day data
+function updateEventDayData(event: ethereum.Event): void {
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailySetupEventCount =
+    eventDayData.dailySetupEventCount.plus(ONE_BI);
+  eventDayData.dailyPendingStatusEventCount =
+    eventDayData.dailyPendingStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount = eventDayData.dailyTotalEventCount.plus(
+    ONE_BI.plus(ONE_BI)
+  );
+  eventDayData.save();
+}
+
+// Create common event entities
+function createCommonEntities(
+  event: ethereum.Event,
+  status: string
+): EscrowStatusEvent {
   // Create SetupEvent entity
   const setupEventEntity = new SetupEvent(toEventId(event));
   setupEventEntity.block = event.block.number;
@@ -83,73 +114,130 @@ export function handlePending(event: Pending): void {
   statusEventEntity.txHash = event.transaction.hash;
   statusEventEntity.escrowAddress = event.address;
   statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.status = 'Pending';
+  statusEventEntity.status = status;
+  statusEventEntity.save();
 
-  // Updates escrow statistics
-  const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.setupEventCount = statsEntity.setupEventCount.plus(ONE_BI);
-  statsEntity.pendingStatusEventCount =
-    statsEntity.pendingStatusEventCount.plus(ONE_BI);
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
-    ONE_BI.plus(ONE_BI)
-  );
-  statsEntity.save();
+  return statusEventEntity;
+}
+
+// Update escrow entity
+function updateEscrowEntity(
+  escrowEntity: Escrow,
+  escrowStatusEvent: EscrowStatusEvent,
+  manifestUrl: string,
+  manifestHash: string,
+  reputationOracle: Address | null = null,
+  recordingOracle: Address | null = null,
+  exchangeOracle: Address | null = null
+): void {
+  escrowEntity.manifestUrl = manifestUrl;
+  escrowEntity.manifestHash = manifestHash;
+  escrowEntity.status = 'Pending';
+
+  // Update oracles if provided
+  if (reputationOracle) {
+    escrowEntity.reputationOracle = reputationOracle;
+  }
+
+  if (recordingOracle) {
+    escrowEntity.recordingOracle = recordingOracle;
+  }
+
+  if (exchangeOracle) {
+    escrowEntity.exchangeOracle = exchangeOracle;
+  }
+
+  escrowEntity.save();
+
+  // Increase amount of jobs processed by leader
+  if (escrowEntity.reputationOracle) {
+    const reputationOracleLeader = createOrLoadLeader(
+      Address.fromBytes(escrowEntity.reputationOracle!)
+    );
+    reputationOracleLeader.amountJobsProcessed =
+      reputationOracleLeader.amountJobsProcessed.plus(ONE_BI);
+    reputationOracleLeader.save();
+  }
+
+  if (escrowEntity.recordingOracle) {
+    const recordingOracleLeader = createOrLoadLeader(
+      Address.fromBytes(escrowEntity.recordingOracle!)
+    );
+    recordingOracleLeader.amountJobsProcessed =
+      recordingOracleLeader.amountJobsProcessed.plus(ONE_BI);
+    recordingOracleLeader.save();
+  }
+
+  if (escrowEntity.exchangeOracle) {
+    const exchangeOracleLeader = createOrLoadLeader(
+      Address.fromBytes(escrowEntity.exchangeOracle!)
+    );
+    exchangeOracleLeader.amountJobsProcessed =
+      exchangeOracleLeader.amountJobsProcessed.plus(ONE_BI);
+    exchangeOracleLeader.save();
+  }
+  escrowStatusEvent.launcher = escrowEntity.launcher;
+  escrowStatusEvent.save();
+}
+
+export function handlePending(event: Pending): void {
+  createTransaction(event, 'setup');
+
+  // Create common entities for setup and status
+  const escrowStatusEvent = createCommonEntities(event, 'Pending');
+
+  // Update statistics
+  updateStatistics();
 
   // Update event day data
-  const eventDayData = getEventDayData(event);
-  eventDayData.dailySetupEventCount =
-    eventDayData.dailySetupEventCount.plus(ONE_BI);
-  eventDayData.dailyPendingStatusEventCount =
-    eventDayData.dailyPendingStatusEventCount.plus(ONE_BI);
-  eventDayData.dailyTotalEventCount = eventDayData.dailyTotalEventCount.plus(
-    ONE_BI.plus(ONE_BI)
-  );
+  updateEventDayData(event);
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
-    escrowEntity.manifestUrl = event.params.manifest;
-    escrowEntity.manifestHash = event.params.hash;
-    escrowEntity.status = 'Pending';
+    // Read data on-chain
+    const escrowContract = EscrowContract.bind(event.address);
 
-    // Assign the new oracle addresses from the event
-    escrowEntity.reputationOracle = event.params.reputationOracle;
-    escrowEntity.recordingOracle = event.params.recordingOracle;
-    escrowEntity.exchangeOracle = event.params.exchangeOracle;
+    const reputationOracle = escrowContract.try_reputationOracle();
+    const recordingOracle = escrowContract.try_recordingOracle();
+    const exchangeOracle = escrowContract.try_exchangeOracle();
 
-    escrowEntity.save();
-    statusEventEntity.launcher = escrowEntity.launcher;
+    updateEscrowEntity(
+      escrowEntity,
+      escrowStatusEvent,
+      event.params.manifest,
+      event.params.hash,
+      !reputationOracle.reverted ? reputationOracle.value : null,
+      !recordingOracle.reverted ? recordingOracle.value : null,
+      !exchangeOracle.reverted ? exchangeOracle.value : null
+    );
+  }
+}
 
-    statusEventEntity.save();
+export function handlePendingV2(event: PendingV2): void {
+  createTransaction(event, 'setup');
 
-    // Increase amount of jobs processed by leader
+  // Create common entities for setup and status
+  const escrowStatusEvent = createCommonEntities(event, 'Pending');
 
-    if (escrowEntity.reputationOracle) {
-      const reputationOracleLeader = createOrLoadLeader(
-        Address.fromBytes(escrowEntity.reputationOracle!)
-      );
-      reputationOracleLeader.amountJobsProcessed =
-        reputationOracleLeader.amountJobsProcessed.plus(ONE_BI);
-      reputationOracleLeader.save();
-    }
+  // Update statistics
+  updateStatistics();
 
-    if (escrowEntity.recordingOracle) {
-      const recordingOracleLeader = createOrLoadLeader(
-        Address.fromBytes(escrowEntity.recordingOracle!)
-      );
-      recordingOracleLeader.amountJobsProcessed =
-        recordingOracleLeader.amountJobsProcessed.plus(ONE_BI);
-      recordingOracleLeader.save();
-    }
+  // Update event day data
+  updateEventDayData(event);
 
-    if (escrowEntity.exchangeOracle) {
-      const exchangeOracleLeader = createOrLoadLeader(
-        Address.fromBytes(escrowEntity.exchangeOracle!)
-      );
-      exchangeOracleLeader.amountJobsProcessed =
-        exchangeOracleLeader.amountJobsProcessed.plus(ONE_BI);
-      exchangeOracleLeader.save();
-    }
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (escrowEntity) {
+    updateEscrowEntity(
+      escrowEntity,
+      escrowStatusEvent,
+      event.params.manifest,
+      event.params.hash,
+      event.params.reputationOracle,
+      event.params.recordingOracle,
+      event.params.exchangeOracle
+    );
   }
 }
 
@@ -188,75 +276,179 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   }
 }
 
-export function handleBulkTransfer(event: BulkTransfer): void {
-  createTransaction(event, 'bulkTransfer');
-  // Create BulkPayoutEvent entity
+// Create BulkPayoutEvent entity
+function createBulkPayoutEvent(
+  event: ethereum.Event,
+  txId: BigInt,
+  recipientsLength: number
+): void {
   const eventEntity = new BulkPayoutEvent(toEventId(event));
   eventEntity.block = event.block.number;
   eventEntity.timestamp = event.block.timestamp;
   eventEntity.txHash = event.transaction.hash;
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
-  eventEntity.bulkPayoutTxId = event.params._txId;
-  eventEntity.bulkCount = BigInt.fromI32(event.params._recipients.length);
+  eventEntity.bulkPayoutTxId = txId;
+  eventEntity.bulkCount = BigInt.fromI32(<i32>recipientsLength);
   eventEntity.save();
+}
 
-  // Update escrow statistics
+// Update escrow statistics
+function updateEscrowStatisticsForBulkTransfer(isPartial: boolean): void {
   const statsEntity = createOrLoadEscrowStatistics();
   statsEntity.bulkPayoutEventCount =
     statsEntity.bulkPayoutEventCount.plus(ONE_BI);
   statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
 
-  // Update event day data
+  if (isPartial) {
+    statsEntity.partialStatusEventCount =
+      statsEntity.partialStatusEventCount.plus(ONE_BI);
+  } else {
+    statsEntity.paidStatusEventCount =
+      statsEntity.paidStatusEventCount.plus(ONE_BI);
+  }
+
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  statsEntity.save();
+}
+
+// Update event day data
+function updateEventDayDataForBulkTransfer(
+  event: ethereum.Event,
+  isPartial: boolean
+): void {
   const eventDayData = getEventDayData(event);
   eventDayData.dailyBulkPayoutEventCount =
     eventDayData.dailyBulkPayoutEventCount.plus(ONE_BI);
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
-  // Create EscrowStatusEvent entity
+  if (isPartial) {
+    eventDayData.dailyPartialStatusEventCount =
+      eventDayData.dailyPartialStatusEventCount.plus(ONE_BI);
+  } else {
+    eventDayData.dailyPaidStatusEventCount =
+      eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
+  }
+
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  eventDayData.save();
+}
+
+// Create and save EscrowStatusEvent entity
+function createAndSaveStatusEvent(
+  event: ethereum.Event,
+  status: string,
+  escrowEntity: Escrow | null
+): void {
   const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;
   statusEventEntity.timestamp = event.block.timestamp;
   statusEventEntity.txHash = event.transaction.hash;
   statusEventEntity.escrowAddress = event.address;
   statusEventEntity.sender = event.transaction.from;
+  statusEventEntity.status = status;
+
+  if (escrowEntity) {
+    statusEventEntity.launcher = escrowEntity.launcher;
+  }
+
+  statusEventEntity.save();
+}
+
+// Update escrow entity
+function updateEscrowEntityForBulkTransfer(
+  escrowEntity: Escrow,
+  isPartial: boolean,
+  finalResultsUrl: string | null
+): void {
+  escrowEntity.status = isPartial ? 'Partial' : 'Paid';
+
+  if (finalResultsUrl) {
+    escrowEntity.finalResultsUrl = finalResultsUrl;
+  }
+
+  escrowEntity.save();
+}
+
+export function handleBulkTransfer(event: BulkTransfer): void {
+  createTransaction(event, 'bulkTransfer');
+
+  // Create BulkPayoutEvent entity
+  createBulkPayoutEvent(
+    event,
+    event.params._txId,
+    event.params._recipients.length
+  );
+
+  // Update escrow statistics
+  updateEscrowStatisticsForBulkTransfer(event.params._isPartial);
+
+  // Update event day data
+  updateEventDayDataForBulkTransfer(event, event.params._isPartial);
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
-    // Assign finalResultsUrl from the event
-    escrowEntity.finalResultsUrl = event.params.finalResultsUrl;
-    escrowEntity.status = event.params._isPartial ? 'Partial' : 'Paid';
+    // Read data on-chain
+    const escrowContract = EscrowContract.bind(event.address);
+    const finalResultsUrl = escrowContract.try_finalResultsUrl();
 
-    escrowEntity.save();
-    statusEventEntity.launcher = escrowEntity.launcher;
-  }
+    updateEscrowEntityForBulkTransfer(
+      escrowEntity,
+      event.params._isPartial,
+      !finalResultsUrl.reverted ? finalResultsUrl.value : null
+    );
 
-  if (event.params._isPartial) {
-    statusEventEntity.status = 'Partial';
-    statsEntity.partialStatusEventCount =
-      statsEntity.partialStatusEventCount.plus(ONE_BI);
-    statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-    eventDayData.dailyPartialStatusEventCount =
-      eventDayData.dailyPartialStatusEventCount.plus(ONE_BI);
-    eventDayData.dailyTotalEventCount =
-      eventDayData.dailyTotalEventCount.plus(ONE_BI);
+    // Create and save EscrowStatusEvent entity
+    createAndSaveStatusEvent(event, escrowEntity.status, escrowEntity);
   } else {
-    statusEventEntity.status = 'Paid';
-    statsEntity.paidStatusEventCount =
-      statsEntity.paidStatusEventCount.plus(ONE_BI);
-    statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-    eventDayData.dailyPaidStatusEventCount =
-      eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
-    eventDayData.dailyTotalEventCount =
-      eventDayData.dailyTotalEventCount.plus(ONE_BI);
+    // Create and save EscrowStatusEvent entity with no escrow entity
+    createAndSaveStatusEvent(
+      event,
+      event.params._isPartial ? 'Partial' : 'Paid',
+      null
+    );
   }
+}
 
-  // Save statistics, and event day data
-  statsEntity.save();
-  eventDayData.save();
-  statusEventEntity.save();
+export function handleBulkTransferV2(event: BulkTransferV2): void {
+  createTransaction(event, 'bulkTransfer');
+
+  // Create BulkPayoutEvent entity
+  createBulkPayoutEvent(
+    event,
+    event.params._txId,
+    event.params._recipients.length
+  );
+
+  // Update escrow statistics
+  updateEscrowStatisticsForBulkTransfer(event.params._isPartial);
+
+  // Update event day data
+  updateEventDayDataForBulkTransfer(event, event.params._isPartial);
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (escrowEntity) {
+    // Assign finalResultsUrl directly from the event
+    updateEscrowEntityForBulkTransfer(
+      escrowEntity,
+      event.params._isPartial,
+      event.params.finalResultsUrl
+    );
+
+    // Create and save EscrowStatusEvent entity
+    createAndSaveStatusEvent(event, escrowEntity.status, escrowEntity);
+  } else {
+    // Create and save EscrowStatusEvent entity with no escrow entity
+    createAndSaveStatusEvent(
+      event,
+      event.params._isPartial ? 'Partial' : 'Paid',
+      null
+    );
+  }
 }
 
 export function handleCancelled(event: Cancelled): void {

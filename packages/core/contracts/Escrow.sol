@@ -22,7 +22,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(string _url, string _hash);
-    event Pending(
+    event Pending(string manifest, string hash);
+    event PendingV2(
         string manifest,
         string hash,
         address reputationOracle,
@@ -30,6 +31,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         address exchangeOracle
     );
     event BulkTransfer(
+        uint256 indexed _txId,
+        address[] _recipients,
+        uint256[] _amounts,
+        bool _isPartial
+    );
+    event BulkTransferV2(
         uint256 indexed _txId,
         address[] _recipients,
         uint256[] _amounts,
@@ -157,7 +164,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         manifestUrl = _url;
         manifestHash = _hash;
         status = EscrowStatuses.Pending;
-        emit Pending(
+        emit PendingV2(
             manifestUrl,
             manifestHash,
             reputationOracle,
@@ -306,7 +313,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             isPartial = true;
         }
 
-        emit BulkTransfer(
+        emit BulkTransferV2(
             _txId,
             _recipients,
             finalAmounts,
