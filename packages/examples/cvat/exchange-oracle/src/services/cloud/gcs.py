@@ -34,11 +34,12 @@ class GcsClient(StorageClient):
 
     def remove_files(self, prefix: str, *, bucket: str | None = None):
         import warnings
+
         warnings.warn(
             "Avoid usage of `GcsClient.remove_files`. See: "
             "https://cloud.google.com/storage/docs/deleting-objects#delete-objects-in-bulk",
             UserWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)

@@ -69,5 +69,3 @@ def cron_job(fn: Callable[..., None]) -> Callable[[], None]:
             logger.debug(f"Cron {cron_spec.repr} finished")
 
     return wrapper
-
-

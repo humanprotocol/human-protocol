@@ -15,10 +15,10 @@ from src.core.oracle_events import (
 )
 from src.core.types import JobLauncherEventTypes, Networks, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
-from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks, _send_webhook
+from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
-from src.handlers.escrow_cleanup import EscrowCleaner
+from src.handlers.escrow_cleanup import cleanup_escrow
 from src.models.webhook import Webhook
 
 
@@ -72,9 +72,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     db_session, webhook.escrow_address
                 )
 
-                EscrowCleaner(
-                    webhook.escrow_address, Networks(webhook.chain_id), projects
-                ).cleanup()
+                cleanup_escrow(webhook.escrow_address, Networks(webhook.chain_id), projects)
 
                 cvat_db_service.delete_projects(db_session, [project.id for project in projects])
 
@@ -134,7 +132,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
             cvat_db_service.update_project_statuses_by_escrow_address(
                 db_session, webhook.escrow_address, webhook.chain_id, ProjectStatuses.canceled
             )
-            EscrowCleaner(webhook.escrow_address, Networks(webhook.chain_id), projects).cleanup()
+            cleanup_escrow(webhook.escrow_address, Networks(webhook.chain_id), projects)
 
             oracle_db_service.outbox.create_webhook(
                 session=db_session,

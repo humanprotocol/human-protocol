@@ -10,18 +10,15 @@ from src.core.oracle_events import (
     ExchangeOracleEvent_EscrowCleaned,
 )
 from src.core.types import (
-    JobStatuses,
     Networks,
     OracleWebhookTypes,
     ProjectStatuses,
     ReputationOracleEventTypes,
-    TaskStatuses,
 )
 from src.crons._cron_job import cron_job
-from src.crons.webhooks._common import process_outgoing_webhooks
-from src.crons.webhooks._common import handle_webhook
+from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
-from src.handlers.escrow_cleanup import EscrowCleaner
+from src.handlers.escrow_cleanup import cleanup_escrow
 
 
 @cron_job
@@ -39,9 +36,7 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
                     projects = db_service.get_projects_by_escrow_address(
                         session, webhook.escrow_address
                     )
-                    EscrowCleaner(
-                        webhook.escrow_address, Networks(webhook.chain_id), projects
-                    ).cleanup()
+                    cleanup_escrow(webhook.escrow_address, Networks(webhook.chain_id), projects)
 
                     db_service.update_project_statuses_by_escrow_address(
                         session,

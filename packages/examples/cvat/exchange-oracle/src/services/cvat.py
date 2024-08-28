@@ -220,7 +220,6 @@ def update_project_statuses_by_escrow_address(
     session.execute(statement)
 
 
-
 def delete_project(session: Session, project_id: str) -> None:
     project = session.query(Project).filter_by(id=project_id).first()
     session.delete(project)

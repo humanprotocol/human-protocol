@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from itertools import chain, groupby
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import cv2
 import datumaro as dm
