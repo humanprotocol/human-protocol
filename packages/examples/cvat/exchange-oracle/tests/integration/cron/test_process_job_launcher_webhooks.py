@@ -412,7 +412,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
-
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Pending.name
             mock_escrow_data.balance = 1

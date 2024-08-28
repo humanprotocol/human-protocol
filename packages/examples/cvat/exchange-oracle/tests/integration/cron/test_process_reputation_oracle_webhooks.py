@@ -31,14 +31,14 @@ escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost
 
 
-@pytest.fixture()
+@pytest.fixture
 def session():
     session = SessionLocal()
     yield session
     session.close()
 
 
-@pytest.fixture()
+@pytest.fixture
 def create_project(session):
     cvat_id = 0
 
@@ -63,7 +63,7 @@ def create_project(session):
     return _create_project
 
 
-@pytest.fixture()
+@pytest.fixture
 def create_webhook(session):
     def _create_webhook(event_type, direction, event_data=None):
         webhook_id = str(uuid.uuid4())
