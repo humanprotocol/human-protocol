@@ -225,8 +225,13 @@ def delete_project(session: Session, project_id: str) -> None:
     session.delete(project)
 
 
-def delete_projects(session: Session, project_ids: list[str]) -> None:
-    session.execute(delete(Project).where(Project.id.in_(project_ids)))
+def delete_projects(session: Session, escrow_address: str, chain_id: int) -> None:
+    session.execute(
+        delete(Project).where(
+            Project.escrow_address == escrow_address,
+            Project.chain_id == chain_id,
+        )
+    )
 
 
 def is_project_completed(session: Session, project_id: str) -> bool:
