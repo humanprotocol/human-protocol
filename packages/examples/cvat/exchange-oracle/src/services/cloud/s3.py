@@ -10,7 +10,8 @@ from src.services.cloud.client import StorageClient
 
 DEFAULT_S3_HOST = "s3.amazonaws.com"
 if TYPE_CHECKING:
-    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3 import S3Client as S3ClientStub
+    from mypy_boto3_s3 import S3ServiceResource as S3ServiceResourceStub
 
 
 class S3Client(StorageClient):
@@ -30,9 +31,9 @@ class S3Client(StorageClient):
         s3 = session.resource(
             "s3", **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {})
         )
-        self.resource = s3
+        self.resource: S3ServiceResourceStub = s3
 
-        self.client: S3Client = s3.meta.client
+        self.client: S3ClientStub = s3.meta.client
 
         if not access_key and not secret_key:
             self.client.meta.events.register("choose-signer.s3.*", disable_signing)
@@ -45,10 +46,9 @@ class S3Client(StorageClient):
         bucket = unquote(bucket) if bucket else self._bucket
         self.client.delete_object(Bucket=bucket, Key=unquote(key))
 
-    def remove_files(self, keys: list[str], *, bucket: str | None = None):
+    def remove_files(self, prefix: str, *, bucket: str | None = None):
         bucket = unquote(bucket) if bucket else self._bucket
-        objects = {"Objects": [{"Key": unquote(key)} for key in keys]}
-        self.client.delete_objects(Bucket=bucket, Delete=objects)
+        self.resource.Bucket(bucket).objects.filter(Prefix=unquote(prefix)).delete()
 
     def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket

@@ -152,10 +152,6 @@ def test_process_incoming_reputation_oracle_webhooks_task_rejected_type(
     )
     mock_storage_client = mocker.MagicMock(spec=StorageClient)
     mocker.patch.object(cloud, cloud.make_client.__name__, return_value=mock_storage_client)
-    mock_storage_client.list_files.side_effect = [
-        ["file1", "file2"],
-        ["results/file3", "results/file4"],
-    ]
     delete_project_mock = mocker.patch.object(api_calls, api_calls.delete_project.__name__)
     delete_cloudstorage_mock = mocker.patch.object(
         api_calls, api_calls.delete_cloudstorage.__name__
@@ -174,12 +170,9 @@ def test_process_incoming_reputation_oracle_webhooks_task_rejected_type(
     assert project.tasks[0].status == case.expected_task_status
     assert project.jobs[0].status == case.expected_job_status
 
-    assert mock_storage_client.list_files.mock_calls == [
+    assert mock_storage_client.remove_files.mock_calls == [
         mocker.call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
         mocker.call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
-    ]
-    assert mock_storage_client.remove_files.mock_calls == [
-        mocker.call(["file1", "file2", "results/file3", "results/file4"]),
     ]
 
     assert delete_project_mock.mock_calls == [

@@ -169,11 +169,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
-            mock_storage_client.list_files.side_effect = [
-                ["file1", "file2"],
-                ["results/file3", "results/file4"],
-            ]
-
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Pending.name
             mock_escrow.return_value = mock_escrow_data
@@ -200,12 +195,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert new_webhook.status == OracleWebhookStatuses.pending.value
         assert new_webhook.event_type == ExchangeOracleEventTypes.task_creation_failed
         assert new_webhook.attempts == 0
-        assert mock_storage_client.list_files.mock_calls == [
+        assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
             call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
-        ]
-        assert mock_storage_client.remove_files.mock_calls == [
-            call(["file1", "file2", "results/file3", "results/file4"]),
         ]
 
         assert delete_project_mock.mock_calls == []
@@ -222,12 +214,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert outgoing_webhook.type == OracleWebhookTypes.job_launcher
         assert outgoing_webhook.event_type == ExchangeOracleEventTypes.task_creation_failed
 
-        assert mock_storage_client.list_files.mock_calls == [
+        assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
             call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
-        ]
-        assert mock_storage_client.remove_files.mock_calls == [
-            call(["file1", "file2", "results/file3", "results/file4"]),
         ]
 
         assert delete_project_mock.mock_calls == []
@@ -332,11 +321,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
-            mock_storage_client.list_files.side_effect = [
-                ["file1", "file2"],
-                ["results/file3", "results/file4"],
-            ]
-
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Pending.name
             mock_escrow_data.balance = 1
@@ -358,12 +342,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert db_project.status == ProjectStatuses.canceled.value
 
-        assert mock_storage_client.list_files.mock_calls == [
+        assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
             call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
-        ]
-        assert mock_storage_client.remove_files.mock_calls == [
-            call(["file1", "file2", "results/file3", "results/file4"]),
         ]
 
         assert delete_project_mock.mock_calls == [
@@ -431,10 +412,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
-            mock_storage_client.list_files.side_effect = [
-                ["file1", "file2"],
-                ["results/file3", "results/file4"],
-            ]
 
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Pending.name
@@ -466,12 +443,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert db_project.status == ProjectStatuses.canceled.value
 
-        assert mock_storage_client.list_files.mock_calls == [
+        assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
             call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
-        ]
-        assert mock_storage_client.remove_files.mock_calls == [
-            call(["file1", "file2", "results/file3", "results/file4"]),
         ]
 
         assert delete_project_mock.mock_calls == [call(0), call(1), call(2)]
