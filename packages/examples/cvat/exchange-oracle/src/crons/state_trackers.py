@@ -15,13 +15,9 @@ from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_completed_escrows
-from src.log import ROOT_LOGGER_NAME
-from src.utils.logging import get_function_logger
-
-module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
 
-@cron_job(module_logger)
+@cron_job
 def track_completed_projects(logger: logging.Logger, session: Session) -> None:
     """
     Tracks completed projects:
@@ -54,7 +50,7 @@ def track_completed_projects(logger: logging.Logger, session: Session) -> None:
         )
 
 
-@cron_job(module_logger)
+@cron_job
 def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
     """
     Tracks completed tasks:
@@ -86,7 +82,7 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
         )
 
 
-@cron_job(module_logger)
+@cron_job
 def track_assignments(logger: logging.Logger) -> None:
     """
     Tracks assignments:
@@ -153,12 +149,12 @@ def track_assignments(logger: logging.Logger) -> None:
                 cvat_service.cancel_assignment(session, assignment.id)
 
 
-@cron_job(module_logger)
+@cron_job
 def track_completed_escrows(logger: logging.Logger) -> None:
     handle_completed_escrows(logger)
 
 
-@cron_job(module_logger)
+@cron_job
 def track_task_creation(logger: logging.Logger, session: Session) -> None:
     """
     Checks task creation status to report failed tasks and continue task creation process.
@@ -245,7 +241,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
         )
 
 
-@cron_job(module_logger)
+@cron_job
 def track_escrow_creation(logger: logging.Logger, session: Session) -> None:
     creations = cvat_service.get_active_escrow_creations(
         session,

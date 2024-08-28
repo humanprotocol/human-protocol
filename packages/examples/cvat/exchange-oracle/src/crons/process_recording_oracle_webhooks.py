@@ -17,13 +17,10 @@ from src.core.types import (
 )
 from src.crons._utils import cron_job, handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
-from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
 
-module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
-
-@cron_job(module_logger_name)
+@cron_job
 def process_incoming_recording_oracle_webhooks(logger: logging.Logger, session: Session):
     """
     Process incoming oracle webhooks
@@ -132,7 +129,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
             raise AssertionError(f"Unknown recording oracle event {webhook.event_type}")
 
 
-@cron_job(module_logger_name)
+@cron_job
 def process_outgoing_recording_oracle_webhooks(logger: logging.Logger, session: Session):
     process_outgoing_webhooks(
         logger,

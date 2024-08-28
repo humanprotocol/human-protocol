@@ -20,12 +20,9 @@ from src.core.types import (
 from src.crons._utils import cron_job, handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
 from src.handlers.escrow_cleanup import EscrowCleaner
-from src.log import ROOT_LOGGER_NAME
-
-module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
 
-@cron_job(module_logger_name)
+@cron_job
 def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session: Session):
     webhooks = oracle_db_service.inbox.get_pending_webhooks(
         session,
@@ -64,7 +61,7 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
                     raise TypeError(f"Unknown reputation oracle event {webhook.event_type}")
 
 
-@cron_job(module_logger_name)
+@cron_job
 def process_outgoing_reputation_oracle_webhooks(logger: logging.Logger, session: Session):
     process_outgoing_webhooks(
         logger,

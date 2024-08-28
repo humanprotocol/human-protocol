@@ -18,13 +18,10 @@ from src.crons._utils import cron_job, handle_webhook, send_webhook
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.escrow_cleanup import EscrowCleaner
-from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
 
-module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
-
-@cron_job(module_logger_name)
+@cron_job
 def process_incoming_job_launcher_webhooks(logger: logging.Logger, session: Session):
     """
     Process incoming job launcher webhooks
@@ -149,7 +146,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
             raise AssertionError(f"Unknown job launcher event {webhook.event_type}")
 
 
-@cron_job(module_logger_name)
+@cron_job
 def process_outgoing_job_launcher_webhooks(logger: logging.Logger, session: Session):
     webhooks = oracle_db_service.outbox.get_pending_webhooks(
         session,
