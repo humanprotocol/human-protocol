@@ -47,7 +47,7 @@ class ExchangeOracleEvent_EscrowCleaned(OracleEvent):
     pass  # escrow is enough for now
 
 
-class ReputationOracleEvent_EscrowCompleted(OracleEvent):  # (will refactor later)
+class ReputationOracleEvent_EscrowCompleted(OracleEvent):
     pass
 
 
