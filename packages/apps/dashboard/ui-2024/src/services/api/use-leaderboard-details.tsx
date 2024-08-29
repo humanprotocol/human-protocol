@@ -8,12 +8,12 @@ import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 export const reputationSchema = z.unknown().transform((value) => {
 	try {
 		const knownReputation = z
-			.union([z.literal('LOW'), z.literal('MEDIUM'), z.literal('HIGH')])
+			.union([z.literal('Low'), z.literal('Medium'), z.literal('High')])
 			.parse(value);
 
 		return knownReputation;
 	} catch (error) {
-		return 'UNKNOWN';
+		return 'Unknown';
 	}
 });
 
