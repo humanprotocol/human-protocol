@@ -128,58 +128,6 @@ describe('Escrow', function () {
     });
   });
 
-  describe('abort', () => {
-    describe('Validations', function () {
-      before(async () => {
-        await deployEscrow();
-        await fundEscrow();
-        await setupEscrow();
-      });
-
-      it('Should revert when aborting with not trusted address', async function () {
-        await expect(
-          escrow.connect(externalAddress).abort()
-        ).to.be.revertedWith('Address calling not trusted');
-      });
-
-      it('Should revert when aborting from reputation oracle', async function () {
-        await expect(
-          escrow.connect(reputationOracle).abort()
-        ).to.be.revertedWith('Address calling not trusted');
-      });
-
-      it('Should revert when aborting from recording oracle', async function () {
-        await expect(
-          escrow.connect(recordingOracle).abort()
-        ).to.be.revertedWith('Address calling not trusted');
-      });
-    });
-
-    describe('Calling abort', function () {
-      beforeEach(async () => {
-        await deployEscrow();
-        await fundEscrow();
-        await setupEscrow();
-      });
-
-      it('Should transfer tokens to owner if contract funded when abort is called', async function () {
-        await escrow.connect(owner).abort();
-
-        expect(
-          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
-        ).to.equal('0', 'Escrow has not been properly aborted');
-      });
-
-      it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
-        await escrow.connect(trustedHandlers[0]).abort();
-
-        expect(
-          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
-        ).to.equal('0', 'Escrow has not been properly aborted');
-      });
-    });
-  });
-
   describe('addTrustedHandlers', async () => {
     before(async () => {
       await deployEscrow();
@@ -196,7 +144,7 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it('Should revert when aborting from reputation oracle', async function () {
+      it('Should revert when adding trusted handlers from reputation oracle', async function () {
         await expect(
           escrow
             .connect(reputationOracle)
@@ -204,7 +152,7 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it('Should revert when aborting from recording oracle', async function () {
+      it('Should revert when adding trusted handlers from recording oracle', async function () {
         await expect(
           escrow
             .connect(recordingOracle)

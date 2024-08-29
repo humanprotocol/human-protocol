@@ -752,52 +752,6 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
-   * This function cancels the specified escrow, sends the balance to the canceler and selfdestructs the escrow contract.
-   *
-   * @param {string} escrowAddress Address of the escrow.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
-   *
-   *
-   * **Code example**
-   *
-   * > Only Job Launcher or trusted handler can call it.
-   *
-   * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { EscrowClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const escrowClient = await EscrowClient.build(signer);
-   *
-   * await escrowClient.abort('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
-   * ```
-   */
-  @requiresSigner
-  async abort(escrowAddress: string, txOptions: Overrides = {}): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
-
-    try {
-      const escrowContract = this.getEscrowContract(escrowAddress);
-
-      await (await escrowContract.abort(txOptions)).wait();
-      return;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
    * This function adds an array of addresses to the trusted handlers list.
    *
    * @param {string} escrowAddress Address of the escrow.

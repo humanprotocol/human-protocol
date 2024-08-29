@@ -27,8 +27,6 @@ interface IEscrow {
         string memory _hash
     ) external;
 
-    function abort() external;
-
     function cancel() external returns (bool);
 
     function withdraw(address _token) external returns (bool);

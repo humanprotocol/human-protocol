@@ -172,13 +172,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit Fund(remainingFunds);
     }
 
-    function abort() external override trusted notComplete notPaid {
-        if (remainingFunds != 0) {
-            cancel();
-        }
-        selfdestruct(canceler);
-    }
-
     function cancel()
         public
         override

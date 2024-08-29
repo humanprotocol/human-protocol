@@ -172,10 +172,9 @@ escrow_client.setup(
 )
 ```
 
-While no payouts have been performed, aborting and canceling a job is still possible.
+While no payouts have been performed, canceling a job is still possible.
 
 ```python
-escrow_client.abort(escrow_address = escrow_address)
 escrow_client.cancel(escrow_address = escrow_address)
 ```
 

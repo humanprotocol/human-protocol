@@ -717,54 +717,6 @@ class EscrowClient:
 
         return escrow_cancel_data
 
-    def abort(self, escrow_address: str, tx_options: Optional[TxParams] = None) -> None:
-        """Cancels the specified escrow,
-        sends the balance to the canceler and selfdestructs the escrow contract.
-
-        :param escrow_address: Address of the escrow to abort
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :raise EscrowClientError: If an error occurs while checking the parameters
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.escrow import EscrowClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                escrow_client = EscrowClient(w3)
-
-                escrow_client.abort("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
-        """
-
-        if not Web3.is_address(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-
-        handle_transaction(
-            self.w3,
-            "Abort",
-            self._get_escrow_contract(escrow_address).functions.abort(),
-            EscrowClientError,
-            tx_options,
-        )
-
     def add_trusted_handlers(
         self,
         escrow_address: str,
