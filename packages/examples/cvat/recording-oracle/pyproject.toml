@@ -15,13 +15,14 @@ SQLAlchemy = "^2.0.17"
 psycopg2 = "^2.9.6"
 APScheduler = "^3.10.1"
 pytest = "^7.4.0"
-human-protocol-sdk = "^3.0.0"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
 numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
+human-protocol-sdk = "^3.0.4"
+hexbytes = ">=1.2.0" # required for to_0x_hex() function
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.82.6"
