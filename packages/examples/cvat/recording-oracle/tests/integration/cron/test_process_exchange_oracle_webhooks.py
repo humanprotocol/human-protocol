@@ -85,11 +85,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.chain.escrow.get_escrow"),
             patch("src.services.cloud.make_client", return_value=mock_storage_client),
         ):
-            mock_storage_client.list_files.side_effect = [
-                ["file1", "file2"],
-                ["results/file3", "results/file4"],
-            ]
-
             process_incoming_exchange_oracle_webhooks()
 
         self.session.refresh(webhook)
@@ -99,20 +94,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert task.cleaned_at.date() == datetime.now(timezone.utc).date()
 
-        assert mock_storage_client.list_files.mock_calls == [
+        assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, webhook.chain_id)),
             call(prefix=compose_results_bucket_prefix(escrow_address, webhook.chain_id)),
-        ]
-        assert mock_storage_client.remove_files.mock_calls == [
-            call(["file1", "file2", "results/file3", "results/file4"]),
-        ]
-
-        assert mock_storage_client.list_files.mock_calls == [
-            call(prefix=compose_data_bucket_prefix(escrow_address, webhook.chain_id)),
-            call(prefix=compose_results_bucket_prefix(escrow_address, webhook.chain_id)),
-        ]
-        assert mock_storage_client.remove_files.mock_calls == [
-            call(["file1", "file2", "results/file3", "results/file4"]),
         ]
 
     def test_process_recording_oracle_webhooks_invalid_escrow_address(self):
