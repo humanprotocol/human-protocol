@@ -12,7 +12,7 @@ export interface WalletSearchStore {
 export const useWalletSearch = create<WalletSearchStore>((set) => ({
 	filterParams: {
 		address: '',
-		chainId: 1,
+		chainId: 137,
 	},
 	setAddress: (address) => {
 		set((state) => ({
