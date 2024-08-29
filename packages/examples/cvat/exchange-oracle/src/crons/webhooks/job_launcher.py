@@ -16,10 +16,28 @@ from src.core.oracle_events import (
 from src.core.types import JobLauncherEventTypes, Networks, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
 from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks
-from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.escrow_cleanup import cleanup_escrow
 from src.models.webhook import Webhook
+
+
+def handle_failure(session: Session, webhook: Webhook, exc: Exception) -> None:
+    if (
+        webhook.event_type == JobLauncherEventTypes.escrow_created
+        and webhook.attempts + 1 >= Config.webhook_max_retries
+    ):
+        logging.error(
+            f"Exceeded maximum retries for {webhook.escrow_address=} creation. "
+            f"Notifying job launcher."
+        )
+        # TODO: think about unifying this further
+        oracle_db_service.outbox.create_webhook(
+            session=session,
+            escrow_address=webhook.escrow_address,
+            chain_id=webhook.chain_id,
+            type=OracleWebhookTypes.job_launcher,
+            event=ExchangeOracleEvent_TaskCreationFailed(reason=str(exc)),
+        )
 
 
 @cron_job
@@ -35,7 +53,7 @@ def process_incoming_job_launcher_webhooks(logger: logging.Logger, session: Sess
     )
 
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, on_fail=handle_failure):
             handle_job_launcher_event(webhook, db_session=session, logger=logger)
 
 
@@ -67,7 +85,7 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
 
                 cvat.create_task(webhook.escrow_address, webhook.chain_id)
 
-            except Exception as ex:
+            except Exception:
                 projects = cvat_db_service.get_projects_by_escrow_address(
                     db_session, webhook.escrow_address
                 )
@@ -76,20 +94,6 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                 cvat_db_service.delete_projects(
                     db_session, webhook.escrow_address, webhook.chain_id
                 )
-
-                # We should not notify before the webhook handling attempts have expired
-                if webhook.attempts + 1 >= Config.webhook_max_retries:
-                    # new session is required since exception might roll back the current session
-                    # creation of this webhook should not depend on this
-                    with SessionLocal.begin() as session:
-                        oracle_db_service.outbox.create_webhook(
-                            session=session,
-                            escrow_address=webhook.escrow_address,
-                            chain_id=webhook.chain_id,
-                            type=OracleWebhookTypes.job_launcher,
-                            event=ExchangeOracleEvent_TaskCreationFailed(reason=str(ex)),
-                        )
-
                 raise
 
         case JobLauncherEventTypes.escrow_canceled:

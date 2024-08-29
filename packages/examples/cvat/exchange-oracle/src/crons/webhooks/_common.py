@@ -13,7 +13,13 @@ from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_mes
 
 
 @contextmanager
-def handle_webhook(logger: logging.Logger, session: Session, webhook: Webhook):
+def handle_webhook(
+    logger: logging.Logger,
+    session: Session,
+    webhook: Webhook,
+    *,
+    on_fail: Callable[[Session, Webhook, Exception], None] = lambda _s, _w, _e: None,
+):
     logger.debug(
         "Processing webhook "
         f"{webhook.type}.{webhook.event_type}~{webhook.signature} "
@@ -26,7 +32,14 @@ def handle_webhook(logger: logging.Logger, session: Session, webhook: Webhook):
     except Exception as e:
         savepoint.rollback()
         logger.exception(f"Webhook {webhook.id} sending failed: {e}")
-        webhook_service.outbox.handle_webhook_fail(session, webhook.id)
+        savepoint = session.begin_nested()
+        try:
+            on_fail(session, webhook, e)
+        except Exception:
+            savepoint.rollback()
+            raise
+        finally:
+            webhook_service.outbox.handle_webhook_fail(session, webhook.id)
     else:
         webhook_service.outbox.handle_webhook_success(session, webhook.id)
         logger.debug("Webhook handled successfully")
