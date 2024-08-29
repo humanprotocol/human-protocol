@@ -46,6 +46,11 @@ def setup_cron_jobs(app: FastAPI) -> None:
             seconds=Config.cron_config.process_recording_oracle_webhooks_int,
         )
         scheduler.add_job(
+            process_incoming_reputation_oracle_webhooks,
+            "interval",
+            seconds=Config.cron_config.process_reputation_oracle_webhooks_int,
+        )
+        scheduler.add_job(
             track_completed_projects,
             "interval",
             seconds=Config.cron_config.track_completed_projects_int,
@@ -74,10 +79,5 @@ def setup_cron_jobs(app: FastAPI) -> None:
             track_assignments,
             "interval",
             seconds=Config.cron_config.track_assignments_int,
-        )
-        scheduler.add_job(
-            process_incoming_reputation_oracle_webhooks,
-            "interval",
-            seconds=Config.cron_config.track_deleted_projects_int,
         )
         scheduler.start()

@@ -100,8 +100,10 @@ class CronConfig:
     process_reputation_oracle_webhooks_chunk_size = int(
         os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
+    process_reputation_oracle_webhooks_int = int(
+        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
+    )
     track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
-    track_deleted_projects_int = int(os.environ.get("TRACK_DELETED_PROJECTS_INT", 30))
     track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
     track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 30))
     track_completed_tasks_chunk_size = os.environ.get("TRACK_COMPLETED_TASKS_CHUNK_SIZE", 20)
