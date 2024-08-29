@@ -25,7 +25,7 @@ def create_escrow(web3: Web3):
     escrow_client = EscrowClient(web3)
     staking_client.approve_stake(amount)
     staking_client.stake(amount)
-    return escrow_client.create(
+    return escrow_client.create_escrow(
         token_address=NETWORKS[ChainId.LOCALHOST]["hmt_address"],
         trusted_handlers=[web3.eth.default_account],
         job_requester_id=JOB_REQUESTER_ID,
