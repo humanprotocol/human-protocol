@@ -15,7 +15,6 @@ const HMTOKEN_STATISTICS_FRAGMENT = gql`
 const ESCROW_STATISTICS_FRAGMENT = gql`
   fragment EscrowStatisticsFields on EscrowStatistics {
     fundEventCount
-    setupEventCount
     storeResultsEventCount
     bulkPayoutEventCount
     pendingStatusEventCount
@@ -32,7 +31,6 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
   fragment EventDayDataFields on EventDayData {
     timestamp
     dailyFundEventCount
-    dailySetupEventCount
     dailyStoreResultsEventCount
     dailyBulkPayoutEventCount
     dailyPendingStatusEventCount
