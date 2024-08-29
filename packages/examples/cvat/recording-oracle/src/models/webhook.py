@@ -26,5 +26,5 @@ class Webhook(Base):
     event_data = Column(JSON, nullable=True, server_default=None)
     direction = Column(String, nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Webhook. id={self.id} type={self.type}.{self.event_type}"

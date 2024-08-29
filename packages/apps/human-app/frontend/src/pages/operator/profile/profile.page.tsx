@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useGetKeys } from '@/api/servieces/operator/get-keys';
+import { useGetKeys } from '@/api/services/operator/get-keys';
 import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { ProfileDisableButton } from '@/pages/operator/profile/profile-disable-button';
 import { ProfileListItem } from '@/components/ui/profile-list-item';
-import { useGetOperatorStats } from '@/api/servieces/operator/get-stats';
+import { useGetOperatorStats } from '@/api/services/operator/get-stats';
 import { ProfileEnableButton } from '@/pages/operator/profile/profile-enable-button';
 import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
 
@@ -66,7 +66,7 @@ export function OperatorProfilePage() {
             backgroundColor: colorPalette.white,
             height: '100%',
             boxShadow: 'none',
-            padding: isMobile ? 0 : '40px',
+            padding: isMobile ? '20px' : '40px',
             borderRadius: '20px',
           }}
         >
@@ -176,7 +176,7 @@ export function OperatorProfilePage() {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            padding: isMobile ? 0 : '40px',
+            padding: isMobile ? '20px' : '40px',
             borderRadius: '20px',
           }}
         >
@@ -194,15 +194,15 @@ export function OperatorProfilePage() {
             <List>
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsProcessed')}
-                paragraph="-"
+                paragraph={statsData.escrows_processed.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsActive')}
-                paragraph="-"
+                paragraph={statsData.escrows_active.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.escrowsCancelled')}
-                paragraph="-"
+                paragraph={statsData.escrows_cancelled.toString()}
               />
               <ProfileListItem
                 header={t('operator.profile.statistics.workersAmount')}

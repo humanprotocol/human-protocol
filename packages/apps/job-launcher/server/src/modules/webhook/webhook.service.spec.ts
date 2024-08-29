@@ -1,5 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, KVStoreClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -32,9 +32,6 @@ import { ControlledError } from '../../common/errors/controlled';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
-    build: jest.fn(),
-  },
-  KVStoreClient: {
     build: jest.fn(),
   },
 }));
@@ -259,9 +256,9 @@ describe('WebhookService', () => {
           .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
       }));
 
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
-      }));
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
 
       const result = await (webhookService as any).getExchangeOracleWebhookUrl(
         MOCK_EXCHANGE_ORACLE_ADDRESS,

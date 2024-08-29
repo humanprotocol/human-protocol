@@ -15,6 +15,7 @@ import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
+import { MutexManagerService } from '../mutex/mutex-manager.service';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { WebhookRepository } from '../webhook/webhook.repository';
     JobRepository,
     RoutingProtocolService,
     WebhookRepository,
+    MutexManagerService,
   ],
   exports: [JobService, RoutingProtocolService],
 })

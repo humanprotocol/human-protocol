@@ -1,9 +1,8 @@
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
-import { useKycSessionIdMutation } from '@/api/servieces/worker/get-kyc-session-id';
+import { useKycStartMutation } from '@/api/services/worker/get-kyc-session-id';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { Button } from '@/components/ui/button';
-import { startSynapsKyc } from '@/pages/worker/profile/start-synaps-kyc';
 import { useKycErrorNotifications } from '@/hooks/use-kyc-notification';
 import { FetchError } from '@/api/fetcher';
 
@@ -12,39 +11,36 @@ export function StartKycButton() {
   const { user } = useAuthenticatedUser();
   const onError = useKycErrorNotifications();
   const {
-    data: kycSessionIdData,
-    isPending: kycSessionIdIsPending,
-    mutate: kycSessionIdMutation,
-    status: kycSessionIdMutationStatus,
-    error: kycSessionIdMutationError,
-  } = useKycSessionIdMutation();
+    data: kycStartData,
+    isPending: kycStartIsPending,
+    mutate: kycStartMutation,
+    status: kycStartMutationStatus,
+    error: kycStartMutationError,
+  } = useKycStartMutation();
 
   const startKYC = () => {
-    kycSessionIdMutation();
+    kycStartMutation();
   };
 
   useEffect(() => {
-    if (kycSessionIdMutationStatus === 'error') {
+    if (kycStartMutationStatus === 'error') {
       if (
-        kycSessionIdMutationError instanceof FetchError &&
-        kycSessionIdMutationError.status === 400
+        kycStartMutationError instanceof FetchError &&
+        kycStartMutationError.status === 400
       ) {
         setIsKYCInProgress(true);
         return;
       }
-      onError(kycSessionIdMutationError);
+      onError(kycStartMutationError);
     }
 
-    if (
-      kycSessionIdMutationStatus === 'success' &&
-      kycSessionIdData.session_id
-    ) {
-      startSynapsKyc(kycSessionIdData.session_id);
+    if (kycStartMutationStatus === 'success' && kycStartData.url) {
+      window.location.href = kycStartData.url;
     }
   }, [
-    kycSessionIdData?.session_id,
-    kycSessionIdMutationError,
-    kycSessionIdMutationStatus,
+    kycStartData?.url,
+    kycStartMutationError,
+    kycStartMutationStatus,
     onError,
   ]);
 
@@ -60,7 +56,7 @@ export function StartKycButton() {
     <Button
       disabled={user.status !== 'ACTIVE'}
       fullWidth
-      loading={kycSessionIdIsPending}
+      loading={kycStartIsPending}
       onClick={startKYC}
       variant="contained"
     >

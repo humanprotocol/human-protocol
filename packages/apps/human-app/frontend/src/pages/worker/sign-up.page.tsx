@@ -7,11 +7,11 @@ import Link from '@mui/material/Link';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
 import { useEffect } from 'react';
-import type { SignUpDto } from '@/api/servieces/worker/sign-up';
+import type { SignUpDto } from '@/api/services/worker/sign-up';
 import {
   signUpDtoSchema,
   useSignUpMutation,
-} from '@/api/servieces/worker/sign-up';
+} from '@/api/services/worker/sign-up';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/data-entry/input';
 import { Password } from '@/components/data-entry/password/password';
@@ -20,9 +20,9 @@ import { env } from '@/shared/env';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
-import { passwordChecks } from '@/components/data-entry/password/password-checks';
-import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -31,13 +31,9 @@ function formattedSignUpErrorMessage(unknownError: unknown) {
 }
 
 export function SignUpWorkerPage() {
-  const { user, signOut } = useAuth();
-
   useEffect(() => {
-    if (user) {
-      signOut();
-    }
-  }, [signOut, user]);
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: false });
+  }, []);
 
   const methods = useForm<SignUpDto>({
     defaultValues: {
@@ -55,7 +51,10 @@ export function SignUpWorkerPage() {
     error: signUpWorkerError,
     isError: isSignUpWorkerError,
     isPending: isSignUpWorkerPending,
+    reset: signUpWorkerMutationReset,
   } = useSignUpMutation();
+
+  useResetMutationErrors(methods.watch, signUpWorkerMutationReset);
 
   const handleWorkerSignUp = (data: SignUpDto) => {
     signUpWorkerMutate(omit(data, ['confirmPassword']));
@@ -86,8 +85,6 @@ export function SignUpWorkerPage() {
             <Password
               label={t('worker.signUpForm.fields.password')}
               name="password"
-              passwordCheckHeader="Password must contain at least:"
-              passwordChecks={passwordChecks}
             />
             <Password
               label={t('worker.signUpForm.fields.confirmPassword')}

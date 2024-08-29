@@ -9,17 +9,18 @@ import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
-import type { SignInDto } from '@/api/servieces/worker/sign-in';
+import type { SignInDto } from '@/api/services/worker/sign-in';
 import {
   signInDtoSchema,
   useSignInMutation,
-} from '@/api/servieces/worker/sign-in';
+} from '@/api/services/worker/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Alert } from '@/components/ui/alert';
-import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
+import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -29,13 +30,10 @@ function formattedSignInErrorMessage(unknownError: unknown) {
 
 export function SignInWorkerPage() {
   const { t } = useTranslation();
-  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      signOut();
-    }
-  }, [signOut, user]);
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: false });
+  }, []);
 
   const methods = useForm<SignInDto>({
     defaultValues: {
@@ -52,7 +50,10 @@ export function SignInWorkerPage() {
     error: signInWorkerError,
     isError: isSignInWorkerError,
     isPending: isSignInWorkerPending,
+    reset: signInWorkerMutationReset,
   } = useSignInMutation();
+
+  useResetMutationErrors(methods.watch, signInWorkerMutationReset);
 
   function handleWorkerSignIn(data: SignInDto) {
     signInWorkerMutate(data);

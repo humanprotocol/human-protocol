@@ -108,8 +108,8 @@ export enum ErrorKyc {
   NotFound = 'KYC session not found',
   AlreadyApproved = 'KYC session already approved',
   VerificationInProgress = 'KYC session verification in progress',
-  Rejected = 'KYC session rejected',
-  InvalidSynapsAPIResponse = 'Invalid Synaps API response',
+  Declined = 'KYC session declined',
+  InvalidKycProviderAPIResponse = 'Invalid KYC provider API response',
   InvalidWebhookSecret = 'Invalid webhook secret',
   CountryNotSet = 'Сountry is not set for the user',
 }
@@ -148,4 +148,5 @@ export enum ErrorQualification {
   NotFound = 'Qualification not found',
   NoWorkersFound = 'No workers found for the provided addresses or emails',
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
+  CannotDeleteAssignedQualification = 'Cannot delete qualification because it is assigned to users',
 }

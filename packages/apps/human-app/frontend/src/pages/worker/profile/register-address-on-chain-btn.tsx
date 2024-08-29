@@ -1,9 +1,9 @@
 import { t } from 'i18next';
 import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { useGetOnChainRegisteredAddress } from '@/api/servieces/worker/get-on-chain-registered-address';
-import { useGetSignedAddress } from '@/api/servieces/worker/get-signed-address';
-import { useRegisterAddressOnChainMutation } from '@/api/servieces/worker/use-register-address-on-chain';
+import { useGetOnChainRegisteredAddress } from '@/api/services/worker/get-on-chain-registered-address';
+import { useGetSignedAddress } from '@/api/services/worker/get-signed-address';
+import { useRegisterAddressOnChainMutation } from '@/api/services/worker/use-register-address-on-chain';
 import { DoneLabel } from '@/pages/worker/profile/done-label';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';

@@ -6,8 +6,8 @@ import { OraclesTable } from '@/pages/worker/jobs-discovery/oracles-table/oracle
 import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-job-types-select';
 import { JOB_TYPES } from '@/shared/consts';
 import { colorPalette } from '@/styles/color-palette';
-import type { OraclesSuccessResponse } from '@/api/servieces/worker/oracles';
-import { useGetOracles } from '@/api/servieces/worker/oracles';
+import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
+import { useGetOracles } from '@/api/services/worker/oracles';
 
 export type OraclesDataQueryResult = UseQueryResult<OraclesSuccessResponse>;
 
@@ -25,7 +25,7 @@ export function JobsDiscoveryPage() {
               : colorPalette.white,
             height: '100%',
             boxShadow: 'none',
-            padding: isMobile ? 0 : '40px',
+            padding: isMobile ? '20px' : '40px',
             minHeight: '800px',
             borderRadius: '20px',
           }}

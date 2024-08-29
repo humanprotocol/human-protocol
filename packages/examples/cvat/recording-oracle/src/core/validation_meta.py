@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 VALIDATION_METAFILE_NAME = "validation_meta.json"
@@ -19,5 +17,5 @@ class ResultMeta(BaseModel):
 
 
 class ValidationMeta(BaseModel):
-    jobs: List[JobMeta]
-    results: List[ResultMeta]
+    jobs: list[JobMeta]
+    results: list[ResultMeta]

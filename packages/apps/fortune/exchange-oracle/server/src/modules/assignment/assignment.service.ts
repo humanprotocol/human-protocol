@@ -120,15 +120,13 @@ export class AssignmentService {
           TOKEN,
           entity.createdAt.toISOString(),
           entity.expiresAt.toISOString(),
+          entity.updatedAt.toISOString(),
         );
-
         if (entity.status === AssignmentStatus.ACTIVE)
           assignment.url =
             this.serverConfigService.feURL +
             '/assignment/' +
             entity.id.toString();
-        else assignment.updatedAt = entity.updatedAt.toISOString();
-
         return assignment;
       }),
     );

@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, IsUUID } from 'class-validator';
-import { IsPassword } from '../../common/validators';
+import {
+  IsEmail,
+  IsString,
+  IsUUID,
+  IsOptional,
+  MinLength,
+} from 'class-validator';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -22,7 +27,8 @@ export class SignInDto {
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  @IsOptional()
+  public hCaptchaToken?: string;
 }
 
 export class RefreshDto {
@@ -33,7 +39,9 @@ export class RefreshDto {
 
 export class ValidatePasswordDto {
   @ApiProperty()
-  @IsPassword()
+  @MinLength(8, {
+    message: 'Password must be at least 8 characters long.',
+  })
   public password: string;
 }
 

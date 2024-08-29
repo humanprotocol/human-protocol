@@ -1,7 +1,7 @@
 import os
+from collections.abc import Sequence
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, Sequence, Tuple
 
 import attrs
 import datumaro as dm
@@ -12,7 +12,7 @@ from src.core.config import Config
 
 DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER = Config.core_config.skeleton_assignment_size_mult
 
-SkeletonBboxMapping = Dict[int, int]
+SkeletonBboxMapping = dict[int, int]
 
 
 @frozen(kw_only=True)
@@ -37,9 +37,9 @@ class RoiInfo:
 
 RoiInfos = Sequence[RoiInfo]
 
-RoiFilenames = Dict[int, str]
+RoiFilenames = dict[int, str]
 
-PointLabelsMapping = Dict[Tuple[str, str], str]
+PointLabelsMapping = dict[tuple[str, str], str]
 "(skeleton, point) -> job point name"
 
 

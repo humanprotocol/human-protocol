@@ -1,7 +1,6 @@
-import { Grid } from '@mui/material';
+import { Grid, styled } from '@mui/material';
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { styled } from '@mui/material/styles';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
@@ -157,7 +156,7 @@ export function Layout({
                 [breakpoints.mobile]: {
                   height: 'unset',
                   position: 'absolute',
-                  zIndex: 2000,
+                  zIndex: 200,
                   top: '0',
                   left: '0',
                   width: notificationWith ? `${notificationWith}px` : 'unset',

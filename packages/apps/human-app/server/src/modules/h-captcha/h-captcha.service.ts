@@ -19,14 +19,10 @@ import { Cache } from 'cache-manager';
 import { HCaptchaStatisticsGateway } from '../../integrations/h-captcha-labeling/h-captcha-statistics.gateway';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { HCaptchaVerifyGateway } from '../../integrations/h-captcha-labeling/h-captcha-verify.gateway';
+import { DAILY_HMT_SPENT_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class HCaptchaService {
-  BAD_REQUEST = 400;
-  OK = 200;
-  get dailyHmtSpentCacheKey() {
-    return 'daily-hmt-spent-cache';
-  }
   private readonly logger = new Logger(HCaptchaService.name);
   constructor(
     private configService: EnvironmentConfigService,
@@ -74,11 +70,11 @@ export class HCaptchaService {
   ): Promise<DailyHmtSpentResponse> {
     this.checkIfHcaptchaSitekeyPresent(command.siteKey);
     let dailyHmtSpent = await this.cacheManager.get<DailyHmtSpentResponse>(
-      this.dailyHmtSpentCacheKey,
+      DAILY_HMT_SPENT_CACHE_KEY,
     );
     if (!dailyHmtSpent) {
       dailyHmtSpent = await this.hCaptchaLabelingGateway.fetchDailyHmtSpent();
-      await this.cacheManager.set(this.dailyHmtSpentCacheKey, dailyHmtSpent, {
+      await this.cacheManager.set(DAILY_HMT_SPENT_CACHE_KEY, dailyHmtSpent, {
         ttl: this.configService.cacheTtlDailyHmtSpent,
       } as any);
     }

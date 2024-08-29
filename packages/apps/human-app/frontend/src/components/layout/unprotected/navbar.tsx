@@ -33,7 +33,8 @@ export function Navbar({ withNavigation }: NavbarProps) {
         alignItems: 'center',
         px: isMobile ? '44px' : 0,
         [breakpoints.mobile]: {
-          margin: '10px 0',
+          height: '104px',
+          margin: '0',
         },
       }}
     >
@@ -95,10 +96,20 @@ export function Navbar({ withNavigation }: NavbarProps) {
                   alignItems: 'flex-end',
                 }}
               >
-                <Button size="large" variant="text">
+                <Button
+                  component={Link}
+                  size="large"
+                  to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
+                  variant="text"
+                >
                   {t('components.navbar.humanProtocol')}
                 </Button>
-                <Button size="large" variant="text">
+                <Button
+                  component={Link}
+                  size="large"
+                  to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
+                  variant="text"
+                >
                   {t('components.navbar.howItWorks')}
                 </Button>
               </Box>

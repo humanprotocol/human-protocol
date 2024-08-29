@@ -3,34 +3,34 @@
 ##################################################
 
 type Holder @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes! # address
   balance: BigInt!
 }
 
 type Worker @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   totalAmountReceived: BigInt!
   payoutCount: BigInt!
 }
 
 type UniqueSender @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   transferCount: BigInt!
   timestamp: BigInt!
 }
 
 type UniqueReceiver @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   receiveCount: BigInt!
   timestamp: BigInt!
 }
 
 type Leader @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   amountStaked: BigInt!
   amountAllocated: BigInt!
@@ -40,7 +40,7 @@ type Leader @entity {
   amountSlashed: BigInt!
   reputation: BigInt!
   reward: BigInt!
-  amountJobsLaunched: BigInt!
+  amountJobsProcessed: BigInt!
 
   role: String
   fee: BigInt
@@ -53,20 +53,20 @@ type Leader @entity {
 }
 
 type LeaderURL @entity {
-  id: ID!
+  id: Bytes!
   key: String
   url: String
   leader: Leader!
 }
 
 type ReputationNetwork @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
 }
 
 type Escrow @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes! # address
   token: Bytes! # address
   factoryAddress: Bytes! # address
@@ -79,27 +79,24 @@ type Escrow @entity {
   manifestUrl: String # string
   manifestHash: String # string
   reputationOracle: Bytes # address
-  reputationOracleFee: BigInt
   recordingOracle: Bytes # address
-  recordingOracleFee: BigInt
   exchangeOracle: Bytes # address
-  exchangeOracleFee: BigInt
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
   jobRequesterId: String # string
   createdAt: BigInt!
 }
 
-type Payout @entity {
-  id: ID!
+type Payout @entity(immutable: true) {
+  id: Bytes!
   escrowAddress: Bytes! # address
   recipient: Bytes! # address
   amount: BigInt!
   createdAt: BigInt!
 }
 
-type DailyWorker @entity {
-  id: ID!
+type DailyWorker @entity(immutable: true) {
+  id: Bytes!
   timestamp: BigInt!
   address: Bytes! # address
   escrowAddress: Bytes! # address
@@ -110,8 +107,8 @@ type DailyWorker @entity {
 ##################################################
 
 # HMToken
-type HMTTransferEvent @entity {
-  id: ID!
+type HMTTransferEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -121,8 +118,8 @@ type HMTTransferEvent @entity {
   amount: BigInt!
 }
 
-type HMTBulkTransferEvent @entity {
-  id: ID!
+type HMTBulkTransferEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -131,8 +128,8 @@ type HMTBulkTransferEvent @entity {
   bulkCount: BigInt!
 }
 
-type HMTApprovalEvent @entity {
-  id: ID!
+type HMTApprovalEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -142,8 +139,8 @@ type HMTApprovalEvent @entity {
   amount: BigInt!
 }
 
-type HMTBulkApprovalEvent @entity {
-  id: ID!
+type HMTBulkApprovalEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -153,8 +150,8 @@ type HMTBulkApprovalEvent @entity {
 }
 
 # Escrow
-type FundEvent @entity {
-  id: ID!
+type FundEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -164,8 +161,8 @@ type FundEvent @entity {
   amount: BigInt!
 }
 
-type SetupEvent @entity {
-  id: ID!
+type SetupEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -174,8 +171,8 @@ type SetupEvent @entity {
   sender: Bytes! # address
 }
 
-type StoreResultsEvent @entity {
-  id: ID!
+type StoreResultsEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -185,8 +182,8 @@ type StoreResultsEvent @entity {
   intermediateResultsUrl: String! # string
 }
 
-type BulkPayoutEvent @entity {
-  id: ID!
+type BulkPayoutEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -197,8 +194,8 @@ type BulkPayoutEvent @entity {
   bulkCount: BigInt!
 }
 
-type EscrowStatusEvent @entity {
-  id: ID!
+type EscrowStatusEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -210,8 +207,8 @@ type EscrowStatusEvent @entity {
 }
 
 # KVStore
-type KVStoreSetEvent @entity {
-  id: ID!
+type KVStoreSetEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -222,7 +219,7 @@ type KVStoreSetEvent @entity {
 }
 
 type KVStore @entity {
-  id: ID!
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   address: Bytes!
@@ -231,8 +228,8 @@ type KVStore @entity {
 }
 
 # Staking
-type StakeDepositedEvent @entity {
-  id: ID!
+type StakeDepositedEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -241,8 +238,8 @@ type StakeDepositedEvent @entity {
   amount: BigInt!
 }
 
-type StakeLockedEvent @entity {
-  id: ID!
+type StakeLockedEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -252,8 +249,8 @@ type StakeLockedEvent @entity {
   lockedUntilTimestamp: BigInt!
 }
 
-type StakeWithdrawnEvent @entity {
-  id: ID!
+type StakeWithdrawnEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -262,8 +259,8 @@ type StakeWithdrawnEvent @entity {
   amount: BigInt!
 }
 
-type StakeSlashedEvent @entity {
-  id: ID!
+type StakeSlashedEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -274,8 +271,8 @@ type StakeSlashedEvent @entity {
   amount: BigInt!
 }
 
-type StakeAllocatedEvent @entity {
-  id: ID!
+type StakeAllocatedEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -285,8 +282,8 @@ type StakeAllocatedEvent @entity {
   amount: BigInt!
 }
 
-type AllocationClosedEvent @entity {
-  id: ID!
+type AllocationClosedEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -297,8 +294,8 @@ type AllocationClosedEvent @entity {
 }
 
 # RewardPool
-type RewardAddedEvent @entity {
-  id: ID!
+type RewardAddedEvent @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -314,7 +311,7 @@ type RewardAddedEvent @entity {
 ##################################################
 
 type HMTokenStatistics @entity {
-  id: ID!
+  id: Bytes!
   totalTransferEventCount: BigInt!
   totalBulkTransferEventCount: BigInt!
   totalApprovalEventCount: BigInt!
@@ -324,7 +321,7 @@ type HMTokenStatistics @entity {
 }
 
 type EscrowStatistics @entity {
-  id: ID!
+  id: Bytes!
   fundEventCount: BigInt!
   setupEventCount: BigInt!
   storeResultsEventCount: BigInt!
@@ -339,7 +336,7 @@ type EscrowStatistics @entity {
 }
 
 type EventDayData @entity {
-  id: ID!
+  id: Bytes!
   timestamp: Int!
   dailyFundEventCount: BigInt!
   dailySetupEventCount: BigInt!
@@ -362,12 +359,12 @@ type EventDayData @entity {
 }
 
 type LeaderStatistics @entity {
-  id: ID!
+  id: Bytes!
   leaders: BigInt!
 }
 
-type Transaction @entity {
-  id: ID!
+type Transaction @entity(immutable: true) {
+  id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!

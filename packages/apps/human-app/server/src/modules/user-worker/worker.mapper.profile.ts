@@ -8,6 +8,8 @@ import {
   SnakeCaseNamingConvention,
 } from '@automapper/core';
 import {
+  RegisterWorkerCommand,
+  RegisterWorkerDto,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from './model/worker-registration.model';
@@ -37,6 +39,15 @@ export class WorkerProfile extends AutomapperProfile {
         mapper,
         SigninWorkerDto,
         SigninWorkerCommand,
+        namingConventions({
+          source: new SnakeCaseNamingConvention(),
+          destination: new CamelCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        RegisterWorkerDto,
+        RegisterWorkerCommand,
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),

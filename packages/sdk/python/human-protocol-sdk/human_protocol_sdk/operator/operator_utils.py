@@ -73,7 +73,7 @@ class LeaderData:
         amount_slashed: int,
         reputation: int,
         reward: int,
-        amount_jobs_launched: int,
+        amount_jobs_processed: int,
         role: Optional[str] = None,
         fee: Optional[int] = None,
         public_key: Optional[str] = None,
@@ -95,7 +95,7 @@ class LeaderData:
         :param amount_slashed: Amount slashed
         :param reputation: Reputation
         :param reward: Reward
-        :param amount_jobs_launched: Amount of jobs launched
+        :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
         :param fee: Fee
         :param public_key: Public key
@@ -115,7 +115,7 @@ class LeaderData:
         self.amount_slashed = amount_slashed
         self.reputation = reputation
         self.reward = reward
-        self.amount_jobs_launched = amount_jobs_launched
+        self.amount_jobs_processed = amount_jobs_processed
         self.role = role
         self.fee = fee
         self.public_key = public_key
@@ -197,10 +197,15 @@ class OperatorUtils:
             query=get_leaders_query(filter),
             params={"role": filter.role},
         )
-        leaders_raw = leaders_data["data"]["leaders"]
-
-        if not leaders_raw:
+        if (
+            not leaders_data
+            or "data" not in leaders_data
+            or "leaders" not in leaders_data["data"]
+            or not leaders_data["data"]["leaders"]
+        ):
             return []
+
+        leaders_raw = leaders_data["data"]["leaders"]
 
         job_types = []
         if isinstance(job_types, str):
@@ -222,7 +227,7 @@ class OperatorUtils:
                     amount_slashed=int(leader.get("amountSlashed", 0)),
                     reputation=int(leader.get("reputation", 0)),
                     reward=int(leader.get("reward", 0)),
-                    amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                    amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
                     role=leader.get("role", None),
                     fee=int(leader.get("fee")) if leader.get("fee", None) else None,
                     public_key=leader.get("publicKey", None),
@@ -283,10 +288,16 @@ class OperatorUtils:
             query=get_leader_query,
             params={"address": leader_address.lower()},
         )
-        leader = leader_data["data"]["leader"]
 
-        if not leader:
+        if (
+            not leader_data
+            or "data" not in leader_data
+            or "leader" not in leader_data["data"]
+            or not leader_data["data"]["leader"]
+        ):
             return None
+
+        leader = leader_data["data"]["leader"]
 
         return LeaderData(
             chain_id=chain_id,
@@ -300,7 +311,7 @@ class OperatorUtils:
             amount_slashed=int(leader.get("amountSlashed", 0)),
             reputation=int(leader.get("reputation", 0)),
             reward=int(leader.get("reward", 0)),
-            amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+            amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
             role=leader.get("role", None),
             fee=int(leader.get("fee")) if leader.get("fee", None) else None,
             public_key=leader.get("publicKey", None),
@@ -360,7 +371,12 @@ class OperatorUtils:
             params={"address": address.lower(), "role": role},
         )
 
-        if not reputation_network_data["data"]["reputationNetwork"]:
+        if (
+            not reputation_network_data
+            or "data" not in reputation_network_data
+            or "reputationNetwork" not in reputation_network_data["data"]
+            or not reputation_network_data["data"]["reputationNetwork"]
+        ):
             return []
 
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
@@ -418,7 +434,12 @@ class OperatorUtils:
             params={"slasherAddress": slasher.lower()},
         )
 
-        if not reward_added_events_data["data"]["rewardAddedEvents"]:
+        if (
+            not reward_added_events_data
+            or "data" not in reward_added_events_data
+            or "rewardAddedEvents" not in reward_added_events_data["data"]
+            or not reward_added_events_data["data"]["rewardAddedEvents"]
+        ):
             return []
 
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]

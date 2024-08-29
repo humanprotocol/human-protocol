@@ -17,7 +17,17 @@ export function ListItem({
         gap: '0.5rem',
       }}
     >
-      <Typography variant="subtitle2">{label}</Typography>
+      <Typography
+        sx={{
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          minWidth: 0,
+        }}
+        variant="subtitle2"
+      >
+        {label}
+      </Typography>
       {children}
     </MuiListItem>
   );

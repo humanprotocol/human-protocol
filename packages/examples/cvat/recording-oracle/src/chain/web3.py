@@ -65,15 +65,13 @@ def sign_message(chain_id: Networks, message) -> str:
         encode_defunct(text=serialized_message), private_key
     )
 
-    return signed_message.signature.hex(), serialized_message
+    return signed_message.signature.to_0x_hex(), serialized_message
 
 
 def recover_signer(chain_id: Networks, message, signature: str) -> str:
     w3 = get_web3(chain_id)
     message_hash = encode_defunct(text=serialize_message(message))
-    signer = w3.eth.account.recover_message(message_hash, signature=signature)
-
-    return signer
+    return w3.eth.account.recover_message(message_hash, signature=signature)
 
 
 def validate_address(escrow_address: str) -> str:

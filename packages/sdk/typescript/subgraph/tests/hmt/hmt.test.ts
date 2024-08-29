@@ -19,6 +19,7 @@ import {
   handleApproval,
   handleBulkApproval,
 } from '../../src/mapping/HMToken';
+import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
 import {
   createTransferEvent,
@@ -30,6 +31,7 @@ import {
 const escrowAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a';
 const escrowAddress = Address.fromString(escrowAddressString);
 const operatorAddressString = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266';
+const operatorAddress = Address.fromString(operatorAddressString);
 const holderAddressString = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8';
 const holderAddress = Address.fromString(holderAddressString);
 const holder1AddressString = '0x92a2eEF7Ff696BCef98957a0189872680600a959';
@@ -43,7 +45,7 @@ describe('HMToken', () => {
       new DataSourceContext()
     );
 
-    const escrow = new Escrow(escrowAddress.toHex());
+    const escrow = new Escrow(escrowAddress);
     escrow.address = escrowAddress;
     escrow.token = Address.zero();
     escrow.factoryAddress = Address.zero();
@@ -73,9 +75,7 @@ describe('HMToken', () => {
 
       handleTransfer(transfer);
 
-      const id = `${transfer.transaction.hash.toHex()}-${transfer.logIndex.toString()}-${
-        transfer.block.timestamp
-      }`;
+      const id = toEventId(transfer).toHex();
 
       // HMTTransferEvent
       assert.fieldEquals(
@@ -179,9 +179,7 @@ describe('HMToken', () => {
 
       handleTransfer(transfer);
 
-      const id = `${transfer.transaction.hash.toHex()}-${transfer.logIndex.toString()}-${
-        transfer.block.timestamp
-      }`;
+      const id = toEventId(transfer).toHex();
 
       // HMTTransferEvent
       assert.fieldEquals(
@@ -229,9 +227,7 @@ describe('HMToken', () => {
 
       handleTransfer(transfer);
 
-      const id = `${transfer.transaction.hash.toHex()}-${transfer.logIndex.toString()}-${
-        transfer.block.timestamp
-      }`;
+      const id = toEventId(transfer).toHex();
 
       // HMTTransferEvent
       assert.fieldEquals(
@@ -270,7 +266,9 @@ describe('HMToken', () => {
       assert.fieldEquals('Worker', operatorAddressString, 'payoutCount', '1');
 
       // Payout
-      const payoutId = `${transfer.transaction.hash.toHex()}-${operatorAddressString}`;
+      const payoutId = transfer.transaction.hash
+        .concat(operatorAddress)
+        .toHex();
       assert.fieldEquals(
         'Payout',
         payoutId,
@@ -284,6 +282,8 @@ describe('HMToken', () => {
         operatorAddressString
       );
       assert.fieldEquals('Payout', payoutId, 'amount', '1');
+
+      // Transaction
       assert.fieldEquals(
         'Transaction',
         transfer.transaction.hash.toHex(),
@@ -328,9 +328,7 @@ describe('HMToken', () => {
 
     handleBulkTransfer(bulkTransfer);
 
-    const id = `${bulkTransfer.transaction.hash.toHex()}-${bulkTransfer.logIndex.toString()}-${
-      bulkTransfer.block.timestamp
-    }`;
+    const id = toEventId(bulkTransfer).toHex();
 
     // HMTBulkTransferEvent
     assert.fieldEquals(
@@ -389,9 +387,7 @@ describe('HMToken', () => {
 
     handleApproval(approval);
 
-    const id = `${approval.transaction.hash.toHex()}-${approval.logIndex.toString()}-${
-      approval.block.timestamp
-    }`;
+    const id = toEventId(approval).toHex();
 
     // HMTApprovalEvent
     assert.fieldEquals(
@@ -463,9 +459,7 @@ describe('HMToken', () => {
 
     handleBulkApproval(bulkApproval);
 
-    const id = `${bulkApproval.transaction.hash.toHex()}-${bulkApproval.logIndex.toString()}-${
-      bulkApproval.block.timestamp
-    }`;
+    const id = toEventId(bulkApproval).toHex();
 
     // HMTBulkApprovalEvent
     assert.fieldEquals(
@@ -538,13 +532,13 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'totalTransferEventCount',
         '2'
       );
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'totalValueTransfered',
         '3'
       );
@@ -573,7 +567,7 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'holders',
         '1'
       );
@@ -591,7 +585,7 @@ describe('HMToken', () => {
       assert.fieldEquals('Holder', holder1Address.toHex(), 'balance', '10');
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'holders',
         '2'
       );
@@ -609,7 +603,7 @@ describe('HMToken', () => {
       assert.fieldEquals('Holder', holder1Address.toHex(), 'balance', '20');
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'holders',
         '1'
       );
@@ -624,7 +618,7 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'totalBulkTransferEventCount',
         '2'
       );
@@ -650,7 +644,7 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'totalApprovalEventCount',
         '2'
       );
@@ -665,14 +659,14 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'HMTokenStatistics',
-        HMT_STATISTICS_ENTITY_ID,
+        HMT_STATISTICS_ENTITY_ID.toHex(),
         'totalBulkApprovalEventCount',
         '2'
       );
     });
 
     test('Should properly calculate FundEvent in statistics, when sending to escrow', () => {
-      const escrow = new Escrow(escrowAddress.toHex());
+      const escrow = new Escrow(escrowAddress);
       escrow.address = escrowAddress;
       escrow.token = Address.zero();
       escrow.factoryAddress = Address.zero();
@@ -706,7 +700,7 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'EscrowStatistics',
-        STATISTICS_ENTITY_ID,
+        STATISTICS_ENTITY_ID.toHex(),
         'fundEventCount',
         '2'
       );
@@ -723,7 +717,7 @@ describe('HMToken', () => {
       ].forEach((field) => {
         assert.fieldEquals(
           'EscrowStatistics',
-          STATISTICS_ENTITY_ID,
+          STATISTICS_ENTITY_ID.toHex(),
           field,
           '0'
         );
@@ -731,7 +725,7 @@ describe('HMToken', () => {
 
       assert.fieldEquals(
         'EscrowStatistics',
-        STATISTICS_ENTITY_ID,
+        STATISTICS_ENTITY_ID.toHex(),
         'totalEventCount',
         '2'
       );

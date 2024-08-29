@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
-import { ChainId } from '../src/enums';
+import { ChainId, OrderDirection } from '../src/enums';
 import { StatisticsClient } from '../src/statistics';
 import {
   GET_ESCROW_STATISTICS_QUERY,
@@ -71,6 +71,9 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
@@ -130,6 +133,9 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
@@ -186,6 +192,9 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
@@ -219,71 +228,20 @@ describe('StatisticsClient', () => {
 
   describe('getHMTStatistics', () => {
     test('should successfully get HMT statistics', async () => {
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({
-          hmtokenStatistics: {
-            totalValueTransfered: '100',
-            totalTransferEventCount: '4',
-            holders: '2',
-          },
-        })
-        .mockResolvedValueOnce({
-          holders: [
-            {
-              address: '0x123',
-              balance: '10',
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          eventDayDatas: [
-            {
-              timestamp: 1,
-              dailyHMTTransferCount: '4',
-              dailyHMTTransferAmount: '100',
-              dailyUniqueSenders: '100',
-              dailyUniqueReceivers: '100',
-            },
-          ],
-        });
-
-      const from = new Date();
-      const to = new Date(from.setDate(from.getDate() + 1));
-
-      const result = await statisticsClient.getHMTStatistics({
-        from,
-        to,
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        hmtokenStatistics: {
+          totalValueTransfered: '100',
+          totalTransferEventCount: '4',
+          holders: '2',
+        },
       });
 
-      expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
-        GET_EVENT_DAY_DATA_QUERY({ from, to }),
-        {
-          from: from.getTime() / 1000,
-          to: to.getTime() / 1000,
-        }
-      );
+      const result = await statisticsClient.getHMTStatistics();
 
       expect(result).toEqual({
         totalTransferAmount: ethers.toBigInt(100),
         totalTransferCount: 4,
         totalHolders: 2,
-        holders: [
-          {
-            address: '0x123',
-            balance: ethers.toBigInt(10),
-          },
-        ],
-        dailyHMTData: [
-          {
-            timestamp: new Date(1000),
-            totalTransactionAmount: ethers.toBigInt(100),
-            totalTransactionCount: 4,
-            dailyUniqueSenders: 100,
-            dailyUniqueReceivers: 100,
-          },
-        ],
       });
     });
 
@@ -292,12 +250,9 @@ describe('StatisticsClient', () => {
         .spyOn(gqlFetch, 'default')
         .mockRejectedValueOnce(new Error('Error'));
 
-      await expect(
-        statisticsClient.getHMTStatistics({
-          from: new Date(),
-          to: new Date(),
-        })
-      ).rejects.toThrow('Error');
+      await expect(statisticsClient.getHMTStatistics()).rejects.toThrow(
+        'Error'
+      );
 
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
@@ -458,6 +413,67 @@ describe('StatisticsClient', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(statisticsClient.getHMTHolders()).rejects.toThrow('Error');
+
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getHMTDailyData', () => {
+    test('should successfully get HMT daily data', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        eventDayDatas: [
+          {
+            timestamp: 1,
+            dailyHMTTransferCount: '4',
+            dailyHMTTransferAmount: '100',
+            dailyUniqueSenders: '100',
+            dailyUniqueReceivers: '100',
+          },
+        ],
+      });
+
+      const from = new Date();
+      const to = new Date(from.setDate(from.getDate() + 1));
+
+      const result = await statisticsClient.getHMTDailyData({
+        from,
+        to,
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_EVENT_DAY_DATA_QUERY({ from, to }),
+        {
+          from: from.getTime() / 1000,
+          to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          timestamp: new Date(1000),
+          totalTransactionAmount: ethers.toBigInt(100),
+          totalTransactionCount: 4,
+          dailyUniqueSenders: 100,
+          dailyUniqueReceivers: 100,
+        },
+      ]);
+    });
+
+    test('should throw error in case gql fetch fails from subgraph', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
+
+      await expect(
+        statisticsClient.getHMTStatistics({
+          from: new Date(),
+          to: new Date(),
+        })
+      ).rejects.toThrow('Error');
 
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });

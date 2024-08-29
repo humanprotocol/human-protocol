@@ -380,7 +380,7 @@ export const theme: ThemeOptions = {
           borderRadius: '20px',
         },
         root: {
-          zIndex: 20,
+          zIndex: 800,
         },
       },
     },

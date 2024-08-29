@@ -38,7 +38,7 @@ class TransactionData:
         self,
         chain_id: ChainId,
         block: int,
-        hash: str,
+        tx_hash: str,
         from_address: str,
         to_address: str,
         timestamp: int,
@@ -47,7 +47,7 @@ class TransactionData:
     ):
         self.chain_id = chain_id
         self.block = block
-        self.hash = hash
+        self.tx_hash = tx_hash
         self.from_address = from_address
         self.to_address = to_address
         self.timestamp = timestamp
@@ -101,15 +101,20 @@ class TransactionUtils:
             query=get_transaction_query(),
             params={"hash": hash.lower()},
         )
-        transaction = transaction_data["data"]["transaction"]
-
-        if not transaction:
+        if (
+            not transaction_data
+            or "data" not in transaction_data
+            or "transaction" not in transaction_data["data"]
+            or not transaction_data["data"]["transaction"]
+        ):
             return None
+
+        transaction = transaction_data["data"]["transaction"]
 
         return TransactionData(
             chain_id=chain_id,
             block=transaction.get("block", 0),
-            hash=transaction.get("txHash", ""),
+            tx_hash=transaction.get("txHash", ""),
             from_address=transaction.get("from", ""),
             to_address=transaction.get("to", ""),
             timestamp=transaction.get("timestamp", 0),
@@ -170,7 +175,12 @@ class TransactionUtils:
                 "orderDirection": filter.order_direction.value,
             },
         )
-        if not data or "data" not in data or "transactions" not in data["data"]:
+        if (
+            not data
+            or "data" not in data
+            or "transactions" not in data["data"]
+            or not data["data"]["transactions"]
+        ):
             return []
 
         transactions_raw = data["data"]["transactions"]
@@ -181,7 +191,7 @@ class TransactionUtils:
                 TransactionData(
                     chain_id=filter.chain_id,
                     block=transaction.get("block", 0),
-                    hash=transaction.get("txHash", ""),
+                    tx_hash=transaction.get("txHash", ""),
                     from_address=transaction.get("from", ""),
                     to_address=transaction.get("to", ""),
                     timestamp=transaction.get("timestamp", 0),

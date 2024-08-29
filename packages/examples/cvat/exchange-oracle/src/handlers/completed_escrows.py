@@ -2,8 +2,9 @@ import io
 import itertools
 import logging
 from collections import Counter
+from collections.abc import Callable
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from datumaro.util import take_by
 from sqlalchemy import exc as sa_errors
@@ -43,7 +44,7 @@ class _CompletedEscrowsHandler:
     4. Prepares a webhook to recording oracle
     """
 
-    def __init__(self, logger: Optional[logging.Logger]) -> None:
+    def __init__(self, logger: logging.Logger | None) -> None:
         self.logger = logger or NullLogger()
 
     def _download_with_retries(
@@ -51,7 +52,7 @@ class _CompletedEscrowsHandler:
         download_callback: Callable[[], io.RawIOBase],
         retry_callback: Callable[[], Any],
         *,
-        max_attempts: Optional[int] = None,
+        max_attempts: int | None = None,
     ) -> io.RawIOBase:
         """
         Sometimes CVAT downloading can fail with the 500 error.
@@ -74,11 +75,12 @@ class _CompletedEscrowsHandler:
                     retry_callback()
                 else:
                     raise
+        return None
 
     def _process_plain_escrows(self):
         logger = self.logger
 
-        plain_task_types = [t for t in TaskTypes if not t == TaskTypes.image_skeletons_from_boxes]
+        plain_task_types = [t for t in TaskTypes if t != TaskTypes.image_skeletons_from_boxes]
         with SessionLocal.begin() as session:
             completed_projects = cvat_service.get_projects_by_status(
                 session,
@@ -95,7 +97,7 @@ class _CompletedEscrowsHandler:
                     # TODO: such escrows can fill all the queried completed projects
                     # need to improve handling for such projects
                     # (e.g. cancel depending on the escrow status)
-                    logger.error(
+                    logger.exception(
                         "Failed to handle completed project id {} for escrow {}: {}".format(
                             project.cvat_id, project.escrow_address, e
                         )
@@ -113,7 +115,7 @@ class _CompletedEscrowsHandler:
                 jobs = cvat_service.get_jobs_by_cvat_project_id(session, project.cvat_id)
 
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[project.job_type]
-                job_annotations: Dict[int, FileDescriptor] = {}
+                job_annotations: dict[int, FileDescriptor] = {}
 
                 for jobs_batch in take_by(
                     jobs, count=CronConfig.track_completed_escrows_jobs_downloading_batch_size
@@ -170,7 +172,7 @@ class _CompletedEscrowsHandler:
                     file=project_annotations_file,
                 )
 
-                annotation_files: List[FileDescriptor] = []
+                annotation_files: list[FileDescriptor] = []
                 annotation_files.append(project_annotations_file_desc)
 
                 annotation_metafile = prepare_annotation_metafile(
@@ -253,10 +255,8 @@ class _CompletedEscrowsHandler:
                 # TODO: such escrows can fill all the queried completed projects
                 # need to improve handling for such projects
                 # (e.g. cancel depending on the escrow status)
-                logger.error(
-                    "Failed to handle completed projects for escrow {}: {}".format(
-                        escrow_address, e
-                    )
+                logger.exception(
+                    f"Failed to handle completed projects for escrow {escrow_address}: {e}"
                 )
                 continue
 
@@ -297,7 +297,7 @@ class _CompletedEscrowsHandler:
                     f"Downloading results for the escrow (escrow_address={escrow_address})"
                 )
 
-                jobs: List[cvat_models.Job] = list(
+                jobs: list[cvat_models.Job] = list(
                     itertools.chain.from_iterable(
                         cvat_service.get_jobs_by_cvat_project_id(session, p.cvat_id)
                         for p in escrow_projects
@@ -305,7 +305,7 @@ class _CompletedEscrowsHandler:
                 )
 
                 annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
-                job_annotations: Dict[int, FileDescriptor] = {}
+                job_annotations: dict[int, FileDescriptor] = {}
 
                 # Collect raw annotations from CVAT, validate and convert them
                 # into a recording oracle suitable format
@@ -347,7 +347,7 @@ class _CompletedEscrowsHandler:
                     file=None,
                 )
 
-                annotation_files: List[FileDescriptor] = []
+                annotation_files: list[FileDescriptor] = []
                 annotation_files.append(resulting_annotations_file_desc)
 
                 annotation_metafile = prepare_annotation_metafile(

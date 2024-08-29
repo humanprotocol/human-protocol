@@ -62,11 +62,8 @@ class EscrowData:
         manifest_hash: Optional[str] = None,
         manifest_url: Optional[str] = None,
         recording_oracle: Optional[str] = None,
-        recording_oracle_fee: Optional[int] = None,
         reputation_oracle: Optional[str] = None,
-        reputation_oracle_fee: Optional[int] = None,
         exchange_oracle: Optional[str] = None,
-        exchange_oracle_fee: Optional[int] = None,
     ):
         """
         Initializes an EscrowData instance.
@@ -88,11 +85,8 @@ class EscrowData:
         :param manifest_hash: Manifest hash.
         :param manifest_url: Manifest URL.
         :param recording_oracle: Recording Oracle address.
-        :param recording_oracle_fee: Recording Oracle fee.
         :param reputation_oracle: Reputation Oracle address.
-        :param reputation_oracle_fee: Reputation Oracle fee.
         :param exchange_oracle: Exchange Oracle address.
-        :param exchange_oracle_fee: Exchange Oracle fee.
         """
 
         self.id = id
@@ -107,11 +101,8 @@ class EscrowData:
         self.manifest_hash = manifest_hash
         self.manifest_url = manifest_url
         self.recording_oracle = recording_oracle
-        self.recording_oracle_fee = recording_oracle_fee
         self.reputation_oracle = reputation_oracle
-        self.reputation_oracle_fee = reputation_oracle_fee
         self.exchange_oracle = exchange_oracle
-        self.exchange_oracle_fee = exchange_oracle_fee
         self.status = status
         self.token = token
         self.total_funded_amount = total_funded_amount
@@ -209,6 +200,7 @@ class EscrowUtils:
             not escrows_data
             or "data" not in escrows_data
             or "escrows" not in escrows_data["data"]
+            or not escrows_data["data"]["escrows"]
         ):
             return []
 
@@ -234,23 +226,8 @@ class EscrowUtils:
                     manifest_hash=escrow.get("manifestHash", None),
                     manifest_url=escrow.get("manifestUrl", None),
                     recording_oracle=escrow.get("recordingOracle", None),
-                    recording_oracle_fee=(
-                        int(escrow.get("recordingOracleFee"))
-                        if escrow.get("recordingOracleFee", None)
-                        else None
-                    ),
                     reputation_oracle=escrow.get("reputationOracle", None),
-                    reputation_oracle_fee=(
-                        int(escrow.get("reputationOracleFee"))
-                        if escrow.get("reputationOracleFee", None)
-                        else None
-                    ),
                     exchange_oracle=escrow.get("exchangeOracle", None),
-                    exchange_oracle_fee=(
-                        int(escrow.get("exchangeOracleFee"))
-                        if escrow.get("exchangeOracleFee", None)
-                        else None
-                    ),
                 )
                 for escrow in escrows_raw
             ]
@@ -331,23 +308,8 @@ class EscrowUtils:
             manifest_hash=escrow.get("manifestHash", None),
             manifest_url=escrow.get("manifestUrl", None),
             recording_oracle=escrow.get("recordingOracle", None),
-            recording_oracle_fee=(
-                int(escrow.get("recordingOracleFee"))
-                if escrow.get("recordingOracleFee", None)
-                else None
-            ),
             reputation_oracle=escrow.get("reputationOracle", None),
-            reputation_oracle_fee=(
-                int(escrow.get("reputationOracleFee"))
-                if escrow.get("reputationOracleFee", None)
-                else None
-            ),
             exchange_oracle=escrow.get("exchangeOracle", None),
-            exchange_oracle_fee=(
-                int(escrow.get("exchangeOracleFee"))
-                if escrow.get("exchangeOracleFee", None)
-                else None
-            ),
         )
 
     @staticmethod
@@ -434,7 +396,12 @@ class EscrowUtils:
             },
         )
 
-        if not data or "data" not in data or "escrowStatusEvents" not in data["data"]:
+        if (
+            not data
+            or "data" not in data
+            or "escrowStatusEvents" not in data["data"]
+            or not data["data"]["escrowStatusEvents"]
+        ):
             return []
 
         status_events = data["data"]["escrowStatusEvents"]

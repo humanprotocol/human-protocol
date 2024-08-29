@@ -11,12 +11,13 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
+import {
+  ORACLE_STATISTICS_CACHE_KEY,
+  WORKER_STATISTICS_CACHE_KEY,
+} from '../../common/constants/cache';
 
 @Injectable()
 export class StatisticsService {
-  get cachePrefix() {
-    return 'Statistics:';
-  }
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
@@ -26,9 +27,9 @@ export class StatisticsService {
     command: OracleStatisticsCommand,
   ): Promise<OracleStatisticsResponse> {
     const address = command.oracleAddress;
-    const key = this.cachePrefix + address;
+    const key = `${ORACLE_STATISTICS_CACHE_KEY}:${address}`;
     const cachedStatistics: OracleStatisticsResponse | undefined =
-      await this.cacheManager.get(this.cachePrefix + address);
+      await this.cacheManager.get(key);
     if (cachedStatistics) {
       return cachedStatistics;
     }
@@ -42,7 +43,7 @@ export class StatisticsService {
   async getUserStats(
     command: UserStatisticsCommand,
   ): Promise<UserStatisticsResponse> {
-    const userCacheKey = command.oracleAddress + command.walletAddress;
+    const userCacheKey = `${WORKER_STATISTICS_CACHE_KEY}:${command.oracleAddress}:${command.walletAddress}`;
     const cachedStatistics: UserStatisticsResponse | undefined =
       await this.cacheManager.get(userCacheKey);
     if (cachedStatistics) {
@@ -50,6 +51,8 @@ export class StatisticsService {
     }
     const response =
       await this.exchangeOracleGateway.fetchUserStatistics(command);
+    response.last_updated = new Date().toISOString();
+
     await this.cacheManager.set(userCacheKey, response, {
       ttl: this.configService.cacheTtlUserStats,
     } as any);

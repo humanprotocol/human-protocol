@@ -1,7 +1,7 @@
 import { WorkerController } from '../worker.controller';
 import { WorkerService } from '../worker.service';
-import { Mapper } from '@automapper/core';
 import {
+  RegisterWorkerDto,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from '../model/worker-registration.model';
@@ -11,6 +11,7 @@ import { classes } from '@automapper/classes';
 import { WorkerProfile } from '../worker.mapper.profile';
 import { workerServiceMock } from './worker.service.mock';
 import { SigninWorkerDto } from '../model/worker-signin.model';
+import { workerToken } from './worker.fixtures';
 
 describe('WorkerController', () => {
   let controller: WorkerController;
@@ -69,6 +70,22 @@ describe('WorkerController', () => {
         hCaptchaToken: dto.h_captcha_token,
       };
       expect(workerService.signinWorker).toHaveBeenCalledWith(expectedCommand);
+    });
+  });
+
+  describe('register', () => {
+    it('should service a user register method with proper fields set', async () => {
+      const dto: RegisterWorkerDto = {
+        oracle_address: '0x34df642',
+      };
+      await controller.registerWorker(dto, workerToken);
+      const expectedCommand = {
+        oracleAddress: dto.oracle_address,
+        token: workerToken,
+      };
+      expect(workerService.registerWorker).toHaveBeenCalledWith(
+        expectedCommand,
+      );
     });
   });
 });

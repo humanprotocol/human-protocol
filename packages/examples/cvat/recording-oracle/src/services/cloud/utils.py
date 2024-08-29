@@ -1,5 +1,3 @@
-from typing import Optional
-
 from src.services.cloud.client import StorageClient
 from src.services.cloud.gcs import DEFAULT_GCS_HOST, GcsClient
 from src.services.cloud.s3 import DEFAULT_S3_HOST, S3Client
@@ -7,7 +5,7 @@ from src.services.cloud.types import BucketAccessInfo, CloudProviders
 
 
 def compose_bucket_url(
-    bucket_name: str, provider: CloudProviders, *, bucket_host: Optional[str] = None
+    bucket_name: str, provider: CloudProviders, *, bucket_host: str | None = None
 ) -> str:
     match provider:
         case CloudProviders.aws:

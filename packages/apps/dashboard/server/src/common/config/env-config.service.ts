@@ -8,6 +8,10 @@ const DEFAULT_HMT_PRICE_SOURCE =
   'https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=usd';
 const DEFAULT_HMT_PRICE_FROM = 'human-protocol';
 const DEFAULT_HMT_PRICE_TO = 'usd';
+const DEFAULT_HCAPTCHA_STATS_SOURCE =
+  'https://foundation-accounts.hmt.ai/support/summary-stats';
+export const HCAPTCHA_STATS_START_DATE = '2022-07-01';
+export const HMT_STATS_START_DATE = '2021-04-06';
 
 @Injectable()
 export class EnvironmentConfigService {
@@ -53,5 +57,19 @@ export class EnvironmentConfigService {
   }
   get hmtPriceToKey(): string {
     return this.configService.get<string>('HMT_PRICE_TO', DEFAULT_HMT_PRICE_TO);
+  }
+
+  get hCaptchaApiKey(): string {
+    return this.configService.getOrThrow<string>('HCAPTCHA_API_KEY');
+  }
+
+  get hCaptchaStatsSource(): string {
+    return this.configService.get<string>(
+      'HCAPTCHA_STATS_SOURCE',
+      DEFAULT_HCAPTCHA_STATS_SOURCE,
+    );
+  }
+  get reputationSource(): string {
+    return this.configService.getOrThrow<string>('REPUTATION_SOURCE_URL');
   }
 }

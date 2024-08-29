@@ -13,7 +13,7 @@ import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
   type MyJob,
-} from '@/api/servieces/worker/my-jobs-data';
+} from '@/api/services/worker/my-jobs-data';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
@@ -26,7 +26,7 @@ import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/deskt
 import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/desktop/my-jobs-expires-at-sort';
 import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/desktop/my-jobs-network-filter';
 import { TableButton } from '@/components/ui/table-button';
-import { useRejectTaskMutation } from '@/api/servieces/worker/reject-task';
+import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { JOB_TYPES } from '@/shared/consts';
 import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
