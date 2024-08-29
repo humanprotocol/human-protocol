@@ -74,17 +74,26 @@ export const EscrowsTableBody = ({
 						}}
 					>
 						<Stack
-							component="a"
 							sx={{
 								':hover': {
 									cursor: 'pointer',
 								},
 							}}
-							onClick={() => {
+							onClick={(e) => {
+								e.stopPropagation();
+								e.preventDefault();
 								navigate(`/search/${filterParams.chainId}/${elem.address}`);
 							}}
 						>
-							{elem.address}
+							<a
+								target="_blank"
+								href={`/search/${filterParams.chainId}/${elem.address}`}
+								style={{
+									textDecoration: 'unset',
+								}}
+							>
+								{elem.address}
+							</a>
 						</Stack>
 					</TableCell>
 				</TableRowWithCustomContextMenu>

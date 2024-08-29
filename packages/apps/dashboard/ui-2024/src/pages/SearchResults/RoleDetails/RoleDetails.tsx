@@ -73,6 +73,10 @@ const RenderRoleDetailsInfo = ({
 				'It validates solutions, provides job updates, and handles cancellations, streamlining the job lifecycle.',
 			],
 		},
+		[Roles.jobLauncher]: {
+			title: 'Job Launcher',
+			points: [],
+		},
 	};
 
 	const details = roleDetailsInfo[role];
@@ -89,14 +93,14 @@ const renderReputationTitle = (reputation: Reputation) => {
 		Reputation,
 		{ title: string; colors: { title: string; border: string } }
 	> = {
-		HIGH: {
+		High: {
 			title: 'High',
 			colors: {
 				title: colorPalette.success.main,
 				border: colorPalette.success.light,
 			},
 		},
-		MEDIUM: {
+		Medium: {
 			title: 'Medium',
 			colors: {
 				title: colorPalette.warning.main,
@@ -104,14 +108,14 @@ const renderReputationTitle = (reputation: Reputation) => {
 			},
 		},
 
-		LOW: {
+		Low: {
 			title: 'Low',
 			colors: {
 				title: colorPalette.orange.main,
 				border: colorPalette.orange.light,
 			},
 		},
-		UNKNOWN: {
+		Unknown: {
 			title: 'Coming soon',
 			colors: {
 				title: colorPalette.ocean.main,
