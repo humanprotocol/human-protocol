@@ -32,8 +32,8 @@ from tests.utils.setup_escrow import (
     bulk_payout,
     create_escrow,
     fund_escrow,
-    setup_escrow,
     get_intermediate_results_url,
+    setup_escrow,
 )
 
 
