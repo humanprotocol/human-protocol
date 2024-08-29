@@ -4,7 +4,6 @@ import { styled } from '@mui/material';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { colorPalette } from '@assets/styles/color-palette';
 import {
-	initialAllTime,
 	TIME_PERIOD_OPTIONS,
 	TimePeriod,
 	useGraphPageChartParams,
