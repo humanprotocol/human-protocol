@@ -32,6 +32,7 @@ from tests.utils.setup_escrow import (
     bulk_payout,
     create_escrow,
     fund_escrow,
+    setup_escrow,
     get_intermediate_results_url,
 )
 
@@ -51,6 +52,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.escrow_address = create_escrow(self.w3)
         fund_escrow(self.w3, self.escrow_address)
+        setup_escrow(self.w3, self.escrow_address)
 
     def escrow(self, status: str = "Pending", balance: float = amount):
         mock_escrow = MagicMock()
@@ -79,6 +81,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_validate_escrow_invalid_status(self):
         escrow_address = create_escrow(self.w3)
         fund_escrow(self.w3, escrow_address)
+        setup_escrow(self.w3, self.escrow_address)
         bulk_payout(
             self.w3,
             escrow_address,
@@ -132,6 +135,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_store_results(self):
         escrow_address = create_escrow(self.w3)
+        fund_escrow(self.w3, escrow_address)
+        setup_escrow(self.w3, self.escrow_address)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             results = store_results(
@@ -143,6 +148,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_store_results_invalid_url(self):
         escrow_address = create_escrow(self.w3)
+        fund_escrow(self.w3, escrow_address)
+        setup_escrow(self.w3, self.escrow_address)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             with pytest.raises(EscrowClientError, match="Invalid URL: invalid_url"):
@@ -150,6 +157,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_store_results_invalid_hash(self):
         escrow_address = create_escrow(self.w3)
+        fund_escrow(self.w3, escrow_address)
+        setup_escrow(self.w3, self.escrow_address)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
             with pytest.raises(EscrowClientError, match="Invalid empty hash"):

@@ -137,16 +137,17 @@ escrow_config = EscrowConfig(
 )
 ```
 
-Calling `create_and_setup_escrow`, the escrow can be created and set up as follows:
+Calling `create`, the escrow can be created:
 
 ```python
 from human_protocol_sdk import EscrowClient
 
 escrow_client = EscrowClient(w3)
-escrow_address = escrow_client.create_and_setup_escrow(
+job_requester_id = 'job-requester'
+escrow_address = escrow_client.create(
     token_address = "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     trusted_handlers = ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],
-    escrow_config = escrow_config
+    job_requester_id = job_requester_id
 )
 ```
 
@@ -156,6 +157,18 @@ The escrow must then be funded.
 escrow_client.fund(
     escrow_address = escrow_address,
     amount = Decimal('100.0')
+)
+```
+
+Calling `setup`, the escrow can be setup:
+
+```python
+from human_protocol_sdk import EscrowClient
+
+escrow_client = EscrowClient(w3)
+escrow_client.setup(
+    escrow_address = escrow_address,
+    escrow_config = escrow_config
 )
 ```
 

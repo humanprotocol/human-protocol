@@ -72,7 +72,6 @@ describe('EscrowClient', () => {
     mockEscrowContract = {
       createEscrow: vi.fn(),
       setup: vi.fn(),
-      createAndSetupEscrow: vi.fn(),
       fund: vi.fn(),
       storeResults: vi.fn(),
       complete: vi.fn(),
@@ -603,114 +602,6 @@ describe('EscrowClient', () => {
         FAKE_HASH,
         txOptions
       );
-    });
-  });
-
-  describe('createAndSetupEscrow', () => {
-    test('should successfully create and setup escrow', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-      const tokenAddress = ethers.ZeroAddress;
-      const trustedHandlers = [ethers.ZeroAddress];
-      const jobRequesterId = 'job-requester';
-
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.createEscrow = vi.fn().mockReturnValue(escrowAddress);
-      escrowClient.fund = vi.fn().mockResolvedValue(true);
-      const setupSpy = vi
-        .spyOn(escrowClient.escrowContract, 'setup')
-        .mockImplementation(() => ({
-          wait: vi.fn().mockResolvedValue(true),
-        }));
-
-      await escrowClient.createAndSetupEscrow(
-        tokenAddress,
-        trustedHandlers,
-        jobRequesterId,
-        escrowConfig,
-        30n
-      );
-
-      expect(escrowClient.createEscrow).toHaveBeenCalledWith(
-        tokenAddress,
-        trustedHandlers,
-        jobRequesterId
-      );
-      expect(escrowClient.fund).toHaveBeenCalledWith(escrowAddress, 30n);
-      expect(setupSpy).toHaveBeenCalledWith(
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
-        VALID_URL,
-        FAKE_HASH,
-        {}
-      );
-    });
-
-    test('should throw an error if setup escrow fails', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.fund = vi.fn().mockResolvedValue(true);
-      escrowClient.escrowContract.setup.mockRejectedValueOnce(new Error());
-
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
-        VALID_URL,
-        FAKE_HASH,
-        {}
-      );
-    });
-
-    test('should thorw an error if the amount is not specified', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-      const tokenAddress = ethers.ZeroAddress;
-      const trustedHandlers = [ethers.ZeroAddress];
-      const jobRequesterId = 'job-requester';
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.createEscrow = vi.fn().mockReturnValue(escrowAddress);
-
-      await expect(
-        escrowClient.createAndSetupEscrow(
-          tokenAddress,
-          trustedHandlers,
-          jobRequesterId,
-          {},
-          0
-        )
-      ).rejects.toThrow();
     });
   });
 
