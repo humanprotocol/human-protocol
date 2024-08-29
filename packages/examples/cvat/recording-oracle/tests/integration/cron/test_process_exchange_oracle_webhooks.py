@@ -52,7 +52,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_process_exchange_oracle_webhook(self):
         escrow_address = create_escrow(self.w3)
         fund_escrow(self.w3, escrow_address)
-        setup_escrow(self.w3, self.escrow_address)
+        setup_escrow(self.w3, escrow_address)
 
         webhook = self.make_webhook(escrow_address)
         self.session.add(webhook)
@@ -112,7 +112,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         mock_manifest_url.return_value = "invalid_url"
         escrow_address = create_escrow(self.w3)
         fund_escrow(self.w3, escrow_address)
-        setup_escrow(self.w3, self.escrow_address)
+        setup_escrow(self.w3, escrow_address)
 
         webhook = self.make_webhook(escrow_address)
 
