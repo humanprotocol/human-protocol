@@ -56,7 +56,7 @@ def update_escrow_iteration(session: Session, escrow_address: str, chain_id: int
     session.execute(expression)
 
 
-def mark_escrow_as_cleared(session: Session, escrow_address: str, chain_id: int):
+def mark_escrow_as_cleaned(session: Session, escrow_address: str, chain_id: int):
     expression = (
         update(Task)
         .where(Task.escrow_address == escrow_address, Task.chain_id == chain_id)

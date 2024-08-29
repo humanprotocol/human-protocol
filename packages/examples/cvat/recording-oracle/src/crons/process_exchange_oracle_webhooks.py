@@ -12,7 +12,6 @@ from src.handlers.cleanup import clean_escrow
 from src.handlers.validation import validate_results
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
-from src.services.validation import mark_escrow_as_cleared
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
@@ -42,8 +41,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session):
                 db_session=db_session,
             )
         case ExchangeOracleEventTypes.escrow_cleaned:
-            clean_escrow(escrow_address=webhook.escrow_address, chain_id=webhook.chain_id)
-            mark_escrow_as_cleared(
+            clean_escrow(
                 db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
             )
         case _:
