@@ -2,98 +2,70 @@ import unittest
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from human_protocol_sdk.escrow import EscrowClientError
-from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
-from web3 import HTTPProvider, Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.escrow import EscrowClientError, EscrowData
+from human_protocol_sdk.kvstore import KVStoreClientError, KVStoreUtils
 
-from src.chain.kvstore import get_reputation_oracle_url, get_role_by_address, register_in_kvstore
+from src.chain.kvstore import get_reputation_oracle_url, register_in_kvstore
 from src.core.config import LocalhostConfig
 
 from tests.utils.constants import (
-    DEFAULT_GAS_PAYER_PRIV,
     DEFAULT_MANIFEST_URL,
+    ESCROW_ADDRESS,
+    FACTORY_ADDRESS,
+    JOB_LAUNCHER_ADDRESS,
     REPUTATION_ORACLE_ADDRESS,
+    REPUTATION_ORACLE_WEBHOOK_URL,
+    TOKEN_ADDRESS,
 )
-from tests.utils.setup_escrow import create_escrow
-from tests.utils.setup_kvstore import store_kvstore_value
+
+escrow_address = ESCROW_ADDRESS
 
 
 class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
-        self.w3 = Web3(HTTPProvider())
-
-        # Set default gas payer
-        self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer),
-            "construct_sign_and_send_raw_middleware",
+        self.w3 = Mock()
+        self.w3.eth.chain_id = ChainId.LOCALHOST.value
+        self.escrow_data = EscrowData(
+            chain_id=ChainId.LOCALHOST.name,
+            id=1,
+            address=escrow_address,
+            amount_paid=100,
+            balance=100,
+            count=0,
+            factory_address=FACTORY_ADDRESS,
+            launcher=JOB_LAUNCHER_ADDRESS,
+            status=Status.Pending.name,
+            token=TOKEN_ADDRESS,
+            total_funded_amount=1000,
+            created_at="",
+            manifest_url=DEFAULT_MANIFEST_URL,
+            reputation_oracle=REPUTATION_ORACLE_ADDRESS,
         )
-        self.w3.eth.default_account = self.gas_payer.address
 
     def test_get_reputation_oracle_url(self):
-        escrow_address = create_escrow(self.w3)
-        store_kvstore_value("webhook_url", DEFAULT_MANIFEST_URL)
-
         with (
-            patch("src.chain.kvstore.get_web3") as mock_get_web3,
-            patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
             patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
         ):
-            mock_get_web3.return_value = self.w3
-            mock_escrow = Mock()
-            mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
-            mock_get_escrow.return_value = mock_escrow
-            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
-
+            mock_escrow.return_value = self.escrow_data
+            mock_leader.return_value = MagicMock(webhook_url=REPUTATION_ORACLE_WEBHOOK_URL)
             reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
-            assert reputation_url == DEFAULT_MANIFEST_URL
+            assert reputation_url == REPUTATION_ORACLE_WEBHOOK_URL
 
     def test_get_reputation_oracle_url_invalid_escrow(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with pytest.raises(EscrowClientError, match="Invalid escrow address: "):
-                get_reputation_oracle_url(self.w3.eth.chain_id, "invalid_address")
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
+            get_reputation_oracle_url(self.w3.eth.chain_id, "invalid_address")
 
     def test_get_reputation_oracle_url_invalid_address(self):
-        create_escrow(self.w3)
-        store_kvstore_value("webhook_url", "")
         with (
-            patch("src.chain.kvstore.get_web3") as mock_get_web3,
-            patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
             patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
         ):
-            mock_get_web3.return_value = self.w3
-            mock_escrow = Mock()
-            mock_escrow.reputation_oracle = REPUTATION_ORACLE_ADDRESS
-            mock_get_escrow.return_value = mock_escrow
+            mock_escrow.return_value = self.escrow_data
             mock_leader.return_value = MagicMock(webhook_url="")
-
-            reputation_url = get_reputation_oracle_url(
-                self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
-            )
-            assert reputation_url == ""
-
-    def test_get_role_by_address(self):
-        store_kvstore_value("role", "Reputation Oracle")
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
-            assert reputation_url == "Reputation Oracle"
-
-    def test_get_role_by_address_invalid_escrow(self):
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with pytest.raises(KVStoreClientError, match="Invalid address: invalid_address"):
-                get_role_by_address(self.w3.eth.chain_id, "invalid_address")
-
-    def test_get_role_by_address_invalid_address(self):
-        create_escrow(self.w3)
-        store_kvstore_value("role", "")
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
-            assert reputation_url == ""
+            recording_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
+            assert recording_url == ""
 
     def test_store_public_key(self):
         PGP_PUBLIC_KEY_URL_1 = "http://pgp-public-key-url-1"
@@ -130,7 +102,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 "src.core.config.Config.encryption_config.pgp_public_key_url", PGP_PUBLIC_KEY_URL_1
             ),
             patch(
-                "human_protocol_sdk.kvstore.KVStoreClient.get_file_url_and_verify_hash",
+                "human_protocol_sdk.kvstore.KVStoreUtils.get_file_url_and_verify_hash",
                 get_file_url_and_verify_hash,
             ),
             patch("src.core.config.LocalhostConfig.is_configured") as mock_localhost_configured,
@@ -139,8 +111,10 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_localhost_configured.return_value = True
             mock_web3.return_value = self.w3
 
-            kvstore_client = KVStoreClient(self.w3)
-            assert kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr) is None
+            assert (
+                KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr)
+                is None
+            )
 
             # check that public key will be set to KVStore at first time
             with patch(
@@ -150,7 +124,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
                 assert (
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
+                    KVStoreUtils.get_file_url_and_verify_hash(
+                        ChainId.LOCALHOST, LocalhostConfig.addr
+                    )
                     == PGP_PUBLIC_KEY_URL_1
                 )
 
@@ -188,6 +164,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 register_in_kvstore()
                 mock_set_file_url_and_hash.assert_called_once()
                 assert (
-                    kvstore_client.get_file_url_and_verify_hash(LocalhostConfig.addr)
+                    KVStoreUtils.get_file_url_and_verify_hash(
+                        ChainId(self.w3.eth.chain_id), LocalhostConfig.addr
+                    )
                     == PGP_PUBLIC_KEY_URL_2
                 )

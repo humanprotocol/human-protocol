@@ -158,7 +158,7 @@ export const NETWORKS: {
   [ChainId.POLYGON_AMOY]: {
     chainId: ChainId.POLYGON_AMOY,
     title: 'Polygon Amoy',
-    scanUrl: 'https://www.oklink.com/amoy',
+    scanUrl: 'https://amoy.polygonscan.com/',
     factoryAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
     hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
     stakingAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',

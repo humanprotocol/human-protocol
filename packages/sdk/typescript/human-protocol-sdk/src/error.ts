@@ -345,3 +345,9 @@ export const ErrorUnsupportedStatus = new Error('Unsupported status for query');
  */
 export const WarnSubgraphApiKeyNotProvided =
   '"SUBGRAPH_API_KEY" is not being provided. It might cause issues with the subgraph.';
+
+export class InvalidKeyError extends Error {
+  constructor(key: string, address: string) {
+    super(`Key "${key}" not found for address ${address}`);
+  }
+}

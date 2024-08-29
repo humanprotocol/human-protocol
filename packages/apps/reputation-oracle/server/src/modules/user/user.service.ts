@@ -256,14 +256,12 @@ export class UserService {
     }
 
     const signer = this.web3Service.getSigner(chainId);
-
     const kvstore = await KVStoreClient.build(signer);
 
-    const status = await KVStoreUtils.get(
-      chainId,
-      signer.address,
-      user.evmAddress,
-    );
+    let status: string | undefined;
+    try {
+      status = await KVStoreUtils.get(chainId, signer.address, user.evmAddress);
+    } catch {}
 
     if (status === OperatorStatus.ACTIVE) {
       throw new ControlledError(
