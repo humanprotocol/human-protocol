@@ -1,4 +1,3 @@
-import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import MuiTableBody from '@mui/material/TableBody';
 import { useEffect } from 'react';
@@ -9,12 +8,16 @@ import { useEscrowDetails } from '@services/api/use-escrows-details';
 import { AddressDetailsLeader } from '@services/api/use-address-details';
 import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { useNavigate } from 'react-router-dom';
+import { Stack } from '@mui/material';
+import { TableRowWithCustomContextMenu } from '@components/TableRowWithCustomContextMenu/TableRowWithCustomContextMenu';
 
 export const EscrowsTableBody = ({
 	role,
 }: {
 	role: AddressDetailsLeader['role'];
 }) => {
+	const navigate = useNavigate();
 	const { filterParams } = useWalletSearch();
 	const { data, isPending, isError, error } = useEscrowDetails({ role });
 	const {
@@ -61,15 +64,30 @@ export const EscrowsTableBody = ({
 	return (
 		<MuiTableBody>
 			{data.results.map((elem, idx) => (
-				<TableRow key={idx}>
+				<TableRowWithCustomContextMenu
+					newTabLink={`/search/${filterParams.chainId}/${elem.address}`}
+					key={idx}
+				>
 					<TableCell
 						sx={{
 							padding: '0 0 24px 0',
 						}}
 					>
-						{elem.address}
+						<Stack
+							component="a"
+							sx={{
+								':hover': {
+									cursor: 'pointer',
+								},
+							}}
+							onClick={() => {
+								navigate(`/search/${filterParams.chainId}/${elem.address}`);
+							}}
+						>
+							{elem.address}
+						</Stack>
 					</TableCell>
-				</TableRow>
+				</TableRowWithCustomContextMenu>
 			))}
 		</MuiTableBody>
 	);

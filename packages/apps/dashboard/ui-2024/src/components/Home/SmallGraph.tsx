@@ -38,7 +38,7 @@ const CustomSmallChartTooltip = ({
 					{payload?.map((elem) => (
 						<Fragment key={elem.name}>
 							<Typography fontWeight={500} variant="caption">
-								{formatDate(elem.payload.name, 'MMMM d, YYYY')}
+								{formatDate(elem.payload.date, 'MMMM DD, YYYY')}
 							</Typography>
 							<Typography fontWeight={500} variant="h6" component="p">
 								{elem.value ? elem.value.toLocaleString('en-US') : ''}
@@ -87,7 +87,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 						interval="preserveStartEnd"
 						dataKey="date"
 						stroke={colorPalette.fog.main}
-						tickFormatter={(value) => formatDate(value, 'DD MMM')}
+						tickFormatter={(value) => formatDate(value, 'DD MMMM')}
 						tick={{ dy: 10 }}
 						tickSize={0}
 					/>

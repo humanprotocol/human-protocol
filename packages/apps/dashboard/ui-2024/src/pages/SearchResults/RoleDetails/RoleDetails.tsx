@@ -15,6 +15,8 @@ import { AddressDetailsLeader, Roles } from '@services/api/use-address-details';
 import { getNetwork } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
+import { Reputation } from '@services/api/use-leaderboard-details';
+import { env } from '@helpers/env';
 
 interface RoleInfoProps {
 	title: string;
@@ -82,19 +84,19 @@ const RenderRoleDetailsInfo = ({
 	return <RoleInformation points={details.points} title={details.title} />;
 };
 
-const renderReputationTitle = (reputation: number) => {
+const renderReputationTitle = (reputation: Reputation) => {
 	const reputationAttributes: Record<
-		string,
+		Reputation,
 		{ title: string; colors: { title: string; border: string } }
 	> = {
-		'3': {
+		HIGH: {
 			title: 'High',
 			colors: {
 				title: colorPalette.success.main,
 				border: colorPalette.success.light,
 			},
 		},
-		'2': {
+		MEDIUM: {
 			title: 'Medium',
 			colors: {
 				title: colorPalette.warning.main,
@@ -102,14 +104,14 @@ const renderReputationTitle = (reputation: number) => {
 			},
 		},
 
-		'1': {
+		LOW: {
 			title: 'Low',
 			colors: {
 				title: colorPalette.orange.main,
 				border: colorPalette.orange.light,
 			},
 		},
-		'0': {
+		UNKNOWN: {
 			title: 'Coming soon',
 			colors: {
 				title: colorPalette.ocean.main,
@@ -118,7 +120,7 @@ const renderReputationTitle = (reputation: number) => {
 		},
 	};
 
-	const colors = reputationAttributes[reputation.toString()].colors;
+	const colors = reputationAttributes[reputation].colors;
 
 	return (
 		<Box
@@ -130,7 +132,7 @@ const renderReputationTitle = (reputation: number) => {
 			}}
 		>
 			<Typography color={colors.title}>
-				{reputationAttributes[reputation.toString()].title}
+				{reputationAttributes[reputation].title}
 			</Typography>
 		</Box>
 	);
@@ -185,19 +187,25 @@ const RoleDetails = ({
 					>
 						Overview
 					</Typography>
-					<Box
-						sx={{
-							borderRadius: 16,
-							backgroundColor: colorPalette.overlay.light,
-							display: 'inline-block',
-							paddingY: 1,
-							paddingX: 1.5,
-						}}
-					>
-						<Typography color={colorPalette.ocean.main}>
-							HUMAN Protocol core architecture
-						</Typography>
-					</Box>
+					{env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE ? (
+						<Box
+							sx={{
+								borderRadius: 16,
+								backgroundColor: colorPalette.overlay.light,
+								display: 'inline-block',
+								paddingY: 1,
+								paddingX: 1.5,
+								textDecoration: 'none',
+							}}
+							component="a"
+							href={env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE}
+							target="_blank"
+						>
+							<Typography color={colorPalette.ocean.main}>
+								HUMAN Protocol core architecture
+							</Typography>
+						</Box>
+					) : null}
 				</Box>
 				<Stack gap={4}>
 					<Stack

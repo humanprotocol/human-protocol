@@ -9,6 +9,7 @@ export const EscrowsTableBodyContainer = ({
 	return (
 		<MuiTableBody sx={{ position: 'relative', height: ' 40vh' }}>
 			<Grid
+				component="tr"
 				container
 				sx={{
 					justifyContent: 'center',
@@ -20,7 +21,7 @@ export const EscrowsTableBodyContainer = ({
 					height: '100%',
 				}}
 			>
-				{children}
+				<th>{children}</th>
 			</Grid>
 		</MuiTableBody>
 	);

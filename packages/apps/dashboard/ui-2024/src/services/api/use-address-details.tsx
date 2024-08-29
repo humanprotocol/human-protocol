@@ -4,6 +4,7 @@ import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { validateResponse } from '../../services/validate-response';
+import { reputationSchema } from '@services/api/use-leaderboard-details';
 
 const transformOptionalTokenAmount = (
 	value: string | undefined,
@@ -33,19 +34,19 @@ export type AddressDetailsWallet = z.infer<typeof walletSchema>;
 
 const escrowSchema = z.object({
 	chainId: z.number().optional().nullable(),
-	address: z.string(),
-	balance: z.string(),
-	token: z.string(),
-	factoryAddress: z.string(),
-	totalFundedAmount: z.string(),
-	amountPaid: z.string(),
-	status: z.string(),
+	address: z.string().optional().nullable(),
+	balance: z.string().optional().nullable(),
+	token: z.string().optional().nullable(),
+	factoryAddress: z.string().optional().nullable(),
+	totalFundedAmount: z.string().optional().nullable(),
+	amountPaid: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
 	manifest: z.string().optional().nullable(),
-	launcher: z.string(),
-	exchangeOracle: z.string(),
-	recordingOracle: z.string(),
-	reputationOracle: z.string(),
-	finalResultsUrl: z.string(),
+	launcher: z.string().optional().nullable(),
+	exchangeOracle: z.string().optional().nullable(),
+	recordingOracle: z.string().optional().nullable(),
+	reputationOracle: z.string().optional().nullable(),
+	finalResultsUrl: z.string().nullable(),
 });
 
 export type AddressDetailsEscrowSchema = z.infer<typeof escrowSchema>;
@@ -70,9 +71,7 @@ const leaderSchema = z.object({
 		.transform(transformOptionalTokenAmount),
 	amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
 	lockedUntilTimestamp: z.string().optional(),
-	reputation: z.union([z.string(), z.number()]).transform((value) => {
-		return `${value}`;
-	}),
+	reputation: reputationSchema,
 	fee: z.number(),
 	jobTypes: z.array(z.string()).optional().nullable(),
 	url: z.string().optional().nullable(),

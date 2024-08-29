@@ -10,8 +10,11 @@ import Link from '@mui/material/Link';
 import logo from '@assets/logo.png';
 import Search from '@components/Search';
 import logoMobile from '@assets/logo-mobile.png';
+import { env } from '@helpers/env';
+import { useNavigate } from 'react-router-dom';
 
 const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
+	const navigate = useNavigate();
 	const [open, setState] = useState(false);
 
 	const handleClick = (url: string) => {
@@ -31,7 +34,17 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 			{displaySearchBar && (
 				<Search displaySearchBar className="search-header-mobile" />
 			)}
-			<Link href="/" underline="none">
+			<Link
+				onClick={() => {
+					navigate('/');
+				}}
+				underline="none"
+				sx={{
+					':hover': {
+						cursor: 'pointer',
+					},
+				}}
+			>
 				<img className="logo" src={logo} alt="logo" />
 				<img className="logo-mobile" src={logoMobile} alt="logo" />
 			</Link>
@@ -43,39 +56,33 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 			<div className="header-list-link">
 				<div
 					className="header-link"
-					onClick={() => handleClick('https://app.humanprotocol.org/')}
+					onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
 				>
 					GitBook
 				</div>
 				<div
 					className="header-link"
-					onClick={() => handleClick('https://app.humanprotocol.org/')}
-				>
-					KV Store
-				</div>
-				<div
-					className="header-link"
-					onClick={() => handleClick('https://app.humanprotocol.org/')}
+					onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
 				>
 					Faucet
 				</div>
 				<div
 					className="header-link"
-					onClick={() => handleClick('https://app.humanprotocol.org/')}
+					onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
 				>
 					HUMAN Website
 				</div>
 				<Button
 					variant="contained"
 					color="primary"
-					onClick={() => handleClick('https://app.humanprotocol.org/')}
+					onClick={() => handleClick(env.VITE_NAVBAR_LINK_LAUNCH_JOBS)}
 				>
 					Launch Jobs
 				</Button>
 				<Button
 					variant="contained"
 					color="secondary"
-					onClick={() => handleClick('https://app.humanprotocol.org/')}
+					onClick={() => handleClick(env.VITE_NAVBAR_LINK_WORK_AND_EARN)}
 				>
 					Work & Earn
 				</Button>
@@ -104,21 +111,35 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 			>
 				<Box className="header-mobile-menu">
 					<div className="header-list-link">
-						<div className="header-link">GitBook</div>
-						<div className="header-link">KV Store</div>
-						<div className="header-link">Faucet</div>
-						<div className="header-link">HUMAN Website</div>
+						<div
+							className="header-link"
+							onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
+						>
+							GitBook
+						</div>
+						<div
+							className="header-link"
+							onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
+						>
+							Faucet
+						</div>
+						<div
+							className="header-link"
+							onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
+						>
+							HUMAN Website
+						</div>
 						<Button
 							variant="contained"
 							color="primary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_NAVBAR_LINK_LAUNCH_JOBS)}
 						>
 							Launch Jobs
 						</Button>
 						<Button
 							variant="contained"
 							color="secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_NAVBAR_LINK_WORK_AND_EARN)}
 						>
 							Work & Earn
 						</Button>

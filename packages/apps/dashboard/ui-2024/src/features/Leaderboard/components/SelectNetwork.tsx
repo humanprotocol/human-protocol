@@ -34,7 +34,11 @@ export const SelectNetwork = () => {
 				{leaderboardSearchSelectConfig.map((selectItem) => {
 					if ('allNetworksId' in selectItem) {
 						return (
-							<MenuItem className="select-item" value={-1}>
+							<MenuItem
+								key={selectItem.name}
+								className="select-item"
+								value={-1}
+							>
 								<HumanIcon />
 								All Networks
 							</MenuItem>
@@ -42,7 +46,11 @@ export const SelectNetwork = () => {
 					}
 
 					return (
-						<MenuItem className="select-item" value={selectItem.id}>
+						<MenuItem
+							key={selectItem.name}
+							className="select-item"
+							value={selectItem.id}
+						>
 							<NetworkIcon chainId={selectItem.id} />
 							{selectItem.name}
 						</MenuItem>

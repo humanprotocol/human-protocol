@@ -5,6 +5,20 @@ import { apiPaths } from '../api-paths';
 import { validateResponse } from '@services/validate-response';
 import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 
+export const reputationSchema = z.unknown().transform((value) => {
+	try {
+		const knownReputation = z
+			.union([z.literal('LOW'), z.literal('MEDIUM'), z.literal('HIGH')])
+			.parse(value);
+
+		return knownReputation;
+	} catch (error) {
+		return 'UNKNOWN';
+	}
+});
+
+export type Reputation = z.infer<typeof reputationSchema>;
+
 const leaderBoardEntity = z.object({
 	address: z.string(),
 	role: z.string(),
@@ -20,9 +34,7 @@ const leaderBoardEntity = z.object({
 
 		return valueAsNumber / 10 ** 18;
 	}),
-	reputation: z.union([z.string(), z.number()]).transform((value) => {
-		return `${value}`;
-	}),
+	reputation: reputationSchema,
 	fee: z.number(),
 	jobTypes: z.array(z.string()),
 	url: z.string(),

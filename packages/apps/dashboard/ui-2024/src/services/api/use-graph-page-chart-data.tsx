@@ -60,10 +60,12 @@ const mergeResponses = (
 	hcaptchaStatsResults: HcaptchaDailyStat[],
 	hmtStatsResults: HMTDailyStat[]
 ): GraphPageChartData => {
-	const longerCollection =
-		hcaptchaStatsResults.length > hmtStatsResults.length
-			? hcaptchaStatsResults
-			: hmtStatsResults;
+	const allDates = Array.from(
+		new Set([
+			...hcaptchaStatsResults.map(({ date }) => date),
+			...hmtStatsResults.map(({ date }) => date),
+		])
+	).sort((a, b) => (dayjs(a).isBefore(dayjs(b)) ? -1 : 1));
 
 	const hcaptchaStatsResultsMap = new Map<string, HcaptchaDailyStat>();
 	const hmtStatsResultsMap = new Map<string, HMTDailyStat>();
@@ -75,8 +77,7 @@ const mergeResponses = (
 	hmtStatsResults.forEach((entry) => {
 		hmtStatsResultsMap.set(entry.date, entry);
 	});
-
-	return longerCollection.map(({ date }) => {
+	return allDates.map((date) => {
 		const hmtStatsEntry: HMTDailyStat = hmtStatsResultsMap.get(date) || {
 			dailyUniqueReceivers: 0,
 			dailyUniqueSenders: 0,
@@ -91,7 +92,6 @@ const mergeResponses = (
 			date: date,
 			solved: 0,
 		};
-
 		return { ...hmtStatsEntry, ...hcaptchaStatsEntry };
 	});
 };
@@ -145,17 +145,22 @@ export function useGraphPageChartData() {
 				validHcaptchaGeneralStats.results,
 				validHmtDailyStats.results
 			);
-
 			const latestDate = mergedResponses[0]?.date
-				? dayjs(new Date(validHcaptchaGeneralStats.results[0]?.date))
+				? dayjs(new Date(mergedResponses[0]?.date))
 				: null;
+
+			const fromDateInLatestDateFormat = dayjs(
+				new Date(dateRangeParams.from.format('YYYY-MM-DD'))
+			);
 
 			if (
 				(selectedTimePeriod === 'ALL' &&
 					!effectiveFromAllTimeDate &&
 					latestDate) ||
-				(!effectiveFromAllTimeDate && latestDate?.isAfter(dateRangeParams.from))
+				(!effectiveFromAllTimeDate &&
+					latestDate?.isAfter(fromDateInLatestDateFormat))
 			) {
+				console.log({ fromDateInLatestDateFormat, latestDate });
 				setEffectiveFromAllTimeDate(latestDate);
 				setFromDate(latestDate);
 			}

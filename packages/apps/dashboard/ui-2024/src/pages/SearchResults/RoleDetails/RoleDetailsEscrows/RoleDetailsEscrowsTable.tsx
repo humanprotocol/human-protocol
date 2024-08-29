@@ -76,6 +76,7 @@ export const RoleDetailsEscrowsTable = ({
 						labelDisplayedRows={({ from, to }) => {
 							return `${from}–${to}`;
 						}}
+						component="div"
 						slotProps={{
 							actions: {
 								nextButton: {

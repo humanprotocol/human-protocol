@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import TableRow from '@mui/material/TableRow';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import MuiTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -25,6 +24,7 @@ import Stack from '@mui/material/Stack';
 import { handleErrorMessage } from '@services/handle-error-message';
 import Loader from '@components/Loader';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { TableRowWithCustomContextMenu } from '@components/TableRowWithCustomContextMenu/TableRowWithCustomContextMenu';
 
 export const Table = ({
 	data = [],
@@ -103,18 +103,22 @@ export const Table = ({
 				) : (
 					<>
 						{visibleRows.map((row, index) => (
-							<TableRow
-								onClick={() =>
-									navigate(`/search/${row.chainId}/${row.address}`, {
-										preventScrollReset: false,
-									})
-								}
-								key={row.address + index}
-								className="home-page-table-row"
-								sx={{
-									paddingTop: '1px',
-									':hover': {
-										backgroundColor: colorPalette.overlay.light,
+							<TableRowWithCustomContextMenu
+								key={index + row.address}
+								newTabLink={`/search/${row.chainId}/${row.address}`}
+								componentProps={{
+									onClick: () => {
+										navigate(`/search/${row.chainId}/${row.address}`, {
+											preventScrollReset: false,
+										});
+									},
+									className: 'home-page-table-row',
+									sx: {
+										paddingTop: '1px',
+										':hover': {
+											backgroundColor: colorPalette.overlay.light,
+										},
+										textDecoration: 'none',
 									},
 								}}
 							>
@@ -179,7 +183,7 @@ export const Table = ({
 									<ReputationLabel reputation={row.reputation} />
 								</TableCell>
 								<TableCell>{row.fee}%</TableCell>
-							</TableRow>
+							</TableRowWithCustomContextMenu>
 						))}
 					</>
 				)}
@@ -191,6 +195,7 @@ export const Table = ({
 function TableBodyWrapper({ children }: { children: JSX.Element | string }) {
 	return (
 		<Stack
+			component="tr"
 			sx={{
 				position: 'absolute',
 				top: 0,
@@ -202,7 +207,7 @@ function TableBodyWrapper({ children }: { children: JSX.Element | string }) {
 				alignItems: 'center',
 			}}
 		>
-			{children}
+			<th>{children}</th>
 		</Stack>
 	);
 }

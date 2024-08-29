@@ -35,7 +35,7 @@ const renderCurrentResultType = (
 		{ title: string; icon: string }
 	> = {
 		leader: {
-			title: 'Role Details',
+			title: 'Wallet Address',
 			icon: WalletIcon,
 		},
 		escrow: {

@@ -30,7 +30,7 @@
     "react-dom": "^18.2.0",
     "react-number-format": "^5.4.0",
     "react-router-dom": "^6.23.1",
-    "recharts": "^2.12.7",
+    "recharts": "^2.13.0-alpha.4",
     "simplebar-react": "^3.2.5",
     "styled-components": "^6.1.11",
     "swiper": "^11.1.3",
