@@ -92,6 +92,7 @@ def parse_event(
         OracleWebhookTypes.job_launcher: JobLauncherEventTypes,
         OracleWebhookTypes.recording_oracle: RecordingOracleEventTypes,
         OracleWebhookTypes.exchange_oracle: ExchangeOracleEventTypes,
+        OracleWebhookTypes.reputation_oracle: ReputationOracleEventTypes,
     }
 
     sender_events = sender_events_mapping.get(sender)
