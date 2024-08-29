@@ -75,7 +75,9 @@ const RenderRoleDetailsInfo = ({
 		},
 		[Roles.jobLauncher]: {
 			title: 'Job Launcher',
-			points: [],
+			points: [
+				'The Job Launcher is a tool that allows anybody to create and launch jobs, to be distributed as tasks through the HUMAN App',
+			],
 		},
 	};
 
