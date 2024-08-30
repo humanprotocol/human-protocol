@@ -237,7 +237,7 @@ export class CronJobService {
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
-          if (oracleType !== OracleType.HCAPTCHA && jobEntity.escrowAddress) {
+          if (oracleType !== OracleType.HCAPTCHA) {
             const webhookEntity = new WebhookEntity();
             Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
