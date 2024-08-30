@@ -25,7 +25,6 @@ import {
   handleCancelled,
   handleCompleted,
   handleFund,
-  handlePayout,
 } from '../../src/mapping/Escrow';
 import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
@@ -36,7 +35,6 @@ import {
   createCancelledEvent,
   createCompletedEvent,
   createFundEvent,
-  createPayoutEvent,
 } from './fixtures';
 
 const escrowAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a';
@@ -761,6 +759,7 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Partial');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '98');
 
     // Bulk 2
     const bulk2 = createBulkTransferEvent(
@@ -851,6 +850,7 @@ describe('Escrow', () => {
       'finalResultsUrl',
       'test.com'
     );
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
     assert.fieldEquals(
       'Transaction',
       bulk1.transaction.hash.toHex(),
@@ -880,79 +880,6 @@ describe('Escrow', () => {
       bulk1.transaction.hash.toHex(),
       'to',
       escrowAddressString
-    );
-  });
-
-  test('Should properly handle Payout event', () => {
-    const newPayout = createPayoutEvent(
-      operatorAddress,
-      workerAddress,
-      1,
-      BigInt.fromI32(10)
-    );
-
-    handlePayout(newPayout);
-
-    // Escrow
-    assert.fieldEquals('Escrow', escrowAddressString, 'balance', '99');
-    assert.fieldEquals('Escrow', escrowAddressString, 'amountPaid', '1');
-
-    // Worker
-    assert.fieldEquals(
-      'Worker',
-      workerAddressString,
-      'totalAmountReceived',
-      '1'
-    );
-    assert.fieldEquals('Worker', workerAddressString, 'payoutCount', '1');
-
-    // Payout
-    const payoutId = newPayout.transaction.hash.concat(workerAddress).toHex();
-    assert.fieldEquals(
-      'Payout',
-      payoutId,
-      'escrowAddress',
-      escrowAddressString
-    );
-    assert.fieldEquals('Payout', payoutId, 'recipient', workerAddressString);
-    assert.fieldEquals('Payout', payoutId, 'amount', '1');
-
-    // Transaction
-    assert.fieldEquals(
-      'Transaction',
-      newPayout.transaction.hash.toHex(),
-      'txHash',
-      newPayout.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newPayout.transaction.hash.toHex(),
-      'method',
-      'payout'
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newPayout.transaction.hash.toHex(),
-      'block',
-      newPayout.block.number.toString()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newPayout.transaction.hash.toHex(),
-      'from',
-      newPayout.transaction.from.toHex()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newPayout.transaction.hash.toHex(),
-      'to',
-      workerAddressString
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newPayout.transaction.hash.toHex(),
-      'value',
-      '1'
     );
   });
 

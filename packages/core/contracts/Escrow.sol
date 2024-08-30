@@ -29,7 +29,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event Cancelled();
     event Completed();
     event Fund(uint256 _amount);
-    event Payout(address _to, uint256 _amount);
 
     EscrowStatuses public override status;
 
@@ -293,30 +292,30 @@ contract Escrow is IEscrow, ReentrancyGuard {
         for (uint256 i = 0; i < _recipients.length; i++) {
             uint256 amount = _amounts[i];
             uint256 amountFee = (totalFeePercentage * amount) / 100;
-            uint256 amountToPay = amount - amountFee;
-            _amounts[i] = amountToPay;
-            _safeTransfer(token, _recipients[i], amountToPay);
-            emit Payout(_recipients[i], amountToPay);
+            _safeTransfer(token, _recipients[i], amount - amountFee);
         }
 
         // Transfer oracle fees
         if (reputationOracleFeePercentage > 0) {
-            uint256 reputationOracleFee = (reputationOracleFeePercentage *
-                aggregatedBulkAmount) / 100;
-            _safeTransfer(token, reputationOracle, reputationOracleFee);
-            emit Payout(reputationOracle, reputationOracleFee);
+            _safeTransfer(
+                token,
+                reputationOracle,
+                (reputationOracleFeePercentage * aggregatedBulkAmount) / 100
+            );
         }
         if (recordingOracleFeePercentage > 0) {
-            uint256 recordingOracleFee = (recordingOracleFeePercentage *
-                aggregatedBulkAmount) / 100;
-            _safeTransfer(token, recordingOracle, recordingOracleFee);
-            emit Payout(recordingOracle, recordingOracleFee);
+            _safeTransfer(
+                token,
+                recordingOracle,
+                (recordingOracleFeePercentage * aggregatedBulkAmount) / 100
+            );
         }
         if (exchangeOracleFeePercentage > 0) {
-            uint256 exchangeOracleFee = (exchangeOracleFeePercentage *
-                aggregatedBulkAmount) / 100;
-            _safeTransfer(token, exchangeOracle, exchangeOracleFee);
-            emit Payout(exchangeOracle, exchangeOracleFee);
+            _safeTransfer(
+                token,
+                exchangeOracle,
+                (exchangeOracleFeePercentage * aggregatedBulkAmount) / 100
+            );
         }
 
         remainingFunds = cachedRemainingFunds;

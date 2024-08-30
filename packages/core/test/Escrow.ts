@@ -609,15 +609,7 @@ describe('Escrow', function () {
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
           .to.emit(escrow, 'BulkTransfer')
-          .withArgs(anyValue, recepients, [7], true)
-          .to.emit(escrow, 'Payout')
-          .withArgs(recepients[0], 7)
-          .to.emit(escrow, 'Payout')
-          .withArgs(await reputationOracle.getAddress(), 1)
-          .to.emit(escrow, 'Payout')
-          .withArgs(await recordingOracle.getAddress(), 1)
-          .to.emit(escrow, 'Payout')
-          .withArgs(await exchangeOracle.getAddress(), 1);
+          .withArgs(anyValue, recepients, [10], true);
       });
     });
 

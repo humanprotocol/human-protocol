@@ -181,8 +181,6 @@ templates:
           handler: handleCompleted
         - event: Fund(uint256)
           handler: handleFund
-        - event: Payout(address,uint256)
-          handler: handlePayout
   - name: LegacyEscrow
     kind: ethereum/contract
     network: '{{ network }}'
