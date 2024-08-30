@@ -265,6 +265,7 @@ describe('AuthService', () => {
       id: 1,
       email: 'user@example.com',
       status: UserStatus.ACTIVE,
+      evmAddress: MOCK_ADDRESS,
     };
 
     beforeEach(() => {
@@ -295,9 +296,11 @@ describe('AuthService', () => {
           email: userEntity.email,
           status: userEntity.status,
           userId: userEntity.id,
-          address: userEntity.evmAddress,
+          wallet_address: userEntity.evmAddress,
           kyc_status: userEntity.kyc?.status,
           reputation_network: MOCK_ADDRESS,
+          qualifications: [],
+          role: undefined,
         },
         {
           expiresIn: authConfigService.accessTokenExpiresIn,
