@@ -300,7 +300,7 @@ describe('AuthService', () => {
           kyc_status: userEntity.kyc?.status,
           reputation_network: MOCK_ADDRESS,
           qualifications: [],
-          role: undefined,
+          role: userEntity.role,
         },
         {
           expiresIn: authConfigService.accessTokenExpiresIn,
