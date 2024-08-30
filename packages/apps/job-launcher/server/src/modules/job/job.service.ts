@@ -1104,6 +1104,7 @@ export class JobService {
         jobId: jobEntity.id,
       });
     }
+
     jobEntity.status = status;
 
     jobEntity.retriesCount = 0;
@@ -1599,5 +1600,17 @@ export class JobService {
 
     jobEntity.status = JobStatus.COMPLETED;
     await this.jobRepository.updateOne(jobEntity);
+  }
+
+  public async isEscrowFunded(jobEntity: JobEntity): Promise<boolean> {
+    if (jobEntity.escrowAddress) {
+      const signer = this.web3Service.getSigner(jobEntity.chainId);
+      const escrowClient = await EscrowClient.build(signer);
+      const balance = await escrowClient.getBalance(jobEntity.escrowAddress);
+
+      return balance !== 0n;
+    }
+
+    return false;
   }
 }

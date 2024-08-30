@@ -20,7 +20,7 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
-import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { JobEntity } from '../job/job.entity';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -215,7 +215,8 @@ export class CronJobService {
 
       for (const jobEntity of jobEntities) {
         try {
-          if (jobEntity.escrowAddress) {
+          if (await this.jobService.isEscrowFunded(jobEntity)) {
+            console.log(jobEntity);
             const { amountRefunded } =
               await this.jobService.processEscrowCancellation(jobEntity);
             await this.paymentService.createRefundPayment({
@@ -236,7 +237,7 @@ export class CronJobService {
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
-          if (oracleType !== OracleType.HCAPTCHA) {
+          if (oracleType !== OracleType.HCAPTCHA && jobEntity.escrowAddress) {
             const webhookEntity = new WebhookEntity();
             Object.assign(webhookEntity, {
               escrowAddress: jobEntity.escrowAddress,
