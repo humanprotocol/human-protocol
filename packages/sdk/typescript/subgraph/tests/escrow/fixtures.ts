@@ -7,6 +7,8 @@ import {
   BulkTransfer,
   Cancelled,
   Completed,
+  PendingV2,
+  BulkTransferV2,
 } from '../../generated/templates/Escrow/Escrow';
 
 export function createPendingEvent(
@@ -31,6 +33,50 @@ export function createPendingEvent(
 
   newPendingEvent.parameters.push(manifestParam);
   newPendingEvent.parameters.push(hashParam);
+
+  return newPendingEvent;
+}
+
+export function createPendingV2Event(
+  sender: Address,
+  manifest: string,
+  hash: string,
+  reputationOracleAddress: Address,
+  recordingOracleAddress: Address,
+  exchangeOracleAddress: Address
+): PendingV2 {
+  const newPendingEvent = changetype<PendingV2>(newMockEvent());
+
+  newPendingEvent.transaction.from = sender;
+
+  newPendingEvent.parameters = [];
+
+  const manifestParam = new ethereum.EventParam(
+    'manifest',
+    ethereum.Value.fromString(manifest)
+  );
+  const hashParam = new ethereum.EventParam(
+    'hash',
+    ethereum.Value.fromString(hash)
+  );
+  const reputationOracleAddressParam = new ethereum.EventParam(
+    'reputationOracleAddress',
+    ethereum.Value.fromAddress(reputationOracleAddress)
+  );
+  const recordingOracleAddressParam = new ethereum.EventParam(
+    'recordingOracleAddress',
+    ethereum.Value.fromAddress(recordingOracleAddress)
+  );
+  const exchangeOracleAddressParam = new ethereum.EventParam(
+    'exchangeOracleAddress',
+    ethereum.Value.fromAddress(exchangeOracleAddress)
+  );
+
+  newPendingEvent.parameters.push(manifestParam);
+  newPendingEvent.parameters.push(hashParam);
+  newPendingEvent.parameters.push(reputationOracleAddressParam);
+  newPendingEvent.parameters.push(recordingOracleAddressParam);
+  newPendingEvent.parameters.push(exchangeOracleAddressParam);
 
   return newPendingEvent;
 }
@@ -98,6 +144,52 @@ export function createBulkTransferEvent(
   newBTEvent.parameters.push(recipientsParam);
   newBTEvent.parameters.push(amountsParam);
   newBTEvent.parameters.push(isPartialParam);
+
+  return newBTEvent;
+}
+
+export function createBulkTransferV2Event(
+  sender: Address,
+  txId: i32,
+  recipients: Address[],
+  amounts: i32[],
+  isPartial: boolean,
+  finalResultsUrl: string,
+  timestamp: BigInt
+): BulkTransferV2 {
+  const newBTEvent = changetype<BulkTransferV2>(newMockEvent());
+
+  newBTEvent.block.timestamp = timestamp;
+  newBTEvent.transaction.from = sender;
+
+  newBTEvent.parameters = [];
+
+  const txIdParam = new ethereum.EventParam(
+    '_txId',
+    ethereum.Value.fromI32(txId)
+  );
+  const recipientsParam = new ethereum.EventParam(
+    '_recipients',
+    ethereum.Value.fromAddressArray(recipients)
+  );
+  const amountsParam = new ethereum.EventParam(
+    '_amounts',
+    ethereum.Value.fromI32Array(amounts)
+  );
+  const isPartialParam = new ethereum.EventParam(
+    '_isPartial',
+    ethereum.Value.fromBoolean(isPartial)
+  );
+  const finalResultsUrlParam = new ethereum.EventParam(
+    '_finalResultsUrl',
+    ethereum.Value.fromString(finalResultsUrl)
+  );
+
+  newBTEvent.parameters.push(txIdParam);
+  newBTEvent.parameters.push(recipientsParam);
+  newBTEvent.parameters.push(amountsParam);
+  newBTEvent.parameters.push(isPartialParam);
+  newBTEvent.parameters.push(finalResultsUrlParam);
 
   return newBTEvent;
 }
