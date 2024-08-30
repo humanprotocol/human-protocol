@@ -1602,11 +1602,14 @@ export class JobService {
     await this.jobRepository.updateOne(jobEntity);
   }
 
-  public async isEscrowFunded(jobEntity: JobEntity): Promise<boolean> {
-    if (jobEntity.escrowAddress) {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
+  public async isEscrowFunded(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<boolean> {
+    if (escrowAddress) {
+      const signer = this.web3Service.getSigner(chainId);
       const escrowClient = await EscrowClient.build(signer);
-      const balance = await escrowClient.getBalance(jobEntity.escrowAddress);
+      const balance = await escrowClient.getBalance(escrowAddress);
 
       return balance !== 0n;
     }

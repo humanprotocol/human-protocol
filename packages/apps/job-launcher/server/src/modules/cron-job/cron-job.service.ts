@@ -20,7 +20,7 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
-import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { JobEntity } from '../job/job.entity';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -215,8 +215,12 @@ export class CronJobService {
 
       for (const jobEntity of jobEntities) {
         try {
-          if (await this.jobService.isEscrowFunded(jobEntity)) {
-            console.log(jobEntity);
+          if (
+            await this.jobService.isEscrowFunded(
+              jobEntity.chainId,
+              jobEntity.escrowAddress,
+            )
+          ) {
             const { amountRefunded } =
               await this.jobService.processEscrowCancellation(jobEntity);
             await this.paymentService.createRefundPayment({
