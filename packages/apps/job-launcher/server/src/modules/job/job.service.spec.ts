@@ -133,6 +133,7 @@ jest.mock('@human-protocol/sdk', () => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       setup: jest.fn().mockResolvedValue(null),
       fund: jest.fn().mockResolvedValue(null),
+      getBalance: jest.fn(),
     })),
   },
   EscrowUtils: {
@@ -3621,6 +3622,63 @@ describe('JobService', () => {
 
       expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
       expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isEscrowFunded', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return true for a valid escrow address with a non-zero balance', async () => {
+      const chainId = 1;
+      const escrowClientMock = {
+        getBalance: jest.fn().mockResolvedValue(BigInt(1000)),
+      };
+
+      (EscrowClient.build as any).mockImplementation(() => escrowClientMock);
+
+      const result = await jobService.isEscrowFunded(chainId, MOCK_ADDRESS);
+
+      expect(result).toBe(true);
+      expect(escrowClientMock.getBalance).toHaveBeenCalledWith(MOCK_ADDRESS);
+    });
+
+    it('should return false for a valid escrow address with a zero balance', async () => {
+      const chainId = 1;
+      const escrowClientMock = {
+        getBalance: jest.fn().mockResolvedValue(BigInt(0)),
+      };
+
+      (EscrowClient.build as any).mockImplementation(() => escrowClientMock);
+
+      const result = await jobService.isEscrowFunded(chainId, MOCK_ADDRESS);
+
+      expect(result).toBe(false);
+      expect(escrowClientMock.getBalance).toHaveBeenCalledWith(MOCK_ADDRESS);
+    });
+
+    it('should return false for an invalid escrow address', async () => {
+      const chainId = 1;
+      const escrowAddress = '';
+
+      const result = await jobService.isEscrowFunded(chainId, escrowAddress);
+
+      expect(result).toBe(false);
+      expect(EscrowClient.build).not.toHaveBeenCalled();
+    });
+
+    it('should return false when no escrow address is provided', async () => {
+      const chainId = 1;
+      const escrowAddress = undefined;
+
+      const result = await jobService.isEscrowFunded(
+        chainId,
+        escrowAddress as any,
+      );
+
+      expect(result).toBe(false);
+      expect(EscrowClient.build).not.toHaveBeenCalled();
     });
   });
 });
