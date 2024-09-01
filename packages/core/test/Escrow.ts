@@ -381,8 +381,14 @@ describe('Escrow', function () {
               MOCK_HASH
             )
         )
-          .to.emit(escrow, 'Pending')
-          .withArgs(MOCK_URL, MOCK_HASH)
+          .to.emit(escrow, 'PendingV2')
+          .withArgs(
+            MOCK_URL,
+            MOCK_HASH,
+            await reputationOracle.getAddress(),
+            await recordingOracle.getAddress(),
+            await exchangeOracle.getAddress()
+          )
           .to.emit(escrow, 'Fund')
           .withArgs(100);
       });
@@ -608,8 +614,8 @@ describe('Escrow', function () {
             .connect(owner)
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
-          .to.emit(escrow, 'BulkTransfer')
-          .withArgs(anyValue, recepients, [10], true);
+          .to.emit(escrow, 'BulkTransferV2')
+          .withArgs(anyValue, recepients, [10], true, MOCK_URL);
       });
     });
 

@@ -20,11 +20,25 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
+    event PendingV2(
+        string manifest,
+        string hash,
+        address reputationOracle,
+        address recordingOracle,
+        address exchangeOracle
+    );
     event BulkTransfer(
         uint256 indexed _txId,
         address[] _recipients,
         uint256[] _amounts,
         bool _isPartial
+    );
+    event BulkTransferV2(
+        uint256 indexed _txId,
+        address[] _recipients,
+        uint256[] _amounts,
+        bool _isPartial,
+        string finalResultsUrl
     );
     event Cancelled();
     event Completed();
@@ -158,7 +172,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
         remainingFunds = getBalance();
         require(remainingFunds > 0, 'Escrow balance is zero');
 
-        emit Pending(manifestUrl, manifestHash);
+        emit PendingV2(
+            manifestUrl,
+            manifestHash,
+            reputationOracle,
+            recordingOracle,
+            exchangeOracle
+        );
         emit Fund(remainingFunds);
     }
 
@@ -322,10 +342,22 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         if (cachedRemainingFunds == 0) {
             status = EscrowStatuses.Paid;
-            emit BulkTransfer(_txId, _recipients, _amounts, false);
+            emit BulkTransferV2(
+                _txId,
+                _recipients,
+                _amounts,
+                false,
+                finalResultsUrl
+            );
         } else {
             status = EscrowStatuses.Partial;
-            emit BulkTransfer(_txId, _recipients, _amounts, true);
+            emit BulkTransferV2(
+                _txId,
+                _recipients,
+                _amounts,
+                true,
+                finalResultsUrl
+            );
         }
     }
 

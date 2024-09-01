@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[interfaces.ts:59](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L59)
+[interfaces.ts:63](https://github.com/humanprotocol/human-protocol/blob/315621d29556c3d3b13e74878918ae7207cff23e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L63)
 
 ***
 
@@ -32,7 +32,35 @@
 
 #### Defined in
 
-[interfaces.ts:66](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L66)
+[interfaces.ts:72](https://github.com/humanprotocol/human-protocol/blob/315621d29556c3d3b13e74878918ae7207cff23e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L72)
+
+***
+
+### registrationInstructions?
+
+> `optional` **registrationInstructions**: `string`
+
+#### Inherited from
+
+`Omit.registrationInstructions`
+
+#### Defined in
+
+[interfaces.ts:68](https://github.com/humanprotocol/human-protocol/blob/315621d29556c3d3b13e74878918ae7207cff23e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L68)
+
+***
+
+### registrationNeeded?
+
+> `optional` **registrationNeeded**: `boolean`
+
+#### Inherited from
+
+`Omit.registrationNeeded`
+
+#### Defined in
+
+[interfaces.ts:67](https://github.com/humanprotocol/human-protocol/blob/315621d29556c3d3b13e74878918ae7207cff23e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L67)
 
 ***
 
@@ -46,7 +74,7 @@
 
 #### Defined in
 
-[interfaces.ts:60](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L60)
+[interfaces.ts:64](https://github.com/humanprotocol/human-protocol/blob/315621d29556c3d3b13e74878918ae7207cff23e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L64)
 
 ***
 
@@ -60,4 +88,4 @@
 
 #### Defined in
 
-[interfaces.ts:61](https://github.com/humanprotocol/human-protocol/blob/249f60968b0f092853c458545691a3700de501e6/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L61)
+[interfaces.ts:65](https://github.com/humanprotocol/human-protocol/blob/315621d29556c3d3b13e74878918ae7207cff23e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L65)

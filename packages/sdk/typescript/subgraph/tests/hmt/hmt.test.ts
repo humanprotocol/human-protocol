@@ -706,7 +706,6 @@ describe('HMToken', () => {
       );
 
       [
-        'setupEventCount',
         'storeResultsEventCount',
         'bulkPayoutEventCount',
         'pendingStatusEventCount',

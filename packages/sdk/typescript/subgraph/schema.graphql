@@ -38,7 +38,6 @@ type Leader @entity {
   lockedUntilTimestamp: BigInt!
   amountWithdrawn: BigInt!
   amountSlashed: BigInt!
-  reputation: BigInt!
   reward: BigInt!
   amountJobsProcessed: BigInt!
 
@@ -49,7 +48,9 @@ type Leader @entity {
   jobTypes: [String!]
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
-  reputationNetwork: ReputationNetwork
+  registrationNeeded: Boolean
+  registrationInstructions: String
+  reputationNetworks: [ReputationNetwork!]
 }
 
 type LeaderURL @entity {
@@ -62,7 +63,7 @@ type LeaderURL @entity {
 type ReputationNetwork @entity {
   id: Bytes!
   address: Bytes!
-  operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
+  operators: [Leader!]! @derivedFrom(field: "reputationNetworks")
 }
 
 type Escrow @entity {
@@ -162,7 +163,7 @@ type FundEvent @entity(immutable: true) {
   amount: BigInt!
 }
 
-type SetupEvent @entity(immutable: true) {
+type PendingEvent @entity(immutable: true) {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
@@ -324,7 +325,6 @@ type HMTokenStatistics @entity {
 type EscrowStatistics @entity {
   id: Bytes!
   fundEventCount: BigInt!
-  setupEventCount: BigInt!
   storeResultsEventCount: BigInt!
   bulkPayoutEventCount: BigInt!
   pendingStatusEventCount: BigInt!
@@ -340,7 +340,6 @@ type EventDayData @entity {
   id: Bytes!
   timestamp: Int!
   dailyFundEventCount: BigInt!
-  dailySetupEventCount: BigInt!
   dailyStoreResultsEventCount: BigInt!
   dailyBulkPayoutEventCount: BigInt!
   dailyPendingStatusEventCount: BigInt!
