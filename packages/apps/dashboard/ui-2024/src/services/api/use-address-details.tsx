@@ -94,8 +94,9 @@ export function useAddressDetails() {
 
 	return useQuery({
 		queryFn: async () => {
+			const address = (filterParams.address || '0x0').toUpperCase();
 			const { data } = await httpService.get(
-				`${apiPaths.addressDetails.path}/${filterParams.address || '0x0'}`,
+				`${apiPaths.addressDetails.path}/${address}`,
 				{ params: { chainId: filterParams.chainId || -1 } }
 			);
 
