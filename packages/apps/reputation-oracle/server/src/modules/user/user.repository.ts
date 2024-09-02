@@ -20,7 +20,13 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async findOneByEmail(email: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { email },
-      relations: { kyc: true, siteKeys: true },
+      relations: {
+        kyc: true,
+        siteKeys: true,
+        userQualifications: {
+          qualification: true,
+        },
+      },
     });
   }
 
