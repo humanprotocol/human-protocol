@@ -214,6 +214,30 @@ describe('AssignmentService', () => {
       ).rejects.toThrow('Fully assigned job');
     });
 
+    it('should fail if job qualifications does not match with user qualifications', async () => {
+      manifest.qualifications = ['test'];
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          id: 1,
+          reputationNetwork: reputationNetwork,
+        } as any);
+      jest
+        .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
+        .mockResolvedValue(null);
+      jest.spyOn(assignmentRepository, 'countByJobId').mockResolvedValue(5);
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+
+      await expect(
+        assignmentService.createAssignment(createAssignmentDto, {
+          address: workerAddress,
+          reputationNetwork: reputationNetwork,
+          qualifications: ['test2'],
+        } as any),
+      ).rejects.toThrow(ErrorAssignment.InvalidAssignmentQualification);
+      manifest.qualifications = undefined;
+    });
+
     it('should fail if job is expired', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
