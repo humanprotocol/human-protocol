@@ -44,7 +44,7 @@ class ExchangeOracleEvent_TaskFinished(OracleEvent):
 
 
 class ExchangeOracleEvent_EscrowCleaned(OracleEvent):
-    pass  # escrow is enough for now
+    pass
 
 
 class ReputationOracleEvent_EscrowCompleted(OracleEvent):
